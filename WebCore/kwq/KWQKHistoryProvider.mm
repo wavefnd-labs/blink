@@ -22,8 +22,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
+#import <Foundation/Foundation.h>
 
 #import <historyprovider.h>
+
+#import <WebCoreHistory.h>
 
 namespace KParts {
 
@@ -33,15 +36,14 @@ HistoryProvider *HistoryProvider::self()
     return &instance;
 }
 
-void HistoryProvider::insert(const QString &)
+void HistoryProvider::insert(const QString &s)
 {
-    // FIXME: implement real history?
+    // Currently handled at the browser level.
 }
 
 bool HistoryProvider::contains(const QString &s) const
 {
-    // FIXME: implement real history?
-    return false;
+    return [[WebCoreHistory sharedHistory] containsURL: [NSURL URLWithString: [NSString stringWithCString: s.ascii()]]];
 }
 
 } // namespace KParts
