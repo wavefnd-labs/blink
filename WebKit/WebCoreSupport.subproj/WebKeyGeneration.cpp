@@ -9,7 +9,7 @@
 
 #import <WebKit/WebKeyGeneration.h>
 
-#ifndef DISABLE_WEB_KEY_GENERATION
+#ifndef USE_NEW_KEY_GENERATION
 
 #import <WebKit/WebAssertions.h>
 
@@ -683,4 +683,4 @@ WebCertificateParseResult addCertificatesToKeychainFromData(const void *bytes, u
     return result;
 }
 
-#endif /* DISABLE_WEB_KEY_GENERATION */
+#endif /* USE_NEW_KEY_GENERATION */
