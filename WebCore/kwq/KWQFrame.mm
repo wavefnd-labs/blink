@@ -39,9 +39,9 @@ void QFrame::setFrameStyle(int s)
     if (view) {
         KHTMLPart *part = view->part();
         if (part) {
-	    KWQ_BLOCK_NS_EXCEPTIONS;
+	    KWQ_BLOCK_EXCEPTIONS;
             [KWQ(part)->bridge() setHasBorder:(s != NoFrame)];
-	    KWQ_UNBLOCK_NS_EXCEPTIONS;
+	    KWQ_UNBLOCK_EXCEPTIONS;
         }
     }
 }
