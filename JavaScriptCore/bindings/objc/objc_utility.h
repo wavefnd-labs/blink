@@ -66,12 +66,16 @@ typedef enum {
     ObjcInvalidType
 } ObjcValueType;
 
+class RootObject;
+
 ObjcValue convertValueToObjcValue (KJS::ExecState *exec, const KJS::Value &value, ObjcValueType type);
 Value convertNSStringToString(NSString *nsstring);
 Value convertObjcValueToValue (KJS::ExecState *exec, void *buffer, ObjcValueType type);
 ObjcValueType objcValueTypeForType (const char *type);
 
 void JSMethodNameToObjCMethodName(const char *name, char *name, unsigned int length);
+
+void *createObjcInstanceForValue (const Object &value, const RootObject *origin, const RootObject *current);
 
 } // namespace Bindings
 
