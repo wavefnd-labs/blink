@@ -43,7 +43,7 @@ typedef enum
 } NP_ValueType;
 
 
-extern NP_Object *coerceValueToNPValueType (KJS::ExecState *exec, const KJS::Value &value, NP_ValueType type);
+extern NP_Object *coerceValueToNPString (KJS::ExecState *exec, const KJS::Value &value);
 extern NP_Object *convertValueToNPValueType (KJS::ExecState *exec, const KJS::Value &value);
 extern KJS::Value convertNPValueTypeToValue (KJS::ExecState *exec, const NP_Object *obj);
 
