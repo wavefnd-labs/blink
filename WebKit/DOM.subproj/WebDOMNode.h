@@ -50,13 +50,13 @@ enum WebNodeType {
 
 - (id<WebDOMDocument>)ownerDocument;
 
-- (id<WebDOMNode>)insert:(id<WebDOMDocument>)newChild before:(id<WebDOMDocument>)refChild;
+- (id<WebDOMNode>)insert:(id<WebDOMNode>)newChild before:(id<WebDOMNode>)refChild;
 
-- (id<WebDOMNode>)replace:(id<WebDOMDocument>)newChild child:(id<WebDOMDocument>)oldChild;
+- (id<WebDOMNode>)replace:(id<WebDOMNode>)newChild child:(id<WebDOMNode>)oldChild;
 
-- (id<WebDOMNode>)removeChild:(id<WebDOMDocument>)oldChild;
+- (id<WebDOMNode>)removeChild:(id<WebDOMNode>)oldChild;
 
-- (id<WebDOMNode>)appendChild:(id<WebDOMDocument>)newChild;
+- (id<WebDOMNode>)appendChild:(id<WebDOMNode>)newChild;
 
 - (BOOL)hasChildNodes;
 
@@ -66,7 +66,7 @@ enum WebNodeType {
 
 - (BOOL)isSupported:(NSString *)feature : (NSString *)version;
 
-- (NSString *)namespaceURIt;
+- (NSString *)namespaceURI;
 
 - (NSString *)prefix;
 
@@ -75,5 +75,35 @@ enum WebNodeType {
 - (NSString *)localName;
 
 - (BOOL)hasAttributes;
+
+@end
+
+
+@protocol WebDOMNamedNodeMap <NSObject>
+
+- (unsigned long) length;
+
+- (id<WebDOMNode>)getNamedItem:(NSString *)name;
+
+- (id<WebDOMNode>)setNamedItem:(id<WebDOMNode>)arg;
+
+- (id<WebDOMNode>)removeNamedItem:(NSString *)name;
+
+- (id<WebDOMNode>)item:(unsigned long) index;
+
+- (id<WebDOMNode>)getNamedItemNS:(NSString *)namespaceURI :(NSString *)localName;
+
+- (id<WebDOMNode>)setNamedItemNS:(id<WebDOMNode>)arg;
+
+- (id<WebDOMNode>)removeNamedItemNS:(NSString *)namespaceURI :(NSString *)localName;
+
+@end
+
+
+@protocol WebDOMNodeList <NSObject>
+
+- (unsigned long)length;
+
+- (id<WebDOMNode>)item: (unsigned long)index;
 
 @end
