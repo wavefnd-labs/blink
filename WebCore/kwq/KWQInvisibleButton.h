@@ -27,9 +27,9 @@
 #define KWQINVISIBLEBUTTON_H_
 
 #ifdef __OBJC__
-@class InvisibleButtonView;
+@class KWQInvisibleButtonView;
 #else
-class InvisibleButtonView;
+class KWQInvisibleButtonView;
 #endif
 
 class KHTMLView;
@@ -47,7 +47,7 @@ public:
 
 private:
     khtml::RenderImageButton *imageButton;
-    InvisibleButtonView *buttonView;
+    KWQInvisibleButtonView *buttonView;
 };
 
 #endif
