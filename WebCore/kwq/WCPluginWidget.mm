@@ -25,13 +25,7 @@
  
 #import "WCPluginWidget.h"
 #import <qwidget.h>
-
-static IFPluginViewCreationFunction creationFunction = 0;
-
-void IFSetPluginViewCreationFunction(IFPluginViewCreationFunction f)
-{
-    creationFunction = f;
-}
+#import <WebCoreViewFactory.h>
 
 QWidget *IFPluginWidgetCreate(const QString &url, const QString &serviceType, const QStringList &args, const QString &baseURL)
 {
@@ -40,8 +34,10 @@ QWidget *IFPluginWidgetCreate(const QString &url, const QString &serviceType, co
         [argsArray addObject:args[i].getNSString()];
     }
     QWidget *widget = new QWidget();
-    if (creationFunction) {
-        widget->setView(creationFunction(url.getNSString(), serviceType.getNSString(), argsArray, baseURL.getNSString()));
-    }
+    widget->setView([[WebCoreViewFactory sharedFactory]
+        viewForPluginWithURL:url.getNSString()
+                    serviceType:serviceType.getNSString()
+                    arguments:argsArray
+                        baseURL:baseURL.getNSString()]);
     return widget;
 }
