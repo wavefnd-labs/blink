@@ -33,11 +33,9 @@
 #include "KWQKURL.h"
 
 #ifdef __OBJC__
-@protocol WebCoreResourceHandle;
-typedef id <WebCoreResourceHandle> WebCoreResourceHandlePtr;
+@class KWQResourceLoader;
 #else
-class WebCoreResourceHandle;
-typedef WebCoreResourceHandle *WebCoreResourceHandlePtr;
+class KWQResourceLoader;
 #endif
 
 namespace KIO {
@@ -66,8 +64,7 @@ public:
     void addMetaData(const QMap<QString, QString> &value);
     void kill();
 
-    void setHandle(WebCoreResourceHandlePtr);
-    WebCoreResourceHandlePtr handle() const;
+    void setLoader(KWQResourceLoader *);
     
     KURL url() const;
 
