@@ -28,7 +28,7 @@ using namespace KJS;
 
 // ------------------------------ Completion -----------------------------------
 
-Completion::Completion(ComplType c, const Value& v, const UString &t)
+Completion::Completion(ComplType c, const Value& v, const Identifier &t)
     : comp(c), val(v), tar(t)
 {
 }
