@@ -60,7 +60,7 @@ typedef enum {
     ObjcInvalidType
 } ObjcValueType;
 
-ObjcValue convertValueToObjcValue (KJS::ExecState *exec, KJS::Value value, ObjcValueType type);
+ObjcValue convertValueToObjcValue (KJS::ExecState *exec, const KJS::Value &value, ObjcValueType type);
 Value convertObjcValueToValue (KJS::ExecState *exec, void *buffer, ObjcValueType type);
 ObjcValueType objcValueTypeForType (const char *type);
 
