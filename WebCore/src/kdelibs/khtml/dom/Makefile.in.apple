@@ -1,0 +1,93 @@
+#======================================================================
+#
+# Makefile
+#
+# $RCSfile$
+# $Revision$
+# $Author$
+# $Date$
+#
+#======================================================================
+# set top source dir relative to this directory
+# include make vars boilerplate
+#
+
+TOPSRCDIR = ../../..
+include $(TOPSRCDIR)/Makefile.vars
+
+#----------------------------------------------------------------------
+# Set variables for this directory
+
+CXXYACCOBJECTS = grammar.cpp grammar.h
+
+CXXOBJECTS = \
+	array_object.o \
+	bool_object.o \
+	collector.o \
+	date_object.o \
+	debugger.o \
+	error_object.o \
+	function.o \
+	function_object.o \
+	global_object.o \
+	grammar.o \
+	internal.o \
+	kjs.o \
+	lexer.o \
+	lookup.o \
+	math_object.o \
+	nodes.o \
+	number_object.o \
+	object.o \
+	object_object.o \
+	operations.o \
+	regexp.o \
+	regexp_object.o \
+	string_object.o \
+	types.o \
+	ustring.o \
+	$(NULL)
+
+PROGRAM = testkjs
+
+OBJECTS = $(CXXYACCOBJECTS) $(CXXOBJECTS) 
+
+LIBRARY = libkjs.a
+
+CLEAN_FILES = $(OBJECTS) \
+	grammar.h \
+	grammar.cpp \
+	grammar.cpp.h \
+	testkjs.o \
+	$(LIBRARY) \
+	$(PROGRAM) \
+	$(NULL)
+
+#----------------------------------------------------------------------
+# Set flags for this directory
+
+YACCFLAGS = -d --output-file=grammar.cpp --name-prefix=kjsyy
+
+#----------------------------------------------------------------------
+# Set targets for this directory
+
+all: $(OBJECTS) $(LIBRARY) $(PROGRAM)
+
+$(LIBRARY): $(CXXOBJECTS)
+	$(AR) $(ARFLAGS) $(LIBRARY) $(CXXOBJECTS)
+	$(RANLIB) $(LIBRARY)
+
+$(PROGRAM): testkjs.o
+	$(CC) $< -o $@ -L. -lkjs
+
+grammar.h: grammar.cpp.h
+	ln -s grammar.cpp.h grammar.h
+
+#----------------------------------------------------------------------
+# include make rules boilerplate
+
+include $(TOPSRCDIR)/Makefile.rules
+
+#======================================================================
+# end
+#======================================================================
