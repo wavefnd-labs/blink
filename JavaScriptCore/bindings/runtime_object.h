@@ -27,8 +27,8 @@
 
 #include <JavaVM/jni.h>
 
-#include "runtime.h"
-#include "object.h"
+#include <JavaScriptCore/runtime.h>
+#include <JavaScriptCore/object.h>
 
 namespace KJS {
 
