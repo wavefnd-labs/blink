@@ -15,12 +15,11 @@ libwebcore_dylib_SOURCES = \
 	$(NULL)
 
 libwebcore_dylib_LIBADD = \
-	./kdelibs/kjs/libkjs.o \
 	./kdelibs/khtml/libkhtml.o \
 	./kwq/libkwq.o \
 	-ljpeg \
+	-L$(symrootsdir) -lJavaScriptCore \
 	$(NULL)
-
 
 LIBWEBCORE_INSTALL_PATH = @executable_path/../Frameworks
 
