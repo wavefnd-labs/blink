@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
  
-#import <Cocoa/Cocoa.h>
+#import <WebCore/WebCoreScrollView.h>
 
 @class KWQTextAreaTextView;
 class QTextEdit;
 @protocol KWQWidgetHolder;
 
-@interface KWQTextArea : NSScrollView <KWQWidgetHolder>
+@interface KWQTextArea : WebCoreScrollView <KWQWidgetHolder>
 {
     KWQTextAreaTextView *textView;
     QTextEdit *widget;
