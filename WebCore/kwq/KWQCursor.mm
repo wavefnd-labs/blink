@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 Apple Computer, Inc.  All rights reserved.
+ * Copyright (C) 2004 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,6 +41,7 @@ QCursor::QCursor(NSCursor *cur)
 QCursor::QCursor(const QPixmap &pixmap)
     : cursor(nil)
 {
+    // Needed for custom cursors.
     ERROR("not yet implemented");
 }
 
@@ -54,12 +55,6 @@ QCursor::~QCursor()
     [cursor release];
 }
       
-QPoint QCursor::pos()
-{
-    LOG(NotYetImplemented, "not yet implemented");
-    return QPoint();
-}
-
 QCursor &QCursor::operator=(const QCursor &other)
 {
     [other.cursor retain];
