@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 Apple Computer, Inc.  All rights reserved.
+ * Copyright (C) 2001, 2002 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,54 +26,13 @@
 #ifndef QFONT_H_
 #define QFONT_H_
 
-#include "KWQString.h"
+#include "KWQFontFamily.h"
 
 #ifdef __OBJC__
 @class NSFont;
-@class NSString;
 #else
 class NSFont;
-class NSString;
 #endif
-
-class KWQFontFamily {
-public:
-    KWQFontFamily();
-    ~KWQFontFamily() { if (_next) _next->deref();  }
-    
-    KWQFontFamily(const KWQFontFamily &);    
-    KWQFontFamily &operator=(const KWQFontFamily &);
-        
-    void setFamily(const QString &);
-    QString family() const { return _family; }
-    bool familyIsEmpty() const { return _family.isEmpty(); }
-    
-    NSString *getNSFamily() const;
-
-    KWQFontFamily *next() { return _next; }
-    const KWQFontFamily *next() const { return _next; }
-
-    void appendFamily(KWQFontFamily *family) 
-    {
-        if (family)
-            family->ref();
-        if (_next) 
-            _next->deref(); 
-        _next = family; 
-    }
-    
-    bool operator==(const KWQFontFamily &) const;
-    bool operator!=(const KWQFontFamily &x) const { return !(*this == x); }
-    
-    void ref() { _refCnt++; }
-    void deref() { _refCnt--; if (_refCnt == 0) delete this; }
-    
-private:
-    QString _family;
-    KWQFontFamily *_next;
-    int _refCnt;
-    mutable NSString *_NSFamily;
-};
 
 class QFont {
 public:
@@ -114,33 +73,5 @@ private:
     float _size;
     mutable NSFont *_nsfont;
 };
-
-// Macro to create a stack array containing non-retained NSString names
-// of CSS font families.  This can be used to avoid allocations in
-// performance critical code.  Create a NSSString ** name families
-// and populates with a NSString * for each family name.  Null terminates
-// the array.
-#define CREATE_FAMILY_ARRAY(font,families)\
-int __numFamilies = 0;\
-{\
-    const KWQFontFamily *__ff = (font).firstFamily();\
-    while (__ff)\
-    {\
-        __numFamilies++;\
-        __ff = __ff->next();\
-    }\
-}\
-NSString *families[__numFamilies+1];\
-{\
-    int __i = 0;\
-    const KWQFontFamily *__ff = (font).firstFamily();\
-    while (__ff)\
-    {\
-        families[__i++] = __ff->getNSFamily();\
-        __ff = __ff->next();\
-    }\
-    families[__i] = 0;\
-}
-
 
 #endif
