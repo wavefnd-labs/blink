@@ -22,7 +22,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
-#include "runtime.h"
+#include <runtime.h>
+#include <jni_instance.h>
 
 using namespace KJS;
 using namespace Bindings;
+
+Instance *Instance::createBindingForLanguageInstance (BindingLanguage language, void *instance)
+{
+    if (language == Instance::JavaLanguage)
+        return new Bindings::JavaInstance ((jobject)instance);
+    return 0;
+}
