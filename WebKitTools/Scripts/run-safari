@@ -26,24 +26,18 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Simplified build script for Web Kit Open Source Project.
+# Simplified "run" script for Web Kit Open Source Project.
 
 use strict;
 use Getopt::Long;
+use webkitdirs;
 
 my $debug = 0;
 GetOptions("debug!" => \$debug);
 
-# Check that an Xcode product directory is set.
-open PRODUCT, "defaults read com.apple.Xcode PBXProductDirectory 2> /dev/null |" or die;
-my $productDir = <PRODUCT>;
-chomp $productDir;
-close PRODUCT;
-if (!$productDir) {
-    die "No product directory set. Please set the 'Place Build Products' preference to 'Customized location' in XCode Building Preferences.\n";
-}
+my $productDir = productDir();
 
-# Check to see that Safari is there.
+# Check to see that Safari is in the usual place.
 my $safariPath = "/Applications/Safari.app/Contents/MacOS/Safari";
 if (! -x $safariPath) {
     die "Can't find executable at $safariPath.\n";
@@ -51,32 +45,23 @@ if (! -x $safariPath) {
 
 # Search for build products; first test Xcode 2.0 location, then Xcode 2.1 locations.
 # For Xcode 2.1, prefer Deployment if both directories are present.
-my @testDirs = ( "$productDir", "$productDir/Deployment", "$productDir/Development" );
+my @testDirs;
+if ($debug) {
+    @testDirs = ("$productDir", "$productDir/Deployment", "$productDir/Development");
+} else {
+    @testDirs = ("$productDir", "$productDir/Development", "$productDir/Deployment");
+}
 my $found = 0;
 for my $testDir (@testDirs) {
-	# Check to see that frameworks are there.
-	print "Looking for frameworks in $testDir ...\n";
-
-	if (! -x "$testDir/JavaScriptCore.framework/Versions/A/JavaScriptCore") {
-		print "Can't find executable at $testDir/JavaScriptCore.framework/Versions/A/JavaScriptCore\n";
-		next;
-	}
-	if (! -x "$testDir/WebCore.framework/Versions/A/WebCore") {
-		print "Can't find executable at $testDir/WebCore.framework/Versions/A/WebCore\n";
-		next;
-	}
-	if (! -x "$testDir/WebKit.framework/Versions/A/WebKit") {
-		print "Can't find executable at $testDir/WebKit.framework/Versions/A/WebKit\n";
-		next;
-	}
-
-	print "Built frameworks found in $testDir\n";
-	$productDir = $testDir;
-	$found = 1;
-	last;
+    next if !-x "$testDir/JavaScriptCore.framework/Versions/A/JavaScriptCore";
+    next if !-x "$testDir/WebCore.framework/Versions/A/WebCore";
+    next if !-x "$testDir/WebKit.framework/Versions/A/WebKit";
+    $productDir = $testDir;
+    $found = 1;
+    last;
 }
 if (!$found) {
-	die "Could not locate frameworks.\n";
+    die "Could not locate frameworks.\n";
 }
 
 # Set up DYLD_FRAMEWORK_PATH to point to the product directory.
