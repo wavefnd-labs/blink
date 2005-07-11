@@ -36,3 +36,4 @@ extern KWQLogChannel KWQLogLoading;
 extern KWQLogChannel KWQLogPopupBlocking;
 extern KWQLogChannel KWQLogEvents;
 extern KWQLogChannel KWQLogEditing;
+extern KWQLogChannel KWQLogTextConversion;
