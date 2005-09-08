@@ -20,12 +20,14 @@
     Boston, MA 02111-1307, USA.
 */
 
+#include <kdom/core/DOMStringImpl.h>
+
 #include "SVGEventImpl.h"
 #include "SVGDOMImplementationImpl.h"
 
 using namespace KSVG;
 
-SVGEventImpl::SVGEventImpl() : KDOM::EventImpl(KDOM::TypeLastEvent)
+SVGEventImpl::SVGEventImpl() : KDOM::EventImpl((KDOM::EventImplType) TypeSVGEvent)
 {
 }
 
@@ -36,9 +38,11 @@ SVGEventImpl::~SVGEventImpl()
 void SVGEventImpl::initEvent(KDOM::DOMStringImpl *eventTypeArg, bool canBubbleArg, bool cancelableArg)
 {
     m_id = SVGDOMImplementationImpl::self()->typeToId(eventTypeArg);
-    m_type = eventTypeArg;
+
     m_bubbles = canBubbleArg;
     m_cancelable = cancelableArg;
+
+    KDOM_SAFE_SET(m_type, eventTypeArg);
 }
 
 // vim:ts=4:noet

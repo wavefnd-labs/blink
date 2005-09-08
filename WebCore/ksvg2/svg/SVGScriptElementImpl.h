@@ -44,7 +44,7 @@ namespace KSVG
         // Internal
         virtual void parseAttribute(KDOM::AttributeImpl *attr);
 
-        static void executeScript(KDOM::DocumentImpl *document, const KDOM::DOMString &jsCode);
+        static void executeScript(KDOM::DocumentImpl *document, KDOM::DOMStringImpl *jsCode);
 
     private:
         KDOM::DOMStringImpl *m_type;
