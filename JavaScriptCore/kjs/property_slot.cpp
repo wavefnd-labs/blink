@@ -21,6 +21,7 @@
  */
 
 
+#include "config.h"
 #include "property_slot.h"
 
 namespace KJS {
