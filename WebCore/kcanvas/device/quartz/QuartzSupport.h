@@ -34,7 +34,6 @@ namespace KSVG {
 CFStringRef CFStringFromCGPath(CGPathRef path);
 CFStringRef CFStringFromCGAffineTransform(CGAffineTransform t);
 CGAffineTransform CGAffineTransformMakeMapBetweenRects(CGRect source, CGRect dest);
-CGPathRef CGPathApplyTransform(CGPathRef path, CGAffineTransform transform);
 
 void applyStrokeStyleToContext(CGContextRef context, KSVG::KCanvasRenderingStyle *style);
 
