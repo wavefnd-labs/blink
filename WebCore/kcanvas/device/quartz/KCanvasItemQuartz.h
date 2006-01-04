@@ -31,10 +31,10 @@ public:
     KCanvasItemQuartz(khtml::RenderStyle *style, KSVG::SVGStyledElementImpl *node);
     virtual ~KCanvasItemQuartz() { }
     
-    virtual QRect bboxForPath(bool includeStroke) const;
-    virtual bool hitsPath(const QPoint &p, bool fill /* false means stroke */) const;
+    virtual QRectF bboxForPath(bool includeStroke) const;
+    virtual bool hitsPath(const QPointF &p, bool fill /* false means stroke */) const;
     
-    virtual QRect getAbsoluteRepaintRect() { return absoluteTransform().mapRect(relativeBBox(true)); }
+    virtual QRect getAbsoluteRepaintRect() { return enclosingQRect(absoluteTransform().mapRect(relativeBBox(true))); }
     
     virtual bool requiresLayer() { return false; }
     virtual void layout() { setNeedsLayout(false); }
@@ -42,5 +42,5 @@ public:
     virtual bool nodeAtPoint(NodeInfo& info, int _x, int _y, int _tx, int _ty,
                             HitTestAction hitTestAction);
 private:
-    void drawMarkersIfNeeded(const QRect &rect, CGPathRef path) const;
+    void drawMarkersIfNeeded(const QRectF &rect, CGPathRef path) const;
 };
