@@ -29,18 +29,18 @@
 #include "KWQMemArray.h"
 #include "IntPoint.h"
 
-class QRect;
-
 namespace WebCore {
+
+class IntRect;
 
 class IntPointArray : public QMemArray<IntPoint> {
 public:
     IntPointArray() { }
     IntPointArray(int size) : QMemArray<IntPoint>(size) { }
-    IntPointArray(const QRect &rect);
+    IntPointArray(const IntRect &rect);
     IntPointArray(int, const int *);
     
-    QRect boundingRect() const;
+    IntRect boundingRect() const;
     
     IntPointArray copy() const;
     
