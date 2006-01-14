@@ -26,7 +26,7 @@
 
 #include "config.h"
 #import "KWQPointF.h"
-#import "KWQPointArray.h"
+#import "IntPointArray.h"
 
 QPointF::QPointF() : xCoord(0), yCoord(0)
 {
@@ -36,7 +36,7 @@ QPointF::QPointF(float xIn, float yIn) : xCoord(xIn), yCoord(yIn)
 {
 }
 
-QPointF::QPointF(const QPoint& p) :xCoord(p.x()), yCoord(p.y())
+QPointF::QPointF(const IntPoint& p) :xCoord(p.x()), yCoord(p.y())
 {
 }
 
