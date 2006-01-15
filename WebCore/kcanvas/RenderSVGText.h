@@ -35,11 +35,17 @@ public:
     RenderSVGText(KSVG::SVGTextElementImpl *node);
 
     const char *renderName() const { return "RenderSVGText"; }
-    void paint(PaintInfo& paintInfo, int parentX, int parentY);
+    void paint(PaintInfo&, int parentX, int parentY);
+    
+    virtual QMatrix localTransform() const { return m_transform; }
+    virtual void setLocalTransform(const QMatrix& transform) { m_transform = transform; }
+    
+    bool nodeAtPoint(NodeInfo&, int _x, int _y, int _tx, int _ty, HitTestAction);
 
  private:
-    void translateTopToBaseline();
-    void translateForAttributes();
+    QMatrix translationTopToBaseline();
+    QMatrix translationForAttributes();
+    QMatrix m_transform;
 };
 
 #endif
