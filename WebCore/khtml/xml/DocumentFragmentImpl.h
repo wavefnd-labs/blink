@@ -25,7 +25,7 @@
 #ifndef DOM_DocumentFragmentImpl_h
 #define DOM_DocumentFragmentImpl_h
 
-#include "dom_nodeimpl.h"
+#include "ContainerNodeImpl.h"
 
 namespace DOM {
 
