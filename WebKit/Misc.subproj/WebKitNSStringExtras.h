@@ -51,6 +51,7 @@
 
 - (NSString *)_webkit_stringByTrimmingWhitespace;
 - (NSString *)_webkit_stringByCollapsingNonPrintingCharacters;
+- (NSString *)_webkit_stringByCollapsingWhitespaceCharacters;
 - (NSString *)_webkit_fixedCarbonPOSIXPath;
 
 @end
