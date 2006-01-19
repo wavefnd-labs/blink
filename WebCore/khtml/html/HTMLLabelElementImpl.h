@@ -25,7 +25,7 @@
 #ifndef HTML_HTMLLabelElementImpl_h
 #define HTML_HTMLLabelElementImpl_h
 
-#include "html/html_elementimpl.h"
+#include "HTMLElementImpl.h"
 
 namespace DOM {
 
