@@ -34,6 +34,5 @@
 
 -(BOOL)_web_isCaseInsensitiveEqualToCString:(const char *)string;
 -(NSMutableDictionary *)_webkit_parseRFC822HeaderFields;
--(NSString *)_webkit_guessedMIMEType;
 
 @end
