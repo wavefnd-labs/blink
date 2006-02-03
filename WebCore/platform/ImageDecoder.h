@@ -45,6 +45,7 @@ typedef CFDataRef NativeBytePtr;
 class ImageDecoderPlugin;
 typedef ImageDecoderPlugin* NativeImageDecoderPtr;
 typedef ByteArray* NativeBytePtr;
+typedef void* NativeImagePtr;
 #endif
 
 const int cAnimationLoopOnce = -1;
