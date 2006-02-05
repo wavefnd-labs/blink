@@ -25,7 +25,7 @@
 #define HTMLNameCollectionImpl_H
 
 #include "HTMLCollectionImpl.h"
-#include "dom_string.h"
+#include "PlatformString.h"
 
 namespace WebCore {
 
