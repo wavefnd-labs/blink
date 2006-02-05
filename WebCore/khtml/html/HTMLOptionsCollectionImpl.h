@@ -22,30 +22,23 @@
  * Boston, MA 02111-1307, USA.
  *
  */
+
 #ifndef HTML_HTMLOptionsCollectionImpl_H
 #define HTML_HTMLOptionsCollectionImpl_H
 
-#include "Shared.h"
+#include "HTMLCollectionImpl.h"
 
-namespace DOM {
+namespace WebCore {
 
-class NodeImpl;
+typedef int ExceptionCode;
+
 class HTMLSelectElementImpl;
 
-class HTMLOptionsCollectionImpl : public Shared<HTMLOptionsCollectionImpl>
-{
+class HTMLOptionsCollectionImpl : public HTMLCollectionImpl {
 public:
-    HTMLOptionsCollectionImpl(HTMLSelectElementImpl *impl) : m_select(impl) { }
+    HTMLOptionsCollectionImpl(HTMLSelectElementImpl*);
 
-    unsigned length() const { return 0; }
-    void setLength(unsigned) { }
-    NodeImpl *item(unsigned index) const { return 0; }
-    NodeImpl *namedItem(const DOMString &name) const { return 0; }
-
-    void detach() { m_select = 0; }
-
-private:
-    HTMLSelectElementImpl *m_select;
+    void setLength(unsigned, ExceptionCode&);
 };
 
 } //namespace
