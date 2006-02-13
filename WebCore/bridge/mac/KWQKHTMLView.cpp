@@ -36,7 +36,7 @@ namespace WebCore {
     See khtml/khtmlview.cpp for the rest of the implementation.
 */
 
-QWidget *FrameView::topLevelWidget() const 
+Widget *FrameView::topLevelWidget() const 
 {
     return Mac(frame())->topLevelWidget();
 }
