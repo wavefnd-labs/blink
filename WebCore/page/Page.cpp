@@ -31,8 +31,7 @@ namespace WebCore {
 
 static int pageCount;
 
-Page::Page(PassRefPtr<Frame> mainFrame) 
-    : m_mainFrame(mainFrame) 
+Page::Page() 
 {
     ++pageCount;
 }
@@ -48,6 +47,12 @@ Page::~Page()
         Collector::collect();
 #endif
     }
+}
+
+void Page::setMainFrame(PassRefPtr<Frame> mainFrame)
+{
+    ASSERT(!m_mainFrame);
+    m_mainFrame = mainFrame;
 }
 
 }
