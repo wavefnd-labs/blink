@@ -26,7 +26,7 @@
 #ifndef KLOCALE_H_
 #define KLOCALE_H_
 
-#include "KWQStringList.h"
+#include "QStringList.h"
 
 QString inputElementAltText();
 QString resetButtonDefaultLabel();
