@@ -95,9 +95,4 @@ bool Widget::checksDescendantsForFocus() const
     return false;
 }
 
-bool Widget::event(QEvent *)
-{
-    return false;
-}
-
 }
