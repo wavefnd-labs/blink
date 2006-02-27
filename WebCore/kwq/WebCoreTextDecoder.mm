@@ -26,7 +26,10 @@
 #import "config.h"
 #import "WebCoreTextDecoder.h"
 
-#import "KWQTextCodec.h"
+#import "TextEncoding.h"
+#import "StreamingTextDecoder.h"
+
+using namespace WebCore;
 
 @implementation WebCoreTextDecoder
 
@@ -34,11 +37,11 @@
 {
     self = [super init];
     
-    QTextCodec *codec = QTextCodec::codecForName([encodingName cStringUsingEncoding:NSASCIIStringEncoding]);
-    if (!codec)
-        codec = QTextCodec::codecForName("ISO-8859-1");
+    WebCore::TextEncoding encoding = WebCore::TextEncoding([encodingName cStringUsingEncoding:NSASCIIStringEncoding]);
+    if (!encoding.isValid())
+        encoding = WebCore::TextEncoding(Latin1Encoding);
     
-    _decoder = codec->makeDecoder();
+    _decoder = new StreamingTextDecoder(encoding);
     
     return self;
 }
