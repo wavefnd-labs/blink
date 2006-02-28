@@ -26,11 +26,20 @@
 #include "config.h"
 #include "FrameWin.h"
 
+#include "BrowserExtensionWin.h"
+#include "DocumentImpl.h"
+#include "KWQKHTMLSettings.h"
+#include "render_frames.h"
+#include "Plugin.h"
+#include "FramePrivate.h"
+
 namespace WebCore {
 
 FrameWin::FrameWin(Page* page, RenderPart* renderPart)
     : Frame(page, renderPart)
 {
+    d->m_extension = new BrowserExtensionWin(this);
+    setSettings(new KHTMLSettings());
 }
 
 FrameWin::~FrameWin()
