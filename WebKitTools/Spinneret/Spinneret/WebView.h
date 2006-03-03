@@ -29,6 +29,8 @@
 #include <windows.h>
 
 namespace WebKit {
+
+    class WebFrame;
     
     class WebView {
     public:
@@ -42,6 +44,8 @@ namespace WebKit {
         void mouseDown(HWND, WPARAM, LPARAM);
         void mouseUp(HWND, WPARAM, LPARAM);
         void mouseDoubleClick(HWND, WPARAM, LPARAM);
+
+        WebFrame* mainFrame();
 
         HWND windowHandle();
     private:
