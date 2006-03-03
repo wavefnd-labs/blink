@@ -46,4 +46,9 @@ FrameWin::~FrameWin()
 {
 }
 
+QString FrameWin::userAgent() const
+{
+    return "Mozilla/5.0 (PC; U; Intel; Windows; en) AppleWebKit/420+ (KHTML, like Gecko)";
+}
+
 }
