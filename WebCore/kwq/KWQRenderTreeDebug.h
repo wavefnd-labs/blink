@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 Apple Computer, Inc.  All rights reserved.
+ * Copyright (C) 2003, 2006 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,15 +36,4 @@ namespace khtml {
 QString externalRepresentation(khtml::RenderObject *);
 void write(QTextStream &ts, const khtml::RenderObject &o, int indent = 0);
 
-#endif
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool debuggingRenderTree();
-
-#ifdef __cplusplus
-}
 #endif
