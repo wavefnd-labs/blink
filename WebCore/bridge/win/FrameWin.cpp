@@ -32,6 +32,7 @@
 #include "render_frames.h"
 #include "Plugin.h"
 #include "FramePrivate.h"
+#include <windows.h>
 
 namespace WebCore {
 
@@ -51,6 +52,24 @@ FrameWin::~FrameWin()
 QString FrameWin::userAgent() const
 {
     return "Mozilla/5.0 (PC; U; Intel; Windows; en) AppleWebKit/420+ (KHTML, like Gecko)";
+}
+
+void FrameWin::runJavaScriptAlert(String const& message)
+{
+    String text = message;
+    text.replace(QChar('\\'), backslashAsCurrencySymbol());
+    QChar nullChar('\0');
+    text += String(&nullChar, 1);
+    MessageBox(view()->windowHandle(), (LPCWSTR)text.unicode(), L"JavaScript Alert", MB_OK);
+}
+
+bool FrameWin::runJavaScriptConfirm(String const& message)
+{
+    String text = message;
+    text.replace(QChar('\\'), backslashAsCurrencySymbol());
+    QChar nullChar('\0');
+    text += String(&nullChar, 1);
+    return (MessageBox(view()->windowHandle(), (LPCWSTR)text.unicode(), L"JavaScript Alert", MB_OKCANCEL) == IDOK);
 }
 
 }
