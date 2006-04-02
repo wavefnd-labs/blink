@@ -35,18 +35,16 @@
 
 class JSValueWrapper {
 public:
-    JSValueWrapper(JSValue *inValue, ExecState *inExec);
+    JSValueWrapper(JSValue *inValue);
     virtual ~JSValueWrapper();
-
-    JSValue *GetValue();
-    ExecState *GetExecState() const;
-
-    ProtectedPtr<JSValue> fValue;
-    ExecState *fExec;
 
     static void GetJSObectCallBacks(JSObjectCallBacks& callBacks);
 
+    JSValue *GetValue();
+
 private:
+    ProtectedPtr<JSValue> fValue;
+    
     static void JSObjectDispose(void *data);
     static CFArrayRef JSObjectCopyPropertyNames(void *data);
     static JSObjectRef JSObjectCopyProperty(void *data, CFStringRef propertyName);
