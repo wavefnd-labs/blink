@@ -24,9 +24,10 @@
  */
 
 #import "DOMViews.h"
+#import "DOMWindow.h"
 
 namespace WebCore {
-    class AbstractView;
+    typedef DOMWindow AbstractView;
 }
 
 @interface DOMAbstractView (WebCoreInternal)
