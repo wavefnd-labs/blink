@@ -38,11 +38,21 @@ namespace WebCore {
     class CachedImage;
     class String;
 
+    typedef int ExceptionCode;
+
     class CanvasPattern : public Shared<CanvasPattern>, CachedObjectClient {
     public:
-        CanvasPattern(CachedImage*, const String& repetitionType);
+        static void parseRepetitionType(const String&, bool& repeatX, bool& repeatY, ExceptionCode&);
+
+#if __APPLE__
+        CanvasPattern(CGImageRef, bool repeatX, bool repeatY);
+#endif
+        CanvasPattern(CachedImage*, bool repeatX, bool repeatY);
         ~CanvasPattern();
 
+#if __APPLE__
+        CGImageRef platformImage() const { return m_platformImage; }
+#endif
         CachedImage* cachedImage() const { return m_cachedImage; }
 
 #if __APPLE__
@@ -50,6 +60,9 @@ namespace WebCore {
 #endif
 
     private:
+#if __APPLE__
+        const CGImageRef m_platformImage;
+#endif
         CachedImage* const m_cachedImage;
         const bool m_repeatX;
         const bool m_repeatY;
