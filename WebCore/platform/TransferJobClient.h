@@ -45,8 +45,8 @@ namespace WebCore {
     typedef NSURLResponse* PlatformResponse;
 #else
     // Not sure what the strategy for this will be on other platforms.
-    typedef void* PlatformData;
-    typedef void* PlatformResponse;
+    typedef struct PlatformDataStruct *PlatformData;
+    typedef struct PlatformResponseStruct *PlatformResponse;
 #endif
 
     class TransferJob;
