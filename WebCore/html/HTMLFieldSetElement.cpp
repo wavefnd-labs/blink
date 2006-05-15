@@ -27,8 +27,8 @@
 #include "config.h"
 #include "HTMLFieldSetElement.h"
 
-#include "rendering/render_form.h"
 #include "HTMLNames.h"
+#include "RenderFieldset.h"
 
 namespace WebCore {
 
