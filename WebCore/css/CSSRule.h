@@ -24,7 +24,7 @@
 #ifndef CSSRule_H
 #define CSSRule_H
 
-#include "css_base.h" // for StyleBase
+#include "StyleBase.h"
 
 namespace WebCore {
 
