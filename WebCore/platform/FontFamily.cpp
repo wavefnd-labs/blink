@@ -31,9 +31,6 @@ namespace WebCore {
 FontFamily::FontFamily()
     : m_next(0)
     , m_refCnt(0)
-#if __APPLE__
-    , m_CFFamily(0)
-#endif
 {
 }
 
@@ -41,9 +38,6 @@ FontFamily::FontFamily(const FontFamily& other)
     : m_family(other.m_family)
     , m_next(other.m_next)
     , m_refCnt(0)
-#if __APPLE__
-    , m_CFFamily(other.m_CFFamily)
-#endif
 {
     if (m_next)
         m_next->ref();
@@ -63,18 +57,12 @@ FontFamily& FontFamily::operator=(const FontFamily& other)
         m_next->deref();
     m_family = other.m_family;
     m_next = other.m_next;
-#if __APPLE__
-    m_CFFamily = other.m_CFFamily;
-#endif
     return *this;
 }
 
 void FontFamily::setFamily(const AtomicString &family)
 {
     m_family = family;
-#if __APPLE__
-    m_CFFamily = 0;
-#endif
 }
 
 bool FontFamily::operator==(const FontFamily &compareFontFamily) const
