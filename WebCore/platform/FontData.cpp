@@ -29,48 +29,12 @@
 
 #import "config.h"
 #import "Font.h"
-#import "WebCoreSystemInterface.h"
 
 namespace WebCore
 {
 
-typedef float WebGlyphWidth;
-
-struct WidthMap {
-    WidthMap() :next(0), widths(0) {}
-
-    ATSGlyphRef startRange;
-    ATSGlyphRef endRange;
-    WidthMap *next;
-    WebGlyphWidth *widths;
-};
-
-static WidthMap *extendWidthMap(const FontData *, ATSGlyphRef);
-
-static void freeWidthMap(WidthMap *);
-
-// Map utility functions
-
-float FontData::widthForGlyph(Glyph glyph) const
-{
-    WidthMap *map;
-    for (map = m_glyphToWidthMap; 1; map = map->next) {
-        if (!map)
-            map = extendWidthMap(this, glyph);
-        if (glyph >= map->startRange && glyph <= map->endRange)
-            break;
-    }
-    float width = map->widths[glyph - map->startRange];
-    if (width >= 0)
-        return width;
-        
-    width = platformWidthForGlyph(glyph);
-    map->widths[glyph - map->startRange] = width;
-    return width;
-}
-
 FontData::FontData(const FontPlatformData& f)
-:m_font(f), m_glyphToWidthMap(0), m_treatAsFixedPitch(false),
+:m_font(f), m_treatAsFixedPitch(false),
  m_smallCapsFontData(0)
  {    
     m_font = f;
@@ -90,52 +54,20 @@ FontData::~FontData()
 {
     platformDestroy();
 
-    freeWidthMap(m_glyphToWidthMap);
-
     // We only get deleted when the cache gets cleared.  Since the smallCapsRenderer is also in that cache,
     // it will be deleted then, so we don't need to do anything here.
 }
 
-static WidthMap *extendWidthMap(const FontData *renderer, ATSGlyphRef glyph)
+float FontData::widthForGlyph(Glyph glyph) const
 {
-    WidthMap *map = new WidthMap;
-    unsigned end;
-    ATSGlyphRef start;
-    unsigned blockSize;
-    unsigned i, count;
+    float width = m_glyphToWidthMap.widthForGlyph(glyph);
+    if (width != cGlyphWidthUnknown)
+        return width;
     
-    blockSize = cGlyphPageSize;
-    start = (glyph / cGlyphPageSize) * cGlyphPageSize;
-    end = ((unsigned)start) + blockSize; 
-
-    map->startRange = start;
-    map->endRange = end;
-    count = end - start + 1;
-
-    map->widths = new WebGlyphWidth[count];
-    for (i = 0; i < count; i++)
-        map->widths[i] = NAN;
-
-    if (renderer->m_glyphToWidthMap == 0)
-        renderer->m_glyphToWidthMap = map;
-    else {
-        WidthMap *lastMap = renderer->m_glyphToWidthMap;
-        while (lastMap->next != 0)
-            lastMap = lastMap->next;
-        lastMap->next = map;
-    }
-
-    return map;
-}
-
-static void freeWidthMap(WidthMap *map)
-{
-    while (map) {
-        WidthMap *next = map->next;
-        delete []map->widths;
-        delete map;
-        map = next;
-    }
+    width = platformWidthForGlyph(glyph);
+    m_glyphToWidthMap.setWidthForGlyph(glyph, width);
+    
+    return width;
 }
 
 }
