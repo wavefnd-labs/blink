@@ -50,7 +50,8 @@ struct PluginInfo {
 class PlugInInfoStore {
 public:
     PluginInfo *createPluginInfoForPluginAtIndex(unsigned);
-    unsigned pluginCount() const;    
+    unsigned pluginCount() const;
+    static bool supportsMIMEType(const String& mimeType);
 };
 
 void refreshPlugins(bool reloadOpenPages);
