@@ -61,6 +61,8 @@ namespace WebCore {
         EditActionTyping,
         EditActionCreateLink,
         EditActionUnlink,
+        EditActionFormatBlock,
+        EditActionInsertList
     } EditAction;    
 }
 
