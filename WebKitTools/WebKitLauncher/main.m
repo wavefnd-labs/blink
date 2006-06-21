@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     NSString *executablePath = [[NSBundle bundleWithPath:[(NSURL *)safariURL path]] executablePath];
     NSString *pathToEnablerLib = [[NSBundle mainBundle] pathForResource:@"WebKitNightlyEnabler" ofType:@"dylib"];
     
-    NSMutableArray *arguments = [NSMutableArray arrayWithObjects:executablePath, @"-WebKitDeveloperExtras", @"YES", nil];
+    NSMutableArray *arguments = [NSMutableArray arrayWithObjects:executablePath, @"-WebKitDeveloperExtras", @"YES", @"-WebKitScriptDebuggerEnabled", @"YES", nil];
     addStartPageToArgumentsIfNeeded(arguments);
 
     while (*++argv)
