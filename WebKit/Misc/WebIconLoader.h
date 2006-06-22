@@ -50,17 +50,6 @@
 - (NSURL *)URL;
 
 /*!
-    @method delegate
-*/
-- (id)delegate;
-
-/*!
-    @method setDelegate:
-    @param delegate
-*/
-- (void)setDelegate:(id)delegate;
-
-/*!
     @method startLoading
 */
 - (void)startLoading;
