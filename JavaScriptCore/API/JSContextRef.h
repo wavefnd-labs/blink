@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-JSContextRef JSContextCreate(const JSObjectCallbacks* globalObjectCallbacks, JSObjectRef globalObjectPrototype);
+JSContextRef JSContextCreate(JSClassRef globalObjectClass, JSObjectRef globalObjectPrototype);
 void JSContextDestroy(JSContextRef context);
 
 JSObjectRef JSContextGetGlobalObject(JSContextRef context);
