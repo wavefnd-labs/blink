@@ -43,4 +43,5 @@
 - (IBAction)stepInto:(id)sender;
 - (IBAction)stepOver:(id)sender;
 - (IBAction)stepOut:(id)sender;
+- (IBAction)showConsole:(id)sender;
 @end
