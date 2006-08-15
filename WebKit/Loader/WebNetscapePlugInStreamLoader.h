@@ -28,14 +28,15 @@
 
 
 #import <WebKit/WebLoader.h>
+#import <WebKit/WebPlugInStreamLoaderDelegate.h>
 
 @class WebNetscapePluginStream;
 
 @interface WebNetscapePlugInStreamLoader : WebLoader
 {
-    WebNetscapePluginStream *stream;
+    NSObject<WebPlugInStreamLoaderDelegate> *stream;
 }
-- (id)initWithStream:(WebNetscapePluginStream *)theStream frameLoader:(WebFrameLoader *)fl;
+- (id)initWithDelegate:(NSObject<WebPlugInStreamLoaderDelegate> *)theStream frameLoader:(WebFrameLoader *)fl;
 - (BOOL)isDone;
 @end
 
