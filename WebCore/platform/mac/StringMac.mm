@@ -23,21 +23,6 @@
 
 namespace WebCore {
 
-String::String(CFStringRef str)
-{
-    if (!str)
-        return;
-
-    CFIndex size = CFStringGetLength(str);
-    if (size == 0)
-        m_impl = StringImpl::empty();
-    else {
-        Vector<UChar, 1024> buffer(size);
-        CFStringGetCharacters(str, CFRangeMake(0, size), buffer.data());
-        m_impl = new StringImpl(buffer.data(), size);
-    }
-}
-
 String::String(NSString* str)
 {
     if (!str)
