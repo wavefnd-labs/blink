@@ -36,7 +36,7 @@ class CSSRuleList : public Shared<CSSRuleList>
 {
 public:
     CSSRuleList();
-    CSSRuleList(StyleList*);
+    CSSRuleList(StyleList*, bool omitCharsetRules = false);
     ~CSSRuleList();
 
     unsigned length() const { return m_lstCSSRules.count(); }
