@@ -34,6 +34,7 @@
 #import <WebCore/DOMHTMLAreaElement.h>
 #import <WebCore/DOMHTMLDocument.h>
 #import <WebCore/DOMHTMLElement.h>
+#import <WebCore/DOMHTMLEmbedElement.h>
 #import <WebCore/DOMHTMLImageElement.h>
 #import <WebCore/DOMHTMLInputElement.h>
 #import <WebCore/DOMHTMLLinkElement.h>
@@ -45,7 +46,6 @@
 @class NSImage;
 
 @interface DOMDocument (DOMDocumentCSSExtensions)
-- (DOMCSSStyleDeclaration *)createCSSStyleDeclaration;
 - (DOMCSSRuleList *)getMatchedCSSRules:(DOMElement *)elt :(NSString *)pseudoElt;
 @end
 
@@ -59,26 +59,6 @@
 
 @interface DOMHTMLObjectElement (DOMHTMLObjectElementExtensions)
 - (NSURL *)absoluteImageURL;
-@end
-
-@interface DOMHTMLEmbedElement : DOMHTMLElement
-- (NSString *)align;
-- (void)setAlign:(NSString *)align;
-- (int)height;
-- (void)setHeight:(int)height;
-- (NSString *)name;
-- (void)setName:(NSString *)name;
-- (NSString *)src;
-- (void)setSrc:(NSString *)src;
-- (NSString *)type;
-- (void)setType:(NSString *)type;
-- (int)width;
-- (void)setWidth:(int)width;
-@end
-
-@interface DOMCSSStyleDeclaration (DOMCSSStyleDeclarationExtensions)
-- (NSString *)getPropertyShorthand:(NSString *)propertyName;
-- (BOOL)isPropertyImplicit:(NSString *)propertyName;
 @end
 
 @interface DOMRange (DOMRangeExtensions)
