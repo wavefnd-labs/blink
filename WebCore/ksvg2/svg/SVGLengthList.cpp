@@ -43,12 +43,14 @@ SVGLengthList::~SVGLengthList()
 
 void SVGLengthList::parse(const DeprecatedString& value, const SVGStyledElement* context, LengthMode mode)
 {
+    ExceptionCode ec = 0;
+
     DeprecatedStringList lengths = DeprecatedStringList::split(' ', value);
     for (unsigned int i = 0; i < lengths.count(); i++) {
         SVGLength* length = new SVGLength(context, mode);
         String str(lengths[i]);
         length->setValueAsString(str);
-        appendItem(length);
+        appendItem(length, ec);
     }
 }
 
