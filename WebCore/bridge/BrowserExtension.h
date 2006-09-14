@@ -60,9 +60,6 @@ public:
     virtual void createNewWindow(const ResourceRequest&) = 0;
     virtual void createNewWindow(const ResourceRequest&, const WindowArgs&, Frame*&) = 0;
 
-    virtual void setIconURL(const KURL&) = 0;
-    virtual void setTypedIconURL(const KURL&, const String& type) = 0;
-
     virtual int getHistoryLength() = 0;
     virtual void goBackOrForward(int distance) = 0;
     virtual KURL historyURL(int distance) = 0;
