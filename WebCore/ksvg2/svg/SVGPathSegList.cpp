@@ -30,7 +30,7 @@
 namespace WebCore {
 
 SVGPathSegList::SVGPathSegList()
-    : SVGList<SVGPathSeg*>()
+    : SVGList<RefPtr<SVGPathSeg> >()
 {
 }
 
