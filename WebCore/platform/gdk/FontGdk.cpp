@@ -48,7 +48,7 @@ void Font::drawGlyphs(GraphicsContext* graphicsContext, const FontData* font, co
     // Select the scaled font.
     font->setFont(context);
 
-    GlyphBufferGlyph* glyphs = glyphBuffer.glyphs(from);
+    GlyphBufferGlyph* glyphs = (GlyphBufferGlyph*) glyphBuffer.glyphs(from);
 
     float offset = point.x();
 
