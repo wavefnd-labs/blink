@@ -28,20 +28,10 @@
 #import <WebCore/DOMDocument.h>
 #import <WebCore/DOMObject.h>
 
-extern NSString * const DOMRangeException;
+#import <WebCore/DOMRangeException.h>
 
+// DOM Range comparison codes
 enum {
-    //
-    // DOM range exception codes
-    //
-    DOM_BAD_BOUNDARYPOINTS_ERR        = 1,
-    DOM_INVALID_NODE_TYPE_ERR         = 2
-};
-
-enum {
-    //
-    // DOM Range comparison codes
-    //
     DOM_START_TO_START                = 0,
     DOM_START_TO_END                  = 1,
     DOM_END_TO_END                    = 2,
