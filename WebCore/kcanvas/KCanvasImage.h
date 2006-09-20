@@ -25,7 +25,7 @@
 #define KCanvasImage_H
 #ifdef SVG_SUPPORT
 
-#include <kcanvas/KCanvasResources.h>
+#include "KCanvasResource.h"
 
 namespace WebCore {
 class Image;
