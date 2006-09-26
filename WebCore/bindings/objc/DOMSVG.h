@@ -25,6 +25,8 @@
  */
 
 #import <WebCore/DOMSVGAngle.h>
+#import <WebCore/DOMSVGElement.h>
+#import <WebCore/DOMSVGException.h>
 #import <WebCore/DOMSVGLength.h>
 #import <WebCore/DOMSVGLengthList.h>
 #import <WebCore/DOMSVGMatrix.h>
