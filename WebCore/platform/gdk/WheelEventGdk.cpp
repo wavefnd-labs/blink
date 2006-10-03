@@ -34,19 +34,17 @@ namespace WebCore {
 
 PlatformWheelEvent::PlatformWheelEvent(GdkEvent* event)
 {
-    if (event->scroll.direction == GDK_SCROLL_UP) {
-        m_delta = -120;
-        m_isHorizontal = false;
-    } else if (event->scroll.direction == GDK_SCROLL_LEFT) {
-        m_delta = -120;
-        m_isHorizontal = true;
-    } else if (event->scroll.direction == GDK_SCROLL_RIGHT) {
-        m_delta = 120;
-        m_isHorizontal = true;
-    } else {
-        m_delta = 120;
-        m_isHorizontal = false;
-    }
+    m_deltaX = 0;
+    m_deltaY = 0;
+
+    if (event->scroll.direction == GDK_SCROLL_UP)
+        m_deltaY = -120;
+    else if (event->scroll.direction == GDK_SCROLL_LEFT)
+        m_deltaX = -120;
+    else if (event->scroll.direction == GDK_SCROLL_RIGHT)
+        m_deltaX = 120;
+    else
+        m_deltaY = 120;
 
     m_position = IntPoint((int)event->scroll.x, (int)event->scroll.y);
     m_globalPosition = IntPoint((int)event->scroll.x_root, (int)event->scroll.y_root);
