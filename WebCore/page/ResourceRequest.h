@@ -35,8 +35,8 @@ namespace WebCore {
 
     struct ResourceRequest {
 
-        ResourceRequest() : m_lockHistory(false), reload(false), m_doPost(false) { }
-        explicit ResourceRequest(const KURL& url) : m_lockHistory(false), reload(false), m_url(url), m_doPost(false) { }
+        ResourceRequest() : reload(false), m_doPost(false) { }
+        explicit ResourceRequest(const KURL& url) : reload(false), m_url(url), m_doPost(false) { }
 
         const KURL& url() const { return m_url; }
         void setURL(const KURL& url) { m_url = url; }
@@ -47,17 +47,8 @@ namespace WebCore {
         bool doPost() const { return m_doPost; }
         void setDoPost(bool post) { m_doPost = post; }
         
-        bool lockHistory() const { return m_lockHistory; }
-        void setLockHistory(bool lock) { m_lockHistory = lock; }
-        
         const String& referrer() const { return m_referrer; }
         void setReferrer(const String& referrer) { m_referrer = referrer; }
-
-        // FIXME: these two parameters are specific to frame opening,
-        // should move to FrameRequest once we have that
-        String frameName;
-    private:
-        bool m_lockHistory;
 
     public:
         FormData postData;
