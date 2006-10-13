@@ -26,44 +26,49 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import "config.h"
 #import "WebFormState.h"
 
-@implementation WebFormState : NSObject
+#import "DOMElementInternal.h"
+#import "Element.h"
+#import "FrameMac.h"
+#import "WebCoreFrameBridge.h"
 
-- (id)initWithForm:(DOMElement *)form values:(NSDictionary *)values sourceFrame:(WebCoreFrameBridge *)sourceFrame
+namespace WebCore {
+
+PassRefPtr<FormState> FormState::create(PassRefPtr<Element> form, const HashMap<String, String>& values, PassRefPtr<Frame> sourceFrame)
 {
-    self = [super init];
-    if (!self)
-        return nil;
-    
-    _form = [form retain];
-    _values = [values copy];
-    _sourceFrame = [sourceFrame retain];
-    return self;
+    return new FormState(form, values, sourceFrame);
 }
 
-- (void)dealloc
+PassRefPtr<FormState> FormState::create(DOMElement *form, NSDictionary *values, WebCoreFrameBridge *sourceFrame)
 {
-    [_form release];
-    [_values release];
-    [_sourceFrame release];
-    [super dealloc];
+    return new FormState(form, values, sourceFrame);
 }
 
-- (DOMElement *)form
+FormState::FormState(PassRefPtr<Element> form, const HashMap<String, String>& values, PassRefPtr<Frame> sourceFrame)
+    : m_form(form)
+    , m_values(values)
+    , m_sourceFrame(sourceFrame)
 {
-    return _form;
 }
 
-- (NSDictionary *)values
+FormState::FormState(DOMElement *form, NSDictionary *values, WebCoreFrameBridge *sourceFrame)
+    : m_form([form _element])
+    , m_sourceFrame([sourceFrame impl])
 {
-    return _values;
+    NSEnumerator *keyEnumerator = [values keyEnumerator];
+    while (NSString *key = [keyEnumerator nextObject])
+        m_values.set(key, [values objectForKey:values]);
 }
 
-- (WebCoreFrameBridge *)sourceFrame
+NSDictionary *FormState::valuesAsNSDictionary() const
 {
-    return _sourceFrame;
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:m_values.size()];
+    HashMap<String, String>::const_iterator end = m_values.end();
+    for (HashMap<String, String>::const_iterator it = m_values.begin(); it != end; ++it)
+        [dictionary setObject:it->second forKey:it->first];
+    return dictionary;
 }
 
-@end
-
+}
