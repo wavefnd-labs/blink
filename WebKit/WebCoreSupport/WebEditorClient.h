@@ -30,15 +30,17 @@
 
 @class WebView;
 
-class WebEditorClient : public WebCore::EditorClient
-{
+class WebEditorClient : public WebCore::EditorClient {
 public:
     WebEditorClient();
     WebEditorClient(WebView* webView);
     ~WebEditorClient();
 
     void setWebView(WebView* webView);
-    bool shouldDeleteRange(WebCore::Range *range);    
+
+    bool shouldDeleteRange(WebCore::Range*);    
+    bool shouldShowDeleteInterface(WebCore::HTMLElement*);
+
 //    bool shouldBeginEditingInRange(Range *range);
 //    bool shouldEndEditingInRange(Range *range);
 //    bool shouldInsertNode(Node *node, Range* replacingRange, WebViewInsertAction givenAction);
