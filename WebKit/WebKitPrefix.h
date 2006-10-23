@@ -48,6 +48,7 @@
 
 #ifdef __cplusplus
 
+#include <algorithm> // needed for exception_defines.h
 #include <cstddef>
 #include <new>
 
@@ -64,3 +65,7 @@
 #endif
 
 #include <JavaScriptCore/Platform.h>
+
+/* Work around bug with C++ library that screws up Objective-C++ when exception support is disabled. */
+#undef try
+#undef catch
