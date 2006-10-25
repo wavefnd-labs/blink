@@ -27,14 +27,14 @@
 #include <wtf/HashMap.h>
 #include "PlatformString.h"
 #include "ResourceLoaderClient.h"  // Defines PlatformResponse
-#include "ResourceRequest.h"
+#include "HTTPHeaderMap.h"
 
 #ifdef __OBJC__
 @class NSDictionary;
 @class NSString;
 
 @interface NSDictionary (WebCore_Extras)
-+ (id)_webcore_dictionaryWithHeaderMap:(const WebCore::ResourceRequest::HTTPHeaderMap&)headerMap;
++ (id)_webcore_dictionaryWithHeaderMap:(const WebCore::HTTPHeaderMap&)headerMap;
 @end
 
 #else
