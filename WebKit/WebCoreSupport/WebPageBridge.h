@@ -33,6 +33,7 @@
 
 @interface WebPageBridge : WebCorePageBridge <WebCorePageBridge>
 {
+@public
     WebView *_webView;
 }
 
