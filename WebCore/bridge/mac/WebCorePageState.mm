@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 Apple Computer, Inc.  All rights reserved.
+ * Copyright (C) 2003, 2006 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,158 +27,45 @@
 #import "WebCorePageState.h"
 
 #import "Document.h"
-#import "FoundationExtras.h"
-#import "FrameMac.h"
-#import "kjs_window.h"
-#import <kjs/SavedBuiltins.h>
+#import "Frame.h"
+#import "Page.h"
+#import "PageState.h"
 
 using namespace WebCore;
-using namespace KJS;
 
 @implementation WebCorePageState
 
-- (id)initWithDocument:(Document *)doc URL:(const KURL &)u windowProperties:(SavedProperties *)wp locationProperties:(SavedProperties *)lp interpreterBuiltins:(SavedBuiltins *)ib pausedTimeouts:(PausedTimeouts *)pt
+- (id)initWithPage:(Page*)page
 {
-    [super init];
+    self = [super init];
+    if (!self)
+        return nil;
 
-    doc->ref();
-    document = doc;
-    doc->setInPageCache(YES);
-    
-    FrameMac *frame = static_cast<FrameMac *>(doc->frame());
-    mousePressNode = frame ? frame->mousePressNode() : 0;
-    if (mousePressNode)
-        mousePressNode->ref();
-    
-    URL = new KURL(u);
-    windowProperties = wp;
-    locationProperties = lp;
-    interpreterBuiltins = ib;
-    pausedTimeouts = pt;
-
-    doc->view()->ref();
-
-    return self;
-}
-
-- (PausedTimeouts *)pausedTimeouts
-{
-    return pausedTimeouts;
-}
-
-- (void)clear
-{
-    if (mousePressNode)
-        mousePressNode->deref();        
-    mousePressNode = 0;
-
-    delete URL;
-    URL = 0;
-
-    JSLock lock;
-
-    delete windowProperties;
-    windowProperties = 0;
-    delete locationProperties;
-    locationProperties = 0;
-    delete interpreterBuiltins;
-    interpreterBuiltins = 0;
-
-    delete pausedTimeouts;
-    pausedTimeouts = 0;
-
-    Collector::collect();
-}
-
-- (void)invalidate
-{
-    // Should only ever invalidate once.
-    ASSERT(document);
-    ASSERT(document->view());
-    ASSERT(!document->inPageCache());
-
-    if (document) {
-        FrameView *view = document->view();
-        if (view)
-            view->deref();
-        document->deref();
-        document = 0;
+    Document* document = page->mainFrame()->document();
+    if (!document || !document->view()) {
+        [self release];
+        return nil;
     }
 
-    [self clear];
+    m_impl = WebCore::PageState::create(page).releaseRef();
+    return self;
 }
 
 - (void)dealloc
 {
-    ASSERT(closed);
+    m_impl->deref();
     [super dealloc];
 }
 
 - (void)finalize
 {
-    ASSERT(closed);
+    m_impl->deref();
     [super finalize];
 }
 
-- (void)close
+- (WebCore::PageState*)impl
 {
-    if (closed)
-        return;
-    if (document) {
-        ASSERT(document->inPageCache());
-        ASSERT(document->view());
-
-        FrameView *view = document->view();
-
-        FrameMac::clearTimers(view);
-
-        bool detached = document->renderer() == 0;
-        document->setInPageCache(NO);
-        if (detached) {
-            document->detach();
-            document->removeAllEventListenersFromAllNodes();
-        }
-        document->deref();
-        document = 0;
-
-        if (view) {
-            view->clearPart();
-            view->deref();
-        }
-    }
-
-    [self clear];
-    closed = YES;
-}
-
-- (Document *)document
-{
-    return document;
-}
-
-- (WebCore::Node *)mousePressNode
-{
-    return mousePressNode;
-}
-
-- (KURL *)URL
-{
-    return URL;
-}
-
-- (SavedProperties *)windowProperties
-{
-    return windowProperties;
-}
-
-- (SavedProperties *)locationProperties
-{
-    return locationProperties;
-}
-
-- (SavedBuiltins *)interpreterBuiltins
-{
-    return interpreterBuiltins;
+    return m_impl;
 }
 
 @end
