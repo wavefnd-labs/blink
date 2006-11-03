@@ -29,13 +29,9 @@
 
 namespace WebCore {
 
-Page::Page(WebCorePageBridge* bridge)
-    : m_frameCount(0)
-    , m_dragCaretController(0, true)
-    , m_defersLoading(false)
-    , m_bridge(bridge)
+void Page::setBridge(WebCorePageBridge* bridge)
 {
-    init();
+    m_bridge = bridge;
 }
 
 // These methods scale between window and WebView coordinates because JavaScript/DOM operations 
@@ -49,29 +45,6 @@ FloatRect Page::windowRect() const
 void Page::setWindowRect(const FloatRect& r)
 {
     [bridge() setWindowFrame:flipScreenRect(scalePageRectToScreenCoordinates(r, this))];
-}
-
-bool Page::canRunModal()
-{
-    BEGIN_BLOCK_OBJC_EXCEPTIONS;
-    return [bridge() canRunModal];
-    END_BLOCK_OBJC_EXCEPTIONS;
-    return false;
-}
-
-bool Page::canRunModalNow()
-{
-    BEGIN_BLOCK_OBJC_EXCEPTIONS;
-    return [bridge() canRunModalNow];
-    END_BLOCK_OBJC_EXCEPTIONS;
-    return false;
-}
-
-void Page::runModal()
-{
-    BEGIN_BLOCK_OBJC_EXCEPTIONS;
-    [bridge() runModal];
-    END_BLOCK_OBJC_EXCEPTIONS;
 }
 
 } // namespace WebCore
