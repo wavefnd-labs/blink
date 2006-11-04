@@ -32,13 +32,6 @@
 
 namespace WebCore {
 
-Page::Page()
-: m_frameCount(0)
-, m_dragCaretController(0, true)
-{
-    init();
-}
-
 static HWND rootWindowForFrame(const Frame* frame)
 {
     if (!frame)
