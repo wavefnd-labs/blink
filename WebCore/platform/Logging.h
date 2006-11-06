@@ -35,7 +35,6 @@
 namespace WebCore {
 
     extern WTFLogChannel LogNotYetImplemented;
-
     extern WTFLogChannel LogFrames;
     extern WTFLogChannel LogLoading;
     extern WTFLogChannel LogPopupBlocking;
@@ -45,6 +44,9 @@ namespace WebCore {
     extern WTFLogChannel LogIconDatabase;
     extern WTFLogChannel LogSQLDatabase;
     extern WTFLogChannel LogSpellingAndGrammar;
-}
 
-#endif
+    void InitializeLoggingChannelsIfNecessary();
+
+} // namespace WebCore
+
+#endif // Logging_H

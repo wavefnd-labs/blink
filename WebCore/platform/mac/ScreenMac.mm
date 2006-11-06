@@ -27,91 +27,48 @@
 #import "Screen.h"
 
 #import "FloatRect.h"
-#import "Page.h"
-#import "WebCorePageBridge.h"
 
 namespace WebCore {
 
-static NSScreen* screen(const Page* page)
+NSScreen *screen(NSWindow *window)
 {
-    if (page)
-        if (NSScreen* screen = [[[page->bridge() outerView] window] screen])
-            return screen;
-    return [NSScreen mainScreen];
-}
-
-static inline FloatRect scale(const FloatRect& rect, const NSSize& scaleSize)
-{
-    float scaleX = scaleSize.width;
-    float scaleY = scaleSize.height;
+    NSScreen *s = [window screen]; // nil if the window is off-screen
+    if (s)
+        return s;
     
-    return FloatRect(rect.x() * scaleX, rect.y() * scaleY, rect.width() * scaleX, rect.height() * scaleY);
-}
-
-NSRect flipScreenRect(NSRect rect)
-{
-    rect.origin.y = NSMaxY([[[NSScreen screens] objectAtIndex:0] frame]) - NSMaxY(rect);
-    return rect;
-}
-
-NSPoint flipScreenPoint(NSPoint point)
-{
-    point.y = NSMaxY([[[NSScreen screens] objectAtIndex:0] frame]) - point.y;
-    return point;
-}
-
-FloatRect scaleScreenRectToPageCoordinates(const FloatRect& rect, const Page* page)
-{
-    NSSize scaleSize = [[page->bridge() outerView] convertSize:NSMakeSize(1.0, 1.0) fromView:nil];
-    return scale(rect, scaleSize);
-}
-
-FloatRect scalePageRectToScreenCoordinates(const FloatRect& rect, const Page* page)
-{
-    NSSize scaleSize = [[page->bridge() outerView] convertSize:NSMakeSize(1.0, 1.0) toView:nil];
-    return scale(rect, scaleSize);
-}
-
-int screenDepth(const Page* page)
-{
-    return NSBitsPerPixelFromDepth([screen(page) depth]);
-}
-
-int screenDepthPerComponent(const Page* page)
-{
-    return NSBitsPerSampleFromDepth([screen(page) depth]);
-}
-
-bool screenIsMonochrome(const Page* page)
-{
-    NSScreen* s = screen(page);
-    NSDictionary* dd = [s deviceDescription];
-    NSString* colorSpaceName = [dd objectForKey:NSDeviceColorSpaceName];
-    return colorSpaceName == NSCalibratedWhiteColorSpace
-        || colorSpaceName == NSCalibratedBlackColorSpace
-        || colorSpaceName == NSDeviceWhiteColorSpace
-        || colorSpaceName == NSDeviceBlackColorSpace;
-}
-
-float scaleFactor(const Page* page)
-{
-    if (page)
-        return [[[page->bridge() outerView] window] userSpaceScaleFactor];
+    NSArray *screens = [NSScreen screens];
+    if ([screens count] > 0)
+        return [screens objectAtIndex:0]; // screen containing the menubar
     
-    return 1.0f;
+    return nil;
 }
 
-// These methods scale between window and WebView coordinates because JavaScript/DOM operations 
-// assume that the WebView and the window share the same coordinate system.
-
-FloatRect screenRect(const Page* page)
+FloatRect scaleFromScreen(const NSRect& rect, NSScreen *screen)
 {
-    return scaleScreenRectToPageCoordinates(flipScreenRect([screen(page) frame]), page);
+    FloatRect scaledRect = rect;
+    scaledRect.scale(1 / [screen userSpaceScaleFactor]);
+    return scaledRect;
 }
 
-FloatRect usableScreenRect(const Page* page)
+NSRect scaleToScreen(const FloatRect& rect, NSScreen *screen)
 {
-    return scaleScreenRectToPageCoordinates(flipScreenRect([screen(page) visibleFrame]), page);
+    FloatRect scaledRect = rect;
+    scaledRect.scale([screen userSpaceScaleFactor]);
+    return scaledRect;
+}
+
+NSPoint flipScreenPoint(const NSPoint& screenPoint, NSScreen *screen)
+{
+    NSPoint flippedPoint = screenPoint;
+    flippedPoint.y = NSMaxY([screen frame]) - flippedPoint.y;
+    return flippedPoint;
+}
+
+NSRect flipScreenRect(const NSRect& rect, NSScreen *screen)
+{
+    NSRect flippedRect = rect;
+    flippedRect.origin.y = NSMaxY([screen frame]) - NSMaxY(flippedRect);
+    return flippedRect;
 }
 
 } // namespace WebCore
