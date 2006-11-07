@@ -28,10 +28,11 @@
 #include "config.h"
 #include "Screen.h"
 
-#include "Page.h"
-#include "Frame.h"
-#include "Widget.h"
 #include "FloatRect.h"
+#include "Frame.h"
+#include "FrameView.h"
+#include "Page.h"
+#include "Widget.h"
 
 #include <gdk/gdk.h>
 
