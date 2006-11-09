@@ -50,6 +50,7 @@ private:
     virtual void didReceiveResponse(ResourceHandle*, const ResourceResponse&);
     virtual void didReceiveData(ResourceHandle*, const char*, int);
     virtual void didFinishLoading(ResourceHandle*);
+    virtual void didFailWithError(ResourceHandle*, const ResourceError&);
 
     void finishLoading(const KURL&);
     void clearLoadingState();
