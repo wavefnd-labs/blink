@@ -25,56 +25,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
+// FIXME: should be renamed to ScreenClientGdk.cpp
+
 #include "config.h"
-#include "Screen.h"
+#include "ScreenClientGdk.h"
 
 #include "FloatRect.h"
-#include "Frame.h"
-#include "FrameView.h"
-#include "Page.h"
-#include "Widget.h"
-
 #include <gdk/gdk.h>
+
+#define notImplemented() do { fprintf(stderr, "%s FIXME: UNIMPLEMENTED %s:%d\n", __PRETTY_FUNCTION__, __FILE__, __LINE__); } while(0)
 
 namespace WebCore {
 
-static GdkDrawable* drawableForPage(const Page* page)
-{
-    Frame* frame = (page ? page->mainFrame() : 0);
-    FrameView* frameView = (frame ? frame->view() : 0);
-    
-    if (!frameView)
-        return 0;
-    
-    return frameView->drawable();
-}
+int ScreenClientGdk::depth() { notImplemented(); return 32; }
+int ScreenClientGdk::depthPerComponent() { notImplemented(); return 8; }
 
-FloatRect screenRect(const Page* page)
-{
-    GdkDrawable* drawable = drawableForPage(page);
-    if (!drawable)
-        return FloatRect();
-    GdkScreen* screen = gdk_drawable_get_screen(drawable);
-    return FloatRect(0, 0, gdk_screen_get_width(screen), gdk_screen_get_height(screen));
-}
+bool ScreenClientGdk::isMonochrome() { notImplemented(); return false; }
 
-int screenDepth(const Page* page)
-{
-    GdkDrawable* drawable = drawableForPage(page);
-    if (!drawable)
-        return 32;
-    return gdk_drawable_get_depth(drawable);
-}
-
-FloatRect usableScreenRect(const Page* page)
-{
-    return screenRect(page);
-}
-
-float scaleFactor(const Page*)
-{
-    return 1.0f;
-
-}
+FloatRect ScreenClientGdk::rect() { notImplemented(); return FloatRect(); }
+FloatRect ScreenClientGdk::usableRect() { notImplemented(); return FloatRect(); }
 
 }
