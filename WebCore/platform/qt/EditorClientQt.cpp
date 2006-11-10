@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2006 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2006 Nikolas Zimmermann <zimmermann@kde.org> 
+ * Copyright (C) 2006 Zack Rusin <zack@kde.org>
  * Copyright (C) 2006 Apple Computer, Inc.
  *
  * All rights reserved.
@@ -62,6 +63,40 @@ int EditorClientQt::spellCheckerDocumentTag()
 {
     notImplemented();
     return 0;
+}
+
+bool EditorClientQt::shouldBeginEditing(WebCore::Range*)
+{
+    notImplemented();
+    return false;
+}
+
+bool EditorClientQt::shouldEndEditing(WebCore::Range*)
+{
+    notImplemented();
+    return false;
+}
+
+bool EditorClientQt::shouldApplyStyle(WebCore::CSSStyleDeclaration*,
+                                      WebCore::Range*)
+{
+    notImplemented();
+    return false;
+}
+
+void EditorClientQt::didBeginEditing()
+{
+    notImplemented();
+}
+
+void EditorClientQt::respondToChangedContents()
+{
+    notImplemented();
+}
+
+void EditorClientQt::didEndEditing()
+{
+    notImplemented();
 }
 
 }
