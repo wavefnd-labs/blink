@@ -44,38 +44,34 @@ FloatRect scalePageRectToScreenCoordinates(const FloatRect& rect, const Page*)
 {
     return rect;
 }
-    
-static MONITORINFOEX monitorInfo(const Page* page)
+
+static MONITORINFOEX monitorInfo(Widget* widget)
 {
-    HMONITOR monitor = MonitorFromWindow(page->mainFrame()->view()->containingWindow(), MONITOR_DEFAULTTOPRIMARY);
+    HMONITOR monitor = MonitorFromWindow(widget->containingWindow(), MONITOR_DEFAULTTOPRIMARY);
     MONITORINFOEX info;
     info.cbSize = sizeof(MONITORINFOEX);
     GetMonitorInfo(monitor, &info);
     return info;
 }
 
-FloatRect screenRect(const Page* page)
+FloatRect screenRect(Widget* widget)
 {
-    return monitorInfo(page).rcMonitor;
+    return monitorInfo(widget).rcMonitor;
 }
 
-int screenDepth(const Page*)
+FloatRect screenAvailableRect(Widget* widget)
+{
+    // FIXME: I have no idea if this is correct
+    return monitorInfo(widget).rcWork;
+}
+
+int screenDepth(Widget*)
 {
     DEVMODE deviceInfo;
     deviceInfo.dmSize = sizeof(DEVMODE);
     deviceInfo.dmDriverExtra = 0;
     EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &deviceInfo);
     return deviceInfo.dmBitsPerPel;
-}
-
-FloatRect usableScreenRect(const Page* page)
-{
-    return monitorInfo(page).rcWork;
-}
-
-float scaleFactor(const Page* page)
-{
-    return 1.0f;
 }
 
 } // namespace WebCore
