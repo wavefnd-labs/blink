@@ -30,10 +30,22 @@
 
 namespace WebCore {
     class ContextMenu;
+    class Frame;
+    class HitTestResult;
+    class KURL;
 
     class ContextMenuClient : public AbstractShared {
     public:
         virtual void addCustomContextMenuItems(ContextMenu*) = 0;
+
+        virtual void copyLinkToClipboard(HitTestResult) = 0;
+        virtual void downloadURL(KURL url) = 0;
+        virtual void copyImageToClipboard(HitTestResult) = 0;
+        virtual void lookUpInDictionary(Frame*) = 0;
+
+#if PLATFORM(MAC)
+        virtual void searchWithSpotlight() = 0;
+#endif
     };
 }
 
