@@ -28,6 +28,7 @@
 
 namespace WebCore {
     class ContextMenu;
+    class ContextMenuItem;
     class Frame;
     class HitTestResult;
     class KURL;
@@ -38,6 +39,7 @@ namespace WebCore {
         virtual void contextMenuDestroyed() = 0;
         
         virtual void addCustomContextMenuItems(ContextMenu*) = 0;
+        virtual void contextMenuItemSelected(ContextMenuItem*) = 0;
 
         virtual void copyLinkToClipboard(HitTestResult) = 0;
         virtual void downloadURL(KURL url) = 0;
