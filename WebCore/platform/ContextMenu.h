@@ -30,39 +30,21 @@
 
 #include "ContextMenuItem.h"
 #include "HitTestResult.h"
+#include "PlatformMenuDescription.h"
 #include "PlatformString.h"
 #if PLATFORM(MAC)
 #include "RetainPtr.h"
-#endif
-
-#if PLATFORM(MAC)
-#ifdef __OBJC__
-@class NSMutableArray;
-#else
-class NSMutableArray;
-#endif
-#elif PLATFORM(WIN)
-typedef struct HMENU__* HMENU;
-#elif PLATFORM(QT)
-class QMenu;
 #endif
 
 namespace WebCore {
 
     class ContextMenuController;
 
-#if PLATFORM(MAC)
-    typedef NSMutableArray* PlatformMenuDescription;
-#elif PLATFORM(WIN)
-    typedef HMENU PlatformMenuDescription;
-#elif PLATFORM(QT)
-    typedef QMenu* PlatformMenuDescription;
-#endif
-
     class ContextMenu : Noncopyable
     {
     public:
         ContextMenu(const HitTestResult&);
+        ContextMenu(const HitTestResult&, const PlatformMenuDescription);
         ~ContextMenu();
 
         void populate();
