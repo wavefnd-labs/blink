@@ -32,13 +32,10 @@
 
 namespace WebCore {
 
-    class ChromeClientWin : public ChromeClient, public Shared<ChromeClientWin> {
+    class ChromeClientWin : public ChromeClient {
     public:
         virtual ~ChromeClientWin() { }
         virtual void chromeDestroyed();
-
-        virtual void ref() { Shared<ChromeClientWin>::ref(); }
-        virtual void deref() { Shared<ChromeClientWin>::deref(); }
 
         virtual void setWindowRect(const FloatRect&);
         virtual FloatRect windowRect();
