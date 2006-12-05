@@ -29,6 +29,31 @@
 #include "config.h"
 #include "ResourceLoader.h"
 
+#include "Frame.h"
+#include "Page.h"
+
 namespace WebCore {
+
+#if !PLATFORM(MAC)
+// FIXME: This is only temporary until ResourceLoader is truly platform independent.
+
+ResourceLoader::~ResourceLoader()
+{
+}
+
+ResourceLoader::ResourceLoader(Frame* frame)
+    : m_reachedTerminalState(false)
+    , m_cancelled(false)
+    , m_calledDidFinishLoad(false)
+    , m_frame(frame)
+    , m_defersLoading(frame->page()->defersLoading())
+{
+}
+
+void ResourceLoader::setDefersLoading(bool)
+{
+}
+
+#endif
 
 }
