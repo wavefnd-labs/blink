@@ -23,7 +23,7 @@
 #ifndef break_lines_h
 #define break_lines_h
 
-#include "UChar.h"
+#include "wtf/unicode/Unicode.h"
 
 namespace WebCore {
 
