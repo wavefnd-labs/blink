@@ -28,21 +28,22 @@
 
 #ifdef SVG_SUPPORT
 
+#include "GraphicsContext.h"
 #include "SVGResource.h"
+
+#include <wtf/OwnPtr.h>
 
 namespace WebCore {
 
     class FloatRect;
-    class GraphicsContext;
-    class SVGResourceImage;
 
     class SVGResourceMasker : public SVGResource {
     public:
         SVGResourceMasker();
         virtual ~SVGResourceMasker();
 
-        void setMask(const PassRefPtr<SVGResourceImage>&);
-        SVGResourceImage* mask() const;
+        void setMask(ImageBuffer* mask);
+        ImageBuffer* mask() const;
 
         virtual bool isMasker() const { return true; }
         virtual TextStream& externalRepresentation(TextStream&) const;
@@ -51,7 +52,7 @@ namespace WebCore {
         void applyMask(GraphicsContext*, const FloatRect& boundingBox) const;
 
     private:
-        RefPtr<SVGResourceImage> m_mask;
+        OwnPtr<ImageBuffer> m_mask;
     };
 
     SVGResourceMasker* getMaskerById(Document*, const AtomicString&);
