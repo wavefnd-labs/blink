@@ -141,7 +141,7 @@ void SVGPolyParser::parsePoints(const DeprecatedString& s) const
     }
 }
 
-void SVGPathParser::parseSVG(const DeprecatedString& s, bool process)
+void DeprecatedSVGPathParser::parseSVG(const DeprecatedString& s, bool process)
 {
     if (s.isEmpty())
         return;
@@ -436,7 +436,7 @@ void SVGPathParser::parseSVG(const DeprecatedString& s, bool process)
 // For each bezier found a svgToCurve call is done.
 // Adapted from Niko's code in kdelibs/kdecore/svgicons.
 // Maybe this can serve in some shared lib? (Rob)
-void SVGPathParser::calculateArc(bool relative, double &curx, double &cury, double angle, double x, double y, double r1, double r2, bool largeArcFlag, bool sweepFlag)
+void DeprecatedSVGPathParser::calculateArc(bool relative, double &curx, double &cury, double angle, double x, double y, double r1, double r2, bool largeArcFlag, bool sweepFlag)
 {
     double sin_th, cos_th;
     double a00, a01, a10, a11;
@@ -569,27 +569,27 @@ void SVGPathParser::calculateArc(bool relative, double &curx, double &cury, doub
         cury += y;    
 }
 
-void SVGPathParser::svgLineToHorizontal(double, bool)
+void DeprecatedSVGPathParser::svgLineToHorizontal(double, bool)
 {
 }
 
-void SVGPathParser::svgLineToVertical(double, bool)
+void DeprecatedSVGPathParser::svgLineToVertical(double, bool)
 {
 }
 
-void SVGPathParser::svgCurveToCubicSmooth(double, double, double, double, bool)
+void DeprecatedSVGPathParser::svgCurveToCubicSmooth(double, double, double, double, bool)
 {
 }
 
-void SVGPathParser::svgCurveToQuadratic(double, double, double, double, bool)
+void DeprecatedSVGPathParser::svgCurveToQuadratic(double, double, double, double, bool)
 {
 }
 
-void SVGPathParser::svgCurveToQuadraticSmooth(double, double, bool)
+void DeprecatedSVGPathParser::svgCurveToQuadraticSmooth(double, double, bool)
 {
 }
 
-void SVGPathParser::svgArcTo(double, double, double, double, double, bool, bool, bool)
+void DeprecatedSVGPathParser::svgArcTo(double, double, double, double, double, bool, bool, bool)
 {
 } 
 
