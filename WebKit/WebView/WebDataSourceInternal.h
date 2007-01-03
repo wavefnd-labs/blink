@@ -52,15 +52,11 @@ class WebDocumentLoaderMac;
 
 @interface WebDataSource (WebInternal)
 - (void)_addToUnarchiveState:(WebArchive *)archive;
-- (NSURL *)_URLForHistory;
 - (void)_makeRepresentation;
-- (BOOL)_loadingFromPageCache;
-- (void)_setLoadingFromPageCache:(BOOL)loadingFromPageCache;
 - (BOOL)_isDocumentHTML;
 - (WebView *)_webView;
 - (WebFrameBridge *)_bridge;
 - (WebArchive *)_popSubframeArchiveWithName:(NSString *)frameName;
-- (void)_loadFromPageCache:(NSDictionary *)pageCache;
 - (NSURL *)_URL;
 - (DOMElement *)_imageElementWithImageResource:(WebResource *)resource;
 - (DOMDocumentFragment *)_documentFragmentWithImageResource:(WebResource *)resource;

@@ -22,6 +22,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
+ 
+#ifndef PageState_H
+#define PageState_H
 
 #include "KURL.h"
 #include "Shared.h"
@@ -65,6 +68,8 @@ namespace WebCore {
         OwnPtr<KJS::SavedProperties> m_locationProperties;
         OwnPtr<KJS::SavedBuiltins> m_interpreterBuiltins;
         OwnPtr<KJS::PausedTimeouts> m_pausedTimeouts;
-    };
+    }; // class PageState
 
-}
+} // namespace WebCore
+
+#endif // PageState_H
