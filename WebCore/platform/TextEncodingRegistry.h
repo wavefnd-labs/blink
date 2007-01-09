@@ -26,8 +26,8 @@
 #ifndef TextEncodingRegistry_h
 #define TextEncodingRegistry_h
 
-#include "wtf/unicode/Unicode.h"
 #include <memory>
+#include <wtf/unicode/Unicode.h>
 
 namespace WebCore {
 
