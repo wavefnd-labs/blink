@@ -77,3 +77,4 @@ const ResourceRequest& ResourceHandle::request() const
 }
 
 } // namespace WebCore
+
