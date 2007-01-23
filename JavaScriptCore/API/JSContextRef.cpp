@@ -41,8 +41,7 @@ JSGlobalContextRef JSGlobalContextCreate(JSClassRef globalObjectClass)
 
     JSObject* globalObject;
     if (globalObjectClass)
-        // FIXME: We need to pass a real ExecState here to support an initialize callback in globalObjectClass
-        globalObject = new JSCallbackObject(0, globalObjectClass, 0, 0);
+        globalObject = new JSCallbackObject(0, globalObjectClass, 0, 0); // FIXME: <rdar://problem/4949002>
     else
         globalObject = new JSObject();
 
