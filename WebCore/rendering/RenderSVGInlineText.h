@@ -37,6 +37,7 @@ public:
     virtual bool requiresLayer() { return false; }
     virtual IntRect selectionRect();
     virtual bool isSVGText() const { return true; }
+    virtual InlineTextBox* createInlineTextBox();
 };
 }
 
