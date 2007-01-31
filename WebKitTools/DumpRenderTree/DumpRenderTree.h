@@ -33,3 +33,5 @@ extern BOOL windowIsKey;
 extern WebFrame *frame;
 extern DumpRenderTreeDraggingInfo *draggingInfo;
 extern volatile BOOL done;
+extern BOOL shouldDumpResourceLoadCallbacks;
+
