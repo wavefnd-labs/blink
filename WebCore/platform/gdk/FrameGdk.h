@@ -45,29 +45,6 @@ public:
     FrameGdk(Page*, HTMLFrameOwnerElement*, FrameLoaderClientGdk*);
     virtual ~FrameGdk();
 
-    // from Frame
-    virtual void unfocusWindow();
-    virtual void focusWindow();
-
-    virtual Range* markedTextRange() const;
-
-    virtual String mimeTypeForFileName(const String&) const;
-
-    virtual KJS::Bindings::Instance* getEmbedInstanceForWidget(Widget*);
-    virtual KJS::Bindings::Instance* getObjectInstanceForWidget(Widget*);
-    virtual KJS::Bindings::Instance* getAppletInstanceForWidget(Widget*);
-    virtual KJS::Bindings::RootObject* bindingRootObject();
-
-    virtual void issueCutCommand();
-    virtual void issueCopyCommand();
-    virtual void issuePasteCommand();
-    virtual void issuePasteAndMatchStyleCommand();
-    virtual void issueTransposeCommand();
-    virtual void respondToChangedSelection(const Selection& oldSelection, bool closeTyping);
-    virtual bool shouldChangeSelection(const Selection& oldSelection, const Selection& newSelection, EAffinity affinity, bool stillSelecting) const;
-
-    virtual void print();
-
     // FrameGdk-only
     void handleGdkEvent(GdkEvent*);
     bool keyPress(const PlatformKeyboardEvent& keyEvent);
@@ -85,9 +62,6 @@ private:
     bool            m_exitAfterLoading;
     bool            m_dumpRenderTreeAfterLoading;
 };
-
-inline FrameGdk* GdkFrame(Frame* frame) { return static_cast<FrameGdk*>(frame); }
-inline const FrameGdk* GdkFrame(const Frame* frame) { return static_cast<const FrameGdk*>(frame); }
 
 }
 
