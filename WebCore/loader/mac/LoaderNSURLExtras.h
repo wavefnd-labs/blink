@@ -43,6 +43,7 @@ BOOL urlIsFileURL(NSURL *url);
 BOOL stringIsFileURL(NSString *urlString);
 BOOL urlIsEmpty(NSURL *url);
 NSURL *canonicalURL(NSURL *url);
+NSString *suggestedFilenameWithMIMEType(NSURL *url, NSString *MIMEType);
 
 #ifdef __cplusplus
 }
