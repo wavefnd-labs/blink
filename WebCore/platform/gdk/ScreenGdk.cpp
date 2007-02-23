@@ -28,39 +28,39 @@
 #include "config.h"
 #include "Screen.h"
 
+#include "NotImplementedGdk.h"
+#include <wtf/Assertions.h>
 #include <stdio.h>
-
-#define notImplemented() do { fprintf(stderr, "FIXME: UNIMPLEMENTED %s %s:%d\n", __PRETTY_FUNCTION__, __FILE__, __LINE__); } while(0)
 
 namespace WebCore {
 
 int screenDepth(Widget*) 
 { 
-    notImplemented(); 
+    notImplementedGdk(); 
     return 32;
 }
 
 int screenDepthPerComponent(Widget*)
 {
-    notImplemented();
+    notImplementedGdk();
     return 8;
 }
 
 bool screenIsMonochrome(Widget*) 
 { 
-    notImplemented(); 
+    notImplementedGdk(); 
     return false; 
 }
 
 FloatRect screenRect(Widget*) 
 { 
-    notImplemented();
+    notImplementedGdk();
     return FloatRect(); 
 }
 
 FloatRect screenAvailableRect(Widget*) 
 { 
-    notImplemented(); 
+    notImplementedGdk(); 
     return FloatRect(); 
 }
 
