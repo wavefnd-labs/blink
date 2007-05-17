@@ -27,18 +27,35 @@
  */
 
 @class DumpRenderTreeDraggingInfo;
+@class NavigationController;
 @class WebFrame;
+@class WebScriptObject;
 @class WebView;
 
 extern BOOL windowIsKey;
-extern WebFrame *frame;
+extern WebFrame *mainFrame;
 extern DumpRenderTreeDraggingInfo *draggingInfo;
 extern volatile BOOL done;
 extern BOOL shouldDumpResourceLoadCallbacks;
+extern BOOL shouldDumpFrameLoadCallbacks;
+extern BOOL dumpTitleChanges;
 extern NSMutableSet *disallowedURLs;
 extern BOOL waitToDump;
 extern BOOL canOpenWindows;
 extern BOOL closeWebViews;
 extern BOOL addFileToPasteboardOnDrag;
+extern NSMutableArray *workQueue;
+extern WebFrame *topLoadingFrame;
+extern BOOL workQueueFrozen;
+extern NavigationController *navigationController;
 
 WebView *createWebView();
+void dump(void);
+
+@interface LayoutTestController : NSObject
+{
+    WebScriptObject *storedWebScriptObject;
+}
+- (void)dealloc;
+@end
+
