@@ -27,17 +27,22 @@
 
 #include "config.h"
 #include "Screen.h"
+#include "Widget.h"
 
 #include "NotImplementedGdk.h"
 #include <wtf/Assertions.h>
+#include <gdk/gdk.h>
 #include <stdio.h>
 
 namespace WebCore {
 
-int screenDepth(Widget*) 
-{ 
-    notImplementedGdk(); 
-    return 32;
+int screenDepth(Widget* widget) 
+{
+    ASSERT(widget->drawable());
+
+    gint dummy, depth;
+    gdk_window_get_geometry(widget->drawable(), &dummy, &dummy, &dummy, &dummy, &depth);
+    return depth;
 }
 
 int screenDepthPerComponent(Widget*)
