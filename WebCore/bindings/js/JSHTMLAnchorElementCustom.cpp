@@ -26,13 +26,20 @@
 #include "config.h"
 #include "JSHTMLAnchorElement.h"
 
-#include "kjs_html.h"
+#include "HTMLAnchorElement.h"
 
 namespace WebCore {
 
+// Implicit toString
+KJS::UString JSHTMLAnchorElement::toString(KJS::ExecState* exec) const
+{
+    return KJS::UString(static_cast<const HTMLAnchorElement*>(impl())->href());
+}
+
+// Explicit toString
 KJS::JSValue* JSHTMLAnchorElement::toString(KJS::ExecState* exec, const KJS::List&)
 {
-    return jsString(JSHTMLElement::toString(exec));
+    return KJS::jsString(toString(exec));
 }
 
 } // namespace WebCore
