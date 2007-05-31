@@ -49,7 +49,7 @@
 #define notImplemented() do { \
         static bool havePrinted = false; \
         if (!havePrinted && !supressNotImplementedWarning()) { \
-            WTFLog(__FILE__, __LINE__, WTF_PRETTY_FUNCTION, &LogNotYetImplemented, "%s is not implemented", __FUNCTION__); \
+            WTFLogVerbose(__FILE__, __LINE__, WTF_PRETTY_FUNCTION, &LogNotYetImplemented, "UNIMPLEMENTED: "); \
             havePrinted = true; \
         } \
     } while (0)
