@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Apple Computer, Inc.  All rights reserved.
+ * Copyright (C) 2006, 2007 Apple Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,6 +38,7 @@ namespace WebCore {
     class Document;
     class Element;
     class Frame;
+    class Screen;
     class String;
     
     class DOMWindow : public Shared<DOMWindow> {
@@ -49,6 +50,7 @@ namespace WebCore {
         void disconnectFrame();
 
         // DOM Level 0
+        Screen* screen() const;
         BarInfo* locationbar() const;
         BarInfo* menubar() const;
         BarInfo* personalbar() const;
@@ -56,19 +58,19 @@ namespace WebCore {
         BarInfo* statusbar() const;
         BarInfo* toolbar() const;
 
-
         // DOM Level 2 AbstractView Interface
         Document* document() const;
-        
+
         // DOM Level 2 Style Interface
         PassRefPtr<CSSStyleDeclaration> getComputedStyle(Element*, const String& pseudoElt) const;
 
         // WebKit extensions
         PassRefPtr<CSSRuleList> getMatchedCSSRules(Element*, const String& pseudoElt, bool authorOnly = true) const;
         double devicePixelRatio() const;
-        
+
     private:
         Frame* m_frame;
+        mutable RefPtr<Screen> m_screen;
         mutable RefPtr<BarInfo> m_locationbar;
         mutable RefPtr<BarInfo> m_menubar;
         mutable RefPtr<BarInfo> m_personalbar;
