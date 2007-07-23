@@ -13,19 +13,20 @@
 <script src="logger.js"></script>
 <script src="kotoeri.js"></script>
 <script>
-    var shouldUseIECompositionKeyCode = false;
+    var shouldBeCompositionEvent = false;
     function keyDown() {
         if (!window.layoutTestController) {
             log("keydown : keyCode == " + event.keyCode);
             return;
         }
-        if (shouldUseIECompositionKeyCode && event.keyCode != 229)
+        if (shouldBeCompositionEvent && event.keyCode != 229)
             log("FAILURE: received keyCode " + event.keyCode + " in a keydown when VK_PROCESSKEY is expected");
+        else if (!shouldBeCompositionEvent && event.keyCode == 229)
+            log("FAILURE: received a keyDown with VK_PROCESSKEY as the keyCode, when an actual key code was expected.");
         else
             log("Received valid keydown event");
     }
     
-    var shouldBeCompositionEvent = false;
     function keyPress() {
         if (!window.layoutTestController) {
             log("keypress : keyCode == " + event.keyCode);
@@ -44,7 +45,6 @@
         textInputController.setInputMethodHandler(kotoeri);
         shouldBeCompositionEvent = true;
         eventSender.keyDown('t');
-        shouldUseIECompositionKeyCode = true;
         eventSender.keyDown('o');
         eventSender.keyDown('u');
         eventSender.keyDown('k');
@@ -53,7 +53,6 @@
         eventSender.keyDown('u');
         eventSender.keyDown('\n');
         shouldBeCompositionEvent = false;
-        shouldUseIECompositionKeyCode = false;
         eventSender.keyDown('\n');
         if (targetInput.value != "toukyou")
             log("FAILED: Input field should countain the text 'toukyou'");
