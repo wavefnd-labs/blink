@@ -51,3 +51,9 @@ extern NSString *WebIconDatabaseImportDirectoryDefaultsKey;
 
 @end
 
+@interface WebIconDatabase (WebPrivate)
+
++ (void)_checkIntegrityBeforeOpening;
+
+@end
+
