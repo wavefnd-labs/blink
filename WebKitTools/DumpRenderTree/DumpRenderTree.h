@@ -31,43 +31,17 @@
 
 #include <JavaScriptCore/Platform.h>
 
-class LayoutTestController;
-
 #if PLATFORM(MAC)
-@class DumpRenderTreeDraggingInfo;
-@class EditingDelegate;
-@class FrameLoadDelegate;
-@class NavigationController;
-@class PolicyDelegate;
-@class ResourceLoadDelegate;
-@class UIDelegate;
-@class WebFrame;
-@class WebView;
+#include "DumpRenderTreeMac.h"
 #endif
+
+class LayoutTestController;
 
 extern volatile bool done;
 
-extern CFMutableArrayRef allWindowsRef;
-extern CFMutableSetRef disallowedURLs;
 extern CFRunLoopTimerRef waitToDumpWatchdog;
-
-extern WebFrame* mainFrame;
-extern WebFrame* topLoadingFrame;
-
-extern DumpRenderTreeDraggingInfo *draggingInfo;
-
-// Global Controllers
-extern NavigationController* navigationController;
 extern LayoutTestController* layoutTestController;
 
-// Delegates
-extern FrameLoadDelegate* frameLoadDelegate;
-extern UIDelegate* uiDelegate;
-extern EditingDelegate* editingDelegate;
-extern ResourceLoadDelegate* resourceLoadDelegate;
-extern PolicyDelegate* policyDelegate;
-
-WebView* createWebView();
 void displayWebView();
 void dump();
 
