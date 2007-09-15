@@ -28,6 +28,7 @@
 #import "config.h"
 #import "FileSystem.h"
 
+#import "NotImplemented.h"
 #import "PlatformString.h"
 
 namespace WebCore {
@@ -54,6 +55,12 @@ bool deleteFile(const String& path)
         
     // unlink(...) returns 0 on successful deletion of the path and non-zero in any other case (including invalid permissions or non-existent file)
     return !unlink(fsRep);
+}
+
+bool fileSize(const String& path, long long& result)
+{
+    notImplemented();
+    return false;
 }
 
 } //namespace WebCore
