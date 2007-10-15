@@ -46,10 +46,12 @@
 #define _WINSOCKAPI_ // Prevent inclusion of winsock.h in windows.h
 
 struct IWebFrame;
+struct IWebPolicyDelegate;
 typedef struct HWND__* HWND;
 
 extern IWebFrame* topLoadingFrame;
 extern IWebFrame* frame;
+extern IWebPolicyDelegate* policyDelegate;
 
 extern HWND webViewWindow;
 
