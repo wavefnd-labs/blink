@@ -29,66 +29,47 @@
 #ifndef Drosera_H
 #define Drosera_H
 
-#include "BaseDelegate.h"
 #include "DebuggerDocument.h"
 
 #include <string>
 #include <WebCore/COMPtr.h>
 #include <WebKit/IWebView.h>
 #include <WebKit/IWebViewPrivate.h>
+#include <wtf/HashMap.h>
+#include <wtf/OwnPtr.h>
 
-class Drosera : BaseDelegate {
+class DebuggerClient;
+
+typedef HashMap<unsigned, std::wstring> ServerDictionary;
+
+class Drosera {
 public:
+    static HINSTANCE getInst();
+    static void setInst(HINSTANCE);
+
     Drosera();
     HRESULT initUI(HINSTANCE hInstance, int nCmdShow);
-    bool webViewLoaded() const { return m_webViewLoaded; }
-
-    // IUnknown
-    HRESULT STDMETHODCALLTYPE QueryInterface(
-        /* [in] */ REFIID riid,
-        /* [retval][out] */ void** ppvObject);
-
-    ULONG STDMETHODCALLTYPE AddRef();
-
-    ULONG STDMETHODCALLTYPE Release();
-
-    // IWebFrameLoadDelegate
-    HRESULT STDMETHODCALLTYPE didFinishLoadForFrame( 
-        /* [in] */ IWebView*,
-        /* [in] */ IWebFrame*);
-
-    HRESULT STDMETHODCALLTYPE windowScriptObjectAvailable( 
-        /* [in] */ IWebView*,
-        /* [in] */ JSContextRef,
-        /* [in] */ JSObjectRef);
-
-    // IWebUIDelegate
-    HRESULT STDMETHODCALLTYPE runJavaScriptAlertPanelWithMessage( 
-        /* [in] */ IWebView*,
-        /* [in] */ BSTR);
-
-    // IWebNotificationObserver
-    HRESULT STDMETHODCALLTYPE onNotify(
-        /* [in] */ IWebNotification*);
-
     LRESULT onSize(WPARAM, LPARAM);
 
-    static HINSTANCE getInst() { return m_hInst; } const
-    static void setInst(HINSTANCE in) { m_hInst = in; }
+    bool webViewLoaded() const;
+    void applicationDidFinishLaunching();
 
-    void initWithServerName(std::wstring* serverName);
-    void switchToServerNamed(std::wstring* name);
+    void serverLoaded();
+    void serverUnloaded();
+    HRESULT attach(int sender);
+
+    ServerDictionary* knownServers() const { return m_knownServerNames.get(); }
+
 private:
-
     HWND m_hWnd;
 
     COMPtr<IWebView> m_webView;
     COMPtr<IWebViewPrivate> m_webViewPrivate;
-    bool m_webViewLoaded;
+    COMPtr<IWebFrameLoadDelegate> m_webFrameLoadDelegate;
+    COMPtr<IWebUIDelegate> m_webUIDelegate;
 
-    static HINSTANCE m_hInst;
-
-    DebuggerDocument m_debuggerDocument;
+    OwnPtr<DebuggerClient> m_debuggerClient;
+    OwnPtr<ServerDictionary> m_knownServerNames;
 };
 
 #endif //Drosera_H
