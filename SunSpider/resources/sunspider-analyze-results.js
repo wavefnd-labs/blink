@@ -128,7 +128,7 @@ function standardDeviation(mean, items)
         var delta = items[i] - mean;
         deltaSquaredSum += delta * delta;
     }
-    variance = deltaSquaredSum / items.length;
+    variance = deltaSquaredSum / (items.length - 1);
     return Math.sqrt(variance);
 }
 
@@ -180,7 +180,7 @@ function formatResult(meanWidth, mean, stdErr, n)
         meanString = " " + meanString;
     }
 
-    return meanString + "ms " + "[ +/- " + (tDist(n) * stdErr).toFixed(2) + "ms | +/- " + ((tDist(n) * stdErr / mean) * 100).toFixed(2) + "% ]";
+    return meanString + "ms +/- " + ((tDist(n) * stdErr / mean) * 100).toFixed(1) + "%";
 }
 
 function computeLabelWidth()
@@ -244,6 +244,7 @@ function printOutput()
     print(resultLine(labelWidth, 0, "Total", meanWidth, mean, stdErr));
     print("----------------------------------------");
     for (var category in categoryMeans) {
+        print("");
         print(resultLine(labelWidth, 2, category, meanWidth, categoryMeans[category], categoryStdErrs[category]));
         for (var test in testMeansByCategory[category]) {
             var shortName = test.replace(/^[^-]*-/, "");
