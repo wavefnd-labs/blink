@@ -54,14 +54,14 @@ public:
         /* [out, retval] */ IWebScriptCallFrame**);
 
     virtual HRESULT STDMETHODCALLTYPE scopeChain(
-        /* [out, retval] */ VARIANT*);
+        /* [out, retval] */ IEnumVARIANT**);
 
     virtual HRESULT STDMETHODCALLTYPE functionName(
         /* [out, retval] */ BSTR*);
 
-    virtual HRESULT STDMETHODCALLTYPE evaluateWebScript(
+    virtual HRESULT STDMETHODCALLTYPE stringByEvaluatingJavaScriptFromString(
         /* [in] */ BSTR script,
-        /* [out, retval] */ VARIANT*);
+        /* [out, retval] */ BSTR*);
 
 private:
     ULONG m_refCount;
