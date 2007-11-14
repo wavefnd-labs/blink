@@ -21,7 +21,7 @@
 #ifndef Icon_h
 #define Icon_h
 
-#include "Shared.h"
+#include <wtf/Shared.h>
 #include <wtf/Forward.h>
 
 #if PLATFORM(MAC)
