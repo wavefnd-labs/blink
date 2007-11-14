@@ -34,8 +34,8 @@
 #include "DOMWindow.h"
 #include "ExceptionCode.h"
 #include "kjs_window.h"
-#include "JSCustomSQLCallback.h"
-#include "JSCustomVersionChangeCallback.h"
+#include "JSCustomSQLTransactionCallback.h"
+#include "JSCustomSQLTransactionErrorCallback.h"
 #include "PlatformString.h"
 #include "SQLValue.h"
 #include <kjs/array_instance.h>
@@ -44,67 +44,67 @@ namespace WebCore {
 
 using namespace KJS;
 
-JSValue* JSDatabase::executeSql(ExecState* exec, const List& args)
-{
-    String sqlStatement = args[0]->toString(exec);
-
-    // Now assemble the list of SQL arguments
-    Vector<SQLValue> SQLValues;
-
-    if (!args[1]->isObject() ||
-        !static_cast<JSObject*>(args[1])->inherits(&ArrayInstance::info)) {
-        setDOMException(exec, TYPE_MISMATCH_ERR);
-        return jsUndefined();
-    }
-    
-    ArrayInstance* array = static_cast<ArrayInstance*>(args[1]);
-    
-    for (unsigned i = 0 ; i < array->getLength(); i++) {
-        JSValue* value = array->getItem(i);
-
-        if (value->isNull()) {
-            SQLValues.append(SQLValue());
-        } else if (value->isNumber()) {
-            SQLValues.append(value->getNumber());
-        } else {
-            // Convert the argument to a string and append it
-            SQLValues.append(value->toString(exec));
-        }
-    }
-
-    JSObject* callback = args[2]->getObject();
-    if (!callback) {
-        setDOMException(exec, TYPE_MISMATCH_ERR);
-        return jsUndefined();
-    }
-
-    if (Frame* frame = m_impl->document()->frame()) {
-        ExceptionCode ec = 0;
-        RefPtr<SQLCallback> sqlCallback(new JSCustomSQLCallback(callback, frame));
-        m_impl->executeSql(sqlStatement, SQLValues, sqlCallback, ec);
-        setDOMException(exec, ec);
-    }
-
-    return jsUndefined();
-}
-
 JSValue* JSDatabase::changeVersion(ExecState* exec, const List& args)
 {
     String oldVersion = args[0]->toString(exec);
     String newVersion = args[1]->toString(exec);
 
-    JSObject* callback = args[2]->getObject();
-    if (!callback) {
+    Frame* frame = Window::retrieveActive(exec)->impl()->frame();
+    if (!frame)
+        return jsUndefined();
+    
+    JSObject *object;
+    if (!(object = args[2]->getObject())) {
         setDOMException(exec, TYPE_MISMATCH_ERR);
         return jsUndefined();
     }
-
-    if (Frame* frame = m_impl->document()->frame()) {
-        RefPtr<VersionChangeCallback> changeCallback(new JSCustomVersionChangeCallback(callback, frame));
-        m_impl->changeVersion(oldVersion, newVersion, changeCallback.release());
+    
+    RefPtr<SQLTransactionCallback> callback(new JSCustomSQLTransactionCallback(object, frame));
+    RefPtr<SQLTransactionErrorCallback> errorCallback;
+        
+    if (!args[3]->isNull()) {
+        if (!(object = args[3]->getObject())) {
+            setDOMException(exec, TYPE_MISMATCH_ERR);
+            return jsUndefined();
+        }
+        
+        errorCallback = new JSCustomSQLTransactionErrorCallback(object, frame);
     }
-
+    
+    m_impl->changeVersion(oldVersion, newVersion, callback.release(), errorCallback.release());
+    
     return jsUndefined();
 }
 
+JSValue* JSDatabase::transaction(ExecState* exec, const List& args)
+{
+    JSObject* object;
+    
+    if (!(object = args[0]->getObject())) {
+        setDOMException(exec, TYPE_MISMATCH_ERR);
+        return jsUndefined();
+    }        
+ 
+    Frame* frame = Window::retrieveActive(exec)->impl()->frame();
+    if (!frame)
+        return jsUndefined();
+    
+    RefPtr<SQLTransactionCallback> callback(new JSCustomSQLTransactionCallback(object, frame));
+    RefPtr<SQLTransactionErrorCallback> errorCallback;
+    
+    if (args.size() > 1 && !args[1]->isNull()) {
+        if (!(object = args[1]->getObject())) {
+            setDOMException(exec, TYPE_MISMATCH_ERR);
+            return jsUndefined();
+        }
+
+        errorCallback = new JSCustomSQLTransactionErrorCallback(object, frame);
+    }
+
+    
+    m_impl->transaction(callback.release(), errorCallback.release());
+
+    return jsUndefined();
+}
+    
 }
