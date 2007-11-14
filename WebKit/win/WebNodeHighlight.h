@@ -31,11 +31,12 @@
 
 #pragma warning(push, 0)
 #include <WebCore/IntRect.h>
+#include <WebCore/WindowMessageListener.h>
 #pragma warning(pop)
 
 #include <windows.h>
 
-class WebNodeHighlight {
+class WebNodeHighlight : WebCore::WindowMessageListener {
 public:
     WebNodeHighlight(HWND webView);
     ~WebNodeHighlight();
@@ -47,18 +48,15 @@ public:
     bool visible() const;
 
 private:
-    void removeSubclass();
+    virtual void windowReceivedMessage(HWND, UINT message, WPARAM, LPARAM);
 
     HWND m_webView;
-    HWND m_subclassedWindow;
     HWND m_overlay;
+    HWND m_observedWindow;
 
     WebCore::IntRect m_rect;
 
-    WNDPROC m_originalWndProc;
-
     friend static LRESULT CALLBACK OverlayWndProc(HWND, UINT, WPARAM, LPARAM);
-    friend static LRESULT CALLBACK SubclassedWndProc(HWND, UINT, WPARAM, LPARAM);
 };
 
 #endif // !defined(WebNodeHighlight_h)
