@@ -37,20 +37,25 @@
 
 namespace WebCore {
 
+class DatabaseTrackerClient;
+class SecurityOriginData;
+
 class DatabaseTracker {
 public:
     void setDatabasePath(const String&);
     const String& databasePath();
 
-    String fullPathForDatabase(const String& origin, const String& name);
+    String fullPathForDatabase(const SecurityOriginData& origin, const String& name);
 
     const HashSet<String>& origins();
-    bool databaseNamesForOrigin(const String& origin, Vector<String>& result);
+    bool databaseNamesForOrigin(const SecurityOriginData& origin, Vector<String>& result);
 
     void deleteAllDatabases();
-    void deleteAllDatabasesForOrigin(const String& origin);
-    void deleteDatabase(const String& origin, const String& name);
+    void deleteDatabasesWithOrigin(const SecurityOriginData& origin);
+    void deleteDatabase(const SecurityOriginData& origin, const String& name);
 
+    void setClient(DatabaseTrackerClient*);
+    
     static DatabaseTracker& tracker();
 private:
     DatabaseTracker();
@@ -64,6 +69,8 @@ private:
     mutable OwnPtr<HashSet<String> > m_origins;
 
     String m_databasePath;
+    
+    DatabaseTrackerClient* m_client;
 };
 
 } // namespace WebCore
