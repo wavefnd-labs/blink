@@ -35,23 +35,24 @@ namespace WebCore {
 
 class SecurityOriginData {
 public:
-    SecurityOriginData(const String& protocol, const String& host, unsigned short port)
-        : m_protocol(protocol)
-        , m_host(host)
-        , m_port(port)
-    { }
+    SecurityOriginData();
+    SecurityOriginData(const String& protocol, const String& host, unsigned short port);
+    SecurityOriginData(const String& stringIdentifier);
     
     const String& protocol() const { return m_protocol; }
     const String& host() const { return m_host; }
     unsigned short port() const { return m_port; }
     
-    String stringIdentifier() const { return m_protocol + ":" + m_host + ":" + String::number(m_port); }
+    String stringIdentifier() const;
 private:
     String m_protocol;
     String m_host;
     unsigned short m_port;
 };
     
+inline bool operator==(const SecurityOriginData& a, const SecurityOriginData& b) { return a.protocol() == b.protocol() && a.host() == b.host() && a.port() == b.port(); }
+inline bool operator==(const SecurityOriginData& a, const SecurityOriginData& b) { return !(a == b); }
+
 } // namespace WebCore
 
 #endif // SecurityOriginData_h
