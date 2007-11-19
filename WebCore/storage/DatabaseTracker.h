@@ -28,6 +28,7 @@
 #ifndef DatabaseTracker_h
 #define DatabaseTracker_h
 
+#include "DatabaseDetails.h"
 #include "PlatformString.h"
 #include "SQLiteDatabase.h"
 #include "StringHash.h"
@@ -51,6 +52,12 @@ public:
     void origins(Vector<SecurityOriginData>& result);
     bool databaseNamesForOrigin(const SecurityOriginData& origin, Vector<String>& result);
 
+    DatabaseDetails detailsForNameAndOrigin(const String&, const SecurityOriginData&);
+    
+    unsigned long long usageForOrigin(const SecurityOriginData&);
+    unsigned long long quotaForOrigin(const SecurityOriginData&);
+    void setQuota(const SecurityOriginData&, unsigned long long);
+    
     void deleteAllDatabases();
     void deleteDatabasesWithOrigin(const SecurityOriginData& origin);
     void deleteDatabase(const SecurityOriginData& origin, const String& name);
