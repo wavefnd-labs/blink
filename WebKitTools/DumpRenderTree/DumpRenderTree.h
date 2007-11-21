@@ -44,6 +44,8 @@ class LayoutTestController;
 extern volatile bool done;
 
 extern CFRunLoopTimerRef waitToDumpWatchdog;
+
+// FIXME: This is a bad abstraction.  We should insted pass this to other controller objects which need access to it.
 extern LayoutTestController* layoutTestController;
 
 void dump();
