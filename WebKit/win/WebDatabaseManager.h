@@ -27,6 +27,53 @@
  */
 #ifndef WebDatabaseManager_h
 #define WebDatabaseManager_h
+
+#include "IWebDatabaseManager.h"
+
+class WebDatabaseManager : public IWebDatabaseManager {
+public:
+    static WebDatabaseManager* createInstance();
+
+    // IUnknown
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface( 
+        /* [in] */ REFIID riid,
+        /* [iid_is][out] */ void** ppvObject);
+
+    virtual ULONG STDMETHODCALLTYPE AddRef();
+
+    virtual ULONG STDMETHODCALLTYPE Release();
+
+    // IWebDatabaseManager
+    virtual HRESULT STDMETHODCALLTYPE sharedWebDatabaseManager( 
+        /* [retval][out] */ IWebDatabaseManager** result);
+        
+    virtual HRESULT STDMETHODCALLTYPE origins( 
+        /* [retval][out] */ IEnumVARIANT** result);
+        
+    virtual HRESULT STDMETHODCALLTYPE databasesWithOrigin( 
+        /* [in] */ IWebSecurityOrigin* origin,
+        /* [retval][out] */ IEnumVARIANT** result);
+        
+    virtual HRESULT STDMETHODCALLTYPE detailsForDatabaseWithOrigin( 
+        /* [in] */ BSTR* database,
+        /* [in] */ IWebSecurityOrigin* origin,
+        /* [retval][out] */ IPropertyBag** result);
+        
+    virtual HRESULT STDMETHODCALLTYPE deleteAllDatabases();
+        
+    virtual HRESULT STDMETHODCALLTYPE deleteDatabasesWithOrigin( 
+        /* [in] */ IWebSecurityOrigin* origin);
+        
+    virtual HRESULT STDMETHODCALLTYPE deleteDatabaseWithOrigin( 
+        /* [in] */ BSTR* databaseName,
+        /* [in] */ IWebSecurityOrigin* origin);
+private:
+    WebDatabaseManager();
+    ~WebDatabaseManager();
+
+    ULONG m_refCount;
+};
+
 void WebKitSetWebDatabasesPathIfNecessary();
 
 #endif
