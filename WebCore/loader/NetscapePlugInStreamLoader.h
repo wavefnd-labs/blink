@@ -29,10 +29,6 @@
 #include "ResourceLoader.h"
 #include <wtf/Forward.h>
 
-#ifdef __OBJC__
-#import "WebPlugInStreamLoaderDelegate.h"
-#endif
-
 namespace WebCore {
     class NetscapePlugInStreamLoader;
 
@@ -45,16 +41,9 @@ namespace WebCore {
         virtual void didFinishLoading(NetscapePlugInStreamLoader*) { }
     };
 
-#ifdef __OBJC__
-        typedef id <WebPlugInStreamLoaderDelegate> PlugInStreamLoaderDelegate;
-#else
-        class NetscapePlugInStreamLoaderClient;
-        typedef NetscapePlugInStreamLoaderClient* PlugInStreamLoaderDelegate;
-#endif
-
     class NetscapePlugInStreamLoader : public ResourceLoader {
     public:
-        static PassRefPtr<NetscapePlugInStreamLoader> create(Frame*, PlugInStreamLoaderDelegate);
+        static PassRefPtr<NetscapePlugInStreamLoader> create(Frame*, NetscapePlugInStreamLoaderClient*);
         virtual ~NetscapePlugInStreamLoader();
 
         bool isDone() const;
@@ -67,15 +56,11 @@ namespace WebCore {
         virtual void releaseResources();
 
     private:
-        NetscapePlugInStreamLoader(Frame*, PlugInStreamLoaderDelegate);
+        NetscapePlugInStreamLoader(Frame*, NetscapePlugInStreamLoaderClient*);
 
         virtual void didCancel(const ResourceError& error);
 
-#if PLATFORM(MAC)
-        RetainPtr<PlugInStreamLoaderDelegate> m_stream;
-#else
         NetscapePlugInStreamLoaderClient* m_client;
-#endif
     };
 
 }
