@@ -22,18 +22,16 @@
 
 #include <wtf/Noncopyable.h>
 
-namespace KJS {
-    class ScheduledAction;
-}
-
 namespace WebCore {
+
+    class ScheduledAction;
 
     struct PausedTimeout {
         int timeoutId;
         int nestingLevel;
         double nextFireInterval;
         double repeatInterval;
-        KJS::ScheduledAction* action;
+        ScheduledAction* action;
     };
 
     class PausedTimeouts : Noncopyable {
