@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Apple Inc. All rights reserved.
+ * Copyright (C) 2007, 2008 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,16 +27,11 @@
 #include "CSSFontFace.h"
 
 #include "CSSFontFaceSource.h"
-#include "CSSFontSelector.h"
-#include "FontData.h"
+#include "CSSSegmentedFontFace.h"
 #include "FontDescription.h"
+#include "SimpleFontData.h"
 
 namespace WebCore {
-
-CSSFontFace::CSSFontFace(CSSFontSelector* selector)
-: m_fontSelector(selector)
-{
-}
 
 CSSFontFace::~CSSFontFace()
 {
@@ -74,19 +69,19 @@ void CSSFontFace::addSource(CSSFontFaceSource* source)
 void CSSFontFace::fontLoaded(CSSFontFaceSource*)
 {
     if (isLoaded())
-        return m_fontSelector->fontLoaded(this);
+        return m_segmentedFontFace->fontLoaded(this);
 }
 
-FontData* CSSFontFace::getFontData(const FontDescription& fontDescription, bool syntheticBold, bool syntheticItalic)
+SimpleFontData* CSSFontFace::getFontData(const FontDescription& fontDescription, bool syntheticBold, bool syntheticItalic)
 {
     if (!isValid())
         return 0;
         
     // If we hit a local font, we know it is valid, and can just return it.
-    FontData* result = 0;
+    SimpleFontData* result = 0;
     unsigned size = m_sources.size();
     for (unsigned i = 0; i < size && !result; i++)
-        result = m_sources[i]->getFontData(fontDescription, syntheticBold, syntheticItalic, m_fontSelector);
+        result = m_sources[i]->getFontData(fontDescription, syntheticBold, syntheticItalic, m_segmentedFontFace->fontSelector());
     return result;
 }
 

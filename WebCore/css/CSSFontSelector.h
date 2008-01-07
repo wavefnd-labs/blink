@@ -35,8 +35,8 @@
 namespace WebCore {
 
 class AtomicString;
-class CSSFontFace;
 class CSSFontFaceRule;
+class CSSSegmentedFontFace;
 class Document;
 class DocLoader;
 class FontDescription;
@@ -51,7 +51,7 @@ public:
     
     void addFontFaceRule(const CSSFontFaceRule*);
 
-    void fontLoaded(CSSFontFace*);
+    void fontLoaded(CSSSegmentedFontFace*);
 
     bool isEmpty() const;
 
@@ -59,7 +59,7 @@ public:
 
 protected:
     Document* m_document; // No need to ref, since we will always get destroyed before the document does.
-    HashMap<String, RefPtr<CSSFontFace> > m_fonts;
+    HashMap<String, RefPtr<CSSSegmentedFontFace> > m_fonts;
 };
 
 } // namespace WebCore
