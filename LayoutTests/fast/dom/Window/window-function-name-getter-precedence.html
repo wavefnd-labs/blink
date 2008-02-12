@@ -1,24 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script type="text/javascript">
-        function log(msg)
+    <script src="resources/WindowProperties.js"></script>
+    <script>
+        if (window.layoutTestController)
+            layoutTestController.dumpAsText();
+
+        function log(message, color) 
         {
-            document.getElementById('console').appendChild(document.createTextNode(msg + '\n'));
+            var paragraph = document.createElement("div");
+            paragraph.appendChild(document.createTextNode(message));
+            paragraph.style.fontFamily = "monospace";
+            if (color)
+                paragraph.style.color = color;
+            document.getElementById("console").appendChild(paragraph);
+        }
+
+        function shouldBe(a, b)
+        {
+            var evalA;
+            try {
+                evalA = eval(a);
+            } catch(e) {
+                evalA = e;
+            }
+            if (evalA == b)
+                log("PASS: " + a + " should be " + b + " and is.", "green");
+            else
+                log("FAIL: " + a + " should be " + b + " but instead is " + evalA, "red");
+        }
+
+        function testFunction(functionName)
+        {
+            var element = document.createElement('div');
+            element.id = functionName;
+            document.body.appendChild(element);
+
+            shouldBe("typeof window." + functionName, "function");
+
+            document.body.removeChild(element);
         }
 
         function runTests()
         {
-            if (window.layoutTestController)
-                layoutTestController.dumpAsText();
+            for (var func in windowFunctions) {
+                testFunction(windowFunctions[func])
+            }
 
-            alert('SUCCESS: If you see this alert the test has succeeded.');
+            window.myFunction = function() { return "myFunction"; }
+            testFunction("myFunction");
+            window.__proto__.myPrototypeFunction = function() { return "myPrototypeFunction"; }
+            testFunction("myPrototypeFunction");
         }
     </script>
 </head>
 <body onload="runTests();">
-    <p>If you don't see an alert dialog (or ALERT text output if you running this under DRT) this test has failed.</p>
-    <div id="alert"></div>
+    <p>This tests that functions of the window object and it's prototype have precedence in lookup over elements with id's of the same name.</p>
     <pre id="console"></pre>
 </body>
 </html>

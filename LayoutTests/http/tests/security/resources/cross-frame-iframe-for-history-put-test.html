@@ -7,6 +7,7 @@
         var goOld;
         var toStringOld;
         var lengthOld;
+        var customAttributeOld;
 
         receiver = function(e)
         {
@@ -17,24 +18,37 @@
 
         window.onload = function()
         {
+            // Add manuel run buttons if the browser does not support window.postMessage
+            if (!window.postMessage) {
+                var button = document.createElement("button");
+                button.appendChild(document.createTextNode("Step 2 - Set Check"));
+                button.onclick = setCheck;
+                document.body.appendChild(button);
+            }
+
+            window.history.customAttribute = "customAttribute";
+
             backOld = window.history.back;
             forwardOld = window.history.forward;
             goOld = window.history.go;
             toStringOld = window.history.toString;
             lengthOld = window.history.length;
+            customAttributeOld = window.history.customAttribute;
 
-            window.parent.postMessage("storedOldValuesComplete");
+            if (window.postMessage)
+                window.parent.postMessage("storedOldValuesComplete");
         }
 
         setCheck = function()
         {
-            log("\n----- tests for putting window.history and its properties -----\n");
+            log("\n----- tests for putting window.history's properties -----\n");
 
             shouldBe("window.history.back", "backOld");
             shouldBe("window.history.forward", "forwardOld");
             shouldBe("window.history.go", "goOld");
             shouldBe("window.history.toString", "toStringOld");
             shouldBe("window.history.length", "lengthOld", true);
+            shouldBe("window.history.customAttribute", "customAttributeOld");
 
             if (window.layoutTestController)
                 layoutTestController.notifyDone();
