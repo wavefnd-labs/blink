@@ -1,7 +1,6 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  Copyright (C) 1999 Harri Porten (porten@kde.org)
- *  Copyright (C) 2004, 2006, 2007 Apple Inc. All rights reserved.
+ *  Copyright (C) 2004, 2006, 2007, 2008 Apple Inc. All rights reserved.
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -25,28 +24,13 @@
 
 namespace WebCore {
 
-    class Document;
-    class HTMLCollection;
     class HTMLElement;
     class JSHTMLElement;
     class Node;
 
-    class ImageConstructorImp : public DOMObject {
-    public:
-        ImageConstructorImp(KJS::ExecState*, Document*);
-
-        virtual bool implementsConstruct() const { return true; }
-        virtual KJS::JSObject* construct(KJS::ExecState*, const KJS::List&);
-
-    private:
-        RefPtr<Document> m_doc;
-    };
-
-
     // Runtime object support code for JSHTMLAppletElement, JSHTMLEmbedElement and JSHTMLObjectElement.
     // FIXME: Move these to a more appropriate place.
 
-    KJS::JSObject* getRuntimeObject(KJS::ExecState*, Node*);
     KJS::JSValue* runtimeObjectGetter(KJS::ExecState*, KJS::JSObject*, const KJS::Identifier&, const KJS::PropertySlot&);
     KJS::JSValue* runtimeObjectPropertyGetter(KJS::ExecState*, KJS::JSObject*, const KJS::Identifier&, const KJS::PropertySlot&);
     bool runtimeObjectCustomGetOwnPropertySlot(KJS::ExecState*, const KJS::Identifier&, KJS::PropertySlot&, JSHTMLElement*, HTMLElement*);
