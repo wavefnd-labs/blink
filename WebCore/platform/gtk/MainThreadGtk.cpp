@@ -34,26 +34,15 @@
 
 namespace WebCore {
 
-struct FunctionWithContext {
-    MainThreadFunction* function;
-    void* context;
-};
-
-static gboolean callFunctionOnMainThread(gpointer data)
+static gboolean timeoutFired(gpointer)
 {
-    FunctionWithContext* functionWithContext = static_cast<FunctionWithContext*>(data);
-    functionWithContext->function(functionWithContext->context);
-    delete functionWithContext;
+    dispatchFunctionsFromMainThread();
     return FALSE;
 }
 
-void callOnMainThread(MainThreadFunction* function, void* context)
+void scheduleDispatchFunctionsOnMainThread()
 {
-    ASSERT(function);
-    FunctionWithContext* functionWithContext = new FunctionWithContext;
-    functionWithContext->function = function;
-    functionWithContext->context = context;
-    g_timeout_add(0, callFunctionOnMainThread, functionWithContext);
+    g_timeout_add(0, timeoutFired, 0);
 }
 
 
