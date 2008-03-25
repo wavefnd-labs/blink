@@ -40,16 +40,9 @@
 
 - (id)_initWithData:(NSData *)data URL:(NSURL *)URL response:(NSURLResponse *)response;
 
-- (BOOL)_shouldIgnoreWhenUnarchiving;
 - (void)_ignoreWhenUnarchiving;
 
-+ (NSArray *)_resourcesFromPropertyLists:(NSArray *)propertyLists;
-+ (NSArray *)_propertyListsFromResources:(NSArray *)resources;
-
-- (id)_initWithPropertyList:(id)propertyList;
-
 - (NSFileWrapper *)_fileWrapperRepresentation;
-- (id)_propertyListRepresentation;
 - (NSURLResponse *)_response;
 - (NSString *)_stringValue;
 
