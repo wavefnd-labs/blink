@@ -30,7 +30,7 @@
 #ifndef MainThread_h
 #define MainThread_h
 
-#include <wtf/Threading.h>
+#include <kjs/InitializeThreading.h>
 
 namespace WebCore {
 
@@ -44,7 +44,7 @@ void initializeThreadingAndMainThread();
 #if !PLATFORM(WIN)
 inline void initializeThreadingAndMainThread()
 {
-    WTF::initializeThreading();
+    KJS::initializeThreading();
 }
 #endif
 
