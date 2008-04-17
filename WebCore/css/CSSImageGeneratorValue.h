@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Apple Computer, Inc.  All rights reserved.
+ * Copyright (C) 2008 Apple Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -54,7 +54,10 @@ public:
     void removeClient(RenderObject*);
     virtual Image* image(RenderObject*, const IntSize&) = 0;
 
-    StyleGeneratedImage* generatedImage();
+    virtual StyleGeneratedImage* generatedImage();
+    
+    virtual bool isFixedSize() const { return false; }
+    virtual IntSize fixedSize(const RenderObject*) { return IntSize(); }
     
 protected:
     Image* getImage(RenderObject*, const IntSize&);
