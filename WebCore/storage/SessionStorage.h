@@ -27,26 +27,22 @@
 #define SessionStorage_h
 
 #include "SecurityOriginHash.h"
+#include "SessionStorageArea.h"
 
-#include "StorageAreaClient.h"
 #include <wtf/HashMap.h>
 #include <wtf/HashSet.h>
 #include <wtf/RefCounted.h>
 
 namespace WebCore {
 
-    class StorageArea;
     class Page;
 
-    class SessionStorage : public StorageAreaClient {
+    class SessionStorage : public RefCounted<SessionStorage> {
     public:
         static PassRefPtr<SessionStorage> create(Page*);
         PassRefPtr<SessionStorage> copy(Page*);
         
         PassRefPtr<StorageArea> storageArea(SecurityOrigin*);
-
-        virtual void itemChanged(StorageArea*, const String& key, const String& oldValue, const String& newValue, Frame* sourceFrame);
-        virtual void itemRemoved(StorageArea*, const String& key, const String& oldValue, Frame* sourceFrame);
 
 #ifndef NDEBUG
         Page* page() { return m_page; }
@@ -59,8 +55,8 @@ namespace WebCore {
 
         Page* m_page;
         
-        typedef HashMap<RefPtr<SecurityOrigin>, RefPtr<StorageArea>, SecurityOriginHash, SecurityOriginTraits> StorageAreaMap;
-        StorageAreaMap m_storageAreaMap;
+        typedef HashMap<RefPtr<SecurityOrigin>, RefPtr<SessionStorageArea>, SecurityOriginHash, SecurityOriginTraits> SessionStorageAreaMap;
+        SessionStorageAreaMap m_storageAreaMap;
     };
 
 } // namespace WebCore
