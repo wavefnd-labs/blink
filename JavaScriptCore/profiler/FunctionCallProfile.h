@@ -31,12 +31,14 @@
 
 #include <kjs/ustring.h>
 #include <wtf/Deque.h>
+#include <wtf/StrHash.h>
 
 namespace KJS {
 
     class FunctionCallProfile;
 
     typedef Deque<FunctionCallProfile*>::const_iterator StackIterator;
+    typedef HashCountedSet<UString::Rep*> FunctionCallHashCount;
 
     class FunctionCallProfile {
     public:
@@ -53,9 +55,10 @@ namespace KJS {
 
         UString functionName() const { return m_functionName; }
         double milliSecs() const { return m_timeSum; }
+        unsigned numberOfCalls() const { return m_numberOfCalls; }
 
         void printDataInspectorStyle(int indentLevel) const;
-        double printDataSampleStyle(int indentLevel) const;
+        double printDataSampleStyle(int indentLevel, FunctionCallHashCount&) const;
 
     private:
         void endAndRecordCall();
