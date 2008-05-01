@@ -45,9 +45,11 @@ public:
     virtual void mouseExited(NSEvent*);
     virtual void mouseMoved(NSEvent*);
     virtual void mouseUp(NSEvent*);
+    virtual bool scrollWheel(NSEvent*);
     
     virtual void keyDown(NSEvent*);
     virtual void keyUp(NSEvent*);
+    virtual void flagsChanged(NSEvent*);
     
     virtual void windowFocusChanged(bool hasFocus);    
     virtual void focusChanged(bool hasFocus);
@@ -55,6 +57,8 @@ public:
     virtual void startTimers(bool throttleTimers);
     virtual void stopTimers();
 
+    virtual void* platformWindow(NSWindow*);
+    
 private:
     void sendNullEvent();
 
