@@ -27,6 +27,8 @@
 #define LocalStorage_h
 
 #include "LocalStorageArea.h"
+#include "LocalStorageTask.h"
+#include "LocalStorageThread.h"
 #include "SecurityOriginHash.h"
 
 #include <wtf/HashMap.h>
@@ -43,6 +45,9 @@ namespace WebCore {
 
         PassRefPtr<StorageArea> storageArea(Frame* sourceFrame, SecurityOrigin*);
 
+        void performImport();
+        void performSync();
+
         void close();
 
     private:
@@ -52,6 +57,7 @@ namespace WebCore {
         StorageAreaMap m_storageAreaMap;
 
         PageGroup* m_group;
+        RefPtr<LocalStorageThread> m_thread;
 
         String m_path;
     };
