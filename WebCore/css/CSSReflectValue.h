@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Apple Inc.  All rights reserved.
+ * Copyright (C) 2008 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,8 +26,8 @@
 #ifndef CSSReflectValue_h
 #define CSSReflectValue_h
 
+#include "CSSReflectionDirection.h"
 #include "CSSValue.h"
-
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefPtr.h>
 
@@ -35,24 +35,29 @@ namespace WebCore {
 
 class CSSPrimitiveValue;
 
-enum CSSReflectionDirection { ReflectionBelow, ReflectionAbove, ReflectionLeft, ReflectionRight };
-
 class CSSReflectValue : public CSSValue {
 public:
-    CSSReflectValue()
-    {}
-    
-    virtual String cssText() const;
+    static PassRefPtr<CSSReflectValue> create(CSSReflectionDirection direction,
+        PassRefPtr<CSSPrimitiveValue> offset, PassRefPtr<CSSValue> mask)
+    {
+        return new CSSReflectValue(direction, offset, mask);
+    }
 
     CSSReflectionDirection direction() const { return m_direction; }
     CSSPrimitiveValue* offset() const { return m_offset.get(); }
     CSSValue* mask() const { return m_mask.get(); }
 
-    void setDirection(CSSReflectionDirection dir) { m_direction = dir; }
-    void setOffset(const PassRefPtr<CSSPrimitiveValue>& val) { m_offset = val; }
-    void setMask(const PassRefPtr<CSSValue>& val) { m_mask = val; }
+    virtual String cssText() const;
 
-protected:
+private:
+    CSSReflectValue(CSSReflectionDirection direction,
+            PassRefPtr<CSSPrimitiveValue> offset, PassRefPtr<CSSValue> mask)
+        : m_direction(direction)
+        , m_offset(offset)
+        , m_mask(mask)
+    {
+    }
+    
     CSSReflectionDirection m_direction;
     RefPtr<CSSPrimitiveValue> m_offset;
     RefPtr<CSSValue> m_mask;
