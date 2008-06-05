@@ -20,6 +20,7 @@
 #ifndef __WEBKIT_H__
 #define __WEBKIT_H__
 
+#include <webkit/webkitversion.h>
 #include <webkit/webkitdefines.h>
 #include <webkit/webkitnetworkrequest.h>
 #include <webkit/webkitwebframe.h>
