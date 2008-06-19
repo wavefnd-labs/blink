@@ -29,7 +29,7 @@ namespace WebCore {
 
 class SVGFEMerge : public SVGFilterEffect {
 public:
-    SVGFEMerge(SVGResourceFilter* filter) : SVGFilterEffect(filter) { }
+    static PassRefPtr<SVGFEMerge> create(SVGResourceFilter*);
 
     const Vector<String>& mergeInputs() const;
     void setMergeInputs(const Vector<String>& mergeInputs);
@@ -41,6 +41,8 @@ public:
 #endif
 
 private:
+    SVGFEMerge(SVGResourceFilter*);
+
     Vector<String> m_mergeInputs;
 };
 
