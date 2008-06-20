@@ -27,12 +27,12 @@
 #define CSSVariablesRule_h
 
 #include "CSSRule.h"
+#include "CSSVariablesDeclaration.h"
 #include <wtf/RefPtr.h>
 
 namespace WebCore {
 
 class CSSStyleSheet;
-class CSSVariablesDeclaration;
 class MediaList;
 
 class CSSVariablesRule : public CSSRule {
