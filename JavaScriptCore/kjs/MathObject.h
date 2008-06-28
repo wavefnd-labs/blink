@@ -20,7 +20,7 @@
 #ifndef MathObject_h
 #define MathObject_h
 
-#include "FunctionPrototype.h"
+#include "JSObject.h"
 #include "lookup.h"
 
 namespace KJS {
