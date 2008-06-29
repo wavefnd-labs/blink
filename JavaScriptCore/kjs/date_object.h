@@ -1,6 +1,6 @@
 /*
- *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
+ *  Copyright (C) 2008 Apple Inc. All rights reserved.
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -21,9 +21,7 @@
 #ifndef DATE_OBJECT_H
 #define DATE_OBJECT_H
 
-#include "JSFunction.h"
 #include "JSWrapperObject.h"
-#include "lookup.h"
 
 namespace KJS {
 
@@ -56,33 +54,6 @@ namespace KJS {
         mutable Cache* m_cache;
     };
 
-    /**
-     * @internal
-     *
-     * The initial value of Date.prototype (and thus all objects created
-     * with the Date constructor
-     */
-    class DatePrototype : public DateInstance {
-    public:
-        DatePrototype(ExecState *, ObjectPrototype *);
-        virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot&);
-        virtual const ClassInfo *classInfo() const { return &info; }
-        static const ClassInfo info;
-    };
-
-    /**
-     * @internal
-     *
-     * The initial value of the the global variable's "Date" property
-     */
-    class DateConstructor : public InternalFunction {
-    public:
-        DateConstructor(ExecState*, FunctionPrototype*, DatePrototype*);
-    private:
-        virtual ConstructType getConstructData(ConstructData&);
-        virtual CallType getCallData(CallData&);
-    };
-
-} // namespace
+} // namespace KJS
 
 #endif
