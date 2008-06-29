@@ -21,23 +21,10 @@
 #ifndef RegExpObject_h
 #define RegExpObject_h
 
-#include "JSFunction.h"
 #include "JSObject.h"
 #include "regexp.h"
 
 namespace KJS {
-
-    class FunctionPrototype;
-    class ObjectPrototype;
-    struct RegExpConstructorPrivate;
-
-    class RegExpPrototype : public JSObject {
-    public:
-        RegExpPrototype(ExecState*, ObjectPrototype*, FunctionPrototype*);
-
-        virtual const ClassInfo* classInfo() const { return &info; }
-        static const ClassInfo info;
-    };
 
     class RegExpObject : public JSObject {
     public:
@@ -71,37 +58,6 @@ namespace KJS {
         double m_lastIndex;
     };
 
-    class RegExpConstructor : public InternalFunction {
-    public:
-        enum { Dollar1, Dollar2, Dollar3, Dollar4, Dollar5, Dollar6, Dollar7, Dollar8, Dollar9, 
-               Input, Multiline, LastMatch, LastParen, LeftContext, RightContext };
+} // namespace KJS
 
-        RegExpConstructor(ExecState*, FunctionPrototype*, RegExpPrototype*);
-
-        virtual void put(ExecState*, const Identifier&, JSValue*);
-        void putValueProperty(ExecState*, int token, JSValue*);
-        virtual bool getOwnPropertySlot(ExecState*, const Identifier&, PropertySlot&);
-        JSValue* getValueProperty(ExecState*, int token) const;
-
-        static const ClassInfo info;
-
-        void performMatch(RegExp*, const UString&, int startOffset, int& position, int& length, int** ovector = 0);
-        JSObject* arrayOfMatches(ExecState*) const;
-        const UString& input() const;
-
-    private:
-        virtual ConstructType getConstructData(ConstructData&);
-        virtual CallType getCallData(CallData&);
-        virtual const ClassInfo* classInfo() const { return &info; }
-
-        JSValue* getBackref(ExecState*, unsigned) const;
-        JSValue* getLastParen(ExecState*) const;
-        JSValue* getLeftContext(ExecState*) const;
-        JSValue* getRightContext(ExecState*) const;
-
-        OwnPtr<RegExpConstructorPrivate> d;
-    };
-
-} // namespace
-
-#endif
+#endif // RegExpObject_h
