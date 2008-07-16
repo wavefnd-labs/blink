@@ -34,7 +34,7 @@ namespace WebCore {
         static PassRefPtr<SVGLengthList> create(const QualifiedName& attributeName) { return adoptRef(new SVGLengthList(attributeName)); }
         virtual ~SVGLengthList();
 
-        void parse(const String& value, const SVGStyledElement* context, SVGLengthMode mode);
+        void parse(const String& value, SVGLengthMode mode);
  
         String valueAsString() const;
 
