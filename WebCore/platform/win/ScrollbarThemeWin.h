@@ -26,11 +26,11 @@
 #ifndef ScrollbarThemeWin_h
 #define ScrollbarThemeWin_h
 
-#include "ScrollbarTheme.h"
+#include "ScrollbarThemeComposite.h"
 
 namespace WebCore {
 
-class ScrollbarThemeWin : public ScrollbarTheme {
+class ScrollbarThemeWin : public ScrollbarThemeComposite {
 public:
     virtual ~ScrollbarThemeWin();
 
