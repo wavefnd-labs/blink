@@ -31,15 +31,21 @@
 
 namespace JSC {
 
+    // WebCore uses this to make document.all and style.filter undetectable.
+    static const unsigned MasqueradesAsUndefined = 0x1;
+
     class TypeInfo {
         friend class CTI;
     public:
-        TypeInfo(JSType type) : m_type(type) { }
-        
+        TypeInfo(JSType type, unsigned flags = 0) : m_type(type), m_flags(flags) { }
+
         JSType type() const { return m_type; }
+
+        bool masqueradesAsUndefined() const { return m_flags & MasqueradesAsUndefined; }
 
     private:
         JSType m_type;
+        unsigned m_flags;
     };
 
 }
