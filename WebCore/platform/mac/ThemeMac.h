@@ -38,8 +38,6 @@ public:
     virtual int baselinePositionAdjustment(ControlPart) const;
 
     virtual LengthSize controlSize(ControlPart, const Font&, const LengthSize&, float zoomFactor) const;
-    virtual bool controlSupportsBorder(ControlPart) const;
-    virtual bool controlSupportsPadding(ControlPart) const;
     
     virtual void paint(ControlPart, ControlStates, GraphicsContext*, const IntRect&, float zoomFactor, ScrollView*) const;
     virtual void inflateControlPaintRect(ControlPart, ControlStates, IntRect&, float zoomFactor) const;
