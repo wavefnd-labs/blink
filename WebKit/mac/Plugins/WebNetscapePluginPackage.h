@@ -58,7 +58,7 @@ typedef enum {
     BOOL needsUnload;
     unsigned int instanceCount;
      
-#if !defined(BUILDING_ONLEOPARD) && !defined(BUILDING_ON_TIGER) && defined(__x86_64__)
+#if USE(PLUGIN_HOST_PROCESS)
     cpu_type_t pluginHostArchitecture;
 #endif
     
