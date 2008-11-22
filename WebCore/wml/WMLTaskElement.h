@@ -40,17 +40,13 @@ public:
     virtual void insertedIntoDocument();
     virtual void executeTask(Event*) = 0;
 
-#if 0
-    void addVariableSetter(WMLSetvarElement*);
-    void removeVariableSetter(WMLSetvarElement*);
-#endif
+    void registerVariableSetter(WMLSetvarElement*);
 
 protected:
     void storeVariableState(Page*);
-#if 0
+
 private:
     HashSet<WMLSetvarElement*> m_variableSetterElements;
-#endif
 };
 
 }
