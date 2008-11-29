@@ -24,6 +24,7 @@
 #if ENABLE(WML)
 #include "WMLNoopElement.h"
 
+#include "WMLDoElement.h"
 #include "WMLErrorHandling.h"
 #include "WMLNames.h"
 
@@ -46,15 +47,11 @@ void WMLNoopElement::insertedIntoDocument()
     if (!parent || !parent->isWMLElement())
         return;
 
-    /* FIXME
     if (parent->hasTagName(doTag)) {
         WMLDoElement* doElement = static_cast<WMLDoElement*>(parent);
         doElement->setNoop(true);
         doElement->setChanged();
-    } else
-    */
-
-    if (parent->hasTagName(anchorTag))
+    } else if (parent->hasTagName(anchorTag))
         reportWMLError(document(), WMLErrorForbiddenTaskInAnchorElement);
 }
 
