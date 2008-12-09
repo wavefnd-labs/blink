@@ -24,6 +24,7 @@
 #if ENABLE(WML)
 #include "WMLEventHandlingElement.h"
 
+#include "WMLDoElement.h"
 #include "WMLIntrinsicEventHandler.h"
 #include "WMLTaskElement.h"
 #include "WMLNames.h"
@@ -41,6 +42,22 @@ void WMLEventHandlingElement::createEventHandlerIfNeeded()
 {
     if (!m_eventHandler)
         m_eventHandler.set(new WMLIntrinsicEventHandler);
+}
+
+void WMLEventHandlingElement::registerDoElement(WMLDoElement* doElement)
+{
+    Vector<WMLDoElement*>::iterator it = m_doElements.begin();
+    Vector<WMLDoElement*>::iterator end = m_doElements.end();
+
+    for (; it != end; ++it) {
+        if ((*it)->name() == doElement->name()) {
+            reportWMLError(document(), WMLErrorDuplicatedDoElement);
+            return;
+        }
+    }
+
+    m_doElements.append(doElement);
+    doElement->setActive(true);
 }
 
 }

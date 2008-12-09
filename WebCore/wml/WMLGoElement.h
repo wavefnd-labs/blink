@@ -27,13 +27,31 @@
 
 namespace WebCore {
 
+class ResourceRequest;
+class WMLPostfieldElement;
+
 class WMLGoElement : public WMLTaskElement {
 public:
     WMLGoElement(const QualifiedName& tagName, Document*);
-    virtual ~WMLGoElement();
+
+    void registerPostfieldElement(WMLPostfieldElement*);
 
     virtual void parseMappedAttribute(MappedAttribute*);
     virtual void executeTask(Event*);
+
+private:
+    void parseContentType(const String&);
+
+    void preparePOSTRequest(ResourceRequest&, bool inSameDeck, const String& cacheControl);
+    void prepareGETRequest(ResourceRequest&, bool inSameDeck, const KURL&);
+
+    HashSet<WMLPostfieldElement*> m_postfieldElements;
+
+    String m_contentType;
+    String m_acceptCharset;
+
+    bool m_isMultiPart;
+    bool m_isPostMethod;
 };
 
 }
