@@ -38,6 +38,10 @@ WMLEventHandlingElement::WMLEventHandlingElement(const QualifiedName& tagName, D
 {
 }
 
+WMLEventHandlingElement::~WMLEventHandlingElement()
+{
+}
+
 void WMLEventHandlingElement::createEventHandlerIfNeeded()
 {
     if (!m_eventHandler)
