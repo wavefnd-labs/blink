@@ -46,16 +46,6 @@ class RootObject;
     
 typedef uint16_t NPUTF16;
 
-enum NP_ValueType {
-    NP_NumberValueType,
-    NP_StringValueType,
-    NP_BooleanValueType,
-    NP_NullValueType,
-    NP_UndefinedValueType,
-    NP_ObjectValueType,
-    NP_InvalidValueType
-};
-
 WebCore::String convertNPStringToUTF16(const NPString *string);
 void convertValueToNPVariant(ExecState*, JSValuePtr, NPVariant* result);
 JSValuePtr convertNPVariantToValue(ExecState*, const NPVariant*, RootObject*);
