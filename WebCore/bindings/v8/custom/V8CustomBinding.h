@@ -35,4 +35,15 @@
 // over and v8_custom actually becomes V8CustomBinding.
 #include "v8_custom.h"
 
+namespace WebCore {
+
+    class HTMLFrameElementBase;
+    class Element;
+    class String;
+
+    bool allowSettingFrameSrcToJavascriptUrl(HTMLFrameElementBase*, String value);
+    bool allowSettingSrcToJavascriptURL(Element*, String name, String value);
+
+} // namespace WebCore
+
 #endif // V8CustomBinding_h
