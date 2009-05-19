@@ -35,6 +35,7 @@
 #include "Database.h"
 #include "Document.h"
 #include "Frame.h"
+#include "JSONObject.h"
 #include "ScriptFunctionCall.h"
 #include "ScriptObjectQuarantine.h"
 #include "ScriptValue.h"
@@ -60,17 +61,17 @@ void InspectorDatabaseResource::bind(ScriptState* scriptState, const ScriptObjec
     if (!scriptState || webInspector.hasNoValue())
         return;
 
-    ScriptObject scriptObject = ScriptObject::createNew(scriptState);
+    JSONObject jsonObject = JSONObject::createNew(scriptState);
     ScriptObject database;
     if (!getQuarantinedScriptObject(m_database.get(), database))
         return;
-    scriptObject.set(scriptState, "database", database);
-    scriptObject.set(scriptState, "domain", m_domain);
-    scriptObject.set(scriptState, "name", m_name);
-    scriptObject.set(scriptState, "version", m_version);
+    jsonObject.set("database", database);
+    jsonObject.set("domain", m_domain);
+    jsonObject.set("name", m_name);
+    jsonObject.set("version", m_version);
     
     ScriptFunctionCall addDatabase(scriptState, webInspector, "addDatabase");
-    addDatabase.appendArgument(scriptObject);
+    addDatabase.appendArgument(jsonObject.scriptObject());
     addDatabase.call();
     m_scriptObjectCreated = true;
 }
