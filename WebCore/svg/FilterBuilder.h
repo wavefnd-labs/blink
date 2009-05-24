@@ -35,19 +35,18 @@ namespace WebCore {
     public:
         FilterBuilder();
 
-        void add(const String& id, PassRefPtr<FilterEffect> effect);
+        void add(const AtomicString& id, RefPtr<FilterEffect> effect);
 
-        FilterEffect* getEffectById(const String& id) const;
+        FilterEffect* getEffectById(const AtomicString& id) const;
         FilterEffect* lastFilter() const { return m_lastEffect.get(); }
 
         void clearEffects();
 
     private:
-        HashMap<RefPtr<StringImpl>, RefPtr<FilterEffect> > m_namedEffects;
+        HashMap<RefPtr<AtomicStringImpl>, RefPtr<FilterEffect> > m_builtinEffects;
+        HashMap<RefPtr<AtomicStringImpl>, RefPtr<FilterEffect> > m_namedEffects;
 
         RefPtr<FilterEffect> m_lastEffect;
-        RefPtr<FilterEffect> m_sourceGraphic;
-        RefPtr<FilterEffect> m_sourceAlpha;
     };
     
 } //namespace WebCore
