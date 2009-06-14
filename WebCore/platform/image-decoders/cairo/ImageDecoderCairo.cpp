@@ -94,7 +94,7 @@ void RGBA32Buffer::setHasAlpha(bool alpha)
     m_hasAlpha = alpha;
 }
 
-void setStatus(FrameStatus status)
+void RGBA32Buffer::setStatus(FrameStatus status)
 {
     m_status = status;
 }
