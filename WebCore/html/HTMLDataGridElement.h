@@ -33,11 +33,10 @@ namespace WebCore {
 class HTMLDataGridElement : public HTMLElement
 {
 public:
-    HTMLDataGridElement(const QualifiedName& name, Document* doc)
-        : HTMLElement(name, doc)
-    { }
+    HTMLDataGridElement(const QualifiedName&, Document*);
     
     virtual int tagPriority() const { return 6; } // Same as <select>s
+    virtual bool checkDTD(const Node*);
 };
 
 } //namespace
