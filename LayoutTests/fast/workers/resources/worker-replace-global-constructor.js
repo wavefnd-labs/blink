@@ -9,7 +9,7 @@ if (window.layoutTestController) {
     layoutTestController.waitUntilDone();
 }
 
-var worker = new Worker('resources/worker-common.js');
+var worker = createWorker();
 worker.postMessage("eval self.MessageEvent = 'PASS'; MessageEvent;");
 worker.postMessage("eval foo//bar");
 
