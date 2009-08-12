@@ -48,8 +48,9 @@ public:
     virtual WebCore::NotificationPresenter::Permission checkPermission(WebCore::SecurityOrigin* origin);
 
 private:
+    bool hasNotificationDelegate();
     COMPtr<IWebDesktopNotificationsDelegate> notificationDelegate();
-    
+
     WebView* m_webView;
 };
 
