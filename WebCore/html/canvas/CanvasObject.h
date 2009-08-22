@@ -52,6 +52,8 @@ namespace WebCore {
     protected:
         CanvasObject(GraphicsContext3D*);
         virtual void _deleteObject(Platform3DObject) = 0;
+        
+        GraphicsContext3D* context() const { return m_context; }
     
     private:
         Platform3DObject m_object;
