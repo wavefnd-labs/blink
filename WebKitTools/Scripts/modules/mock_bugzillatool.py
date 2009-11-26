@@ -41,6 +41,9 @@ class MockBugzilla():
             return [self.patch1, self.patch2]
         return None
 
+    def close_bug_as_fixed(self, bug_id, comment_text=None):
+        pass
+
 
 class MockBuildBot():
     def builder_statuses(self):
