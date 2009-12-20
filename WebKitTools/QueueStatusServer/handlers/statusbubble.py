@@ -29,9 +29,11 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
-from model import QueueStatus
+from model.queuestatus import QueueStatus
 
 
+# FIXME: This class is wrong.  I'm going to rebuid the functionality correctly
+#        for the dashboard and then kill this class.
 class StatusSummary(object):
     def _status_to_code(self, status):
         code_names = {
@@ -76,4 +78,4 @@ class StatusBubble(webapp.RequestHandler):
         template_values = {
             "queue_status" : status_summary.summarize(int(attachment_id)),
         }
-        self.response.out.write(template.render('status_bubble.html', template_values))
+        self.response.out.write(template.render("templates/statusbubble.html", template_values))
