@@ -34,6 +34,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from handlers.dashboard import Dashboard
+from handlers.patch import Patch
 from handlers.patchstatus import PatchStatus
 from handlers.recentstatus import RecentStatus
 from handlers.showresults import ShowResults
@@ -48,6 +49,7 @@ routes = [
     ('/update-status', UpdateStatus),
     ('/dashboard', Dashboard),
     (r'/patch-status/(.*)/(.*)', PatchStatus),
+    (r'/patch/(.*)', Patch),
     (r'/status-bubble/(.*)', StatusBubble),
     (r'/results/(.*)', ShowResults)
 ]
