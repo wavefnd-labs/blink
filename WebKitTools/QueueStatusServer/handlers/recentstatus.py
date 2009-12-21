@@ -29,6 +29,7 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
+from model.queues import queues
 from model.queuestatus import QueueStatus
 
 class RecentStatus(webapp.RequestHandler):
@@ -43,14 +44,14 @@ class RecentStatus(webapp.RequestHandler):
     # We could change "/" to just redirect to /queue-status/commit-queue in the future
     # at which point we would not need a default value for queue_name here.
     def get(self, queue_name="commit-queue"):
-        statuses_query = QueueStatus.all().filter("queue_name =", queue_name).order("-date")
-        statuses = statuses_query.fetch(6)
-        if not statuses:
-            return self.response.out.write("No status to report.")
+        queue_status = {}
+        for queue in queues:
+            statuses = QueueStatus.all().filter("queue_name =", queue).order("-date").fetch(6)
+            if not statuses:
+                continue
+            queue_status[queue] = statuses
+
         template_values = {
-            "last_status" : statuses[0],
-            "recent_statuses" : statuses[1:],
-            "pretty_queue_name" : self._pretty_queue_name(queue_name),
-            "show_commit_queue_footer" : queue_name == "commit-queue"
+            "queue_status" : queue_status,
         }
-        self.response.out.write(template.render("index.html", template_values))
+        self.response.out.write(template.render("templates/recentstatus.html", template_values))
