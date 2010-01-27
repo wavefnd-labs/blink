@@ -37,6 +37,8 @@
 #include <qwebpage.h>
 
 class WebPage : public QWebPage {
+    Q_OBJECT
+
 public:
     WebPage(QObject* parent = 0);
 
