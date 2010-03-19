@@ -30,14 +30,18 @@ import os
 
 from webkitpy.commands.queuestest import QueuesTest
 from webkitpy.commands.sheriffbot import SheriffBot
-from webkitpy.mock_bugzillatool import MockBugzillaTool
+from webkitpy.mock_bugzillatool import MockBugzillaTool, mock_builder
 
 class SheriffBotTest(QueuesTest):
     def test_sheriff_bot(self):
+        mock_work_item = {
+            "svn_revision": 29837,
+            "builders": [mock_builder]
+        }
         expected_stderr = {
             "begin_work_queue": "CAUTION: sheriff-bot will discard all local changes in \"%s\"\nRunning WebKit sheriff-bot.\n" % os.getcwd(),
             "next_work_item": "",
-            "process_work_item": "MOCK: irc.post: r29837 appears to have broken the build.\n",
+            "process_work_item": "MOCK: irc.post: abarth, darin, eseidel: r29837 appears to have broken Mock builder name (Tests)\n",
             "handle_unexpected_error": "Mock error message\n"
         }
-        self.assert_queue_outputs(SheriffBot(), work_item=29837, expected_stderr=expected_stderr)
+        self.assert_queue_outputs(SheriffBot(), work_item=mock_work_item, expected_stderr=expected_stderr)
