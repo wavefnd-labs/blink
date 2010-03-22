@@ -24,4 +24,5 @@
 
 # This module is imported by the module that imports all webkitpy unit tests.
 
+from logutils_unittest import *
 from versioning_unittest import *
