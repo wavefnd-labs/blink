@@ -20,8 +20,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Runs init package unit tests."""
+"""Imports unit tests for webkitpy.common.system."""
 
-# This module is imported by the module that imports all webkitpy unit tests.
-
-from logutils_unittest import *
+from webkitpy.common.system.logutils_unittest import *
+from webkitpy.common.system.executive_unittest import *
+from webkitpy.common.system.user_unittest import *
