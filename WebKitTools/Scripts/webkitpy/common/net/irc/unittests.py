@@ -30,5 +30,4 @@
 
 # This module is imported by the module that imports all webkitpy unit tests.
 
-from webkitpy.common.net.irc.messagepump_unittest import *
-from webkitpy.common.net.irc.threadedmessagequeue_unittest import *
+# No tests yet!  :(
