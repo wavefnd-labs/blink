@@ -34,22 +34,23 @@ from webkitpy.common.system.deprecated_logging import log
 
 
 class _IRCThread(threading.Thread):
-    def __init__(self, message_queue, irc_delegate):
+    def __init__(self, message_queue, irc_delegate, irc_bot):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self._message_queue = message_queue
         self._irc_delegate = irc_delegate
+        self._irc_bot = irc_bot
 
     def run(self):
-        bot = IRCBot(self._message_queue, self.irc_delegate)
+        bot = self._irc_bot(self._message_queue, self._irc_delegate)
         bot.start()
 
 
 class IRCProxy(object):
-    def __init__(self, irc_delegate):
+    def __init__(self, irc_delegate, irc_bot=IRCBot):
         log("Connecting to IRC")
         self._message_queue = ThreadedMessageQueue()
-        self._child_thread = _IRCThread(self._message_queue, irc_delegate)
+        self._child_thread = _IRCThread(self._message_queue, irc_delegate, irc_bot)
         self._child_thread.start()
 
     def post(self, message):
