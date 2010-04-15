@@ -53,6 +53,9 @@ enum Kind {
     DidFinishProgress,
     DidFirstLayoutForFrame,
     DidFirstVisuallyNonEmptyLayoutForFrame,
+    DidNavigateWithNavigationData,
+    DidPerformClientRedirect,
+    DidPerformServerRedirect,
     DidReceiveEvent,
     DidReceiveServerRedirectForProvisionalLoadForFrame,
     DidReceiveTitleForFrame,
@@ -60,6 +63,7 @@ enum Kind {
     DidSetFrame,
     DidStartProgress,
     DidStartProvisionalLoadForFrame,
+    DidUpdateHistoryTitle,
     SetToolTip,
     TakeFocus,
 };
