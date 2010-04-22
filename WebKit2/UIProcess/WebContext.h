@@ -32,6 +32,8 @@
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
 
+struct WKContextStatistics;
+
 namespace WebKit {
 
 class WebPageNamespace;
@@ -55,6 +57,8 @@ public:
     void preferencesDidChange();
 
     ProcessModel processModel() const { return m_processModel; }
+
+    void getStatistics(WKContextStatistics* statistics);
 
 private:
     WebContext(ProcessModel);
