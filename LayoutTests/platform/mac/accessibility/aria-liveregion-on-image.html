@@ -18,8 +18,10 @@ var successfullyParsed = false;
 
     description("This tests that ARIA live regions that is on an image will work when the alt tag is changed.");
 
+    var image = 0;
     function ariaCallback(notification) {
         if (notification == "AXLiveRegionChanged") {
+            image.removeNotificationListener();
             window.layoutTestController.notifyDone();
         }
     }
@@ -28,7 +30,7 @@ var successfullyParsed = false;
         window.layoutTestController.waitUntilDone();
 
         document.getElementById("image").focus();
-        var image = window.accessibilityController.focusedElement;
+        image = window.accessibilityController.focusedElement;
 
         var addedNotification = image.addNotificationListener(ariaCallback);
         shouldBe("addedNotification", "true");

@@ -21,6 +21,7 @@ var successfullyParsed = false;
 
     description("This tests that ARIA live regions are sending out the correct notifications. We perform four operations (add, remove, change text, change alt tag), each one should trigger a live region notification");
 
+    var liveRegion = 0;
     var liveRegionChangeCount = 0;
     function ariaCallback(notification) {
         if (notification == "AXLiveRegionChanged") {
@@ -28,6 +29,7 @@ var successfullyParsed = false;
 
             // We should get a total of 4 live region changes.
             if (liveRegionChangeCount == 4) {
+               liveRegion.removeNotificationListener();
                window.layoutTestController.notifyDone();
             }
         }
@@ -37,7 +39,7 @@ var successfullyParsed = false;
         window.layoutTestController.waitUntilDone();
 
         document.getElementById("liveregion").focus();
-        var liveRegion = window.accessibilityController.focusedElement;
+        liveRegion = window.accessibilityController.focusedElement;
 
         var addedNotification = liveRegion.addNotificationListener(ariaCallback);
         shouldBe("addedNotification", "true");
