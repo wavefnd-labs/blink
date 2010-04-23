@@ -64,7 +64,7 @@ public:
 private:
     void ensureBackingStore();
     void drawUpdateChunkIntoBackingStore(UpdateChunk*);
-    void didSetSize(const WebCore::IntSize&, UpdateChunk*);
+    void didSetSize(UpdateChunk*);
     void update(UpdateChunk*);
 
     OwnPtr<HDC> m_backingStoreDC;
