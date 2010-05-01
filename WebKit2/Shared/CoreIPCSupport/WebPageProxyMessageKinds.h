@@ -53,6 +53,7 @@ enum Kind {
     DidFinishProgress,
     DidFirstLayoutForFrame,
     DidFirstVisuallyNonEmptyLayoutForFrame,
+    DidGetRenderTreeExternalRepresentation,
     DidNavigateWithNavigationData,
     DidPerformClientRedirect,
     DidPerformServerRedirect,
