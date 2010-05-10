@@ -27,44 +27,34 @@
 #ifndef WebGLFloatArray_h
 #define WebGLFloatArray_h
 
-#include "WebGLArray.h"
+#include "WebGLTypedArrayBase.h"
 #include <wtf/MathExtras.h>
-#include <wtf/PassRefPtr.h>
-#include <wtf/RefCounted.h>
 
 namespace WebCore {
 
-class WebGLFloatArray : public WebGLArray {
+class WebGLFloatArray : public WebGLTypedArrayBase<float> {
   public:
-    virtual bool isFloatArray() const { return true; }
-
     static PassRefPtr<WebGLFloatArray> create(unsigned length);
     static PassRefPtr<WebGLFloatArray> create(float* array, unsigned length);
     static PassRefPtr<WebGLFloatArray> create(PassRefPtr<WebGLArrayBuffer> buffer, unsigned byteOffset, unsigned length);
 
-    float* data() { return static_cast<float*>(baseAddress()); }
-
-    virtual unsigned length() const;
-    virtual unsigned byteLength() const;
-    virtual PassRefPtr<WebGLArray> slice(int start, int end);
+    using WebGLTypedArrayBase<float>::set;
 
     void set(unsigned index, double value)
     {
-        if (index >= m_size)
+        if (index >= WebGLTypedArrayBase<float>::m_length)
             return;
         if (isnan(value)) // Clamp NaN to 0
             value = 0;
-        float* storage = static_cast<float*>(m_baseAddress);
-        storage[index] = static_cast<float>(value);
+        WebGLTypedArrayBase<float>::data()[index] = static_cast<float>(value);
     }
 
     // Invoked by the indexed getter. Does not perform range checks; caller
     // is responsible for doing so and returning undefined as necessary.
     float item(unsigned index) const
     {
-        ASSERT(index < m_size);
-        float* storage = static_cast<float*>(m_baseAddress);
-        float result = storage[index];
+        ASSERT(index < WebGLTypedArrayBase<float>::m_length);
+        float result = WebGLTypedArrayBase<float>::data()[index];
         if (isnan(result)) {
             // Clamp NaN to 0
             result = 0;
@@ -72,11 +62,16 @@ class WebGLFloatArray : public WebGLArray {
         return result;
     }
 
-    void set(WebGLFloatArray* array, unsigned offset, ExceptionCode& ec);
-
   private:
-    WebGLFloatArray(PassRefPtr<WebGLArrayBuffer> buffer, unsigned byteOffset, unsigned length);
-    unsigned m_size;
+    WebGLFloatArray(PassRefPtr<WebGLArrayBuffer> buffer,
+                    unsigned byteOffset,
+                    unsigned length);
+    // Make constructor visible to superclass.
+    friend class WebGLTypedArrayBase<float>;
+
+    // Overridden from WebGLArray.
+    virtual bool isFloatArray() const { return true; }
+    virtual PassRefPtr<WebGLArray> slice(int start, int end) const;
 };
 
 } // namespace WebCore
