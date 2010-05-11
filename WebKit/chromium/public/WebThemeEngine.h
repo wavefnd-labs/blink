@@ -76,44 +76,6 @@ public:
         WebCanvas*, int part, int state, int classicState,
         const WebRect&) = 0;
 #endif
-
-    // WebThemeEngine was originally used only on Windows, hence its platform-
-    // specific parameters.  This is new cross-platform theming API, and we'll
-    // switch the code to using these APIs on all platforms instead.
-    enum Part {
-        PartScrollbarDownArrow,
-        PartScrollbarLeftArrow,
-        PartScrollbarRightArrow,
-        PartScrollbarUpArrow,
-        PartScrollbarHorizontalThumb,
-        PartScrollbarVerticalThumb,
-        PartScrollbarHoriztonalTrack,
-        PartScrollbarVerticalTrack,
-    };
-
-    enum State {
-        StateDisabled,
-        StateHot,
-        StateHover,
-        StateNormal,
-        StatePressed,
-    };
-
-    struct ScrollbarTrackExtraParams {
-        int alignX;
-        int alignY;
-    };
-
-    union ExtraParams {
-        ScrollbarTrackExtraParams scrollbarTrack;
-    };
-
-    // Gets the size of the given theme component.  For variable sized items
-    // like vertical scrollbar tracks, the width will be the required width of
-    // the track while the height will be the minimum height.
-    virtual void getSize(Part, WebSize*) {}
-    virtual void paint(
-        WebCanvas*, Part, State, const WebRect&, const ExtraParams&) {}
 };
 
 } // namespace WebKit
