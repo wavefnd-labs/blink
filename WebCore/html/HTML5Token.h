@@ -36,6 +36,7 @@ namespace WebCore {
 class HTML5Token : public Noncopyable {
 public:
     enum Type {
+        Uninitialized,
         DOCTYPE,
         StartTag,
         EndTag,
@@ -44,7 +45,7 @@ public:
         EndOfFile,
     };
 
-    explicit HTML5Token(Type type)
+    explicit HTML5Token(Type type = Uninitialized)
         : m_type(type)
         , m_forceQuirks(false)
         , m_selfClosing(false)
