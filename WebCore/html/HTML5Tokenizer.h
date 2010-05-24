@@ -33,9 +33,8 @@
 
 namespace WebCore {
 
-class Document;
 class HTMLDocument;
-class HTMLParser;
+class HTML5TreeBuilder;
 class HTML5Lexer;
 
 // FIXME: This is the wrong layer to hook in the new HTML 5 Lexer,
@@ -59,9 +58,8 @@ public:
 private:
     SegmentedString m_source;
 
-    Document* m_doc;
     OwnPtr<HTML5Lexer> m_lexer;
-    OwnPtr<HTMLParser> m_parser;
+    OwnPtr<HTML5TreeBuilder> m_treeBuilder;
 };
 
 }
