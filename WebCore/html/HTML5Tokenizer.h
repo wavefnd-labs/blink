@@ -34,18 +34,15 @@
 
 namespace WebCore {
 
-class HTMLDocument;
-class HTML5TreeBuilder;
 class HTML5Lexer;
+class HTML5ScriptRunner;
+class HTML5TreeBuilder;
+class HTMLDocument;
 
-// FIXME: This is the wrong layer to hook in the new HTML 5 Lexer,
-// however HTMLTokenizer is too large and too fragile of a class to hack into.
-// Eventually we should split all of the HTML lexer logic out from HTMLTokenizer
-// and then share non-lexer-specific tokenizer logic between HTML5 and the
-// legacy WebKit HTML lexer.
-
-// FIXME: This class is far from complete.
-class HTML5Tokenizer :  public Tokenizer, public CachedResourceClient {
+// FIXME: The whole Tokenizer class system should be renamed "Parser"
+// or "ParserController" as the job of this class is to drive parsing process
+// but it does not itself Tokenize.
+class HTML5Tokenizer :  public Tokenizer, CachedResourceClient {
 public:
     HTML5Tokenizer(HTMLDocument*, bool reportErrors);
     virtual ~HTML5Tokenizer();
@@ -55,9 +52,14 @@ public:
     virtual void end();
     virtual void finish();
     virtual bool isWaitingForScripts() const;
+    virtual void executeScriptsWaitingForStylesheets();
+
+    // CachedResourceClient
+    virtual void notifyFinished(CachedResource*);
 
 private:
     void pumpLexer();
+    void resumeParsingAfterScriptExecution();
 
     SegmentedString m_source;
 
@@ -65,6 +67,7 @@ private:
     HTML5Token m_token;
 
     OwnPtr<HTML5Lexer> m_lexer;
+    OwnPtr<HTML5ScriptRunner> m_scriptRunner;
     OwnPtr<HTML5TreeBuilder> m_treeBuilder;
 };
 
