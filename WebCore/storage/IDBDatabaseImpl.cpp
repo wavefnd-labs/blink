@@ -27,6 +27,8 @@
 #include "IDBDatabaseImpl.h"
 
 #include "DOMStringList.h"
+#include "IDBDatabaseException.h"
+#include "IDBObjectStoreImpl.h"
 
 #if ENABLE(INDEXED_DATABASE)
 
@@ -48,6 +50,19 @@ PassRefPtr<DOMStringList> IDBDatabaseImpl::objectStores()
     // FIXME: This should return the actual list.
     return DOMStringList::create();
 }
+
+void IDBDatabaseImpl::createObjectStore(const String& name, const String& keyPath, bool autoIncrement, PassRefPtr<IDBCallbacks> callbacks)
+{
+    if (m_objectStores.contains(name)) {
+        callbacks->onError(IDBDatabaseError::create(IDBDatabaseException::CONSTRAINT_ERR, "ObjectStore name already exists."));
+        return;
+    }
+
+    RefPtr<IDBObjectStore> objectStore = IDBObjectStoreImpl::create(name, keyPath, autoIncrement);
+    m_objectStores.set(name, objectStore);
+    callbacks->onSuccess(objectStore.release());
+}
+
 
 } // namespace WebCore
 
