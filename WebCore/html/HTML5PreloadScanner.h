@@ -27,6 +27,7 @@
 #ifndef HTML5PreloadScanner_h
 #define HTML5PreloadScanner_h
 
+#include "CSSPreloadScanner.h"
 #include "HTML5Lexer.h"
 #include "HTML5Token.h"
 #include "SegmentedString.h"
@@ -47,12 +48,15 @@ public:
 
 private:
     void processToken();
+    bool scanningBody() const;
 
     Document* m_document;
     SegmentedString m_source;
     HTML5Lexer m_lexer;
     HTML5Token m_token;
+    CSSPreloadScanner m_cssScanner;
     bool m_bodySeen;
+    bool m_inStyle;
 };
 
 }
