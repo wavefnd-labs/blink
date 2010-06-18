@@ -47,9 +47,9 @@ protected:
         : m_pluginStrategy(0)
     {
     }
+    virtual ~PlatformStrategies() { }
 
 private:    
-    virtual ~PlatformStrategies();
     virtual PluginStrategy* createPluginStrategy() = 0;
 
     PluginStrategy* m_pluginStrategy;
