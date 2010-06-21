@@ -27,6 +27,8 @@
 
 #if USE(PLATFORM_STRATEGIES)
 
+#include "PluginInfoStore.h"
+
 using namespace WebCore;
 
 namespace WebKit {
@@ -50,12 +52,14 @@ PluginStrategy* WebPlatformStrategies::createPluginStrategy()
 
 void WebPlatformStrategies::refreshPlugins()
 {
-    // FIXME: Implement.
+    // FIXME: This should call out to the UI process.
+    PluginInfoStore::shared().refresh();
 }
 
 void WebPlatformStrategies::getPluginInfo(Vector<WebCore::PluginInfo>& plugins)
 {
-    // FIXME: Implement.
+    // FIXME: This should call out to the UI process.
+    PluginInfoStore::shared().getPlugins(plugins);
 }
 
 } // namespace WebKit
