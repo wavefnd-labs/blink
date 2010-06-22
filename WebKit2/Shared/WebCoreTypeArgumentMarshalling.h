@@ -29,69 +29,16 @@
 #include "ArgumentDecoder.h"
 #include "ArgumentEncoder.h"
 #include "Arguments.h"
+#include "SimpleArgumentCoder.h"
 #include <WebCore/FloatRect.h>
 #include <WebCore/IntRect.h>
 #include <WebCore/PlatformString.h>
 
 namespace CoreIPC {
 
-template<> struct ArgumentCoder<WebCore::IntPoint> {
-    static void encode(ArgumentEncoder* encoder, const WebCore::IntPoint& p)
-    {
-        encoder->encode(CoreIPC::In(p.x(), p.y()));
-    };
-
-    static bool decode(ArgumentDecoder* decoder, WebCore::IntPoint& p)
-    {
-        int x;
-        int y;
-        if (!decoder->decode(CoreIPC::Out(x, y)))
-            return false;
-        
-        p.setX(x);
-        p.setY(y);
-        return true;
-    }
-};
-
-template<> struct ArgumentCoder<WebCore::IntSize> {
-    static void encode(ArgumentEncoder* encoder, const WebCore::IntSize& s)
-    {
-        encoder->encode(CoreIPC::In(s.width(), s.height()));
-    };
-    
-    static bool decode(ArgumentDecoder* decoder, WebCore::IntSize& s)
-    {
-        int width;
-        int height;
-        if (!decoder->decode(CoreIPC::Out(width, height)))
-            return false;
-        
-        s.setWidth(width);
-        s.setHeight(height);
-        return true;
-    }
-
-};
-
-template<> struct ArgumentCoder<WebCore::IntRect> {
-    static void encode(ArgumentEncoder* encoder, const WebCore::IntRect& r)
-    {
-        encoder->encode(CoreIPC::In(r.location(), r.size()));
-    };
-    
-    static bool decode(ArgumentDecoder* decoder, WebCore::IntRect& r)
-    {
-        WebCore::IntPoint location;
-        WebCore::IntSize size;
-        if (!decoder->decode(CoreIPC::Out(location, size)))
-            return false;
-        
-        r.setLocation(location);
-        r.setSize(size);
-        return true;
-    }
-};
+template<> struct ArgumentCoder<WebCore::IntPoint> : SimpleArgumentCoder<WebCore::IntPoint> { };
+template<> struct ArgumentCoder<WebCore::IntSize> : SimpleArgumentCoder<WebCore::IntSize> { };
+template<> struct ArgumentCoder<WebCore::IntRect> : SimpleArgumentCoder<WebCore::IntRect> { };
 
 template<> struct ArgumentCoder<WebCore::String> {
     static void encode(ArgumentEncoder* encoder, const WebCore::String& string)
