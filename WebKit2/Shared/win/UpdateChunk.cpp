@@ -27,7 +27,7 @@
 
 #include "ArgumentDecoder.h"
 #include "ArgumentEncoder.h"
-#include "WebCoreTypeArgumentMarshalling.h"
+#include "WebCoreArgumentCoders.h"
 
 using namespace WebCore;
 
