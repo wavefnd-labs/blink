@@ -62,8 +62,6 @@ private:
         // deleted after finish().
         return false;
     }
-
-    virtual bool isWaitingForScripts() const { return false; }
 };
 
 };
