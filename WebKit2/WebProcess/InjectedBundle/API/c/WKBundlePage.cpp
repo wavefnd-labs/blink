@@ -39,9 +39,9 @@ void WKBundlePageSetClient(WKBundlePageRef pageRef, WKBundlePageClient * wkClien
         toWK(pageRef)->initializeInjectedBundleClient(wkClient);
 }
 
-WKURLRef WKBundlePageGetMainFrameURL(WKBundlePageRef pageRef)
+WKBundleFrameRef WKBundlePageGetMainFrame(WKBundlePageRef pageRef)
 {
-    return toURLRef(toWK(pageRef)->mainFrameURL().impl());
+    return toRef(toWK(pageRef)->mainFrame());
 }
 
 WKStringRef WKBundlePageCopyRenderTreeExternalRepresentation(WKBundlePageRef pageRef)
