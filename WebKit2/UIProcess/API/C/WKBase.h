@@ -39,6 +39,7 @@ typedef struct OpaqueWKPageNamespace* WKPageNamespaceRef;
 typedef struct OpaqueWKPreferencesRef* WKPreferencesRef;
 typedef struct OpaqueWKStringRef* WKStringRef;
 typedef struct OpaqueWKURLRef* WKURLRef;
+typedef struct OpaqueWKArrayRef* WKArrayRef;
 
 #if defined(WIN32) || defined(_WIN32)
 #if BUILDING_WEBKIT2
