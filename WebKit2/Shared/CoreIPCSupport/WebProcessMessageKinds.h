@@ -35,7 +35,10 @@ namespace WebProcessMessage {
 enum Kind {
     LoadInjectedBundle,
     Create,
-    PostMessage
+    PostMessage,
+#if PLATFORM(MAC)
+    SetupAcceleratedCompositingPort
+#endif
 };
 
 }
