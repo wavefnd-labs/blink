@@ -27,6 +27,8 @@
 #define WebKit2_h
 
 #include <WebKit2/WKBase.h>
+#include <WebKit2/WKBackForwardList.h>
+#include <WebKit2/WKBackForwardListItem.h>
 #include <WebKit2/WKContext.h>
 #include <WebKit2/WKFrame.h>
 #include <WebKit2/WKFramePolicyListener.h>

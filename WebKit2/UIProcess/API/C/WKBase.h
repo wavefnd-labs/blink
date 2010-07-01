@@ -30,6 +30,9 @@
 #include <WebKit2/WKBaseWin.h>
 #endif
 
+typedef struct OpaqueWKArrayRef* WKArrayRef;
+typedef struct OpaqueWKBackForwardListItemRef* WKBackForwardListItemRef;
+typedef struct OpaqueWKBackForwardListRef* WKBackForwardListRef;
 typedef struct OpaqueWKContext* WKContextRef;
 typedef struct OpaqueWKFrame* WKFrameRef;
 typedef struct OpaqueWKFramePolicyListener* WKFramePolicyListenerRef;
@@ -39,7 +42,6 @@ typedef struct OpaqueWKPageNamespace* WKPageNamespaceRef;
 typedef struct OpaqueWKPreferencesRef* WKPreferencesRef;
 typedef struct OpaqueWKStringRef* WKStringRef;
 typedef struct OpaqueWKURLRef* WKURLRef;
-typedef struct OpaqueWKArrayRef* WKArrayRef;
 
 #undef WK_EXPORT
 #if defined(WK_NO_EXPORT)
