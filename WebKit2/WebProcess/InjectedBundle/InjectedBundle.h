@@ -37,6 +37,8 @@ namespace WebKit {
 typedef CFBundleRef PlatformBundle;
 #elif PLATFORM(WIN)
 typedef HMODULE PlatformBundle;
+#elif PLATFORM(QT)
+typedef void* PlatformBundle;
 #endif
 
 class WebPage;
