@@ -33,10 +33,16 @@
 
 using namespace WebKit;
 
-void WKBundlePageSetClient(WKBundlePageRef pageRef, WKBundlePageClient * wkClient)
+void WKBundlePageSetLoaderClient(WKBundlePageRef pageRef, WKBundlePageLoaderClient * wkClient)
 {
     if (wkClient && !wkClient->version)
-        toWK(pageRef)->initializeInjectedBundleClient(wkClient);
+        toWK(pageRef)->initializeInjectedBundleLoaderClient(wkClient);
+}
+
+void WKBundlePageSetUIClient(WKBundlePageRef pageRef, WKBundlePageUIClient * wkClient)
+{
+    if (wkClient && !wkClient->version)
+        toWK(pageRef)->initializeInjectedBundleUIClient(wkClient);
 }
 
 WKBundleFrameRef WKBundlePageGetMainFrame(WKBundlePageRef pageRef)
