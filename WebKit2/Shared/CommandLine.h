@@ -40,6 +40,7 @@ public:
 #if PLATFORM(MAC)
     bool parse(int argc, char** argv);
 #elif PLATFORM(WIN)
+    bool parse(LPTSTR commandLineString);
 #endif
     WebCore::String operator[](const WebCore::String& key) const
     {
