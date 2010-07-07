@@ -26,11 +26,16 @@
 #ifndef BackForwardControllerClient_h
 #define BackForwardControllerClient_h
 
+#include "BackForwardList.h"
+#include <wtf/PassRefPtr.h>
+
 namespace WebCore {
 
 class BackForwardControllerClient {
 public:
     virtual void backForwardControllerDestroyed() = 0;
+
+    virtual PassRefPtr<BackForwardList> createBackForwardList() = 0;
 
 protected:
     virtual ~BackForwardControllerClient() { }
