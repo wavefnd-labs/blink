@@ -37,5 +37,26 @@ NetscapePluginModule::NetscapePluginModule(const String& pluginPath)
 {
 }
 
+PassRefPtr<NetscapePluginModule> NetscapePluginModule::create(const String& pluginPath)
+{
+    RefPtr<NetscapePluginModule> pluginModule(adoptRef(new NetscapePluginModule(pluginPath)));
+    
+    // Try to load and initialize the plug-in module.
+    if (!pluginModule->load())
+        return 0;
+    
+    return pluginModule.release();
+}
+
+bool NetscapePluginModule::load()
+{
+    if (!tryLoad()) {
+        unload();
+        return false;
+    }
+    
+    return true;
+}
+
 } // namespace WebKit
 
