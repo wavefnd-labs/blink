@@ -32,12 +32,14 @@ using namespace WebCore;
 
 namespace WebKit {
 
-PluginView::PluginView()
+PluginView::PluginView(PassRefPtr<Plugin> plugin)
+    : m_plugin(plugin)
 {
 }
 
 PluginView::~PluginView()
 {
+    m_plugin->destroy();
 }
 
 void PluginView::setFrameRect(const WebCore::IntRect& rect)
@@ -55,19 +57,12 @@ void PluginView::paint(GraphicsContext* context, const IntRect& dirtyRect)
     if (paintRect.isEmpty())
         return;
 
-#if PLATFORM(MAC)
-    CGContextRef cgContext = context->platformContext();
-    CGContextSaveGState(cgContext);
-    
-    CGColorRef redColor = CGColorCreateGenericRGB(1, 0, 0, 1);
-    CGContextSetFillColorWithColor(cgContext, redColor);
-    CGContextFillRect(cgContext, paintRect);
-    CGColorRelease(redColor);
-#endif 
+    m_plugin->paint(context, paintRect);
 }
 
 void PluginView::viewGeometryDidChange()
 {
+    m_plugin->geometryDidChange(frameRect());
 }
 
 void PluginView::invalidateRect(const IntRect&)
