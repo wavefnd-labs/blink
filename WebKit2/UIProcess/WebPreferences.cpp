@@ -86,4 +86,15 @@ bool WebPreferences::loadsImagesAutomatically() const
     return m_store.loadsImagesAutomatically;
 }
 
+void WebPreferences::setOfflineWebApplicationCacheEnabled(bool b)
+{
+    m_store.offlineWebApplicationCacheEnabled = b;
+    update();
+}
+    
+bool WebPreferences::offlineWebApplicationCacheEnabled() const
+{
+    return m_store.offlineWebApplicationCacheEnabled;
+}
+
 } // namespace WebKit
