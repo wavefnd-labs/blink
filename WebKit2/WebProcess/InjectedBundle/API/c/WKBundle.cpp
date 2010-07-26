@@ -24,6 +24,7 @@
  */
 
 #include "WKBundle.h"
+#include "WKBundlePrivate.h"
 
 #include "InjectedBundle.h"
 #include "WKAPICast.h"
