@@ -53,7 +53,7 @@ public:
     void npJSObjectDestroyed(NPJSObject*);
 
     // Returns a JSObject object that wraps the given NPObject.
-    JSC::JSObject* getOrCreateJSObject(NPObject*, JSC::ExecState*, JSC::JSGlobalObject*);
+    JSC::JSObject* getOrCreateJSObject(JSC::ExecState*, JSC::JSGlobalObject*, NPObject*);
 
 
     // Called when the plug-in is destroyed. Will invalidate all the NPObjects.
