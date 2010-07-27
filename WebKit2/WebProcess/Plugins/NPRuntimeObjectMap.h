@@ -31,6 +31,7 @@
 struct NPObject;
 
 namespace JSC {
+    class ExecState;
     class JSObject;
 }
 
@@ -40,7 +41,6 @@ class NPJSObject;
 class PluginView;
 
 // A per plug-in map of NPObjects that wrap JavaScript objects.
-
 class NPRuntimeObjectMap {
 public:
     explicit NPRuntimeObjectMap(PluginView*);
@@ -49,10 +49,14 @@ public:
     // retain it and return it.
     NPObject* getOrCreateNPObject(JSC::JSObject*);
 
+    void npJSObjectDestroyed(NPJSObject*);
+
+    // Called when the plug-in is destroyed. Will invalidate all the NPObjects.
     void invalidate();
 
+    JSC::ExecState* globalExec() const;
+
 private:
-    friend class NPJSObject;
     PluginView* m_pluginView;
 
     HashMap<JSC::JSObject*, NPJSObject*> m_objects;
