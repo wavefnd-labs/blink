@@ -26,17 +26,17 @@
 #ifndef WebPreferences_h
 #define WebPreferences_h
 
+#include "APIObject.h"
 #include "WebPreferencesStore.h"
 #include <wtf/HashSet.h>
 #include <wtf/PassRefPtr.h>
-#include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
 
 namespace WebKit {
 
 class WebContext;
 
-class WebPreferences : public RefCounted<WebPreferences> {
+class WebPreferences : public APIObject {
 public:
     static WebPreferences* shared();
 
