@@ -32,6 +32,11 @@
 
 using namespace WebKit;
 
+WKTypeID WKPageNamespaceGetTypeID()
+{
+    return toRef(APIObject::TypePageNamespace);
+}
+
 WKPageNamespaceRef WKPageNamespaceCreate(WKContextRef ownerContextRef)
 {
     return toRef(toWK(ownerContextRef)->createPageNamespace());
