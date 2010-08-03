@@ -26,22 +26,11 @@
 #ifndef DrawingAreaProxy_h
 #define DrawingAreaProxy_h
 
-#include "ArgumentEncoder.h"
+#include "DrawingAreaBase.h"
 
 #if PLATFORM(QT)
 class QPainter;
 #endif
-
-namespace CoreIPC {
-    class ArgumentDecoder;
-    class Connection;
-    class MessageID;
-}
-
-namespace WebCore {
-    class IntSize;
-    class IntRect;
-}
 
 namespace WebKit {
 
@@ -53,20 +42,11 @@ typedef HDC PlatformDrawingContext;
 typedef QPainter* PlatformDrawingContext;
 #endif
 
-class DrawingAreaProxy {
+class DrawingAreaProxy : public DrawingAreaBase {
 public:
-    // This has to match DrawingArea::Type.
-    enum Type {
-        None,
-        ChunkedUpdateDrawingAreaType,
-#if USE(ACCELERATED_COMPOSITING)
-        LayerBackedDrawingAreaType,
-#endif
-    };
+    static DrawingAreaID nextDrawingAreaID();
 
     virtual ~DrawingAreaProxy();
-
-    Type type() const { return m_type; }
 
     virtual void didReceiveMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder&) = 0;
     virtual void didReceiveSyncMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder&, CoreIPC::ArgumentEncoder&) = 0;
@@ -76,12 +56,6 @@ public:
 
     virtual void setPageIsVisible(bool isVisible) = 0;
     
-    // The DrawingAreaProxy should never be decoded itself. Instead, the DrawingArea should be decoded.
-    virtual void encode(CoreIPC::ArgumentEncoder& encoder) const
-    {
-        encoder.encode(static_cast<uint32_t>(m_type));
-    }
-
 #if USE(ACCELERATED_COMPOSITING)
     virtual void attachCompositingContext(uint32_t contextID) = 0;
     virtual void detachCompositingContext() = 0;
@@ -89,10 +63,8 @@ public:
 
 protected:
     DrawingAreaProxy(Type);
-
-    Type m_type;
 };
-    
+
 } // namespace WebKit
 
 #endif // DrawingAreaProxy_h
