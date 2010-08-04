@@ -30,7 +30,10 @@
 
 namespace WebCore {
 
-size_t lastHyphenLocation(const UChar*, size_t length, size_t beforeIndex);
+class AtomicString;
+
+bool canHyphenate(const AtomicString& localeIdentifier);
+size_t lastHyphenLocation(const UChar*, size_t length, size_t beforeIndex, const AtomicString& localeIdentifier);
 
 } // namespace WebCore
 
