@@ -26,13 +26,10 @@
 #ifndef NetscapePluginModule_h
 #define NetscapePluginModule_h
 
-#include <WebCore/npfunctions.h>
+#include "Module.h"
 #include <WebCore/PlatformString.h>
+#include <WebCore/npfunctions.h>
 #include <wtf/RefCounted.h>
-
-#if PLATFORM(MAC)
-#include <wtf/RetainPtr.h>
-#endif
 
 namespace WebKit {
 
@@ -62,9 +59,7 @@ private:
     NPP_ShutdownProcPtr m_shutdownProcPtr;
     NPPluginFuncs m_pluginFuncs;
 
-#if PLATFORM(MAC)
-    RetainPtr<CFBundleRef> m_bundle;
-#endif
+    OwnPtr<Module> m_module;
 };
     
 } // namespace WebKit
