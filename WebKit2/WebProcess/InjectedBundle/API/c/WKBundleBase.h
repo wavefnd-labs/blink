@@ -30,6 +30,7 @@ typedef struct OpaqueWKBundle* WKBundleRef;
 typedef struct OpaqueWKBundleFrame* WKBundleFrameRef;
 typedef struct OpaqueWKBundleNodeHandle* WKBundleNodeHandleRef;
 typedef struct OpaqueWKBundlePage* WKBundlePageRef;
+typedef struct OpaqueWKBundleScriptWorld* WKBundleScriptWorldRef;
 
 typedef struct OpaqueWKBundleDOMCSSStyleDeclaration* WKBundleCSSStyleDeclarationRef;
 typedef struct OpaqueWKBundleNode* WKBundleNodeRef;

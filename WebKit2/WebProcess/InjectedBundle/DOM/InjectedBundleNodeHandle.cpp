@@ -40,21 +40,6 @@ static DOMHandleCache& domHandleCache()
     return cache;
 }
 
-static inline InjectedBundleNodeHandle* getDOMHandle(Node* domObject)
-{
-    return domHandleCache().get(domObject);
-}
-
-static inline void setDOMHandle(Node* domObject, InjectedBundleNodeHandle* handle)
-{
-    domHandleCache().set(domObject, handle);
-}
-
-static inline void removeDOMHandle(Node* domObject)
-{
-    domHandleCache().remove(domObject);
-}
-
 PassRefPtr<InjectedBundleNodeHandle> InjectedBundleNodeHandle::getOrCreate(Node* node)
 {
     std::pair<DOMHandleCache::iterator, bool> result = domHandleCache().add(node, 0);
