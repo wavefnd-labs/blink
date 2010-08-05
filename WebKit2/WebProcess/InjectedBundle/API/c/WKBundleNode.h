@@ -29,10 +29,6 @@
 #include <WebKit2/WKBase.h>
 #include <WebKit2/WKBundleBase.h>
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
