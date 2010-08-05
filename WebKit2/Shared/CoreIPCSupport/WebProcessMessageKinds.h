@@ -33,6 +33,11 @@
 namespace WebProcessMessage {
 
 enum Kind {
+    SetVisitedLinkTable,
+    VisitedLinkStateChanged,
+    AllVisitedLinkStateChanged,
+    
+    // FIXME: Remove AddVisitedLink.
     AddVisitedLink,
     LoadInjectedBundle,
     SetApplicationCacheDirectory,
