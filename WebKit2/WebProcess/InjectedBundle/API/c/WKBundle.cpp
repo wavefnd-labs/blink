@@ -62,3 +62,18 @@ void WKBundleActivateMacFontAscentHack(WKBundleRef bundleRef)
 {
     toWK(bundleRef)->activateMacFontAscentHack();
 }
+
+void WKBundleGarbageCollectJavaScriptObjects(WKBundleRef bundleRef)
+{
+    toWK(bundleRef)->garbageCollectJavaScriptObjects();
+}
+
+void WKBundleGarbageCollectJavaScriptObjectsOnAlternateThreadForDebugging(WKBundleRef bundleRef, bool waitUntilDone)
+{
+    toWK(bundleRef)->garbageCollectJavaScriptObjectsOnAlternateThreadForDebugging(waitUntilDone);
+}
+
+size_t WKBundleGetJavaScriptObjectsCount(WKBundleRef bundleRef)
+{
+    return toWK(bundleRef)->javaScriptObjectsCount();
+}
