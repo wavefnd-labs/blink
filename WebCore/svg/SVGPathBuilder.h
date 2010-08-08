@@ -36,6 +36,7 @@ public:
     SVGPathBuilder();
 
     void setCurrentPath(Path* path) { m_path = path; }
+    virtual void cleanup() { m_path = 0; }
 
 private:
     // Used in UnalteredParisng/NormalizedParsing modes.
