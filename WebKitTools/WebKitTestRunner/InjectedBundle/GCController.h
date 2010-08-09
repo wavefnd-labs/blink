@@ -36,12 +36,11 @@ public:
     static PassRefPtr<GCController> create();
     virtual ~GCController();
 
+    void makeWindowObject(JSContextRef, JSObjectRef windowObject, JSValueRef* exception);
+
     // JSWrappable
     virtual JSClassRef wrapperClass();
 
-    void makeWindowObject(JSContextRef, JSObjectRef windowObject, JSValueRef* exception);
-
-    // The basics.
     void collect();
     void collectOnAlternateThread(bool waitUntilDone);
     size_t getJSObjectCount();
