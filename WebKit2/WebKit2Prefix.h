@@ -34,6 +34,9 @@
 #define WTF_USE_JSC 1
 #define WTF_USE_V8 0
 
+#define JS_EXPORTDATA
+#define JS_EXPORTCLASS
+
 #elif defined(__APPLE__)
 
 #if !defined(BUILDING_ON_LEOPARD) && !defined(BUILDING_ON_SNOW_LEOPARD)
