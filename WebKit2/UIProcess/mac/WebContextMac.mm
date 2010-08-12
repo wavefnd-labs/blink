@@ -59,5 +59,9 @@ String WebContext::applicationCacheDirectory()
     return [cacheDir stringByAppendingPathComponent:appName];
 }
 
+void WebContext::platformSetUpWebProcess()
+{
+}
+
 } // namespace WebKit
 
