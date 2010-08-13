@@ -35,6 +35,7 @@ public:
     enum Type {
         // Base types
         TypeArray,
+        TypeDictionary,
         TypeData,
         TypeError,
         TypeString,
