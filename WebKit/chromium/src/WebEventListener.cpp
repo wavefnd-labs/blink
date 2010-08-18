@@ -46,17 +46,17 @@ WebEventListener::~WebEventListener()
     delete m_private;
 }
 
-void WebEventListener::notifyEventListenerDeleted(EventListenerWrapper* wrapper)
+void WebEventListener::notifyEventListenerDeleted(DeprecatedEventListenerWrapper* wrapper)
 {
     m_private->eventListenerDeleted(wrapper);
 }
 
-EventListenerWrapper* WebEventListener::createEventListenerWrapper(const WebString& eventType, bool useCapture, Node* node)
+DeprecatedEventListenerWrapper* WebEventListener::createEventListenerWrapper(const WebString& eventType, bool useCapture, Node* node)
 {
     return m_private->createEventListenerWrapper(eventType, useCapture, node);
 }
 
-EventListenerWrapper* WebEventListener::getEventListenerWrapper(const WebString& eventType, bool useCapture, Node* node)
+DeprecatedEventListenerWrapper* WebEventListener::getEventListenerWrapper(const WebString& eventType, bool useCapture, Node* node)
 {
     return m_private->getEventListenerWrapper(eventType, useCapture, node);
 }
