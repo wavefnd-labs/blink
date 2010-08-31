@@ -35,11 +35,12 @@ public:
     enum Type {
         // Base types
         TypeArray,
-        TypeDictionary,
         TypeData,
+        TypeDictionary,
         TypeError,
         TypeString,
         TypeURL,
+        TypeURLRequest,
         
         // UIProcess types
         TypeBackForwardList,
