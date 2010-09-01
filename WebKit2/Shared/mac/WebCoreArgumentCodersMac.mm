@@ -27,27 +27,34 @@
 
 namespace CoreIPC {
 
+static void encodeWithNSKeyedArchiver(ArgumentEncoder* encoder, id rootObject)
+{
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:rootObject];
+    encoder->encodeBytes(static_cast<const uint8_t*>([data bytes]), [data length]);
+}
+
+static id decodeWithNSKeyedArchiver(ArgumentDecoder* decoder)
+{
+    Vector<uint8_t> bytes;
+    if (!decoder->decodeBytes(bytes))
+        return nil;
+
+    RetainPtr<NSData> nsData(AdoptNS, [[NSData alloc] initWithBytesNoCopy:bytes.data() length:bytes.size() freeWhenDone:NO]);
+    return [NSKeyedUnarchiver unarchiveObjectWithData:nsData.get()];
+}
+
 void encodeResourceRequest(ArgumentEncoder* encoder, const WebCore::ResourceRequest& resourceRequest)
 {
-    NSURLRequest *nsURLRequest = resourceRequest.nsURLRequest();
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:nsURLRequest];
-
-    encoder->encodeBytes(static_cast<const uint8_t*>([data bytes]), [data length]);
+    encodeWithNSKeyedArchiver(encoder, resourceRequest.nsURLRequest());
 }
 
 bool decodeResourceRequest(ArgumentDecoder* decoder, WebCore::ResourceRequest& resourceRequest)
 {
-    Vector<uint8_t> bytes;
-    if (!decoder->decodeBytes(bytes))
-        return false;
-
-    NSData *nsData = [[NSData alloc] initWithBytesNoCopy:bytes.data() length:bytes.size() freeWhenDone:NO];
-    NSURLRequest *nsURLRequest = [NSKeyedUnarchiver unarchiveObjectWithData:nsData];
+    NSURLRequest *nsURLRequest = decodeWithNSKeyedArchiver(decoder);
     if (!nsURLRequest)
         return false;
 
     resourceRequest = WebCore::ResourceRequest(nsURLRequest);
-
     return true;
 }
 
