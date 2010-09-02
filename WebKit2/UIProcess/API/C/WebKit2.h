@@ -34,11 +34,12 @@
 #include <WebKit2/WKBackForwardListItem.h>
 #include <WebKit2/WKContext.h>
 #include <WebKit2/WKData.h>
-#include <WebKit2/WKDictionary.h>
 #include <WebKit2/WKError.h>
 #include <WebKit2/WKFormSubmissionListener.h>
 #include <WebKit2/WKFrame.h>
 #include <WebKit2/WKFramePolicyListener.h>
+#include <WebKit2/WKMutableArray.h>
+#include <WebKit2/WKMutableDictionary.h>
 #include <WebKit2/WKNavigationData.h>
 #include <WebKit2/WKPage.h>
 #include <WebKit2/WKPageNamespace.h>
@@ -46,6 +47,7 @@
 #include <WebKit2/WKString.h>
 #include <WebKit2/WKURL.h>
 #include <WebKit2/WKURLRequest.h>
+#include <WebKit2/WKURLResponse.h>
 
 #if !__APPLE__ || __OBJC__
 #include <WebKit2/WKView.h>
