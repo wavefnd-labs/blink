@@ -34,6 +34,8 @@ namespace WebCore {
 
 namespace WebKit {
 
+class WebEditCommandProxy;
+
 class PageClient {
 public:
     virtual ~PageClient() { }
@@ -45,6 +47,10 @@ public:
     virtual void toolTipChanged(const WTF::String&, const WTF::String&) = 0;
 
     virtual void setCursor(const WebCore::Cursor&) = 0;
+
+    enum UndoOrRedo { Undo, Redo };
+    virtual void registerEditCommand(PassRefPtr<WebEditCommandProxy>, UndoOrRedo) = 0;
+    virtual void clearAllEditCommands() = 0;
 
 #if USE(ACCELERATED_COMPOSITING)
     virtual void pageDidEnterAcceleratedCompositing() = 0;
