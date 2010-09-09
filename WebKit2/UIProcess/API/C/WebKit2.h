@@ -41,6 +41,7 @@
 #include <WebKit2/WKMutableArray.h>
 #include <WebKit2/WKMutableDictionary.h>
 #include <WebKit2/WKNavigationData.h>
+#include <WebKit2/WKNumber.h>
 #include <WebKit2/WKPage.h>
 #include <WebKit2/WKPageNamespace.h>
 #include <WebKit2/WKPreferences.h>
