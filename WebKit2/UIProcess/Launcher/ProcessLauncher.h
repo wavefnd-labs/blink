@@ -43,7 +43,7 @@ public:
     public:
         virtual ~Client() { }
         
-        virtual void didFinishLaunching(ProcessLauncher*, const CoreIPC::Connection::Identifier&) = 0;
+        virtual void didFinishLaunching(ProcessLauncher*, CoreIPC::Connection::Identifier) = 0;
     };
     
     static PassRefPtr<ProcessLauncher> create(Client* client)
@@ -56,8 +56,6 @@ public:
 
     void terminateProcess();
     void invalidate();
-
-    static CoreIPC::Connection::Identifier createWebThread();
 
 #if PLATFORM(QT)
     friend class ProcessLauncherHelper;
