@@ -52,6 +52,8 @@ WK_EXPORT WKURLRef WKFrameCopyURL(WKFrameRef frame);
 
 WK_EXPORT WKPageRef WKFrameGetPage(WKFrameRef frame);
 
+WK_EXPORT WKCertificateInfoRef WKFrameGetCertificateInfo(WKFrameRef frame);
+
 #ifdef __cplusplus
 }
 #endif
