@@ -26,9 +26,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from google.appengine.ext import db
 from google.appengine.ext import webapp
 
 from model.workitems import WorkItems
+from model.activeworkitems import ActiveWorkItems
 from model import queuestatus
 
 from datetime import datetime, timedelta
@@ -39,26 +41,21 @@ class NextPatch(webapp.RequestHandler):
         work_items = WorkItems.all().filter("queue_name =", queue_name).get()
         if not work_items:
             return None
-        one_hour_ago = datetime.now() - timedelta(minutes=60)
-        statuses = queuestatus.QueueStatus.all().filter("queue_name =", queue_name).filter("date >", one_hour_ago).fetch(15)
-        active_patch_ids = set([status.active_patch_id for status in statuses])
-        for item_id in work_items.item_ids:
-            if item_id not in active_patch_ids:
-                return item_id
-        # Either there were no work items, or they're all active.
-        return None
-
-    def _assign(self, queue_name, patch_id):
-        queue_status = queuestatus.QueueStatus()
-        queue_status.queue_name = queue_name
-        queue_status.active_patch_id = patch_id
-        queue_status.message = "Assigned for processing"
-        queue_status.put()
+        active_work_items = ActiveWorkItems.get_or_insert(key_name=queue_name, queue_name=queue_name)
+        return db.run_in_transaction(self._assign_patch, active_work_items.key(), work_items.item_ids)
 
     def get(self, queue_name):
         patch_id = self._get_next_patch_id(queue_name)
         if not patch_id:
             self.error(404)
             return
-        self._assign(queue_name, patch_id)
         self.response.out.write(patch_id)
+
+    @staticmethod
+    def _assign_patch(key, work_item_ids):
+        now = datetime.now()
+        active_work_items = db.get(key)
+        active_work_items.deactivate_expired(now)
+        next_item = active_work_items.next_item(work_item_ids, now)
+        active_work_items.put()
+        return next_item
