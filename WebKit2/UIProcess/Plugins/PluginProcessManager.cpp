@@ -28,6 +28,7 @@
 #include "PluginProcessManager.h"
 
 #include "PluginInfoStore.h"
+#include "PluginProcessProxy.h"
 #include "WebContext.h"
 #include <wtf/StdLibExtras.h>
 #include <wtf/text/WTFString.h>
@@ -44,7 +45,23 @@ void PluginProcessManager::getPluginProcessConnection(const String& pluginPath, 
 {
     ASSERT(!pluginPath.isNull());
 
-    // FIXME: Implement.
+    PluginInfoStore::Plugin plugin = webProcessProxy->context()->pluginInfoStore()->infoForPluginWithPath(pluginPath);
+
+    PluginProcessProxy* pluginProcess = 0;
+    
+    for (size_t i = 0; i < m_pluginProcesses.size(); ++i) {
+        if (m_pluginProcesses[i]->pluginInfo().path == plugin.path) {
+            pluginProcess = m_pluginProcesses[i];
+            break;
+        }
+    }
+
+    if (!pluginProcess) {
+        pluginProcess = PluginProcessProxy::create(this, plugin).leakPtr();
+        m_pluginProcesses.append(pluginProcess);
+    }
+
+    // FIXME: Ask the plug-in process for a connection
 }
 
 void PluginProcessManager::removePluginProcessProxy(PluginProcessProxy* pluginProcessProxy)
