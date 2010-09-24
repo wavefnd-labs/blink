@@ -22,6 +22,7 @@
 
 #include "qwebkitglobal.h"
 
+class QWKPage;
 class QWKPreferencesPrivate;
 
 class QWEBKIT_EXPORT QWKPreferences {
@@ -34,7 +35,7 @@ public:
         XSSAuditingEnabled
     };
 
-    static QWKPreferences* globalPreferences();
+    static QWKPreferences* sharedPreferences();
 
     void setAttribute(WebAttribute attr, bool on);
     bool testAttribute(WebAttribute attr) const;
@@ -46,6 +47,9 @@ private:
     ~QWKPreferences();
 
     QWKPreferencesPrivate *d;
+
+    friend class QWKPage;
+    friend class QWKPreferencesPrivate;
 };
 
 #endif // QWKPREFERENCES_H
