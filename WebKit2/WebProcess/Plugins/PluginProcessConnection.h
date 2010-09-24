@@ -64,6 +64,7 @@ private:
     PluginProcessConnectionManager* m_pluginProcessConnectionManager;
     String m_pluginPath;
 
+    // The connection from the web process to the plug-in process.
     RefPtr<CoreIPC::Connection> m_connection;
 };
 
