@@ -27,6 +27,7 @@
 #define WebUIClient_h
 
 #include "WKPage.h"
+#include "WebEvent.h"
 #include <wtf/Forward.h>
 #include <wtf/PassRefPtr.h>
 
@@ -36,6 +37,7 @@ class IntSize;
 
 namespace WebKit {
 
+class APIObject;
 class WebFrameProxy;
 class WebPageProxy;
 
@@ -51,6 +53,7 @@ public:
     bool runJavaScriptConfirm(WebPageProxy*, const String&, WebFrameProxy*);
     String runJavaScriptPrompt(WebPageProxy*, const String&, const String&, WebFrameProxy*);
     void setStatusText(WebPageProxy*, const String&);
+    void mouseDidMoveOverElement(WebPageProxy*, WebEvent::Modifiers, APIObject*);
     void contentsSizeChanged(WebPageProxy*, const WebCore::IntSize&, WebFrameProxy*);
 
 private:
