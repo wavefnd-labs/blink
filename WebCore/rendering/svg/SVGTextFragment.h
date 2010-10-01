@@ -47,7 +47,7 @@ struct SVGTextFragment {
     float height;
 
     // Includes rotation/glyph-orientation-(horizontal|vertical) transforms, lengthAdjust="spacingAndGlyphs" (for textPath only),
-    // as well as orientation related shifts (see SVGCharacterLayoutBuilder, which builds this transformation).
+    // as well as orientation related shifts (see SVGTextLayoutEngine, which builds this transformation).
     AffineTransform transform;
 };
 
