@@ -24,6 +24,7 @@
  */
 
 #include "WKString.h"
+#include "WKStringPrivate.h"
 
 #include "WKAPICast.h"
 
@@ -63,4 +64,15 @@ bool WKStringIsEqual(WKStringRef aRef, WKStringRef bRef)
 bool WKStringIsEqualToUTF8CString(WKStringRef aRef, const char* b)
 {
     return toWK(aRef)->equalToUTF8String(b);
+}
+
+WKStringRef WKStringCreateWithJSString(JSStringRef jsStringRef)
+{
+    RefPtr<WebString> webString = WebString::create(jsStringRef);
+    return toRef(webString.release().leakRef());
+}
+
+JSStringRef WKStringCopyJSString(WKStringRef stringRef)
+{
+    return toWK(stringRef)->createJSString();
 }
