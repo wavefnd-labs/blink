@@ -40,6 +40,7 @@ enum Kind {
     LoadInjectedBundle,
     SetApplicationCacheDirectory,
     SetShouldTrackVisitedLinks,
+    SetCacheModel,
     Create,
     RegisterURLSchemeAsEmptyDocument,
 #if PLATFORM(MAC)
