@@ -29,11 +29,13 @@ class QWebPage;
 
 namespace WebCore {
 
+class DeviceOrientationProviderQt;
+
 class DeviceOrientationClientQt : public QObject, public DeviceOrientationClient {
     Q_OBJECT
 public:
     DeviceOrientationClientQt(QWebPage*);
-    virtual ~DeviceOrientationClientQt() {}
+    virtual ~DeviceOrientationClientQt();
 
     virtual void setController(DeviceOrientationController*);
     virtual void startUpdating();
@@ -41,9 +43,13 @@ public:
     virtual DeviceOrientation* lastOrientation() const;
     virtual void deviceOrientationControllerDestroyed();
 
+public Q_SLOTS:
+    void changeDeviceOrientation(DeviceOrientation*);
+
 private:
     QWebPage* m_page;
     DeviceOrientationController* m_controller;
+    DeviceOrientationProviderQt* m_provider;
 };
 
 } // namespace WebCore
