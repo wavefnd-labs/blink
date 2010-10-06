@@ -1,3 +1,29 @@
+2010-10-06  Daniel Bates  <dbates@rim.com>
+
+        Reviewed by Darin Adler.
+
+        ASSERTION FAILURE: Attempt to cast RenderObject to RenderFrameSet
+        when <frameset> has CSS content property
+        https://bugs.webkit.org/show_bug.cgi?id=47314
+
+        Fixes an issue where sending a mouse event to an HTML Frameset Element that
+        whose content was replaced via the CSS content property causes an assertion
+        failure.
+
+        By default, HTMLFrameSetElement forwards mouse events to RenderFrameSet so as
+        to support resizing a frame within the set. When a <frameset> specifies an
+        image in its CSS content property we create a generic render object (RenderObject)
+        for the frame set instead of a RenderFrameSet object. The event handler code
+        in HTMLFrameSetElement calls WebCore::toRenderFrameSet() to cast its renderer
+        to type RenderFrameSet, which fails. To correct this, HTMLFrameSetElement
+        must check that its renderer is of type RenderFrameSet before casting to this type.
+
+        Test: fast/frames/crash-frameset-CSS-content-property.html
+
+        * html/HTMLFrameSetElement.cpp:
+        (WebCore::HTMLFrameSetElement::defaultEventHandler): Check that our renderer is
+        of type RenderFrameSet before casting it as such.
+
 2010-10-06  Albert J. Wong  <ajwong@chromium.org>
 
         Reviewed by Andreas Kling.
