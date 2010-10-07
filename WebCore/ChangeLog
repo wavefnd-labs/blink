@@ -1,3 +1,61 @@
+2010-10-06  Darin Adler  <darin@apple.com>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Cache CGColor as we do NSColor
+        https://bugs.webkit.org/show_bug.cgi?id=47226
+
+        This fixes performance problems on certain web pages that use
+        multiple colors. Once in the past we were using NSColor. Now that
+        we are using CGColor, we need the same sort of caching that we have
+        for NSColor.
+
+        One example: <http://results.active.com/uploads/html/100759.html>.
+
+        * WebCore.xcodeproj/project.pbxproj: Add GraphicsContextCG.h.
+
+        * platform/graphics/Color.h: Replace createCGColor with cachedCGColor.
+
+        * platform/graphics/cg/ColorCG.cpp:
+        (WebCore::cachedCGColorSpace): Added.
+        (WebCore::leakCGColor): Added. 
+        (WebCore::cachedCGColor): Added.
+
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore::setCGFillColor): Use cachedCGColor.
+        (WebCore::setCGStrokeColor): Ditto.
+        (WebCore::GraphicsContext::fillRect): Ditto.
+        (WebCore::GraphicsContext::setPlatformShadow): Ditto.
+
+        * platform/graphics/cg/GraphicsContextCG.h: Added.
+        * platform/graphics/cg/GraphicsContextPlatformPrivateCG.h:
+        Moved the color space functions here.
+
+        * platform/graphics/cg/ImageCG.cpp: Tweaked headers and formatting.
+
+        * platform/graphics/mac/ColorMac.mm: Removed the createCGColor
+        function.
+
+        * platform/graphics/mac/GraphicsContextMac.mm:
+        (WebCore::drawFocusRingToContext): Removed innappropriate use of
+        RetainPtr for the arguments to this function.
+        (WebCore::GraphicsContext::drawFocusRing): Use cachedCGColor.
+
+        * platform/graphics/mac/GraphicsLayerCA.mm:
+        (WebCore::setLayerBorderColor): Use cachedCGColor.
+        (WebCore::setLayerBackgroundColor): Ditto.
+        * platform/graphics/win/GraphicsContextCGWin.cpp:
+        (WebCore::GraphicsContext::drawFocusRing): Ditto.
+        * platform/graphics/win/GraphicsLayerCACF.cpp:
+        (WebCore::setLayerBorderColor): Ditto.
+        (WebCore::setLayerBackgroundColor): Ditto.
+
+        * platform/graphics/win/WKCACFLayerRenderer.cpp:
+        (WebCore::WKCACFLayerRenderer::WKCACFLayerRenderer): Use
+        CGColorCreateGenericRGB for color used only for debugging.
+        * platform/graphics/win/WebTiledLayer.cpp:
+        (WebCore::WebTiledLayer::addTile): Ditto.
+
 2010-10-06  Peter Kasting  <pkasting@google.com>
 
         Reviewed by James Robinson
