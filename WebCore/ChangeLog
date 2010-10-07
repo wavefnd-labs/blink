@@ -1,3 +1,48 @@
+2010-10-07  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        https://bugs.webkit.org/show_bug.cgi?id=47370
+        
+        Make line box placement in the inline direction writing-mode-aware.  Lines now set their y-position instead of x-position
+        when vertical.
+        
+        Refactored shadow overflow to give text-shadow the same helpers in RenderStyle that box-shadow has so that the shadow-walking loop in
+        placeBoxesInInlineDirection can be replaced with the helper.
+
+        Overflow had to be patched to be writing-mode-aware so that the correct physical directions would be set for vertical line
+        boxes.
+
+        Vertical lines are still not testable until they can be placed in the block direction.  Then the render tree dumps
+        become meaningful (even if the pixel results look horrible).
+
+        * rendering/InlineBox.h:
+        (WebCore::InlineBox::logicalRight):
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::placeBoxesInInlineDirection):
+        * rendering/InlineFlowBox.h:
+        (WebCore::InlineFlowBox::logicalLeftLayoutOverflow):
+        (WebCore::InlineFlowBox::logicalRightLayoutOverflow):
+        (WebCore::InlineFlowBox::logicalLeftVisualOverflow):
+        (WebCore::InlineFlowBox::logicalRightVisualOverflow):
+        (WebCore::InlineFlowBox::setInlineDirectionOverflowPositions):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::computeInlineDirectionPositionsForLine):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::getShadowExtent):
+        (WebCore::RenderStyle::getShadowHorizontalExtent):
+        (WebCore::RenderStyle::getShadowVerticalExtent):
+        * rendering/style/RenderStyle.h:
+        (WebCore::InheritedFlags::getTextShadowExtent):
+        (WebCore::InheritedFlags::getTextShadowHorizontalExtent):
+        (WebCore::InheritedFlags::getTextShadowVerticalExtent):
+        (WebCore::InheritedFlags::getTextShadowInlineDirectionExtent):
+        (WebCore::InheritedFlags::getBoxShadowExtent):
+        (WebCore::InheritedFlags::getBoxShadowHorizontalExtent):
+        (WebCore::InheritedFlags::getBoxShadowVerticalExtent):
+        (WebCore::InheritedFlags::getBoxShadowInlineDirectionExtent):
+        (WebCore::InheritedFlags::getShadowInlineDirectionExtent):
+
 2010-10-07  Dan Bernstein  <mitz@apple.com>
 
         Reviewed by Simon Fraser.
