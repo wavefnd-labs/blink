@@ -1,3 +1,19 @@
+2010-10-07  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Simon Fraser.
+
+        <rdar://problem/8142645> REGRESSION (r47440): Printing Mail messages with large fonts does not fill page
+        https://bugs.webkit.org/show_bug.cgi?id=47374
+
+        In the legacy (paint-time pagination) printing model, when there are overlapping lines,
+        adjustPageHeightDeprecated() was not idempotent, since the truncation point imposed by line n,
+        namely the top of line n, was above the bottom of line n-1, so in the next round, line n-1
+        moved the truncation point up again.
+
+        * rendering/RenderLineBoxList.cpp:
+        (WebCore::RenderLineBoxList::paint): Consider the top of the next line when deciding if the
+        current line extends below the truncation point.
+
 2010-10-07  Simon Fraser  <simon.fraser@apple.com>
 
         Reviewed by Beth Dakin.
