@@ -39,6 +39,9 @@ namespace WebKit {
 struct WebRect;
 struct WebSize;
 
+// FIXME: This file has been moved to the win subdirectory as it's entirely
+// windows dependent. Once chromium has been updated to access the file from
+// there this file should be deleted.
 class WebThemeEngine {
 public:
 #ifdef WIN32
