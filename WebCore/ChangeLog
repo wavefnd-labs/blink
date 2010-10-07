@@ -1,3 +1,36 @@
+2010-10-07  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Tony Chang.
+
+        REGRESSION: Indenting pre duplicates content
+        https://bugs.webkit.org/show_bug.cgi?id=47233
+
+        The bug was caused by our not splitting text nodes properly.
+
+        In new approach, we split text nodes in each iteration. Added rangeForParagraphSplitingTextNodesIfNeeded
+        to split text nodes at the start and at the end of paragraph, which also adjusts start and end positions
+        for moveParagraphWithClones. Added endOfNextParagrahSplittingTextNodesIfNeeded to adjust endOfNextParagraph,
+        start, and end to work-around moveParagraphWithClones's removing a line feed.
+
+        Tests: editing/execCommand/indent-pre-list.html
+               editing/execCommand/indent-pre-paragraphs.html
+
+        * editing/ApplyBlockElementCommand.cpp:
+        (WebCore::ApplyBlockElementCommand::formatSelection): See above.
+        (WebCore::isNewLineAtPosition):
+        (WebCore::renderStyleOfEnclosingTextNode): Added.
+        (WebCore::ApplyBlockElementCommand::rangeForParagraphSplittingTextNodesIfNeeded): Added.
+        (WebCore::ApplyBlockElementCommand::endOfNextParagrahSplittingTextNodesIfNeeded): Added.
+        * editing/ApplyBlockElementCommand.h:
+        * editing/FormatBlockCommand.cpp:
+        (WebCore::FormatBlockCommand::formatRange): Takes two Positions instead of one VisiblePosition.
+        * editing/FormatBlockCommand.h:
+        * editing/IndentOutdentCommand.cpp:
+        (WebCore::IndentOutdentCommand::tryIndentingAsListItem): Ditto.
+        (WebCore::IndentOutdentCommand::indentIntoBlockquote): Ditto.
+        (WebCore::IndentOutdentCommand::formatRange): Ditto.
+        * editing/IndentOutdentCommand.h:
+
 2010-10-07  Jian Li  <jianli@chromium.org>
 
         Reviewed by Adam Barth.
