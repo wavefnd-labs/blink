@@ -1,3 +1,72 @@
+2010-10-08  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        gradient stroke on lines does not work
+        https://bugs.webkit.org/show_bug.cgi?id=40985
+
+        Correct handling of invalid fill/stroke paint servers / colors according to SVG 1.1 2nd Edition.
+        Perfectly matches Opera, and now lets us pass three of the new tests.
+
+        Fix incorrect svg/custom/invalid-fill* tests:
+        -> If there's an invalid fill URI, but no fallback specified, it is as if fill="black" was specified. (invalid-fill.svg)
+        -> If there's an invalid fill color, but no fallback specified, it is as if fill="none" was specified. (invalid-fill-hex.svg)
+
+        Needed to refactor some of the gradient/pattern code to properly handle fallback paint servers.
+        As side effect, we're allowing gradients with gradientUnits="userSpaceOnUse" to apply on 1d objects (lines) again, per SVG 1.1 2nd edition.
+
+        Tests: svg/W3C-SVG-1.1-SE/pservers-pattern-03-f.svg
+               svg/W3C-SVG-1.1-SE/pservers-grad-17-b.svg
+               svg/W3C-SVG-1.1-SE/pservers-grad-20-b.svg
+
+        * rendering/RenderSVGResource.cpp: Rewrite fill/stroke paint resource requests, share all code between the similar functions.
+        (WebCore::requestPaintingResource):
+        (WebCore::RenderSVGResource::fillPaintingResource):
+        (WebCore::RenderSVGResource::strokePaintingResource):
+        * rendering/RenderSVGResource.h:
+        * rendering/RenderSVGResourceGradient.cpp: Split collecting gradient properties from building the gradient. We don't need to build it, if it's not applyable (eg. on 1d lines).
+        (WebCore::RenderSVGResourceGradient::RenderSVGResourceGradient):
+        (WebCore::RenderSVGResourceGradient::removeAllClientsFromCache):
+        (WebCore::clipToTextMask):
+        (WebCore::RenderSVGResourceGradient::applyResource):
+        * rendering/RenderSVGResourceGradient.h: Stop storing boundingBoxMode & gradientTransform in each GradientData object, it's enough to just store it in the gradient resource, once.
+        * rendering/RenderSVGResourceLinearGradient.cpp:
+        (WebCore::RenderSVGResourceLinearGradient::collectGradientAttributes): Splitted from buildGradient.
+        (WebCore::RenderSVGResourceLinearGradient::buildGradient):
+        * rendering/RenderSVGResourceLinearGradient.h:
+        (WebCore::RenderSVGResourceLinearGradient::boundingBoxMode): Return bounding box mode information, from m_attributes instead of storing in gradientData.
+        (WebCore::RenderSVGResourceLinearGradient::calculateGradientTransform): Ditto.
+        * rendering/RenderSVGResourcePattern.cpp: Split collecting pattern properties from building the pattern. We don't need to build it, if it's not applyable (eg. on 1d lines).
+        (WebCore::RenderSVGResourcePattern::RenderSVGResourcePattern):
+        (WebCore::RenderSVGResourcePattern::removeAllClientsFromCache):
+        (WebCore::RenderSVGResourcePattern::applyResource):
+        (WebCore::RenderSVGResourcePattern::buildTileImageTransform):
+        * rendering/RenderSVGResourcePattern.h:
+        * rendering/RenderSVGResourceRadialGradient.cpp:
+        (WebCore::RenderSVGResourceRadialGradient::collectGradientAttributes):
+        (WebCore::RenderSVGResourceRadialGradient::buildGradient):
+        * rendering/RenderSVGResourceRadialGradient.h:
+        (WebCore::RenderSVGResourceRadialGradient::boundingBoxMode):
+        (WebCore::RenderSVGResourceRadialGradient::calculateGradientTransform):
+        * rendering/SVGRenderTreeAsText.cpp: Adapt to change, that fill/strokePaintingResource now take a Color& fallbackColor parameter.
+        (WebCore::writeStyle):
+        (WebCore::writeSVGResourceContainer):
+        * rendering/svg/RenderSVGPath.cpp: 
+        (WebCore::RenderSVGPath::fillContains): Ditto.
+        (WebCore::RenderSVGPath::strokeContains): Ditto.
+        (WebCore::RenderSVGPath::fillAndStrokePath): Properly handle fallback color, if an existing (!) paint server failed to apply.
+        * rendering/svg/SVGInlineTextBox.cpp:
+        (WebCore::SVGInlineTextBox::acquirePaintingResource): Ditto.
+        * svg/SVGLinearGradientElement.cpp:
+        (WebCore::SVGLinearGradientElement::collectGradientAttributes): Pass LinearGradientAttributes by reference, instead of returning a copy.
+        * svg/SVGLinearGradientElement.h: Rename collectGradientProperties to collectGradientAttributes.
+        * svg/SVGPatternElement.cpp:
+        (WebCore::SVGPatternElement::collectPatternAttributes): Pass PatternAttributes by reference, instead of returning.
+        * svg/SVGPatternElement.h: Rename collectPatternProperties to collectPatternAttributes.
+        * svg/SVGRadialGradientElement.cpp:
+        (WebCore::SVGRadialGradientElement::collectGradientAttributes): Pass RadialGradientAttributes by reference, instead of returning a copy.
+        * svg/SVGRadialGradientElement.h: Rename collectGradientProperties to collectGradientAttributes.
+
 2010-10-08  Benjamin Poulain  <benjamin.poulain@nokia.com>
 
         Reviewed by Andreas Kling.
