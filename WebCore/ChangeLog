@@ -1,3 +1,32 @@
+2010-10-08  Dirk Schulze  <krit@webkit.org>
+
+        Reviewed by Nikolas Zimmermann.
+
+        SVG feImage needs absolute subregion for preserveAspectRatio
+        https://bugs.webkit.org/show_bug.cgi?id=47409
+
+        PreserverAspectRatio needs the subregion in absolute coordinates to determine
+        the destination position and size of the input image. The maxEffectRect() already
+        stores the absolute subregion, but clipped to the filter region.
+
+        Test: svg/W3C-SVG-1.1se/filters-image-03-f.svg
+
+        * platform/graphics/filters/FETile.cpp:
+        (WebCore::FETile::apply):
+        * platform/graphics/filters/FilterEffect.h: Added enum to differentate sourece inputs, feTile and feImage.
+        (WebCore::FilterEffect::filterEffectType):
+        * platform/graphics/filters/SourceAlpha.h: Make use of the new enum in FilterEffect
+        (WebCore::SourceAlpha::filterEffectType):
+        * platform/graphics/filters/SourceGraphic.h: Ditto.
+        (WebCore::SourceGraphic::filterEffectType):
+        * svg/graphics/filters/SVGFEImage.cpp: Take the absolute subregion to determine the destination rect for input image.
+        (WebCore::FEImage::apply):
+        * svg/graphics/filters/SVGFEImage.h: Ditto.
+        (WebCore::FEImage::setAbsoluteSubregion):
+        (WebCore::FEImage::filterEffectType):
+        * svg/graphics/filters/SVGFilter.cpp: Give over subregion in absolute coordinates to feImage. Just feImage makes use of it.
+        (WebCore::SVGFilter::determineFilterPrimitiveSubregion):
+
 2010-10-08  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Reviewed by Dirk Schulze.
