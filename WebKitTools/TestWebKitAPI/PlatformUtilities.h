@@ -38,6 +38,7 @@ namespace Util {
 void run(bool* done);
 
 WKURLRef createURLForResource(const char* resource, const char* extension);
+WKURLRef URLForNonExistentResource();
 
 inline std::string toSTD(WKStringRef string)
 {
