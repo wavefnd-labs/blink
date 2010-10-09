@@ -1,3 +1,26 @@
+2010-10-08  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Redo in ReplaceNodeWithSpanCommand is broken
+        https://bugs.webkit.org/show_bug.cgi?id=47428
+
+        The bug was caused by ReplaceNodeWithSpanCommand's inheriting from CompositeEditCommand,
+        and ReplaceNodeWithSpanCommand's not implementing doReapply. Because ReplaceNodeWithSpanCommand's doApply
+        directly modifies DOM and does not use simple edit commands while CompositeEditCommand's doReapply
+        only calls reapply of compositing simple edit commands, ReplaceNodeWithSpanCommand's doReapply was no-op.
+
+        Fixed the bug by changing the base class of ReplaceNodeWithSpanCommand to SimpleEditCommand.
+        This allows ReplaceNodeWithSpanCommand's doReapply to call its doApply, which already supports redo operation.
+
+        Test: editing/undo/replace-by-span-then-remove.html
+
+        * editing/ApplyStyleCommand.h:
+        (WebCore::ApplyStyleCommand::printStyle):
+        * editing/ReplaceNodeWithSpanCommand.cpp:
+        (WebCore::ReplaceNodeWithSpanCommand::ReplaceNodeWithSpanCommand):
+        * editing/ReplaceNodeWithSpanCommand.h:
+
 2010-10-09  Carlos Garcia Campos  <cgarcia@igalia.com>
 
         Reviewed by Martin Robinson.
