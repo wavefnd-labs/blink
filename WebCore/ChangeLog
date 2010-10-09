@@ -2,6 +2,29 @@
 
         Reviewed by Xan Lopez.
 
+        [Gtk] Non-rectangular buttons have a square background behind them
+        https://bugs.webkit.org/show_bug.cgi?id=23569
+
+        Remove some code which was clearing pieces of the GdkDrawable if it was
+        currently mapped to a window. In our case it is unnecessary, because the
+        platform-independent parts of the render have already cleared this section
+        if it is needed.
+
+        Mozilla must not trip this code path, which means they are probably rendering
+        most often to a non-mapped GdkPixmap.
+
+        No new tests as some themed rendering is covered by existing tests that
+        render buttons. This particular bug is very hard to test as it only appears
+        with certain GTK+ themes and we currently have no mechanism to test different
+        themes in DRT.
+
+        * platform/gtk/gtk2drawing.c:
+        (moz_gtk_button_paint): Remove unnecessary code.
+
+2010-10-09  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Xan Lopez.
+
         [GTK] Slider padding translate into a larger track rect
         https://bugs.webkit.org/show_bug.cgi?id=47435
 
