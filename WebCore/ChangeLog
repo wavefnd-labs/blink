@@ -1,3 +1,25 @@
+2010-10-08  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Daniel Bates.
+
+        [GTK] Fails /LayoutTests/fast/css/button-height.html
+        https://bugs.webkit.org/show_bug.cgi?id=33936
+
+        GTK buttons honor height property set via CSS. The code for the method
+        adjustButtonStyle originates from the original GTK+ theme drawing code
+        and is clearly just a copy-paste from the Safari theme drawing code. The
+        Safari theme drawing code does quite a bit of work to ensure that button
+        fonts are consistent with the system theme, which is not something the GTK+
+        port does.
+
+        This change brings the method more in line with the Chromium port, which
+        allows CSS to style buttons, only overriding the line-height property,
+        which is required for layout tests to pass.
+
+        * platform/gtk/RenderThemeGtk.cpp:
+        (WebCore::RenderThemeGtk::adjustButtonStyle): No longer override most CSS
+        properties for button styling.
+
 2010-10-08  Mihai Parparita  <mihaip@chromium.org>
 
         Reviewed by Adam Barth.
