@@ -1,3 +1,172 @@
+2010-10-08  James Robinson  <jamesr@chromium.org>
+
+        Reviewed by Adam Barth.
+
+        Avoid inlining large and/or virtual functions in widely included header files
+        https://bugs.webkit.org/show_bug.cgi?id=47230
+
+        Functions with very large bodies should not be included in widely included header files.
+        This results in the function's code ending up included in hundreds of object files that
+        the linker has to discard, at a cost of linker memory use, link time, and disk space. This
+        is a particular problem in the Chromium windows build where MSVC often exhausts its 32-bit
+        virtual address space and completely fails to link.
+
+        This patch moves function definitions from the .h to the corresponding .cpp when the function
+        is large and not a candidate for inlining either because it is virtual or because its size is
+        above any reasonable compiler's threshhold for inlining.  The most common case by far in this
+        patch is changing a class' implicitly defined destructor to an explicitly declared d'tor in
+        the header and an explicitly defined d'tor in the .cpp.  This is important since many of our
+        container and utility classes (especially Vector, String, and HashSet) have quite large
+        destructors.
+
+        This patch removes 22.4MB of object file size in a debug 64 bit compile.
+
+        * css/CSSBorderImageValue.cpp:
+        (WebCore::CSSBorderImageValue::~CSSBorderImageValue):
+        * css/CSSBorderImageValue.h:
+        * css/CSSFontFaceSrcValue.cpp:
+        (WebCore::CSSFontFaceSrcValue::~CSSFontFaceSrcValue):
+        * css/CSSFontFaceSrcValue.h:
+        * css/CSSFunctionValue.h:
+        * dom/BeforeTextInsertedEvent.cpp:
+        (WebCore::BeforeTextInsertedEvent::~BeforeTextInsertedEvent):
+        * dom/BeforeTextInsertedEvent.h:
+        * dom/BeforeUnloadEvent.cpp:
+        (WebCore::BeforeUnloadEvent::~BeforeUnloadEvent):
+        * dom/BeforeUnloadEvent.h:
+        * dom/ClassNodeList.h:
+        * dom/ClipboardEvent.cpp:
+        (WebCore::ClipboardEvent::~ClipboardEvent):
+        * dom/ClipboardEvent.h:
+        * dom/CustomEvent.cpp:
+        (WebCore::CustomEvent::~CustomEvent):
+        * dom/CustomEvent.h:
+        * dom/Element.cpp:
+        * dom/Element.h:
+        * dom/EventTarget.cpp:
+        (WebCore::EventTargetData::EventTargetData):
+        * dom/EventTarget.h:
+        * dom/InputElement.cpp:
+        (WebCore::InputElementData::~InputElementData):
+        * dom/InputElement.h:
+        * dom/MutationEvent.cpp:
+        (WebCore::MutationEvent::~MutationEvent):
+        * dom/MutationEvent.h:
+        * dom/Node.cpp:
+        (WebCore::Node::refEventTarget):
+        (WebCore::Node::derefEventTarget):
+        * dom/Node.h:
+        * dom/OptionElement.cpp:
+        (WebCore::OptionElementData::~OptionElementData):
+        * dom/OptionElement.h:
+        * dom/PopStateEvent.cpp:
+        (WebCore::PopStateEvent::~PopStateEvent):
+        * dom/PopStateEvent.h:
+        * dom/QualifiedName.cpp:
+        (WebCore::QualifiedName::~QualifiedName):
+        * dom/QualifiedName.h:
+        * dom/SelectElement.cpp:
+        (WebCore::SelectElementData::~SelectElementData):
+        * dom/SelectElement.h:
+        * dom/StaticHashSetNodeList.cpp:
+        (WebCore::StaticHashSetNodeList::StaticHashSetNodeList):
+        (WebCore::StaticHashSetNodeList::~StaticHashSetNodeList):
+        * dom/StaticHashSetNodeList.h:
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::~StyleElement):
+        * dom/StyleElement.h:
+        * dom/TouchEvent.cpp:
+        (WebCore::TouchEvent::TouchEvent):
+        (WebCore::TouchEvent::~TouchEvent):
+        * dom/TouchEvent.h:
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::~CompositeEditCommand):
+        * editing/CompositeEditCommand.h:
+        * editing/TextIterator.cpp:
+        (WebCore::BitStack::~BitStack):
+        (WebCore::TextIterator::~TextIterator):
+        (WebCore::WordAwareIterator::~WordAwareIterator):
+        * editing/TextIterator.h:
+        * inspector/InspectorValues.cpp:
+        (WebCore::InspectorObject::~InspectorObject):
+        (WebCore::InspectorObject::InspectorObject):
+        (WebCore::InspectorArray::~InspectorArray):
+        (WebCore::InspectorArray::InspectorArray):
+        * inspector/InspectorValues.h:
+        * loader/CachedResource.cpp:
+        (WebCore::CachedResource::registerHandle):
+        (WebCore::CachedResource::unregisterHandle):
+        * loader/CachedResource.h:
+        * platform/network/HTTPHeaderMap.cpp:
+        (WebCore::HTTPHeaderMap::HTTPHeaderMap):
+        (WebCore::HTTPHeaderMap::~HTTPHeaderMap):
+        (WebCore::HTTPHeaderMap::get):
+        (WebCore::HTTPHeaderMap::add):
+        * platform/network/HTTPHeaderMap.h:
+        * rendering/RenderApplet.cpp:
+        (WebCore::RenderApplet::~RenderApplet):
+        * rendering/RenderApplet.h:
+        * rendering/RenderButton.cpp:
+        (WebCore::RenderButton::~RenderButton):
+        * rendering/RenderButton.h:
+        * rendering/RenderCounter.cpp:
+        (WebCore::RenderCounter::~RenderCounter):
+        * rendering/RenderCounter.h:
+        * rendering/RenderFieldset.h:
+        * rendering/RenderForeignObject.cpp:
+        (WebCore::RenderForeignObject::~RenderForeignObject):
+        * rendering/RenderForeignObject.h:
+        * rendering/RenderFrame.h:
+        * rendering/RenderFrameBase.h:
+        * rendering/RenderHTMLCanvas.h:
+        * rendering/RenderIFrame.h:
+        * rendering/RenderInline.h:
+        * rendering/RenderListItem.h:
+        * rendering/RenderMarquee.cpp:
+        (WebCore::RenderMarquee::~RenderMarquee):
+        * rendering/RenderMarquee.h:
+        * rendering/RenderPath.cpp:
+        (WebCore::RenderPath::~RenderPath):
+        * rendering/RenderPath.h:
+        * rendering/RenderSVGBlock.h:
+        * rendering/RenderSVGContainer.cpp:
+        (WebCore::RenderSVGContainer::~RenderSVGContainer):
+        * rendering/RenderSVGContainer.h:
+        * rendering/RenderSVGHiddenContainer.h:
+        * rendering/RenderSVGInline.h:
+        * rendering/RenderSVGInlineText.cpp:
+        (WebCore::RenderSVGInlineText::~RenderSVGInlineText):
+        * rendering/RenderSVGInlineText.h:
+        * rendering/RenderSVGModelObject.h:
+        * rendering/RenderSVGResourceFilterPrimitive.h:
+        * rendering/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::~RenderSVGRoot):
+        * rendering/RenderSVGRoot.h:
+        * rendering/RenderSVGTSpan.h:
+        * rendering/RenderSVGText.h:
+        * rendering/RenderSVGTextPath.h:
+        * rendering/RenderSVGTransformableContainer.h:
+        * rendering/RenderSVGViewportContainer.h:
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::~RenderTable):
+        * rendering/RenderTable.h:
+        * rendering/RenderTableCell.h:
+        * rendering/RenderTableCol.h:
+        * rendering/RenderTableRow.h:
+        * rendering/RenderTextFragment.cpp:
+        (WebCore::RenderTextFragment::~RenderTextFragment):
+        * rendering/RenderTextFragment.h:
+        * rendering/RenderWordBreak.h:
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::~SVGStyledElement):
+        * svg/SVGStyledElement.h:
+        * svg/SVGStyledTransformableElement.cpp:
+        (WebCore::SVGStyledTransformableElement::~SVGStyledTransformableElement):
+        * svg/SVGStyledTransformableElement.h:
+        * xml/XPathParser.cpp:
+        (WebCore::XPath::Parser::~Parser):
+        * xml/XPathParser.h:
+
 2010-10-08  Martin Robinson  <mrobinson@igalia.com>
 
         Reviewed by Daniel Bates.
