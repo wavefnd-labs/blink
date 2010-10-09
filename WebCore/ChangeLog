@@ -1,3 +1,26 @@
+2010-10-08  Mihai Parparita  <mihaip@chromium.org>
+
+        Reviewed by Adam Barth.
+
+        popstate events are lost when network connection is in progress
+        https://bugs.webkit.org/show_bug.cgi?id=42940
+        
+        Instead of checking FrameLoader::isComplete() (which isn't true if the
+        document's resource loader has requests outstanding), check that the
+        document's readyState is complete, as the spec says.
+
+        Test: http/tests/history/popstate-fires-with-pending-requests.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::statePopped):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didBeginDocument): Added call to set readyState
+        to Loading earlier. Otherwise, readyState's initial value is Complete,
+        and we only set it to Loading in Document::implicitOpen (which is called
+        after FrameLoader::didBeginDocument by DocumentWriter::begin), so we 
+        could end up in Document::statePopped and have the readyState be
+        Complete, even if we hadn't even begin loading the document.
+
 2010-10-08  Daniel Cheng  <dcheng@chromium.org>
 
         Reviewed by Tony Chang.
