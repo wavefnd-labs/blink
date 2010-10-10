@@ -1,3 +1,25 @@
+2010-10-10  Mihai Parparita  <mihaip@chromium.org>
+
+        Reviewed by Adam Barth.
+
+        <a ping> tests are slow
+        https://bugs.webkit.org/show_bug.cgi?id=47431
+        
+        The ping tests showed up as being flaky in Adam Barth's email; this
+        might just be due to them being on the slow side due to the 1 second
+        refresh in check-ping.php. We can instead switch to using file_exists
+        in a loop if we invalidate the file status cache. Running the three
+        ping tests with --iterations=10 now takes 4 seconds instead of 23.
+        
+        This surfaces a race condition in image-load-in-unload-handler.html
+        (we don't start sending data till we get the ping, but unload handlers
+        (where the ping is sent) aren't run till we start getting data). Fixed
+        by adding a dummy page in between.
+
+        * http/tests/navigation/resources/check-ping.php:
+        * http/tests/navigation/image-load-in-unload-handler.html:
+        * http/tests/navigation/resources/ping-redirect.html: Added.
+
 2010-10-10  Robert Hogan  <robert@webkit.org>
 
         Reviewed by Antonio Gomes.
