@@ -1,3 +1,23 @@
+2010-10-11  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        spellcheck="false" not respected in designMode
+        https://bugs.webkit.org/show_bug.cgi?id=39978
+
+        The bug was caused by WebKit's setting focus to html element rather than body element in design mode.
+        Because we disable spell-check only if ancestor nodes of the focused element had spellcheck=false,
+        this caused us to ignore body element's spellcheck attribute.
+
+        Fixed the bug by overriding supportsFocus in HTMLBodyElement to make body element focusable
+        when the parent node of body elements (namely html element) is editable.
+
+        Test: editing/spelling/design-mode-spellcheck-off.html
+
+        * html/HTMLBodyElement.cpp:
+        (WebCore::HTMLBodyElement::supportsFocus): Added.
+        * html/HTMLBodyElement.h:
+
 2010-10-11  Oliver Hunt  <oliver@apple.com>
 
         Build fix -- I thought i had killed the prior commit in time to have this be part of the commit.
