@@ -1,3 +1,50 @@
+2010-10-11  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Tony Chang.
+
+        [GTK] editing/pasteboard/dataTransfer-setData-getData.html fails on GTK+
+        https://bugs.webkit.org/show_bug.cgi?id=47244
+
+        Store the URI list as a String in DataObjectGtk, so that non-URI elements
+        are preserved when getData(...) is called. This necessitates some other
+        changes, including adding a m_filenames member to DataObjectGtk to store
+        filenames extracted during setURIList(...). The logic in getData(...) has
+        also changed to set success = true no matter what to match the spec. A
+        followup patch will remove this parameter completely for all platforms.
+
+        * platform/gtk/ClipboardGtk.cpp:
+        (WebCore::ClipboardGtk::getData): Always succeed to match the HTML5
+        spec and Firefox. Simply return the uriList string from the DataObject
+        instead of reconstructing it from a vector of KURLs.
+        (WebCore::ClipboardGtk::setData): The DataObject now accepts a string
+        for the uriList parameter.
+        (WebCore::ClipboardGtk::types): Predicate the "Files" member on 
+        DataObjectGtk::hasFilenames().
+        (WebCore::ClipboardGtk::files): Update to reflect the change from
+        DataObjectGtk::files() to DataObjectGtk::filenames().
+        * platform/gtk/DataObjectGtk.cpp:
+        (WebCore::DataObjectGtk::setURIList): Expanded this setter to find the
+        first valid URL to use as the m_url member and also extract a list of filenames
+        from the URI list.
+        (WebCore::DataObjectGtk::setURL): Updated to reflect changes to m_uriList.
+        (WebCore::DataObjectGtk::clear): Updated to reflect changes to m_uriList and
+        also leave a comment explaining why we do not clear filenames here.
+        * platform/gtk/DataObjectGtk.h:
+        (WebCore::DataObjectGtk::url): This implementation is now a simple getter.
+        (WebCore::DataObjectGtk::uriList): Ditto.
+        (WebCore::DataObjectGtk::filenames): Added.
+        (WebCore::DataObjectGtk::hasURL): Now a simple check.
+        (WebCore::DataObjectGtk::hasFilenames): Added.
+        (WebCore::DataObjectGtk::clearURIList): Simple setter.
+        (WebCore::DataObjectGtk::clearURL): Ditto.
+        * platform/gtk/DragDataGtk.cpp:
+        (WebCore::DragData::containsFiles): Updated to access DataObjectGtk::hasFilenames().
+        (WebCore::DragData::asFilenames): Updated to access DataObjectGtk::filenames().
+        * platform/gtk/PasteboardHelper.cpp:
+        (WebCore::PasteboardHelper::getClipboardContents): Use the uriList as a string now.
+        (WebCore::PasteboardHelper::fillSelectionData):  Ditto.
+        (WebCore::PasteboardHelper::fillDataObjectFromDropData): Ditto.
+
 2010-10-11  James Robinson  <jamesr@chromium.org>
 
         Reviewed by Kenneth Russell.
