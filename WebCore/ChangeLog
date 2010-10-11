@@ -1,3 +1,84 @@
+2010-10-11  Andreas Kling  <kling@webkit.org>
+
+        Reviewed by Dirk Schulze.
+
+        SVG: Remove "create" methods and use port-specific "add" counterparts
+        https://bugs.webkit.org/show_bug.cgi?id=46052
+
+        Circles and ellipses will be significantly faster on platforms that
+        implement Path::addEllipse() in a sane fashion.
+
+        Also, a lot of Path copying has been factored out by changing functions
+        that would return Paths to take Path& arguments instead (toPathData, toClipPath)
+
+        * mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::paint):
+        * mathml/RenderMathMLSquareRoot.cpp:
+        (WebCore::RenderMathMLSquareRoot::paint):
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::addRoundedRectClip):
+        (WebCore::GraphicsContext::clipOutRoundedRect):
+        * platform/graphics/Path.cpp:
+        (WebCore::pathLengthApplierFunction):
+        (WebCore::Path::addRoundedRect):
+        * platform/graphics/Path.h:
+        * platform/graphics/cairo/ContextShadowCairo.cpp:
+        (WebCore::ContextShadow::drawRectShadowWithoutTiling):
+        (WebCore::ContextShadow::drawRectShadow):
+        * platform/graphics/cairo/GraphicsContextCairo.cpp:
+        (WebCore::GraphicsContext::drawFocusRing):
+        (WebCore::GraphicsContext::drawTiledShadow):
+        (WebCore::GraphicsContext::fillRoundedRect):
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore::GraphicsContext::fillRoundedRect):
+        * platform/graphics/qt/GraphicsContextQt.cpp:
+        (WebCore::GraphicsContext::fillRoundedRect):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::paintBorder):
+        (WebCore::RenderBoxModelObject::paintBoxShadow):
+        * rendering/RenderEmbeddedObject.cpp:
+        (WebCore::RenderEmbeddedObject::getReplacementTextGeometry):
+        * rendering/RenderSVGResourceClipper.cpp:
+        (WebCore::RenderSVGResourceClipper::pathOnlyClipping):
+        * rendering/svg/RenderSVGPath.cpp:
+        (WebCore::RenderSVGPath::layout):
+        * rendering/svg/RenderSVGTextPath.cpp:
+        (WebCore::RenderSVGTextPath::layoutPath):
+        * rendering/svg/SVGInlineTextBox.cpp:
+        (WebCore::SVGInlineTextBox::paintDecorationWithStyle):
+        * svg/SVGAnimateMotionElement.cpp:
+        (WebCore::SVGAnimateMotionElement::animationPath):
+        * svg/SVGCircleElement.cpp:
+        (WebCore::SVGCircleElement::toPathData):
+        * svg/SVGCircleElement.h:
+        * svg/SVGEllipseElement.cpp:
+        (WebCore::SVGEllipseElement::toPathData):
+        * svg/SVGEllipseElement.h:
+        * svg/SVGLineElement.cpp:
+        (WebCore::SVGLineElement::toPathData):
+        * svg/SVGLineElement.h:
+        * svg/SVGPathElement.cpp:
+        (WebCore::SVGPathElement::getTotalLength):
+        (WebCore::SVGPathElement::getPointAtLength):
+        (WebCore::SVGPathElement::toPathData):
+        * svg/SVGPathElement.h:
+        * svg/SVGPolygonElement.cpp:
+        (WebCore::SVGPolygonElement::toPathData):
+        * svg/SVGPolygonElement.h:
+        * svg/SVGPolylineElement.cpp:
+        (WebCore::SVGPolylineElement::toPathData):
+        * svg/SVGPolylineElement.h:
+        * svg/SVGRectElement.cpp:
+        (WebCore::SVGRectElement::toPathData):
+        * svg/SVGRectElement.h:
+        * svg/SVGStyledTransformableElement.cpp:
+        (WebCore::SVGStyledTransformableElement::toClipPath):
+        * svg/SVGStyledTransformableElement.h:
+        (WebCore::SVGStyledTransformableElement::toPathData):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::toClipPath):
+        * svg/SVGUseElement.h:
+
 2010-10-01  Oliver Hunt  <oliver@apple.com>
 
         Reviewed by Gavin Barraclough.
