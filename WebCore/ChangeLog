@@ -1,3 +1,25 @@
+2010-10-11  Oliver Hunt  <oliver@apple.com>
+
+        Reviewed by Andreas Kling.
+
+        Incorrect handling of 0 length logs in GraphicsContext3DOpenGL.cpp
+        https://bugs.webkit.org/show_bug.cgi?id=47494
+
+        Working on another patch I found that there was some screwy behaviour
+        when dealing with logs from GL.  GL_INFO_LOG_LENGTH is defined as being
+        zero if there is no log message, but we did not check for that case and
+        simply perfomed a zero sized alloc and passed the resultant buffer to
+        glGetShaderInfoLog, etc.  glGetShaderInfoLog would then write a null
+        terminator to the buffer, thus causing an overflow.  This is obviously
+        not a problem in practice as allocations are at least 4 bytes long in
+        all common allocators, but it is still a bug.
+
+        I also removed some unnecessary null checks following calls to fastMalloc.
+
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::getProgramInfoLog):
+        (WebCore::GraphicsContext3D::getShaderInfoLog):
+
 2010-10-11  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Reviewed by Andreas Kling.
