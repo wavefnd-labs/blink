@@ -1,3 +1,100 @@
+2010-10-11  Daniel Cheng  <dcheng@chromium.org>
+
+        Reviewed by Tony Chang.
+
+        [chromium] Prepare Clipboard/DragData for transition to new drag-and-drop interface.
+        https://bugs.webkit.org/show_bug.cgi?id=44992
+
+        In order to allow a graceful transition, ChromiumDataObject has been
+        reimplemented as a wrapper around the three different types of data
+        objects that the Chrome port uses:
+        1. ChromiumDataObjectLegacy -- this is the original ChromiumDataObject.
+           All the data that ClipboardChromium/DragDataChromium can potentially
+           use is copied over, regardless of whether or not it is needed.
+        2. ReadableDataObject -- used for dragging in and pasting into WebKit.
+           For efficiency, it caches an optimistic list of types it believes it
+           can handle. When getData() is called, a browser IPC is called to
+           retrieve the appropriate data.
+        3. WritableDataObject -- similar to ChromiumDataObjectLegacy in that it
+           buffers all data when dragging out of WebKit or copying/cutting.
+           Unfortunately, there is a difference between dragging out and
+           copying/cutting--on drag outs, the data is buffered and flushed out
+           when startDrag() is called. For copy/cut, any calls to setData()
+           result in a browser IPC right away, so calls to setData() in one
+           copy/cut event are not atomic.
+
+        Copy and paste has been changed to use the new data objects. Dragging
+        out uses the legacy data object, and dragging in now has two potential
+        entry points--one using the legacy data object, and one using
+        ReadableDataObject. Once Chromium transitions to using the new drag-in
+        interface, the old interface will be removed.
+
+        This change is covered by existing tests.
+
+        * WebCore.gypi:
+        * editing/chromium/EditorChromium.cpp:
+        (WebCore::Editor::newGeneralClipboard):
+        * page/chromium/EventHandlerChromium.cpp:
+        (WebCore::EventHandler::createDraggingClipboard):
+        * platform/chromium/ChromiumDataObject.cpp:
+        (WebCore::ChromiumDataObject::ChromiumDataObject):
+        (WebCore::ChromiumDataObject::create):
+        (WebCore::ChromiumDataObject::createReadable):
+        (WebCore::ChromiumDataObject::createWritable):
+        (WebCore::ChromiumDataObject::clearData):
+        (WebCore::ChromiumDataObject::clearAll):
+        (WebCore::ChromiumDataObject::clearAllExceptFiles):
+        (WebCore::ChromiumDataObject::hasData):
+        (WebCore::ChromiumDataObject::types):
+        (WebCore::ChromiumDataObject::getData):
+        (WebCore::ChromiumDataObject::setData):
+        (WebCore::ChromiumDataObject::urlTitle):
+        (WebCore::ChromiumDataObject::setUrlTitle):
+        (WebCore::ChromiumDataObject::htmlBaseUrl):
+        (WebCore::ChromiumDataObject::setHtmlBaseUrl):
+        (WebCore::ChromiumDataObject::containsFilenames):
+        (WebCore::ChromiumDataObject::filenames):
+        (WebCore::ChromiumDataObject::setFilenames):
+        (WebCore::ChromiumDataObject::fileExtension):
+        (WebCore::ChromiumDataObject::setFileExtension):
+        (WebCore::ChromiumDataObject::fileContentFilename):
+        (WebCore::ChromiumDataObject::setFileContentFilename):
+        (WebCore::ChromiumDataObject::fileContent):
+        (WebCore::ChromiumDataObject::setFileContent):
+        * platform/chromium/ChromiumDataObject.h:
+        * platform/chromium/ChromiumDataObjectLegacy.cpp: Copied from ChromiumDataObject.cpp
+        (WebCore::ChromiumDataObjectLegacy::clearData):
+        (WebCore::ChromiumDataObjectLegacy::clearAll):
+        (WebCore::ChromiumDataObjectLegacy::clearAllExceptFiles):
+        (WebCore::ChromiumDataObjectLegacy::hasData):
+        (WebCore::ChromiumDataObjectLegacy::types):
+        (WebCore::ChromiumDataObjectLegacy::getData):
+        (WebCore::ChromiumDataObjectLegacy::setData):
+        (WebCore::ChromiumDataObjectLegacy::ChromiumDataObjectLegacy):
+        * platform/chromium/ChromiumDataObjectLegacy.h: Copied from ChromiumDataObject.h
+        (WebCore::ChromiumDataObjectLegacy::create):
+        (WebCore::ChromiumDataObjectLegacy::copy):
+        (WebCore::ChromiumDataObjectLegacy::urlTitle):
+        (WebCore::ChromiumDataObjectLegacy::setUrlTitle):
+        (WebCore::ChromiumDataObjectLegacy::htmlBaseUrl):
+        (WebCore::ChromiumDataObjectLegacy::setHtmlBaseUrl):
+        (WebCore::ChromiumDataObjectLegacy::containsFilenames):
+        (WebCore::ChromiumDataObjectLegacy::filenames):
+        (WebCore::ChromiumDataObjectLegacy::setFilenames):
+        (WebCore::ChromiumDataObjectLegacy::fileExtension):
+        (WebCore::ChromiumDataObjectLegacy::setFileExtension):
+        (WebCore::ChromiumDataObjectLegacy::fileContentFilename):
+        (WebCore::ChromiumDataObjectLegacy::setFileContentFilename):
+        (WebCore::ChromiumDataObjectLegacy::fileContent):
+        (WebCore::ChromiumDataObjectLegacy::setFileContent):
+        * platform/chromium/ClipboardChromium.cpp:
+        (WebCore::ClipboardChromium::create):
+        * platform/chromium/ClipboardChromium.h:
+        * platform/chromium/ReadableDataObject.cpp:
+        (WebCore::ReadableDataObject::getData):
+        * platform/chromium/WritableDataObject.cpp:
+        (WebCore::WritableDataObject::setData):
+
 2010-10-11  Anders Carlsson  <andersca@apple.com>
 
         Reviewed by Darin Adler.
