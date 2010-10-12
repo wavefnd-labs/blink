@@ -1,3 +1,22 @@
+2010-10-11  Eric Uhrhane  <ericu@chromium.org>
+
+        Reviewed by Dumitru Daniliuc.
+
+        FileWriter should hold a reference to a Blob during write
+        https://bugs.webkit.org/show_bug.cgi?id=47318
+
+        Without this reference, the Blob might get garbage-collected from JS
+        before the write has completed, which would be quite unintuitive to the
+        user.  I just grab a RefPtr to the Blob at write(), then clear it when
+        we're done.
+
+        * fileapi/FileWriter.cpp:
+        (WebCore::FileWriter::stop):
+        (WebCore::FileWriter::write):
+        (WebCore::FileWriter::didWrite):
+        (WebCore::FileWriter::didFail):
+        * fileapi/FileWriter.h:
+
 2010-10-11  Michael Saboff  <msaboff@apple.com>
 
         Reviewed by Darin Adler.
