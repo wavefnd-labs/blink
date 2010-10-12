@@ -31,8 +31,6 @@
 #ifndef WebBlobRegistry_h
 #define WebBlobRegistry_h
 
-#include "WebBlobStorageData.h"
-
 namespace WebKit {
 
 class WebBlobData;
