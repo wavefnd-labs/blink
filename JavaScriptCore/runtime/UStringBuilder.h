@@ -23,65 +23,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef StringBuilder_h
-#define StringBuilder_h
+#ifndef UStringBuilder_h
+#define UStringBuilder_h
 
-#include <wtf/Vector.h>
+#include <wtf/text/StringBuilder.h>
 
 namespace JSC {
 
-class StringBuilder {
+class UStringBuilder : public StringBuilder {
 public:
-    void append(const UChar u)
-    {
-        buffer.append(u);
-    }
-
-    void append(const char* str)
-    {
-        append(str, strlen(str));
-    }
-
-    void append(const char* str, size_t len)
-    {
-        reserveCapacity(buffer.size() + len);
-        for (size_t i = 0; i < len; i++)
-            buffer.append(static_cast<unsigned char>(str[i]));
-    }
-
-    void append(const UChar* str, size_t len)
-    {
-        buffer.append(str, len);
-    }
+    // Forward declare these methods, otherwhise append() is ambigious.
+    void append(const UChar u) { StringBuilder::append(u); }
+    void append(const char* str) { StringBuilder::append(str); }
+    void append(const char* str, size_t len) { StringBuilder::append(str, len); }
+    void append(const UChar* str, size_t len) { StringBuilder::append(str, len); }
 
     void append(const UString& str)
     {
-        buffer.append(str.characters(), str.length());
+        m_buffer.append(str.characters(), str.length());
     }
 
-    bool isEmpty() { return buffer.isEmpty(); }
-    void reserveCapacity(size_t newCapacity)
+    UString toUString()
     {
-        if (newCapacity < buffer.capacity())
-            return;
-        buffer.reserveCapacity(std::max(newCapacity, buffer.capacity() + buffer.capacity() / 4 + 1));
+        m_buffer.shrinkToFit();
+        ASSERT(m_buffer.data() || !m_buffer.size());
+        return UString::adopt(m_buffer);
     }
-    void resize(size_t size) { buffer.resize(size); }
-    size_t size() const { return buffer.size(); }
-
-    UChar operator[](size_t i) const { return buffer.at(i); }
-
-    UString build()
-    {
-        buffer.shrinkToFit();
-        ASSERT(buffer.data() || !buffer.size());
-        return UString::adopt(buffer);
-    }
-
-protected:
-    Vector<UChar, 64> buffer;
 };
 
-}
+} // namespace JSC
 
-#endif
+#endif // UStringBuilder_h

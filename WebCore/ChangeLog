@@ -1,3 +1,74 @@
+2010-10-12  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Gavin Barraclough.
+
+        Unify JSC::StringBuilder & WebCore::StringBuilder
+        https://bugs.webkit.org/show_bug.cgi?id=47538
+
+        JSC::StringBuilder operates on a Vector<UChar, 64> and allows to build a string based on a stream of characters in an efficient manner.
+        WebCore::StringBuilder operates on a Vector<String, 16> and allows to concat an arbitary number of Strings. It's not efficient in handling single
+        characters, as a String with length=1 has to be constructed for those. An analysis of the callers of WebCore::StringBuilder shows that
+        most callsites actually combine Strings and single characters, so using a Vector<UChar> would be more efficient. Those who only combine large
+        strings are only used for debugging purposes, so it's fine to switch them to a Vector<UChar> approach as well.
+
+        Replace WebCore::StringBuilder with JSC::StringBuilder, and move it to wtf/text/StringBuilder.h into the WTF namespace.
+        While I was at it remove platform/text/StringBuffer.h, as it was only including wtf/text/StringBuffer.h.
+
+        No change in functionality, thus no new tests.
+
+        * Android.mk: Remove platform/text/StringBuilder.* and platform/text/StringBuffer.h.
+        * CMakeLists.txt: Ditto.
+        * GNUmakefile.am: Ditto. 
+        * WebCore.gypi: Ditto.
+        * WebCore.order: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * ForwardingHeaders/runtime/StringBuilder.h: Removed.
+        * ForwardingHeaders/runtime/UStringBuilder.h: Added.
+        * ForwardingHeaders/wtf/text/StringBuilder.h: Added.
+        * bindings/js/ScriptString.h: Don't include PlatformString.h but wtf/text/WTFString.h.
+        (WebCore::ScriptString::operator+=): Use JSC::UStringBuilder instead of JSC::StringBuilder.
+        * bridge/jni/JNIBridge.cpp: Use WTF::StringBuilder (+ use append(const UChar) for single characters).
+        * css/MediaQuery.cpp: Ditto.
+        * css/MediaQueryExp.cpp: Ditto.
+        * dom/Node.cpp: Ditto.
+        (WebCore::Node::appendTextContent): Manually track wheter the StringBuilder content is empty or null, the new StringBuilder doesn't differentiate between null & empty strings.
+        * dom/Node.h: Remove appendTextContent definition, it's not needed to be exported, removes the need for a StringBuilder.h include or forward declaration.
+        * html/DOMTokenList.cpp: Use WTF::StringBuilder.
+        * inspector/InspectorResource.cpp: Remove useless StringBuffer.h include.
+        * platform/android/FileSystemAndroid.cpp: Use WTF::StringBuilder.
+        * platform/brew/FileSystemBrew.cpp: Ditto.
+        * platform/chromium/ClipboardChromium.cpp: Ditto (+ use append(const UChar) for single characters).
+        * platform/graphics/gpu/PODInterval.h: Ditto (Only used as debugging helper here, in debug builds).
+        * platform/graphics/gpu/PODRedBlackTree.h: Ditto (Only used as debugging helper here, in debug builds).
+        * platform/graphics/mac/GraphicsLayerCA.mm: Remove useless StringBuilder.h include.
+        * platform/graphics/win/MediaPlayerPrivateQuickTimeVisualContext.cpp: Use WTF::StringBuilder, and use append(const UChar) for single characters.
+        * platform/graphics/win/MediaPlayerPrivateQuickTimeWin.cpp: Ditto.
+        * platform/network/ProxyServer.cpp:
+        (WebCore::appendProxyServerString): Use WTF::StringBuilder.
+        * platform/text/StringBuffer.h: Removed.
+        * platform/text/StringBuilder.cpp: Removed.
+        * platform/text/StringBuilder.h: Removed.
+        * plugins/DOMMimeType.cpp: Use WTF::StringBuilder.
+        * svg/SVGPathParserFactory.cpp: Ditto.
+        * svg/SVGPathStringBuilder.cpp: SVGPathStringBuilder used stringBuilder.toString(ConcatAddingSpacesBetweenIndividualStrings), adapt to the change, that this mode is gone now.
+        (WebCore::SVGPathStringBuilder::result): Just use toString(), append a space to the end of each command, when building the string. Remove the last trailing space before building the result.
+        (WebCore::SVGPathStringBuilder::moveTo):
+        (WebCore::SVGPathStringBuilder::lineTo):
+        (WebCore::SVGPathStringBuilder::lineToHorizontal):
+        (WebCore::SVGPathStringBuilder::lineToVertical):
+        (WebCore::SVGPathStringBuilder::curveToCubic):
+        (WebCore::SVGPathStringBuilder::curveToCubicSmooth):
+        (WebCore::SVGPathStringBuilder::curveToQuadratic):
+        (WebCore::SVGPathStringBuilder::curveToQuadraticSmooth):
+        (WebCore::SVGPathStringBuilder::arcTo):
+        (WebCore::SVGPathStringBuilder::closePath):
+        * svg/SVGPathStringBuilder.h:
+        (WebCore::SVGPathStringBuilder::cleanup): StringBuilder::clear() is gone, just cleanup by assigning StringBuilder().
+        * websockets/WebSocket.cpp: Use WTF::StringBuilder.
+        * websockets/WebSocketHandshake.cpp: Ditto (+ use append(const UChar) for single characters).
+
 2010-10-12  Gyuyoung Kim  <gyuyoung.kim@samsung.com>
 
         Reviewed by Antonio Gomes.
