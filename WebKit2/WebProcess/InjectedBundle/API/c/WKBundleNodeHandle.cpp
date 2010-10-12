@@ -24,6 +24,7 @@
  */
 
 #include "WKBundleNodeHandle.h"
+#include "WKBundleNodeHandlePrivate.h"
 
 #include "InjectedBundleNodeHandle.h"
 #include "WKAPICast.h"
@@ -34,4 +35,10 @@ using namespace WebKit;
 WKTypeID WKBundleNodeHandleGetTypeID()
 {
     return toAPI(InjectedBundleNodeHandle::APIType);
+}
+
+WKBundleNodeHandleRef WKBundleNodeHandleCreate(JSContextRef contextRef, JSObjectRef objectRef)
+{
+    RefPtr<InjectedBundleNodeHandle> nodeHandle = InjectedBundleNodeHandle::getOrCreate(contextRef, objectRef);
+    return toAPI(nodeHandle.release().releaseRef());
 }
