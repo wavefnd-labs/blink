@@ -1,3 +1,58 @@
+2010-10-12  Jian Li  <jianli@chromium.org>
+
+        Reviewed by David Levin.
+
+        Fix passing blob data with string data item between threads.
+        https://bugs.webkit.org/show_bug.cgi?id=46543
+
+        The fix is to use a thread-safe ref-counted Vector<char> to store the
+        string data. This also makes us be able to store any binary data in it.
+
+        I've also fix BlobBuilder and BlobRegistryImpl to avoid some additional
+        copies to make blob handling faster.
+
+        * fileapi/BlobBuilder.cpp:
+        (WebCore::BlobBuilder::append):
+        * fileapi/ThreadableBlobRegistry.cpp:
+        (WebCore::BlobRegistryContext::BlobRegistryContext):
+        * platform/network/BlobData.cpp:
+        (WebCore::BlobDataItem::RawData::RawData):
+        (WebCore::BlobDataItem::RawData::detachFromCurrentThread):
+        (WebCore::BlobDataItem::detachFromCurrentThread):
+        (WebCore::BlobData::create):
+        (WebCore::BlobData::detachFromCurrentThread):
+        (WebCore::BlobData::appendData):
+        * platform/network/BlobData.h:
+        (WebCore::BlobDataItem::RawData::create):
+        (WebCore::BlobDataItem::RawData::data):
+        (WebCore::BlobDataItem::RawData::length):
+        (WebCore::BlobDataItem::RawData::mutableData):
+        (WebCore::BlobDataItem::BlobDataItem):
+        * platform/network/BlobRegistryImpl.cpp:
+        (WebCore::BlobRegistryImpl::registerBlobURL):
+        * platform/network/BlobResourceHandle.cpp:
+        (WebCore::BlobResourceHandle::readDataSync):
+        (WebCore::BlobResourceHandle::readDataAsync):
+        * platform/network/mac/FormDataStreamMac.mm:
+        (WebCore::setHTTPBody):
+        * platform/text/LineEnding.cpp:
+        (OutputBuffer::CStringBuffer::CStringBuffer):
+        (OutputBuffer::CStringBuffer::~CStringBuffer):
+        (OutputBuffer::CStringBuffer::allocate):
+        (OutputBuffer::CStringBuffer::copy):
+        (OutputBuffer::CStringBuffer::buffer):
+        (OutputBuffer::VectorCharAppendBuffer::VectorCharAppendBuffer):
+        (OutputBuffer::VectorCharAppendBuffer::~VectorCharAppendBuffer):
+        (OutputBuffer::VectorCharAppendBuffer::allocate):
+        (OutputBuffer::VectorCharAppendBuffer::copy):
+        (OutputBuffer::internalNormalizeLineEndingsToCRLF):
+        (WebCore::normalizeToCROrLF):
+        (WebCore::normalizeLineEndingsToCRLF):
+        (WebCore::normalizeLineEndingsToCR):
+        (WebCore::normalizeLineEndingsToLF):
+        (WebCore::normalizeLineEndingsToNative):
+        * platform/text/LineEnding.h:
+
 2010-10-12  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r69589.
