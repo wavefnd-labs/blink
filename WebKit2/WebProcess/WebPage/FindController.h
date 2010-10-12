@@ -36,6 +36,7 @@ namespace WebCore {
 
 namespace WebKit {
 
+class FindPageOverlay;
 class WebPage;
 
 class FindController {
@@ -47,8 +48,11 @@ public:
     void findString(const String&, FindDirection, FindOptions, unsigned maxNumMatches);
     void hideFindUI();
 
+    void findPageOverlayDestroyed();
+
 private:
     WebPage* m_webPage;
+    FindPageOverlay* m_findPageOverlay;
 };
 
 } // namespace WebKit
