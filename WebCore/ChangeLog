@@ -1,3 +1,98 @@
+2010-10-07  Pavel Podivilov  <podivilov@chromium.org>
+
+        Reviewed by Pavel Feldman.
+
+        Web Inspector: refactoring of native breakpoints.
+        https://bugs.webkit.org/show_bug.cgi?id=47360
+
+        Make DOM, EventListener and XHR breakpoints subclasses of NativeBreakpoint class.
+        Move stuff that depends on breakpoint type to corresponding subclass.
+
+        * inspector/Inspector.idl:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::didCommitLoad):
+        (WebCore::InspectorController::setNativeBreakpoint):
+        (WebCore::InspectorController::removeNativeBreakpoint):
+        (WebCore::InspectorController::findEventListenerBreakpoint):
+        (WebCore::InspectorController::findXHRBreakpoint):
+        * inspector/InspectorController.h:
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::setDOMBreakpoint):
+        (WebCore::InspectorDOMAgent::removeDOMBreakpoint):
+        (WebCore::InspectorDOMAgent::descriptionForDOMEvent):
+        (WebCore::InspectorDOMAgent::didRemoveDOMNode):
+        (WebCore::InspectorDOMAgent::removeBreakpointsForNode):
+        (WebCore::InspectorDOMAgent::createBreakpointId):
+        * inspector/InspectorDOMAgent.h:
+        * inspector/InspectorDebuggerAgent.h:
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore::InspectorInstrumentation::willInsertDOMNodeImpl):
+        (WebCore::InspectorInstrumentation::willRemoveDOMNodeImpl):
+        (WebCore::InspectorInstrumentation::willModifyDOMAttrImpl):
+        (WebCore::InspectorInstrumentation::willSendXMLHttpRequestImpl):
+        (WebCore::InspectorInstrumentation::willDispatchEventImpl):
+        * inspector/front-end/BreakpointManager.js:
+        (WebInspector.BreakpointManager):
+        (WebInspector.BreakpointManager.prototype.reset):
+        (WebInspector.BreakpointManager.prototype.createDOMBreakpoint):
+        (WebInspector.BreakpointManager.prototype.createEventListenerBreakpoint):
+        (WebInspector.BreakpointManager.prototype.createXHRBreakpoint):
+        (WebInspector.BreakpointManager.prototype._removeNativeBreakpoint):
+        (WebInspector.BreakpointManager.prototype._setNativeBreakpointOnBackend.didSetNativeBreakpoint):
+        (WebInspector.BreakpointManager.prototype._setNativeBreakpointOnBackend):
+        (WebInspector.BreakpointManager.prototype.debuggerPaused):
+        (WebInspector.BreakpointManager.prototype.debuggerResumed):
+        (WebInspector.BreakpointManager.prototype.restoreDOMBreakpoints.restoreBreakpointsForNode):
+        (WebInspector.BreakpointManager.prototype.restoreDOMBreakpoints):
+        (WebInspector.NativeBreakpoint):
+        (WebInspector.NativeBreakpoint.prototype.remove):
+        (WebInspector.NativeBreakpoint.prototype.get _frontendId):
+        (WebInspector.NativeBreakpoint.prototype.get _type):
+        (WebInspector.NativeBreakpoint.prototype._compare):
+        (WebInspector.NativeBreakpoint.prototype._onRemove):
+        (WebInspector.DOMBreakpoint):
+        (WebInspector.DOMBreakpoint.prototype.click):
+        (WebInspector.DOMBreakpoint.prototype.compareTo):
+        (WebInspector.DOMBreakpoint.prototype.populateLabelElement):
+        (WebInspector.DOMBreakpoint.prototype.populateStatusMessageElement.formatters.s):
+        (WebInspector.DOMBreakpoint.prototype.populateStatusMessageElement.append):
+        (WebInspector.DOMBreakpoint.prototype.populateStatusMessageElement):
+        (WebInspector.DOMBreakpoint.prototype._condition):
+        (WebInspector.DOMBreakpoint.prototype._onRemove):
+        (WebInspector.EventListenerBreakpoint):
+        (WebInspector.EventListenerBreakpoint.prototype.compareTo):
+        (WebInspector.EventListenerBreakpoint.prototype.label):
+        (WebInspector.EventListenerBreakpoint.prototype.populateStatusMessageElement):
+        (WebInspector.EventListenerBreakpoint.prototype._condition):
+        (WebInspector.XHRBreakpoint):
+        (WebInspector.XHRBreakpoint.prototype.compareTo):
+        (WebInspector.XHRBreakpoint.prototype.populateLabelElement):
+        (WebInspector.XHRBreakpoint.prototype.populateStatusMessageElement):
+        (WebInspector.XHRBreakpoint.prototype._condition):
+        (WebInspector.domBreakpointTypeLabel):
+        (WebInspector.domBreakpointTypeContextMenuLabel):
+        * inspector/front-end/BreakpointsSidebarPane.js:
+        (WebInspector.BreakpointItem):
+        (WebInspector.BreakpointItem.prototype._breakpointClicked):
+        (WebInspector.EventListenerBreakpointsSidebarPane.prototype._populate):
+        * inspector/front-end/CallStackSidebarPane.js:
+        (WebInspector.CallStackSidebarPane):
+        (WebInspector.CallStackSidebarPane.prototype.registerShortcuts):
+        (WebInspector.CallStackSidebarPane.prototype._breakpointHit):
+        * inspector/front-end/DOMAgent.js:
+        (WebInspector.DOMNode):
+        (WebInspector.DOMAgent.prototype._setDocument):
+        (WebInspector.DOMAgent.prototype._removeBreakpoints):
+        (WebInspector.childNodeRemoved):
+        * inspector/front-end/ElementsTreeOutline.js:
+        (WebInspector.ElementsTreeElement.prototype._populateTagContextMenu):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype.debuggerPaused):
+        * inspector/front-end/inspector.js:
+        (WebInspector.createDOMBreakpointsSidebarPane.breakpointAdded):
+        (WebInspector.createDOMBreakpointsSidebarPane):
+        (WebInspector.reset):
+
 2010-10-11  Eric Uhrhane  <ericu@chromium.org>
 
         Reviewed by Dumitru Daniliuc.
