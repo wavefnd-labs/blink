@@ -1,3 +1,49 @@
+2010-10-12  Chris Marrin  <cmarrin@apple.com>
+
+        Reviewed by Darin Adler.
+
+        Manage DrawingBuffer lifetime in GraphicsContext3D
+        https://bugs.webkit.org/show_bug.cgi?id=47501
+
+        GraphicsContext3D and DrawingBuffer are now Refcounted. DrawingBuffer
+        has a RefPtr to GraphicsContext3D to ensure the proper lifetime. 
+        DrawingBuffer is now created by GraphicsContext3D. Also DrawingBuffer
+        refers to GraphicsContext3D rather than SharedGraphicsContext3D.
+
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::CanvasRenderingContext2D):
+        * html/canvas/CanvasRenderingContext2D.h:
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore::WebGLRenderingContext::create):
+        (WebCore::WebGLRenderingContext::WebGLRenderingContext):
+        * html/canvas/WebGLRenderingContext.h:
+        * platform/graphics/GraphicsContext3D.cpp:
+        (WebCore::GraphicsContext3D::createDrawingBuffer):
+        * platform/graphics/GraphicsContext3D.h:
+        * platform/graphics/chromium/DrawingBufferChromium.cpp:
+        (WebCore::generateColorTexture):
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore::DrawingBuffer::~DrawingBuffer):
+        (WebCore::DrawingBuffer::publishToPlatformLayer):
+        (WebCore::DrawingBuffer::reset):
+        * platform/graphics/gpu/DrawingBuffer.cpp:
+        (WebCore::DrawingBuffer::create):
+        (WebCore::DrawingBuffer::clear):
+        (WebCore::DrawingBuffer::bind):
+        * platform/graphics/gpu/DrawingBuffer.h:
+        (WebCore::DrawingBuffer::graphicsContext3D):
+        * platform/graphics/gpu/SharedGraphicsContext3D.cpp:
+        (WebCore::SharedGraphicsContext3D::create):
+        (WebCore::SharedGraphicsContext3D::SharedGraphicsContext3D):
+        * platform/graphics/gpu/SharedGraphicsContext3D.h:
+        (WebCore::SharedGraphicsContext3D::graphicsContext3D):
+        * platform/graphics/gpu/mac/DrawingBufferMac.mm:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore::DrawingBuffer::~DrawingBuffer):
+        (WebCore::DrawingBuffer::reset):
+        * platform/graphics/mac/GraphicsContext3DMac.mm:
+        (WebCore::GraphicsContext3D::create):
+
 2010-10-12  Jian Li  <jianli@chromium.org>
 
         Reviewed by David Levin.
