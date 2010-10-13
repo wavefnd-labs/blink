@@ -1,3 +1,38 @@
+2010-10-06  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Dirk Schulze.
+
+        [Cairo] Activate ContextShadow in all places where shadows are drawn
+        https://bugs.webkit.org/show_bug.cgi?id=46475
+
+        Turn on ContextShadow for the Cairo port and remove all old shadow code.
+        Shadow tiling optimizations will be added in a followup patch to ContextShadowCairo.
+
+        * platform/graphics/GraphicsContext.h: Add a ContextShadow forward declaration for Cairo.
+        * platform/graphics/cairo/FontCairo.cpp: Switch to using ContextShadow.
+        (WebCore::prepareContextForGlyphDrawing): Added this helper which sets up the translation
+        on the specified cairo_t to prepare for drawing glyphs.
+        (WebCore::drawGlyphsToContext): Added this helper which draws the glyphs to a cairo_t,
+        while properly handling glyphs with synthetic bold.
+        (WebCore::Font::drawGlyphs): Removed old shadow code and replaced it with ContextShadow usage.
+        * platform/graphics/cairo/GraphicsContextCairo.cpp:
+        (WebCore::drawPathShadow): Modified this to use ContextShadow and to take an enum
+        argument specifying whether to fill or stroke the solid figure for the shadow.
+        (WebCore::fillCurrentCairoPath): Updated drawPathShadow call.
+        (WebCore::strokeCurrentCairoPath): Ditto.
+        (WebCore::GraphicsContext::savePlatformState): Save the ContextShadow.
+        (WebCore::GraphicsContext::restorePlatformState): Restore the ContextShadow.
+        (WebCore::GraphicsContext::drawPath): Updated drawPathShadow call.
+        (WebCore::GraphicsContext::fillRect): Uses ContextShadow now.
+        (WebCore::GraphicsContext::setPlatformShadow): Uses ContextShadow now.
+        (WebCore::GraphicsContext::contextShadow): Added.
+        (WebCore::GraphicsContext::clearPlatformShadow): Clears the ContextShadow member.
+        (WebCore::GraphicsContext::fillRoundedRect): Updated drawPathShadow call.
+        * platform/graphics/cairo/GraphicsContextPlatformPrivateCairo.h:
+        (WebCore::GraphicsContextPlatformPrivate::hasShadow): Added.
+        * platform/graphics/cairo/ImageCairo.cpp:
+        (WebCore::BitmapImage::draw): Updated to use ContextShadow.
+
 2010-10-13  John Knottenbelt  <jknotten@chromium.org>
 
         Reviewed by Steve Block.
