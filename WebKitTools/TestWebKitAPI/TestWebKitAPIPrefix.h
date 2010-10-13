@@ -24,14 +24,18 @@
  */
 
 
-#include <stdint.h>
-
-#include <WebKit2/WebKit2.h>
-
 #if __APPLE__
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 #endif
 
+#elif defined(WIN32) || defined(_WIN32)
+
+#define NOMINMAX
+
 #endif
+
+#include <stdint.h>
+
+#include <WebKit2/WebKit2.h>
