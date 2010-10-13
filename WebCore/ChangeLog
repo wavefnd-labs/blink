@@ -1,3 +1,46 @@
+2010-10-13  Yury Semikhatsky  <yurys@chromium.org>
+
+        Reviewed by Pavel Feldman.
+
+        Web Inspector: stack information is inconsistent between console.trace and runtime errors.
+        https://bugs.webkit.org/show_bug.cgi?id=47252
+
+        * console.trace() is now formatted the same way as other stack traces
+
+        * If there is //@ sourceURL=url line at the end of eval'ed script source
+        the url will be shown in the stack traces for script. That is why ScriptCallFrame::sourceURL
+        type has changed from KURL to String.
+
+        Tests: inspector/console-trace-in-eval.html
+               inspector/console-uncaught-exception-in-eval.html
+
+        * bindings/js/ScriptCallFrame.cpp:
+        (WebCore::ScriptCallFrame::ScriptCallFrame):
+        * bindings/js/ScriptCallFrame.h:
+        (WebCore::ScriptCallFrame::sourceURL):
+        * bindings/v8/ScriptCallFrame.cpp:
+        (WebCore::ScriptCallFrame::ScriptCallFrame):
+        * bindings/v8/ScriptCallFrame.h:
+        (WebCore::ScriptCallFrame::sourceURL):
+        * bindings/v8/ScriptCallStack.cpp:
+        (WebCore::getFrameLocation):
+        (WebCore::ScriptCallStack::create):
+        * bindings/v8/ScriptCallStack.h:
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::setCaptureCallStackForUncaughtExceptions):
+        * bindings/v8/custom/V8ConsoleCustom.cpp:
+        (WebCore::V8Console::traceCallback):
+        * inspector/ConsoleMessage.cpp:
+        (WebCore::ConsoleMessage::CallFrame::buildInspectorObject):
+        (WebCore::ConsoleMessage::ConsoleMessage):
+        * inspector/ConsoleMessage.h:
+        * inspector/front-end/ConsoleView.js:
+        (WebInspector.ConsoleMessage.prototype._formatMessage):
+        * page/Console.cpp:
+        (WebCore::Console::addMessage):
+        (WebCore::Console::count):
+        (WebCore::Console::timeEnd):
+
 2010-10-13  Kent Tamura  <tkent@chromium.org>
 
         Unreviewed, a trivial change.
