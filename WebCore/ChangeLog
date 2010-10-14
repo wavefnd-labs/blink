@@ -1,3 +1,196 @@
+2010-10-13  Sergio Villar Senin  <svillar@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        [GTK] Add HTTP caching support
+        https://bugs.webkit.org/show_bug.cgi?id=44261
+
+        This patch adds HTTP caching support to libsoup networking backend.
+        This code will eventually be part of libsoup, but has been temporarily
+        imported into the WebCore tree for testing purposes. All libsoup code
+        is located in WebCore/platform/network/soup/cache. The webkit prefix
+        was added to all the symbols to prevent problems when this lands in
+        libsoup. Some external API was also added under webkit/ directory and
+        will be used by library clients to enable HTTP caching.
+
+        There are two parts to this imported code, the first one is the code
+        under WebCore/platform/network/soup/cache/ that contains all the
+        SoupURILoader code that supports the development of the cache. The
+        second part is the HTTP cache implementation located in
+        WebCore/platform/network/soup/cache/webkit/.
+
+        * GNUmakefile.am:
+        * platform/network/soup/cache/soup-directory-input-stream.c: Added.
+        (webkit_soup_directory_input_stream_parse_info):
+        (webkit_soup_directory_input_stream_read_next_file):
+        (webkit_soup_directory_input_stream_read):
+        (webkit_soup_directory_input_stream_close):
+        (webkit_soup_directory_input_stream_class_init):
+        (webkit_soup_directory_input_stream_init):
+        (webkit_soup_directory_input_stream_new):
+        * platform/network/soup/cache/soup-directory-input-stream.h: Added.
+        * platform/network/soup/cache/soup-http-input-stream.c: Added.
+        (webkit_soup_http_input_stream_finalize):
+        (webkit_soup_http_input_stream_class_init):
+        (webkit_soup_http_input_stream_seekable_iface_init):
+        (webkit_soup_http_input_stream_init):
+        (webkit_soup_http_input_stream_queue_message):
+        (webkit_soup_http_input_stream_new):
+        (webkit_soup_http_input_stream_got_headers):
+        (webkit_soup_http_input_stream_got_chunk):
+        (webkit_soup_http_input_stream_finished):
+        (webkit_soup_http_input_stream_cancelled):
+        (webkit_soup_http_input_stream_prepare_for_io):
+        (webkit_soup_http_input_stream_done_io):
+        (set_error_if_http_failed):
+        (read_from_leftover):
+        (webkit_soup_http_input_stream_send_internal):
+        (send_sync_finished):
+        (webkit_soup_http_input_stream_send):
+        (webkit_soup_http_input_stream_read):
+        (webkit_soup_http_input_stream_close):
+        (wrapper_callback):
+        (send_async_thread):
+        (webkit_soup_http_input_stream_send_async_in_thread):
+        (send_async_finished):
+        (webkit_soup_http_input_stream_send_async_internal):
+        (webkit_soup_http_input_stream_send_async):
+        (webkit_soup_http_input_stream_send_finish):
+        (read_async_done):
+        (webkit_soup_http_input_stream_read_async):
+        (webkit_soup_http_input_stream_read_finish):
+        (webkit_soup_http_input_stream_close_async):
+        (webkit_soup_http_input_stream_close_finish):
+        (webkit_soup_http_input_stream_tell):
+        (webkit_soup_http_input_stream_can_seek):
+        (webkit_soup_http_input_stream_seek):
+        (webkit_soup_http_input_stream_can_truncate):
+        (webkit_soup_http_input_stream_truncate):
+        (webkit_soup_http_input_stream_get_message):
+        * platform/network/soup/cache/soup-http-input-stream.h: Added.
+        * platform/network/soup/cache/soup-request-data.c: Added.
+        (webkit_soup_request_data_init):
+        (webkit_soup_request_data_finalize):
+        (webkit_soup_request_data_check_uri):
+        (uri_decoded_copy):
+        (webkit_soup_request_data_send):
+        (webkit_soup_request_data_get_content_length):
+        (webkit_soup_request_data_get_content_type):
+        (webkit_soup_request_data_class_init):
+        * platform/network/soup/cache/soup-request-data.h: Added.
+        * platform/network/soup/cache/soup-request-file.c: Added.
+        (webkit_soup_request_file_get_file):
+        (webkit_soup_request_file_init):
+        (webkit_soup_request_file_finalize):
+        (webkit_soup_request_file_check_uri):
+        (webkit_soup_request_file_ftp_main_loop_quit):
+        (webkit_soup_request_file_ensure_file_ftp):
+        (webkit_soup_request_file_ensure_file):
+        (webkit_soup_request_file_send):
+        (webkit_soup_request_file_send_async_thread):
+        (webkit_soup_request_file_send_async):
+        (webkit_soup_request_file_send_finish):
+        (webkit_soup_request_file_get_content_length):
+        (webkit_soup_request_file_get_content_type):
+        (webkit_soup_request_file_class_init):
+        * platform/network/soup/cache/soup-request-file.h: Added.
+        * platform/network/soup/cache/soup-request-http.c: Added.
+        (webkit_soup_request_http_get_message):
+        (webkit_soup_request_http_init):
+        (webkit_soup_request_http_check_uri):
+        (webkit_soup_request_http_finalize):
+        (webkit_soup_request_http_send):
+        (sent_async):
+        (conditional_get_ready_cb):
+        (send_async_cb):
+        (webkit_soup_request_http_send_async):
+        (webkit_soup_request_http_send_finish):
+        (webkit_soup_request_http_get_content_length):
+        (webkit_soup_request_http_get_content_type):
+        (webkit_soup_request_http_class_init):
+        * platform/network/soup/cache/soup-request-http.h: Added.
+        * platform/network/soup/cache/soup-request.c: Added.
+        (webkit_soup_request_init):
+        (webkit_soup_request_finalize):
+        (webkit_soup_request_set_property):
+        (webkit_soup_request_get_property):
+        (webkit_soup_request_initable_init):
+        (webkit_soup_request_default_check_uri):
+        (webkit_soup_request_default_send_async):
+        (webkit_soup_request_default_send_finish):
+        (webkit_soup_request_send):
+        (webkit_soup_request_send_async):
+        (webkit_soup_request_send_finish):
+        (webkit_soup_request_class_init):
+        (webkit_soup_request_initable_interface_init):
+        (webkit_soup_request_get_uri):
+        (webkit_soup_request_get_session):
+        (webkit_soup_request_get_content_length):
+        (webkit_soup_request_get_content_type):
+        * platform/network/soup/cache/soup-request.h: Added.
+        * platform/network/soup/cache/soup-requester.c: Added.
+        (webkit_soup_requester_init):
+        (finalize):
+        (webkit_soup_requester_class_init):
+        (init_request_types):
+        (webkit_soup_requester_new):
+        (webkit_soup_requester_request):
+        (webkit_soup_requester_request_uri):
+        (webkit_soup_scheme_is_valid):
+        (webkit_soup_requester_add_protocol):
+        (webkit_soup_requester_remove_protocol):
+        (webkit_soup_error_quark):
+        * platform/network/soup/cache/soup-requester.h: Added.
+        * platform/network/soup/cache/webkit/soup-cache-private.h: Added.
+        * platform/network/soup/cache/webkit/soup-cache.c: Added.
+        (get_cacheability):
+        (webkit_soup_cache_entry_free):
+        (copy_headers):
+        (update_headers):
+        (webkit_soup_cache_entry_get_current_age):
+        (webkit_soup_cache_entry_is_fresh_enough):
+        (webkit_soup_message_get_cache_key):
+        (webkit_soup_cache_entry_set_freshness):
+        (webkit_soup_cache_entry_new):
+        (webkit_soup_cache_writing_fixture_free):
+        (close_ready_cb):
+        (write_ready_cb):
+        (msg_got_chunk_cb):
+        (msg_got_body_cb):
+        (webkit_soup_cache_entry_delete):
+        (lru_compare_func):
+        (cache_accepts_entries_of_size):
+        (make_room_for_new_entry):
+        (webkit_soup_cache_entry_insert_by_key):
+        (msg_restarted_cb):
+        (append_to_ready_cb):
+        (msg_got_headers_cb):
+        (webkit_soup_cache_send_response):
+        (request_started):
+        (attach):
+        (webkit_soup_cache_session_feature_init):
+        (webkit_soup_cache_init):
+        (webkit_soup_cache_finalize):
+        (webkit_soup_cache_set_property):
+        (webkit_soup_cache_get_property):
+        (webkit_soup_cache_constructed):
+        (webkit_soup_cache_type_get_type):
+        (webkit_soup_cache_class_init):
+        (webkit_soup_cache_new):
+        (webkit_soup_cache_has_response):
+        (webkit_soup_cache_get_cacheability):
+        (force_flush_timeout):
+        (webkit_soup_cache_flush):
+        (remove_cache_item):
+        (webkit_soup_cache_clear):
+        (webkit_soup_cache_generate_conditional_request):
+        (pack_entry):
+        (webkit_soup_cache_dump):
+        (webkit_soup_cache_load):
+        (webkit_soup_cache_set_max_size):
+        (webkit_soup_cache_get_max_size):
+        * platform/network/soup/cache/webkit/soup-cache.h: Added.
+
 2010-10-13  Gavin Barraclough  <barraclough@apple.com>
 
         Chromium build fix.
