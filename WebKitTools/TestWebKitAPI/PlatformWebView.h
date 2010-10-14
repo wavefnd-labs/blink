@@ -26,6 +26,8 @@
 #ifndef PlatformWebView_h
 #define PlatformWebView_h
 
+#include <wtf/Platform.h>
+
 #ifdef __APPLE__
 #ifdef __OBJC__
 @class WKView;
@@ -43,6 +45,10 @@ typedef HWND PlatformWindow;
 
 namespace TestWebKitAPI {
 
+#if PLATFORM(WIN)
+class WindowMessageObserver;
+#endif
+
 class PlatformWebView {
 public:
     PlatformWebView(WKPageNamespaceRef);
@@ -54,10 +60,24 @@ public:
     void focus();
 
     void simulateSpacebarKeyPress();
+    void simulateAltKeyPress();
+
+#if PLATFORM(WIN)
+    void setParentWindowMessageObserver(WindowMessageObserver* observer) { m_parentWindowMessageObserver = observer; }
+#endif
 
 private:
+#if PLATFORM(WIN)
+    static void registerWindowClass();
+    static LRESULT CALLBACK wndProc(HWND, UINT message, WPARAM, LPARAM);
+#endif
+
     PlatformWKView m_view;
     PlatformWindow m_window;
+
+#if PLATFORM(WIN)
+    WindowMessageObserver* m_parentWindowMessageObserver;
+#endif
 };
 
 } // namespace TestWebKitAPI
