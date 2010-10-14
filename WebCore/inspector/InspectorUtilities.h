@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2009 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,37 +28,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef InspectorResourceAgent_h
-#define InspectorResourceAgent_h
+#ifndef InspectorUtilities_h
+#define InspectorUtilities_h
 
-#include "InspectorResource.h"
-
-#include <wtf/PassRefPtr.h>
+#include "PlatformString.h"
 
 #if ENABLE(INSPECTOR)
 
-namespace WTF {
-class String;
-}
-
 namespace WebCore {
 
-class CachedResource;
+class CSSStyleDeclaration;
+class CSSStyleRule;
+class CSSStyleSheet;
 class Document;
 class KURL;
-class SharedBuffer;
+class StyleBase;
 
-class InspectorResourceAgent {
+class InspectorUtilities {
 public:
-    static bool resourceContent(Document*, const KURL&, String* result);
-    static bool resourceContentBase64(Document*, const KURL&, String* result);
-    static PassRefPtr<SharedBuffer> resourceData(Document*, const KURL&, String* textEncodingName);
-    static InspectorResource::Type cachedResourceType(Document*, const KURL&);
-    static CachedResource* cachedResource(Document*, const KURL&);
+    static bool resourceContentForURL(const KURL& url, Document* frameDocument, String* result);
 };
 
 } // namespace WebCore
 
 #endif // ENABLE(INSPECTOR)
 
-#endif // !defined(InspectorResourceAgent_h)
+#endif // !defined(InspectorUtilities_h)
