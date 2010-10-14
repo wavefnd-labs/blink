@@ -1,3 +1,38 @@
+2010-10-13  Sergio Villar Senin  <svillar@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        WebKitGtk+ to use the new API from the imported SoupURILoader code
+
+        [GTK] Add HTTP caching support
+        https://bugs.webkit.org/show_bug.cgi?id=44261
+
+        ResourceHandleSoup now does everything via SoupURILoader. This means
+        that all URLs are handled via the same code path, where WebCore simply
+        asks libsoup for a WebKitSoupRequest and the request returns an input
+        stream. Many of ResourceHandleSoup's data members are now PlatformRefPtr
+        as well, to simplify reference counting
+
+        * platform/network/ResourceHandleInternal.h:
+        (WebCore::ResourceHandleInternal::ResourceHandleInternal):
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::ResourceHandleInternal::~ResourceHandleInternal):
+        (WebCore::ResourceHandle::~ResourceHandle):
+        (WebCore::restartedCallback):
+        (WebCore::gotChunkCallback):
+        (WebCore::parseDataUrl):
+        (WebCore::cleanupSoupRequestOperation):
+        (WebCore::sendRequestCallback):
+        (WebCore::startHttp):
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::cancel):
+        (WebCore::closeCallback):
+        (WebCore::readCallback):
+        (WebCore::startGio):
+        * platform/network/soup/ResourceRequest.h:
+        * platform/network/soup/ResourceRequestSoup.cpp:
+        (WebCore::ResourceRequest::updateSoupMessage):
+
 2010-10-12  Abhishek Arya  <inferno@chromium.org>
 
         Reviewed by Darin Adler.
