@@ -1,3 +1,43 @@
+2010-10-14  Andreas Kling  <kling@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Canvas: "currentColor" should inherit the canvas element's color
+        https://bugs.webkit.org/show_bug.cgi?id=40273
+
+        Add support for "currentColor" in CanvasRenderingContext2D APIs.
+        If the canvas is in-document, "currentColor" is replaced by canvas.style.color,
+        otherwise we use fully opaque black.
+
+        For gradient addColorStop(), "currentColor" always means fully opaque black.
+
+        Spec link:
+        http://www.whatwg.org/specs/web-apps/current-work/#2dcontext
+
+        Test: fast/canvas/canvas-currentColor.html
+
+        * html/canvas/CanvasGradient.cpp:
+        (WebCore::CanvasGradient::addColorStop):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::setStrokeStyle):
+        (WebCore::CanvasRenderingContext2D::setFillStyle):
+        (WebCore::CanvasRenderingContext2D::setShadowColor):
+        (WebCore::CanvasRenderingContext2D::setShadow):
+        * html/canvas/CanvasStyle.cpp:
+        (WebCore::parseColor):
+        (WebCore::currentColor):
+        (WebCore::parseColorOrCurrentColor):
+        (WebCore::CanvasStyle::CanvasStyle):
+        (WebCore::CanvasStyle::createFromString):
+        (WebCore::CanvasStyle::createFromStringWithOverrideAlpha):
+        (WebCore::CanvasStyle::isEquivalentColor):
+        (WebCore::CanvasStyle::applyStrokeColor):
+        (WebCore::CanvasStyle::applyFillColor):
+        * html/canvas/CanvasStyle.h:
+        (WebCore::CanvasStyle::isCurrentColor):
+        (WebCore::CanvasStyle::hasOverrideAlpha):
+        (WebCore::CanvasStyle::overrideAlpha):
+
 2010-10-08  Yury Semikhatsky  <yurys@chromium.org>
 
         Reviewed by Pavel Feldman.
