@@ -1,3 +1,104 @@
+2010-10-13  Jeremy Orlow  <jorlow@chromium.org>
+
+        Reviewed by Nate Chapin.
+
+        IndexedDB should fire some errors synchronously
+        https://bugs.webkit.org/show_bug.cgi?id=47530
+
+        Add dumb plumbing to pass around exception codes.
+        Utilize that plumbing in the backend to fire some
+        errors synchronously.
+        Verify that create/remove* functions are only called
+        in setVersionTransactions (and raise when not).
+        Remove plumbing for obsolete IDBDatabase.objectStore
+        Remove obsolete mode param.
+
+        * storage/IDBCursor.cpp:
+        (WebCore::IDBCursor::update):
+        (WebCore::IDBCursor::continueFunction):
+        (WebCore::IDBCursor::remove):
+        * storage/IDBCursor.h:
+        (WebCore::IDBCursor::continueFunction):
+        * storage/IDBCursor.idl:
+        * storage/IDBCursorBackendImpl.cpp:
+        (WebCore::IDBCursorBackendImpl::update):
+        (WebCore::IDBCursorBackendImpl::continueFunction):
+        (WebCore::IDBCursorBackendImpl::remove):
+        * storage/IDBCursorBackendImpl.h:
+        * storage/IDBCursorBackendInterface.h:
+        * storage/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::IDBDatabase):
+        (WebCore::IDBDatabase::createObjectStore):
+        (WebCore::IDBDatabase::removeObjectStore):
+        (WebCore::IDBDatabase::setVersion):
+        (WebCore::IDBDatabase::transaction):
+        * storage/IDBDatabase.h:
+        (WebCore::IDBDatabase::createObjectStore):
+        (WebCore::IDBDatabase::transaction):
+        * storage/IDBDatabase.idl:
+        * storage/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::createObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::objectStore):
+        (WebCore::IDBDatabaseBackendImpl::removeObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::setVersion):
+        (WebCore::IDBDatabaseBackendImpl::transaction):
+        * storage/IDBDatabaseBackendImpl.h:
+        * storage/IDBDatabaseBackendInterface.h:
+        * storage/IDBFactory.cpp:
+        (WebCore::IDBFactory::open):
+        * storage/IDBFactory.h:
+        (WebCore::IDBFactory::open):
+        * storage/IDBFactory.idl:
+        * storage/IDBIndex.cpp:
+        (WebCore::IDBIndex::openCursor):
+        (WebCore::IDBIndex::openKeyCursor):
+        (WebCore::IDBIndex::get):
+        (WebCore::IDBIndex::getKey):
+        * storage/IDBIndex.h:
+        (WebCore::IDBIndex::openCursor):
+        (WebCore::IDBIndex::openKeyCursor):
+        * storage/IDBIndex.idl:
+        * storage/IDBIndexBackendImpl.cpp:
+        (WebCore::IDBIndexBackendImpl::openCursor):
+        (WebCore::IDBIndexBackendImpl::openKeyCursor):
+        (WebCore::IDBIndexBackendImpl::get):
+        (WebCore::IDBIndexBackendImpl::getKey):
+        * storage/IDBIndexBackendImpl.h:
+        * storage/IDBIndexBackendInterface.h:
+        * storage/IDBObjectStore.cpp:
+        (WebCore::IDBObjectStore::get):
+        (WebCore::IDBObjectStore::add):
+        (WebCore::IDBObjectStore::put):
+        (WebCore::IDBObjectStore::remove):
+        (WebCore::IDBObjectStore::createIndex):
+        (WebCore::IDBObjectStore::index):
+        (WebCore::IDBObjectStore::removeIndex):
+        (WebCore::IDBObjectStore::openCursor):
+        * storage/IDBObjectStore.h:
+        (WebCore::IDBObjectStore::add):
+        (WebCore::IDBObjectStore::put):
+        (WebCore::IDBObjectStore::createIndex):
+        (WebCore::IDBObjectStore::openCursor):
+        * storage/IDBObjectStore.idl:
+        * storage/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::get):
+        (WebCore::IDBObjectStoreBackendImpl::put):
+        (WebCore::IDBObjectStoreBackendImpl::remove):
+        (WebCore::IDBObjectStoreBackendImpl::createIndex):
+        (WebCore::IDBObjectStoreBackendImpl::index):
+        (WebCore::IDBObjectStoreBackendImpl::removeIndex):
+        (WebCore::IDBObjectStoreBackendImpl::openCursor):
+        * storage/IDBObjectStoreBackendImpl.h:
+        (WebCore::IDBObjectStoreBackendImpl::name):
+        (WebCore::IDBObjectStoreBackendImpl::keyPath):
+        (WebCore::IDBObjectStoreBackendImpl::autoIncrement):
+        * storage/IDBObjectStoreBackendInterface.h:
+        * storage/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::objectStore):
+        * storage/IDBTransaction.h:
+        * storage/IDBTransactionBackendImpl.cpp:
+        (WebCore::IDBTransactionBackendImpl::objectStore):
+
 2010-10-13  Sergio Villar Senin  <svillar@igalia.com>
 
         Reviewed by Martin Robinson.
