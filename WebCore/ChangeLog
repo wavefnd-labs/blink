@@ -1,3 +1,33 @@
+2010-10-15  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Match the elements supported by execCommand('formatBlock') and queryCommandValue('formatBlock')
+        https://bugs.webkit.org/show_bug.cgi?id=47712
+
+        Extended queryCommandValue('formatBlock', false, null) to support article, aside, blockquote, dd, dl,
+        div, dl, dt, dl, footer, header, hgroup, nav, and section. Because this makes isElementForFormatBlockCommand
+        in Editor.cpp and FormatBlockCommand::isElementToApplyInFormatBlockCommand identical, they are merged and moved
+        to FormatBlockCommand.cpp
+
+        Tests are added to editing/execCommand/query-format-block.html
+
+        * editing/Editor.cpp: Removed isElementForFormatBlockCommand and Editor::elementForFormatBlockCommand.
+        * editing/Editor.h:
+        * editing/EditorCommand.cpp:
+        (WebCore::executeFormatBlock): Removed the check of tag name; the check is moved into FormatBlockCommand.
+        (WebCore::valueFormatBlock): Calls FormatBlockCommand::elementForFormatBlockCommand.
+        * editing/FormatBlockCommand.cpp:
+        (WebCore::isElementForFormatBlock):
+        (WebCore::FormatBlockCommand::FormatBlockCommand):
+        (WebCore::FormatBlockCommand::formatSelection): Added to check the tag name. Exit early if the specified tag name
+        is not what FormatBlock should apply. Set m_didApply true if m_didApply did apply the element.
+        (WebCore::FormatBlockCommand::formatRange): Moved from Editor.cpp.  Takes Range* instead of accessing selection directly.
+        (WebCore::FormatBlockCommand::elementForFormatBlockCommand): Moved from Editor.cpp
+        (WebCore::enclosingBlockToSplitTreeTo): Calls isElementForFormatBlock.
+        * editing/FormatBlockCommand.h:
+        (WebCore::FormatBlockCommand::didApply): Added.
+
 2010-10-15  Dirk Schulze  <krit@webkit.org>
 
         Reviewed by Nikolas Zimmermann.
