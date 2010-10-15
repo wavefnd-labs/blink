@@ -1,3 +1,86 @@
+2010-10-14  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Reviewed by Pavel Feldman.
+
+        Web Inspector: inspector settings/properties/states management
+        should be extracted into separate class.
+
+        We have a lot of flags/values in InspectorController.
+        Some flags are persisting into profile.
+        Others are part of inspector state for frontend.
+        All these flags should keep their values after navigation.
+        It'd be better to extract these flags/values into separate
+        class which will care about theirs lifetime.
+
+        https://bugs.webkit.org/show_bug.cgi?id=47275
+
+        * CMakeLists.txt:
+        * GNUmakefile.am:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.pro:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::InspectorController):
+        (WebCore::InspectorController::inspectorStartsAttached):
+        (WebCore::InspectorController::setInspectorStartsAttached):
+        (WebCore::InspectorController::setInspectorAttachedHeight):
+        (WebCore::InspectorController::inspectorAttachedHeight):
+        (WebCore::InspectorController::searchingForNodeInPage):
+        (WebCore::InspectorController::resourceTrackingEnabled):
+        (WebCore::InspectorController::saveApplicationSettings):
+        (WebCore::InspectorController::getInspectorState):
+        (WebCore::InspectorController::restoreInspectorStateFromCookie):
+        (WebCore::InspectorController::getSettings):
+        (WebCore::InspectorController::storeLastActivePanel):
+        (WebCore::InspectorController::mouseDidMoveOverElement):
+        (WebCore::InspectorController::handleMousePress):
+        (WebCore::InspectorController::setSearchingForNode):
+        (WebCore::InspectorController::setMonitoringXHREnabled):
+        (WebCore::InspectorController::showPanel):
+        (WebCore::InspectorController::disconnectFrontend):
+        (WebCore::InspectorController::populateScriptObjects):
+        (WebCore::InspectorController::restoreDebugger):
+        (WebCore::InspectorController::restoreProfiler):
+        (WebCore::InspectorController::getTrackedResource):
+        (WebCore::InspectorController::didLoadResourceFromMemoryCache):
+        (WebCore::InspectorController::identifierForInitialRequest):
+        (WebCore::InspectorController::resourceRetrievedByXMLHttpRequest):
+        (WebCore::InspectorController::scriptImported):
+        (WebCore::InspectorController::setResourceTrackingEnabled):
+        (WebCore::InspectorController::ensureSettingsLoaded):
+        (WebCore::InspectorController::startTimelineProfiler):
+        (WebCore::InspectorController::stopTimelineProfiler):
+        (WebCore::InspectorController::enableProfiler):
+        (WebCore::InspectorController::disableProfiler):
+        (WebCore::InspectorController::enableDebuggerFromFrontend):
+        (WebCore::InspectorController::disableDebugger):
+        (WebCore::InspectorController::loadBreakpoints):
+        (WebCore::InspectorController::saveBreakpoints):
+        * inspector/InspectorController.h:
+        * inspector/InspectorFrontendClientLocal.cpp:
+        (WebCore::InspectorFrontendClientLocal::changeAttachedWindowHeight):
+        (WebCore::InspectorFrontendClientLocal::restoreAttachedWindowHeight):
+        * inspector/InspectorState.cpp: Added.
+        (WebCore::InspectorState::InspectorState):
+        (WebCore::InspectorState::restoreFromInspectorCookie):
+        (WebCore::InspectorState::generateStateObjectForFrontend):
+        (WebCore::InspectorState::loadFromSettings):
+        (WebCore::InspectorState::updateCookie):
+        (WebCore::InspectorState::setValue):
+        (WebCore::InspectorState::getBoolean):
+        (WebCore::InspectorState::getString):
+        (WebCore::InspectorState::getLong):
+        (WebCore::InspectorState::registerBoolean):
+        (WebCore::InspectorState::registerString):
+        (WebCore::InspectorState::registerLong):
+        (WebCore::InspectorState::Property::create):
+        * inspector/InspectorState.h: Added.
+        (WebCore::InspectorState::setBoolean):
+        (WebCore::InspectorState::setString):
+        (WebCore::InspectorState::setLong):
+
 2010-10-14  Jia Pu  <jpu@apple.com>
 
         Reviewed by Adele Peterson.
