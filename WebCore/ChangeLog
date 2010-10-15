@@ -1,3 +1,39 @@
+2010-10-14  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Tony Chang and Darin Adler.
+
+        execCommand FormatBlock creates lots of blockquotes
+        https://bugs.webkit.org/show_bug.cgi?id=19795
+
+        The bug was caused by WebKit's not reusing the block node added by previous iteration
+        and its inserting block node at wrong places.
+
+        Fixed the bug by rewriting FormatBlockCommand::formatRange.  New code resembles that of
+        IndentOutdentCommand::indentIntoBlockquote.  The difference between two is that formatRange
+        avoids the existing block elements when replacing blocks and it also adds a placeholder
+        when removing the existing block caused paragraphs to collapse.
+
+        Also fixed a bug in moveParagraphWithClones where erroneous br is added to the start of
+        the block element to which the paragraph is moved if the block element is the start of a paragraph
+        and not the end of a paragraph.
+
+        Tests: editing/execCommand/format-block-multiple-paragraphs.html
+               editing/execCommand/format-block-table.html
+
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::moveParagraphWithClones): No longer adds erroneous br.
+        * editing/EditorCommand.cpp:
+        (WebCore::executeFormatBlock):
+        * editing/FormatBlockCommand.cpp:
+        (WebCore::FormatBlockCommand::formatRange): Rewritten; see above.
+        (WebCore::FormatBlockCommand::isElementToApplyInFormatBlockCommand): Renamed from validBlockElement
+        and moved from htmlediting.cpp.
+        (WebCore::enclosingBlockToSplitTreeTo): Added.
+        * editing/FormatBlockCommand.h:
+        * editing/VisiblePosition.cpp:
+        (WebCore::enclosingBlockFlowElement): Changed the return type to Element*
+        * editing/VisiblePosition.h:
+
 2010-10-14  Justin Schuh  <jschuh@chromium.org>
 
         Reviewed by James Robinson.
