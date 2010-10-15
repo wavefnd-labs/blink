@@ -1,3 +1,249 @@
+2010-10-14  Darin Adler  <darin@apple.com>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Use more specific types for node pointers, especially when calling node insertion and removal functions
+        https://bugs.webkit.org/show_bug.cgi?id=47702
+
+        Refactoring. No new tests.
+
+        While developing this patch I temporarily removed the node insertion and
+        removal member functions from the Node class and fixed almost all call sites
+        so they call it directly on the ContainerNode class, which will be important
+        once we make the functions non-virtual.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::SelectorChecker::checkSelector):
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::insertBefore):
+        (WebCore::ContainerNode::replaceChild):
+        (WebCore::ContainerNode::appendChild):
+        * dom/Document.cpp:
+        (WebCore::Document::caretRangeFromPoint):
+        * dom/DynamicNodeList.cpp:
+        (WebCore::DynamicNodeList::itemWithName):
+        * dom/Position.cpp:
+        (WebCore::Position::previous):
+        (WebCore::Position::next):
+        * dom/Text.cpp:
+        (WebCore::Text::replaceWholeText):
+        * dom/TreeWalker.cpp:
+        (WebCore::TreeWalker::firstChild):
+        (WebCore::TreeWalker::lastChild):
+        (WebCore::TreeWalker::previousNode):
+        * dom/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+        * editing/BreakBlockquoteCommand.cpp:
+        (WebCore::BreakBlockquoteCommand::doApply):
+        * editing/CompositeEditCommand.h:
+        * editing/DeleteButtonController.cpp:
+        (WebCore::isDeletableElement):
+        * editing/IndentOutdentCommand.cpp:
+        (WebCore::IndentOutdentCommand::outdentParagraph):
+        * editing/InsertNodeBeforeCommand.cpp:
+        (WebCore::InsertNodeBeforeCommand::doApply):
+        * editing/JoinTextNodesCommand.cpp:
+        (WebCore::JoinTextNodesCommand::doApply):
+        (WebCore::JoinTextNodesCommand::doUnapply):
+        * editing/MergeIdenticalElementsCommand.cpp:
+        (WebCore::MergeIdenticalElementsCommand::doUnapply):
+        * editing/RemoveNodeCommand.cpp:
+        (WebCore::RemoveNodeCommand::doApply):
+        (WebCore::RemoveNodeCommand::doUnapply):
+        * editing/RemoveNodeCommand.h:
+        * editing/SplitElementCommand.cpp:
+        (WebCore::SplitElementCommand::executeApply):
+        * editing/SplitTextNodeCommand.cpp:
+        (WebCore::SplitTextNodeCommand::doApply):
+        (WebCore::SplitTextNodeCommand::doReapply):
+        * editing/TextIterator.cpp:
+        (WebCore::parentCrossingShadowBoundaries):
+        * editing/htmlediting.cpp:
+        (WebCore::enclosingList):
+        * editing/markup.cpp:
+        (WebCore::serializeNodes):
+        (WebCore::ancestorToRetainStructureAndAppearance):
+        (WebCore::createMarkup):
+        * html/HTMLAreaElement.cpp:
+        (WebCore::HTMLAreaElement::updateFocusAppearance):
+        * html/HTMLEmbedElement.cpp:
+        (WebCore::HTMLEmbedElement::rendererIsNeeded):
+        * html/HTMLFormElement.cpp:
+        (WebCore::HTMLFormElement::rendererIsNeeded):
+        * html/HTMLFrameSetElement.cpp:
+        (WebCore::HTMLFrameSetElement::attach):
+        * html/HTMLImageElement.cpp:
+        (WebCore::HTMLImageElement::insertedIntoTree):
+        * html/HTMLLegendElement.cpp:
+        (WebCore::HTMLLegendElement::associatedControl):
+        * html/HTMLOptGroupElement.cpp:
+        (WebCore::HTMLOptGroupElement::recalcSelectOptions):
+        (WebCore::HTMLOptGroupElement::ownerSelectElement):
+        * html/HTMLOptionElement.cpp:
+        (WebCore::HTMLOptionElement::ownerSelectElement):
+        * html/HTMLTableCellElement.cpp:
+        (WebCore::HTMLTableCellElement::additionalAttributeStyleDecls):
+        * html/HTMLTableColElement.cpp:
+        (WebCore::HTMLTableColElement::additionalAttributeStyleDecls):
+        * html/HTMLTableElement.cpp:
+        (WebCore::HTMLTableElement::insertRow):
+        * html/HTMLTableRowElement.cpp:
+        (WebCore::HTMLTableRowElement::rowIndex):
+        * html/HTMLTableSectionElement.cpp:
+        (WebCore::HTMLTableSectionElement::additionalAttributeStyleDecls):
+        * page/DOMSelection.cpp:
+        (WebCore::DOMSelection::getRangeAt):
+        (WebCore::DOMSelection::containsNode):
+        * rendering/RenderSVGGradientStop.cpp:
+        (WebCore::RenderSVGGradientStop::gradientElement):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::ownerSVGElement):
+        (WebCore::SVGElement::viewportElement):
+        * svg/SVGFELightElement.cpp:
+        (WebCore::SVGFELightElement::svgAttributeChanged):
+        (WebCore::SVGFELightElement::childrenChanged):
+        * svg/SVGFEMergeNodeElement.cpp:
+        (WebCore::SVGFEMergeNodeElement::svgAttributeChanged):
+        * svg/SVGFontFaceFormatElement.cpp:
+        (WebCore::SVGFontFaceFormatElement::childrenChanged):
+        * svg/SVGFontFaceUriElement.cpp:
+        (WebCore::SVGFontFaceUriElement::childrenChanged):
+        * svg/SVGGlyphElement.cpp:
+        (WebCore::SVGGlyphElement::invalidateGlyphCache):
+        * svg/SVGHKernElement.cpp:
+        (WebCore::SVGHKernElement::insertedIntoDocument):
+        (WebCore::SVGHKernElement::removedFromDocument):
+        * svg/SVGLocatable.cpp:
+        (WebCore::SVGLocatable::nearestViewportElement):
+        (WebCore::SVGLocatable::farthestViewportElement):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::updateContainerOffsets):
+        * svg/SVGVKernElement.cpp:
+        (WebCore::SVGVKernElement::insertedIntoDocument):
+        (WebCore::SVGVKernElement::removedFromDocument):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::targetElement):
+        * wml/WMLDoElement.cpp:
+        (WebCore::WMLDoElement::insertedIntoDocument):
+        (WebCore::WMLDoElement::removedFromDocument):
+        * wml/WMLNoopElement.cpp:
+        (WebCore::WMLNoopElement::insertedIntoDocument):
+        * wml/WMLOptionElement.cpp:
+        (WebCore::ownerSelectElement):
+        * wml/WMLPostfieldElement.cpp:
+        (WebCore::WMLPostfieldElement::insertedIntoDocument):
+        (WebCore::WMLPostfieldElement::removedFromDocument):
+        * wml/WMLSetvarElement.cpp:
+        (WebCore::WMLSetvarElement::insertedIntoDocument):
+        (WebCore::WMLSetvarElement::removedFromDocument):
+        * wml/WMLTaskElement.cpp:
+        (WebCore::WMLTaskElement::insertedIntoDocument):
+        (WebCore::WMLTaskElement::removedFromDocument):
+        * wml/WMLTimerElement.cpp:
+        (WebCore::WMLTimerElement::insertedIntoDocument):
+        (WebCore::WMLTimerElement::removedFromDocument):
+        * xml/XPathStep.cpp:
+        (WebCore::XPath::Step::nodesInAxis):
+        Use ContainerNode* for the result of the parentNode function now that
+        it returns a ContainerNode*. In the past it used to return just Node*.
+
+        * dom/ContainerNode.h: Added toContainerNode.
+
+        * dom/Element.h: Use ContainerNode*. Added toElement.
+
+        * dom/Element.cpp:
+        (WebCore::Element::deprecatedCreateContextualFragment): Explcitly
+        cast to HTMLElement* in the case that handles <html> and <body>
+        elements.
+        (WebCore::Element::baseURI): Use ContainerNode*.
+
+        * dom/Node.cpp:
+        (WebCore::Node::markAncestorsWithChildNeedsStyleRecalc): Use ContainerNode*.
+        (WebCore::Node::isDescendantOf): Ditto.
+        (WebCore::Node::createRendererIfNeeded): Ditto.
+        (WebCore::Node::setTextContent): Use already-typecast pointer in a call to
+        appendChild.
+        (WebCore::Node::ancestorElement): Use ContainerNode*.
+
+        * dom/Range.cpp:
+        (WebCore::Range::compareNode): Use ContainerNode*.
+        (WebCore::Range::intersectsNode): Ditto.
+        (WebCore::Range::processContents): Cast to ContainerNode* in a couple cases
+        where we previously checked that the node in question has a child. Any node
+        that returns a non-zero value for firstChild is a ContainerNode.
+        (WebCore::Range::checkNodeBA): Ditto.
+        (WebCore::Range::selectNode): Ditto.
+        (WebCore::Range::surroundContents): Ditto.
+
+        * dom/XMLDocumentParser.cpp:
+        (WebCore::XMLDocumentParser::insertErrorMessageBlock): Rewrote code to use
+        more specific types, document instead of doc, and paragraph instead of par.
+
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::ApplyStyleCommand::removeStyleFromRunBeforeApplyingStyle):
+        Use ContainerNode*.
+        (WebCore::ApplyStyleCommand::replaceWithSpanOrRemoveIfWithoutAttributes):
+        Use replaceElementWithSpanPreservingChildrenAndAttributes; the old function
+        took a Node argument and had Node in its name.
+
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::removeNodeAndPruneAncestors): Use ContainerNode.
+        (WebCore::CompositeEditCommand::replaceElementWithSpanPreservingChildrenAndAttributes):
+        Renamed and changed to take HTMLElement. Also use ContainerNode.
+        (WebCore::CompositeEditCommand::prune): Ditto.
+        (WebCore::CompositeEditCommand::breakOutOfEmptyListItem): Ditto.
+        (WebCore::CompositeEditCommand::breakOutOfEmptyMailBlockquotedParagraph): Ditto.
+
+        * editing/ReplaceNodeWithSpanCommand.cpp:
+        (WebCore::ReplaceNodeWithSpanCommand::ReplaceNodeWithSpanCommand): Take an
+        HTMLElement instead of a Node. Call it m_elementToReplace instead of m_node.
+        (WebCore::swapInNodePreservingAttributesAndChildren): Take HTMLElement.
+        (WebCore::ReplaceNodeWithSpanCommand::doApply): Updated for name changes.
+        (WebCore::ReplaceNodeWithSpanCommand::doUnapply): Ditto.
+        * editing/ReplaceNodeWithSpanCommand.h: Ditto.
+
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplacementFragment::ReplacementFragment): Use StyledElement for result
+        of insertFragmentForTestRendering since that's what it returns.
+        (WebCore::ReplacementFragment::removeNode): Use ContainerNode.
+        (WebCore::ReplacementFragment::insertNodeBefore): Ditto.
+        (WebCore::ReplacementFragment::insertFragmentForTestRendering): Return StyledElement.
+        Use HTMLElement for body.
+        (WebCore::ReplacementFragment::restoreTestRenderingNodesToFragment): Take
+        StyledElement.
+        (WebCore::ReplaceSelectionCommand::handleStyleSpans): Use ContainerNode.
+        (WebCore::ReplaceSelectionCommand::copyStyleToChildren): Use HTMLElement for
+        the cloned span, since the clone will be a sspan too.
+        (WebCore::ReplaceSelectionCommand::insertAsListItems): Use ContainerNode since
+        the list item has a child, and that proves it is a ContainerNode.
+
+        * editing/SelectionController.cpp:
+        (WebCore::SelectionController::selectFrameElementInParentIfFullySelected):
+        Use ContainerNode and also removed an unnneded local variable.
+
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::setOuterText): Use ContainerNode.
+        (WebCore::HTMLElement::insertAdjacent): Use ContainerNode and also use && to make
+        the logic a little simpler.
+        (WebCore::contextElementForInsertion): Use ContainerNode.
+        (WebCore::HTMLElement::findFormAncestor): Ditto.
+
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::removeNode): Use ContainerNode.
+        (WebCore::InspectorDOMAgent::changeTagName): Ditto.
+        (WebCore::InspectorDOMAgent::setOuterHTML): Ditto.
+        (WebCore::InspectorDOMAgent::innerParentNode): Use isDocumentNode instead of
+        nodeType. We should almost never use nodeType inside the engine.
+        (WebCore::InspectorDOMAgent::didInsertDOMNode): Use ContainerNode.
+        (WebCore::InspectorDOMAgent::didRemoveDOMNode): Ditto.
+
+        * wml/WMLOptGroupElement.cpp: Removed unneeded overrides of insertBefore,
+        replaceChild, removeChild, appendChild, and removeChildren functions.
+        Ths already overrides childrenChanged, that is called by all of the above,
+        and it does the same thing these functions did.
+        (WebCore::ownerSelectElement): Use ContainerNode.
+        * wml/WMLOptGroupElement.h: Ditto.
+
 2010-10-15  Ryosuke Niwa  <rniwa@webkit.org>
 
         Reviewed by Darin Adler.
