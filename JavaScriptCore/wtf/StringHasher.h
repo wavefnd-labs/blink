@@ -18,8 +18,8 @@
  * Boston, MA 02110-1301, USA.
  *
  */
-#ifndef WTF_StringHashFunctions_h
-#define WTF_StringHashFunctions_h
+#ifndef WTF_StringHasher_h
+#define WTF_StringHasher_h
 
 #include <wtf/unicode/Unicode.h>
 
@@ -167,4 +167,4 @@ private:
 
 } // namespace WTF
 
-#endif // WTF_StringHashFunctions_h
+#endif // WTF_StringHasher_h
