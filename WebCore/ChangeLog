@@ -1,5 +1,27 @@
 2010-10-15  Ryosuke Niwa  <rniwa@webkit.org>
 
+        Reviewed by Darin Adler.
+
+        unlink removes inline style of anchor elements
+        https://bugs.webkit.org/show_bug.cgi?id=47424
+
+        The bug was caused by our not extracting styles when the anchor element is removed by removeInlineStyle.
+        Because we removed the element without pushing its inline style down, we lost style information.
+
+        Fixed the bug by pushing down styles in removeInlineStyle as done in pushDownInlineStyleAroundNode.
+        Also fixed a bug in addInlineStyleIfNeeded where StyleChange incorrectly removed styles of the container
+        node as supposed to that of startNode from the style to apply when startNode is not an element.
+
+        Test: editing/execCommand/toggle-unlink.html
+
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::ApplyStyleCommand::removeInlineStyleFromElement): To prevent a similar bug in the future,
+        added an assert that extractedStyle is specified whenever we're removing a styled element.
+        (WebCore::ApplyStyleCommand::removeInlineStyle):
+        (WebCore::ApplyStyleCommand::addInlineStyleIfNeeded):
+
+2010-10-15  Ryosuke Niwa  <rniwa@webkit.org>
+
         Reviewed by Tony Chang.
 
         serializeNodesWithNamespaces should be in MarkupAccumulator
