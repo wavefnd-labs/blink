@@ -1,4 +1,9 @@
-description("Obtaining File from FileEntry");
+if (this.importScripts) {
+    importScripts('fs-worker-common.js');
+    importScripts('fs-test-util.js');
+}
+
+description("Obtaining File from FileEntry.");
 
 var fileSystem = null;
 var testFileName = '/testFileEntry.txt';
@@ -32,10 +37,6 @@ function fileSystemCallback(fs) {
     removeAllInDirectory(fileSystem.root, createTestFile, errorCallback);
 }
 
-if (window.requestFileSystem) {
-    window.jsTestIsAsync = true;
-    requestFileSystem(window.TEMPORARY, 100, fileSystemCallback, errorCallback);
-} else
-    debug("This test requires FileSystem API support.");
-
-window.successfullyParsed = true;
+var jsTestIsAsync = true;
+requestFileSystem(TEMPORARY, 100, fileSystemCallback, errorCallback);
+var successfullyParsed = true;
