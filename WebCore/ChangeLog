@@ -1,3 +1,24 @@
+2010-10-15  Brian Weinstein  <bweinstein@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        REGRESSION(r69850) Loading apple.com/startpage in WebKit on Windows gets a bad request.
+        https://bugs.webkit.org/show_bug.cgi?id=47753
+        <rdar://problem/8558242>
+        
+        r69850 switched over to a different way of concatenating WebCore strings, but ran into an issue
+        where some Windows calls were returning null terminated strings, and this breaks the new
+        method of concatenation.
+        
+        GetLocaleInfo returns a null-terminated string, but WebCore strings are non-null terminated,
+        so once we create our WebCore string, we want to trim off the null terminating character before
+        we return the localeInfo.
+
+        Test: fast/dom/navigator-userAgent.html
+
+        * platform/win/Language.cpp:
+        (WebCore::localeInfo):
+
 2010-10-15  Alexey Proskuryakov  <ap@apple.com>
 
         Trying to fix crashes on Leopard buildbot.
