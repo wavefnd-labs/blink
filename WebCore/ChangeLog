@@ -1,3 +1,32 @@
+2010-10-15  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Tony Chang.
+
+        serializeNodesWithNamespaces should be in MarkupAccumulator
+        https://bugs.webkit.org/show_bug.cgi?id=47749
+
+        Moved serializeNodesWithNamespaces to MarkupAccumulator, and renamed it to serializeNodes.
+        MarkupAccumulator::serializeNode now returns the resultant string instead of having a separate takeResults().
+        Added several helper functions to MarkupAccumulator.
+
+        No new tests are added since this is a cleanup.
+
+        * editing/MarkupAccumulator.cpp:
+        (WebCore::MarkupAccumulator::serializeNodes): Wrapper for serializeNodes and concatenateMarkup.
+        (WebCore::MarkupAccumulator::serializeNodesWithNamespaces): Moved from markup.cpp
+        (WebCore::MarkupAccumulator::appendStartTag): Calls appendString instead of appending into m_succeedingMarkup directly.
+        (WebCore::MarkupAccumulator::appendEndTag): Ditto.
+        (WebCore::MarkupAccumulator::totalLength): Added; extracted from takeResults.
+        (WebCore::MarkupAccumulator::concatenateMarkup): Ditto.
+        * editing/MarkupAccumulator.h:
+        (WebCore::MarkupAccumulator::length): Added; calls totalLength.
+        * editing/markup.cpp:
+        (WebCore::StyledMarkupAccumulator::appendString): Added; calls MarkupAccumulator's appendString.
+        (WebCore::StyledMarkupAccumulator::wrapWithStyleNode): Calls appendString.
+        (WebCore::StyledMarkupAccumulator::takeResults): Calls length, totalLength, and concatenateMarkup.
+        (WebCore::StyledMarkupAccumulator::serializeNodes): Became a member function.
+        (WebCore::createMarkup): Uses MarkupAccumulator.
+
 2010-10-15  Kinuko Yasuda  <kinuko@google.com>
 
         Reviewed by Jian Li.
