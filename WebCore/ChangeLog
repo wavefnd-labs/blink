@@ -1,3 +1,25 @@
+2010-10-17  Sergey A. Sukiyazov  <sergey.sukiyazov@gmail.com>
+
+        Reviewed by Andreas Kling
+
+        [Qt] Hovering the mouse over links produce a trail of underlined links (X11 paint engine)
+        https://bugs.webkit.org/show_bug.cgi?id=42248
+
+        The problem will appear because coordinates of points may increase by 0.05f (if line width is odd) inside
+        method GraphicsContext::adjustLineToPixelBoundaries(...) and become outside of text bounding rect htere,
+        then the new point coordinates will be passed to Qt graphics engine.
+
+        The solution decreases Y cordinates of points inside drawLineForText(...) method only if Qt graphics engine
+        is X11. The Y coordinates will be increase by 0.5f inside method adjustLineToPixelBoundaries(...),  which
+        called from drawLine(...), and then inside Qt painting engine will be rounded to next greater integer value.
+
+        NOTE: This changes will affect only Qt X11 verision and if only X11 Painting Engine will be used.
+
+        No new tests.
+
+        * platform/graphics/qt/GraphicsContextQt.cpp:
+        (WebCore::GraphicsContext::drawLineForText):
+
 2010-10-17  Rob Buis  <rwlbuis@gmail.com>
 
         Reviewed by Dirk Schulze.
