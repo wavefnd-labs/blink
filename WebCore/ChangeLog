@@ -1,3 +1,32 @@
+2010-10-18  Vangelis Kokkevis  <vangelis@chromium.org>
+
+        Reviewed by James Robinson.
+
+        [chromium] Prevent the creation of very large textures for layers by switching
+        to "large layer" mode when a texture is larger than some fixed reasonable size
+        (set to 2000 pixels for now).
+        https://bugs.webkit.org/show_bug.cgi?id=47751
+
+        The code also changes the large layer logic to use the current scissor rect used
+        by the compositor instead of the visible rect to determine how to clip large layers.
+        This will provide additional texture savings. In addition, the various layer rects
+        have been converted to use integers instead of floats to preserve uniformity in the code.
+        
+        Tests: Existing large layer layout tests including huge-layer and huge-layer-img
+
+        * platform/graphics/chromium/ContentLayerChromium.cpp:
+        (WebCore::ContentLayerChromium::requiresClippedUpdateRect):
+        (WebCore::ContentLayerChromium::calculateClippedUpdateRect):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::getDrawRect):
+        * platform/graphics/chromium/LayerChromium.h:
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::drawLayers):
+        (WebCore::LayerRendererChromium::drawLayersRecursive):
+        (WebCore::LayerRendererChromium::scissorToRect):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (WebCore::LayerRendererChromium::currentScissorRect):
+
 2010-10-18  Jia Pu  <jpu@apple.com>
 
         Reviewed by Stephanie Lewis.
