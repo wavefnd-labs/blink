@@ -45,6 +45,7 @@ public:
         TypeURL,
         TypeURLRequest,
         TypeURLResponse,
+        TypeUserContentURLPattern,
 
         // Base numeric types
         TypeBoolean,
