@@ -1,3 +1,108 @@
+2010-10-17  Pavel Feldman  <pfeldman@chromium.org>
+
+        Reviewed by Yury Semikhatsky.
+
+        Web Inspector: Introduce InspectorResourceAgent.h/cpp and ResourceManager.js to
+        fill network panel with data.
+        https://bugs.webkit.org/show_bug.cgi?id=47779
+        
+        InspectorResourceAgent instance / JS part are introduced in this patch. Agent's lifetime is equal
+        to the front-end's. This new resource agent does not have state, instead it covers two functions:
+         1) forwards loader client messages to the front-end 2) is capable of building a tree of cached resources.
+        (1) feeds network panel with data, (2) shows the resource tree in the new ResourcesPanel concept.
+        This bug is for extracting this new InspectorResourceAgent class and its javascript counterpart.
+        Once resources panel is refactored for the new concept, InspectorResource, InspectorController's
+        resource-related routines, inspector.js's code dealing with resources, they all will be gone.
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/CodeGeneratorInspector.pm:
+        * inspector/Inspector.idl:
+        * inspector/InspectorApplicationCacheAgent.cpp:
+        (WebCore::InspectorApplicationCacheAgent::didReceiveManifestResponse):
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::connectFrontend):
+        (WebCore::InspectorController::releaseFrontendLifetimeAgents):
+        (WebCore::InspectorController::didCommitLoad):
+        (WebCore::InspectorController::frameDetachedFromParent):
+        (WebCore::InspectorController::didLoadResourceFromMemoryCache):
+        (WebCore::InspectorController::identifierForInitialRequest):
+        (WebCore::InspectorController::willSendRequest):
+        (WebCore::InspectorController::markResourceAsCached):
+        (WebCore::InspectorController::didReceiveResponse):
+        (WebCore::InspectorController::didReceiveContentLength):
+        (WebCore::InspectorController::didFinishLoading):
+        (WebCore::InspectorController::didFailLoading):
+        (WebCore::InspectorController::resourceRetrievedByXMLHttpRequest):
+        (WebCore::InspectorController::scriptImported):
+        (WebCore::InspectorController::didCreateWebSocket):
+        (WebCore::InspectorController::willSendWebSocketHandshakeRequest):
+        (WebCore::InspectorController::didReceiveWebSocketHandshakeResponse):
+        (WebCore::InspectorController::didCloseWebSocket):
+        * inspector/InspectorController.h:
+        * inspector/InspectorResource.cpp:
+        (WebCore::InspectorResource::updateResponse):
+        (WebCore::cachedResourceType):
+        (WebCore::InspectorResource::type):
+        (WebCore::InspectorResource::sourceString):
+        (WebCore::InspectorResource::sourceBytes):
+        (WebCore::InspectorResource::endTiming):
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::InspectorResourceAgent::resourceContent):
+        (WebCore::InspectorResourceAgent::resourceContentBase64):
+        (WebCore::InspectorResourceAgent::resourceData):
+        (WebCore::InspectorResourceAgent::cachedResource):
+        (WebCore::buildObjectForHeaders):
+        (WebCore::buildObjectForTiming):
+        (WebCore::buildObjectForResourceRequest):
+        (WebCore::buildObjectForResourceResponse):
+        (WebCore::buildObjectForMainResource):
+        (WebCore::cachedResourceTypeString):
+        (WebCore::buildObjectForCachedResource):
+        (WebCore::buildObjectForFrameResources):
+        (WebCore::InspectorResourceAgent::~InspectorResourceAgent):
+        (WebCore::InspectorResourceAgent::identifierForInitialRequest):
+        (WebCore::InspectorResourceAgent::willSendRequest):
+        (WebCore::InspectorResourceAgent::markResourceAsCached):
+        (WebCore::InspectorResourceAgent::didReceiveResponse):
+        (WebCore::InspectorResourceAgent::didReceiveContentLength):
+        (WebCore::InspectorResourceAgent::didFinishLoading):
+        (WebCore::InspectorResourceAgent::didFailLoading):
+        (WebCore::InspectorResourceAgent::didLoadResourceFromMemoryCache):
+        (WebCore::InspectorResourceAgent::setOverrideContent):
+        (WebCore::InspectorResourceAgent::didCommitLoad):
+        (WebCore::InspectorResourceAgent::frameDetachedFromParent):
+        (WebCore::createReadableStringFromBinary):
+        (WebCore::InspectorResourceAgent::didCreateWebSocket):
+        (WebCore::InspectorResourceAgent::willSendWebSocketHandshakeRequest):
+        (WebCore::InspectorResourceAgent::didReceiveWebSocketHandshakeResponse):
+        (WebCore::InspectorResourceAgent::didCloseWebSocket):
+        (WebCore::InspectorResourceAgent::cachedResources):
+        (WebCore::InspectorResourceAgent::InspectorResourceAgent):
+        * inspector/InspectorResourceAgent.h:
+        (WebCore::InspectorResourceAgent::create):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::resourceStyleSheetText):
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onRevealAndSelectResource):
+        (WebInspector.ExtensionServer.prototype._onGetResourceContent):
+        * inspector/front-end/Resource.js:
+        (WebInspector.Resource.prototype.get responseReceivedTime):
+        (WebInspector.Resource.prototype.set endTime):
+        * inspector/front-end/Settings.js:
+        * inspector/front-end/SourceView.js:
+        (WebInspector.SourceView.prototype.setupSourceFrameIfNeeded):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/inspector.css:
+        (.tabbed-pane-header li):
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/inspector.js:
+        (WebInspector.updateResource):
+        * loader/ResourceLoadNotifier.cpp:
+        (WebCore::ResourceLoadNotifier::dispatchDidReceiveResponse):
+        * loader/appcache/ApplicationCacheGroup.cpp:
+        (WebCore::ApplicationCacheGroup::didReceiveResponse):
+
 2010-10-16  Pavel Feldman  <pfeldman@chromium.org>
 
         Reviewed by Yury Semikhatsky.
