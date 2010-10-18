@@ -1,3 +1,69 @@
+2010-10-18  Darin Adler  <darin@apple.com>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Remove some functions from class Node and make a few others non-virtual
+        https://bugs.webkit.org/show_bug.cgi?id=47735
+
+        Refactoring. No new tests.
+
+        * bindings/js/JSNodeCustom.cpp:
+        (WebCore::JSNode::markChildren): Added a FIXME about the use of the virtual
+        ownerDocument function.
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::removeChildren): Removed the unused return value.
+
+        * dom/ContainerNode.h: Made insertBefore, replaceChild, removeChild, and
+        appendChild non-virtual for clarity and performance. Made removeChildren
+        non-virtual and removed its return value. Moved the inline Node functions
+        that call through to ContainerNode into this file since the old way involved
+        an extra level of inline function but otherwise had no advantages.
+
+        * dom/Element.h: Moved isMathMLElement here because there is no call site
+        that needs to call it on a Node*. We can always move it back if we need to,
+        but it's better to have less in the Node class.
+
+        * dom/Node.cpp:
+        (WebCore::Node::insertBefore): Added an isContainerNode check so this can
+        be non-virtual. There are very few callers who call this function on Node.
+        If we want to optimize them further we can make the isContainerNode check
+        inline in the future.
+        (WebCore::Node::replaceChild): Ditto.
+        (WebCore::Node::removeChild): Ditto.
+        (WebCore::Node::appendChild): Ditto.
+        (WebCore::Node::remove): Removed unneeded ref/unref because
+        ContainerNode::removeChild already does this.
+        (WebCore::Node::createRendererIfNeeded): Removed #if around call to
+        childShouldCreateRenderer since it's needed even without SVG and XHTMLMP.
+
+        * dom/Node.h: Moved definitions of inline functions that depend on
+        ContainerNode to the ContainerNode.h header. They already required inclusion
+        of that header, so there is no functional change. Made insertBefore,
+        replaceChild, removeChild, and appendChild non-virtual. There are very few
+        callers of these functions on this class. Moved isMathMLElement to Element.
+        Added a FIXME about the name of eventAncestors. Fixed comment formatting.
+        Eliminated unused isEditableBlock function. Moved the body of the
+        enclosingInlineElement function to the editing file that was the only
+        call site. Removed the previousEditable and nextEditable functions,
+        incorporating their bodies into the one place they were called.
+        Took the childShouldCreateRenderer function out of #if since it's
+        now used by the implementation of the <noscript> element.
+
+        * dom/Position.cpp:
+        (WebCore::nextRenderedEditable): Rewrote the function to use nextLeafNode
+        instead of nextEditable.
+        (WebCore::previousRenderedEditable): Rewrote the function to use
+        previousLeafNode instead of previousEditable.
+
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::enclosingInline): Moved function here from the Node class. Also
+        fixed an incorrect cast this function did, which assumed the function
+        result was always an element, which the function does not guarantee.
+        (WebCore::ReplaceSelectionCommand::doApply): Call the function above.
+
+        * history/HistoryItem.cpp: Added include of MathExtras.h.
+
 2010-10-18  Yongjun Zhang  <yongjun_zhang@apple.com>
 
         Reviewed by Darin Adler.
