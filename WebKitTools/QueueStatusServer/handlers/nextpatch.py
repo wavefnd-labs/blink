@@ -36,7 +36,7 @@ from model.queues import Queue
 
 class NextPatch(webapp.RequestHandler):
     def get(self, queue_name):
-        queue = Queue.queue_for_name(queue_name)
+        queue = Queue.queue_with_name(queue_name)
         if not queue:
             self.error(404)
             return
