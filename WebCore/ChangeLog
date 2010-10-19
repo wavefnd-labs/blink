@@ -1,3 +1,49 @@
+2010-10-19  Eric Carlson  <eric.carlson@apple.com>
+
+        Reviewed by Darin Adler.
+
+        https://bugs.webkit.org/show_bug.cgi?id=46763
+        CRASH in WebCore::ThreadTimers::sharedTimerFiredInternal
+
+        Fix crashes caused by moving and deleting <source> element(s) of active media element.
+
+        Tests: media/video-source-moved.html
+               media/video-source-removed.html
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement): Add logging. Initialize selectNextSourceChild.
+        (WebCore::HTMLMediaElement::~HTMLMediaElement): Ditto.
+        (WebCore::HTMLMediaElement::insertedIntoDocument): Ditto.
+        (WebCore::HTMLMediaElement::removedFromDocument): Ditto.
+        (WebCore::HTMLMediaElement::scheduleLoad): Ditto.
+        (WebCore::HTMLMediaElement::setNetworkState): Deal with m_currentSourceNode being null when
+        the media engine signals a failure by skipping the error message and continuing as usual.
+        (WebCore::HTMLMediaElement::setVolume): Fix logging typo.
+        (WebCore::HTMLMediaElement::havePotentialSourceChild): Save and restore m_nextChildNodeToConsider
+        around call to selectNextSourceChild because they are both significant.
+        (WebCore::HTMLMediaElement::selectNextSourceChild): Use m_nextChildNodeToConsider to pick
+        the first node to consider. Bail immediately if it signals that we have already processed 
+        every <source> node. Stach the node following the current source element in m_nextChildNodeToConsider
+        so we can resume the search even if m_currentSourceNode is removed while it is being processed.
+        (WebCore::HTMLMediaElement::sourceWasAdded): New, move logic from HTMLSourceElement::insertedIntoTree
+        here and correct it to deal with a <source> node being inserted immediately after the
+        current <source> node and a new <source> node being inserted at the end of the list after
+        all candidates have failed.
+        (WebCore::HTMLMediaElement::sourceWillBeRemoved): New, deal with current source node and next
+        potential node being removed.
+        * html/HTMLMediaElement.h:
+        (WebCore::HTMLMediaElement::sourceChildEndOfListValue): New, define sentinal value used to indicate
+        that all nodes have been processed.
+
+        * html/HTMLSourceElement.cpp:
+        (WebCore::HTMLSourceElement::HTMLSourceElement): Add logging.
+        (WebCore::HTMLSourceElement::insertedIntoTree): Call mediaElement->sourceWasAdded instead
+        of having logic here.
+        (WebCore::HTMLSourceElement::willRemove): New, call mediaElement->sourceWillBeRemoved
+        (WebCore::HTMLSourceElement::scheduleErrorEvent): Add logging.
+        (WebCore::HTMLSourceElement::cancelPendingErrorEvent): Add logging.
+        * html/HTMLSourceElement.h:
+
 2010-10-19  Luiz Agostini  <luiz.agostini@openbossa.org>
 
         Reviewed by Antti Koivisto.
