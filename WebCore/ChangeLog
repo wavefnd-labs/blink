@@ -1,3 +1,27 @@
+2010-10-18  Oliver Hunt  <oliver@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        REGRESSION: Feedly extension crashes Webkit
+        https://bugs.webkit.org/show_bug.cgi?id=45811
+
+        The basic problem was the deserializer was holding a pointer into
+        the constant pool, but if you were sufficiently unlucky then the
+        constant pool would be moved while still relying on the pointer,
+        which leads to badness.
+
+        I looked at just making all the sites this could happen extract the
+        right string/jsstring before any possible allocations, but it seemed
+        too fragile so i've gone for a forwarding object as the solution.
+
+        * bindings/js/SerializedScriptValue.cpp:
+        (WebCore::CloneDeserializer::CachedStringRef::CachedStringRef):
+        (WebCore::CloneDeserializer::CachedStringRef::operator->):
+        (WebCore::CloneDeserializer::readStringData):
+        (WebCore::CloneDeserializer::readFile):
+        (WebCore::CloneDeserializer::readTerminal):
+        (WebCore::CloneDeserializer::deserialize):
+
 2010-10-18  Chris Rogers  <crogers@google.com>
 
         Reviewed by Chris Fleizach.
