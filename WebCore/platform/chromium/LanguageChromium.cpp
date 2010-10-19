@@ -36,7 +36,7 @@
 
 namespace WebCore {
 
-String defaultLanguage()
+String platformDefaultLanguage()
 {
     static String computedDefaultLanguage;
     if (computedDefaultLanguage.isEmpty())

@@ -1,3 +1,47 @@
+2010-10-19  Alexey Proskuryakov  <ap@apple.com>
+
+        Reviewed by Anders Carlsson.
+
+        https://bugs.webkit.org/show_bug.cgi?id=47933
+        <rdar://problem/8494337> navigator.language doesn't work in WebKit2
+
+        * CMakeListsEfl.txt:
+        * GNUmakefile.am:
+        * WebCore.gypi:
+        * WebCore.pro:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/chromium/Language.cpp: Removed.
+        * platform/chromium/LanguageChromium.cpp: Copied from WebCore/platform/chromium/Language.cpp.
+        * platform/efl/Language.cpp: Removed.
+        * platform/efl/LanguageEfl.cpp: Copied from WebCore/platform/efl/Language.cpp.
+        * platform/gtk/Language.cpp: Removed.
+        * platform/gtk/LanguageGtk.cpp: Copied from WebCore/platform/gtk/Language.cpp.
+        * platform/qt/Language.cpp: Removed.
+        * platform/qt/LanguageQt.cpp: Copied from WebCore/platform/qt/Language.cpp.
+        * platform/win/Language.cpp: Removed.
+        * platform/win/LanguageWin.cpp: Copied from WebCore/platform/win/Language.cpp.
+        * platform/Language.cpp: Added.
+        Cross platform code is now in platform/Language.cpp. So, I renamed platform files to match
+        the common pattern.
+
+        * WebCore.exp.in: Exported new functions.
+
+        * platform/Language.h: Added an ability to force the language, and an ability to set up
+        listeners for changes (if the platform implements that). Web process will always use the
+        forced language, as sent to it from UI process.
+
+        * platform/mac/Language.mm: Moved code from WebKit.
+        (WebCore::platformDefaultLanguage): Added code to synchronize user defaults. For some reason,
+        they come unsynchronized in WebKit2 here, unlike WebKit1.
+
+        * page/mac/WebCoreViewFactory.h: Removed defaultLanguageCode. WebCore no longer goes to WebKit
+        to ask for that.
+
+        * platform/mac/WebCoreSystemInterface.h:
+        * platform/mac/WebCoreSystemInterface.mm:
+        Added wkCopyCFLocalizationPreferredName().
+
 2010-10-19  James Simonsen  <simonjam@chromium.org>
 
         Reviewed by Adam Barth.

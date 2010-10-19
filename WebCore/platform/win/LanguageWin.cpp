@@ -48,7 +48,7 @@ static String localeInfo(LCTYPE localeType, const String& fallback)
     return localeName;
 }
 
-String defaultLanguage()
+String platformDefaultLanguage()
 {
     static String computedDefaultLanguage;
     if (!computedDefaultLanguage.isEmpty())

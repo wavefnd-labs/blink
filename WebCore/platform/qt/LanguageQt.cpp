@@ -1,8 +1,6 @@
 /*
- * Copyright (C) 2003, 2006 Apple Computer, Inc.  All rights reserved.
- * Copyright (C) 2008 INdT - Instituto Nokia de Tecnologia
- * Copyright (C) 2009-2010 ProFUSION embedded systems
- * Copyright (C) 2009-2010 Samsung Electronics
+ * Copyright (C) 2010 INdT - Instituto Nokia de Tecnologia
+ * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,15 +27,15 @@
 #include "config.h"
 #include "Language.h"
 
-#include "NotImplemented.h"
 #include "PlatformString.h"
+#include <QLocale>
 
 namespace WebCore {
 
-String defaultLanguage()
+String platformDefaultLanguage()
 {
-    notImplemented();
-    return String();
+    QLocale locale;
+    return locale.name().replace("_", "-");
 }
 
 }

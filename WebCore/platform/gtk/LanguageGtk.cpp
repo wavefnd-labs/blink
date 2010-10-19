@@ -32,7 +32,7 @@ namespace WebCore {
 // Using pango_language_get_default() here is not an option, because
 // it doesn't support changing the locale in runtime, so it returns
 // always the same value.
-String defaultLanguage()
+String platformDefaultLanguage()
 {
     char* localeDefault = setlocale(LC_CTYPE, NULL);
 
