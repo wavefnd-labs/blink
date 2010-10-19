@@ -1,3 +1,27 @@
+2010-10-19  Jeremy Orlow  <jorlow@chromium.org>
+
+        Reviewed by Nate Chapin.
+
+        Fix multiple index support in IndexedDB
+        https://bugs.webkit.org/show_bug.cgi?id=47919
+
+        Fix 2 bugs that caused the IndexData of all but the last index to be
+        properly updated:
+        * The objectStoreDataId is NOT unique if there are multiple indexes. So
+          remove the constraint.
+        * Do not delete all existing entries with that objectStoreDataId before
+          adding an entry for each index. Only do it once at the beginning.
+
+        Test: storage/indexeddb/queued-commands.html
+            + index-basics.html modified
+
+        * storage/IDBFactoryBackendImpl.cpp:
+        (WebCore::createTables):
+        * storage/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::deleteIndexData):
+        (WebCore::putIndexData):
+        (WebCore::IDBObjectStoreBackendImpl::putInternal):
+
 2010-10-19  Martin Robinson  <mrobinson@igalia.com>
 
         Fix the GTK+ build after r70072. The logic looks incorrect, but
