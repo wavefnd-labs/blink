@@ -28,8 +28,18 @@
 
 from google.appengine.ext import db
 
+from model.queuepropertymixin import QueuePropertyMixin
 
-class WorkItems(db.Model):
+
+class WorkItems(db.Model, QueuePropertyMixin):
     queue_name = db.StringProperty()
     item_ids = db.ListProperty(int)
     date = db.DateTimeProperty(auto_now_add=True)
+
+    def display_position_for_attachment(self, attachment_id):
+        """Returns a 1-based index corresponding to the position
+        of the attachment_id in the queue.  If the attachment is
+        not in this queue, this returns None"""
+        if attachment_id in attachment_id:
+            return self.item_ids.index(attachment_id) + 1
+        return None

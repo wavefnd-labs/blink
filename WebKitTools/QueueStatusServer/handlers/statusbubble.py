@@ -40,11 +40,11 @@ class StatusBubble(webapp.RequestHandler):
     _queues_to_display = [queue for queue in Queue.all() if queue.is_ews()]
 
     def _build_bubble(self, queue, attachment):
-        queue_status = attachment.status_for_queue(queue.name())
+        queue_status = attachment.status_for_queue(queue)
         bubble = {
             "name": queue.short_name().lowercase(),
             "attachment_id": attachment.id,
-            "queue_position": attachment.position_in_queue(queue.name()),
+            "queue_position": attachment.position_in_queue(queue),
             "state": attachment.state_from_queue_status(queue_status) if queue_status else "none",
             "status": queue_status,
         }
