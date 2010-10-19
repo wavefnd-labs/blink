@@ -35,6 +35,11 @@ WKTypeID WKErrorGetTypeID()
     return toAPI(WebError::APIType);
 }
 
+WKStringRef WKErrorCopyWKErrorDomain()
+{
+    return toCopiedAPI(WebError::webKitErrorDomain());
+}
+
 WKStringRef WKErrorCopyDomain(WKErrorRef errorRef)
 {
     return toCopiedAPI(toImpl(errorRef)->domain());
