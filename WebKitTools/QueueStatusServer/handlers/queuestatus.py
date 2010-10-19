@@ -30,8 +30,6 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
 from model.queues import Queue
-from model.workitems import WorkItems
-from model.activeworkitems import ActiveWorkItems
 
 from model import queuestatus
 
