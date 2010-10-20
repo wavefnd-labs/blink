@@ -1,3 +1,21 @@
+2010-10-19  Yongjun Zhang  <yongjun_zhang@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        Pixel cracks when using background image sprite on transformed element at certain scales.
+        https://bugs.webkit.org/show_bug.cgi?id=47868
+
+        The pixel bleeding happens when the current context has scale and interpolation is kCGInterpolationHigh
+        or kCGInterpolationDefault.  If the source rect size is smaller than the intrinsic image size,  some
+        pixels outside of the clip rect will also be used to interpolate the color value for clip edges, which
+        results in unwanted thin lines around the painted area.  We need to use sub-image patch to get rid of
+        the artifacts in this case.
+
+        Test: fast/images/pixel-crack-image-background-webkit-transform-scale.html
+
+        * platform/graphics/cg/ImageCG.cpp:
+        (WebCore::BitmapImage::draw):
+
 2010-10-19  Evan Martin  <evan@chromium.org>
 
         Reviewed by Tony Chang.
