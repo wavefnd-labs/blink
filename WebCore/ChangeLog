@@ -1,5 +1,222 @@
 2010-10-20  Dirk Schulze  <krit@webkit.org>
 
+        Reviewed by Nikolas Zimmermann.
+
+        Merge ColorSpace and ImageColorSpace enums
+        https://bugs.webkit.org/show_bug.cgi?id=47922
+
+        Merging these two enums makes it easier to implement color-interpolation as well as
+        color-interpolation-filter for SVG.
+        Added ColorSpaceLinearRGB to the ColorSpace enum and changed ImageColorSpace to ColorSpace in all related
+        files. Renamed enum entries DeviceColorSpace and sRGBColorSpace to ColorSpaceDeviceRGB and ColorSpaceSRGB
+        to follow webkit style rules.
+        Removed gray scale support in ImageBuffer since it is not used anymore on WebKit.
+
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore::CSSPrimitiveValue::operator ColorSpace):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::applyProperty):
+        * editing/SelectionController.cpp:
+        (WebCore::SelectionController::paintCaret):
+        * html/HTMLCanvasElement.cpp:
+        (WebCore::HTMLCanvasElement::paint):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::setAllAttributesToDefault):
+        (WebCore::CanvasRenderingContext2D::setShadow):
+        (WebCore::CanvasRenderingContext2D::applyShadow):
+        (WebCore::CanvasRenderingContext2D::drawImage):
+        (WebCore::CanvasRenderingContext2D::drawImageFromRect):
+        (WebCore::CanvasRenderingContext2D::drawTextInternal):
+        * html/canvas/CanvasStyle.cpp:
+        (WebCore::CanvasStyle::applyStrokeColor):
+        (WebCore::CanvasStyle::applyFillColor):
+        * inspector/InspectorController.cpp:
+        (WebCore::drawOutlinedQuad):
+        (WebCore::InspectorController::drawElementTitle):
+        * mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::paint):
+        * mathml/RenderMathMLFraction.cpp:
+        (WebCore::RenderMathMLFraction::paint):
+        * mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::paint):
+        * mathml/RenderMathMLSquareRoot.cpp:
+        (WebCore::RenderMathMLSquareRoot::paint):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::paintContents):
+        * page/PrintContext.cpp:
+        (WebCore::PrintContext::spoolAllPagesWithBoundaries):
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::wheelEvent):
+        * platform/ScrollbarTheme.h:
+        (WebCore::ScrollbarTheme::paintScrollCorner):
+        * platform/ScrollbarThemeComposite.cpp:
+        (WebCore::ScrollbarThemeComposite::paintScrollCorner):
+        * platform/chromium/PopupMenuChromium.cpp:
+        (WebCore::PopupContainer::paintBorder):
+        (WebCore::PopupListBox::paint):
+        (WebCore::PopupListBox::paintRow):
+        * platform/chromium/ScrollbarThemeChromium.cpp:
+        (WebCore::ScrollbarThemeChromium::paintTickmarks):
+        * platform/chromium/ScrollbarThemeChromiumMac.mm:
+        (WebCore::ScrollbarThemeChromiumMac::paint):
+        * platform/graphics/ColorSpace.h:
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::setStrokePattern):
+        (WebCore::GraphicsContext::setFillPattern):
+        (WebCore::GraphicsContext::setStrokeGradient):
+        (WebCore::GraphicsContext::setFillGradient):
+        * platform/graphics/GraphicsContextPrivate.h:
+        (WebCore::GraphicsContextState::GraphicsContextState):
+        * platform/graphics/ImageBuffer.cpp:
+        (WebCore::ImageBuffer::transformColorSpace):
+        * platform/graphics/ImageBuffer.h:
+        (WebCore::ImageBuffer::create):
+        * platform/graphics/cairo/ImageBufferCairo.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        * platform/graphics/cg/ColorCG.cpp:
+        (WebCore::cachedCGColorSpace):
+        (WebCore::cachedCGColor):
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore::linearRGBColorSpaceRef):
+        * platform/graphics/cg/GraphicsContextCG.h:
+        * platform/graphics/cg/ImageBufferCG.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        (WebCore::cgImage):
+        (WebCore::ImageBuffer::draw):
+        * platform/graphics/cg/ImageBufferData.h:
+        * platform/graphics/cg/ImageCG.cpp:
+        (WebCore::imageWithColorSpace):
+        * platform/graphics/chromium/GLES2Canvas.cpp:
+        (WebCore::GLES2Canvas::clearRect):
+        (WebCore::GLES2Canvas::fillRect):
+        * platform/graphics/chromium/TransparencyWin.cpp:
+        (WebCore::TransparencyWin::setupLayerForWhiteLayer):
+        * platform/graphics/filters/FEColorMatrix.cpp:
+        (WebCore::FEColorMatrix::apply):
+        * platform/graphics/filters/FEComposite.cpp:
+        (WebCore::FEComposite::apply):
+        * platform/graphics/filters/FEFlood.cpp:
+        (WebCore::FEFlood::apply):
+        * platform/graphics/filters/FEMerge.cpp:
+        (WebCore::FEMerge::apply):
+        * platform/graphics/filters/FEOffset.cpp:
+        (WebCore::FEOffset::apply):
+        * platform/graphics/filters/FETile.cpp:
+        (WebCore::FETile::apply):
+        * platform/graphics/filters/FilterEffect.cpp:
+        (WebCore::FilterEffect::effectContext):
+        * platform/graphics/filters/SourceAlpha.cpp:
+        (WebCore::SourceAlpha::apply):
+        * platform/graphics/filters/SourceGraphic.cpp:
+        (WebCore::SourceGraphic::apply):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::paint):
+        * platform/graphics/gtk/FontGtk.cpp:
+        (WebCore::Font::drawComplexText):
+        * platform/graphics/mac/GraphicsContextMac.mm:
+        (WebCore::GraphicsContext::drawFocusRing):
+        * platform/graphics/mac/GraphicsLayerCA.mm:
+        (WebCore::setLayerBorderColor):
+        (WebCore::setLayerBackgroundColor):
+        * platform/graphics/qt/GraphicsContextQt.cpp:
+        (WebCore::GraphicsContext::GraphicsContext):
+        * platform/graphics/qt/ImageBufferQt.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        (WebCore::ImageBuffer::draw):
+        * platform/graphics/skia/ImageBufferSkia.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        * platform/graphics/skia/PlatformContextSkia.cpp:
+        (WebCore::PlatformContextSkia::uploadSoftwareToHardware):
+        * platform/graphics/win/FontCGWin.cpp:
+        (WebCore::Font::drawGlyphs):
+        * platform/graphics/win/GraphicsContextCGWin.cpp:
+        (WebCore::GraphicsContext::GraphicsContext):
+        (WebCore::GraphicsContext::drawFocusRing):
+        * platform/graphics/win/GraphicsLayerCACF.cpp:
+        (WebCore::setLayerBorderColor):
+        (WebCore::setLayerBackgroundColor):
+        * platform/graphics/win/ImageCGWin.cpp:
+        (WebCore::BitmapImage::getHBITMAPOfSize):
+        * platform/graphics/win/ImageCairoWin.cpp:
+        (WebCore::BitmapImage::getHBITMAPOfSize):
+        (WebCore::BitmapImage::drawFrameMatchingSourceSize):
+        * platform/graphics/win/WebLayer.cpp:
+        (WebCore::WebLayer::drawInContext):
+        * platform/graphics/wince/GraphicsContextWinCE.cpp:
+        (WebCore::GraphicsContext::clearRect):
+        (WebCore::GraphicsContext::fillRect):
+        * platform/graphics/wince/ImageWinCE.cpp:
+        (WebCore::BitmapImage::getHBITMAPOfSize):
+        * platform/graphics/wx/GraphicsContextWx.cpp:
+        (WebCore::GraphicsContext::GraphicsContext):
+        * platform/gtk/RenderThemeGtk.cpp:
+        (WebCore::RenderThemeGtk::paintSearchFieldResultsDecoration):
+        (WebCore::RenderThemeGtk::paintSearchFieldCancelButton):
+        (WebCore::paintMediaButton):
+        (WebCore::RenderThemeGtk::paintMediaSliderTrack):
+        (WebCore::RenderThemeGtk::paintMediaSliderThumb):
+        * platform/mac/ScrollbarThemeMac.mm:
+        (WebCore::ScrollbarThemeMac::paint):
+        * platform/win/PopupMenuWin.cpp:
+        (WebCore::PopupMenuWin::paint):
+        * platform/win/WebCoreTextRenderer.cpp:
+        (WebCore::doDrawTextAtPoint):
+        * platform/wx/wxcode/mac/carbon/non-kerned-drawing.cpp:
+        (WebCore::drawTextWithSpacing):
+        * plugins/PluginView.cpp:
+        (WebCore::PluginView::paintMissingPluginIcon):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::beginTransparencyLayers):
+        (WebCore::RenderLayer::paintResizer):
+        * rendering/RenderListMarker.cpp:
+        (WebCore::RenderListMarker::paint):
+        * rendering/RenderMediaControlsChromium.cpp:
+        (WebCore::paintMediaButton):
+        (WebCore::paintMediaSlider):
+        (WebCore::paintMediaVolumeSlider):
+        (WebCore::paintMediaTimelineContainer):
+        * rendering/RenderSVGImage.cpp:
+        (WebCore::RenderSVGImage::paint):
+        * rendering/RenderSVGResourceClipper.cpp:
+        (WebCore::RenderSVGResourceClipper::applyClippingToContext):
+        * rendering/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::applyResource):
+        (WebCore::RenderSVGResourceFilter::postApplyResource):
+        * rendering/RenderSVGResourceGradient.cpp:
+        (WebCore::createMaskAndSwapContextForTextGradient):
+        * rendering/RenderSVGResourceMasker.cpp:
+        (WebCore::RenderSVGResourceMasker::applyResource):
+        (WebCore::RenderSVGResourceMasker::drawContentIntoMaskImage):
+        * rendering/RenderSVGResourcePattern.cpp:
+        (WebCore::RenderSVGResourcePattern::createTileImage):
+        * rendering/RenderSVGResourceSolidColor.cpp:
+        (WebCore::RenderSVGResourceSolidColor::applyResource):
+        * rendering/RenderScrollbarTheme.cpp:
+        (WebCore::RenderScrollbarTheme::paintScrollCorner):
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::paintProgressBar):
+        (WebCore::RenderThemeMac::paintMenuListButton):
+        * rendering/RenderThemeSafari.cpp:
+        (WebCore::RenderThemeSafari::paintMenuListButton):
+        * rendering/RenderThemeWinCE.cpp:
+        (WebCore::RenderThemeWinCE::paintSearchFieldCancelButton):
+        (WebCore::RenderThemeWinCE::paintSliderTrack):
+        (WebCore::RenderThemeWinCE::paintSliderThumb):
+        * rendering/SVGImageBufferTools.cpp:
+        (WebCore::SVGImageBufferTools::createImageBuffer):
+        * rendering/SVGImageBufferTools.h:
+        * rendering/style/StyleRareInheritedData.cpp:
+        (WebCore::StyleRareInheritedData::StyleRareInheritedData):
+        * svg/SVGFEImageElement.cpp:
+        (WebCore::SVGFEImageElement::build):
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::nativeImageForCurrentFrame):
+        * svg/graphics/filters/SVGFEImage.cpp:
+        (WebCore::FEImage::apply):
+
+2010-10-20  Dirk Schulze  <krit@webkit.org>
+
         Reviewed by Andreas Kling.
 
         Remove left over code after moving Cairo port to ShadowContext
