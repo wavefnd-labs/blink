@@ -1,3 +1,90 @@
+2010-10-21  takano takumi  <takano1@asia.apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        Need to swap glyphs for vertical writing
+        https://bugs.webkit.org/show_bug.cgi?id=46973
+
+        Made changes to pass the writing-mode orientation flag in RenderStyle down to FontPlatformData,
+        and ultimately to CoreText APIs in both font complex path and fast path.
+
+        Tests: fast/text/international/vertical-text-glyph-test.html
+               fast/text/international/vertical-text-metrics-test.html
+
+        * WebCore.exp.in:
+        * WebCore.xcodeproj/project.pbxproj: Added platform/graphics/FontOrientation.h.
+        * css/CSSFontFaceSource.cpp:
+        (WebCore::CSSFontFaceSource::getFontData): Added font orientation parameter to SimpleFontData.
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::applyProperty): Set appropriate font orientation to the font description
+        when writing-mode is being specified.
+        * loader/CachedFont.cpp:
+        (WebCore::CachedFont::platformDataFromCustomData): Made to pass font orientation to FontPlatformData.
+        * loader/CachedFont.h:
+        * platform/graphics/FontCache.cpp: Added font orientation to FontPlatformDataCacheKey
+        (WebCore::FontPlatformDataCacheKey::FontPlatformDataCacheKey):
+        (WebCore::FontPlatformDataCacheKey::operator==):
+        (WebCore::computeHash):
+        (WebCore::FontCache::getCachedFontPlatformData):
+        * platform/graphics/FontDescription.h: Added font orientation support to FontDescription class
+        (WebCore::FontDescription::FontDescription):
+        (WebCore::FontDescription::orientation):
+        (WebCore::FontDescription::setOrientation):
+        (WebCore::FontDescription::operator==):
+        * platform/graphics/FontOrientation.h: Added.
+        * platform/graphics/SimpleFontData.h:
+        * platform/graphics/cairo/FontCustomPlatformData.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/cairo/FontCustomPlatformData.h: Changed to pass font orientation to fontPlatformData()
+        * platform/graphics/cocoa/FontPlatformData.h: Added font orientation support to FontPlatformData class
+        (WebCore::FontPlatformData::FontPlatformData):
+        (WebCore::FontPlatformData::orientation):
+        (WebCore::FontPlatformData::hash):
+        (WebCore::FontPlatformData::operator==):
+        * platform/graphics/cocoa/FontPlatformDataCocoa.mm: Added font orientation support
+        (WebCore::FontPlatformData::FontPlatformData):
+        (WebCore::FontPlatformData::operator=):
+        (WebCore::FontPlatformData::allowsLigatures): Don't allow ligatures when the font is vertical orientation.
+        (WebCore::FontPlatformData::description):
+        * platform/graphics/gtk/FontCustomPlatformDataPango.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/haiku/FontCustomPlatformData.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/haiku/FontCustomPlatformData.h: Changed to pass font orientation to fontPlatformData()
+        * platform/graphics/mac/FontCacheMac.mm: Added font orientation parameter when creating FontPlatformData object.
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::createFontPlatformData):
+        * platform/graphics/mac/FontCustomPlatformData.cpp: Added font orientation parameter when creating FontPlatformData object.
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/mac/FontCustomPlatformData.h: Changed to pass font orientation parameter to fontPlatformData()
+        * platform/graphics/mac/GlyphPageTreeNodeMac.cpp:
+        (WebCore::GlyphPage::fill): Changed to use CoreText to extract glyphs when the current font is vertical orientation.
+        CoreText automatically swaps glyphs with vertical variants when the font orientation is vertical.
+        * platform/graphics/mac/SimpleFontDataCoreText.cpp: Added vertical form attribute to the attribute dictionary for a CTLine.
+        (WebCore::SimpleFontData::getCFStringAttributes):
+        * platform/graphics/mac/SimpleFontDataMac.mm:
+        (WebCore::SimpleFontData::platformBoundsForGlyph): Changed to use CoreText (from CG) to support vertical metrics.
+        (WebCore::SimpleFontData::platformWidthForGlyph): Made to use CoreText, instead of wkGetGlyphTransformedAdvances,
+        to get vertical metrics when the font orientation is vertical.
+        * platform/graphics/qt/FontCustomPlatformData.h: Changed to pass font orientation to fontPlatformData()
+        * platform/graphics/qt/FontCustomPlatformDataQt.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/skia/FontCustomPlatformData.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/skia/FontCustomPlatformData.h: Changed to pass font orientation to fontPlatformData()
+        * platform/graphics/win/FontCustomPlatformData.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/win/FontCustomPlatformData.h: Changed to pass font orientation to fontPlatformData()
+        * platform/graphics/win/FontCustomPlatformDataCairo.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/win/FontCustomPlatformDataCairo.h: Changed to pass font orientation to fontPlatformData()
+        * platform/graphics/wince/FontCustomPlatformData.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/wince/FontCustomPlatformData.h: Changed to pass font orientation to fontPlatformData()
+        * platform/graphics/wx/FontCustomPlatformData.cpp: Changed to pass font orientation to fontPlatformData()
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        * platform/graphics/wx/FontCustomPlatformData.h: Changed to pass font orientation to fontPlatformData()
+
 2010-10-21  Pavel Feldman  <pfeldman@chromium.org>
 
         Reviewed by Yury Semikhatsky.
