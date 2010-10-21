@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
- * 
+ * Copyright (C) 2008, 2009 Google Inc. All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above
@@ -28,29 +28,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptCallStackFactory_h
-#define ScriptCallStackFactory_h
+#include "config.h"
+#include "ScriptCallFrame.h"
 
 #include <v8.h>
-#include <wtf/PassOwnPtr.h>
+
+#include "PlatformString.h"
+#include "V8Binding.h"
+#include "V8Proxy.h"
+#include "ScriptValue.h"
 
 namespace WebCore {
 
-class ScriptState;
+ScriptCallFrame::ScriptCallFrame(const String& functionName, const String& urlString, int lineNumber, const v8::Arguments& arguments, unsigned skipArgumentCount)
+    : m_functionName(functionName)
+    , m_sourceURL(urlString)
+    , m_lineNumber(lineNumber)
+{
+    for (int i = skipArgumentCount; i < arguments.Length(); ++i)
+        m_arguments.append(ScriptValue(arguments[i]));
+}
 
-const v8::StackTrace::StackTraceOptions stackTraceOptions = static_cast<v8::StackTrace::StackTraceOptions>(
-      v8::StackTrace::kLineNumber
-    | v8::StackTrace::kColumnOffset
-    | v8::StackTrace::kScriptNameOrSourceURL
-    | v8::StackTrace::kFunctionName);
+ScriptCallFrame::ScriptCallFrame(const String& functionName, const String& urlString, int lineNumber)
+    : m_functionName(functionName)
+    , m_sourceURL(urlString)
+    , m_lineNumber(lineNumber)
+{
+}
 
-class ScriptArguments;
-class ScriptCallStack;
+ScriptCallFrame::~ScriptCallFrame()
+{
+}
 
-PassOwnPtr<ScriptCallStack> createScriptCallStack(v8::Local<v8::Context>, v8::Handle<v8::StackTrace>, size_t maxStackSize);
-PassOwnPtr<ScriptCallStack> createScriptCallStack(size_t maxStackSize);
-PassOwnPtr<ScriptArguments> createScriptArguments(const v8::Arguments& v8arguments, unsigned skipArgumentCount);
+const ScriptValue& ScriptCallFrame::argumentAt(unsigned index) const
+{
+    ASSERT(m_arguments.size() > index);
+    return m_arguments[index];
+}
 
 } // namespace WebCore
-
-#endif // ScriptCallStackFactory_h

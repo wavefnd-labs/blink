@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Google Inc. All rights reserved.
+ * Copyright (c) 2008, Google Inc. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,39 +28,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "ScriptCallFrame.h"
+#ifndef ScriptCallStack_h
+#define ScriptCallStack_h
 
-#include "InspectorValues.h"
+#include "ScriptCallFrame.h"
+#include "ScriptState.h"
+#include <wtf/Noncopyable.h>
 #include <wtf/RefPtr.h>
+
+namespace JSC {
+    class ExecState;
+    class JSValue;
+}
 
 namespace WebCore {
 
-ScriptCallFrame::ScriptCallFrame(const String& functionName, const String& urlString, unsigned lineNumber)
-    : m_functionName(functionName)
-    , m_sourceURL(urlString)
-    , m_lineNumber(lineNumber)
-{
-}
+    class InspectorArray;
 
-ScriptCallFrame::~ScriptCallFrame()
-{
-}
+    class ScriptCallStack : public Noncopyable {
+    public:
+        ScriptCallStack(JSC::ExecState*, unsigned skipArgumentCount = 0);
+        ~ScriptCallStack();
 
-bool ScriptCallFrame::isEqual(const ScriptCallFrame& o) const
-{
-    return m_functionName == o.m_functionName
-        && m_sourceURL == o.m_sourceURL
-        && m_lineNumber == o.m_lineNumber;
-}
+        ScriptState* state() const { return m_exec; }
+        ScriptState* globalState() const { return m_exec->lexicalGlobalObject()->globalExec(); }
+        // frame retrieval methods
+        const ScriptCallFrame &at(unsigned);
+        unsigned size();
+        static bool stackTrace(int, const RefPtr<InspectorArray>&);
 
-PassRefPtr<InspectorObject> ScriptCallFrame::buildInspectorObject() const
-{
-    RefPtr<InspectorObject> frame = InspectorObject::create();
-    frame->setString("functionName", m_functionName);
-    frame->setString("sourceURL", m_sourceURL);
-    frame->setNumber("lineNumber", m_lineNumber);
-    return frame;
-}
+    private:
+        void initialize();
+        bool m_initialized;
+
+        JSC::ExecState* m_exec;
+        Vector<ScriptCallFrame> m_frames;
+        JSC::JSFunction* m_caller;
+    };
 
 } // namespace WebCore
+
+#endif // ScriptCallStack_h
