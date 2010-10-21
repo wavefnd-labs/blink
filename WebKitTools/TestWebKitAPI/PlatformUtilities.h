@@ -26,10 +26,8 @@
 #ifndef PlatformUtilities_h
 #define PlatformUtilities_h
 
-#include <WebKit2/WKString.h>
+#include <WebKit2/WebKit2.h>
 #include <string>
-#include <wtf/OwnArrayPtr.h>
-#include <wtf/PassOwnArrayPtr.h>
 
 namespace TestWebKitAPI {
 namespace Util {
@@ -37,18 +35,15 @@ namespace Util {
 // Runs a platform runloop until the 'done' is true. 
 void run(bool* done);
 
+WKContextRef createContextForInjectedBundleTest(const std::string&);
+
+WKStringRef createInjectedBundlePath();
 WKURLRef createURLForResource(const char* resource, const char* extension);
 WKURLRef URLForNonExistentResource();
 
 bool isKeyDown(WKNativeEventPtr);
 
-inline std::string toSTD(WKStringRef string)
-{
-    size_t bufferSize = WKStringGetMaximumUTF8CStringSize(string);
-    OwnArrayPtr<char> buffer = adoptArrayPtr(new char[bufferSize]);
-    size_t stringLength = WKStringGetUTF8CString(string, buffer.get(), bufferSize);
-    return std::string(buffer.get(), stringLength - 1);
-}
+std::string toSTD(WKStringRef string);
 
 } // namespace Util
 } // namespace TestWebKitAPI
