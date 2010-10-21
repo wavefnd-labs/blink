@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Google Inc. All rights reserved.
+ * Copyright (c) 2010 Google Inc. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -29,85 +29,62 @@
  */
 
 #include "config.h"
-#include "ScriptCallStack.h"
+#include "ScriptCallStackFactory.h"
 
+#include "JSDOMBinding.h"
+#include "ScriptArguments.h"
+#include "ScriptCallFrame.h"
+#include "ScriptCallStack.h"
+#include "ScriptValue.h"
 #include <interpreter/CallFrame.h>
 #include <interpreter/Interpreter.h>
+#include <runtime/ArgList.h>
 #include <runtime/JSFunction.h>
+#include <runtime/JSGlobalData.h>
 #include <runtime/JSValue.h>
 #include <runtime/UString.h>
-#include <runtime/JSGlobalData.h>
 
 using namespace JSC;
 
 namespace WebCore {
 
-ScriptCallStack::ScriptCallStack(ExecState* exec, unsigned skipArgumentCount)
-    : m_initialized(false)
-    , m_exec(exec)
-    , m_caller(0)
+PassOwnPtr<ScriptCallStack> createScriptCallStack(JSC::ExecState* exec, size_t maxStackSize)
 {
-    int signedLineNumber;
-    intptr_t sourceID;
-    UString urlString;
-    JSValue function;
-
-    exec->interpreter()->retrieveLastCaller(exec, signedLineNumber, sourceID, urlString, function);
-
-    unsigned lineNumber = signedLineNumber >= 0 ? signedLineNumber : 0;
-
-    if (function) {
-        m_caller = asFunction(function);
-        m_frames.append(ScriptCallFrame(m_caller->name(m_exec), urlString, lineNumber, m_exec, skipArgumentCount));
-    } else {
-        // Caller is unknown, but we should still add the frame, because
-        // something called us, and gave us arguments.
-        m_frames.append(ScriptCallFrame(UString(), urlString, lineNumber, m_exec, skipArgumentCount));
-    }
-}
-
-ScriptCallStack::~ScriptCallStack()
-{
-}
-
-const ScriptCallFrame &ScriptCallStack::at(unsigned index)
-{
-    // First frame is pre-populated in constructor, so don't trigger
-    // initialization unless looking beyond the first frame.
-    if (index > 0)
-        initialize();
-    ASSERT(m_frames.size() > index);
-    return m_frames[index];
-}
-
-unsigned ScriptCallStack::size()
-{
-    initialize();
-    return m_frames.size();
-}
-
-void ScriptCallStack::initialize()
-{
-    if (!m_caller || m_initialized)
-        return;
-
-    int signedLineNumber;
-    intptr_t sourceID;
-    UString urlString;
-    JSValue function;
-    // callFrame must exist if m_caller is not null.
-    CallFrame* callFrame = m_exec->callerFrame();
+    Vector<ScriptCallFrame> frames;
+    CallFrame* callFrame = exec;
     while (true) {
         ASSERT(callFrame);
-        m_exec->interpreter()->retrieveLastCaller(callFrame, signedLineNumber, sourceID, urlString, function);
-        if (!function)
-            break;
-        JSFunction* jsFunction = asFunction(function);
+        int signedLineNumber;
+        intptr_t sourceID;
+        UString urlString;
+        JSValue function;
+
+        exec->interpreter()->retrieveLastCaller(callFrame, signedLineNumber, sourceID, urlString, function);
+        UString functionName;
+        if (function)
+            functionName = asFunction(function)->name(exec);
+        else {
+            // Caller is unknown, but if frames is empty we should still add the frame, because
+            // something called us, and gave us arguments.
+            if (!frames.isEmpty())
+                break;
+        }
         unsigned lineNumber = signedLineNumber >= 0 ? signedLineNumber : 0;
-        m_frames.append(ScriptCallFrame(jsFunction->name(m_exec), urlString, lineNumber, m_exec, 0));
+        frames.append(ScriptCallFrame(ustringToString(functionName), ustringToString(urlString), lineNumber));
+        if (!function || frames.size() == maxStackSize)
+            break;
         callFrame = callFrame->callerFrame();
     }
-    m_initialized = true;
+    return new ScriptCallStack(frames);
+}
+
+PassOwnPtr<ScriptArguments> createScriptArguments(JSC::ExecState* exec, unsigned skipArgumentCount)
+{
+    Vector<ScriptValue> arguments;
+    size_t argumentCount = exec->argumentCount();
+    for (size_t i = skipArgumentCount; i < argumentCount; ++i)
+        arguments.append(ScriptValue(exec->argument(i)));
+    return new ScriptArguments(exec, arguments);
 }
 
 bool ScriptCallStack::stackTrace(int, const RefPtr<InspectorArray>&)
