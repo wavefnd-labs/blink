@@ -1,3 +1,93 @@
+2010-10-21  Pavel Feldman  <pfeldman@chromium.org>
+
+        Reviewed by Yury Semikhatsky.
+
+        Web Inspector: provide resource tree in the Storage panel (behind the flag).
+        https://bugs.webkit.org/show_bug.cgi?id=48069
+
+        * WebCore.gypi:
+        * inspector/Inspector.idl:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::frameDetachedFromParent):
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::buildObjectForDocumentLoader):
+        (WebCore::buildObjectForFrameResource):
+        (WebCore::buildObjectForCachedResource):
+        (WebCore::populateObjectWithFrameResources):
+        (WebCore::InspectorResourceAgent::identifierForInitialRequest):
+        (WebCore::InspectorResourceAgent::didLoadResourceFromMemoryCache):
+        (WebCore::buildObjectForFrameTree):
+        (WebCore::InspectorResourceAgent::didCommitLoad):
+        (WebCore::InspectorResourceAgent::frameDetachedFromParent):
+        (WebCore::InspectorResourceAgent::cachedResources):
+        (WebCore::InspectorResourceAgent::resourceContent):
+        * inspector/InspectorResourceAgent.h:
+        * inspector/front-end/Images/frame.png: Added.
+        * inspector/front-end/NetworkPanel.js:
+        (WebInspector.NetworkPanel.prototype.refreshResource):
+        (WebInspector.NetworkPanel.prototype._showResource):
+        * inspector/front-end/Resource.js:
+        (WebInspector.Resource.Type.toString):
+        (WebInspector.Resource.prototype.getContents):
+        * inspector/front-end/ResourceManager.js:
+        (WebInspector.ResourceManager):
+        (WebInspector.ResourceManager.prototype.identifierForInitialRequest):
+        (WebInspector.ResourceManager.prototype._createResource):
+        (WebInspector.ResourceManager.prototype.willSendRequest):
+        (WebInspector.ResourceManager.prototype._appendRedirect):
+        (WebInspector.ResourceManager.prototype.markResourceAsCached):
+        (WebInspector.ResourceManager.prototype.didReceiveResponse):
+        (WebInspector.ResourceManager.prototype._updateResourceWithResponse):
+        (WebInspector.ResourceManager.prototype.didReceiveContentLength):
+        (WebInspector.ResourceManager.prototype.didFinishLoading):
+        (WebInspector.ResourceManager.prototype.didFailLoading):
+        (WebInspector.ResourceManager.prototype.didLoadResourceFromMemoryCache):
+        (WebInspector.ResourceManager.prototype._updateResourceWithCachedResource):
+        (WebInspector.ResourceManager.prototype.setOverrideContent):
+        (WebInspector.ResourceManager.prototype.didCommitLoadForFrame):
+        (WebInspector.ResourceManager.prototype.frameDetachedFromParent):
+        (WebInspector.ResourceManager.prototype._clearResources):
+        (WebInspector.ResourceManager.prototype.didCreateWebSocket):
+        (WebInspector.ResourceManager.prototype.willSendWebSocketHandshakeRequest):
+        (WebInspector.ResourceManager.prototype.didReceiveWebSocketHandshakeResponse):
+        (WebInspector.ResourceManager.prototype.didCloseWebSocket):
+        (WebInspector.ResourceManager.prototype._processCachedResources):
+        (WebInspector.ResourceManager.prototype._appendFramesRecursively.comparator):
+        (WebInspector.ResourceManager.prototype._appendFramesRecursively):
+        (WebInspector.ResourceManager.createResourceView):
+        (WebInspector.ResourceManager.resourceViewTypeMatchesResource):
+        (WebInspector.ResourceManager.resourceViewForResource):
+        (WebInspector.ResourceManager.getContents):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.ResourcesPanel.prototype.get searchableViews):
+        (WebInspector.ResourcesPanel.prototype.addMessageToResource):
+        (WebInspector.ResourcesPanel.prototype._recreateViewForResourceIfNeeded):
+        (WebInspector.ResourcesPanel.prototype.showResource):
+        (WebInspector.ResourcesPanel.prototype.sourceFrameForResource):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype._showScriptOrResource):
+        * inspector/front-end/StoragePanel.js:
+        (WebInspector.StoragePanel):
+        (WebInspector.StoragePanel.prototype.addFrame):
+        (WebInspector.StoragePanel.prototype.removeFrame):
+        (WebInspector.StoragePanel.prototype.addFrameResource):
+        (WebInspector.StoragePanel.prototype.removeFrameResources):
+        (WebInspector.StoragePanel.prototype.showResource):
+        (WebInspector.BaseStorageTreeElement.prototype.onattach):
+        (WebInspector.BaseStorageTreeElement.prototype.onreveal):
+        (WebInspector.FrameTreeElement):
+        (WebInspector.FrameTreeElement.prototype.onselect):
+        (WebInspector.FrameResourceTreeElement):
+        (WebInspector.FrameResourceTreeElement.prototype.onselect):
+        (WebInspector.FrameResourceTreeElement.prototype.onattach):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/inspector.css:
+        (.frame-storage-tree-item .icon):
+        (.storage.panel .sidebar.outline-disclosure > ol):
+        (.resources-category-images .image-resource-icon-preview):
+        (.children.small .resources-category-images .image-resource-icon-preview):
+        * inspector/front-end/inspector.js:
+
 2010-10-21  David Kilzer  <ddkilzer@apple.com>
 
         <http://webkit.org/b/48047> Fix warnings found by check-Xcode-source-file-types
