@@ -1,3 +1,137 @@
+2010-10-20  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Redesign SVGAnimatedProperty concept to share "POD type wrappers" between all bindings (-> add ObjC SVG bindings)
+        https://bugs.webkit.org/show_bug.cgi?id=47905
+
+        Tests: svg/dom/SVGLengthList-appendItem.xhtml
+               svg/dom/SVGLengthList-basics.xhtml
+               svg/dom/SVGLengthList-getItem.xhtml
+               svg/dom/SVGLengthList-initialize.xhtml
+               svg/dom/SVGLengthList-insertItemBefore.xhtml
+               svg/dom/SVGLengthList-removeItem.xhtml
+               svg/dom/SVGLengthList-replaceItem.xhtml
+               svg/dom/SVGLengthList-xml-dom-modifications.xhtml
+
+        Introduce a more lightweight, less intrusive way to expose SVGAnimated* DOM bindings.
+
+        Concrete example:
+        The SVG DOM defines a 'SVGAnimatedLength' object, that's used to represent the x / y / width / height attributes of a 'SVGRectElement'.
+        Each 'SVGAnimatedLength' object exposes a baseVal (markup defined attribute value) and an animVal (reflects the current state during animations),
+        both of type 'SVGLength'. These objects are all _live_. That means you can do:
+        var foobar = rect.x.baseVal; foobar.value += 150;
+
+        If we'd implement the SVG DOM straightforward, we'd have to store a refcounted SVGAnimatedLength object, containing two refcounted SVGLength objects
+        in SVGRectElement, for each of the x/y/width/height attributes. Our solution, to reduce memory footprint and increase performance is to store
+        SVGLength stack-allocated, non refcounted types in SVGRectElement for x/y/width/height, and don't implement the SVGAnimatedLength object at all.
+
+        In the past the JS bindings had to expose wrappers for SVGAnimatedLength on their own, and wrap each SVGLength object in an object called JSSVGPODTypeWrapper<SVGLength>.
+        When JS changed the 'value' of the 'SVGLength', we constructed a copy of the SVGLength object, modified it, and called rectElement->setXBaseValue(newLength).
+        This is not efficient at all, as we have to construct several copies of the SVGLength object, utilize callbacks to propagate the value changes in the SVG DOM.
+        Furthermore, all bindings had to expose a similar concept, otherwhise SVG DOM wouldn't work. Up until now, only JSC and V8 bindings were available, that worked properly.
+
+        The new SVGAnimatedProperty concept removes the need for JSSVGPODTypeWrapper (and friends like JSSVGContextCache, that associated a SVGLength with its SVGRectElement).
+        Instead a solution is offered, that all bindings can use simultaneously, without adding new types or special concepts like JSSVGPODTypeWrapper.
+
+        It works like this:
+        A new refcounted SVGAnimatedProperty<PropertyType> template class is available, that stores a QualifiedName to associate the SVG DOM property with a XML DOM attribute.
+        It also stores a RefPtr to the SVGElement that created it.
+        
+        In SVGRectElement we still store SVGLength m_x/m_y/m_width/m_height members, and offer a new "xAnimated()" method which looks up or creates a SVGAnimatedProperty<SVGLength>
+        object. The JS/V8/ObjC bindings call this method whenever someone requests "rect.x/y/width/height", and a new wrapper is created, and stored in a HashMap.
+
+        The SVGAnimatedProperty<PropertyType> is a base class for SVGAnimatedPropertyTearOff and SVGAnimatedListPropertyTearOff, the latter is used for all types of lists (SVGLengthList).
+        SVGAnimatedProperty contains two methods used in the bindings: SVGProperty* baseVal and SVGProperty* animVal. SVGProperty is a base class for SVGPropertyTearOff and
+        SVGListPropertyTearOff. Upon invocation of the baseVal/animVal methods a new SVG(List)PropertyTearOff object is created and stored in a RefPtr.
+        The SVGPropertyTearOff objects stores a _reference_ to the type it wraps. Concrete example:
+        When calling rect.x, a SVGAnimatedPropertyTearOff<SVGLength> is created, that stores a pointer to the SVGRectElement, and a SVGNames::xAttr.
+        When calling rect.x.baseVal, a SVGPropertyTearOf<SVGLength> is created, that stores a reference to the "m_x" member variable of the SVGRectElement.
+        Any changes applied to the SVGLength object, through the wrapper, are immediately live, as no copies are involved anymore, nor the need to fire any callback methods.
+        This is the key concept of the new tear offs, no copies, no callbacks, no virtual methods (except one, needed for lists, but it's a detail).
+
+        The SVGAnimatedListPropertyTearOff and SVGListPropertyTearOff work the same, but for SVG*List objects. The whole SVG*List API is _removed_ from the SVG DOM classes
+        like SVGLengthList. It now inherits from Vector<SVGLength>, where it used to store a Vector<RefPtr<SVGListItem<SVGLength> > >. The SVGList API (insertItemBefore, appendItem, etc.)
+        is exposed through SVGListPropertyTearOff, and there's no need anymore for SVGLengthList to deal with it at all.
+        SVGLengthList is live just like most other SVG DOM object. Concrete example:
+        var item0 = text.x.baseVal.getItem(0); item0.value += 150;
+
+        Previously we chose to store a refcounted SVGListItem object, which wrapped the SVGLength object, to achieve liveness. We could change a single list item from DOM
+        w/o copying the whole list. The drawback is that a simple type likeSVGLengthList, was heavy to store, as it contained a list of RefPtrs around a wrapper object
+        around the real object 'SVGLength'. This complexity is completly gone.
+
+        The SVGListPropertyTearOff<SVGLengthList> stores a reference to the SVGLengthList object (eg. SVGTextElement::m_x) and maintains a list of SVGPropertyTearOff<SVGLength>
+        wrappers, that are created when necessary (getItem(2), will create a wrapper around the third list item), and cached. These SVGPropertyTearOff<SVGLength> objects
+        store references to the SVGLength object _in the SVGLengthList_. One has to be extra carefully, to keep those lists synchronized.
+        The SVGLengthList API is fully implemented for the first time, including moving items between lists, and is extensively tested with 8 new testcases.
+
+        This patch only changed SVGLength/SVGLengthList to the new concept. All other types remain using the old DeprecatedSVGAnimatedProperty* concept.
+        This will change in follow-up patches.
+
+        * GNUmakefile.am: Add new files from svg/properties to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/js/JSSVGLengthCustom.cpp: Adapt to context cache removal for SVGLength.
+        (WebCore::JSSVGLength::value):
+        (WebCore::JSSVGLength::convertToSpecifiedUnits):
+        * bindings/scripts/CodeGenerator.pm: Add new isSVGNewStyleAnimatedProperty() helper method, return true for "SVGAnimatedLength" and "SVGAnimatedLengthList".
+        * bindings/scripts/CodeGeneratorJS.pm: Generate new style SVG JS bindings, that don't need JSSVGContextCache / JSSVGPODTypeWrapper.
+        * bindings/scripts/CodeGeneratorObjC.pm: Ditto. (+ Finally expose a working set of SVG DOM API for Objective C).
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        * bindings/v8/custom/V8SVGLengthCustom.cpp: Adapt to context cache removal for SVGLength.
+        (WebCore::V8SVGLength::valueAccessorGetter):
+        (WebCore::V8SVGLength::convertToSpecifiedUnitsCallback):
+        * rendering/svg/SVGTextLayoutAttributesBuilder.cpp:
+        (WebCore::extractFloatValuesFromSVGLengthList): SVGLengthList is a POD type now, passed as const reference.
+        * svg/DeprecatedSVGAnimatedPropertyTraits.h: Remove handling for SVGLength/SVGLengthList, those are converted to the new SVGAnimatedProperty design now.
+        * svg/DeprecatedSVGAnimatedTemplate.h: Ditto.
+        * svg/SVGAnimatedLength.h: Added.
+        * svg/SVGAnimatedLength.idl: Mark as [SVGAnimatedProperty].
+        * svg/SVGAnimatedLengthList.h: Added.
+        * svg/SVGAnimatedLengthList.idl: Mark as [SVGAnimatedProperty].
+        * svg/SVGCircleElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_PROPERTY_NEW/ until the transition to the new concept is finished.
+        * svg/SVGCursorElement.h: Ditto.
+        * svg/SVGEllipseElement.h: Ditto.
+        * svg/SVGFilterElement.h: Ditto.
+        * svg/SVGFilterPrimitiveStandardAttributes.h: Ditto.
+        * svg/SVGForeignObjectElement.h: Ditto.
+        * svg/SVGImageElement.h: Ditto.
+        * svg/SVGLength.idl: Mark as [SVGProperty].
+        * svg/SVGLengthList.cpp: Use Vector API (appendItem -> append). No need to ever use the SVGList API internally. SVGLengthList is a Vector<SVGLength> now.
+        (WebCore::SVGLengthList::parse): 
+        (WebCore::SVGLengthList::valueAsString):
+        * svg/SVGLengthList.h: Inherit from Vector<SVGLength> - not from the SVGList base class. It's a simple, non-refcounted POD type now.
+        (WebCore::SVGLengthList::SVGLengthList):
+        * svg/SVGLengthList.idl: Mark as [SVGListProperty].
+        * svg/SVGLineElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_PROPERTY_NEW/ until the transition to the new concept is finished.
+        * svg/SVGLinearGradientElement.h: Ditto.
+        * svg/SVGMarkerElement.h: Ditto.
+        * svg/SVGMaskElement.h: Ditto.
+        * svg/SVGPatternElement.h: Ditto.
+        * svg/SVGRadialGradientElement.h: Ditto.
+        * svg/SVGRectElement.h: Ditto.
+        * svg/SVGSVGElement.h: Ditto.
+        * svg/SVGSVGElement.idl: Mark createSVGLength() as [SVGLiveProperty] - a wrapper for the returned object has to be created.
+        * svg/SVGTextContentElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_PROPERTY_NEW/ until the transition to the new concept is finished.
+        * svg/SVGTextPathElement.h: Ditto.
+        * svg/SVGTextPositioningElement.cpp:
+        (WebCore::SVGTextPositioningElement::SVGTextPositioningElement):
+        (WebCore::SVGTextPositioningElement::parseMappedAttribute): Detach wrappers pointing to the old x/y/dx/dy list, if the underlying list changes via XML DOM.
+        (WebCore::listContainsRelativeValue): Adapt to SVGLengthList interface changes, it's a POD type now.
+        * svg/SVGTextPositioningElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_LIST_PROPERTY_NEW/ until the transition to the new concept is finished.
+        * svg/SVGUseElement.h:
+        * svg/properties/SVGAnimatedListPropertyTearOff.h: Added.
+        * svg/properties/SVGAnimatedProperty.h: Added. This is the base class for SVGAnimatedPropertyTearOff and SVGAnimatedListPropertyTearOff.
+        * svg/properties/SVGAnimatedPropertyDescription.h: Added. Refactored from DeprecatedSVGAnimatedProperty.h.
+        * svg/properties/SVGAnimatedPropertyMacros.h: Added. These macros will be _removed_ as soon as the transition to the new concept is finished.
+        * svg/properties/SVGAnimatedPropertyTearOff.h: Added.
+        * svg/properties/SVGListPropertyTearOff.h: Added.
+        * svg/properties/SVGProperty.h: Added. This is the base class for SVGPropertyTearOff and SVGListPropertyTearOff.
+        * svg/properties/SVGPropertyTearOff.h: Added.
+        * svg/properties/SVGPropertyTraits.h: Added.
+
 2010-10-21  Alex Milowski  <alex@milowski.com>
 
         Reviewed by Kenneth Rohde Christiansen.
