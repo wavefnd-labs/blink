@@ -1,3 +1,43 @@
+2010-10-21  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Tony Chang.
+
+        removeFormat needs to be reimplemented
+        https://bugs.webkit.org/show_bug.cgi?id=43017
+
+        Reimplemented execCommand('RemoveFormat', false, null). New implementation removes
+        the same elements removed by Internet Explorer. Because WebKit supports StyleWithCSS
+        we also reset any editing styles to match that of the root editable element
+        while Internet Explorer does not remove any CSS styles.
+
+        New implementation uses ApplyStyleCommand to remove appropriate elements and reset the style.
+        Added new constructor and member variable to ApplyStyleCommand to support mass-removal of elements
+        since it's inefficient to call ApplyStyleCommand on each element we're removing.
+
+        To avoid an infinite loop in pushDownInlineStyleAroundNode when mass-removing, WebKit no longer
+        push down element one level at a time. Instead, we keep a stack of styled elements to be applied,
+        and apply wrap siblings of targetNode's ancestors by all of them at once.
+
+        Tests: editing/execCommand/remove-format-elements.html
+               editing/execCommand/remove-format-multiple-elements.html
+
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::ApplyStyleCommand::ApplyStyleCommand): Added; this version takes style and a function pointer
+        to a boolean function that determines which element needs to removed, and set m_removeOnly to true.
+        (WebCore::ApplyStyleCommand::doApply): Added support for m_isInlineElementToRemoveFunction.
+        (WebCore::ApplyStyleCommand::applyBlockStyle): Ditto.
+        (WebCore::ApplyStyleCommand::applyInlineStyleToNodeRange): Exits early if m_removeOnly is true.
+        (WebCore::ApplyStyleCommand::isStyledInlineElementToRemove): Added.
+        (WebCore::ApplyStyleCommand::removeStyleFromRunBeforeApplyingStyle): Calls isStyledInlineElementToRemove.
+        (WebCore::ApplyStyleCommand::removeInlineStyleFromElement): Ditto.
+        (WebCore::ApplyStyleCommand::removeInlineStyle): Ditto.
+        (WebCore::ApplyStyleCommand::pushDownInlineStyleAroundNode): See above.
+        * editing/ApplyStyleCommand.h:
+        (WebCore::ApplyStyleCommand::create): Added.
+        * editing/RemoveFormatCommand.cpp:
+        (WebCore::isElementForRemoveFormatCommand): Added.
+        (WebCore::RemoveFormatCommand::doApply): Rewritten.
+
 2010-10-21  Tony Gentilcore  <tonyg@chromium.org>
 
         Reviewed by Adam Barth.
