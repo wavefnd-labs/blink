@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2010 Google Inc. All rights reserved.
+ * Copyright (c) 2008, Google Inc. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,35 +28,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScriptCallStack_h
-#define ScriptCallStack_h
-
+#include "config.h"
 #include "ScriptCallFrame.h"
-#include <wtf/Noncopyable.h>
-#include <wtf/Vector.h>
+
+#include <runtime/ArgList.h>
+#include <runtime/UString.h>
+
+using namespace JSC;
 
 namespace WebCore {
 
-class InspectorArray;
+ScriptCallFrame::ScriptCallFrame(const UString& functionName, const UString& urlString, int lineNumber, ExecState* exec, unsigned skipArgumentCount)
+    : m_functionName(ustringToString(functionName))
+    , m_sourceURL(ustringToString(urlString))
+    , m_lineNumber(lineNumber)
+{
+    if (!exec)
+        return;
+    size_t argumentCount = exec->argumentCount();
+    for (size_t i = skipArgumentCount; i < argumentCount; ++i)
+        m_arguments.append(ScriptValue(exec->argument(i)));
+}
 
-class ScriptCallStack : public Noncopyable {
-public:
-    static const size_t maxCallStackSizeToCapture = 200;
+ScriptCallFrame::~ScriptCallFrame()
+{
+}
 
-    ScriptCallStack(Vector<ScriptCallFrame>&);
-    ~ScriptCallStack();
-
-    const ScriptCallFrame &at(size_t);
-    size_t size();
-    static bool stackTrace(int, const RefPtr<InspectorArray>&);
-
-    bool isEqual(ScriptCallStack*) const;
-    PassRefPtr<InspectorArray> buildInspectorObject() const;
-
-private:
-    Vector<ScriptCallFrame> m_frames;
-};
+const ScriptValue &ScriptCallFrame::argumentAt(unsigned index) const
+{
+    ASSERT(m_arguments.size() > index);
+    return m_arguments[index];
+}
 
 } // namespace WebCore
-
-#endif // ScriptCallStack_h
