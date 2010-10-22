@@ -1,3 +1,37 @@
+2010-10-22  Cosmin Truta  <ctruta@chromium.org>
+
+        Reviewed by Nikolas Zimmermann.
+
+        getBoundingClientRect does not work with SVG <text>
+        https://bugs.webkit.org/show_bug.cgi?id=46775
+
+        Dispatched the calls from Element::getBoundingClientRect to getBBox
+        through SVGElement::boundingBox.
+        Recognized SVGTextElement in addition to SVGStyledLocatableElement
+        as a class that provides getBBox.
+        Fixed the result of zooming: adjusted the getBoundingClientRect rectangle
+        for absolute zoom, even for SVG elements.
+
+        Additional cleanup task:
+        Removed redundant overloads of SVGStyledTransformableElement
+        methods: nearestViewportElement, farthestViewportElement, getBBox.
+        These methods are already inherited from SVGStyledLocatableElement.
+
+        Test: css3/zoom-coords.xhtml
+
+        * WebCore.xcodeproj/project.pbxproj: Set role of SVGLocatable.h to private.
+        * dom/Element.cpp:
+        (Element::getBoundingClientRect): Used SVGElement::boundingBox.
+        Adjusted coordinates for absolute zoom, for all kinds of elements.
+        * svg/SVGElement.cpp:
+        * svg/SVGElement.h:
+        (SVGElement::boundingBox): Added.
+        * svg/SVGStyledTransformableElement.cpp:
+        * svg/SVGStyledTransformableElement.h:
+        (SVGStyledTransformableElement::nearestViewportElement): Removed.
+        (SVGStyledTransformableElement::farthestViewportElement): Removed.
+        (SVGStyledTransformableElement::getBBox): Removed.
+
 2010-10-22  Patrick Gansterer  <paroga@webkit.org>
 
         Reviewed by Adam Roben.
