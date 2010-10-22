@@ -1,3 +1,41 @@
+2010-10-22  Adam Roben  <aroben@apple.com>
+
+        Windows build fix
+
+        r70319 added Windows-native versions of the various platform/network
+        headers to platform/network/win. WebCoreGenerated was copying these
+        headers over the CFNetwork-specific versions in $WebKitOutputDir,
+        leading to the wrong headers being used in WebKit.
+
+        This patch changes WebCoreGenerated not to copy any headers from
+        platform/network/win into $WebKitOutputDir. Instead, only headers from
+        platform/network/cf or platform/network/curl (as specified) are copied.
+        There were some CFNetwork-specific files still hanging around in
+        platform/network/win; these have been moved to platform/network/cf.
+
+        * WebCore.vcproj/WebCore.vcproj: Updated for file moves and let VS
+        * format the file as it saw fit.
+
+        * WebCore.vcproj/WebCoreGenerated.vcproj: Added the various scripts
+        * this project uses to make editing them easier.
+
+        * WebCore.vcproj/copyForwardingHeaders.cmd: Changed not to copy any
+        * headers from platform/network/win.
+
+        * platform/network/cf/CookieJarCFNet.cpp: Renamed from WebCore/platform/network/win/CookieJarCFNetWin.cpp.
+        * platform/network/cf/CookieStorageCFNet.cpp: Renamed from WebCore/platform/network/win/CookieStorageWin.cpp.
+        * platform/network/cf/CookieStorageCFNet.h: Renamed from WebCore/platform/network/win/CookieStorageWin.h.
+
+        * platform/network/cf/ResourceHandleCFNet.cpp: Updated for rename.
+
+        * platform/network/cf/AuthenticationChallenge.h:
+        * platform/network/cf/ResourceError.h:
+        * platform/network/cf/ResourceRequest.h:
+        * platform/network/cf/ResourceResponse.h:
+        * platform/network/cf/SocketStreamError.h:
+        * platform/network/cf/SocketStreamHandle.h:
+        Touched to force a re-copy.
+
 2010-10-22  Abhishek Arya  <inferno@chromium.org>
 
         Reviewed by Dave Hyatt.
