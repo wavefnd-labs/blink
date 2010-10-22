@@ -1,3 +1,40 @@
+2010-10-22  Leandro Gracia Gil  <leandrogracia@google.com>
+
+        Reviewed by Jeremy Orlow.
+
+        Patch the current speech input implementation to use and validate the
+        nearest language tag. The language is now passed to the startRecognition
+        methods so that language-specific recognition could be used. Also added
+        a second parameter to setMockSpeechInputResult for the language used in
+        speech recognition.
+        https://bugs.webkit.org/show_bug.cgi?id=47089
+
+        This is the 2nd of a 4-sided patch in Chromium and WebKit. For more
+        details see http://codereview.chromium.org/3615005/show and
+        http://codereview.chromium.org/3595018/show.
+
+        Test: fast/speech/input-text-language-tag.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::computeInheritedLanguage): includes a brief character
+          validation for the BCP 47 language tag.
+        * page/SpeechInput.cpp:
+        (WebCore::SpeechInput::startRecognition):
+        * page/SpeechInput.h:
+        * page/SpeechInputClient.h:
+        * platform/mock/SpeechInputClientMock.cpp:
+        (WebCore::SpeechInputClientMock::startRecognition):
+        (WebCore::SpeechInputClientMock::setRecognitionResult): results are now
+          stored by language using a hash map.
+        (WebCore::SpeechInputClientMock::timerFired):
+        * platform/mock/SpeechInputClientMock.h:
+        * rendering/TextControlInnerElements.cpp:
+        (WebCore::TextControlInnerElement::attachInnerElement):
+        (WebCore::SearchFieldCancelButtonElement::detach):
+        (WebCore::SpinButtonElement::defaultEventHandler):
+        (WebCore::InputFieldSpeechButtonElement::defaultEventHandler):
+        (WebCore::InputFieldSpeechButtonElement::detach):
+
 2010-10-21  Yury Semikhatsky  <yurys@chromium.org>
 
         Unreviewed, rolling out r70298.WebKit win compilation failure.
@@ -1678,43 +1715,6 @@
         * platform/mock/SpeechInputClientMock.cpp:
         (WebCore::SpeechInputClientMock::startRecognition):
         (WebCore::SpeechInputClientMock::setRecognitionResult):
-        (WebCore::SpeechInputClientMock::timerFired):
-        * platform/mock/SpeechInputClientMock.h:
-        * rendering/TextControlInnerElements.cpp:
-        (WebCore::TextControlInnerElement::attachInnerElement):
-        (WebCore::SearchFieldCancelButtonElement::detach):
-        (WebCore::SpinButtonElement::defaultEventHandler):
-        (WebCore::InputFieldSpeechButtonElement::defaultEventHandler):
-        (WebCore::InputFieldSpeechButtonElement::detach):
-
-2010-10-19  Leandro Gracia Gil  <leandrogracia@google.com>
-
-        Reviewed by Jeremy Orlow.
-
-        Patch the current speech input implementation to use and validate the
-        nearest language tag. The language is now passed to the startRecognition
-        methods so that language-specific recognition could be used. Also added
-        a second parameter to setMockSpeechInputResult for the language used in
-        speech recognition.
-        https://bugs.webkit.org/show_bug.cgi?id=47089
-
-        This is the 2nd of a 4-sided patch in Chromium and WebKit. For more
-        details see http://codereview.chromium.org/3615005/show and
-        http://codereview.chromium.org/3595018/show.
-
-        Test: fast/speech/input-text-language-tag.html
-
-        * dom/Element.cpp:
-        (WebCore::Element::computeInheritedLanguage): includes a brief character
-          validation for the BCP 47 language tag.
-        * page/SpeechInput.cpp:
-        (WebCore::SpeechInput::startRecognition):
-        * page/SpeechInput.h:
-        * page/SpeechInputClient.h:
-        * platform/mock/SpeechInputClientMock.cpp:
-        (WebCore::SpeechInputClientMock::startRecognition):
-        (WebCore::SpeechInputClientMock::setRecognitionResult): results are now
-          stored by language using a hash map.
         (WebCore::SpeechInputClientMock::timerFired):
         * platform/mock/SpeechInputClientMock.h:
         * rendering/TextControlInnerElements.cpp:
