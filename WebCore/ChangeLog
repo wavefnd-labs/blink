@@ -1,3 +1,22 @@
+2010-10-22  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Anders Carlsson.
+
+        Layout not updating in a subtree when a scrollbar is hidden in a flexbox descendant
+        https://bugs.webkit.org/show_bug.cgi?id=48154
+
+        Test: scrollbars/hidden-scrollbar-prevents-layout.html
+
+        updateScrollInfoAfterLayout() calling setHasHorizontalScrollbar() caused updateScrollbarParts()
+        to call setChildNeedsLayout() on the overflow, because the RenderScrollbar was created with
+        the default thickness instead of the thickness specified in style. This led to the the overflow’s
+        parent to be re-marked for layout during its own parent’s finishDelayUpdateScrollInfo(), and
+        the result was that at the end of RenderView::layout(), there was a dirty renderer.
+
+        * rendering/RenderScrollbar.cpp:
+        (WebCore::RenderScrollbar::RenderScrollbar): Set the frame size in the 'display: none' and
+        'visibility: hidden' cases as well.
+
 2010-10-22  Patrick Gansterer  <paroga@webkit.org>
 
         Unreviewed.
