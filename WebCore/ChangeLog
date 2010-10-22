@@ -1,3 +1,44 @@
+2010-10-21  James Simonsen  <simonjam@chromium.org>
+
+        Reviewed by Adam Barth.
+
+        HTMLTreeBuilder's InForeignContent code needs a re-write
+
+        Foreign Content mode was changed significantly by:
+        http://www.w3.org/Bugs/Public/show_bug.cgi?id=10314
+
+        The differences can be seen here:
+        http://html5.org/tools/web-apps-tracker?from=5520&to=5522
+
+        This bug addresses all spec changes in the diff except the select scope
+        changes, which have already been fixed in a separate bug.
+
+        https://bugs.webkit.org/show_bug.cgi?id=46676
+
+        * html/parser/HTMLElementStack.cpp:
+        (WebCore::HTMLNames::isScopeMarker): Add foreign elements to list.
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::HTMLTreeBuilder):
+        (WebCore::HTMLTreeBuilder::processDoctypeToken): Switch mode before reprocessing any tokens.
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody): Ditto. Remove secondary insertion mode.
+        (WebCore::HTMLTreeBuilder::processStartTagForInTable): Switch mode before reprocessing any tokens.
+        (WebCore::HTMLTreeBuilder::processStartTag): Ditto. Remove secondary insertion mode.
+        (WebCore::HTMLTreeBuilder::resetInsertionModeAppropriately): Remove foreign var. Use hasTagName() instead of == localName() to fix bug with foreign elements.
+        (WebCore::HTMLTreeBuilder::processEndTagForInTableBody): Switch mode before reprocessing any tokens.
+        (WebCore::HTMLTreeBuilder::processEndTagForInRow): Ditto.
+        (WebCore::HTMLTreeBuilder::processEndTagForInCell): Ditto.
+        (WebCore::HTMLTreeBuilder::processEndTagForInBody): Ditto.
+        (WebCore::HTMLTreeBuilder::processEndTag): Ditto.
+        (WebCore::HTMLTreeBuilder::prepareToReprocessToken): Added.
+        (WebCore::HTMLTreeBuilder::reprocessStartTag): Added.
+        (WebCore::HTMLTreeBuilder::reprocessEndTag): Added.
+        (WebCore::HTMLTreeBuilder::processForeignContentUsingInBodyModeAndResetMode): Added.
+        (WebCore::HTMLTreeBuilder::resetForeignInsertionMode): Added.
+        (WebCore::HTMLTreeBuilder::processComment): Switch mode before reprocessing any tokens.
+        (WebCore::HTMLTreeBuilder::processCharacterBuffer): Ditto.
+        (WebCore::HTMLTreeBuilder::processEndOfFile): Ditto.
+        * html/parser/HTMLTreeBuilder.h: Functions and member for tracking potential switch from InForeignContentMode.
+
 2010-10-21  Adam Barth  <abarth@webkit.org>
 
         Reviewed by David Levin.
