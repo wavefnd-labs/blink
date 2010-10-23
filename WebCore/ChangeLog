@@ -1,3 +1,56 @@
+2010-10-23  Alexey Proskuryakov  <ap@apple.com>
+
+        Reviewed by Anders Carlsson.
+
+        https://bugs.webkit.org/show_bug.cgi?id=48083
+        <rdar://problem/8489082> Need WebKit2 API for private browsing (48083)
+
+        * GNUmakefile.am:
+        * WebCore.gypi:
+        * WebCore.pro:
+        * WebCore.vcproj/WebCore.vcproj:
+        Added CookieStorage.h to build files that contain headers.
+
+        * WebCore.xcodeproj/project.pbxproj: Added CookieStorage.h and CookieStorageMac.mm.
+
+        * WebCore.exp.in: Export _wkSetCookieStoragePrivateBrowsingEnabled (WebKit initializes WKSI
+        on WebCore's behalf).
+
+        * platform/mac/WebCoreSystemInterface.h:
+        * platform/mac/WebCoreSystemInterface.mm:
+        More work for passing the function pointer down to WebCore.
+
+        * page/Settings.cpp: (WebCore::Settings::setPrivateBrowsingEnabled): Tell cookie manager to
+        when to use private browsing mode. Note that although this is a per-page setting, it
+        actually has global effect.
+
+        * page/Settings.h: Extended a comment about what private browsing does.
+
+        * platform/android/TemporaryLinkStubs.cpp: (setCookieStoragePrivateBrowsingEnabled):
+        * platform/chromium/TemporaryLinkStubs.cpp: (WebCore::setCookieStoragePrivateBrowsingEnabled):
+        * platform/efl/TemporaryLinkStubs.cpp: (WebCore::setCookieStoragePrivateBrowsingEnabled):
+        * platform/gtk/TemporaryLinkStubs.cpp: (WebCore::setCookieStoragePrivateBrowsingEnabled):
+        * platform/haiku/TemporaryLinkStubs.cpp: (WebCore::setCookieStoragePrivateBrowsingEnabled):
+        * platform/qt/TemporaryLinkStubsQt.cpp: (WebCore::setCookieStoragePrivateBrowsingEnabled):
+        Added an empty implementation for ports that don't implement private browsing, or implement
+        it in ways I cannot discover.
+
+        * platform/network/CookieStorage.h: Added. I'm not entirely sure how this is different from
+        CookieJar.h, just following a precedent already set by Windows port with CookieStorageWin.h.
+
+        * platform/network/mac/CookieStorageMac.mm: Added.
+        (WebCore::setCookieStoragePrivateBrowsingEnabled): Call a WKSI function to enable private
+        browsing mode for cookies.
+
+        * platform/network/cf/CookieStorageCFNet.cpp:
+        (WebCore::currentCookieStorage): Added ASSERT(isMainThread()).
+        (WebCore::setCurrentCookieStorage): Ditto.
+        (WebCore::setCookieStoragePrivateBrowsingEnabled): Set cookie storage to a private one
+        when in private browsing mode. ResourceHandle applies the storage to each individual request.
+
+        * platform/network/cf/CookieStorageCFNet.h: Added a comment explaining that these functions
+        are only for WebKit1.
+
 2010-10-23  David Kilzer  <ddkilzer@apple.com>
 
         <http://webkit.org/b/48181> Add missing include of MacErrors.h
