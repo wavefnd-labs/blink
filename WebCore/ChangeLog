@@ -1,3 +1,40 @@
+2010-10-24  Dirk Schulze  <krit@webkit.org>
+
+        Reviewed by Nikolas Zimmermann.
+
+        Filter example Chiseled from SVG Wow! is slow
+        https://bugs.webkit.org/show_bug.cgi?id=48174
+
+        Use a pointer to the ByteArray instead of the ref counted CanvasPixelArray or ImageData directly
+        to access the data for pixel manipulation on SVG Filters or SVG Masker. This is a
+        performance increase since the recurring use of the -> operator can be avoided.
+        FEConvolveMatrix and FELighting still need to change in a followup patch.
+
+        No functionality was changed. So, no new tests.
+
+        * platform/graphics/filters/FEBlend.cpp:
+        (WebCore::FEBlend::apply):
+        * platform/graphics/filters/FEColorMatrix.cpp:
+        (WebCore::luminance):
+        (WebCore::effectType):
+        (WebCore::FEColorMatrix::apply):
+        * platform/graphics/filters/FEComponentTransfer.cpp:
+        (WebCore::FEComponentTransfer::apply):
+        * platform/graphics/filters/FEComposite.cpp:
+        (WebCore::arithmetic):
+        (WebCore::FEComposite::apply):
+        * platform/graphics/filters/FEDisplacementMap.cpp:
+        (WebCore::FEDisplacementMap::apply):
+        * platform/graphics/filters/FEGaussianBlur.cpp:
+        (WebCore::boxBlur):
+        (WebCore::FEGaussianBlur::apply):
+        * platform/graphics/filters/FEMorphology.cpp:
+        (WebCore::FEMorphology::apply):
+        * platform/graphics/filters/FETurbulence.cpp:
+        (WebCore::FETurbulence::apply):
+        * rendering/RenderSVGResourceMasker.cpp:
+        (WebCore::RenderSVGResourceMasker::drawContentIntoMaskImage):
+
 2010-10-24  Pavel Feldman  <pfeldman@chromium.org>
 
         Reviewed by Timothy Hatcher.
