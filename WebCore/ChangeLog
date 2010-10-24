@@ -1,3 +1,41 @@
+2010-10-23  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Convert SVGAngle to the new SVGPropertyTearOff concept, reimplement it properly
+        https://bugs.webkit.org/show_bug.cgi?id=48179
+
+        Rewrite SVGAngle to use the new SVGPropertyTearOff concept, and consume much less memory.
+        Down from two floats, one string and an ushort to one float and one ushort. Synchronize value/valueInSpecifiedUnits/valueAsString on demand.
+
+        Adding an extensive SVGAngle test, that required to implement 'StrictTypeChecking' for attribute setters (was only implemented in V8/JSC for function cals so far).
+
+        Test: svg/dom/SVGAngle.html
+
+        * GNUmakefile.am: Add SVGAnimatedAngle.h to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/scripts/CodeGenerator.pm: Split IsPrimitiveType in IsPrimitiveType and IsNumericType.
+        * bindings/scripts/CodeGeneratorJS.pm: Implement 'StrictTypeChecking' for setters and recognize SVGAngle as new SVGPropertyTearOff type.
+        * bindings/scripts/CodeGeneratorObjC.pm: Ditto.
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        * svg/DeprecatedSVGAnimatedPropertyTraits.h: Remove SVGAngle handling.
+        * svg/DeprecatedSVGAnimatedTemplate.h: Remove SVGAnimatedAngle handling.
+        * svg/SVGAngle.cpp: Rewrite, to consume less memory and to operate more efficient.
+        * svg/SVGAngle.h: Ditto.
+        * svg/SVGAngle.idl: Add 'StrictTypeChecking' to the value/valueInSpecifiedUnits methods.
+        * svg/SVGAnimatedAngle.h: Added.
+        * svg/SVGAnimatedAngle.idl: Mark as [SVGAnimatedProperty].
+        * svg/SVGMarkerElement.cpp:
+        (WebCore::SVGMarkerElement::parseMappedAttribute): SVGAngle::setValueAsString() now takes an ExceptionCode parameter.
+        * svg/SVGMarkerElement.h: s/ANIMATED_PROPERTY/ANIMATED_PROPERTY_NEW/ for the SVGAngle type.
+        * svg/SVGNumber.idl: Remove exception setter exceptions, which aren't needed. As we're now generating exception handlers in the bindings, it would lead to compile errors.
+        * svg/SVGPoint.idl: Ditto.
+        * svg/SVGRect.idl: Ditto.
+        * svg/SVGSVGElement.idl: Remove obsolete [SVGLiveProperty] flag.
+
 2010-10-23  Daniel Bates  <dbates@rim.com>
 
         Reviewed by Adam Barth.
