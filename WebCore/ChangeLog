@@ -1,3 +1,23 @@
+2010-10-25  Jian Li  <jianli@chromium.org>
+
+        Reviewed by David Levin.
+
+        Calling FileReader.abort during reading could cause crash
+        https://bugs.webkit.org/show_bug.cgi?id=48163
+
+        Test: fast/files/file-reader-abort.html
+
+        * fileapi/FileReader.cpp:
+        (WebCore::delayedAbort):
+        (WebCore::FileReader::abort): Schedule to do the abort later to work
+        around the case that abort() could be called from event handler.
+        (WebCore::FileReader::doAbort):
+        (WebCore::FileReader::didFail): Do not go with normal error handling
+        when we are in the process of aborting.
+        (WebCore::FileReader::failed):
+        (WebCore::FileReader::readyState):
+        * fileapi/FileReader.h:
+
 2010-10-25  Patrick Gansterer  <paroga@webkit.org>
 
         Reviewed by Adam Roben.
