@@ -56,6 +56,7 @@ public:
         TypeBackForwardList,
         TypeBackForwardListItem,
         TypeContext,
+        TypeInspector,
         TypeFormSubmissionListener,
         TypeFrame,
         TypeFramePolicyListener,
