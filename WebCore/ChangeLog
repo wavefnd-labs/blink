@@ -1,3 +1,63 @@
+2010-10-26  Jeremy Orlow  <jorlow@chromium.org>
+
+        Reviewed by Steve Block.
+
+        Quota for IndexedDB should be per origin not per database
+        https://bugs.webkit.org/show_bug.cgi?id=48064
+
+        Merge all databases for each origin into a single SQLiteDatabase.
+
+        Replace the awkward metaData table with a Database table.
+
+        Create a new IDBSQLiteDatabase class that wraps SQLiteDatabase
+        and implements weak pointer semantics for IDBFactory. It's ref
+        counted so multiple IDBDatabaseBackendImpls can share one.
+
+        Fix uniqueness constraints that were overly conservitive.
+
+        Get rid of the code that blows away existing data every time
+        the database is opened.
+
+        Get rid of the fairly useless indexedDB manual test and replace
+        it with one that verifies data persists.
+
+        Use name+origin (not just name) in our cache of IDBDatabaseBackend
+        objects (so one origin can't access anothers' data).
+
+        Test: storage/indexeddb/duplicates.html
+
+        * WebCore.gypi:
+        * manual-tests/indexed-database.html: Removed.
+        * manual-tests/indexeddb-persists.html: Added.
+        * storage/IDBDatabaseBackendImpl.cpp:
+        (WebCore::extractMetaData):
+        (WebCore::setMetaData):
+        (WebCore::IDBDatabaseBackendImpl::IDBDatabaseBackendImpl):
+        (WebCore::IDBDatabaseBackendImpl::setDescription):
+        (WebCore::IDBDatabaseBackendImpl::sqliteDatabase):
+        (WebCore::IDBDatabaseBackendImpl::createObjectStoreInternal):
+        (WebCore::IDBDatabaseBackendImpl::setVersionInternal):
+        (WebCore::IDBDatabaseBackendImpl::loadObjectStores):
+        * storage/IDBDatabaseBackendImpl.h:
+        (WebCore::IDBDatabaseBackendImpl::create):
+        (WebCore::IDBDatabaseBackendImpl::id):
+        * storage/IDBFactoryBackendImpl.cpp:
+        (WebCore::IDBFactoryBackendImpl::removeSQLiteDatabase):
+        (WebCore::openSQLiteDatabase):
+        (WebCore::createTables):
+        (WebCore::IDBFactoryBackendImpl::open):
+        (WebCore::IDBFactoryBackendImpl::databaseFileName):
+        * storage/IDBFactoryBackendImpl.h:
+        * storage/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::putObjectStoreData):
+        (WebCore::IDBObjectStoreBackendImpl::putInternal):
+        * storage/IDBSQLiteDatabase.cpp: Added.
+        (WebCore::IDBSQLiteDatabase::IDBSQLiteDatabase):
+        (WebCore::IDBSQLiteDatabase::~IDBSQLiteDatabase):
+        * storage/IDBSQLiteDatabase.h: Added.
+        (WebCore::IDBSQLiteDatabase::create):
+        (WebCore::IDBSQLiteDatabase::db):
+
 2010-10-20  Andrey Kosyakov  <caseq@chromium.org>
 
         Reviewed by Yury Semikhatsky.
