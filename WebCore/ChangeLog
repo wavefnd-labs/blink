@@ -1,3 +1,96 @@
+2010-10-26  Mario Sanchez Prada  <msanchez@igalia.com>
+
+        Reviewed by Chris Fleizach.
+
+        [Gtk] Layout tables should indicate that they are not data tables via an object attribute
+        https://bugs.webkit.org/show_bug.cgi?id=35422
+
+        Set the 'layout-guess' attribute to 'true' for data tables.
+
+        Reorganized some code in AccessibilityTable so now the function
+        isDataTable() is more coherent by just answering that very
+        specific question, regardless of whether the table is being
+        exposed or not to Assistive Technologies.
+
+        Hence, now it's possible to make two questions separately instead
+        of just one, meaning that the new function isAccessibleTable() is
+        now what we formerly defined as the isDataTable() function.
+
+        * accessibility/AccessibilityObject.h:
+        (WebCore::AccessibilityObject::isAccessibilityTable):
+           New function to allow asking tables both whether they are
+           exposed and whether they are data tables, which are different
+           questions whose answers might be the same in many situations,
+           but different sometimes (as it can happen in the GTK port).
+        * accessibility/AccessibilityTable.h:
+        * accessibility/AccessibilityTable.cpp:
+        (WebCore::AccessibilityTable::hasARIARole):
+           New, checks whether the table has a valid ARIA role.
+        (WebCore::AccessibilityTable::isAccessibilityTable):
+           New, returns the value of m_isAccessibilityTable. It's
+           basically the former isDataTable() function renamed.
+        (WebCore::AccessibilityTable::isDataTable):
+           Changed behaviour. Instead of just returning the value of
+           m_isAccessibilityTable as it did so far (which was confusing
+           because of that's not what the name suggests), focus on
+           checking whether it's a data table or not and return a bool
+           value accordingly. It's basically a rename of the former
+           isTableExposableThroughAccessibility() function, but withouth
+           the GTK-specific if-endif region (which didn't make sense
+           here now, because that was answering the question "is the table
+           exposed in the GTK port?", instead of "is it a data table?").
+        (WebCore::AccessibilityTable::isTableExposableThroughAccessibility):
+           Uses the hasAriaRole(), and isDataTable() to determine whether
+           a table should be exposed or not. Also includes the GTK-specific
+           if-region coming from the former implementation of the function
+           isTableExposableThroughAccessibility() not to check whether it's
+           a data table in case the rest of the checks succeeded (all
+           tables are exposed in the GTK port).
+        (WebCore::AccessibilityTable::addChildren):
+           Replace usage of isDataTable() with isAccessibilityTable(), to
+           keep exactly the same behaviour happening before this patch.
+        (WebCore::AccessibilityTable::roleValue): Ditto.
+        (WebCore::AccessibilityTable::accessibilityIsIgnored): Ditto.
+        (WebCore::AccessibilityTable::title): Ditto.
+
+        Updated usage of the former function isDataTable() everywhere
+        else, replacing it with the new isAccessibilityTable(), so keeping
+        exactly the same behaviour happening before this patch.
+
+        * accessibility/AccessibilityARIAGrid.cpp:
+        (WebCore::AccessibilityARIAGrid::addChildren):
+           Use isAccessibilityTable() instead of isDataTable().
+        * accessibility/AccessibilityARIAGridCell.cpp:
+        (WebCore::AccessibilityARIAGridCell::parentTable): Ditto.
+        * accessibility/AccessibilityARIAGridRow.cpp:
+        (WebCore::AccessibilityARIAGridRow::disclosedRows): Ditto.
+        (WebCore::AccessibilityARIAGridRow::disclosedByRow): Ditto.
+        (WebCore::AccessibilityARIAGridRow::parentTable): Ditto.
+        * accessibility/AccessibilityTableCell.cpp:
+        (WebCore::AccessibilityTableCell::isTableCell):
+           Use isAccessibilityTable() instead of isDataTable().
+        * accessibility/AccessibilityTableHeaderContainer.cpp:
+        (WebCore::AccessibilityTableHeaderContainer::addChildren): Ditto.
+        * accessibility/AccessibilityTableRow.cpp:
+        (WebCore::AccessibilityTableRow::isTableRow): Ditto
+        * accessibility/mac/AccessibilityObjectWrapper.mm:
+        (-[AccessibilityObjectWrapper additionalAccessibilityAttributeNames]):
+           Use isAccessibilityTable() instead of isDataTable().
+        (-[AccessibilityObjectWrapper accessibilityAttributeNames]): Ditto.
+        (-[AccessibilityObjectWrapper accessibilityAttributeValue:]): Ditto.
+        (-[AccessibilityObjectWrapper accessibilityParameterizedAttributeNames]): Ditto.
+        (-[AccessibilityObjectWrapper accessibilitySetValue:forAttribute:]): Ditto.
+        (-[AccessibilityObjectWrapper accessibilityAttributeValue:forParameter:]): Ditto.
+
+        Use the new function isAccessibilityTable() together with the
+        modified implementation of isDataTable() to set the 'layout-guess'
+        attribute when needed.
+
+        * accessibility/gtk/AccessibilityObjectWrapperAtk.cpp:
+        (webkit_accessible_get_attributes):
+           Set the 'layout-guess' attribute to 'true' to help Assistive
+           Technologies guessing which tables are not data tables.
+
 2010-10-26  Chris Marrin  <cmarrin@apple.com>
 
         Reviewed by Simon Fraser.
