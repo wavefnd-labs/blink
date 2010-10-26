@@ -1,3 +1,43 @@
+2010-10-26  Jeremy Orlow  <jorlow@chromium.org>
+
+        Reviewed by Steve Block.
+        Fix IndexedDB crashes
+        https://bugs.webkit.org/show_bug.cgi?id=48266
+
+        If IDBKey returns null, type conversion failed. Handle this case
+        in the bindings.
+
+        Change UNKNOWN_ERR to be 1 since 0 is hard coded to mean no error.
+        This is just a stop-gap move until we get it figured out in standards
+        land.
+
+        IDBObjectStore needs to handle null ranges.
+
+        It's actually OK for m_transaction to be non-null when hitting the
+        destructor. We just need to then remove it from the set of pending
+        transactions.
+
+        The transaction can become aborted in the middle of processing a
+        list of tasks. Fix this.
+
+        All changes (except the last 2 races) are tested in LayoutTests.
+        I couldn't find a way to reliably reproduce the races.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjInternal::idbKeyCallback):
+        * bindings/v8/IDBBindingUtilities.cpp:
+        (WebCore::createIDBKeyFromValue):
+        * storage/IDBDatabaseException.h:
+        * storage/IDBDatabaseException.idl:
+        * storage/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::openCursorInternal):
+        * storage/IDBRequest.cpp:
+        (WebCore::IDBRequest::~IDBRequest):
+        (WebCore::IDBRequest::timerFired):
+        * storage/IDBTransactionBackendImpl.cpp:
+        (WebCore::IDBTransactionBackendImpl::taskTimerFired):
+
 2010-10-25  Andrey Kosyakov  <caseq@chromium.org>
 
         Reviewed by Pavel Feldman.
