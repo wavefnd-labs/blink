@@ -1,3 +1,27 @@
+2010-10-27  Simon Fraser  <simon.fraser@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        Accelerated animation with missing values in keyframes is broken
+        https://bugs.webkit.org/show_bug.cgi?id=48395
+
+        r66339 changed the behavior of keyframe animations such that if a property
+        is missing from a keyframe, the property will be interpolated between those
+        keyframes that do have a value for the property. If a value is missing
+        from the first or last keyframes, the element's unanimated style supplies
+        that value.
+        
+        However, accelerated animations had a bug where if a value was missing
+        from the first (and maybe subsequent) or last (and maybe preceding) keyframes,
+        the animation data given to the GraphicsLayer would be missing the style from the
+        first or final keyframe.
+
+        Tests: animations/missing-values-first-keyframe.html
+               animations/missing-values-last-keyframe.html
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::startAnimation):
+
 2010-10-27  Renata Hodovan  <reni@inf.u-szeged.hu>
 
         Reviewed by Dirk Schulze.
