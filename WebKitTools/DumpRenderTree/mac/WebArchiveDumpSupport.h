@@ -26,9 +26,16 @@
 #ifndef WebArchiveDumpSupport_h
 #define WebArchiveDumpSupport_h
 
+#include <CoreFoundation/CoreFoundation.h>
+
 @class NSString;
 @class WebArchive;
 
 NSString *serializeWebArchiveToXML(WebArchive *webArchive);
+
+#pragma mark -
+#pragma mark Platform-specific methods
+
+CFArrayRef supportedNonImageMIMETypes();
 
 #endif /* WebArchiveDumpSupport_h */
