@@ -1,3 +1,29 @@
+2010-10-27  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Gustavo Noronha Silva.
+
+        [Cairo] Font fallback determination is very ineffecient
+        https://bugs.webkit.org/show_bug.cgi?id=42052
+
+        When choosing a fallback font in FontCache::getFontDataForCharacters, use FontConfig's
+        mechanism for searching the fallback list directly, instead of scanning the list manually.
+        If the font is a custom font or any other font with no FontConfig pattern associated with
+        it, as FontConfig for a font that can supply the missing glyphs.
+
+        Test: platform/gtk/fonts/custom-font-missing-glyphs.html
+
+        * platform/graphics/cairo/FontCacheFreeType.cpp:
+        (WebCore::createFontConfigPatternForCharacters): Added this helper which turns
+        a collection of unicode characters into a FontConfig pattern.
+        (WebCore::findBestFontGivenFallbacks): Using a FontConfig pattern created with th
+        above helper and a FcFontSet of fallback fonts, this helper will find a font in
+        the set which fulfills the requirments.
+        (WebCore::FontCache::getFontDataForCharacters): Given an existing font with missing
+        glyphs, either find an appropriate fallback font from the list of FontConfig fallbacks
+        or ask FontConfig directly for an appropriate font.
+        * platform/graphics/cairo/FontPlatformDataFreeType.h: Made a member mutable, as it is
+        initialized lazily.
+
 2010-10-27  Alexander Pavlov  <apavlov@chromium.org>
 
         Reviewed by Pavel Feldman.
