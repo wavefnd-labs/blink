@@ -1,3 +1,41 @@
+2010-10-26  Darin Adler  <darin@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        WebKitTestRunner needs to support layoutTestController.dumpBackForwardList
+        https://bugs.webkit.org/show_bug.cgi?id=42322
+        rdar://problem/8193631
+
+        WebKitTestRunner needs to support layoutTestController.clearBackForwardList
+        https://bugs.webkit.org/show_bug.cgi?id=42333
+        rdar://problem/8193643
+
+        * WebCore.exp.in: Updated exports.
+
+        * history/BackForwardList.h: Added comments about future refactoring.
+        Moved functions that are not called inside WebCore into a separate
+        section, to be removed later. Added an isActive function to replace the
+        use of enabled() and entries().
+
+        * history/BackForwardListImpl.h: Removed isBackForwardListImpl.
+        Marked virtual function overrides virtual explicitly, except for the
+        ones that will be non-virtual once we make the changes above.
+        Added the isActive function.
+
+        * history/PageCache.cpp:
+        (WebCore::logCanCachePageDecision): Use isActive.
+        (WebCore::PageCache::canCache): Ditto.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::checkDidPerformFirstNavigation): Check
+        using currentItem, backItem, and forwardItem instead of
+        using entries.
+
+        * page/Settings.cpp:
+        (WebCore::Settings::setUsesPageCache): Loop through the back/forward
+        list entries using backListCount and forwardListCount instead of
+        using entries.
+
 2010-10-27  Chris Rogers  <crogers@google.com>
 
         Reviewed by Chris Marrin.
