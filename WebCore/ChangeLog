@@ -1,3 +1,33 @@
+2010-10-26  Dai Mikurube  <dmikurube@google.com>
+
+        Reviewed by Kent Tamura.
+
+        constraint validation: stepMismatch (rounding error)
+        https://bugs.webkit.org/show_bug.cgi?id=48220
+
+        1. Changed the computation to achieve difference from a integral
+        multiple of the allowed value step.
+
+        The previous fmod(doubleValue, step) sometimes returned unacceptable
+        remainder. For example,
+            double doubleValue = 1.005; // Actually, near to 1.005
+            double step = 0.005; // Actually, near to 0.005
+            fmod(doubleValue, step) ==> (near to) 0.005
+        It's a case that doubleValue is a little smaller than 1.005 and step is
+        a little larger than 0.005.
+
+        2. Changed the error threshold.
+
+        Number values in HTML5 are expressed in IEEE 754 single-precision.
+        Too precise comparison sometimes leads unintended errors.
+
+        For example, I found a case :
+                  remainder = 0.00000000000000022204460
+            acceptableError = 0.00000000000000007105427
+
+        * html/NumberInputType.cpp:
+        (WebCore::NumberInputType::stepMismatch):
+
 2010-10-26  Chris Rogers  <crogers@google.com>
 
         Reviewed by Kenneth Russell.
