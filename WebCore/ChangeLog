@@ -1,3 +1,25 @@
+2010-10-27  Andy Estes  <aestes@apple.com>
+
+        Reviewed by David Hyatt.
+
+        Siblings of floated elements should be cleared below the float if they
+        are too wide to fit in the containing block.
+        https://bugs.webkit.org/show_bug.cgi?id=48396
+
+        Test: fast/block/float/clear-element-too-wide-for-containing-block.html
+
+        WebKit did not clear elements adjacent to floats if they were wider than
+        the containing block, instead keeping them on the same line and allowing
+        them to spill out the right side of the containing block. We should
+        match the spec in this regard and clear the element below the float even
+        if it is too wide for the containing block. Doing this seems to also
+        match IE's and Firefox's behavior.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::getClearDelta): Continue to compute the clear
+        delta even if the child's minimum preferred width is greater than the
+        containing block's available width.
+
 2010-10-26  Rob Buis  <rwlbuis@gmail.com>
 
         Reviewed by Nikolas Zimmermann.
