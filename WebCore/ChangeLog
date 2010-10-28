@@ -1,3 +1,46 @@
+2010-10-28  Jia Pu  <jpu@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        Editing a word with misspell or autocorrection underline should remove the underline when the editing changes the word.
+        https://bugs.webkit.org/show_bug.cgi?id=48078
+        <rdar://problem/8579155>
+
+        Tests: platform/mac/editing/spelling/editing-multiple-words-with-markers.html
+               platform/mac/editing/spelling/editing-word-with-marker-1.html
+               platform/mac/editing/spelling/editing-word-with-marker-2.html
+
+        This patch is part of on-going improvement of autocorrection feature on Mac OS X. When an editing
+        occurs, if it affects words (by deleting/inserting characters, spliting word, merging words) that
+        have Spelling and/or CorrectionIndicator markers, we want to remove the markers. If subsequntial
+        spelling checking finds spelling error in newlly formed words, it will add the markers back in.
+
+        * dom/DocumentMarker.h: Changed MarkerType to bit masks to make search multiple types easier.
+
+        * dom/DocumentMarkerController.cpp: Refactored two removeMarkers() methods to support remove
+          markers with specific type from a node.
+        (WebCore::DocumentMarkerController::removeMarkers): Changed signature to remove marker with specific type.
+        (WebCore::DocumentMarkerController::removeMarkersFromMarkerMapVectorPair): Refactoring.
+        (WebCore::DocumentMarkerController::hasMarkers): Convenience method to search markers in range.
+
+        * dom/DocumentMarkerController.h: Added new methods and matched new signature of removeMarkers().
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::respondToChangedContents): Remove existing markers if the change formed new word.
+        (WebCore::Editor::cut): Remove markers on words that will be modified by this editing.
+        (WebCore::Editor::paste): Ditto.
+        (WebCore::Editor::pasteAsPlainText): Ditto.
+        (WebCore::Editor::removeSpellAndCorrectionMarkersFromWordsToBeEdited): Main logic for removing 
+          markers on words affected by editing.
+
+        * editing/Editor.h: Added removeSpellAndCorrectionMarkersFromWordsToBeEdited().  Added
+          REMOVE_MARKERS_UPON_EDITING and SUPPORT_AUTOCORRECTION_PANEL macro to improve readability.
+
+        * editing/TypingCommand.cpp:
+        (WebCore::TypingCommand::insertText): Remove markers on words that will be modified by this editing.
+        (WebCore::TypingCommand::deleteKeyPressed): Ditto.
+        (WebCore::TypingCommand::forwardDeleteKeyPressed): Ditto.
+
 2010-10-28  Brian Weinstein  <bweinstein@apple.com>
 
         Reviewed by Brady Eidson.
