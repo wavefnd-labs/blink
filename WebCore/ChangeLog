@@ -1,3 +1,43 @@
+2010-10-29  Carlos Garcia Campos  <cgarcia@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        [GTK] Handle surrogate pairs in TextBreakIteratorGtk
+        https://bugs.webkit.org/show_bug.cgi?id=48227
+
+        TextBreakIteratorGtk uses UTF-8 because it's what pango expects, but we
+        need to return indices for the given input string that are in UTF-16.
+        The number of characters is the same for both UTF-16 and UTF-8 except when
+        the input string contains surrogate pairs. We need to keep both, the
+        index for the UTF-8 string to be used internally, and the index for the
+        UTF-16 string to be used as return value of the iterator interface. It
+        fixes test fast/forms/textarea-maxlength.html
+
+        * platform/text/gtk/TextBreakIteratorGtk.cpp:
+        (WebCore::CharacterIterator::getText):
+        (WebCore::CharacterIterator::getLength):
+        (WebCore::CharacterIterator::getSize):
+        (WebCore::CharacterIterator::getIndex):
+        (WebCore::CharacterIterator::getUTF16Index):
+        (WebCore::CharacterIterator::getUTF16Length):
+        (WebCore::CharacterIterator::characterSize):
+        (WebCore::CharacterIterator::setText):
+        (WebCore::CharacterIterator::setIndex):
+        (WebCore::CharacterIterator::setUTF16Index):
+        (WebCore::CharacterIterator::first):
+        (WebCore::CharacterIterator::last):
+        (WebCore::CharacterIterator::next):
+        (WebCore::CharacterIterator::previous):
+        (WebCore::setUpIterator):
+        (WebCore::textBreakFirst):
+        (WebCore::textBreakLast):
+        (WebCore::textBreakNext):
+        (WebCore::textBreakPrevious):
+        (WebCore::textBreakPreceding):
+        (WebCore::textBreakFollowing):
+        (WebCore::textBreakCurrent):
+        (WebCore::isTextBreak):
+
 2010-10-29  Alexander Pavlov  <apavlov@chromium.org>
 
         Reviewed by Pavel Feldman.
