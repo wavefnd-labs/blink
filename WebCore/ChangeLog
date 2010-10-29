@@ -1,3 +1,29 @@
+2010-10-29  Alexey Proskuryakov  <ap@apple.com>
+
+        Reviewed by Darin Adler.
+
+        https://bugs.webkit.org/show_bug.cgi?id=48576
+        Let WebKit2 client know when a frame is a frameset
+
+        This can change in two cases, when document changes, and when frame is navigated to another
+        document.
+
+        * dom/Document.cpp: (WebCore::Document::documentDidBecomeActive): Update the client when
+        a document is restored from page cache.
+
+        * loader/FrameLoaderClient.h: Added a new client call to notify client.
+
+        * html/HTMLFrameSetElement.h:
+        * html/HTMLFrameSetElement.cpp:
+        (WebCore::HTMLFrameSetElement::insertedIntoDocument):
+        (WebCore::HTMLFrameSetElement::removedFromDocument):
+        Update the client when document changes, potentially becoming a frameset. Per WebCore
+        definition, a document is a frameset when it has a FRAMESET element as direct child of
+        document element (it may also have body elements).
+
+        * loader/EmptyClients.h: (WebCore::EmptyFrameLoaderClient::dispatchDidBecomeFrameset):
+        Added an empty implementation.
+
 2010-10-29  Csaba Osztrogonác  <ossy@webkit.org>
 
         Unreviewed fix. Touch WebCorePrefix.h to fix incremental build failure after r70878.
