@@ -1,3 +1,23 @@
+2010-10-27  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Convert SVGAnimatedBoolean to the new SVGAnimatedPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=48469
+
+        Add simple test that SVGAnimatedBooleans aren't creating tear off when accessing baseVal/animVal.
+        For example with SVGLength you can do:
+        var foo = rect.x.baseVal; // SVGRectElement -> SVGAnimatedLength -> SVGLength
+        foo.value = 50; // affects the SVGRectElement
+
+        For SVGExternalResourcesRequired (one of the two SVGAnimatedBoolean types), this is not possible, as baseVal returns a POD type (boolean).
+        var bar = rect.externalResourcesRequired.baseVal; // bar is a boolean
+        bar = false; // does NOT effect the rect.externalResourcesRequired object
+
+        * svg/dom/SVGExternalResourcesRequired-expected.txt: Added.
+        * svg/dom/SVGExternalResourcesRequired.html: Added.
+        * svg/dom/script-tests/SVGExternalResourcesRequired.js: Added.
+
 2010-10-28  MORITA Hajime  <morrita@google.com>
 
         Reviewed by Kent Tamura.

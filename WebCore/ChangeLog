@@ -1,3 +1,79 @@
+2010-10-27  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Convert SVGAnimatedBoolean to the new SVGAnimatedPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=48469
+
+        Convert the next SVG animated primitive type to use the SVGAnimatedPropertyTearOff concept: SVGAnimatedBoolean.
+        Added new test verifying that StrictTypeChecking is enabled for SVGAnimatedBooleans. It also tests that this type is "static", see LayoutTests/ChangeLog for details.
+
+        Add support for StrictTypeChecking for boolean types.
+
+        Test: svg/dom/SVGExternalResourcesRequired.html
+
+        * GNUmakefile.am: Add SVGAnimatedBoolean.h and SVGAnimatedStaticPropertyTearOff.h to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/scripts/CodeGenerator.pm: Add SVGAnimatedBoolean to the new style svg animated bindings list.
+        * bindings/scripts/CodeGeneratorJS.pm: Add StrictTypeChecking support for boolean types.
+        * bindings/scripts/CodeGeneratorObjC.pm: Ditto. Only generate kit() usage for new style animated types, if the wrapped type needs a tear off.
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        * svg/DeprecatedSVGAnimatedTemplate.h: Remove SVGAnimatedBoolean handling.
+        * svg/SVGAElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_STATIC_PROPERTY_NEW/ for boolean types everywhere. Include SVGAnimatedPropertyMacros.h where needed.
+        * svg/SVGAnimatedBoolean.h: Added.
+        * svg/SVGAnimatedBoolean.idl:
+        * svg/SVGAnimationElement.h:
+        * svg/SVGCircleElement.h:
+        * svg/SVGClipPathElement.h:
+        * svg/SVGCursorElement.h:
+        * svg/SVGDefsElement.h:
+        * svg/SVGEllipseElement.h:
+        * svg/SVGExternalResourcesRequired.cpp:
+        * svg/SVGExternalResourcesRequired.h:
+        (WebCore::SVGExternalResourcesRequired::~SVGExternalResourcesRequired):
+        * svg/SVGFEConvolveMatrixElement.h:
+        * svg/SVGFEImageElement.h:
+        * svg/SVGFilterElement.h:
+        * svg/SVGFontElement.h:
+        * svg/SVGForeignObjectElement.h:
+        * svg/SVGGElement.h:
+        * svg/SVGGradientElement.h:
+        * svg/SVGImageElement.h:
+        * svg/SVGLineElement.h:
+        * svg/SVGMPathElement.h:
+        * svg/SVGMarkerElement.h:
+        * svg/SVGMaskElement.h:
+        * svg/SVGPathElement.h:
+        * svg/SVGPatternElement.h:
+        * svg/SVGPolyElement.h:
+        * svg/SVGRectElement.h:
+        * svg/SVGSVGElement.h:
+        * svg/SVGScriptElement.h:
+        * svg/SVGSwitchElement.h:
+        * svg/SVGSymbolElement.h:
+        * svg/SVGTextContentElement.h:
+        * svg/SVGUseElement.h:
+        * svg/SVGViewElement.h:
+        * svg/properties/SVGAnimatedListPropertyTearOff.h: Moved RefPtr<SVGProperty> m_baseVal/m_animVal from SVGAnimatedProperty, as SVGAnimatedStaticPropertyTearOff doesn't need them.
+        * svg/properties/SVGAnimatedProperty.h: Remove m_baseVal/m_animVal.
+        (WebCore::SVGAnimatedProperty::commitChange): New method to share code between the SVGAnimated*PropertyTearOff classes.
+        * svg/properties/SVGAnimatedPropertyMacros.h: Add new DECLARE_ANIMATED_STATIC_PROPERTY_NEW macro which creates SVGAnimatedStaticPropertyTearOff types.
+        * svg/properties/SVGAnimatedPropertyTearOff.h: Moved RefPtr<SVGProperty> m_baseVal/m_animVal from SVGAnimatedProperty, as SVGAnimatedStaticPropertyTearOff doesn't need them.
+        * svg/properties/SVGAnimatedStaticPropertyTearOff.h: Added.
+        (WebCore::SVGAnimatedStaticPropertyTearOff::baseVal): Directly returns the stored m_property as reference, no tear off is created.
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animVal): Ditto.
+        (WebCore::SVGAnimatedStaticPropertyTearOff::setBaseVal): Directly updates the stored m_property reference, and invalidates the SVG attributes.
+        (WebCore::SVGAnimatedStaticPropertyTearOff::setAnimVal): Not implemented.
+        (WebCore::SVGAnimatedStaticPropertyTearOff::create):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::SVGAnimatedStaticPropertyTearOff):
+        * svg/properties/SVGListPropertyTearOff.h:
+        (WebCore::SVGListPropertyTearOff::commitChange): Share code, use SVGAnimatedProperty::commitChange.
+        * svg/properties/SVGPropertyTearOff.h:
+        (WebCore::SVGPropertyTearOff::commitChange): Ditto.
+
 2010-10-28  MORITA Hajime  <morrita@google.com>
 
         Reviewed by Kent Tamura.
