@@ -1,3 +1,33 @@
+2010-10-29  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Adam Roben.
+
+        https://bugs.webkit.org/show_bug.cgi?id=48444
+
+        Fix the dirty rect checks in RenderBoxLineList, InlineFlowBox, InlineTextBox.  They were still assuming horizontal-tb writing-mode.
+        This patch makes the checks directionally abstract and also refactors the checks in RenderLineBoxList to share code. 
+
+        No tests yet, since the invalidation code for inlines still assumes horizontal-tb.  That will be fixed in a follow-up bug,
+        and then repaint tests will be easy to write.
+
+        * rendering/InlineBox.cpp:
+        (WebCore::InlineBox::adjustForFlippedBlocksWritingMode):
+        * rendering/InlineBox.h:
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::paint):
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::paint):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::convertFromFlippedWritingMode):
+        * rendering/RenderBox.h:
+        * rendering/RenderLineBoxList.cpp:
+        (WebCore::RenderLineBoxList::rangeIntersectsDirtyRect):
+        (WebCore::RenderLineBoxList::anyLineIntersectsDirtyRect):
+        (WebCore::RenderLineBoxList::lineIntersectsDirtyRect):
+        (WebCore::RenderLineBoxList::paint):
+        (WebCore::RenderLineBoxList::hitTest):
+        * rendering/RenderLineBoxList.h:
+
 2010-10-29  Patrick Gansterer  <paroga@webkit.org>
 
         Reviewed by Adam Roben.
