@@ -1,3 +1,95 @@
+2010-10-30  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Rob Buis.
+
+        Convert SVGAnimatedNumber/SVGAnimatedNumberList to the new SVGAnimatedPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=48686
+
+        Convert the next set of primitives to use the new SVG(Animated)PropertyTearOff concept.
+
+        Tests: svg/dom/SVGAnimatedNumber.html
+               svg/dom/SVGAnimatedNumberList.html
+               svg/dom/SVGNumber.html
+
+        * GNUmakefile.am: Add SVGAnimatedNumber.h / SVGAnimatedNumberList.h to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/scripts/CodeGenerator.pm: Recognize SVGAnimatedNumber/SVGAnimatedNumberList as new style SVG animated properties. Remove SVGNumber from PODType hash.
+        * bindings/scripts/CodeGeneratorJS.pm: Remove special SVGNumber handing, it's obsolete now.
+        * bindings/scripts/CodeGeneratorObjC.pm: Add special SVGNumber handling, as it's the first of the converted dynamic SVGAnimatedProperty types that's not in WebCore namespace.
+        * bindings/scripts/CodeGeneratorV8.pm: Use AvoidInclusionOfType method from CodeGenerator.pm, remove special SVGNumber handling, that's obsolete now.
+        * rendering/svg/SVGTextLayoutAttributesBuilder.cpp:
+        (WebCore::extractFloatValuesFromSVGNumberList): Adapt to SVGNumberList change, which is a plain Vector<float> now.
+        * svg/DeprecatedSVGAnimatedPropertyTraits.h: Remove SVGAnimatedNumber/SVGAnimatedNumberList handling.
+        * svg/DeprecatedSVGAnimatedTemplate.h: Ditto.
+        * svg/SVGAnimatedNumber.h: Added.
+        * svg/SVGAnimatedNumber.idl: Enable StrictTypeChecking.
+        * svg/SVGAnimatedNumberList.h: Added.
+        * svg/SVGAnimatedNumberList.idl: Ditto.
+        * svg/SVGComponentTransferFunctionElement.cpp: Switch animated float properties to the new SVGAnimatedNumber(List).
+        (WebCore::SVGComponentTransferFunctionElement::SVGComponentTransferFunctionElement):
+        (WebCore::SVGComponentTransferFunctionElement::parseMappedAttribute):
+        (WebCore::SVGComponentTransferFunctionElement::transferFunction):
+        * svg/SVGComponentTransferFunctionElement.h:
+        * svg/SVGFEColorMatrixElement.cpp: Ditto.
+        (WebCore::SVGFEColorMatrixElement::SVGFEColorMatrixElement):
+        (WebCore::SVGFEColorMatrixElement::parseMappedAttribute):
+        (WebCore::SVGFEColorMatrixElement::build):
+        * svg/SVGFEColorMatrixElement.h:
+        * svg/SVGFECompositeElement.h: Ditto.
+        * svg/SVGFEConvolveMatrixElement.cpp: Ditto.
+        (WebCore::SVGFEConvolveMatrixElement::SVGFEConvolveMatrixElement):
+        (WebCore::SVGFEConvolveMatrixElement::kernelUnitLengthXIdentifier): Added, replacing char[] hack by a static atomic string.
+        (WebCore::SVGFEConvolveMatrixElement::kernelUnitLengthYIdentifier): Ditto.
+        (WebCore::SVGFEConvolveMatrixElement::parseMappedAttribute):
+        (WebCore::SVGFEConvolveMatrixElement::build):
+        * svg/SVGFEConvolveMatrixElement.h: Switch animated float properties to the new SVGAnimatedNumber(List).
+        * svg/SVGFEDiffuseLightingElement.cpp: Ditto.
+        (WebCore::SVGFEDiffuseLightingElement::kernelUnitLengthXIdentifier): Remove trailing whitespace.
+        (WebCore::SVGFEDiffuseLightingElement::kernelUnitLengthYIdentifier): Ditto.
+        * svg/SVGFEDiffuseLightingElement.h: Switch animated float properties to the new SVGAnimatedNumber(List).
+        * svg/SVGFEDisplacementMapElement.h: Ditto.
+        * svg/SVGFEGaussianBlurElement.cpp: Ditto.
+        (WebCore::SVGFEGaussianBlurElement::stdDeviationXIdentifier): Remove trailing whitespace.
+        (WebCore::SVGFEGaussianBlurElement::stdDeviationYIdentifier): Ditto.
+        * svg/SVGFEGaussianBlurElement.h: Switch animated float properties to the new SVGAnimatedNumber(List).
+        * svg/SVGFELightElement.h: Ditto.
+        * svg/SVGFEMorphologyElement.cpp:
+        (WebCore::SVGFEMorphologyElement::radiusXIdentifier): Added, replacing char[] hack by a static atomic string.
+        (WebCore::SVGFEMorphologyElement::radiusYIdentifier): Ditto.
+        * svg/SVGFEMorphologyElement.h: Switch animated float properties to the new SVGAnimatedNumber(List).
+        * svg/SVGFEOffsetElement.h: Ditto.
+        * svg/SVGFESpecularLightingElement.cpp:
+        (WebCore::SVGFESpecularLightingElement::kernelUnitLengthXIdentifier): Remove trailing whitespace.
+        (WebCore::SVGFESpecularLightingElement::kernelUnitLengthYIdentifier): Ditto.
+        * svg/SVGFESpecularLightingElement.h: Switch animated float properties to the new SVGAnimatedNumber(List).
+        * svg/SVGFETurbulenceElement.cpp:
+        (WebCore::SVGFETurbulenceElement::baseFrequencyXIdentifier): Remove trailing whitespace.
+        (WebCore::SVGFETurbulenceElement::baseFrequencyYIdentifier): Ditto.
+        * svg/SVGFETurbulenceElement.h: Switch animated float properties to the new SVGAnimatedNumber(List).
+        * svg/SVGFilterElement.cpp:
+        (WebCore::SVGFilterElement::filterResXIdentifier): Remove trailing whitespace.
+        (WebCore::SVGFilterElement::filterResYIdentifier): Ditto.
+        * svg/SVGLengthList.idl: Remove leftover [SVGListProperty] marker.
+        * svg/SVGMarkerElement.cpp:
+        (WebCore::SVGMarkerElement::orientTypeIdentifier): Remove trailing whitespace.
+        (WebCore::SVGMarkerElement::orientAngleIdentifier): Ditto.
+        * svg/SVGNumber.idl: Remove [PODType] marker, add StrictTypeChecking.
+        * svg/SVGNumberList.cpp: Convert from SVGPODList<RefPtr<SVGPODListItem<float> > > to plain Vector<float>, just like it has been done for SVGLengthList before.
+        (WebCore::SVGNumberList::parse):
+        (WebCore::SVGNumberList::valueAsString):
+        * svg/SVGNumberList.h:
+        (WebCore::SVGNumberList::SVGNumberList):
+        * svg/SVGPathElement.h: Switch animated float properties to the new SVGAnimatedNumber(List).
+        * svg/SVGStopElement.h: Ditto.
+        * svg/SVGTextPositioningElement.cpp: Switch animated float properties to the new SVGAnimatedNumber(List).
+        (WebCore::SVGTextPositioningElement::SVGTextPositioningElement):
+        (WebCore::SVGTextPositioningElement::parseMappedAttribute):
+        * svg/SVGTextPositioningElement.h: Ditto.
+        * svg/properties/SVGPropertyTraits.h: Add SVGNumberList handling.
+
 2010-10-29  Daniel Bates  <dbates@rim.com>
 
         No review, rolling out 70971.

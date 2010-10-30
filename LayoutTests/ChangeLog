@@ -1,5 +1,35 @@
 2010-10-30  Nikolas Zimmermann  <nzimmermann@rim.com>
 
+        Reviewed by Rob Buis.
+
+        Convert SVGAnimatedNumber/SVGAnimatedNumberList to the new SVGAnimatedPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=48686
+
+        Fix invalid tests in svg/dynamic-updates, that relied on a bug in our SVGNumberList implementation. If an item was already
+        inserted in a list, and we tried to insert it somewhere else, we didn't remove it from the old list. Now that SVGNumberList
+        has been switched to SVGAnimatedListPropertyTearOff, the bug is fixed, and it behaves exactly like SVGLengthList.
+
+        Side effect: svg/dynamic-updates/SVGFETurbulenceElement-svgdom-baseFrequency-prop.html now works as expected (dynamic update is executed)
+
+        * platform/mac-leopard/svg/dynamic-updates/SVGFETurbulenceElement-svgdom-baseFrequency-prop-expected.checksum:
+        * platform/mac-leopard/svg/dynamic-updates/SVGFETurbulenceElement-svgdom-baseFrequency-prop-expected.png:
+        * svg/dom/SVGAnimatedNumber-expected.txt: Added.
+        * svg/dom/SVGAnimatedNumber.html: Added.
+        * svg/dom/SVGAnimatedNumberList-expected.txt: Added.
+        * svg/dom/SVGAnimatedNumberList.html: Added.
+        * svg/dom/SVGNumber-expected.txt: Added.
+        * svg/dom/SVGNumber.html: Added.
+        * svg/dom/script-tests/SVGAnimatedNumber.js: Added.
+        * svg/dom/script-tests/SVGAnimatedNumberList.js: Added.
+        * svg/dom/script-tests/SVGNumber.js: Added.
+        * svg/dynamic-updates/script-tests/SVGFEColorMatrixElement-svgdom-type-prop.js: Test now works in Firefox as well.
+        (executeTest): SVGNumber.value only accepts numbers, not strings, now that StrictTypeChecking is enabled.
+        * svg/dynamic-updates/script-tests/SVGFEColorMatrixElement-svgdom-values-prop.js: Test now works in Firefox as well.
+        (executeTest): Don't call appendItem several times with the same SVGNumber, it will be removed if it was already inserted in a list.
+        * svg/dynamic-updates/script-tests/SVGFETurbulenceElement-svgdom-baseFrequency-prop.js:
+
+2010-10-30  Nikolas Zimmermann  <nzimmermann@rim.com>
+
         Not reviewed.
 
         Update SVGFEFloodElement mac-leopard baseline, which was forgotten.
