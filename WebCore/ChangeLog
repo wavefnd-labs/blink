@@ -1,3 +1,105 @@
+2010-10-29  Darin Adler  <darin@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        More back/forward refactoring
+
+        * WebCore.exp.in: Updated.
+
+        * GNUmakefile.am: Removed BackForwardControllerClient.h.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+
+        * history/BackForwardControllerClient.h: Removed.
+
+        * history/BackForwardController.cpp:
+        (WebCore::BackForwardController::BackForwardController):
+        Set up just m_client.
+        (WebCore::BackForwardController::~BackForwardController):
+        Removed call to backForwardControllerDestroyed.
+        (WebCore::BackForwardController::canGoBackOrForward): Added.
+        (WebCore::BackForwardController::goBackOrForward): Added.
+        (WebCore::BackForwardController::goBack): Added.
+        (WebCore::BackForwardController::goForward): Added.
+        (WebCore::BackForwardController::addItem): Added.
+        (WebCore::BackForwardController::setCurrentItem): Added.
+        (WebCore::BackForwardController::count): Added.
+        (WebCore::BackForwardController::backCount): Added.
+        (WebCore::BackForwardController::forwardCount): Added.
+        (WebCore::BackForwardController::itemAtIndex): Added.
+        (WebCore::BackForwardController::isActive): Added.
+        (WebCore::BackForwardController::close): Added.
+
+        * history/BackForwardController.h: Added functions from Page
+        and BackForwardList that should be called here instead.
+        Note that BackForwardList is to be renamed BackForwardClient soon.
+
+        * history/BackForwardList.h: Removed many now-unneeded
+        virtual functions.
+
+        * history/BackForwardListImpl.h: Moved BackForwardListClient
+        in here.
+
+        * history/PageCache.cpp:
+        (WebCore::logCanCachePageDecision): Use backForward().
+        (WebCore::PageCache::canCache): Ditto.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::transitionToCommitted): Removed unneeded
+        null check of backFowardList, which is never null.
+        (WebCore::FrameLoader::checkLoadCompleteForThisFrame): Use backForward.
+        (WebCore::FrameLoader::didFirstLayout): Ditto.
+        (WebCore::FrameLoader::continueLoadAfterNavigationPolicy): Ditto.
+        (WebCore::FrameLoader::checkDidPerformFirstNavigation): Ditto.
+        * loader/HistoryController.cpp:
+        (WebCore::HistoryController::goToItem): Ditto.
+        (WebCore::HistoryController::updateForStandardLoad): Ditto.
+        (WebCore::HistoryController::updateForRedirectWithLockedBackForwardList): Ditto.
+        (WebCore::HistoryController::updateBackForwardListClippedAtTarget): Ditto.
+        (WebCore::HistoryController::pushState): Ditto.
+        * loader/NavigationScheduler.cpp:
+        (WebCore::ScheduledHistoryNavigation::fire): Ditto.
+        (WebCore::NavigationScheduler::scheduleHistoryNavigation): Ditto.
+        * page/ContextMenuController.cpp:
+        (WebCore::ContextMenuController::contextMenuItemSelected): Ditto.
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::close): Ditto.
+        * page/History.cpp:
+        (WebCore::History::length): Ditto.
+
+        * page/Page.cpp:
+        (WebCore::Page::Page): Use more adoptPtr. Use backForwardClient instead of
+        backForwardControllerClient.
+        (WebCore::Page::~Page): Use backForward.
+        (WebCore::Page::backForwardList): Ditto.
+        (WebCore::Page::goBack): Ditto.
+        (WebCore::Page::goForward): Ditto.
+        (WebCore::Page::canGoBackOrForward): Ditto.
+        (WebCore::Page::goBackOrForward): Ditto.
+        (WebCore::Page::getHistoryLength): Ditto.
+        (WebCore::Page::PageClients::PageClients): Made non-inline.
+        (WebCore::Page::PageClients::~PageClients): Ditto.
+
+        * page/Page.h: Made PageClients constructor and destructor non-inline.
+        Added backForward function. Marked old functions as deprecated.
+
+        * page/Settings.cpp:
+        (WebCore::Settings::setUsesPageCache): Use backForward.
+        * platform/ContextMenu.cpp:
+        (WebCore::ContextMenu::populate): Ditto.
+        (WebCore::ContextMenu::checkOrEnableIfNeeded): Ditto.
+        * wml/WMLDoElement.cpp:
+        (WebCore::WMLDoElement::defaultEventHandler): Ditto.
+        * wml/WMLDocument.cpp:
+        (WebCore::WMLDocument::finishedParsing): Ditto.
+        * wml/WMLPageState.cpp:
+        (WebCore::WMLPageState::reset): Ditto.
+        (WebCore::tryAccessHistoryURLs): Ditto.
+        * wml/WMLPrevElement.cpp:
+        (WebCore::WMLPrevElement::executeTask): Ditto.
+
 2010-10-29  David Hyatt  <hyatt@apple.com>
 
         Reviewed by Sam Weinig.
