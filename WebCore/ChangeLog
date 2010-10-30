@@ -1,3 +1,49 @@
+2010-10-30  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Reviewed by Darin Adler.
+
+        Implement shadow DOM-aware event targeting and introduce EventContext to track the context of each event dispatch.
+        https://bugs.webkit.org/show_bug.cgi?id=46015
+
+        This patch adds the notion of EventContext (and a very similar-acting WindowEventContext, specifically
+        for DOMWindow), an abstraction that carries information around dispatching an event for any given Node.
+
+        This abstraction is necessary to ensure that events, fired from shadow DOM nodes are properly retargeted to
+        appear as if they are coming from their host, thus never exposing the shadow DOM nodes to the world outside.
+
+        * Android.mk: Added EventContext, WindowEventContext files.
+        * CMakeLists.txt: Ditto.
+        * GNUmakefile.am: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * dom/ContainerNode.cpp:
+        (WebCore::notifyChildInserted): Changed to be shadow DOM-aware.
+        * dom/EventContext.cpp: Added.
+        * dom/EventContext.h: Added.
+        * dom/Node.cpp:
+        (WebCore::Node::markAncestorsWithChildNeedsStyleRecalc): Changed to be shadow DOM-aware.
+        (WebCore::Node::createRendererIfNeeded): Ditto.
+        (WebCore::Node::parentOrHostNode): Added new helper method.
+        (WebCore::Node::enclosingLinkEventParentOrSelf): Changed to be shadow DOM-aware.
+        (WebCore::eventTargetRespectingSVGTargetRules): Collapsed two helper methods into one.
+        (WebCore::Node::eventAncestors): Refactored to collect a vector of EventContexts.
+        (WebCore::Node::topEventContext): Added.
+        (WebCore::eventHasListeners): Changed to use EventContexts.
+        (WebCore::Node::dispatchGenericEvent): Ditto.
+        * dom/Node.h: Removed eventParentNode that's no longer needed, added parentOrHostNode decl,
+            and changed signature of eventAncestors to use EventContexts.
+        * dom/Text.cpp:
+        (WebCore::Text::createRenderer): Changed to be shadow DOM-aware.
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::getEventListenersForNode): Changed to use EventContexts.
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::updateMouseEventTargetNode): Removed code that's no longer necessary.
+        * svg/SVGElement.cpp: Removed eventParentNode that's no longer needed.
+        * svg/SVGElement.h: Ditto.
+        * dom/WindowEventContext.cpp: Added.
+        * dom/WindowEventContext.h: Added.
+
 2010-10-30  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Reviewed by Rob Buis.
