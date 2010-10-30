@@ -1,3 +1,48 @@
+2010-10-29  Daniel Bates  <dbates@rim.com>
+
+        Reviewed by Adam Barth.
+
+        For unnamed frames, window.name returns a generated name
+        https://bugs.webkit.org/show_bug.cgi?id=6751
+
+        Fixes an issue where the window.name of an unnamed frame returns
+        a unique generated name that is used internally to identify the
+        frame. Instead, we should return an empty string as implied by
+        section 5.1.6 of the HTML5 spec. (http://www.w3.org/TR/html5/browsers.html#browsing-context-names).
+        This section describes that a browsing context can have no name or be
+        the empty string.
+
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::openURL): Removed ASSERT for empty
+        frame name since this is valid as per the HTML5 spec.
+        (WebCore::HTMLFrameElementBase::setName): Removed the call to FrameTree::uniqueChildName()
+        since the loader code no longer depends on the frame name being unique.
+        * html/HTMLFrameElementBase.h:
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::mainResource): Use FrameTree::uniqueName().
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::loadURLIntoChildFrame): Ditto.
+        (WebCore::FrameLoader::commitProvisionalLoad): Ditto.
+        * loader/HistoryController.cpp:
+        (WebCore::HistoryController::saveDocumentState): Ditto.
+        (WebCore::HistoryController::restoreDocumentState): Ditto.
+        (WebCore::HistoryController::createItem):
+        (WebCore::HistoryController::currentFramesMatchItem): Ditto.
+        * loader/ProgressTracker.cpp:
+        (WebCore::ProgressTracker::progressStarted): Ditto.
+        (WebCore::ProgressTracker::progressCompleted): Ditto.
+        * loader/archive/cf/LegacyWebArchive.cpp:
+        (WebCore::LegacyWebArchive::create): Ditto.
+        * page/FrameTree.cpp:
+        (WebCore::FrameTree::setName): Modified to store the DOM-specified
+        name of the frame.
+        (WebCore::FrameTree::clearName):
+        (WebCore::FrameTree::uniqueChildName): Use FrameTree::uniqueName().
+        (WebCore::FrameTree::child): Ditto.
+        (WebCore::FrameTree::find): Ditto.
+        * page/FrameTree.h:
+        (WebCore::FrameTree::uniqueName): Added.
+
 2010-10-29  Darin Adler  <darin@apple.com>
 
         Try to fix build.
