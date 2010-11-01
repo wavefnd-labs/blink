@@ -1,3 +1,24 @@
+2010-11-01  Simon Fraser  <simon.fraser@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        Assertion failure in FrameView::layout when clicking on a YouTube video on youtube.com front page
+        https://bugs.webkit.org/show_bug.cgi?id=44287
+        
+        When removing subframes, it's possible for layout() to get called on a FrameView
+        for a Frame that has been removed from the frame tree. This can happen if the parent
+        document happens to do a layout() while RenderView still has a reference to the widget
+        for the removed frame; updateWidgetPosition() will try to force a layout() on the 
+        subframe.
+        
+        Fix by checking that the FrameView's Frame still has a reference to the page before
+        calling layout() on the subframe.
+
+        Test: fast/frames/layout-after-destruction.html
+
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::updateWidgetPosition):
+
 2010-11-01  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r71065.
