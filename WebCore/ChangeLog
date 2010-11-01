@@ -1,3 +1,90 @@
+2010-11-01  Mario Sanchez Prada  <msanchez@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        [Gtk] AtkHyperlink needs to be implemented
+        https://bugs.webkit.org/show_bug.cgi?id=33785
+
+        Implemented the AtkHyperlink/AtkHypertext stuff in the GTK port.
+
+        Even thought these kind of tasks are usually about implementing an
+        interface, in this case it was needed to implement some more
+        things due to the fact that AtkHyperlink is neither an interface
+        nor an AtkObject, but just an abstract class child of GObject that
+        needs to be redefined in a specific subclass of that one. On top
+        of that, it was needed to implement the AtkAction interface as
+        well for that new class, so exposed hyperlinks can work as
+        expected with Assistive Technologies based on ATK.
+
+        Furthermore, as there's no mechanism to get an instance of that
+        AtkHyperlink other than doing it through an AtkObject implementing
+        the AtkHypertext interface, it was needed to also add the code to
+        implement that one, so it makes possible to ask for the
+        'hyperlinks' under an 'hypertext' accessible object.
+
+        Finally, to complete the implementation of all this stuff and make
+        it all consistent, it was needed as well to implement the
+        AtkHyperlinkImpl interface (providing just one method only) so
+        that allows retrieving the AtkHyperlink object associated to an
+        AtkObject implementing such an interface.
+
+        * GNUmakefile.am: Add the new WebKitAccessibleHyperlink.[h|cpp]
+        files to the sources list for the GTK port.
+
+        * accessibility/gtk/AccessibilityObjectWrapperAtk.cpp:
+        (core): New function to return the core accessibility object
+        related to an AtkObject implementing the AtkHypertext interface.
+        (webkitAccessibleHypertextGetLink): New, part of the
+        implementation of the AtkHypertext interface.
+        (webkitAccessibleHypertextGetNLinks): New, likewise.
+        (webkitAccessibleHypertextGetLinkIndex): New, likewise.
+        (atkHypertextInterfaceInit): New, initialize the AtkHypertext
+        interface.
+        (webkitAccessibleHyperlinkImplGetHyperlink): New, part of the
+        implementation of the AtkHyperlinkImpl interface.
+        (atkHyperlinkImplInterfaceInit): New, initialize the
+        AtkHyperlinkImpl interface.
+        (GetAtkInterfaceTypeFromWAIType): Add ATK_TYPE_HYPERTEXT and
+        ATK_TYPE_HYPERLINK_IMPL to the list of recognized types.
+        (getInterfaceMaskFromObject): Decide when it's needed to add
+        WAI_HYPERTEXT and WAI_HYPERLINK to the interface mask.
+
+        * accessibility/gtk/WebKitAccessibleHyperlink.h: Added.
+        * accessibility/gtk/WebKitAccessibleHyperlink.cpp: Added.
+        (returnString): Return (const char*) from String variables.
+        (core): Return the associated AccessibilityObject.
+        (webkitAccessibleHyperlinkActionDoAction): Part of the
+        implementation of the AtkAction interface.
+        (webkitAccessibleHyperlinkActionGetNActions): Likewise.
+        (webkitAccessibleHyperlinkActionGetDescription): Likewise.
+        (webkitAccessibleHyperlinkActionGetKeybinding): Likewise.
+        (webkitAccessibleHyperlinkActionGetName): Likewise.
+        (atkActionInterfaceInit): Initialize the AtkAction interface.
+        (getRangeLengthForObject): Returns the length for a given Range,
+        considering special cases (e.g. List item markers).
+        (webkitAccessibleHyperlinkGetURI): Implementation of one of the
+        methods in the AtkHyperlink abstract class.
+        (webkitAccessibleHyperlinkGetObject): Likewise.
+        (webkitAccessibleHyperlinkGetStartIndex): Likewise.
+        (webkitAccessibleHyperlinkGetEndIndex): Likewise.
+        (webkitAccessibleHyperlinkIsValid): Likewise.
+        (webkitAccessibleHyperlinkGetNAnchors): Likewise.
+        (webkitAccessibleHyperlinkIsSelectedLink): Likewise.
+        (webkitAccessibleHyperlinkGetProperty): Getter method.
+        (webkitAccessibleHyperlinkSetProperty): Setter method.
+        (webkitAccessibleHyperlinkFinalize): Finalize method.
+        (webkitAccessibleHyperlinkClassInit): Initialize the
+        WebKitAccessibleHyperlink class.
+        (webkitAccessibleHyperlinkInit): Initialize the
+        WebKitAccessibleHyperlink instance.
+        (webkitAccessibleHyperlinkGetType): Implementation of the
+        get_type() function for the WebKitAccessibleHyperlink class.
+        (webkitAccessibleHyperlinkNew): Returns an instance of the class
+        associated to a given AtkHyperlinkImpl object.
+        (webkitAccessibleHyperlinkGetAccessibilityObject): Public function
+        returning the AccessibilityObject associated to the instance of
+        the WebKitAccessibleHyperlink class.
+
 2010-11-01  Pavel Feldman  <pfeldman@chromium.org>
 
         Not reviewed: simplify inspector styles test to make all bots happy.
