@@ -28,13 +28,10 @@
 
 #if ENABLE(PLUGIN_PROCESS)
 
+#include "Connection.h"
 #include <WebCore/npruntime.h>
 #include <wtf/HashMap.h>
 #include <wtf/Noncopyable.h>
-
-namespace CoreIPC {
-    class Connection;
-}
 
 namespace WebKit {
 
@@ -52,6 +49,10 @@ public:
 
     // Expose the given NPObject as a remote object. Returns the objectID.
     uint64_t registerNPObject(NPObject*);
+
+    CoreIPC::Connection* connection() const { return m_connection; }
+
+    CoreIPC::SyncReplyMode didReceiveSyncMessage(CoreIPC::Connection* connection, CoreIPC::MessageID messageID, CoreIPC::ArgumentDecoder* arguments, CoreIPC::ArgumentEncoder* reply);
 
 private:
     CoreIPC::Connection* m_connection;
