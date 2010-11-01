@@ -1,3 +1,24 @@
+2010-11-01  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Xan Lopez.
+
+        [GTK] Pasting markup into Thunderbird compose window produces no text
+        https://bugs.webkit.org/show_bug.cgi?id=43737
+
+        Include a content-type meta tag prefix on all clipboard markup. Programs like
+        Thunderbird expect this meta tag and will not paste anything unless it is there.
+
+        This is covered by changes to WebKit/gtk/tests/testcopyandpaste.c. This patch was
+        written in such a way as to not affect layout test results, otherwise there
+        would be many new GTK+-specific results that say "FAIL").
+
+        * platform/gtk/PasteboardHelper.cpp:
+        (WebCore::removeMarkupPrefix): Added this helper which removes the prefix
+        when found on incoming clipboard and drag-and-drop text.
+        (WebCore::PasteboardHelper::getClipboardContents): Remove the meta tag prefix.
+        (WebCore::PasteboardHelper::fillSelectionData): Add the meta tag prefix.
+        (WebCore::PasteboardHelper::fillDataObjectFromDropData): Remove the meta tag prefix
+
 2010-11-01  Justin Schuh  <jschuh@chromium.org>
 
         Reviewed by Dirk Schulze.
