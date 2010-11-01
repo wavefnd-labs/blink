@@ -1,3 +1,73 @@
+2010-11-01  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Rob Buis.
+
+        Enable StrictTypeChecking for all types using SVG(Animated)PropertyTearOff
+        https://bugs.webkit.org/show_bug.cgi?id=48715
+
+        Enable StrictTypeChecking for all readwrite attributes and function calls of all types using the new SVG(Animated)PropertyTearOff concept.
+        Also enable RequiresAllArguments=Raise for all function calls of these new types. Cover this functionality by tests for each of them.
+
+        When testing SVGLength it became obvious that quite a lot of functionality was missing.
+        Conversion from relative arguments (percentage, ems, exs) to user specified units was missing, added that functionality and tested it.
+        User units to pt conversion was wrong, fixed that.
+
+        Tests: svg/dom/SVGAnimatedAngle.html
+               svg/dom/SVGAnimatedBoolean.html
+               svg/dom/SVGAnimatedEnumeration.html
+               svg/dom/SVGAnimatedInteger.html
+               svg/dom/SVGAnimatedLength.html
+               svg/dom/SVGAnimatedLengthList.html
+               svg/dom/SVGAnimatedRect.html
+               svg/dom/SVGLength-px-with-context.html
+               svg/dom/SVGLength-px.html
+               svg/dom/SVGLength.html
+
+        * bindings/js/JSSVGLengthCustom.cpp: These SVGLength methods now take an ExceptionCode parameter, adapt to that. 
+        (WebCore::JSSVGLength::value):
+        (WebCore::JSSVGLength::setValue):
+        (WebCore::JSSVGLength::convertToSpecifiedUnits):
+        * bindings/scripts/CodeGeneratorObjC.pm: Remove FIXMEs, pass real context instead off null pointer. DOMSVGLength::value is functional now.
+        * bindings/v8/custom/V8SVGLengthCustom.cpp: These SVGLength methods now take an ExceptionCode parameter, adapt to that.
+        (WebCore::V8SVGLength::valueAccessorGetter):
+        (WebCore::V8SVGLength::valueAccessorSetter):
+        (WebCore::V8SVGLength::convertToSpecifiedUnitsCallback):
+        * rendering/style/SVGRenderStyle.h: Adapt to SVGLength API changes.
+        (WebCore::SVGRenderStyle::initialBaselineShiftValue):
+        (WebCore::SVGRenderStyle::initialKerning):
+        (WebCore::SVGRenderStyle::initialStrokeDashOffset):
+        (WebCore::SVGRenderStyle::initialStrokeWidth):
+        * svg/SVGAngle.idl: Add StrictTypeChecking, RequiresAllArguments=Raise to all methods.
+        * svg/SVGAnimatedBoolean.idl: Remove StrictTypeChecking from animVal, it's readonly so this is useless.
+        * svg/SVGAnimatedEnumeration.idl: Add StrictTypeChecking to all attributes.
+        * svg/SVGAnimatedInteger.idl: Ditto.
+        * svg/SVGLength.cpp: Implement all missing features of SVGLength. Conform to our style guide (s/.0f// etc)
+        (WebCore::lengthTypeToString):
+        (WebCore::SVGLength::SVGLength):
+        (WebCore::SVGLength::value): Throw NOT_SUPPORTED_ERR when trying to obtain to relative units, when no context is given (SVGLength created by createSVGLength()).
+        (WebCore::SVGLength::setValue): Ditto, for the setter.
+        (WebCore::SVGLength::valueAsPercentage): Use m_valueInSpecifiedUnits instead of valueInSpecifiedUnits().
+        (WebCore::SVGLength::setValueAsString): Throw SYNTAX_ERR if parsing failed.
+        (WebCore::SVGLength::valueAsString): Use makeString() instead of String and operator+.
+        (WebCore::SVGLength::newValueSpecifiedUnits): Add ExceptionCode parameter, throw NOT_SUPPORTED_ERR, if the given unit type is invalid.
+        (WebCore::SVGLength::convertToSpecifiedUnits): Ditto.
+        (WebCore::SVGLength::determineViewport): Added helper function used by convertValue*Percentage*.
+        (WebCore::SVGLength::convertValueFromUserUnitsToPercentage): Add new helper functions, used by value/setValue.
+        (WebCore::SVGLength::convertValueFromPercentageToUserUnits): Ditto.
+        (WebCore::SVGLength::convertValueFromUserUnitsToEMS): Ditto.
+        (WebCore::SVGLength::convertValueFromEMSToUserUnits): Ditto.
+        (WebCore::SVGLength::convertValueFromUserUnitsToEXS): Ditto.
+        (WebCore::SVGLength::convertValueFromEXSToUserUnits): Ditto.
+        (WebCore::SVGLength::fromCSSPrimitiveValue): Adapt to newValueSpecifiedUnits API change.
+        (WebCore::SVGLength::toCSSPrimitiveValue): Remove default switch case.
+        * svg/SVGLength.h:
+        (WebCore::SVGLength::valueInSpecifiedUnits): Inlined.
+        (WebCore::SVGLength::setValueInSpecifiedUnits): Ditto.
+        (WebCore::SVGLength::isRelative):
+        * svg/SVGLength.idl: Add StrictTypeChecking for all attributes/functions and RequiresAllArguments=Raise for all functions.
+        * svg/SVGLengthList.cpp: Adapt to SVGLength API changes.
+        (WebCore::SVGLengthList::parse):
+
 2010-10-31  Pavel Feldman  <pfeldman@chromium.org>
 
         Reviewed by Timothy Hatcher.

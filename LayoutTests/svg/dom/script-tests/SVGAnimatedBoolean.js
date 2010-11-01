@@ -1,4 +1,4 @@
-description("This test checks the SVGExternalResourcesRequired API");
+description("This test checks the SVGAnimatedBoolean API - utilizing the externalResourcesRequired property of SVGRectElement");
 
 var rectElement = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 debug("");
