@@ -1,3 +1,30 @@
+2010-11-01  MORITA Hajime  <morrita@google.com>
+
+        Reviewed by Kent Tamura.
+
+        @spellcheck attribute at the child of contentEditable node is ignored.
+        https://bugs.webkit.org/show_bug.cgi?id=48418
+
+        Changed to check spellcheck availability against a node under the
+        selection (caret) instead of the focus. For shadow elements, the
+        check now refers its host node.  Note that the original code didn't
+        care shadows because focus is never set on them.
+        
+        Test: editing/spelling/spelling-attribute-at-child.html
+
+        * dom/Element.h:
+        * editing/Editor.cpp:
+        (WebCore::Editor::markMisspellingsOrBadGrammar):
+        (WebCore::Editor::isSpellCheckingEnabledFor): 
+        (WebCore::Editor::isSpellCheckingEnabledInFocusedNode): Now just calling isSpellCheckingEnabledFor()
+        (WebCore::Editor::markAllMisspellingsAndBadGrammarInRanges):
+        * editing/Editor.h:
+        * platform/ContextMenu.cpp:
+        (WebCore::ContextMenu::populate):
+        * rendering/TextControlInnerElements.cpp:
+        (WebCore::TextControlInnerElement::isSpellCheckingEnabled): Added.
+        * rendering/TextControlInnerElements.h:
+
 2010-11-01  Martin Robinson  <mrobinson@igalia.com>
 
         Reviewed by Daniel Bates.
