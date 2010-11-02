@@ -1,3 +1,36 @@
+2010-11-02  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Xan Lopez.
+
+        Remove special handling of HashTableDeletedValue in PlatformRefPtr and manually manage memory that cannot be controlled by HashTraits
+        https://bugs.webkit.org/show_bug.cgi?id=48841
+
+        Switch to manually managing the memory in FontPlatformDataFreeType. This
+        is necessary because smart pointers do not know how to deal with a pointer
+        value of -1 (HashTableDeletedValue) and HashTraits can only manage the type
+        contained in the HashMap. 
+
+        No new tests as this should not change functionality.
+
+        * platform/graphics/cairo/FontPlatformDataFreeType.cpp:
+        (WebCore::FontPlatformData::FontPlatformData):
+        (WebCore::FontPlatformData::operator=):
+        (WebCore::FontPlatformData::~FontPlatformData):
+        (WebCore::FontPlatformData::operator==):
+        (WebCore::FontPlatformData::initializeWithFontFace):
+        * platform/graphics/cairo/FontPlatformDataFreeType.h:
+        (WebCore::FontPlatformData::FontPlatformData):
+        (WebCore::FontPlatformData::scaledFont):
+        (WebCore::FontPlatformData::hash):
+        (WebCore::FontPlatformData::isHashTableDeletedValue):
+        (WebCore::FontPlatformData::hashTableDeletedFontValue):
+        * platform/graphics/cairo/GlyphPageTreeNodeCairo.cpp:
+        (WebCore::GlyphPage::fill):
+        * platform/graphics/cairo/SimpleFontDataCairo.cpp:
+        (WebCore::SimpleFontData::platformInit):
+        (WebCore::SimpleFontData::containsCharacters):
+        (WebCore::SimpleFontData::platformWidthForGlyph):
+
 2010-11-02  Adam Barth  <abarth@webkit.org>
 
         Reviewed by Eric Seidel.
