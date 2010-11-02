@@ -1,3 +1,18 @@
+2010-11-02  Adele Peterson  <adele@apple.com>
+
+        Reviewed by Kent Tamura.
+
+        Fix for https://bugs.webkit.org/show_bug.cgi?id=48814
+        <rdar://problem/8546143> Attempting to redo typing in apple.com/startpage search field causes infinite recursion in TextControlInnerTextElement::defaultEventHandler
+
+        Test: editing/undo/redo-after-detach.html
+
+        * rendering/TextControlInnerElements.cpp: (WebCore::TextControlInnerTextElement::defaultEventHandler):
+        A TextControlInnerTextElement will almost always have a shadowAncestorNode, the HTMLInputElement.  In this case, 
+        after the renderer was destroyed, this shadow node was kept alive by the EditCommand, even though its not hooked up 
+        anymore to the shadow DOM.  EditCommands can sometimes operate on stale selections and are expected to fail silently.  
+        So here we prevent the infinite loop during event dispatch, and the rest of the redo operation will fail silently.
+
 2010-11-02  Chris Marrin  <cmarrin@apple.com>
 
         Reviewed by Adam Roben.
