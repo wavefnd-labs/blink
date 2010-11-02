@@ -1,3 +1,33 @@
+2010-11-01  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Xan Lopez.
+
+        [Soup] Random crashes in http/tests/websocket/tests/workers/worker-handshake-challenge-randomness.html
+        https://bugs.webkit.org/show_bug.cgi?id=48805
+
+        Track active WebSocket handles via a sequential id. This ensures
+        that when a handle is reallocated into a recently used segment of
+        memory, it doesn't trigger a false positive in the code which ensures
+        the original handle is active.
+
+        No new tests. This test should stop crashing on the bots, proving the fix.
+
+        * platform/network/soup/SocketStreamHandle.h:
+        (WebCore::SocketStreamHandle::id): Added an m_id member and accessor
+        to SocketStreamHandle.
+        * platform/network/soup/SocketStreamHandleSoup.cpp:
+        (WebCore::getHandleFromId): Updated to work with HashMap of handle ids to
+        SocketStreamHandle*.
+        (WebCore::deactivateHandle): Ditto.
+        (WebCore::activateHandle): Ditto.
+        (WebCore::SocketStreamHandle::SocketStreamHandle): Ditto.
+        (WebCore::SocketStreamHandle::connected): Ditto.
+        (WebCore::SocketStreamHandle::readBytes): Ditto.
+        (WebCore::SocketStreamHandle::beginWaitingForSocketWritability): Ditto.
+        (WebCore::connectedCallback): Ditto.
+        (WebCore::readReadyCallback): Ditto.
+        (WebCore::writeReadyCallback): Ditto.
+
 2010-11-02  Csaba Osztrogonác  <ossy@webkit.org>
 
         Unreviewed trivial fix.
