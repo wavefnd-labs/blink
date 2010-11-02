@@ -1,3 +1,38 @@
+2010-11-02  Mihai Parparita  <mihaip@chromium.org>
+
+        Reviewed by Adam Barth.
+
+        [Chromium] Crash when encountering history.back() call during Page::goToItem execution
+        https://bugs.webkit.org/show_bug.cgi?id=48477
+        
+        For the Chromium port, BackForwardList::itemAtIndex synthesizes a 
+        HistoryItem and saves a pointer to it in m_pendingItem. During 
+        Page::goToItem we call FrameLoader::stopAllLoaders, which can trigger
+        onload handlers (if a subframe was not considered committed by the frame
+        loader). If one of those handlers calls calls history.back() or another
+        operation that ends up in NavigationScheduler::scheduleHistoryNavigation,
+        we would call BackForwardList::itemAtIndex, which means that we would 
+        lose the m_pendingItem RefPtr that pointed to the item being navigated 
+        to, causing its ref count to go to 0*, and thus for the HistoryItem to
+        be deleted before we were done navigating to it.
+        
+        This is fixed in two ways:
+        - Add a protector RefPtr in Page::goToItem to make sure that the item is
+          still around for when we pass it to HistoryController:goToItem.
+        - Change NavigationScheduler::scheduleHistoryNavigation to not use
+          BackForwardList::itemAtIndex and instead look at the
+          forward/backListCount() (since it doesn't actually care about the
+          returned HistoryItem).
+        
+        * Full annotated stack trace of this is at http://crbug.com/59554#c9.        
+
+        Test: http/tests/history/back-during-onload-triggered-by-back.html
+
+        * loader/NavigationScheduler.cpp:
+        (WebCore::NavigationScheduler::scheduleHistoryNavigation):
+        * page/Page.cpp:
+        (WebCore::Page::goToItem):
+
 2010-10-28  Zhenyao Mo  <zmo@google.com>
 
         Reviewed by Kenneth Russell.
