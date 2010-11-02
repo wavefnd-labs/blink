@@ -1,3 +1,53 @@
+2010-11-02  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Rob Buis.
+
+        Convert SVGPreserveAspectRatio to the new SVGPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=48822
+
+        Convert the next type to use the SVGPropertyTearOffConcept. Just SVGAnimatedTransformList/SVGTransform/SVGStringList are missing.
+
+        Tests: svg/dom/SVGAnimatedPreserveAspectRatio.html
+               svg/dom/SVGPreserveAspectRatio.html
+
+        * GNUmakefile.am: Add SVGAnimatedPreserveAspectRatio.h to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/scripts/CodeGenerator.pm: Recognize SVGAnimatedPreserveAspectRatio as new style animated type.
+        * bindings/scripts/CodeGeneratorJS.pm: Remove special SVGPreserveAspectRatio handling.
+        * bindings/scripts/CodeGeneratorObjC.pm: Always include the type wrapped by SVGPropertyTearOff<> - this was missing before, and now become visible as missing include.
+        * bindings/scripts/CodeGeneratorV8.pm: Remove special SVGPreserveAspectRatio handling.
+        * svg/DeprecatedSVGAnimatedPropertyTraits.h: Remove SVGPreserveAspectRatio handling.
+        * svg/DeprecatedSVGAnimatedTemplate.h: Ditto.
+        * svg/SVGAnimatedPreserveAspectRatio.h: Added.
+        * svg/SVGFEImageElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_PROPERTY_NEW/ where SVGPreserveAspectRatio is used.
+        * svg/SVGFitToViewBox.cpp:
+        (WebCore::SVGFitToViewBox::viewBoxToViewTransform): SVGPreserveAspectRatio::getCTM doesn't need x/y parameters, they were not used anywhere, remove them.
+        * svg/SVGFitToViewBox.h: Replace includes by class forwards.
+        * svg/SVGImageElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_PROPERTY_NEW/ where SVGPreserveAspectRatio is used.
+        * svg/SVGLocatable.cpp: Add SVGNames.h include, to allow Qt to build (thanks ews!).
+        * svg/SVGMarkerElement.h: Ditto.
+        * svg/SVGPatternElement.h: Ditto.
+        * svg/SVGPreserveAspectRatio.cpp: Modernize code, add error handling for align/meetOrSlice covered by the new tests.
+        (WebCore::SVGPreserveAspectRatio::SVGPreserveAspectRatio):
+        (WebCore::SVGPreserveAspectRatio::setAlign):
+        (WebCore::SVGPreserveAspectRatio::setMeetOrSlice):
+        (WebCore::SVGPreserveAspectRatio::parsePreserveAspectRatio):
+        (WebCore::SVGPreserveAspectRatio::transformRect):
+        (WebCore::SVGPreserveAspectRatio::getCTM):
+        (WebCore::SVGPreserveAspectRatio::valueAsString):
+        * svg/SVGPreserveAspectRatio.h: Reindented header.
+        (WebCore::SVGPreserveAspectRatio::align): Inlined.
+        (WebCore::SVGPreserveAspectRatio::meetOrSlice): Inlined.
+        * svg/SVGPreserveAspectRatio.idl: Enable StrictTypeChecking for the align/meetOrSlice properties.
+        * svg/SVGSVGElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARE_ANIMATED_PROPERTY_NEW/ where SVGPreserveAspectRatio is used.
+        * svg/SVGStyledTransformableElement.h: Add SVGAnimatedPropertyMacros.h include, needed by efl to build (thanks ews!).
+        * svg/SVGSymbolElement.h: Ditto.
+        * svg/SVGViewElement.h: Ditto.
+        * svg/SVGViewSpec.h: Ditto.
+
 2010-11-01  MORITA Hajime  <morrita@google.com>
 
         Reviewed by Kent Tamura.
