@@ -1,3 +1,42 @@
+2010-11-03  Zoltan Herczeg  <zherczeg@webkit.org>
+
+        Reviewed by Dirk Schulze.
+
+        SVG FELighting performance issues
+        https://bugs.webkit.org/show_bug.cgi?id=48212
+
+        This patch speeds-up FELighting filter painting by 40%
+        It reduces the number of floating point operations and
+        empolys faster pixel manipulation (both for read and
+        write). Furthermore the length() member of FloatPoint3D
+        is made inline to speed up vector length calculations.
+
+        The lighting filter pixels tests are cover this patch.
+
+        * platform/graphics/FloatPoint3D.cpp:
+        * platform/graphics/FloatPoint3D.h:
+        (WebCore::FloatPoint3D::length):
+        * platform/graphics/filters/FELighting.cpp:
+        (WebCore::FELighting::LightingData::topLeft):
+        (WebCore::FELighting::LightingData::topRow):
+        (WebCore::FELighting::LightingData::topRight):
+        (WebCore::FELighting::LightingData::leftColumn):
+        (WebCore::FELighting::LightingData::interior):
+        (WebCore::FELighting::LightingData::rightColumn):
+        (WebCore::FELighting::LightingData::bottomLeft):
+        (WebCore::FELighting::LightingData::bottomRow):
+        (WebCore::FELighting::LightingData::bottomRight):
+        (WebCore::FELighting::inlineSetPixel):
+        (WebCore::FELighting::setPixel):
+        (WebCore::FELighting::drawLighting):
+        (WebCore::FELighting::apply):
+        * platform/graphics/filters/FELighting.h:
+        * platform/graphics/filters/LightSource.cpp:
+        (WebCore::PointLightSource::updatePaintingData):
+        (WebCore::SpotLightSource::updatePaintingData):
+        (WebCore::DistantLightSource::initPaintingData):
+        * platform/graphics/filters/LightSource.h:
+
 2010-11-03  Daniel Bates  <dbates@rim.com>
 
         Reviewed by Adam Barth.
