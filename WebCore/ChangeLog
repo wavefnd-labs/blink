@@ -1,3 +1,71 @@
+2010-11-03  Kenneth Russell  <kbr@google.com>
+
+        Reviewed by Chris Marrin.
+
+        Redesign extension mechanism in GraphicsContext3D
+        https://bugs.webkit.org/show_bug.cgi?id=46894
+
+        Upon request, factored out extension support from GraphicsContext3D
+        into a new Extensions3D class. (The plural was chosen because the
+        class and subclasses hold multiple extensions.)
+
+        Unlike GraphicsContext3D, Extensions3D contains only pure virtual
+        methods. This was done because Extensions3D's inheritance diagram
+        and usage pattern is very different from that of GraphicsContext3D,
+        and the concrete subclasses need to decide how to implement the
+        various entry points. Requiring them to be placed at the
+        Extensions3D level will cause implementation details to leak into
+        the base class, which is highly undesirable. Any virtual call
+        overhead to these entry points will be negligible.
+
+        Changed call sites utilizing these extensions to call through the
+        Extensions3D object or its subclasses.
+
+        Tested:
+         - Chromium on Linux with accelerated 2D canvas and HTML5 video
+         - Chromium on Mac OS X with WebGL and CSS 3D content
+         - Safari on Mac OS X with WebGL and CSS 3D content
+
+        No new tests. Covered by existing tests.
+
+        * WebCore.gypi:
+        * WebCore.pro:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/Extensions3D.h: Added.
+        (WebCore::Extensions3D::~Extensions3D):
+        * platform/graphics/GraphicsContext3D.cpp:
+        * platform/graphics/GraphicsContext3D.h:
+        * platform/graphics/chromium/DrawingBufferChromium.cpp:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore::DrawingBuffer::publishToPlatformLayer):
+        * platform/graphics/chromium/Extensions3DChromium.h: Added.
+        * platform/graphics/chromium/VideoLayerChromium.cpp:
+        (WebCore::VideoLayerChromium::updateTexture):
+        * platform/graphics/gpu/SharedGraphicsContext3D.cpp:
+        (WebCore::SharedGraphicsContext3D::supportsBGRA):
+        * platform/graphics/gpu/SharedGraphicsContext3D.h:
+        * platform/graphics/gpu/Texture.cpp:
+        (WebCore::convertFormat):
+        * platform/graphics/mac/GraphicsContext3DMac.mm:
+        * platform/graphics/opengl/Extensions3DOpenGL.cpp: Added.
+        (WebCore::Extensions3DOpenGL::Extensions3DOpenGL):
+        (WebCore::Extensions3DOpenGL::~Extensions3DOpenGL):
+        (WebCore::Extensions3DOpenGL::supports):
+        (WebCore::Extensions3DOpenGL::getGraphicsResetStatusARB):
+        * platform/graphics/opengl/Extensions3DOpenGL.h: Added.
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::getExtensions):
+        * platform/graphics/qt/Extensions3DQt.cpp: Added.
+        (WebCore::Extensions3DQt::Extensions3DQt):
+        (WebCore::Extensions3DQt::~Extensions3DQt):
+        (WebCore::Extensions3DQt::supports):
+        (WebCore::Extensions3DQt::getGraphicsResetStatusARB):
+        * platform/graphics/qt/Extensions3DQt.h: Added.
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (WebCore::GraphicsContext3D::getExtensions):
+        * platform/graphics/skia/PlatformContextSkia.cpp:
+        (WebCore::PlatformContextSkia::readbackHardwareToSoftware):
+
 2010-11-03  Mike Thole  <mthole@apple.com>
 
         Reviewed by Darin Adler.
