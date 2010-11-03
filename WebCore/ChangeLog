@@ -1,3 +1,39 @@
+2010-11-03  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        chrome.dll!WebCore::SVGListPropertyTearOff<...>::getItem ReadAV@NULL (578c0f7f21ca517ba29a4eafb7099c1b)
+        https://bugs.webkit.org/show_bug.cgi?id=48829
+
+        Share SVGPropertyTearOff wrapper cache between SVGAnimatedListPropertyTearOff::baseVal/animVal.
+        When modifying the list through baseVal, and then grabbing the animVal list an assertion was fired,
+        as the wrapper cache was out of sync with the underlying SVG*List vector.
+
+        Test: svg/dom/baseVal-animVal-list-crash.html
+
+        * svg/properties/SVGAnimatedListPropertyTearOff.h:
+        (WebCore::SVGAnimatedListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedListPropertyTearOff::animVal):
+        (WebCore::SVGAnimatedListPropertyTearOff::removeItemFromList):
+        (WebCore::SVGAnimatedListPropertyTearOff::detachListWrappers):
+        (WebCore::SVGAnimatedListPropertyTearOff::values):
+        (WebCore::SVGAnimatedListPropertyTearOff::wrappers):
+        (WebCore::SVGAnimatedListPropertyTearOff::create):
+        (WebCore::SVGAnimatedListPropertyTearOff::SVGAnimatedListPropertyTearOff):
+        * svg/properties/SVGListPropertyTearOff.h:
+        (WebCore::SVGListPropertyTearOff::create):
+        (WebCore::SVGListPropertyTearOff::removeItemFromList):
+        (WebCore::SVGListPropertyTearOff::clear):
+        (WebCore::SVGListPropertyTearOff::numberOfItems):
+        (WebCore::SVGListPropertyTearOff::initialize):
+        (WebCore::SVGListPropertyTearOff::getItem):
+        (WebCore::SVGListPropertyTearOff::insertItemBefore):
+        (WebCore::SVGListPropertyTearOff::replaceItem):
+        (WebCore::SVGListPropertyTearOff::removeItem):
+        (WebCore::SVGListPropertyTearOff::appendItem):
+        (WebCore::SVGListPropertyTearOff::SVGListPropertyTearOff):
+        (WebCore::SVGListPropertyTearOff::commitChange):
+
 2010-11-02  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Reviewed by Pavel Feldman.
