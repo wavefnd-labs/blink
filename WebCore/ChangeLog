@@ -1,3 +1,33 @@
+2010-11-03  Daniel Bates  <dbates@rim.com>
+
+        Reviewed by Adam Barth.
+
+        For unnamed frames, window.name returns a generated name
+        https://bugs.webkit.org/show_bug.cgi?id=6751
+
+        Part 2 of 2.
+
+        Fixes an issue where the window.name of an unnamed frame returns
+        a unique generated name that is used internally to identify the
+        frame. Instead, we should return an empty string as implied by
+        section 5.1.6 of the HTML5 spec. (http://www.w3.org/TR/html5/browsers.html#browsing-context-names).
+        This section describes that a browsing context can have no name or be
+        the empty string.
+
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::openURL): Removed ASSERT for empty
+        frame name since this is valid as per the HTML5 spec.
+        (WebCore::HTMLFrameElementBase::setName): Removed the call to FrameTree::uniqueChildName()
+        since the loader code no longer depends on the frame name being unique.
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::name): Modified to call FrameTree::name().
+        * page/FrameTree.cpp:
+        (WebCore::FrameTree::setName):
+        (WebCore::FrameTree::clearName):
+        * page/FrameTree.h:
+        (WebCore::FrameTree::name): Re-added; returns the DOM-specified name of the
+        frame. Previously, this method returned the internal frame name.
+
 2010-11-03  takano takumi  <takano1@asia.apple.com>
 
         Reviewed by Dan Bernstein.
