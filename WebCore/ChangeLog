@@ -1,3 +1,103 @@
+2010-11-03  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Convert SVGAnimatedString/SVGStringList to the new SVG*PropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=48898
+
+        Convert SVGAnimatedString/SVGStringList to the new svg animated type concept.
+        SVGStringList is special compared to all other SVG*Lists, as it returns non-live elements.
+        That means myStringList.getItem(0) = 'foobar' doesn't take effect.
+
+        When appending an item to a SVGStringList, that has been taken from another list, it's not removed from the list origin.
+        That demanded a new SVGStringListPropertyTearOff which does just that.
+
+        Tests: svg/W3C-SVG-1.1-SE/types-dom-06-f.svg
+               svg/dom/SVGStringList.html
+
+        * GNUmakefile.am: Add SVGAnimatedString.h / SVGStringListPropertyTearOff.h to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/scripts/CodeGenerator.pm: Recognize SVGAnimatedString as new style svg animated type. Map SVGStringList to SVGStringListPropertyTearOff.
+        * bindings/scripts/CodeGeneratorJS.pm: Handle SVGStringListPropertyTearOff in GetSVGPropertyTypes.
+        * bindings/scripts/CodeGeneratorObjC.pm: Ditto.
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        * svg/DeprecatedSVGAnimatedPropertyTraits.h: Remove SVGAnimatedString handling.
+        * svg/DeprecatedSVGAnimatedTemplate.h: Ditto.
+        * svg/SVGAElement.cpp: Renamed target to svgTarget() to avoid clashes with Element::target(), adjust the bindings to call svgTarget() instead of target(), when processing SVGAElement.
+        (WebCore::SVGAElement::parseMappedAttribute):
+        (WebCore::SVGAElement::synchronizeProperty):
+        * svg/SVGAElement.h:
+        * svg/SVGAltGlyphElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARED_ANIMATED_STATIC_PROPERTY_NEW/
+        * svg/SVGAnimatedString.h: Added.
+        * svg/SVGCursorElement.h: Ditto.
+        * svg/SVGFEBlendElement.h: Ditto.
+        * svg/SVGFEColorMatrixElement.h: Ditto.
+        * svg/SVGFEComponentTransferElement.h: Ditto.
+        * svg/SVGFECompositeElement.h: Ditto.
+        * svg/SVGFEConvolveMatrixElement.h: Ditto.
+        * svg/SVGFEDiffuseLightingElement.h: Ditto.
+        * svg/SVGFEDisplacementMapElement.h: Ditto.
+        * svg/SVGFEGaussianBlurElement.h: Ditto.
+        * svg/SVGFEImageElement.h: Ditto.
+        * svg/SVGFEMergeNodeElement.h: Ditto.
+        * svg/SVGFEMorphologyElement.h: Ditto.
+        * svg/SVGFEOffsetElement.h: Ditto.
+        * svg/SVGFESpecularLightingElement.h: Ditto.
+        * svg/SVGFETileElement.h: Ditto.
+        * svg/SVGFilterElement.h: Ditto.
+        * svg/SVGFilterPrimitiveStandardAttributes.h: Ditto.
+        * svg/SVGForeignObjectElement.h: Ditto.
+        * svg/SVGGradientElement.h: Ditto.
+        * svg/SVGImageElement.h: Ditto. 
+        * svg/SVGLengthList.idl: Remove leftover SVGListProperty marker.
+        * svg/SVGMPathElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARED_ANIMATED_STATIC_PROPERTY_NEW/
+        * svg/SVGPatternElement.h: Ditto.
+        * svg/SVGScriptElement.h: Ditto.
+        * svg/SVGStringList.cpp: Make SVGStringList a plain Vector<String>.
+        (WebCore::SVGStringList::commitChange): React to SVGStringList changes.
+        (WebCore::SVGStringList::reset):
+        (WebCore::SVGStringList::parse):
+        * svg/SVGStringList.h:
+        (WebCore::SVGStringList::SVGStringList):
+        * svg/SVGStyledElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARED_ANIMATED_STATIC_PROPERTY_NEW/
+        * svg/SVGTRefElement.h: Ditto.
+        * svg/SVGTests.cpp: Adapt to SVGStringList API changes.
+        (WebCore::SVGTests::SVGTests):
+        (WebCore::SVGTests::hasExtension):
+        (WebCore::SVGTests::isValid):
+        (WebCore::SVGTests::parseMappedAttribute):
+        (WebCore::SVGTests::isKnownAttribute):
+        * svg/SVGTests.h: Ditto.
+        (WebCore::SVGTests::requiredFeatures):
+        (WebCore::SVGTests::requiredExtensions):
+        (WebCore::SVGTests::systemLanguage):
+        * svg/SVGTextPathElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARED_ANIMATED_STATIC_PROPERTY_NEW/
+        * svg/SVGURIReference.h: Adapt to SVGStringList API changes.
+        (WebCore::SVGURIReference::~SVGURIReference):
+        * svg/SVGUseElement.h: s/DECLARE_ANIMATED_PROPERTY/DECLARED_ANIMATED_STATIC_PROPERTY_NEW/
+        * svg/SVGViewElement.cpp: Adapt to SVGStringList API changes.
+        (WebCore::SVGViewElement::SVGViewElement):
+        (WebCore::SVGViewElement::parseMappedAttribute):
+        * svg/SVGViewElement.h: Ditto.
+        (WebCore::SVGViewElement::viewTarget):
+        * svg/properties/SVGAnimatedPropertyMacros.h: Moved GetOwnerElementForType heleprs from SVGAnimatedPropertySynchronizer into this file.
+        * svg/properties/SVGAnimatedPropertySynchronizer.h: 
+        * svg/properties/SVGPropertyTraits.h: Handle SVGStringList.
+        * svg/properties/SVGStringListPropertyTearOff.h: Added. This is a simplified version of SVGListPropertyTearOff, tied to SVGStringList and its special demands.
+        (WebCore::SVGStringListPropertyTearOff::create):
+        (WebCore::SVGStringListPropertyTearOff::clear):
+        (WebCore::SVGStringListPropertyTearOff::numberOfItems):
+        (WebCore::SVGStringListPropertyTearOff::initialize):
+        (WebCore::SVGStringListPropertyTearOff::getItem):
+        (WebCore::SVGStringListPropertyTearOff::insertItemBefore):
+        (WebCore::SVGStringListPropertyTearOff::replaceItem):
+        (WebCore::SVGStringListPropertyTearOff::removeItem):
+        (WebCore::SVGStringListPropertyTearOff::appendItem):
+        (WebCore::SVGStringListPropertyTearOff::SVGStringListPropertyTearOff):
+
 2010-11-03  Zoltan Herczeg  <zherczeg@webkit.org>
 
         Reviewed by Dirk Schulze.
