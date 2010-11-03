@@ -1,3 +1,25 @@
+2010-11-02  Michael Nordman  <michaeln@google.com>
+
+        Reviewed by Alexey Proskuryakov.
+
+        [Chromium] Some work on making appcache layout tests less flaky.
+        https://bugs.webkit.org/show_bug.cgi?id=48002
+        1) Make network-simulator.php less slow.
+        In addition to redirecting back to the requested url, the response contains
+        multiple content-length headers. Chrome's network stacks considers that an
+        error condition too and picks up on it faster (one round trip instead of multiple).
+        This avoids timeouts due to using PHP via slow CGI on windows.
+        2) Removed canLoad() from appcache/fallback.html layout test, the load()
+        result is sufficient for determining if it could be loaded. So fewer requests are
+        made to conduct the test, cutting out more time.
+        3) Removed some unneeded code from offline-access-frame.html. Appcache events are guaranteed
+        to be deferred until after 'onload' has happened. This test was coded prior to that
+        guarantee being satisfied.
+
+        * http/tests/appcache/fallback.html:
+        * http/tests/resources/network-simulator.php:
+        * http/tests/resources/offline-access-frame.html:
+
 2010-11-02  Mihai Parparita  <mihaip@chromium.org>
         
         Update the pixel expectations for fast/canvas, fast/css-generated-content, fast/inline-block, fast/inline, and fast/overflow for the Mac port.
