@@ -1,3 +1,64 @@
+2010-11-03  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Dave Hyatt.
+
+        Make collapsed borders in tables work with different block flows
+        https://bugs.webkit.org/show_bug.cgi?id=46191
+
+        No new tests since tables don’t support different block flows yet.
+
+        This change still doesn’t support cells whose block flow differs from the table’s.
+
+        * rendering/AutoTableLayout.cpp:
+        (WebCore::AutoTableLayout::recalcColumn): Updated for the renaming of styleOrColWidth().
+        (WebCore::AutoTableLayout::calcEffectiveWidth): Ditto.
+        * rendering/FixedTableLayout.cpp:
+        (WebCore::FixedTableLayout::calcWidthArray): Ditto.
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computePreferredLogicalWidths): Ditto.
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::styleOrColLogicalWidth): Renamed styleOrColWidth() to this and
+        changed to use logical widths.
+        (WebCore::RenderTableCell::computePreferredLogicalWidths): Updated for the above rename.
+        (WebCore::RenderTableCell::updateLogicalWidth): Renamed updateWidth() to this and changed
+        to set the logical width.
+        (WebCore::RenderTableCell::collapsedStartBorder): Changed collapsedLeftBorder() into this.
+        Note that “start” here will refer to the table’s block flow, not the cell’s, once we allow
+        the two to differ.
+        (WebCore::RenderTableCell::collapsedEndBorder): Similar.
+        (WebCore::RenderTableCell::collapsedBeforeBorder): Similar.
+        (WebCore::RenderTableCell::collapsedAfterBorder): Similar.
+        (WebCore::RenderTableCell::collapsedLeftBorder): Resolves “left” to a logical side using
+        the table’s block flow.
+        (WebCore::RenderTableCell::collapsedRightBorder): Similar.
+        (WebCore::RenderTableCell::collapsedTopBorder): Similar.
+        (WebCore::RenderTableCell::collapsedBottomBorder): Similar.
+        (WebCore::RenderTableCell::borderStart): Use borderHalfStart().
+        (WebCore::RenderTableCell::borderEnd): Similar.
+        (WebCore::RenderTableCell::borderBefore): Similar.
+        (WebCore::RenderTableCell::borderAfter): Similar.
+        (WebCore::RenderTableCell::borderHalfLeft): Resolves “left” to a logical side using the
+        table’s block flow.
+        (WebCore::RenderTableCell::borderHalfRight): Similar.
+        (WebCore::RenderTableCell::borderHalfTop): Similar.
+        (WebCore::RenderTableCell::borderHalfBottom): Similar.
+        (WebCore::RenderTableCell::borderHalfStart): Added. Uses collapsedStartBorder(). Splits odd
+        widths based on physical side.
+        (WebCore::RenderTableCell::borderHalfEnd): Similar.
+        (WebCore::RenderTableCell::borderHalfBefore): Similar.
+        (WebCore::RenderTableCell::borderHalfAfter): Similar.
+        (WebCore::RenderTableCell::collectBorderStyles): Use logical methods.
+        (WebCore::RenderTableCell::paintCollapsedBorder): Updated.
+        * rendering/RenderTableCell.h:
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::setCellWidths): Updated for the renaming of updateWidth().
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::borderBefore): Added.
+        (WebCore::RenderStyle::borderAfter): Added.
+        (WebCore::RenderStyle::borderStart): Added.
+        (WebCore::RenderStyle::borderEnd): Adeed.
+        * rendering/style/RenderStyle.h:
+
 2010-11-03  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Fix Win build correctly after r71244 and r71248
