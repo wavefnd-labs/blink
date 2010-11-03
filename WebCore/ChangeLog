@@ -1,3 +1,40 @@
+2010-10-28  Zhenyao Mo  <zmo@google.com>
+
+        Reviewed by Kenneth Russell.
+
+        Perform framebuffer attachment checking upon draw call rather than attachment
+        https://bugs.webkit.org/show_bug.cgi?id=46318
+
+        * html/canvas/WebGLFramebuffer.cpp:
+        (WebCore::getInternalFormat): Helper function to get an attachment's internal format.
+        (WebCore::isUninitialized): Helper function to decide if an attachment is initialized or not.
+        (WebCore::setInitialized): Helper funtion to set an attachment as being initialized.
+        (WebCore::WebGLFramebuffer::setAttachment): No longer perform buffer initialization at this point.
+        (WebCore::WebGLFramebuffer::removeAttachment): Ditto.
+        (WebCore::WebGLFramebuffer::getColorBufferFormat): Make it const.
+        (WebCore::WebGLFramebuffer::isIncomplete): Attachments conflict check.
+        (WebCore::WebGLFramebuffer::onAccess): Check atatchment conflicts and buffer initialization if necessary.
+        (WebCore::WebGLFramebuffer::initializeRenderbuffers): Return a boolean whether the framebuffer is complete or not.
+        * html/canvas/WebGLFramebuffer.h: Add new function declaration and remove some outdated functions.
+        (WebCore::WebGLFramebuffer::isColorAttached):
+        (WebCore::WebGLFramebuffer::isDepthAttached): Make this private.
+        (WebCore::WebGLFramebuffer::isStencilAttached): Ditto.
+        (WebCore::WebGLFramebuffer::isDepthStencilAttached): Ditto.
+        * html/canvas/WebGLRenderbuffer.h:
+        (WebCore::WebGLRenderbuffer::setInternalFormat): Also set the renderbuffer as uninitialized.
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore::WebGLRenderingContext::bindFramebuffer): No longer perform framebuffer initialization at this point.
+        (WebCore::WebGLRenderingContext::checkFramebufferStatus): Check WebGL specific attachment conflicts.
+        (WebCore::WebGLRenderingContext::clear): Call WebGLFramebuffer::onAccess.
+        (WebCore::WebGLRenderingContext::copyTexImage2D): Ditto.
+        (WebCore::WebGLRenderingContext::copyTexSubImage2D): Ditto.
+        (WebCore::WebGLRenderingContext::drawArrays): Ditto.
+        (WebCore::WebGLRenderingContext::drawElements): Ditto.
+        (WebCore::WebGLRenderingContext::framebufferRenderbuffer): No longer perform framebuffer initialization at this point.
+        (WebCore::WebGLRenderingContext::readPixels): Call WebGLFramebuffer::onAccess.
+        (WebCore::WebGLRenderingContext::renderbufferStorage): No longer perform framebuffer initialization at this point.
+        (WebCore::WebGLRenderingContext::texImage2DBase): Ditto.
+
 2010-11-01  Zhenyao Mo  <zmo@google.com>
 
         Reviewed by Kenneth Russell.
