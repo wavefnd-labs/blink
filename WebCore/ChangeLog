@@ -782,7 +782,57 @@
         (WebInspector.ImageView.prototype.contentTabSelected):
         (WebInspector.ImageView.prototype.contentTabSelected.onImageLoad):
 
-2010-11-02  Adele Peterson  <adele@apple.com>
+ 2010-10-31  Noam Rosenthal  <noam.rosenthal@nokia.com>
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        [Texmap] [Qt] Texture mapper initial implementation
+        https://bugs.webkit.org/show_bug.cgi?id=47070
+
+        Some refactor for texmap to enable WebKit2: remove globals, and allow TextureMapper to exist without a GraphicsContext.
+        This will allow rendering the TextureMapperNode tree without an active QPainter, into the current GL context.
+        Most of the changes simply move the globas in TextureMapperGL into members of that class.
+
+        No new tests. Old tests in LayoutTests/compositing cover this.
+
+        * platform/graphics/opengl/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGLData::ShaderInfo::getUniformLocation):
+        (WebCore::TextureMapperGLData::ShaderInfo::createShaderProgram):
+        (WebCore::TextureMapperGLData::DirectlyCompositedImageRepository::findOrCreate):
+        (WebCore::TextureMapperGLData::DirectlyCompositedImageRepository::deref):
+        (WebCore::TextureMapperGLData::DirectlyCompositedImageRepository::DirectlyCompositedImageRepository):
+        (WebCore::TextureMapperGLData::DirectlyCompositedImageRepository::~DirectlyCompositedImageRepository):
+        (WebCore::TextureMapperGLData::TextureMapperGLData):
+        (WebCore::TextureMapperGL::TextureMapperGL):
+        (WebCore::TextureMapperGL::drawTexture):
+        (WebCore::BitmapTextureGL::setContentsToImage):
+        (WebCore::BitmapTextureGL::destroy):
+        (WebCore::TextureMapperGL::~TextureMapperGL):
+        (WebCore::TextureMapperGL::makeContextCurrent):
+        (WebCore::TextureMapperGL::obtainCurrentContext):
+        (WebCore::TextureMapperGL::bindSurface):
+        (WebCore::TextureMapperGL::paintToTarget):
+        (WebCore::TextureMapperGL::createTexture):
+        * platform/graphics/opengl/TextureMapperGL.h:
+        (WebCore::TextureMapperGL::data):
+        * platform/graphics/qt/TextureMapperQt.cpp:
+        (WebCore::TextureMapperQt::TextureMapperQt):
+        (WebCore::TextureMapperQt::setGraphicsContext):
+        (WebCore::TextureMapper::create):
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.cpp:
+        (WebCore::TextureMapperNode::paint):
+        (WebCore::TextureMapperNode::uploadTextureFromContent):
+        * platform/graphics/texmap/TextureMapper.h:
+        (WebCore::TextureMapper::setGraphicsContext):
+        (WebCore::TextureMapper::setImageInterpolationQuality):
+        (WebCore::TextureMapper::setTextDrawingMode):
+        (WebCore::TextureMapper::imageInterpolationQuality):
+        (WebCore::TextureMapper::textDrawingMode):
+        (WebCore::TextureMapper::TextureMapper):
+        * platform/graphics/texmap/TextureMapperPlatformLayer.h:
+        (WebCore::TextureMapperContentLayer::paint):
+
+ 2010-11-02  Adele Peterson  <adele@apple.com>
 
         Reviewed by Kent Tamura.
 
@@ -83083,7 +83133,7 @@
 
         Reviewed by Gustavo Noronha Silva.
 
-        Bug 41340 - [GStreamer] Subtle race condition during seeks
+        Bug 41340 - [GStreamer] Subtle race condition during seeks
         https://bugs.webkit.org/show_bug.cgi?id=41340
 
         * platform/graphics/gstreamer/WebKitWebSourceGStreamer.cpp:
