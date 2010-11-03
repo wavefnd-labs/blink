@@ -96,6 +96,44 @@
 
         Reviewed by Dan Bernstein.
 
+        Overlapped nested iframes show smearing when scrolled
+        https://bugs.webkit.org/show_bug.cgi?id=48873
+
+        A FrameView goes into slow scrolling mode (not blitting) when told that it is
+        overlapped. However, a nested iframe could still try to use fast scrolling
+        when its parent is overlapped, which could result in bad rendering.
+        
+        Fixed by making useSlowRepaints() and useSlowRepaintsIfNotOverlapped()
+        walk up their parent chain, asking if their parents also use slow
+        repaints.
+        
+        All the places that call setCanBlitOnScroll() now call
+        updateCanBlitOnScrollRecursively() to ensure that the canBlitOnScroll
+        flag is updated correctly on subframes.
+        
+        Repaint tests do not work on nested iframes, so added manual test.
+
+        * manual-tests/frames/nested-iframe-blit-on-scroll.html: Added.
+        * manual-tests/frames/resources/blit-on-scroll-subframe.html: Added.
+        * manual-tests/frames/resources/blit-on-scroll-subsubframe.html: Added.
+        * page/FrameView.cpp:
+        (WebCore::FrameView::layout):
+        (WebCore::FrameView::useSlowRepaints):
+        (WebCore::FrameView::useSlowRepaintsIfNotOverlapped):
+        (WebCore::FrameView::updateCanBlitOnScrollRecursively):
+        (WebCore::FrameView::setUseSlowRepaints):
+        (WebCore::FrameView::addSlowRepaintObject):
+        (WebCore::FrameView::removeSlowRepaintObject):
+        (WebCore::FrameView::addFixedObject):
+        (WebCore::FrameView::removeFixedObject):
+        (WebCore::FrameView::setIsOverlapped):
+        (WebCore::FrameView::setContentIsOpaque):
+        * page/FrameView.h:
+
+2010-11-02  Simon Fraser  <simon.fraser@apple.com>
+
+        Reviewed by Dan Bernstein.
+
         Iframes nested inside a compositing layer don't repaint correctly
         https://bugs.webkit.org/show_bug.cgi?id=48880
         <rdar://problem/8194698>
