@@ -2,6 +2,28 @@
 
         Reviewed by Adam Barth.
 
+        handle plugins without mimetypes in fast/js/navigator-mimeTypes-length.html
+        https://bugs.webkit.org/show_bug.cgi?id=49015
+
+        This test was added in r15573 to verify that navigator.mimeTypes.length
+        returns the number of mimeTypes provided by plugins.  However, it assumes
+        that there are more mimeTypes handled than plugins installed.  It's
+        possible for a plugin to handle no mime types, so this invariant isn't
+        true.  This often works on Win/Mac because they have a plugin that handles
+        multimedia files (like QuickTime), but on Linux, often there are no plugins
+        installed other than the test plugin (which handles 1 mime type).
+
+        Instead, add up the mime types from each plugin and verify that it
+        matches navigator.mimeTypes.length.
+
+        * fast/js/navigator-mimeTypes-length-expected.txt:
+        * fast/js/script-tests/navigator-mimeTypes-length.js:
+        * platform/google-chrome-linux32/fast/js/navigator-mimeTypes-length-expected.txt: Removed.
+
+2010-11-04  Tony Chang  <tony@chromium.org>
+
+        Reviewed by Adam Barth.
+
         make plugins/update-widgets-crash.html resilient to multiple calls to NPP_SetWindow
         https://bugs.webkit.org/show_bug.cgi?id=49013
 
