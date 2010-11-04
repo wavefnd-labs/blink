@@ -1,3 +1,41 @@
+2010-11-04  Pratik Solanki  <psolanki@apple.com>
+
+        Reviewed by Darin Adler.
+
+        Should make use of purge priorities for different resource types
+        https://bugs.webkit.org/show_bug.cgi?id=48684
+
+        Assign purge priorities to CachedResource objects. JavaScript and CSS stylesheets are more
+        important than images so hint to the kernel to purge them last. We do this by repurposing
+        the previously unused function, PurgeableBuffer::setPurgePriority(). It now just sets the
+        priority field and does not have side-effects like calling makePurgeable(true).
+
+        Also, remove unusued PurgeableBuffer::create(const Vector<char>&) function and move the
+        purgeable memory size threshold from CachedResource to PurgeableBuffer.
+
+        * WebCore.xcodeproj/project.pbxproj: Add new PurgePriority.h header and mark it as private
+        header.
+        * loader/CachedCSSStyleSheet.h:
+        (WebCore::CachedCSSStyleSheet::purgePriority):
+        * loader/CachedImage.h:
+        (WebCore::CachedImage::purgePriority):
+        * loader/CachedResource.cpp:
+        (WebCore::CachedResource::makePurgeable): Set the purge priority on the PurgeableBffer.
+        Also, move the check for purgeable size threshold to PurgeableBuffer.
+        * loader/CachedResource.h:
+        (WebCore::CachedResource::purgePriority): Added. New virtual method that lets the class
+        specify its purge priority.
+        * loader/CachedScript.h:
+        (WebCore::CachedScript::purgePriority):
+        * platform/PurgePriority.h: Added. Move the PurgePriority enum from PurgeableBuffer class to
+        its own header file.
+        (WebCore::):
+        * platform/PurgeableBuffer.h:
+        (WebCore::PurgeableBuffer::setPurgePriority): Update this previously unused function to just
+        set the priority and not call makePurgeable(true).
+        * platform/mac/PurgeableBufferMac.cpp: Update size threshold to 16KB which is what
+        CachedResource was using.
+
 2010-11-04  Chris Guillory  <chris.guillory@google.com>
 
         Reviewed by Chris Fleizach.
