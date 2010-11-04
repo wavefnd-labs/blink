@@ -1,3 +1,52 @@
+2010-11-03  Kent Tamura  <tkent@chromium.org>
+
+        Reviewed by Dimitri Glazkov.
+
+        Framework to show form validation message for invalid controls
+        https://bugs.webkit.org/show_bug.cgi?id=31718
+
+        HTMLFormElement::validateInteractively() shows a validation message for
+        an invalid control by HTMLFormControlElement::updateVisibleValidationMessage(),
+        and the message is hidden when the invalid control looses focus, becomes
+        valid, detached, or the form is submitted again.
+
+        Introduce ValidationMessage class to manage visible form validation
+        message. It has no implementation to show/hide a message yet.
+
+        No new tests. New behavior is disabled by default, and is timing-dependent.
+
+        * Android.mk: Add ValidationMessage.
+        * CMakeLists.txt: ditto.
+        * GNUmakefile.am: ditto.
+        * WebCore.gypi: ditto.
+        * WebCore.pro: ditto.
+        * WebCore.vcproj/WebCore.vcproj: ditto.
+        * WebCore.xcodeproj/project.pbxproj: ditto.
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::detach): Hides a validation message.
+        (WebCore::HTMLFormControlElement::setNeedsWillValidateCheck):
+           Hides a validation message if validation is not needed.
+        (WebCore::HTMLFormControlElement::updateVisibleValidationMessage):
+        (WebCore::HTMLFormControlElement::hideVisibleValidationMessage):
+        (WebCore::HTMLFormControlElement::setNeedsValidityCheck):
+          Hides a validation message or updates the validation message.
+        (WebCore::HTMLFormControlElement::dispatchBlurEvent):
+          Hides a validation message.
+        (WebCore::HTMLFormControlElement::visibleValidationMessage):
+        * html/HTMLFormControlElement.h:
+        * html/HTMLFormElement.cpp:
+        (WebCore::HTMLFormElement::validateInteractively):
+         - Hide existing validation messages before showing new message.
+         - Show new validation message.
+        * html/ValidationMessage.cpp: Added.
+        (WebCore::ValidationMessage::ValidationMessage):
+        (WebCore::ValidationMessage::~ValidationMessage):
+        (WebCore::ValidationMessage::create):
+        (WebCore::ValidationMessage::setMessage):
+        (WebCore::ValidationMessage::hideMessage):
+        * html/ValidationMessage.h: Added.
+        (WebCore::ValidationMessage::message):
+
 2010-11-03  Patrick Gansterer  <paroga@webkit.org>
 
         Reviewed by Adam Roben.
