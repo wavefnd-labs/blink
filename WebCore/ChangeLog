@@ -1,3 +1,26 @@
+2010-11-03  Brian Weinstein  <bweinstein@apple.com>
+
+        Reviewed by Brady Eidson.
+
+        User scripts shouldn't be injected in a frame's empty initial document.
+        https://bugs.webkit.org/show_bug.cgi?id=48970
+        <rdar://problem/8618164>
+        <rdar://problem/8082122>
+        
+        When a frame loads, it first creates an empty initial document, then navigates to the correct URL. Our
+        current policy with user scripts is to inject them into both the initial empty document, and then inject
+        them again.
+        
+        This causes developers to think their scripts have been injected twice into all iframes, and there is a timing
+        issue between WebKit1 and WebKit2 that causes start scripts to be injected into the initial empty document
+        of the main frame when a new tab or window is created.
+        
+        The fix for this is to not inject user scripts when the frame is creating its initial empty document before loading
+        the correct source.
+
+        * page/Frame.cpp:
+        (WebCore::Frame::injectUserScripts):
+
 2010-11-04  Andreas Kling  <kling@webkit.org>
 
         Reviewed by Nikolas Zimmermann.
