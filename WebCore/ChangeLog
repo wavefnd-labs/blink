@@ -1,3 +1,28 @@
+2010-11-04  Robert Hogan  <robert@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Stale reference to JSDOMWindow in ScriptController::m_cacheableBindingObject
+
+        After bug 37725 we need to update the globalObject() (i.e. JSDOMWindow)
+        associated with the m_cacheablebindingRootObject every time we clear the
+        frame and load a new page. This allows the runtime objects
+        (e.g. LayoutTestController etc.) to persist between navigations as
+        before but also ensures that when qt_runtime, or any other bridge,
+        looks at the root->globalObject() of a cacheable binding object
+        it gets the DOMWindow of the current page rather than the DOMWindow
+        that was in place when m_cacheableBindingRootObject was created.
+
+        Fixes fast/dom/nodesFromRect-basic.html on Qt.
+
+        https://bugs.webkit.org/show_bug.cgi?id=48758
+
+        * bindings/js/ScriptController.cpp:
+        (WebCore::ScriptController::clearWindowShell):
+        * bridge/runtime_root.cpp:
+        (JSC::Bindings::RootObject::updateGlobalObject):
+        * bridge/runtime_root.h:
+
 2010-11-04  Kenneth Rohde Christiansen  <kenneth@webkit.org>
 
         Reviewed by David Hyatt.
