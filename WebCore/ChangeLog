@@ -1,3 +1,25 @@
+2010-11-01  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Crash in ApplyStyleCommand::removeStyleFromRunBeforeApplyingStyle
+        https://bugs.webkit.org/show_bug.cgi?id=48581
+
+        The crash was caused by RemoveNodePreservingChildrenCommand's calling removeNode
+        on m_node without checking that m_node has a parent and it's still in the document.
+        Fixed the crash by adding an early exit in CompositeEditCommand::removeNode and
+        deploying RefPtr in several places of ApplyStyleCommand.cpp.
+
+        Test: editing/style/iframe-onload-crash.html
+
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::ApplyStyleCommand::applyInlineStyleToNodeRange):
+        (WebCore::ApplyStyleCommand::removeStyleFromRunBeforeApplyingStyle):
+        (WebCore::ApplyStyleCommand::removeInlineStyleFromElement):
+        * editing/ApplyStyleCommand.h:
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::removeNode):
+
 2010-11-03  Jia Pu  <jpu@apple.com>
 
         Reviewed by Darin Adler.
