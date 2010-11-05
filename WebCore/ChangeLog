@@ -1,3 +1,73 @@
+2010-11-04  Jia Pu  <jpu@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        reversion bubble in WebViews
+        https://bugs.webkit.org/show_bug.cgi?id=47630
+        <rdar://problem/8530960>
+
+        Added manual test:
+        manual-tests/autocorrection/continue-typing-to-dismiss-reversion.html
+        manual-tests/autocorrection/delete-to-dismiss-reversion.html
+        manual-tests/autocorrection/delete-to-end-of-word-to-show-reversion.html
+        manual-tests/autocorrection/move-to-end-of-word-to-show-reversion.html
+        manual-tests/autocorrection/type-whitespace-to-dismiss-reversion.html
+
+        We can only manully test this feature for two reasons:
+        1. On Mac OS X, the result of spell checking is partly determined by past user usage. We can't
+           realiably generating test cases until we can disable user custom data during spell checking.
+        2. To exerciese this feature, we need a minimum of 0.3 second delay using WebCore timer.
+
+        This patch is to add reversion to correction panel. It consists of following major code changes:
+        1. Collected all autocorrection related member variables in Editor into a CorrectionPanelInfo
+           class to improve readability.
+        2. Changed signature of Editor::startCorrectionPanelTimer() to allow caller to specify the
+           type of correction panel--regular correction or reversion.
+        3. Made necessary changes to adopt reversion API in AppKit.
+        4. Use SUPPORT_CORRECTION_PANEL macro to improve readability.
+
+        * GNUmakefile.am: Added CorrectionPanelInfo.h.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj:
+        * editing/CorrectionPanelInfo.h: Added.
+        * editing/Editor.cpp:
+        (WebCore::Editor::respondToChangedSelection): Start correction panel timer for reversion when
+          the new selection is a caret selection at end of a previously corrected word.
+        (WebCore::Editor::appliedEditing): Stop timer at the beginning of the method instead of at the end.
+        (WebCore::Editor::~Editor): Adopted new method dismissCorrectionPanel().
+        (WebCore::Editor::markMisspellingsAfterTypingToPosition): Adopted new method applyCorrectionPanelInfo().
+        (WebCore::Editor::markAllMisspellingsAndBadGrammarInRanges): Code change for new m_correctionPanelInfo
+          member variable.
+        (WebCore::Editor::correctionPanelTimerFired): Change to handle reversion panel type.
+        (WebCore::Editor::handleRejectedCorrection): Ditto.
+        (WebCore::Editor::startCorrectionPanelTimer): Changed signature to allow passing in panel type.
+        (WebCore::Editor::stopCorrectionPanelTimer): Adopted macro SUPPORT_CORRECTION_PANEL.
+        (WebCore::Editor::handleCancelOperation): Ditto.
+        (WebCore::Editor::isShowingCorrectionPanel): Ditto.
+        (WebCore::Editor::dismissCorrectionPanel): Update m_correctionPanelInfo when correction panel
+          is dismissed.
+        (WebCore::Editor::applyCorrectionPanelInfo): Factored out code that applies autocorrection.
+        (WebCore::Editor::changeSelectionAfterCommand): Adopt macro SUPPORT_CORRECTION_PANEL.
+        * editing/Editor.h: Adopted CorrectionPanelInfo and add new member methods.
+        * editing/EditorCommand.cpp: Adopted macro SUPPORT_CORRECTION_PANEL
+        (WebCore::createCommandMap):
+        * editing/TypingCommand.cpp: Adopted macro SUPPORT_CORRECTION_PANEL and new signature of
+          startCorrectionPanelTimer().
+        (WebCore::TypingCommand::markMisspellingsAfterTyping):
+        * loader/EmptyClients.h:
+        (WebCore::EmptyEditorClient::showCorrectionPanel): Adopted new signature of base class method.
+        (WebCore::EmptyEditorClient::dismissCorrectionPanel):  Ditto.
+        * manual-tests/autocorrection/continue-typing-to-dismiss-reversion.html: Added.
+        * manual-tests/autocorrection/delete-to-dismiss-reversion.html: Added.
+        * manual-tests/autocorrection/delete-to-end-of-word-to-show-reversion.html: Added.
+        * manual-tests/autocorrection/move-to-end-of-word-to-show-reversion.html: Added.
+        * manual-tests/autocorrection/type-whitespace-to-dismiss-reversion.html: Added.
+        * page/EditorClient.h: Changed signature of showCorrectionPanel() and dismissCorrectionPanel().
+        * platform/graphics/mac/GraphicsContextMac.mm: Added comment to improve readability.
+        (WebCore::GraphicsContext::drawLineForTextChecking):
+
 2010-11-04  Dan Bernstein  <mitz@apple.com>
 
         Reviewed by Dave Hyatt.
