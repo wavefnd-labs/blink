@@ -2,6 +2,43 @@
 
         Reviewed by Steve Block.
 
+        Clean up IDBTransactionBackend/Coordinator
+        https://bugs.webkit.org/show_bug.cgi?id=48425
+
+        Get rid of obsolete id and thus we don't need the factory method
+        on IDBTransactionCoordinator that creates IDBTransactionBackends.
+
+        Add an assert to IDBTransactionBackend to make sure we're not in
+        the coordinator and then remove the coordinators ref counting link
+        to the transaction.
+
+        Have the transaction backend zero out refs to the database when its
+        done using it.
+
+        Existing tests provide coverage for this refactoring.
+
+        * storage/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::setVersion):
+        (WebCore::IDBDatabaseBackendImpl::transaction):
+        * storage/IDBTransactionBackendImpl.cpp:
+        (WebCore::IDBTransactionBackendImpl::create):
+        (WebCore::IDBTransactionBackendImpl::IDBTransactionBackendImpl):
+        (WebCore::IDBTransactionBackendImpl::~IDBTransactionBackendImpl):
+        (WebCore::IDBTransactionBackendImpl::abort):
+        (WebCore::IDBTransactionBackendImpl::commit):
+        * storage/IDBTransactionBackendImpl.h:
+        * storage/IDBTransactionBackendInterface.h:
+        * storage/IDBTransactionCoordinator.cpp:
+        (WebCore::IDBTransactionCoordinator::didStartTransaction):
+        (WebCore::IDBTransactionCoordinator::didFinishTransaction):
+        (WebCore::IDBTransactionCoordinator::isActive):
+        (WebCore::IDBTransactionCoordinator::processStartedTransactions):
+        * storage/IDBTransactionCoordinator.h:
+
+2010-10-27  Jeremy Orlow  <jorlow@chromium.org>
+
+        Reviewed by Steve Block.
+
         IDBFactoryBackend's reference to IDBDatabaseBackend should be weak
         https://bugs.webkit.org/show_bug.cgi?id=48416
 
