@@ -1,3 +1,24 @@
+2010-11-04  Zhenyao Mo  <zmo@google.com>
+
+        Reviewed by Kenneth Russell.
+
+        Need to simulate DEPTH_STENCIL in framebufferRenderbuffer / getFramebufferAttachmentParameter
+        https://bugs.webkit.org/show_bug.cgi?id=49020
+
+        * html/canvas/WebGLFramebuffer.cpp:
+        (WebCore::WebGLFramebuffer::getAttachment): Return the attached renderbuffer/texture.
+        (WebCore::WebGLFramebuffer::isIncomplete): Add an extra parameter deciding whether we should check internal format matching the attachment point or not.
+        (WebCore::WebGLFramebuffer::onAccess): Pass extra parameter in isIncomplete.
+        * html/canvas/WebGLFramebuffer.h:
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore::WebGLRenderingContext::checkFramebufferStatus): Pass extra parameter in isIncomplete.
+        (WebCore::WebGLRenderingContext::framebufferRenderbuffer): Emulate DEPTH_STENCIL_ATTACHMENT; re-attach previously conflicted buffers upon detachment.
+        (WebCore::WebGLRenderingContext::getFramebufferAttachmentParameter): Throw an error when conflicted attachments exist.
+        (WebCore::WebGLRenderingContext::renderbufferStorage): Map DEPTH_STENCIL to DEPTH24_STENCIL8.
+        * platform/graphics/Extensions3D.h: Add DEPTH24_STENCIL8 enum and update the documentation.
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::framebufferRenderbuffer): Remove emulation code at this level.
+
 2010-11-05  Chris Guillory  <chris.guillory@google.com>
 
         Reviewed by Chris Fleizach.
