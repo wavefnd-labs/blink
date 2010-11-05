@@ -1,3 +1,109 @@
+2010-11-04  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Dave Hyatt.
+
+        Made table layout and painting work with all writing modes. Hit-testing, repainting, tables
+        where some elements have their own layers, and cells whose writing mode differs from the
+        table’s are not supported yet.
+
+        Make tables work with vertical text
+        https://bugs.webkit.org/show_bug.cgi?id=46417
+
+        Tests: fast/table/027-vertical.html
+               fast/table/028-vertical.html
+               fast/table/035-vertical.html
+               fast/table/038-vertical.html
+               fast/table/040-vertical.html
+               fast/table/auto-with-percent-height-vertical.html
+               fast/table/border-collapsing/001-vertical.html
+               fast/table/border-collapsing/002-vertical.html
+               fast/table/border-collapsing/003-vertical.html
+               fast/table/border-collapsing/004-vertical.html
+               fast/table/border-collapsing/border-collapsing-head-foot-vertical.html
+               fast/table/border-collapsing/equal-precedence-resolution-vertical.html
+               fast/table/border-collapsing/rtl-border-collapsing-vertical.html
+               fast/table/colspanMinWidth-vertical.html
+               fast/table/fixed-with-auto-with-colspan-vertical.html
+               fast/table/growCellForImageQuirk-vertical.html
+               fast/table/height-percent-test-vertical.html
+               fast/table/percent-widths-stretch-vertical.html
+               fast/table/rowspan-paint-order-vertical.html
+               fast/table/table-display-types-vertical.html
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::adjustRenderStyle): Changed to allow all writing modes for tables,
+        make row groups, rows, column groups and columns inherit the table’s writing mode. For now,
+        make cells do this too.
+        * html/HTMLTableElement.cpp:
+        (WebCore::HTMLTableElement::parseMappedAttribute): Map align=center using logical properties.
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::RenderTable): Initialize m_borderStart and m_borderEnd.
+        (WebCore::RenderTable::styleDidChange): Changed the rule for when to use auto layout to look
+        at the logical width instead of the width.
+        (WebCore::RenderTable::computeLogicalWidth): Uses logical widths and works with perpendicular
+        containing blocks.
+        (WebCore::RenderTable::layout): Use logical lengths.
+        (WebCore::RenderTable::setCellLogicalWidths): Renamed setCellWidths() to this and updated for
+        the renaming of RenderTableSection::setCellWidths().
+        (WebCore::RenderTable::paintObject): Account for flipped modes.
+        (WebCore::RenderTable::subtractCaptionRect): Added this helper method the considers writing modes.
+        (WebCore::RenderTable::paintBoxDecorations): Adopted subtractCaptionRect().
+        (WebCore::RenderTable::paintMask): Ditto.
+        (WebCore::RenderTable::computePreferredLogicalWidths): Updated for the renaming of
+        recalcHorizontalBorders().
+        (WebCore::RenderTable::calcBorderStart): Renamed calcBorderLeft() to this and changed it to use
+        borderStart(). Splits odd number of pixels based on the physical side.
+        (WebCore::RenderTable::calcBorderEnd): Similar.
+        (WebCore::RenderTable::recalcBordersInRowDirection): Renamed recalcHorizontalBorders() to this
+        and updated for other renames.
+        (WebCore::RenderTable::borderBefore): Replaced borderTop() with this.
+        (WebCore::RenderTable::borderAfter): Similar.
+        (WebCore::RenderTable::outerBorderBefore): Similar.
+        (WebCore::RenderTable::outerBorderAfter): Similar.
+        (WebCore::RenderTable::outerBorderStart): Similar.
+        (WebCore::RenderTable::outerBorderEnd): Similar.
+        (WebCore::RenderTable::firstLineBoxBaseline): Changed to use logical heights.
+        (WebCore::RenderTable::overflowClipRect): Account for writing modes.
+        * rendering/RenderTable.h:
+        (WebCore::RenderTable::borderStart):
+        (WebCore::RenderTable::borderEnd):
+        (WebCore::RenderTable::borderLeft):
+        (WebCore::RenderTable::borderRight):
+        (WebCore::RenderTable::borderTop):
+        (WebCore::RenderTable::borderBottom):
+        (WebCore::RenderTable::outerBorderLeft):
+        (WebCore::RenderTable::outerBorderRight):
+        (WebCore::RenderTable::outerBorderTop):
+        (WebCore::RenderTable::outerBorderBottom):
+        (WebCore::RenderTable::bordersPaddingAndSpacingInRowDirection): Changed to match its name.
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::styleWillChange): Changed to detect changes to logical height.
+        * rendering/RenderTableSection.cpp:
+        (WebCore::setRowLogicalHeightToRowStyleLogicalHeightIfNotRelative): Renamed and changed to use
+        logical heights.
+        (WebCore::RenderTableSection::RenderTableSection): Updated initializers for new member variables.
+        (WebCore::RenderTableSection::addChild): Updated for rename.
+        (WebCore::RenderTableSection::ensureRows): Ditto.
+        (WebCore::RenderTableSection::addCell): Ditto. Also use logical heights.
+        (WebCore::RenderTableSection::setCellLogicalWidths): Renamed setCellWidths() to this, changed
+        to use logical widths.
+        (WebCore::RenderTableSection::calcRowLogicalHeight): Added “logical” to the name. Updated with
+        logical heights.
+        (WebCore::RenderTableSection::layoutRows):
+        (WebCore::RenderTableSection::calcOuterBorderBefore):
+        (WebCore::RenderTableSection::calcOuterBorderAfter):
+        (WebCore::RenderTableSection::calcOuterBorderStart):
+        (WebCore::RenderTableSection::calcOuterBorderEnd):
+        (WebCore::RenderTableSection::recalcOuterBorder):
+        (WebCore::RenderTableSection::firstLineBoxBaseline):
+        (WebCore::RenderTableSection::paintCell):
+        (WebCore::RenderTableSection::recalcCells):
+        * rendering/RenderTableSection.h:
+        (WebCore::RenderTableSection::outerBorderBefore):
+        (WebCore::RenderTableSection::outerBorderAfter):
+        (WebCore::RenderTableSection::outerBorderStart):
+        (WebCore::RenderTableSection::outerBorderEnd):
+
 2010-11-04  Kent Tamura  <tkent@chromium.org>
 
         Unreviewed, trivial test fix.
