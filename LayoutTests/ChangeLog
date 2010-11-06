@@ -1,3 +1,76 @@
+2010-11-05  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Dan Bernstein and Simon Fraser.
+
+        https://bugs.webkit.org/show_bug.cgi?id=47237
+        
+        Make selection work with vertical text.  This patch fixes a bug in the computation of lineTop.  For lines
+        with positive leading, lineTop was incorrectly including the top leading.  Since the flipping of lines
+        for "lr" and "bt" writing modes involved flipping using lineTop and lineBottom, an incorrect lineTop meant
+        that those modes were mis-rendering.  This is why the Japanese "lr" text examples have the first line smushed
+        too far against the border.
+        
+        Fixing lineTop to no longer incorrectly include top leading has implications for editing.  I ended up
+        rewriting positionForPoint to exactly match selection, since that seemed to be the most intuitive
+        behavior.  I got rid of the verticalClickFudgeFactor and now just use selectionTop and selectionBottom
+        instead of lineTop and lineBottom.  I am pretty sure the code used selectionTop in a previous incarnation
+        anyway and that I moved away from it when I implemented lineTop and lineBottom.  The code then grew
+        more complicated from people trying to work with lineTop and lineBottom, but going back to selectionTop
+        and selectionBottom is the right behavior I think.  One editing test has been updated after this change
+        (editing/selection/after-line-break.html), and one DOM test has been changed to not hit test past the
+        bottom of a line (fast/dom/Document/CaretRangeFromPoint/basic.html).
+        
+        I patched selection painting of InlineTextBoxes so that the leading going up to the next line box is used
+        for "lr" and "bt" modes instead of the previous box.  This makes sense for English text, but we may want
+        a different policy for Japanese text eventually (possibly just splitting the difference instead).  Leaving it
+        this way for now, and we can collect feedback on the design.
+        
+        I rewrote all of the selection gap painting code to be writing-mode aware.  During the course of rewriting this
+        code I noticed a bug in the logicalLeftSelectionOffset and logicalRightSelectionOffset functions where there
+        was a coordinate space mismatch on a comparison.  Fixing this improves the repaint/selection-clear.html test.
+
+        Added new tests in fast/blockflow/.
+
+        * editing/selection/after-line-break-expected.txt:
+        * fast/blockflow/japanese-lr-selection.html: Added.
+        * fast/blockflow/japanese-rl-selection.html: Added.
+        * fast/dom/Document/CaretRangeFromPoint/basic.html:
+        * platform/mac/fast/blockflow/background-horizontal-bt-expected.checksum:
+        * platform/mac/fast/blockflow/background-horizontal-bt-expected.png:
+        * platform/mac/fast/blockflow/background-horizontal-bt-expected.txt:
+        * platform/mac/fast/blockflow/background-vertical-lr-expected.checksum:
+        * platform/mac/fast/blockflow/background-vertical-lr-expected.png:
+        * platform/mac/fast/blockflow/background-vertical-lr-expected.txt:
+        * platform/mac/fast/blockflow/border-image-horizontal-bt-expected.checksum:
+        * platform/mac/fast/blockflow/border-image-horizontal-bt-expected.png:
+        * platform/mac/fast/blockflow/border-image-horizontal-bt-expected.txt:
+        * platform/mac/fast/blockflow/border-image-vertical-lr-expected.checksum:
+        * platform/mac/fast/blockflow/border-image-vertical-lr-expected.png:
+        * platform/mac/fast/blockflow/border-image-vertical-lr-expected.txt:
+        * platform/mac/fast/blockflow/border-radius-clipping-vertical-lr-expected.checksum:
+        * platform/mac/fast/blockflow/border-radius-clipping-vertical-lr-expected.png:
+        * platform/mac/fast/blockflow/border-radius-clipping-vertical-lr-expected.txt:
+        * platform/mac/fast/blockflow/border-vertical-lr-expected.checksum:
+        * platform/mac/fast/blockflow/border-vertical-lr-expected.png:
+        * platform/mac/fast/blockflow/border-vertical-lr-expected.txt:
+        * platform/mac/fast/blockflow/box-shadow-horizontal-bt-expected.checksum:
+        * platform/mac/fast/blockflow/box-shadow-horizontal-bt-expected.png:
+        * platform/mac/fast/blockflow/box-shadow-horizontal-bt-expected.txt:
+        * platform/mac/fast/blockflow/box-shadow-vertical-lr-expected.checksum:
+        * platform/mac/fast/blockflow/box-shadow-vertical-lr-expected.png:
+        * platform/mac/fast/blockflow/box-shadow-vertical-lr-expected.txt:
+        * platform/mac/fast/blockflow/japanese-lr-selection-expected.checksum: Added.
+        * platform/mac/fast/blockflow/japanese-lr-selection-expected.png: Added.
+        * platform/mac/fast/blockflow/japanese-lr-selection-expected.txt: Added.
+        * platform/mac/fast/blockflow/japanese-lr-text-expected.checksum:
+        * platform/mac/fast/blockflow/japanese-lr-text-expected.png:
+        * platform/mac/fast/blockflow/japanese-lr-text-expected.txt:
+        * platform/mac/fast/blockflow/japanese-rl-selection-expected.checksum: Added.
+        * platform/mac/fast/blockflow/japanese-rl-selection-expected.png: Added.
+        * platform/mac/fast/blockflow/japanese-rl-selection-expected.txt: Added.
+        * platform/mac/fast/repaint/selection-clear-expected.checksum:
+        * platform/mac/fast/repaint/selection-clear-expected.png:
+
 2010-11-05  Adam Barth  <abarth@webkit.org>
 
         Reviewed by Eric Seidel.

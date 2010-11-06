@@ -1,3 +1,73 @@
+2010-11-05  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Dan Bernstein and Simon Fraser.
+
+        https://bugs.webkit.org/show_bug.cgi?id=47237
+        
+        Make selection work with vertical text.  This patch fixes a bug in the computation of lineTop.  For lines
+        with positive leading, lineTop was incorrectly including the top leading.  Since the flipping of lines
+        for "lr" and "bt" writing modes involved flipping using lineTop and lineBottom, an incorrect lineTop meant
+        that those modes were mis-rendering.  This is why the Japanese "lr" text examples have the first line smushed
+        too far against the border.
+        
+        Fixing lineTop to no longer incorrectly include top leading has implications for editing.  I ended up
+        rewriting positionForPoint to exactly match selection, since that seemed to be the most intuitive
+        behavior.  I got rid of the verticalClickFudgeFactor and now just use selectionTop and selectionBottom
+        instead of lineTop and lineBottom.  I am pretty sure the code used selectionTop in a previous incarnation
+        anyway and that I moved away from it when I implemented lineTop and lineBottom.  The code then grew
+        more complicated from people trying to work with lineTop and lineBottom, but going back to selectionTop
+        and selectionBottom is the right behavior I think.  One editing test has been updated after this change
+        (editing/selection/after-line-break.html), and one DOM test has been changed to not hit test past the
+        bottom of a line (fast/dom/Document/CaretRangeFromPoint/basic.html).
+        
+        I patched selection painting of InlineTextBoxes so that the leading going up to the next line box is used
+        for "lr" and "bt" modes instead of the previous box.  This makes sense for English text, but we may want
+        a different policy for Japanese text eventually (possibly just splitting the difference instead).  Leaving it
+        this way for now, and we can collect feedback on the design.
+        
+        I rewrote all of the selection gap painting code to be writing-mode aware.  During the course of rewriting this
+        code I noticed a bug in the logicalLeftSelectionOffset and logicalRightSelectionOffset functions where there
+        was a coordinate space mismatch on a comparison.  Fixing this improves the repaint/selection-clear.html test.
+
+        Added new tests in fast/blockflow/.
+
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::placeBoxesInBlockDirection):
+        * rendering/InlineFlowBox.h:
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::selectionBottom):
+        (WebCore::InlineTextBox::paintSelection):
+        (WebCore::InlineTextBox::paintCompositionBackground):
+        (WebCore::InlineTextBox::paintSpellingOrGrammarMarker):
+        (WebCore::InlineTextBox::paintTextMatchMarker):
+        * rendering/InlineTextBox.h:
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::selectionGapRectsForRepaint):
+        (WebCore::RenderBlock::paintSelection):
+        (WebCore::clipOutPositionedObjects):
+        (WebCore::blockDirectionOffset):
+        (WebCore::inlineDirectionOffset):
+        (WebCore::RenderBlock::logicalRectToPhysicalRect):
+        (WebCore::RenderBlock::selectionGaps):
+        (WebCore::RenderBlock::inlineSelectionGaps):
+        (WebCore::RenderBlock::blockSelectionGaps):
+        (WebCore::RenderBlock::blockSelectionGap):
+        (WebCore::RenderBlock::logicalLeftSelectionGap):
+        (WebCore::RenderBlock::logicalRightSelectionGap):
+        (WebCore::RenderBlock::logicalLeftSelectionOffset):
+        (WebCore::RenderBlock::logicalRightSelectionOffset):
+        * rendering/RenderBlock.h:
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::flipForWritingMode):
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::logicalBottom):
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::alignBoxesInBlockDirection):
+        (WebCore::RootInlineBox::lineSelectionGap):
+        (WebCore::RootInlineBox::selectionTop):
+        (WebCore::RootInlineBox::selectionBottom):
+        * rendering/RootInlineBox.h:
+
 2010-11-05  Simon Fraser  <simon.fraser@apple.com>
 
         Just put things back the way they were. Too many mysterious linker errors.
