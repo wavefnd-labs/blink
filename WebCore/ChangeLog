@@ -1,3 +1,51 @@
+2010-11-04  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Bug 46335 - Add EditingStyle
+        https://bugs.webkit.org/show_bug.cgi?id=46335
+
+        Added EditingStyle to WebCore/editing.  This class is intended to encapsulate getPropertiesNotIn, removeNonEditingProperties,
+        editingStyleAtPosition, and prepareEditingStyleToApplyAt in ApplyStyleCommand.cpp once deployed everywhere.
+        Deployed it in typing styles.
+
+        No new tests are added since this is a refactoring in progress.
+
+        * CMakeLists.txt: Added EditingStyle.cpp
+        * GNUmakefile.am: Added EditingStyle.cpp and EditingStyle.h
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::moveParagraphs): Calls editingStyleIncludingTypingStyle.
+        (WebCore::CompositeEditCommand::breakOutOfEmptyListItem): Uses EditingStyle.
+        * editing/DeleteSelectionCommand.cpp:
+        (WebCore::DeleteSelectionCommand::saveTypingStyleState): Ditto.
+        (WebCore::DeleteSelectionCommand::calculateTypingStyleAfterDelete): Ditto.
+        * editing/DeleteSelectionCommand.h:
+        * editing/EditingStyle.cpp: Added.
+        (WebCore::editingStyleFromComputedStyle): Added.
+        (WebCore::EditingStyle::EditingStyle): Added.
+        (WebCore::EditingStyle::init): Added; a clone of ApplyStyleCommand::editingStyleAtPosition.
+        (WebCore::EditingStyle::removeTextFillAndStrokeColorsIfNeeded): Extracted from init.
+        (WebCore::EditingStyle::replaceFontSizeByKeywordIfPossible): Extracted from init.
+        (WebCore::EditingStyle::isEmpty): Added.
+        (WebCore::EditingStyle::setStyle): Added.
+        (WebCore::EditingStyle::clear): Added.
+        (WebCore::EditingStyle::removeBlockProperties): Added.
+        (WebCore::EditingStyle::prepareToApplyAt): Added.
+        (WebCore::editingStyleIncludingTypingStyle): Added.
+        * editing/EditingStyle.h: Added.
+        (WebCore::EditingStyle::create): Added.
+        (WebCore::EditingStyle::style): Added.
+        * editing/RemoveFormatCommand.cpp:
+        (WebCore::RemoveFormatCommand::doApply): Uses EditingStyle.
+        * editing/SelectionController.h:
+        (WebCore::SelectionController::typingStyle): Uses EditingStyle.
+        (WebCore::SelectionController::clearTypingStyle): Uses EditingStyle.
+        (WebCore::SelectionController::setTypingStyle): Uses EditingStyle.
+        * rendering/style/RenderStyle.h: Added EditingStyle as a friend.
+
 2010-11-05  David Hyatt  <hyatt@apple.com>
 
         Reviewed by Dan Bernstein and Simon Fraser.
