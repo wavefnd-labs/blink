@@ -1,3 +1,23 @@
+2010-11-04  Enrica Casucci  <enrica@apple.com>
+
+        Reviewed by Adele Peterson.
+
+        Pasting large amounts of plain text in a text area is very slow
+        https://bugs.webkit.org/show_bug.cgi?id=49040
+        <rdar://problem/7640912>
+        
+        The optimization consists in skipping the ApplyStyle command when
+        pasting into a text area or into an element that has -webkit-user-modify: read-write-plaintext-only.
+        The biggest performance hit comes from iterating through
+        a large number of paragraph when no style change is needed.
+        A further step will be to improve the paragraph iteration when it
+        can't be avoided.
+        
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplaceSelectionCommand::doApply): Check if the selection
+        is in a text form control or in an element that has -webkit-user-modify: read-write-plaintext-only
+        and force no style matching.
+
 2010-11-05  Ryosuke Niwa  <rniwa@webkit.org>
 
         Reviewed by David Levin.
