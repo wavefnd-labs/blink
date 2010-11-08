@@ -1,3 +1,38 @@
+2010-11-08  Darin Adler  <darin@apple.com>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Incorrect image map used when multiple maps have the same name
+        https://bugs.webkit.org/show_bug.cgi?id=49086
+
+        Test: fast/images/image-map-multiple.html
+
+        Factored out the code used to look up elements by id and reused it
+        to look up maps by name. It handles multiple elements efficiently.
+
+        * dom/Document.cpp:
+        (WebCore::Document::DocumentOrderedMap::clear): Added.
+        (WebCore::Document::DocumentOrderedMap::add): Added. Has code that
+        was formerly in addElementById.
+        (WebCore::Document::DocumentOrderedMap::remove): Added. Has code that
+        was formerly in removeElementById.
+        (WebCore::Document::DocumentOrderedMap::get): Added. Has code that
+        was formerly in getElementById.
+        (WebCore::keyMatchesId): Added.
+        (WebCore::Document::getElementById): Use DocumentOrderedMap::get.
+        (WebCore::Document::addElementById): Use DocumentOrderedMap::add.
+        (WebCore::Document::removeElementById): Use DocumentOrderedMap::remove.
+        (WebCore::Document::addImageMap): Use DocumentOrderedMap::add.
+        (WebCore::Document::removeImageMap): Use DocumentOrderedMap::remove.
+        (WebCore::keyMatchesMapName): Added.
+        (WebCore::keyMatchesLowercasedMapName): Added.
+        (WebCore::Document::getImageMap): Use DocumentOrderedMap::get.
+
+        * dom/Document.h: Added DocumentOrderedMap class, used inside the
+        Document class. Changed m_imageMapsByName to be a DocumentOrderedMap.
+        Changed m_elementsById to be a DocumentOrderedMap. Eliminated
+        m_duplicateIds, since DocumentOrderedMap now has that internally.
+
 2010-11-08  Alexey Proskuryakov  <ap@apple.com>
 
         Reviewed by Darin Adler.
