@@ -1,3 +1,28 @@
+2010-11-08  Xiaomei Ji  <xji@chromium.org>
+
+        Reviewed by Dan Bernstein.
+
+        Fix Unicode explicit bidi control characters are removed in editing operations,
+        such as insert/copy/cut/paste.
+        https://bugs.webkit.org/show_bug.cgi?id=25321
+
+        Unicode explicit bidi control characters were excluded in BidiRun and
+        consequently from InlineTextBoxes due to their effect on rendering complex
+        text with ATSUI.
+        The fix is including those characters in BidiRun and remove them from
+        ComplexTextRun with ATSUI.
+
+        Test: editing/inserting/insert-paste-bidi-control.html
+               fast/text/atsui-bidi-control.html
+
+        * platform/graphics/mac/ComplexTextControllerATSUI.cpp:
+        (WebCore::ComplexTextController::ComplexTextRun::ComplexTextRun):
+        * platform/text/BidiResolver.h:
+        (WebCore::::checkDirectionInLowerRaiseEmbeddingLevel):
+        (WebCore::::lowerExplicitEmbeddingLevel):
+        (WebCore::::raiseExplicitEmbeddingLevel):
+        (WebCore::::createBidiRunsForLine):
+
 2010-11-08  David Hyatt  <hyatt@apple.com>
 
         Reviewed by Dan Bernstein.
