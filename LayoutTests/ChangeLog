@@ -1,3 +1,36 @@
+2010-11-08  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        https://bugs.webkit.org/show_bug.cgi?id=49126
+        
+        RenderBlock::positionForPoint is not writing-mode aware.  Patch the function to examine lines in the correct
+        writing-mode direction.  Patched and renamed a number of helpers used by positionForPoint.
+        
+        Fixed a bug with RenderReplaced's positionForPoint. There was a coordinate space mismatch between what the
+        function expected (local coordinates) and what was passed in (containing block coords), which meant the function didn't even work.
+        
+        Fixed a bug with the propagation of selection state on RenderReplaced to its containing block.  The bit double propagated
+        because both the base class function and the derived class function did the propagation, and the setter function did not
+        do the right thing if this happened.
+        
+        Patched the localSelectionRect method on RenderReplaced so that selection draws in the right place in all writing modes.
+        
+        Added new tests of positionForPoint and replaced elements in fast/blockflow.
+
+        * fast/blockflow/horizontal-bt-replaced-selection.html: Added.
+        * fast/blockflow/vertical-lr-replaced-selection.html: Added.
+        * fast/blockflow/vertical-rl-replaced-selection.html: Added.
+        * platform/mac/fast/blockflow/horizontal-bt-replaced-selection-expected.checksum: Added.
+        * platform/mac/fast/blockflow/horizontal-bt-replaced-selection-expected.png: Added.
+        * platform/mac/fast/blockflow/horizontal-bt-replaced-selection-expected.txt: Added.
+        * platform/mac/fast/blockflow/vertical-lr-replaced-selection-expected.checksum: Added.
+        * platform/mac/fast/blockflow/vertical-lr-replaced-selection-expected.png: Added.
+        * platform/mac/fast/blockflow/vertical-lr-replaced-selection-expected.txt: Added.
+        * platform/mac/fast/blockflow/vertical-rl-replaced-selection-expected.checksum: Added.
+        * platform/mac/fast/blockflow/vertical-rl-replaced-selection-expected.png: Added.
+        * platform/mac/fast/blockflow/vertical-rl-replaced-selection-expected.txt: Added.
+
 2010-11-08  Anders Carlsson  <andersca@apple.com>
 
         Reviewed by Adam Roben.
