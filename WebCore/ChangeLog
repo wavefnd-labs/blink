@@ -1,3 +1,42 @@
+2010-11-08  Noam Rosenthal  <noam.rosenthal@nokia.com>
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        [Texmap] [Qt] Texture mapper initial implementation
+        https://bugs.webkit.org/show_bug.cgi?id=47070
+
+        Make the necessary changes in TextureMapperNode in preparation of making it possible to paint it
+        from a different thread.
+        The main problematic part was the cache, which made it so that textures can become invalid and have to
+        be rerendered from content during paint. This is solved here by creating a pack/unpack function for
+        textures, which lets a texture archive its data away from video memory, or do whatever the platform
+        thinks is right for freeing memory without needing to re-render again from content (which cannot be
+        made thread safe).
+
+        After this change, TextureMapperNode moved to its own file, and has 2 entry points: paint and syncCompositingState.
+        The idea is that syncCompositingState has to be called in the UI thread, paint can be called from a different
+        thread, and they should block each other.
+
+        The new test tests the cache code-path, to show that the pack/unpack technique works for cases where it
+        kicks in.
+
+        Test: compositing/layer-creation/many-layers.html
+
+        * WebCore.pro:
+        * platform/graphics/opengl/TextureMapperGL.cpp:
+        (WebCore::BitmapTextureGL::~BitmapTextureGL):
+        (WebCore::BitmapTextureGL::BitmapTextureGL):
+        (WebCore::TextureMapperGL::TextureMapperGL):
+        (WebCore::TextureMapperGL::drawTexture):
+        * platform/graphics/opengl/TextureMapperGL.h:
+        (WebCore::TextureMapperGL::create):
+        * platform/graphics/qt/TextureMapperQt.cpp:
+        (WebCore::BitmapTextureQt::pack):
+        (WebCore::BitmapTextureQt::unpack):
+        (WebCore::TextureMapper::create):
+        (WebCore::BitmapTextureQt::BitmapTextureQt):
+        * platform/graphics/qt/TextureMapperQt.h: Added.
+
 2010-11-08  Simon Fraser  <simon.fraser@apple.com>
 
         Reviewed by Sam Weinig.
