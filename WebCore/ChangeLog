@@ -1,3 +1,88 @@
+2010-11-08  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Convert SVGPoint/SVGPointList to the new SVGPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=49067
+
+        Remove SVGAnimatedPoints interface, not reachable through bindings anyway, it was just another MI interface, that
+        now has been integrated into SVGPolylineElement/SVGPolygonElement, simplfying the generation and avoiding virtual
+        calls in SVGPolylineElement/SVGPolygonElement.
+
+        Remove the need to use manual XML <-> SVG DOM synchronization. The points/animatedPoints methods now create
+        SVGListPropertyTearOffs, thus using the same synchronization/expose-to-bindings concept like all other
+        animated properties.
+
+        Convert SVGPoint/SVGPointList to use the new SVGPropertyTearOff concept, adapted all code, as SVGPointList
+        is now a plain Vector<FloatPoint>. Enable StrictTypeChecking for SVGPoint.
+
+        Test: svg/dom/SVGPoint.html
+
+        * Android.derived.v8bindings.mk: Remove SVGAnimatedPoints (and IDL generation).
+        * Android.mk: Ditto.
+        * CMakeLists.txt: Ditto.
+        * DerivedSources.make: Ditto.
+        * GNUmakefile.am: Ditto. Add SVGStaticPropertyTearOff.h to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.order: Remove SVGAnimatedPoints symbols.
+        * WebCore.pro: Remove SVGAnimatedPoints (and IDL generation). Add SVGStaticPropertyTearOff.h to build.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/objc/DOMSVG.h: Remove DOMSVGAnimatedPoints include.
+        * bindings/scripts/CodeGenerator.pm: Adapt code converting SVGPoint/SVGPointList to use the new SVGPropertyTearOff concepts.
+        * bindings/scripts/CodeGeneratorJS.pm: Ditto.
+        * bindings/scripts/CodeGeneratorObjC.pm: Ditto.
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        * rendering/SVGRenderTreeAsText.cpp: Adapt for SVGPolyElement API change, use pointList() instead of points() (which is only used for bindings now).
+        (WebCore::operator<<):
+        * svg/SVGAllInOne.cpp: Remove SVGAnimatedPoints.cpp.
+        * svg/SVGAnimateElement.cpp: Adapt for SVGPointList API change, it's not refcounted anymore.
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        (WebCore::SVGAnimateElement::calculateFromAndToValues):
+        (WebCore::SVGAnimateElement::applyResultsToTarget):
+        * svg/SVGAnimateElement.h:  Ditto.
+        * svg/SVGAnimatedPoints.cpp: Removed.
+        * svg/SVGAnimatedPoints.h: Removed.
+        * svg/SVGAnimatedPoints.idl: Removed.
+        * svg/SVGParserUtilities.cpp: Adapt for SVGPointList API change, it's not refcounted anymore.
+        (WebCore::pointsListFromSVGData):
+        * svg/SVGParserUtilities.h: Ditto.
+        * svg/SVGPoint.idl: Remove PODType marker, and add StrictTypeChecking for x/y attributes.
+        * svg/SVGPointList.cpp: SVGPointList is now a plain Vector<FloatPoint>, rewrite.
+        (WebCore::SVGPointList::valueAsString):
+        (WebCore::SVGPointList::createAnimated):
+        * svg/SVGPointList.h: Ditto.
+        (WebCore::SVGPointList::SVGPointList):
+        * svg/SVGPolyElement.cpp: Remove manual SVG <-> XML DOM synchronization. Now handles through the SVGAnimatedPropertyTearOff concept.
+        (WebCore::SVGPolyElement::parseMappedAttribute):
+        (WebCore::SVGPolyElement::svgAttributeChanged):
+        (WebCore::SVGPolyElement::synchronizeProperty):
+        (WebCore::SVGPolyElement::synchronizePoints):
+        (WebCore::SVGPolyElement::points):
+        (WebCore::SVGPolyElement::animatedPoints):
+        * svg/SVGPolyElement.h: Reindented.
+        (WebCore::SVGPolyElement::pointList):
+        (WebCore::SVGPolyElement::isValid):
+        (WebCore::SVGPolyElement::supportsMarkers):
+        * svg/SVGPolygonElement.cpp: Adapt for SVGPointList API change.
+        (WebCore::SVGPolygonElement::toPathData):
+        * svg/SVGPolygonElement.idl: Remove SVGAnimatedPoints inheritance.
+        * svg/SVGPolylineElement.cpp: Adapt for SVGPointList API change.
+        (WebCore::SVGPolylineElement::toPathData):
+        * svg/SVGPolylineElement.idl: Remove SVGAnimatedPoints inheritance.
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::setCurrentTranslate): Use updateCurrentTranslate().
+        (WebCore::SVGSVGElement::updateCurrentTranslate): Added, only used by the bindings, after changing a value of SVGStaticPropertyTearOff object.
+        * svg/SVGSVGElement.h:
+        (WebCore::SVGSVGElement::currentTranslate): Return reference to m_translation.
+        * svg/properties/SVGPropertyTearOff.h: Made constructors protected, as SVGStaticPropertyTearOff inherits from it.
+        (WebCore::SVGPropertyTearOff::commitChange):
+        * svg/properties/SVGPropertyTraits.h: Add SVGPointList handing.
+        * svg/properties/SVGStaticPropertyTearOff.h: Added. Used for SVGProperty types returned by attributes, that are not associated with a SVGAnimatedProperty. (SVGSVGElement::currentTranslate).
+        (WebCore::SVGStaticPropertyTearOff::create):
+        (WebCore::SVGStaticPropertyTearOff::commitChange):
+        (WebCore::SVGStaticPropertyTearOff::SVGStaticPropertyTearOff):
+
 2010-11-08  Mikhail Naganov  <mnaganov@chromium.org>
 
         Reviewed by Adam Barth.
