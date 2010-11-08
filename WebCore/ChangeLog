@@ -1,3 +1,93 @@
+2010-11-08  Nate Chapin  <japhet@chromium.org>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Move connection-per-host counting and request prioritization out
+        of Loader and down to the ResourceLoader level.
+
+        https://bugs.webkit.org/show_bug.cgi?id=27165
+
+        Refactor only, so no new tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.am:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.pro:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::suspendPostAttachCallbacks):
+        (WebCore::ContainerNode::resumePostAttachCallbacks):
+        * loader/DocumentThreadableLoader.cpp:
+        (WebCore::DocumentThreadableLoader::loadRequest):
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::loadNow):
+        * loader/NetscapePlugInStreamLoader.cpp:
+        (WebCore::NetscapePlugInStreamLoader::create):
+        * loader/NetscapePlugInStreamLoader.h:
+        * loader/ResourceLoadScheduler.cpp: Added.
+        (WebCore::ResourceLoadScheduler::hostForURL):
+        (WebCore::resourceLoadScheduler): Returns the single ResourceLoadScheduler instance
+        (WebCore::ResourceLoadScheduler::ResourceLoadScheduler):
+        (WebCore::ResourceLoadScheduler::scheduleSubresourceLoad):
+        (WebCore::ResourceLoadScheduler::schedulePluginStreamLoad):
+        (WebCore::ResourceLoadScheduler::addMainResourceLoad):
+        (WebCore::ResourceLoadScheduler::scheduleLoad):
+        (WebCore::ResourceLoadScheduler::remove):
+        (WebCore::ResourceLoadScheduler::crossOriginRedirectReceived):
+        (WebCore::ResourceLoadScheduler::servePendingRequests):
+        (WebCore::ResourceLoadScheduler::suspendPendingRequests):
+        (WebCore::ResourceLoadScheduler::resumePendingRequests):
+        (WebCore::ResourceLoadScheduler::scheduleServePendingRequests):
+        (WebCore::ResourceLoadScheduler::requestTimerFired):
+        (WebCore::ResourceLoadScheduler::assertLoaderBeingCounted):
+        (WebCore::ResourceLoadScheduler::HostInformation::assertLoaderBeingCounted):
+        (WebCore::ResourceLoadScheduler::HostInformation::HostInformation):
+        (WebCore::ResourceLoadScheduler::HostInformation::~HostInformation):
+        (WebCore::ResourceLoadScheduler::HostInformation::schedule):
+        (WebCore::ResourceLoadScheduler::HostInformation::addLoadInProgress):
+        (WebCore::ResourceLoadScheduler::HostInformation::remove):
+        (WebCore::ResourceLoadScheduler::HostInformation::hasRequests):
+        * loader/ResourceLoadScheduler.h: Added.
+        (WebCore::ResourceLoadScheduler::HostInformation::name):
+        (WebCore::ResourceLoadScheduler::HostInformation::limitRequests):
+        (WebCore::ResourceLoadScheduler::HostInformation::requestsPending):
+        * loader/ResourceLoader.cpp:
+        (WebCore::ResourceLoader::releaseResources): Remove this from ResourceLoadScheduler's counting.
+        (WebCore::ResourceLoader::load):
+        (WebCore::ResourceLoader::start): Create the ResourceHandle, called by ResourceLoadScheduler.
+        (WebCore::ResourceLoader::willSendRequest): Ensure ResourceLoadScheduler counts redirects
+            correctly.
+        * loader/ResourceLoader.h:
+        (WebCore::ResourceLoader::url):
+        * loader/icon/IconLoader.cpp:
+        (WebCore::IconLoader::startLoading):
+        * loader/loader.cpp: Move scheduling to ResourceLoadScheduler, remove Host subclass
+            and make Loader the SubresourceLoaderClient instead.
+        (WebCore::determinePriority):
+        (WebCore::Loader::load): Schedule the creation of the ResourceHandle, rather than
+            doing it immediately.
+        (WebCore::Loader::cancelRequests):
+        (WebCore::Loader::didFinishLoading):
+        (WebCore::Loader::didFail):
+        (WebCore::Loader::didReceiveResponse):
+        (WebCore::Loader::didReceiveData):
+        (WebCore::Loader::didReceiveCachedMetadata):
+        * loader/loader.h:
+        * page/EventSource.cpp:
+        (WebCore::EventSource::connect):
+        (WebCore::EventSource::endRequest):
+        * plugins/PluginStream.cpp:
+        (WebCore::PluginStream::start):
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::XMLHttpRequest):
+        (WebCore::XMLHttpRequest::~XMLHttpRequest):
+        (WebCore::XMLHttpRequest::createRequest):
+        (WebCore::XMLHttpRequest::didFail):
+        (WebCore::XMLHttpRequest::didFinishLoading):
+        * xml/XMLHttpRequest.h:
+
 2010-11-08  Ryosuke Niwa  <rniwa@webkit.org>
 
         Reviewed by Darin Adler.
