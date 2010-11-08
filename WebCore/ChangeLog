@@ -1,3 +1,50 @@
+2010-11-08  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Remove the remaining editing-style functions from ApplyStyleCommand
+        https://bugs.webkit.org/show_bug.cgi?id=49155
+
+        Replaced removeNonEditingProperties, editingStyleAtPosition, prepareEditingStyleToApplyAt,
+        and removeStylesAddedByNode in ApplyStyleCommand.cpp by removeNonEditingProperties, EditingStyle::create,
+        prepareToApplyAt, and removeStyleAddedByNode in EditingStyle.cpp.
+
+        Also removed unnecessary header includes from various cpp files.
+
+        No tests are added since this is a cleanup.
+
+        * editing/ApplyStyleCommand.cpp: Removed removeNonEditingProperties, editingStyleAtPosition,
+        prepareEditingStyleToApplyAt, and removeStylesAddedByNode.
+        * editing/ApplyStyleCommand.h: Ditto.
+        * editing/DeleteSelectionCommand.cpp: Removed removeEnclosingAnchorStyle.
+        (WebCore::DeleteSelectionCommand::saveTypingStyleState): Calls removeStylesAddedByNode instead.
+        * editing/EditingStyle.cpp:
+        (WebCore::copyEditingProperties): Moved and renamed ApplyStyleCommand::removeNonEditingProperties.
+        (WebCore::editingStyleFromComputedStyle): Calls copyEditingProperties. Changed the argument to PassRefPtr
+        as supposed to a raw pointer for convenience.
+        (WebCore::EditingStyle::init): Calls editingStyleFromComputedStyle.
+        (WebCore::EditingStyle::removeStyleAddedByNode): Added.
+        (WebCore::EditingStyle::removeStyleConflictingWithStyleOfNode): Added.
+        (WebCore::EditingStyle::removeNonEditingProperties): Added.
+        (WebCore::editingStyleIncludingTypingStyle): Calls copyEditingProperties.
+        * editing/EditingStyle.h: Added prototypes.
+        * editing/Editor.cpp:
+        (WebCore::Editor::selectionComputedStyle): Uses EditingStyle.
+        * editing/InsertParagraphSeparatorCommand.cpp:
+        (WebCore::InsertParagraphSeparatorCommand::calculateStyleBeforeInsertion): Ditto.
+        (WebCore::InsertParagraphSeparatorCommand::applyStyleAfterInsertion): Ditto.
+        * editing/InsertParagraphSeparatorCommand.h:
+        * editing/RemoveFormatCommand.cpp:
+        (WebCore::RemoveFormatCommand::doApply): Ditto.
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::handleStyleSpansBeforeInsertion): Ditto.
+        (WebCore::ReplaceSelectionCommand::handleStyleSpans): Ditto.
+        (WebCore::ReplaceSelectionCommand::doApply): Ditto.
+        (WebCore::ReplaceSelectionCommand::completeHTMLReplacement): Ditto.
+        * editing/ReplaceSelectionCommand.h:
+        * editing/markup.cpp: Removed removeEnclosingMailBlockquoteStyle and removeDefaultStyles.
+        (WebCore::createMarkup): Uses EditingStyle.
+
 2010-11-08  Simon Fraser  <simon.fraser@apple.com>
 
         Reviewed by Dan Bernstein.
