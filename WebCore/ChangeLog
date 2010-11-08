@@ -1,3 +1,34 @@
+2010-11-08  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Xan Lopez.
+
+        [GTK] Wrapped DOM bindings GObjects do not disconnect event listeners when they die
+        https://bugs.webkit.org/show_bug.cgi?id=49136
+
+        When GObjects are finalized and freed, disconnect their event listeners, so that
+        WebCore does not try to fire signals on dead GObjects. We do this by holding a weak
+        reference to the GObject in the signal listener. When the weak reference notification
+        callback is executed, we disconnect the event listener.
+
+        No new tests; this fix is proved by prevention of crashes in soon to be
+        landed editing delegate signals, which are covered by the layout tests.
+
+        * bindings/gobject/GObjectEventListener.cpp:
+        (WebCore::GObjectEventListener::GObjectEventListener): Updated the constructor.
+        (WebCore::GObjectEventListener::~GObjectEventListener): Disconnect the weak reference
+        if the GObject is still alive.
+        (WebCore::GObjectEventListener::gobjectDestroyed): When the GObject is destroyed,
+        disconnect the appropriate event listener.
+        (WebCore::GObjectEventListener::handleEvent): Changes to reflect use of CString
+        instead of WebCore string.
+        * bindings/gobject/GObjectEventListener.h:
+        (WebCore::GObjectEventListener::addEventListener): Changed create to addEventListener,
+        so that the connection and disconnection is an internal contract to the class.
+        (WebCore::GObjectEventListener::gobjectDestroyedCallback): Added.
+        * bindings/scripts/CodeGeneratorGObject.pm: Modified the code generate to use
+        GObjectEventListener::addEventListener and no longer call addEventListener on
+        its own.
+
 2010-11-08  Adam Roben  <aroben@apple.com>
 
         Windows Release build fix after r71514
