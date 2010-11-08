@@ -1,3 +1,33 @@
+2010-11-08  Simon Fraser  <simon.fraser@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        Allow applets to participate in accelerated compositing
+        https://bugs.webkit.org/show_bug.cgi?id=49117
+        <rdar://problem/8625819>
+        
+        Add RenderApplet to the list of renderers that can optionally get RenderLayers,
+        and be composited for some reason.
+
+        Not currently testable.
+
+        * rendering/RenderApplet.h: Outdented the class declaration.
+
+        * rendering/RenderApplet.cpp:
+        (WebCore::RenderApplet::requiresLayer): Return true if the underlying widget
+        has a platform layer.
+        (WebCore::RenderApplet::allowsAcceleratedCompositing): Check the widget to see
+        if it has a platform layer.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::shouldBeNormalFlowOnly): Reformat, and add isApplet().
+        (WebCore::RenderLayer::isSelfPaintingLayer): Reformat, and add isApplet().
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerConfiguration): Use 'renderer' local variable
+        for efficiency. Now check for embedded objects and applets.
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::requiresCompositingForPlugin): Check for embedded objects and applets.
+
 2010-11-08  Xan Lopez  <xlopez@igalia.com>
 
         Reviewed by Martin Robinson.
