@@ -1,3 +1,58 @@
+2010-11-08  Simon Fraser  <simon.fraser@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        Media objects in nested iframes showing above everything else in TinyMCE
+        https://bugs.webkit.org/show_bug.cgi?id=44877
+
+        Tests: compositing/iframes/become-composited-nested-iframes.html
+               compositing/iframes/overlapped-nested-iframes.html
+        
+        The overlap testing logic that connects compositing across iframe boundaries
+        needed to be educated about nestd iframes, for platforms (i.e. Mac) where iframes
+        are allowed to be independently composited.
+        
+        Also fix a bug that could cause iframes (and possibly other elements) that share
+        style to fail to become composited.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::canShareStyleWithElement): Disable style sharing for elements
+        that force synethetic style updates in order to gain RenderLayers, so they can become
+        composited. This is tested by become-composited-nested-iframes.html, though it is very
+        timing-dependent.
+        
+        * page/FrameView.h:
+        * page/FrameView.cpp:
+        (WebCore::FrameView::hasCompositedContentIncludingDescendants): New method that
+        is a "deep" version of hasCompositedContent() on platforms where that is necessary to ask.
+        
+        (WebCore::FrameView::hasCompositingAncestor): New method.
+        (WebCore::FrameView::setIsOverlapped): If we can have independently composited iframes,
+        we need to force all descendant iframes to update so that compositing gets hooked up across
+        nested iframes.
+        
+        (WebCore::FrameView::isOverlappedIncludingAncestors): New method, only called on platforms
+        where allowsIndependentlyCompositedIFrames() is true.
+
+        * rendering/RenderLayerCompositor.h:
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::allowsIndependentlyCompositedIFrames): Utility method that
+        returns true if an iframe can be a compositing root.
+        
+        (WebCore::RenderLayerCompositor::shouldPropagateCompositingToEnclosingIFrame): Make use of
+        allowsIndependentlyCompositedIFrames().
+        
+        (WebCore::RenderLayerCompositor::notifyIFramesOfCompositingChange): We need to notify all
+        descendant frames, not just children.
+        
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::setStyle): Add assert to ensure that we don't do style sharing
+        for elements that play tricks with synthetic style changes.
+
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::paint): Run overlap testing if a frame has any composited
+        descendants.
+
 2010-11-08  Darin Adler  <darin@apple.com>
 
         Reviewed by Alexey Proskuryakov.
