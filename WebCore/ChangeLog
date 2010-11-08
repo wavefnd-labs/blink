@@ -1,3 +1,129 @@
+2010-11-08  Yury Semikhatsky  <yurys@chromium.org>
+
+        Reviewed by Pavel Feldman.
+
+        Web Inspector: decouple ScriptArguments from ScriptCallStack
+        https://bugs.webkit.org/show_bug.cgi?id=48058
+
+        ScriptCallFrame and ScriptCallStack are now the same for both JSC and V8.
+        The factory functions that allow to create ScriptCallStack from VM-specific
+        objects are defined in ScriptCallStackFactory.cpp.
+
+        ScriptArguments class is used for passing arguments from JS code to the native
+        part.
+
+        No new tests. This refactoring is covered with existing Console tests.
+
+        * Android.jscbindings.mk:
+        * Android.v8bindings.mk:
+        * CMakeLists.txt:
+        * GNUmakefile.am:
+        * WebCore.gypi:
+        * WebCore.pro:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/JSBindingsAllInOne.cpp:
+        * bindings/js/JSConsoleCustom.cpp:
+        (WebCore::JSConsole::profile):
+        (WebCore::JSConsole::profileEnd):
+        * bindings/js/ScriptCallStackFactory.cpp: Renamed from WebCore/bindings/js/ScriptCallStack.cpp.
+        (WebCore::createScriptCallStack):
+        (WebCore::createScriptArguments):
+        (WebCore::ScriptCallStack::stackTrace):
+        * bindings/js/ScriptCallStackFactory.h: Copied from WebCore/bindings/js/ScriptCallFrame.cpp.
+        * bindings/js/ScriptState.cpp:
+        (WebCore::ScriptStateProtectedPtr::~ScriptStateProtectedPtr):
+        (WebCore::ScriptStateProtectedPtr::ScriptStateProtectedPtr):
+        (WebCore::ScriptStateProtectedPtr::get):
+        * bindings/js/ScriptState.h:
+        * bindings/scripts/CodeGeneratorJS.pm:
+        * bindings/scripts/CodeGeneratorV8.pm:
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore::jsTestObjPrototypeFunctionCustomArgsAndException):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjInternal::customArgsAndExceptionCallback):
+        * bindings/v8/ScriptCallFrame.h: Removed.
+        * bindings/v8/ScriptCallStack.h: Removed.
+        * bindings/v8/ScriptCallStackFactory.cpp: Renamed from WebCore/bindings/v8/ScriptCallStack.cpp.
+        (WebCore::toScriptCallFrame):
+        (WebCore::toScriptCallFramesVector):
+        (WebCore::createScriptCallStack):
+        (WebCore::createScriptArguments):
+        (WebCore::ScriptCallStack::stackTrace):
+        * bindings/v8/ScriptCallStackFactory.h: Copied from WebCore/bindings/js/ScriptCallFrame.cpp.
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::setCaptureCallStackForUncaughtExceptions):
+        * bindings/v8/ScriptState.h:
+        (WebCore::ScriptStateProtectedPtr::get):
+        * bindings/v8/V8ConsoleMessage.cpp:
+        (WebCore::V8ConsoleMessage::handler):
+        (WebCore::V8ConsoleMessage::dispatchNow):
+        * bindings/v8/V8ConsoleMessage.h:
+        * bindings/v8/custom/V8ConsoleCustom.cpp:
+        (WebCore::V8Console::traceCallback):
+        (WebCore::V8Console::assertCallback):
+        (WebCore::V8Console::profileCallback):
+        (WebCore::V8Console::profileEndCallback):
+        * dom/NodeFilter.h:
+        * inspector/ConsoleMessage.cpp:
+        (WebCore::ConsoleMessage::ConsoleMessage):
+        (WebCore::ConsoleMessage::addToFrontend):
+        (WebCore::ConsoleMessage::updateRepeatCountInConsole):
+        (WebCore::ConsoleMessage::isEqual):
+        * inspector/ConsoleMessage.h:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::addMessageToConsole):
+        (WebCore::InspectorController::startGroup):
+        * inspector/InspectorController.h:
+        * inspector/ScriptArguments.cpp: Copied from WebCore/bindings/v8/ScriptCallFrame.cpp.
+        (WebCore::ScriptArguments::ScriptArguments):
+        (WebCore::ScriptArguments::~ScriptArguments):
+        (WebCore::ScriptArguments::argumentAt):
+        (WebCore::ScriptArguments::globalState):
+        (WebCore::ScriptArguments::getFirstArgumentAsString):
+        (WebCore::ScriptArguments::isEqual):
+        * inspector/ScriptArguments.h: Copied from WebCore/bindings/js/ScriptCallFrame.h.
+        (WebCore::ScriptArguments::argumentCount):
+        * inspector/ScriptCallFrame.cpp: Renamed from WebCore/bindings/v8/ScriptCallFrame.cpp.
+        (WebCore::ScriptCallFrame::ScriptCallFrame):
+        (WebCore::ScriptCallFrame::~ScriptCallFrame):
+        (WebCore::ScriptCallFrame::isEqual):
+        (WebCore::ScriptCallFrame::buildInspectorObject):
+        * inspector/ScriptCallFrame.h: Renamed from WebCore/bindings/js/ScriptCallFrame.h.
+        (WebCore::ScriptCallFrame::functionName):
+        (WebCore::ScriptCallFrame::sourceURL):
+        (WebCore::ScriptCallFrame::lineNumber):
+        * inspector/ScriptCallStack.cpp: Renamed from WebCore/bindings/js/ScriptCallFrame.cpp.
+        (WebCore::ScriptCallStack::ScriptCallStack):
+        (WebCore::ScriptCallStack::~ScriptCallStack):
+        (WebCore::ScriptCallStack::at):
+        (WebCore::ScriptCallStack::size):
+        (WebCore::ScriptCallStack::isEqual):
+        (WebCore::ScriptCallStack::buildInspectorObject):
+        * inspector/ScriptCallStack.h: Renamed from WebCore/bindings/js/ScriptCallStack.h.
+        * page/Console.cpp:
+        (WebCore::Console::addMessage):
+        (WebCore::Console::debug):
+        (WebCore::Console::error):
+        (WebCore::Console::info):
+        (WebCore::Console::log):
+        (WebCore::Console::dir):
+        (WebCore::Console::dirxml):
+        (WebCore::Console::trace):
+        (WebCore::Console::assertCondition):
+        (WebCore::Console::count):
+        (WebCore::Console::markTimeline):
+        (WebCore::Console::profile):
+        (WebCore::Console::profileEnd):
+        (WebCore::Console::timeEnd):
+        (WebCore::Console::group):
+        (WebCore::Console::groupCollapsed):
+        (WebCore::Console::shouldCaptureFullStackTrace):
+        (WebCore::Console::warn):
+        * page/Console.h:
+        (WebCore::Console::profiles):
+        * page/Console.idl:
+
 2010-11-08  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Not reviewed. Build fix.
@@ -12211,6 +12337,116 @@
 
         * WebCore.xcodeproj/project.pbxproj: Removed explicit file type
         for CSSPrimitiveValue.idl to make it match other IDL files.
+
+2010-10-21  Yury Semikhatsky  <yurys@chromium.org>
+
+        Reviewed by Pavel Feldman.
+
+        Web Inspector: decouple ScriptArguments from ScriptCallStack
+        https://bugs.webkit.org/show_bug.cgi?id=48058
+
+        ScriptCallFrame and ScriptCallStack are now the same for both JSC and V8.
+        The factory functions that allow to create ScriptCallStack from VM-specific
+        objects are defined in ScriptCallStackFactory.cpp.
+
+        ScriptArguments class is used for passing arguments from JS code to the native
+        part.
+
+        No new tests. This refactoring is covered with existing Console tests.
+
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/ScriptCallFrame.cpp: Removed.
+        * bindings/js/ScriptCallFrame.h: Removed.
+        * bindings/js/ScriptCallStack.cpp: Removed.
+        * bindings/js/ScriptCallStack.h: Removed.
+        * bindings/js/ScriptCallStackFactory.cpp: Added.
+        (WebCore::createScriptCallStack):
+        (WebCore::createScriptArguments):
+        (WebCore::ScriptCallStack::stackTrace):
+        * bindings/js/ScriptCallStackFactory.h: Added.
+        * bindings/js/ScriptState.h:
+        (WebCore::ScriptStateProtectedPtr::get):
+        * bindings/scripts/CodeGeneratorJS.pm:
+        * bindings/scripts/CodeGeneratorV8.pm:
+        * bindings/v8/ScriptCallFrame.cpp: Removed.
+        * bindings/v8/ScriptCallFrame.h: Removed.
+        * bindings/v8/ScriptCallStack.cpp: Removed.
+        * bindings/v8/ScriptCallStack.h: Removed.
+        * bindings/v8/ScriptCallStackFactory.cpp: Added.
+        (WebCore::toScriptCallFrame):
+        (WebCore::toScriptCallFramesVector):
+        (WebCore::createScriptCallStack):
+        (WebCore::createScriptArguments):
+        (WebCore::ScriptCallStack::stackTrace):
+        * bindings/v8/ScriptCallStackFactory.h: Added.
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::setCaptureCallStackForUncaughtExceptions):
+        * bindings/v8/ScriptState.h:
+        (WebCore::ScriptStateProtectedPtr::get):
+        * bindings/v8/V8ConsoleMessage.cpp:
+        (WebCore::V8ConsoleMessage::handler):
+        (WebCore::V8ConsoleMessage::dispatchNow):
+        * bindings/v8/V8ConsoleMessage.h:
+        * bindings/v8/custom/V8ConsoleCustom.cpp:
+        (WebCore::V8Console::traceCallback):
+        (WebCore::V8Console::assertCallback):
+        * inspector/ConsoleMessage.cpp:
+        (WebCore::ConsoleMessage::ConsoleMessage):
+        (WebCore::ConsoleMessage::addToFrontend):
+        (WebCore::ConsoleMessage::updateRepeatCountInConsole):
+        (WebCore::ConsoleMessage::isEqual):
+        * inspector/ConsoleMessage.h:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::addMessageToConsole):
+        (WebCore::InspectorController::startGroup):
+        * inspector/InspectorController.h:
+        * inspector/ScriptArguments.cpp: Added.
+        (WebCore::ScriptArguments::ScriptArguments):
+        (WebCore::ScriptArguments::~ScriptArguments):
+        (WebCore::ScriptArguments::argumentAt):
+        (WebCore::ScriptArguments::globalState):
+        (WebCore::ScriptArguments::getFirstArgumentAsString):
+        (WebCore::ScriptArguments::isEqual):
+        * inspector/ScriptArguments.h: Added.
+        (WebCore::ScriptArguments::argumentCount):
+        * inspector/ScriptCallFrame.cpp: Added.
+        (WebCore::ScriptCallFrame::ScriptCallFrame):
+        (WebCore::ScriptCallFrame::~ScriptCallFrame):
+        (WebCore::ScriptCallFrame::isEqual):
+        (WebCore::ScriptCallFrame::buildInspectorObject):
+        * inspector/ScriptCallFrame.h: Added.
+        (WebCore::ScriptCallFrame::functionName):
+        (WebCore::ScriptCallFrame::sourceURL):
+        (WebCore::ScriptCallFrame::lineNumber):
+        * inspector/ScriptCallStack.cpp: Added.
+        (WebCore::ScriptCallStack::ScriptCallStack):
+        (WebCore::ScriptCallStack::~ScriptCallStack):
+        (WebCore::ScriptCallStack::at):
+        (WebCore::ScriptCallStack::size):
+        (WebCore::ScriptCallStack::isEqual):
+        (WebCore::ScriptCallStack::buildInspectorObject):
+        * inspector/ScriptCallStack.h: Added.
+        * page/Console.cpp:
+        (WebCore::Console::addMessage):
+        (WebCore::Console::debug):
+        (WebCore::Console::error):
+        (WebCore::Console::info):
+        (WebCore::Console::log):
+        (WebCore::Console::dir):
+        (WebCore::Console::dirxml):
+        (WebCore::Console::trace):
+        (WebCore::Console::assertCondition):
+        (WebCore::Console::count):
+        (WebCore::Console::markTimeline):
+        (WebCore::Console::profile):
+        (WebCore::Console::profileEnd):
+        (WebCore::Console::timeEnd):
+        (WebCore::Console::group):
+        (WebCore::Console::groupCollapsed):
+        (WebCore::Console::shouldCaptureFullStackTrace):
+        (WebCore::Console::warn):
+        * page/Console.h:
 
 2010-10-21  Yury Semikhatsky  <yurys@chromium.org>
 

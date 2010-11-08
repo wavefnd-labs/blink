@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Google Inc. All rights reserved.
+ * Copyright (c) 2010 Google Inc. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -32,35 +32,28 @@
 #define ScriptCallFrame_h
 
 #include "PlatformString.h"
-#include "ScriptValue.h"
-#include <wtf/Vector.h>
-
-namespace JSC {
-class ExecState;
-class UString;
-}
+#include <wtf/PassRefPtr.h>
 
 namespace WebCore {
 
+class InspectorObject;
+
 class ScriptCallFrame  {
 public:
-    ScriptCallFrame(const JSC::UString& functionName, const JSC::UString& urlString, int lineNumber, JSC::ExecState*, unsigned skipArgumentCount);
+    ScriptCallFrame(const String& functionName, const String& urlString, unsigned lineNumber);
     ~ScriptCallFrame();
 
     const String& functionName() const { return m_functionName; }
     const String& sourceURL() const { return m_sourceURL; }
     unsigned lineNumber() const { return m_lineNumber; }
 
-    // argument retrieval methods
-    const ScriptValue& argumentAt(unsigned) const;
-    unsigned argumentCount() const { return m_arguments.size(); }
+    bool isEqual(const ScriptCallFrame&) const;
+    PassRefPtr<InspectorObject> buildInspectorObject() const;
 
 private:
     String m_functionName;
     String m_sourceURL;
     unsigned m_lineNumber;
-
-    Vector<ScriptValue> m_arguments;
 };
 
 } // namespace WebCore
