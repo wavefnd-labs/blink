@@ -1,3 +1,24 @@
+2010-11-09  Simon Fraser  <simon.fraser@apple.com>
+
+        Reviewed by Darin Adler.
+
+        Caret fails to render with some combination of iframes and compositing
+        https://bugs.webkit.org/show_bug.cgi?id=49079
+        
+        Because it's possible for the caret to jump between different
+        compositing layers and the view, caret repainting currently dirties
+        both the view and all compositing layers that intersect the caret rect,
+        via repaintRectangleInViewAndCompositedLayers().
+        
+        When an iframe contained compositing layers, we erroneously skipped
+        invalidating the compositing layer inside the iframe, which caused
+        the caret to fail to blink.
+
+        * manual-tests/compositing/caret-in-compositing-frame.html: Added.
+        * manual-tests/compositing/resources/editable-compositing-subframe.html: Added.
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::repaintRectangleInViewAndCompositedLayers):
+
 2010-11-09  Peter Rybin  <peter.rybin@gmail.com>
 
         Reviewed by Adam Barth.
