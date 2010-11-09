@@ -1,3 +1,32 @@
+2010-11-09  Jenn Braithwaite  <jennb@chromium.org>
+
+        Reviewed by Dmitry Titov.
+
+        Update ProgressTracker when moving a frame between documents
+        https://bugs.webkit.org/show_bug.cgi?id=48368
+
+        No new tests. andersca informs me it's not possible to test
+        ProgressTracker changes via layouttests. Review extra carefully...
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::transferLoadingResourcesFromPage):
+        Changed to use FrameLoader to deliver the notification to the
+        client via the notifier.
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader:;transferLoadingResourcesFromPage):
+        Update old and new progress tracker about frame progress.
+        (WebCore::FrameLoader::dispatchTransferLoadingResourceFromPage):
+        Added to route notification via the notifier.
+        * loader/FrameLoader.h:
+        * loader/ProgressTracker.cpp:
+        (WebCore::ProgressTracker::completeProgress):
+        Comment change only.
+        * loader/ResourceLoadNotifier.cpp:
+        (WebCore::ResourceLoadNotifier::dispatchTransferLoadingResourceFromPage):
+        Added to provide one place to notify client and progress tracker -
+        and probably inspector controller (separate patch).
+        * loader/ResourceLoadNotifier.h:
+
 2010-11-09  Dai Mikurube  <dmikurube@google.com>
 
         Reviewed by Kent Tamura.
