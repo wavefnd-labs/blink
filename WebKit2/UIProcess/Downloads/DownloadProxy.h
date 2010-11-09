@@ -59,7 +59,7 @@ private:
     virtual Type type() const { return APIType; }
 
     // Message handlers.
-    void didBegin();
+    void didStart();
     void didCreateDestination(const String& path);
     void didFinish();
 
