@@ -1,3 +1,47 @@
+2010-11-09  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        https://bugs.webkit.org/show_bug.cgi?id=49202
+        
+        Make lists work with vertical text.
+        
+        (1) Patch all the CSS rules in html.css so that the margins are directionally abstract.
+        (2) Add a transposedRect and transposedSize method to IntRect and IntSize for swapping x/y and width/height.
+        (3) Add adjustLineDirectionPosition as a helper for moving a line box only in the line direction.
+        (4) Fix a bug in addIntrudingFLoats uncovered by list test cases where the top margin of an element was being
+        incorrectly added to a float's physical left side instead of its top side.
+        (5) Make positioning and painting and selection of list markers account for all writing modes.
+        (6) Add helpers for setting the start and end margins directly in a RenderStyle, since lists do this to hack
+        marker margins before they have been calculated and set on the box.
+        
+        Cloned a bunch of fast/lists tests into fast/lists/*-vertical.html versions.
+        
+        * css/html.css:
+        * platform/graphics/IntRect.h:
+        (WebCore::IntRect::transposedRect):
+        * platform/graphics/IntSize.h:
+        (WebCore::IntSize::transposedSize):
+        * rendering/InlineBox.h:
+        (WebCore::InlineBox::adjustLineDirectionPosition):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::addIntrudingFloats):
+        * rendering/RenderListItem.cpp:
+        (WebCore::getParentOfFirstLineBox):
+        (WebCore::RenderListItem::positionListMarker):
+        (WebCore::RenderListItem::paint):
+        * rendering/RenderListMarker.cpp:
+        (WebCore::RenderListMarker::localSelectionRect):
+        (WebCore::RenderListMarker::paint):
+        (WebCore::RenderListMarker::layout):
+        (WebCore::RenderListMarker::computePreferredLogicalWidths):
+        (WebCore::RenderListMarker::updateMargins):
+        (WebCore::RenderListMarker::getRelativeMarkerRect):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::setMarginStart):
+        (WebCore::RenderStyle::setMarginEnd):
+        * rendering/style/RenderStyle.h:
+
 2010-11-09  Abhishek Arya  <inferno@chromium.org>
 
         Reviewed by Antti Koivisto.

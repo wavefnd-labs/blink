@@ -1,3 +1,60 @@
+2010-11-09  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        https://bugs.webkit.org/show_bug.cgi?id=49202
+        
+        Make lists work with vertical text.
+        
+        (1) Patch all the CSS rules in html.css so that the margins are directionally abstract.
+        (2) Add a transposedRect and transposedSize method to IntRect and IntSize for swapping x/y and width/height.
+        (3) Add adjustLineDirectionPosition as a helper for moving a line box only in the line direction.
+        (4) Fix a bug in addIntrudingFLoats uncovered by list test cases where the top margin of an element was being
+        incorrectly added to a float's physical left side instead of its top side.
+        (5) Make positioning and painting and selection of list markers account for all writing modes.
+        (6) Add helpers for setting the start and end margins directly in a RenderStyle, since lists do this to hack
+        marker margins before they have been calculated and set on the box.
+        
+        Cloned a bunch of fast/lists tests into fast/lists/*-vertical.html versions.
+
+        * fast/lists/001-vertical.html: Added.
+        * fast/lists/002-vertical.html: Added.
+        * fast/lists/003-vertical.html: Added.
+        * fast/lists/005-vertical.html: Added.
+        * fast/lists/006-vertical.html: Added.
+        * fast/lists/007-vertical.html: Added.
+        * fast/lists/008-vertical.html: Added.
+        * fast/lists/009-vertical.html: Added.
+        * platform/mac/fast/lists/001-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/001-vertical-expected.png: Added.
+        * platform/mac/fast/lists/001-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/002-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/002-vertical-expected.png: Added.
+        * platform/mac/fast/lists/002-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/003-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/003-vertical-expected.png: Added.
+        * platform/mac/fast/lists/003-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/005-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/005-vertical-expected.png: Added.
+        * platform/mac/fast/lists/005-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/006-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/006-vertical-expected.png: Added.
+        * platform/mac/fast/lists/006-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/007-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/007-vertical-expected.png: Added.
+        * platform/mac/fast/lists/007-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/008-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/008-vertical-expected.png: Added.
+        * platform/mac/fast/lists/008-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/009-vertical-expected.checksum: Added.
+        * platform/mac/fast/lists/009-vertical-expected.png: Added.
+        * platform/mac/fast/lists/009-vertical-expected.txt: Added.
+        * platform/mac/fast/lists/inlineBoxWrapperNullCheck-expected.png:
+        * platform/mac/fast/lists/markers-in-selection-expected.checksum:
+        * platform/mac/fast/lists/markers-in-selection-expected.png:
+        * platform/mac/fast/lists/ol-start-parsing-expected.checksum:
+        * platform/mac/fast/lists/ol-start-parsing-expected.png:
+
 2010-11-09  Mihai Parparita  <mihaip@chromium.org>
 
         Unreviewed Chromium test_expectations.txt update.
