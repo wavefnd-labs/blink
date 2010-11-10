@@ -1,3 +1,21 @@
+2010-11-10  Stephen White  <senorblanco@chromium.org>
+
+        Reviewed by James Robinson.
+
+        Fix canvas.putImageData(canvas.getImageData(...)) to be lossless.
+        https://bugs.webkit.org/show_bug.cgi?id=49330
+
+        These cycles should be lossless for valid colours.  A similar fix went
+        into the CG port at r32878.
+
+        Covered by canvas/philip/tests/2d.imageData.put.unchanged.html.
+
+        * platform/graphics/skia/ImageBufferSkia.cpp:
+        (WebCore::mulDiv255Ceil):
+        A helper function to do (a + b + 254) / 255 without a divide.
+        (WebCore::putImageData):
+        Use the above helper to round up when premultiplying alpha.
+
 2010-11-10  Csaba Osztrogonác  <ossy@webkit.org>
 
         Reviewed by David Hyatt.
