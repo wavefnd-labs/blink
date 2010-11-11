@@ -1,3 +1,251 @@
+2010-11-11  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Simon Fraser.
+
+        https://bugs.webkit.org/show_bug.cgi?id=48664
+        
+        Make repaint invalidation work with flipped blocks ("rl" and "bt" writing modes).
+        
+        This patch disables the layout state for flipped blocks, since the paint offset isn't right.
+        
+        Bugs in the overflow sides for lines have been fixed.  before/AfterSideVisible/LayoutOverflowForLine
+        now respect flipping (and don't incorrectly change sides).  This is a very confusing aspect of
+        the overflow stuff (and at some point we should consider renaming top/left/right/bottom since they
+        aren't physical).
+        
+        offsetFromContainer and mapLocalToContainer remain physical and refer to the top left offset.
+        This means at every step up you convert to the correct physical coordinate.  It also means these
+        functions will be unreliable during layout for flipped blocks.  At first glance, this seems to be
+        more or less ok.
+        
+        computeRectForRepaint now delays flipping conversions until you cross a writing-mode boundary.  This
+        allows for documents to be fully flipped and repaint during layout can still be reliable.  This is
+        critical for incremental line layout repainting.
+        
+        Added new tests in fast/repaint and also rebaselined the tests in that directory because I'm tired
+        of all the stale results and failures.
+
+        * fast/repaint/japanese-rl-selection-clear.html: Added.
+        * fast/repaint/japanese-rl-selection-repaint.html: Added.
+        * fast/repaint/repaint-svg-after-style-change-expected.png:
+        * platform/mac/fast/repaint/4774354-expected.checksum:
+        * platform/mac/fast/repaint/4774354-expected.png:
+        * platform/mac/fast/repaint/4776765-expected.checksum:
+        * platform/mac/fast/repaint/4776765-expected.png:
+        * platform/mac/fast/repaint/background-generated-expected.checksum:
+        * platform/mac/fast/repaint/background-generated-expected.png:
+        * platform/mac/fast/repaint/background-misaligned-expected.png:
+        * platform/mac/fast/repaint/backgroundSizeRepaint-expected.checksum:
+        * platform/mac/fast/repaint/backgroundSizeRepaint-expected.png:
+        * platform/mac/fast/repaint/block-layout-inline-children-replaced-expected.checksum:
+        * platform/mac/fast/repaint/block-layout-inline-children-replaced-expected.png:
+        * platform/mac/fast/repaint/block-no-inflow-children-expected.checksum:
+        * platform/mac/fast/repaint/block-no-inflow-children-expected.png:
+        * platform/mac/fast/repaint/block-selection-gap-in-composited-layer-expected.checksum:
+        * platform/mac/fast/repaint/block-selection-gap-in-composited-layer-expected.png:
+        * platform/mac/fast/repaint/block-selection-gap-stale-cache-2-expected.png:
+        * platform/mac/fast/repaint/border-fit-lines-expected.checksum:
+        * platform/mac/fast/repaint/border-fit-lines-expected.png:
+        * platform/mac/fast/repaint/border-radius-repaint-expected.checksum:
+        * platform/mac/fast/repaint/border-radius-repaint-expected.png:
+        * platform/mac/fast/repaint/border-repaint-glitch-expected.checksum:
+        * platform/mac/fast/repaint/border-repaint-glitch-expected.png:
+        * platform/mac/fast/repaint/box-shadow-dynamic-expected.checksum:
+        * platform/mac/fast/repaint/box-shadow-dynamic-expected.png:
+        * platform/mac/fast/repaint/box-shadow-h-expected.checksum:
+        * platform/mac/fast/repaint/box-shadow-h-expected.png:
+        * platform/mac/fast/repaint/box-shadow-v-expected.checksum:
+        * platform/mac/fast/repaint/box-shadow-v-expected.png:
+        * platform/mac/fast/repaint/bugzilla-3509-expected.checksum:
+        * platform/mac/fast/repaint/bugzilla-3509-expected.png:
+        * platform/mac/fast/repaint/bugzilla-5699-expected.checksum:
+        * platform/mac/fast/repaint/bugzilla-5699-expected.png:
+        * platform/mac/fast/repaint/bugzilla-6278-expected.checksum:
+        * platform/mac/fast/repaint/bugzilla-6278-expected.png:
+        * platform/mac/fast/repaint/bugzilla-6388-expected.checksum:
+        * platform/mac/fast/repaint/bugzilla-6388-expected.png:
+        * platform/mac/fast/repaint/bugzilla-6473-expected.checksum:
+        * platform/mac/fast/repaint/bugzilla-6473-expected.png:
+        * platform/mac/fast/repaint/bugzilla-7235-expected.checksum:
+        * platform/mac/fast/repaint/bugzilla-7235-expected.png:
+        * platform/mac/fast/repaint/button-spurious-layout-hint-expected.png:
+        * platform/mac/fast/repaint/caret-outside-block-expected.checksum:
+        * platform/mac/fast/repaint/caret-outside-block-expected.png:
+        * platform/mac/fast/repaint/change-transform-expected.checksum:
+        * platform/mac/fast/repaint/change-transform-expected.png:
+        * platform/mac/fast/repaint/clip-with-layout-delta-expected.png:
+        * platform/mac/fast/repaint/clipped-relative-expected.checksum:
+        * platform/mac/fast/repaint/clipped-relative-expected.png:
+        * platform/mac/fast/repaint/containing-block-position-change-expected.checksum:
+        * platform/mac/fast/repaint/containing-block-position-change-expected.png:
+        * platform/mac/fast/repaint/content-into-overflow-expected.png:
+        * platform/mac/fast/repaint/continuation-after-outline-expected.checksum:
+        * platform/mac/fast/repaint/continuation-after-outline-expected.png:
+        * platform/mac/fast/repaint/control-clip-expected.checksum:
+        * platform/mac/fast/repaint/control-clip-expected.png:
+        * platform/mac/fast/repaint/create-layer-repaint-expected.checksum:
+        * platform/mac/fast/repaint/create-layer-repaint-expected.png:
+        * platform/mac/fast/repaint/delete-into-nested-block-expected.checksum:
+        * platform/mac/fast/repaint/delete-into-nested-block-expected.png:
+        * platform/mac/fast/repaint/dynamic-table-vertical-alignment-change-expected.checksum:
+        * platform/mac/fast/repaint/dynamic-table-vertical-alignment-change-expected.png:
+        * platform/mac/fast/repaint/erase-overflow-expected.png:
+        * platform/mac/fast/repaint/fixed-expected.checksum:
+        * platform/mac/fast/repaint/fixed-expected.png:
+        * platform/mac/fast/repaint/flexible-box-overflow-expected.checksum:
+        * platform/mac/fast/repaint/flexible-box-overflow-expected.png:
+        * platform/mac/fast/repaint/flexible-box-overflow-horizontal-expected.checksum:
+        * platform/mac/fast/repaint/flexible-box-overflow-horizontal-expected.png:
+        * platform/mac/fast/repaint/float-in-new-block-with-layout-delta-expected.png:
+        * platform/mac/fast/repaint/float-move-during-layout-expected.checksum:
+        * platform/mac/fast/repaint/float-move-during-layout-expected.png:
+        * platform/mac/fast/repaint/float-new-in-block-expected.png:
+        * platform/mac/fast/repaint/float-overflow-expected.png:
+        * platform/mac/fast/repaint/float-overflow-right-expected.png:
+        * platform/mac/fast/repaint/focus-layers-expected.checksum:
+        * platform/mac/fast/repaint/focus-layers-expected.png:
+        * platform/mac/fast/repaint/focus-ring-expected.png:
+        * platform/mac/fast/repaint/inline-block-overflow-expected.checksum:
+        * platform/mac/fast/repaint/inline-block-overflow-expected.png:
+        * platform/mac/fast/repaint/inline-block-resize-expected.png:
+        * platform/mac/fast/repaint/inline-color-change-expected.checksum:
+        * platform/mac/fast/repaint/inline-color-change-expected.png:
+        * platform/mac/fast/repaint/inline-outline-repaint-expected.checksum:
+        * platform/mac/fast/repaint/inline-outline-repaint-expected.png:
+        * platform/mac/fast/repaint/intermediate-layout-position-clip-expected.png:
+        * platform/mac/fast/repaint/intermediate-layout-position-expected.png:
+        * platform/mac/fast/repaint/invisible-objects-expected.png:
+        * platform/mac/fast/repaint/japanese-rl-selection-clear-expected.checksum: Added.
+        * platform/mac/fast/repaint/japanese-rl-selection-clear-expected.png: Added.
+        * platform/mac/fast/repaint/japanese-rl-selection-clear-expected.txt: Added.
+        * platform/mac/fast/repaint/japanese-rl-selection-repaint-expected.checksum: Added.
+        * platform/mac/fast/repaint/japanese-rl-selection-repaint-expected.png: Added.
+        * platform/mac/fast/repaint/japanese-rl-selection-repaint-expected.txt: Added.
+        * platform/mac/fast/repaint/layer-child-outline-expected.checksum:
+        * platform/mac/fast/repaint/layer-child-outline-expected.png:
+        * platform/mac/fast/repaint/layer-full-repaint-expected.png:
+        * platform/mac/fast/repaint/layer-hide-when-needs-layout-expected.png:
+        * platform/mac/fast/repaint/layer-outline-expected.checksum:
+        * platform/mac/fast/repaint/layer-outline-expected.png:
+        * platform/mac/fast/repaint/layer-outline-horizontal-expected.checksum:
+        * platform/mac/fast/repaint/layer-outline-horizontal-expected.png:
+        * platform/mac/fast/repaint/layer-visibility-expected.png:
+        * platform/mac/fast/repaint/layout-state-only-positioned-expected.png:
+        * platform/mac/fast/repaint/layout-state-relative-expected.checksum:
+        * platform/mac/fast/repaint/layout-state-relative-expected.png:
+        * platform/mac/fast/repaint/layout-state-scrolloffset-expected.checksum:
+        * platform/mac/fast/repaint/layout-state-scrolloffset-expected.png:
+        * platform/mac/fast/repaint/layout-state-scrolloffset2-expected.checksum:
+        * platform/mac/fast/repaint/layout-state-scrolloffset2-expected.png:
+        * platform/mac/fast/repaint/layout-state-scrolloffset3-expected.checksum:
+        * platform/mac/fast/repaint/layout-state-scrolloffset3-expected.png:
+        * platform/mac/fast/repaint/line-overflow-expected.checksum:
+        * platform/mac/fast/repaint/line-overflow-expected.png:
+        * platform/mac/fast/repaint/lines-with-layout-delta-expected.checksum:
+        * platform/mac/fast/repaint/lines-with-layout-delta-expected.png:
+        * platform/mac/fast/repaint/list-marker-2-expected.checksum:
+        * platform/mac/fast/repaint/list-marker-2-expected.png:
+        * platform/mac/fast/repaint/list-marker-expected.checksum:
+        * platform/mac/fast/repaint/list-marker-expected.png:
+        * platform/mac/fast/repaint/make-children-non-inline-expected.checksum:
+        * platform/mac/fast/repaint/make-children-non-inline-expected.png:
+        * platform/mac/fast/repaint/moving-shadow-on-container-expected.checksum:
+        * platform/mac/fast/repaint/moving-shadow-on-container-expected.png:
+        * platform/mac/fast/repaint/moving-shadow-on-path-expected.checksum:
+        * platform/mac/fast/repaint/moving-shadow-on-path-expected.png:
+        * platform/mac/fast/repaint/multicol-repaint-expected.checksum:
+        * platform/mac/fast/repaint/multicol-repaint-expected.png:
+        * platform/mac/fast/repaint/opacity-change-on-overflow-float-expected.checksum:
+        * platform/mac/fast/repaint/opacity-change-on-overflow-float-expected.png:
+        * platform/mac/fast/repaint/outline-child-repaint-expected.checksum:
+        * platform/mac/fast/repaint/outline-child-repaint-expected.png:
+        * platform/mac/fast/repaint/outline-inset-expected.png:
+        * platform/mac/fast/repaint/outline-repaint-glitch-expected.checksum:
+        * platform/mac/fast/repaint/outline-repaint-glitch-expected.png:
+        * platform/mac/fast/repaint/outline-shrinking-expected.checksum:
+        * platform/mac/fast/repaint/outline-shrinking-expected.png:
+        * platform/mac/fast/repaint/overflow-clip-subtree-layout-expected.png:
+        * platform/mac/fast/repaint/overflow-delete-line-expected.checksum:
+        * platform/mac/fast/repaint/overflow-delete-line-expected.png:
+        * platform/mac/fast/repaint/overflow-into-content-expected.png:
+        * platform/mac/fast/repaint/overflow-outline-repaint-expected.checksum:
+        * platform/mac/fast/repaint/overflow-outline-repaint-expected.png:
+        * platform/mac/fast/repaint/overflow-scroll-body-appear-expected.checksum:
+        * platform/mac/fast/repaint/overflow-scroll-body-appear-expected.png:
+        * platform/mac/fast/repaint/overflow-scroll-delete-expected.checksum:
+        * platform/mac/fast/repaint/overflow-scroll-delete-expected.png:
+        * platform/mac/fast/repaint/reflection-redraw-expected.checksum:
+        * platform/mac/fast/repaint/reflection-redraw-expected.png:
+        * platform/mac/fast/repaint/reflection-repaint-test-expected.png:
+        * platform/mac/fast/repaint/renderer-destruction-by-invalidateSelection-crash-expected.png:
+        * platform/mac/fast/repaint/repaint-resized-overflow-expected.checksum:
+        * platform/mac/fast/repaint/repaint-resized-overflow-expected.png:
+        * platform/mac/fast/repaint/search-field-cancel-expected.checksum:
+        * platform/mac/fast/repaint/search-field-cancel-expected.png:
+        * platform/mac/fast/repaint/selected-replaced-expected.checksum:
+        * platform/mac/fast/repaint/selected-replaced-expected.png:
+        * platform/mac/fast/repaint/selection-after-delete-expected.checksum:
+        * platform/mac/fast/repaint/selection-after-delete-expected.png:
+        * platform/mac/fast/repaint/selection-after-remove-expected.checksum:
+        * platform/mac/fast/repaint/selection-after-remove-expected.png:
+        * platform/mac/fast/repaint/selection-clear-expected.checksum:
+        * platform/mac/fast/repaint/selection-clear-expected.png:
+        * platform/mac/fast/repaint/selection-gap-overflow-scroll-expected.checksum:
+        * platform/mac/fast/repaint/selection-gap-overflow-scroll-expected.png:
+        * platform/mac/fast/repaint/selection-rl-expected.checksum:
+        * platform/mac/fast/repaint/selection-rl-expected.png:
+        * platform/mac/fast/repaint/shadow-multiple-horizontal-expected.png:
+        * platform/mac/fast/repaint/shadow-multiple-strict-horizontal-expected.checksum:
+        * platform/mac/fast/repaint/shadow-multiple-strict-horizontal-expected.png:
+        * platform/mac/fast/repaint/shadow-multiple-strict-vertical-expected.checksum:
+        * platform/mac/fast/repaint/shadow-multiple-strict-vertical-expected.png:
+        * platform/mac/fast/repaint/shadow-multiple-vertical-expected.png:
+        * platform/mac/fast/repaint/stacked-diacritics-expected.checksum:
+        * platform/mac/fast/repaint/stacked-diacritics-expected.png:
+        * platform/mac/fast/repaint/static-to-positioned-expected.checksum:
+        * platform/mac/fast/repaint/static-to-positioned-expected.png:
+        * platform/mac/fast/repaint/subtree-root-clip-2-expected.png:
+        * platform/mac/fast/repaint/subtree-root-clip-3-expected.png:
+        * platform/mac/fast/repaint/subtree-root-clip-expected.png:
+        * platform/mac/fast/repaint/subtree-root-skipped-expected.checksum:
+        * platform/mac/fast/repaint/subtree-root-skipped-expected.png:
+        * platform/mac/fast/repaint/table-cell-collapsed-border-expected.checksum:
+        * platform/mac/fast/repaint/table-cell-collapsed-border-expected.png:
+        * platform/mac/fast/repaint/table-cell-move-expected.checksum:
+        * platform/mac/fast/repaint/table-cell-move-expected.png:
+        * platform/mac/fast/repaint/table-cell-vertical-overflow-expected.png:
+        * platform/mac/fast/repaint/table-col-background-expected.png:
+        * platform/mac/fast/repaint/table-collapsed-border-expected.checksum:
+        * platform/mac/fast/repaint/table-collapsed-border-expected.png:
+        * platform/mac/fast/repaint/table-extra-bottom-grow-expected.checksum:
+        * platform/mac/fast/repaint/table-extra-bottom-grow-expected.png:
+        * platform/mac/fast/repaint/table-outer-border-expected.png:
+        * platform/mac/fast/repaint/table-row-expected.png:
+        * platform/mac/fast/repaint/table-section-overflow-expected.png:
+        * platform/mac/fast/repaint/table-section-repaint-expected.png:
+        * platform/mac/fast/repaint/table-two-pass-layout-overpaint-expected.png:
+        * platform/mac/fast/repaint/text-append-dirty-lines-expected.checksum:
+        * platform/mac/fast/repaint/text-append-dirty-lines-expected.png:
+        * platform/mac/fast/repaint/text-selection-rect-in-overflow-2-expected.checksum:
+        * platform/mac/fast/repaint/text-selection-rect-in-overflow-2-expected.png:
+        * platform/mac/fast/repaint/text-selection-rect-in-overflow-expected.checksum:
+        * platform/mac/fast/repaint/text-selection-rect-in-overflow-expected.png:
+        * platform/mac/fast/repaint/text-shadow-expected.checksum:
+        * platform/mac/fast/repaint/text-shadow-expected.png:
+        * platform/mac/fast/repaint/text-shadow-horizontal-expected.checksum:
+        * platform/mac/fast/repaint/text-shadow-horizontal-expected.png:
+        * platform/mac/fast/repaint/transform-absolute-child-expected.png:
+        * platform/mac/fast/repaint/transform-absolute-in-positioned-container-expected.checksum:
+        * platform/mac/fast/repaint/transform-absolute-in-positioned-container-expected.png:
+        * platform/mac/fast/repaint/transform-disable-layoutstate-expected.png:
+        * platform/mac/fast/repaint/transform-layout-repaint-expected.png:
+        * platform/mac/fast/repaint/transform-relative-position-expected.checksum:
+        * platform/mac/fast/repaint/transform-relative-position-expected.png:
+        * platform/mac/fast/repaint/transform-repaint-descendants-expected.checksum:
+        * platform/mac/fast/repaint/transform-repaint-descendants-expected.png:
+        * platform/mac/fast/repaint/transform-replaced-shadows-expected.png:
+        * platform/mac/fast/repaint/transform-translate-expected.png:
+
 2010-11-11  Mihai Parparita  <mihaip@chromium.org>
 
         Unreviewed Chromium expectations update and rebaseline.
