@@ -1,3 +1,63 @@
+2010-10-15  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Xan Lopez.
+
+        [GTK] Widgets do not support CSS transformations
+        https://bugs.webkit.org/show_bug.cgi?id=40139
+
+        Instead of rendering directly onto the target drawable when rendering
+        form controls on GTK+ 2.0, render onto an intermediate surface and use
+        cairo to blit the result back to the target surface. This has two
+        benefits. The first is that it always honors the current Cairo
+        transformation. The second is that since the intermediate drawable is
+        always a 32-bit GdkPixmap, we do not have to have a set of widgets
+        per-colormap any longer.
+
+        This change also begins the abstraction of widget rendering so that GTK+
+        2 and GTK+ 3 can use the same code path. The WidgetRenderingContext will
+        eventually hide all version differences from RenderThemeGtk, which can
+        just focus on interpreting the GtkStyle properties. 
+
+        * GNUmakefile.am: Add WidgetRenderinContext source files to the sources list.
+        * platform/graphics/cairo/PlatformRefPtrCairo.cpp:
+        (WTF::refPlatformPtr): Add a specialization for Cairo patterns.
+        (WTF::derefPlatformPtr): Ditto.
+        * platform/graphics/cairo/PlatformRefPtrCairo.h: Ditto.
+        * platform/gtk/RenderThemeGtk.cpp:
+        (WebCore::RenderThemeGtk::RenderThemeGtk): No longer keep a set of
+        widgets per-colormap for GTK+, instead just determine if we can use RGBA
+        colormaps and go from there.
+        (WebCore::RenderThemeGtk::~RenderThemeGtk): Ditto.
+        (WebCore::RenderThemeGtk::getIndicatorMetrics): Put the logic for
+        getting toggle button indicator metrics into this helper.
+        (WebCore::RenderThemeGtk::paintRenderObject): Now uses
+        WidgetRenderingContext to do widget rendering.
+        (WebCore::setToggleSize): Use the new getIndicatorMetrics helper.
+        * platform/gtk/RenderThemeGtk.h: Added a member to track whether or not
+          the widgets are using a RGBA colormap. Also remove a defunct Page*
+          member.
+        * platform/gtk/ScrollbarThemeGtk.cpp: Switch all widget drawing
+        operations to use WidgetRenderingContext.
+        (WebCore::ScrollbarThemeGtk::paintTrackBackground): Ditto.
+        (WebCore::ScrollbarThemeGtk::paintScrollbarBackground): Ditto.
+        (WebCore::ScrollbarThemeGtk::paintThumb): Ditto.
+        (WebCore::ScrollbarThemeGtk::paint): Ditto.
+        (WebCore::ScrollbarThemeGtk::paintButton): Ditto.
+        * platform/gtk/WidgetRenderingContext.h: Added.
+        * platform/gtk/WidgetRenderingContextGtk2.cpp: Added.
+        (WebCore::purgeScratchBuffer): Added, this is similar to the scratch
+        buffer implementation from ContextShadow.
+        (WebCore::PurgeScratchBufferTimer::fired): Ditto.
+        (WebCore::scheduleScratchBufferPurge): Ditto.
+        (WebCore::getExtraSpaceForWidget):
+        (WebCore::WidgetRenderingContext::WidgetRenderingContext): Added.
+        (WebCore::WidgetRenderingContext::~WidgetRenderingContext): Added.
+        (WebCore::WidgetRenderingContext::paintMozillaWidget): Added.
+        * platform/gtk/WidgetRenderingContextGtk3.cpp: Added.
+        (WebCore::WidgetRenderingContext::WidgetRenderingContext): Added.
+        (WebCore::~WidgetRenderingContext::WidgetRenderingContext): Added.
+        (WebCore::WidgetRenderingContext::paintMozillaWidget): Added.
+
 2010-11-10  Beth Dakin  <bdakin@apple.com>
 
         Reviewed by Simon Fraser.
