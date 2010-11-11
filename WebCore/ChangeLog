@@ -1,3 +1,53 @@
+2010-11-11  Eric Carlson  <eric.carlson@apple.com>
+
+        Reviewed by Antti Koivisto.
+
+        Lots of time spent in MediaPlayerPrivate::currentTime() when playing multiple videos.
+        https://bugs.webkit.org/show_bug.cgi?id=49009
+
+        Make it possible for HTMLMediaElement to cache the movie time and report 'currentTime'
+        as [cached time + elapsed wall time]. The media engine returns the maximum duration it 
+        is safe to calculate time before resampling the actual movie time with the new
+        maximumDurationToCacheMovieTime method. Because this may be different for different media
+        engines the default return value is 0, making it an opt-in feature.
+
+        No new tests were added because the existing tests already check currentTime, and because
+        it is only possible to look for drift between the calculated and actual media time by 
+        calculating the time AND getting the actual media time - which the defeats the purpose of
+        the change. Building with LOG_CACHED_TIME_WARNINGS defined enables code that does both
+        and logs warnings when the delta between calculated and observed is greater than 0.01.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement): Initialize new member variables.
+        (WebCore::HTMLMediaElement::prepareForLoad): Force a time resync before setting m_paused.
+        (WebCore::HTMLMediaElement::seek): Force a time resync before getting the current time before
+        seeking so there is no drift.
+        (WebCore::HTMLMediaElement::refreshCachedTime): New, update the cached movie time and the
+        wall clock time it was recorded.
+        (WebCore::HTMLMediaElement::invalidateCachedTime): New, flag the cached time as invalid.
+        (WebCore::HTMLMediaElement::currentTime): Use a cached movie time for as long as the media
+        engine says it is safe. Lots of optional logging can be enabled to help ports fine tune
+        the maximum cache interval.
+        (WebCore::HTMLMediaElement::ended): Force a time resync before setting m_paused.
+        (WebCore::HTMLMediaElement::endScrubbing): Fix a typo in the logging.
+        (WebCore::HTMLMediaElement::scheduleTimeupdateEvent): Call currentTime() instead of calling
+        MediaPlayer so we use the cached time as much as it possible.
+        (WebCore::HTMLMediaElement::mediaPlayerTimeChanged): Invalidate cached time because the engine
+        seeked.
+        (WebCore::HTMLMediaElement::mediaPlayerRateChanged): Ditto.
+        (WebCore::HTMLMediaElement::updatePlayState): Invalidate cached time before changing m_paused.
+        * html/HTMLMediaElement.h:
+
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::MediaPlayer::maximumDurationToCacheMovieTime): New.
+        * platform/graphics/MediaPlayer.h:
+        * platform/graphics/MediaPlayerPrivate.h:
+        (WebCore::MediaPlayerPrivateInterface::maximumDurationToCacheMovieTime): New.
+
+        * platform/graphics/mac/MediaPlayerPrivateQTKit.h:
+        (WebCore::MediaPlayerPrivate::maximumDurationToCacheMovieTime): New, say it is safe to cache
+        time for five seconds (based on lots of experimenting with LOG_CACHED_TIME_WARNINGS enabled).
+
 2010-11-11  Adam Roben  <aroben@apple.com>
 
         Windows build fix after r71816
