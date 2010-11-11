@@ -1,3 +1,141 @@
+2010-11-10  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Convert SVGMatrix/SVGTransform/SVGTransformList to the new SVGPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=49311
+
+        Move the last list type, SVGTransformList, and the last POD types, SVGMatrix & SVGTransform, over to the new SVGPropertyTearOff concept.
+        Removes the need for a custom JSSVGMatrix/V8SVGMatrix implementation, it's all integrated within the bindings now.
+
+        Tests: svg/W3C-SVG-1.1-SE/coords-dom-01-f.svg
+               svg/W3C-SVG-1.1-SE/coords-dom-02-f.svg
+               svg/W3C-SVG-1.1-SE/coords-dom-03-f.svg
+               svg/W3C-SVG-1.1-SE/coords-dom-04-f.svg
+               svg/W3C-SVG-1.1-SE/types-dom-01-b.svg
+               svg/W3C-SVG-1.1-SE/types-dom-02-f.svg
+               svg/W3C-SVG-1.1-SE/types-dom-03-b.svg
+               svg/W3C-SVG-1.1-SE/types-dom-04-b.svg
+               svg/W3C-SVG-1.1-SE/types-dom-05-b.svg
+               svg/dom/SVGMatrix.html
+               svg/dom/SVGTransform.html
+               svg/dom/SVGTransformList.html
+
+        * Android.jscbindings.mk: Removed JSSVGMatrixCustom.cpp.
+        * Android.v8bindings.mk: Removed V8SVGMatrixCustom.cpp.
+        * CMakeLists.txt: Remove JSSVGMatrixCustom.cpp. 
+        * GNUmakefile.am: Ditto. Add SVGAnimatedTransformListPropertyTearOff.h/SVGStaticPropertyWithParentTearOff.h/SVGTransformListPropertyTearOff.h/SVGAnimatedTransformList.h/SVGMatrix.h to build.
+        * WebCore.gypi: Ditto.
+        * WebCore.pro: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/js/JSBindingsAllInOne.cpp: Remove JSSVGMatrixCustom.cpp
+        * bindings/js/JSSVGMatrixCustom.cpp: Removed.
+        * bindings/scripts/CodeGenerator.pm: Convert SVGMatrix/SVGTransform/SVGTransformList to the new concept.
+        * bindings/scripts/CodeGeneratorJS.pm: Ditto.
+        * bindings/scripts/CodeGeneratorObjC.pm: Ditto.
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        * bindings/v8/custom/V8SVGMatrixCustom.cpp: Removed.
+        * svg/DeprecatedSVGAnimatedPropertyTraits.h: Remove SVGTransformList handling.
+        * svg/DeprecatedSVGAnimatedTemplate.h: Ditto.
+        * svg/SVGAnimateTransformElement.cpp: Adapt to SVGTransformList API changes.
+        (WebCore::transformListFor):
+        (WebCore::SVGAnimateTransformElement::resetToBaseValue):
+        (WebCore::SVGAnimateTransformElement::calculateAnimatedValue):
+        (WebCore::SVGAnimateTransformElement::applyResultsToTarget):
+        * svg/SVGAnimatedTransformList.h: Added.
+        * svg/SVGGradientElement.cpp: Ditto.
+        (WebCore::SVGGradientElement::SVGGradientElement):
+        (WebCore::SVGGradientElement::parseMappedAttribute):
+        * svg/SVGGradientElement.h: Ditto.
+        * svg/SVGLinearGradientElement.cpp: Ditto.
+        (WebCore::SVGLinearGradientElement::collectGradientAttributes):
+        * svg/SVGMatrix.h: Added. SVGMatrix inherits from AffineTransform, and is only used in the bindings. It implements SVGs special requirements.
+        (WebCore::SVGMatrix::translate): Returns a copy of the matrix, not affecting the original matrix.
+        (WebCore::SVGMatrix::scale): Ditto.
+        (WebCore::SVGMatrix::scaleNonUniform): Ditto.
+        (WebCore::SVGMatrix::rotate): Ditto.
+        (WebCore::SVGMatrix::flipX): Ditto.
+        (WebCore::SVGMatrix::flipY): Ditto.
+        (WebCore::SVGMatrix::skewX): Ditto.
+        (WebCore::SVGMatrix::skewY): Ditto.
+        (WebCore::SVGMatrix::multiply): Ditto.
+        (WebCore::SVGMatrix::inverse): Ditto.
+        (WebCore::SVGMatrix::rotateFromVector): Dittto.
+        * svg/SVGMatrix.idl: Enable StrictTypeChecking/RequiresAllArguments=Raise on all attributes/functions.
+        * svg/SVGPatternElement.cpp: Adapt to SVGTransformList API changes.
+        (WebCore::SVGPatternElement::SVGPatternElement):
+        (WebCore::SVGPatternElement::parseMappedAttribute):
+        (WebCore::SVGPatternElement::collectPatternAttributes):
+        * svg/SVGPatternElement.h: Ditto.
+        * svg/SVGPoint.idl: Enable StrictTypeChecking/RequiresAllArguments=Raise for 'matrixTransform', now that SVGMatrix has been converted to the new scheme.
+        * svg/SVGRadialGradientElement.cpp: Adapt to SVGTransformList API changes.
+        (WebCore::SVGRadialGradientElement::collectGradientAttributes):
+        * svg/SVGSVGElement.cpp: Ditto.
+        (WebCore::SVGSVGElement::createSVGTransformFromMatrix):
+        (WebCore::SVGSVGElement::viewBoxToViewTransform):
+        * svg/SVGSVGElement.h: Ditto.
+        * svg/SVGStyledTransformableElement.cpp: Ditto.
+        (WebCore::SVGStyledTransformableElement::SVGStyledTransformableElement):
+        (WebCore::SVGStyledTransformableElement::animatedLocalTransform):
+        (WebCore::SVGStyledTransformableElement::parseMappedAttribute):
+        * svg/SVGStyledTransformableElement.h: Ditto.
+        * svg/SVGTextElement.cpp: Ditto.
+        (WebCore::SVGTextElement::SVGTextElement):
+        (WebCore::SVGTextElement::parseMappedAttribute):
+        (WebCore::SVGTextElement::animatedLocalTransform):
+        * svg/SVGTextElement.h: Ditto.
+        * svg/SVGTransform.cpp: Modernize code, inlined some getters.
+        (WebCore::SVGTransform::SVGTransform):
+        (WebCore::SVGTransform::setMatrix):
+        * svg/SVGTransform.h: Reindent header.
+        (WebCore::SVGTransform::type):
+        (WebCore::SVGTransform::svgMatrix):
+        (WebCore::SVGTransform::matrix):
+        (WebCore::SVGTransform::angle):
+        (WebCore::SVGTransform::rotationCenter):
+        (WebCore::SVGTransform::isValid):
+        (WebCore::operator==): Avoid function calls, make operator== a friend of SVGTransform, and compare members directly.
+        (WebCore::operator!=):
+        * svg/SVGTransform.idl:
+        * svg/SVGTransformList.cpp: Rewritten as plain Vector<SVGTransform>.
+        (WebCore::SVGTransformList::createSVGTransformFromMatrix):
+        (WebCore::SVGTransformList::consolidate):
+        (WebCore::SVGTransformList::concatenate):
+        (WebCore::SVGTransformList::valueAsString):
+        * svg/SVGTransformList.h:
+        (WebCore::SVGTransformList::SVGTransformList):
+        * svg/SVGTransformList.idl: Enable StrictTypeChecking/RequiresAllArguments=Raise on all attributes/functions.
+        * svg/SVGTransformable.cpp: Adapt to SVGTransformList API changes.
+        (WebCore::SVGTransformable::parseTransformAttribute):
+        * svg/SVGTransformable.h: Ditto.
+        * svg/SVGViewSpec.cpp: Ditto.
+        (WebCore::SVGViewSpec::SVGViewSpec):
+        (WebCore::SVGViewSpec::setTransform):
+        (WebCore::SVGViewSpec::parseViewSpec):
+        * svg/SVGViewSpec.h: Ditto.
+        (WebCore::SVGViewSpec::transform):
+        * svg/properties/SVGAnimatedListPropertyTearOff.h: Made constructor and members protected.
+        * svg/properties/SVGAnimatedPropertyMacros.h: Add new helper macro DECLARE_ANIMATED_TRANSFORM_LIST_PROPERTY. This is needed until we expand all macros.
+        * svg/properties/SVGAnimatedTransformListPropertyTearOff.h: Added. Extends SVGAnimatedListPropertyTearOff, returning SVGTransformListPropertyTearOff objects.
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::animVal):
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::create):
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::SVGAnimatedTransformListPropertyTearOff):
+        * svg/properties/SVGListPropertyTearOff.h: Made construct and members protected.
+        * svg/properties/SVGProperty.h: Declare commitChange() as pure virtual method.
+        * svg/properties/SVGPropertyTraits.h: Handle SVGTransformList.
+        * svg/properties/SVGStaticPropertyWithParentTearOff.h: Added. Same concept as JSSVGStaticPODTypeWrapperWithParent, used to expose SVGPropertyTearOffs for types
+                                                               that are using this concept themselves. (SVGMatrix attribute of SVGTransform, both are POD types, using SVGPropertyTearOff).
+        (WebCore::SVGStaticPropertyWithParentTearOff::create):
+        (WebCore::SVGStaticPropertyWithParentTearOff::commitChange):
+        (WebCore::SVGStaticPropertyWithParentTearOff::SVGStaticPropertyWithParentTearOff):
+        * svg/properties/SVGTransformListPropertyTearOff.h: Added. Extends SVGListPropertyTearOff by two special SVGTransformList methods: consolidate and createSVGTransformFromMatrix.
+        (WebCore::SVGTransformListPropertyTearOff::create):
+        (WebCore::SVGTransformListPropertyTearOff::createSVGTransformFromMatrix):
+        (WebCore::SVGTransformListPropertyTearOff::consolidate):
+        (WebCore::SVGTransformListPropertyTearOff::SVGTransformListPropertyTearOff):
+
 2010-11-11  Alejandro G. Castro  <alex@igalia.com>
 
         Reviewed by Nikolas Zimmermann.
