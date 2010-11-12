@@ -1,3 +1,21 @@
+2010-11-11  Chris Rogers  <crogers@google.com>
+
+        Reviewed by Kenneth Russell.
+
+        Fix Accelerate.framework issues in VectorMath 32-bit ppc & i386 vs. other architectures (64-bit, ARM, etc.).
+        On the Mac we use the highly optimized versions in Accelerate.framework
+        In 32-bit mode (__ppc__ or __i386__) <Accelerate/Accelerate.h> includes <vecLib/vDSP_translate.h> which defines macros
+        of the same name as our namespaced function names, so we must handle this case differently.
+        Other architectures (64bit, ARM, etc.) do not include this header file.
+        
+        https://bugs.webkit.org/show_bug.cgi?id=49112
+
+        No new tests since audio API is not yet implemented.
+
+        * platform/audio/VectorMath.cpp:
+        (WebCore::VectorMath::vsmul):
+        (WebCore::VectorMath::vadd):
+
 2010-11-11  Dan Bernstein  <mitz@apple.com>
 
         Reviewed by Darin Adler.
