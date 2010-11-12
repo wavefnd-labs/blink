@@ -1,3 +1,57 @@
+2010-11-11  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Script runs more than once after a clone
+        https://bugs.webkit.org/show_bug.cgi?id=48966
+
+        The bug was caused by cloneElementWithoutChildren's not propagating isEvaluated flag,
+        which indicates whether or not the script has already started, and the fact
+        neither HTMLScriptRunner nor XMLDocumentParser was setting isEvaluated flag to true.
+
+        Fixed the bug by making cloneElementWithoutChildren call a virtual cloneElementWithoutAttributesAndChildren,
+        and override it in HTMLScriptElement and SVGScriptElement to propagate isEvaluated flag,
+        and replacing direct access to ScriptController by a call to new ScriptElementData::executeScript,
+        which updates the isEvaluated flag properly.
+
+        See also: http://www.whatwg.org/specs/web-apps/current-work/#already-started
+
+        Tests: fast/dom/script-clone-rerun-self.html
+               fast/dom/script-clone-rerun.html
+               svg/dom/SVGScriptElement/script-clone-rerun-self.svg
+               svg/dom/SVGScriptElement/script-clone-rerun.svg
+
+        * dom/Element.cpp:
+        (WebCore::Element::cloneElementWithoutChildren): Calls cloneElementWithoutChildren.
+        (WebCore::Element::cloneElementWithoutAttributesAndChildren): Extracted from cloneElementWithoutChildren.
+        * dom/Element.h:
+        * dom/ScriptElement.cpp:
+        (WebCore::ScriptElementData::ScriptElementData): Added isEvaluated flag to the argument list.
+        (WebCore::ScriptElementData::evaluateScript): Extracted from HTMLScriptRunner::executeScript.
+        (WebCore::ScriptElementData::executeScript): Renamed evaluated to isEvaluated.
+        (WebCore::ScriptElementData::ignoresLoadRequest): Renamed evaluated to isEvaluated.
+        * dom/ScriptElement.h: Renamed evaluated to isEvaluated.
+        (WebCore::ScriptElementData::isEvaluated): Added.
+        * dom/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::endElementNs): Calls ScriptElement::executeScript.
+        * html/HTMLScriptElement.cpp:
+        (WebCore::HTMLScriptElement::HTMLScriptElement): Added isEvaluated flag to the argument list.
+        (WebCore::HTMLScriptElement::create): Calls the constructor with the isEvaluated flag set to false.
+        (WebCore::HTMLScriptElement::cloneElementWithoutAttributesAndChildren): Propagates isEvaluated.
+        (WebCore::HTMLScriptElement::executeScript): Added; calls ScriptElementData::executeScript.
+        * html/HTMLScriptElement.h:
+        * html/parser/HTMLScriptRunner.cpp:
+        (WebCore::HTMLScriptRunner::executePendingScriptAndDispatchEvent): Added an assertion that was lost
+        in extracting ScriptElementData::executeScript.
+        (WebCore::HTMLScriptRunner::runScript): Calls ScriptElementData::executeScript.
+        * html/parser/HTMLScriptRunner.h:
+        * svg/SVGScriptElement.cpp:
+        (WebCore::SVGScriptElement::SVGScriptElement): Added isEvaluated flag to the argument list.
+        (WebCore::SVGScriptElement::create): Calls the constructor with the isEvaluated flag set to false.
+        (WebCore::SVGScriptElement::cloneElementWithoutAttributesAndChildren): Propagates isEvaluated.
+        (WebCore::SVGScriptElement::executeScript): Added; calls ScriptElementData::executeScript.
+        * svg/SVGScriptElement.h:
+
 2010-11-11  Shinichiro Hamaji  <hamaji@chromium.org>
 
         Reviewed by Darin Adler.
