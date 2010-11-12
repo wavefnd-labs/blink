@@ -1,3 +1,52 @@
+2010-11-05  MORITA Hajime  <morrita@google.com>
+
+        Reviewed by Kent Tamura.
+
+        Refactoring: Return values of TextCheckingHelper::paragraphAlignedRange should form a class.
+        https://bugs.webkit.org/show_bug.cgi?id=49053
+
+        Replaced paragraphAlignedRange() function call into
+        TextCheckingParagraph class. The class encapsulates a range of a
+        paragraph, and its relation within associated checking range.
+        Instance variables of the class are computed lazily. So we can save unnecessary
+        memory allocation and DOM tree traversal.
+        
+        No new tests, no behavior change. 
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::markAllMisspellingsAndBadGrammarInRanges): Replaced paragraphAlignedRange() call.
+        (WebCore::Editor::changeBackToReplacedString): Replaced paragraphAlignedRange() call.
+        * editing/TextCheckingHelper.cpp:
+        (WebCore::expandToParagraphBoundary):
+        (WebCore::TextCheckingParagraph::TextCheckingParagraph):
+        (WebCore::TextCheckingParagraph::~TextCheckingParagraph):
+        (WebCore::TextCheckingParagraph::expandRangeToNextEnd):
+        (WebCore::TextCheckingParagraph::invalidateParagraphRangeValues):
+        (WebCore::TextCheckingParagraph::rangeLength):
+        (WebCore::TextCheckingParagraph::paragraphRange):
+        (WebCore::TextCheckingParagraph::subrange):
+        (WebCore::TextCheckingParagraph::offsetTo):
+        (WebCore::TextCheckingParagraph::isEmpty):
+        (WebCore::TextCheckingParagraph::offsetAsRange):
+        (WebCore::TextCheckingParagraph::text):
+        (WebCore::TextCheckingParagraph::checkingStart):
+        (WebCore::TextCheckingParagraph::checkingEnd):
+        (WebCore::TextCheckingParagraph::checkingLength):
+        (WebCore::TextCheckingHelper::findFirstBadGrammar): Replaced paragraphAlignedRange() call.
+        (WebCore::TextCheckingHelper::guessesForMisspelledOrUngrammaticalRange): Replaced paragraphAlignedRange() call.
+        * editing/TextCheckingHelper.h:
+        (WebCore::TextCheckingParagraph::textLength):
+        (WebCore::TextCheckingParagraph::textSubstring):
+        (WebCore::TextCheckingParagraph::textCharacters):
+        (WebCore::TextCheckingParagraph::textCharAt):
+        (WebCore::TextCheckingParagraph::checkingSubstring):
+        (WebCore::TextCheckingParagraph::checkingRangeMatches):
+        (WebCore::TextCheckingParagraph::isCheckingRangeCoveredBy):
+        (WebCore::TextCheckingParagraph::checkingRangeCovers):
+        (WebCore::TextCheckingParagraph::checkingRange):
+        (WebCore::TextCheckingParagraph::isTextEmpty):
+        (WebCore::TextCheckingParagraph::isRangeEmpty):
+
 2010-11-11  Ryosuke Niwa  <rniwa@webkit.org>
 
         Reviewed by Darin Adler.
