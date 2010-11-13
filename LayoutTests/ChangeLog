@@ -1,3 +1,38 @@
+2010-11-13  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        https://bugs.webkit.org/show_bug.cgi?id=49464
+        
+        Fix bugs with the orientation of fonts when the font is brought in via fallback, when the font contains no
+        vertical tables, or when the font is loaded via font-face in both horizontal and vertical forms.
+        
+        (1) Include orientation as part of the @font-face hashtables so that the fonts are treated as
+        distinct when used in horizontal and vertical forms.
+        
+        (2) Let the orientation member of FontPlatformData represent the desired orientation rather than
+        the supported one.  Add an orientation member to SimpleFontData that represents the actual
+        supported orientation of the font.
+        
+        (3) For fonts with no vertical tables, add a brokenIdeographicsFont accessor that is invoked when
+        CJK ideographs are encountered.  This is essentially identical to the small caps fallback mechanism
+        but invoked only for ideographs.  The special ideograph font locks the orientation to vertical and
+        renders the glyphs upright even when the font has no vertical tables.  Punctuation and such will
+        still look funny, and really this is a bug in the font, but at least this way it will be apparent
+        that the font is to blame.
+
+        Added fast/blockflow/broken-ideographic-font.html and fast/blockflow/vertical-font-fallback.html.
+
+        * fast/blockflow/broken-ideographic-font.html: Added.
+        * fast/blockflow/resources/MakibaFont13.ttf: Added.
+        * fast/blockflow/vertical-font-fallback.html: Added.
+        * platform/mac/fast/blockflow/broken-ideographic-font-expected.checksum: Added.
+        * platform/mac/fast/blockflow/broken-ideographic-font-expected.png: Added.
+        * platform/mac/fast/blockflow/broken-ideographic-font-expected.txt: Added.
+        * platform/mac/fast/blockflow/vertical-font-fallback-expected.checksum: Added.
+        * platform/mac/fast/blockflow/vertical-font-fallback-expected.png: Added.
+        * platform/mac/fast/blockflow/vertical-font-fallback-expected.txt: Added.
+
 2010-11-13  Rob Buis  <rwlbuis@gmail.com>
 
         Reviewed by Dirk Schulze.
