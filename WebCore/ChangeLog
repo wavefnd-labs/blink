@@ -1,3 +1,30 @@
+2010-11-12  Daniel Bates  <dbates@rim.com>
+
+        Reviewed by Adam Barth.
+
+        Transferred <iframe>s may not have a unique internal name
+        https://bugs.webkit.org/show_bug.cgi?id=48768
+
+        Fixes an issue where an <iframe> that is transferred from
+        document A to document B, where A != B, may not have a
+        unique internal name in B.
+
+        Test: fast/frames/iframe-reparenting-unique-name.html
+
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::setNameAndOpenURL): Inlined code from
+        HTMLFrameElementBase::setName() so that we can remove setName(), which
+        was only called being called by HTMLFrameElementBase::setNameAndOpenURL().
+        * html/HTMLFrameElementBase.h: Removed HTMLFrameElementBase::setName().
+        * html/HTMLFrameOwnerElement.h: Removed HTMLFrameOwnerElement::setName().
+        * page/Frame.cpp:
+        (WebCore::Frame::transferChildFrameToNewDocument): Modified to call FrameTree::transferChild().
+        * page/FrameTree.cpp:
+        (WebCore::FrameTree::transferChild): Added.
+        (WebCore::FrameTree::appendChild): Moved the majority of the code into FrameTree::actuallyAppendChild().
+        (WebCore::FrameTree::actuallyAppendChild): Added.
+        * page/FrameTree.h:
+
 2010-11-12  Joseph Pecoraro  <joepeck@webkit.org>
 
         Reviewed by Alexey Proskuryakov.
