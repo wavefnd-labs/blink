@@ -1,5 +1,110 @@
 2010-11-14  Kent Tamura  <tkent@chromium.org>
 
+        Reviewed by Dimitri Glazkov.
+
+        Improve API for form validation message strings
+        https://bugs.webkit.org/show_bug.cgi?id=34945
+        
+        This change introduces three new functions;
+        validationMessageTypeMismatchFor*Text(). The implementation for each
+        platform is just a call to validationMessageTypeMismatchText().
+
+        Some validationMessage*() functions have new parameters.  The parameters
+        are ignored in all platforms for now.
+
+        This change doesn't change any behavior. However a platform can add
+        additional information to validation messages.  e.g. Changing "type
+        mismatch" to "Please specify an e-mail address" for <input type=email>.
+
+        * html/EmailInputType.cpp:
+        (WebCore::EmailInputType::typeMismatchText): Call validationMessageTypeMismatchForEmailText()
+          or validationMessageTypeMismatchForMultipleEmailText().
+        * html/EmailInputType.h:
+        * html/HTMLFormControlElement.h: Add maxLength() and value() to access them from ValidityState.
+        * html/HTMLInputElement.cpp: Add the following functions to pass extra
+          information to validation message string functions.
+        (WebCore::HTMLInputElement::minimumString):
+        (WebCore::HTMLInputElement::maximumString):
+        (WebCore::HTMLInputElement::stepBaseString):
+        (WebCore::HTMLInputElement::stepString):
+        (WebCore::HTMLInputElement::typeMismatchText):
+        * html/HTMLInputElement.h:
+        * html/HTMLTextAreaElement.h:
+        * html/InputType.cpp:
+        (WebCore::InputType::typeMismatchText): Call validationMessageTypeMismatchText().
+        * html/InputType.h:
+        * html/URLInputType.cpp:
+        (WebCore::URLInputType::typeMismatchText): Call validationMessageTypeMismatchForURLText().
+        * html/URLInputType.h:
+        * html/ValidityState.cpp:
+        (WebCore::ValidityState::validationMessage):
+        * platform/LocalizedStrings.cpp:
+        (WebCore::validationMessageTypeMismatchForEmailText):
+        (WebCore::validationMessageTypeMismatchForMultipleEmailText):
+        (WebCore::validationMessageTypeMismatchForURLText):
+        (WebCore::validationMessageTooLongText):
+        (WebCore::validationMessageRangeUnderflowText):
+        (WebCore::validationMessageRangeOverflowText):
+        (WebCore::validationMessageStepMismatchText):
+        * platform/LocalizedStrings.h:
+          - Add validationMessageTypeMismatchForEmailText(),
+            validationMessageTypeMismatchForMultipleEmailText() and
+            validationMessageTypeMismatchForURLText()
+          - Add length parameters to validationMessageTooLongText().
+          - Add the minimum value parameter to validationMessageRangeUnderflowText()
+          - Add the maximum value parameter to validationMessageRangeOverflowText()
+          - Add parameters of the base value and the step value to validationMessageStepMismatchText()
+        * platform/android/LocalizedStringsAndroid.cpp:
+        (WebCore::validationMessageTypeMismatchForEmailText):
+        (WebCore::validationMessageTypeMismatchForMultipleEmailText):
+        (WebCore::validationMessageTypeMismatchForURLText):
+        (WebCore::validationMessageTooLongText):
+        (WebCore::validationMessageRangeUnderflowText):
+        (WebCore::validationMessageRangeOverflowText):
+        (WebCore::validationMessageStepMismatchText):
+        * platform/brew/LocalizedStringsBrew.cpp:
+        (WebCore::validationMessageTypeMismatchForEmailText):
+        (WebCore::validationMessageTypeMismatchForMultipleEmailText):
+        (WebCore::validationMessageTypeMismatchForURLText):
+        (WebCore::validationMessageTooLongText):
+        (WebCore::validationMessageRangeUnderflowText):
+        (WebCore::validationMessageRangeOverflowText):
+        (WebCore::validationMessageStepMismatchText):
+        * platform/efl/LocalizedStringsEfl.cpp:
+        (WebCore::validationMessageRangeOverflowText):
+        (WebCore::validationMessageRangeUnderflowText):
+        (WebCore::validationMessageStepMismatchText):
+        (WebCore::validationMessageTooLongText):
+        (WebCore::validationMessageTypeMismatchForEmailText):
+        (WebCore::validationMessageTypeMismatchForMultipleEmailText):
+        (WebCore::validationMessageTypeMismatchForURLText):
+        * platform/gtk/LocalizedStringsGtk.cpp:
+        (WebCore::validationMessageTypeMismatchForEmailText):
+        (WebCore::validationMessageTypeMismatchForMultipleEmailText):
+        (WebCore::validationMessageTypeMismatchForURLText):
+        (WebCore::validationMessageTooLongText):
+        (WebCore::validationMessageRangeUnderflowText):
+        (WebCore::validationMessageRangeOverflowText):
+        (WebCore::validationMessageStepMismatchText):
+        * platform/haiku/LocalizedStringsHaiku.cpp:
+        (WebCore::validationMessageTypeMismatchForEmailText):
+        (WebCore::validationMessageTypeMismatchForMultipleEmailText):
+        (WebCore::validationMessageTypeMismatchForURLText):
+        (WebCore::validationMessageTooLongText):
+        (WebCore::validationMessageRangeUnderflowText):
+        (WebCore::validationMessageRangeOverflowText):
+        (WebCore::validationMessageStepMismatchText):
+        * platform/wx/LocalizedStringsWx.cpp:
+        (WebCore::validationMessageTypeMismatchForEmailText):
+        (WebCore::validationMessageTypeMismatchForMultipleEmailText):
+        (WebCore::validationMessageTypeMismatchForURLText):
+        (WebCore::validationMessageTooLongText):
+        (WebCore::validationMessageRangeUnderflowText):
+        (WebCore::validationMessageRangeOverflowText):
+        (WebCore::validationMessageStepMismatchText):
+
+2010-11-14  Kent Tamura  <tkent@chromium.org>
+
         Reviewed by Andreas Kling.
 
         KeyboardEvent::keyIdentifier() should return "const String&"
