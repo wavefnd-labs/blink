@@ -1,3 +1,74 @@
+2010-11-15  Vangelis Kokkevis  <vangelis@chromium.org>
+
+        Reviewed by Kenneth Russell.
+
+        [chromium] Fixes layer opacity implementation of composited layers
+        https://bugs.webkit.org/show_bug.cgi?id=49233
+
+        This introduces a fairly drastic change in how LayerRendererChromium draws
+        composited layers. Layers that have non-zero opacity as well as layers that
+        clip their descendants (and have non-trivial transforms) are now first
+        rendered onto off-screen surfaces (RenderSurfaceChromium's). The compositing
+        operation now consists of two distinct phases: First a hierarchical traversal
+        of the layer tree to compute the layer transforms, determine what the necessary
+        RenderSurfaces are and sort layer that preserve-3d based on their z-value. A second
+        pass goes through all the RenderSurfaces discovered by the first pass and updates
+        their contents.
+        Additional significant side-effects of this change are:
+        1. Depth buffer and depth testing is no longer used. Drawing relies on a painter's
+           algorithm to render layers with the preserves-3d property from back to front using
+           the Z coordinate of their center. This will further be improved in the future with
+           the intoduction of a BSP tree to properly deal with intersecting layers.
+        2. Compositor no longer uses the stencil buffer to do clipping. Clipping is now performed
+           by rendering layer subtrees into an offscreen buffer and setting the appropriate
+           scissor and viewport transformation.
+
+        Tests: abs-position-inside-opacity.html (for the opacity implementation)
+               and the rest of the compositing layout tests to verify that
+               everything still works.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/ContentLayerChromium.cpp:
+        (WebCore::ContentLayerChromium::cleanupResources):
+        (WebCore::ContentLayerChromium::requiresClippedUpdateRect):
+        (WebCore::ContentLayerChromium::calculateClippedUpdateRect):
+        (WebCore::ContentLayerChromium::updateContents):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        (WebCore::LayerChromium::cleanupResources):
+        (WebCore::LayerChromium::createRenderSurface):
+        (WebCore::LayerChromium::descendantsDrawContent):
+        (WebCore::LayerChromium::descendantsDrawContentRecursive):
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore::LayerChromium::drawTransform):
+        (WebCore::LayerChromium::layerRenderer):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::orthoMatrix):
+        (WebCore::isScaleOrTranslation):
+        (WebCore::LayerRendererChromium::compareLayerZ):
+        (WebCore::LayerRendererChromium::LayerRendererChromium):
+        (WebCore::LayerRendererChromium::prepareToDrawLayers):
+        (WebCore::LayerRendererChromium::drawLayers):
+        (WebCore::LayerRendererChromium::updateLayersRecursive):
+        (WebCore::LayerRendererChromium::useRenderSurface):
+        (WebCore::LayerRendererChromium::drawLayer):
+        (WebCore::LayerRendererChromium::setScissorToRect):
+        (WebCore::LayerRendererChromium::setDrawViewportRect):
+        (WebCore::LayerRendererChromium::initializeSharedObjects):
+        (WebCore::LayerRendererChromium::cleanupSharedObjects):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        * platform/graphics/chromium/RenderSurfaceChromium.cpp: Added.
+        (WebCore::RenderSurfaceChromium::RenderSurfaceChromium):
+        (WebCore::RenderSurfaceChromium::~RenderSurfaceChromium):
+        (WebCore::RenderSurfaceChromium::cleanupResources):
+        (WebCore::RenderSurfaceChromium::layerRenderer):
+        (WebCore::RenderSurfaceChromium::prepareContentsTexture):
+        * platform/graphics/chromium/RenderSurfaceChromium.h: Added.
+        (WebCore::RenderSurfaceChromium::contentRectCenter):
+        (WebCore::RenderSurfaceChromium::contentRect):
+        * platform/graphics/chromium/VideoLayerChromium.cpp:
+        (WebCore::VideoLayerChromium::cleanupResources):
+
 2010-11-15  Martin Robinson  <mrobinson@igalia.com>
 
         Reviewed by Andreas Kling.
