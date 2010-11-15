@@ -1,3 +1,50 @@
+2010-11-14  Kenichi Ishibashi  <bashi@google.com>
+
+        Reviewed by Kent Tamura.
+
+        [HTML5] "form" attribute support for form control elements
+        https://bugs.webkit.org/show_bug.cgi?id=47813
+
+        Adds a list of form-associated elements with form attribute into
+        the Document class to support form attribute.
+        Adds a function to determine the right place to locate
+        form-associated elements with form attribute into
+        m_associatedElements of HTMLFormElement class.
+
+        Tests: fast/forms/form-attribute-elements-order.html
+               fast/forms/form-attribute-elements-order2.html
+               fast/forms/form-attribute-elements.html
+               fast/forms/form-attribute.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::registerFormElementWithFormAttribute): Added.
+        (WebCore::Document::unregisterFormElementWithFormAttribute): Added.
+        (WebCore::Document::resetFormElementsOwner): Added.
+        * dom/Document.h: Added the list for elements with form attribute.
+        * html/HTMLAttributeNames.in: Added form attribute.
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::insertedIntoTree): Modified to handle
+        form attribute.
+        (WebCore::HTMLFormControlElement::removedFromTree): Ditto.
+        (WebCore::HTMLFormControlElement::resetFormOwner): Added.
+        (WebCore::HTMLFormControlElement::attributeChanged): Added.
+        * html/HTMLFormControlElement.h:
+        * html/HTMLFormElement.cpp:
+        (WebCore::HTMLFormElement::HTMLFormElement): Modified to initialize
+        newly-added variables.
+        (WebCore::HTMLFormElement::insertedIntoDocument): Modified to reset
+        form owner of form-associated elements.
+        (WebCore::HTMLFormElement::removedFromDocument): Ditto.
+        (WebCore::HTMLFormElement::formElementIndexWithFormAttribute): Added.
+        (WebCore::HTMLFormElement::formElementIndex): Modified to treat
+        form-associated elements with form attribute separately.
+        (WebCore::HTMLFormElement::removeFormElement): Modified to handle
+        form-associated elements with form attribute.
+        * html/HTMLFormElement.h: Added three variables to handle form attribute.
+        * html/HTMLOutputElement.cpp: Removed "FIXME" comment.
+        (WebCore::HTMLOutputElement::parseMappedAttribute):
+        * html/HTMLOutputElement.h: Removed setForm().
+
 2010-11-14  David Hyatt  <hyatt@apple.com>
 
         Reviewed by Dan Bernstein.
