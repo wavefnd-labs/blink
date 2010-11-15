@@ -1,3 +1,22 @@
+2010-11-15  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Darin Adler.
+
+        <rdar://problem/8662770> Error image has incorrect size when a custom font is used
+
+        Test: fast/images/style-access-during-imageChanged-crash.html
+
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::RenderImage): Added initialization of m_needsToSetSizeForAltText.
+        (WebCore::RenderImage::imageSizeForError): Factored the non-alt-text dependent size computation
+        out of setImageSizeForAltText() into this function.
+        (WebCore::RenderImage::setImageSizeForAltText): Changed to use imageSizeForError().
+        (WebCore::RenderImage::styleDidChange): Added. If m_needsToSetSizeForAltText is true, sets the
+        intrinsic size and calls imageDimensionsChanged() as needed to cause layout or invalidation.
+        (WebCore::RenderImage::imageChanged): Moved som comed from here...
+        (WebCore::RenderImage::imageDimensionsChanged): ...to here.
+        * rendering/RenderImage.h:
+
 2010-11-15  Anders Carlsson  <andersca@apple.com>
 
         Reviewed by Dimitri Glazkov.
@@ -946,7 +965,7 @@
 
 2010-11-12  Ryosuke Niwa  <rniwa@webkit.org>
 
-        Unreviewed XCode project fix.
+        Unreviewed Xcode project fix.
 
         * WebCore.xcodeproj/project.pbxproj:
 
