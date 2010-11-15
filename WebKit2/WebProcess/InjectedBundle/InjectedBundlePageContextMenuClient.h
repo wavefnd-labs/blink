@@ -36,12 +36,14 @@ namespace WebCore {
 
 namespace WebKit {
 
+class APIObject;
+class InjectedBundleHitTestResult;
 class WebContextMenuItemData;
 class WebPage;
 
 class InjectedBundlePageContextMenuClient : public APIClient<WKBundlePageContextMenuClient> {
 public:
-    bool getCustomMenuFromDefaultItems(WebPage*, WebCore::ContextMenu* defaultMenu, Vector<WebContextMenuItemData>& newMenu);
+    bool getCustomMenuFromDefaultItems(WebPage*, InjectedBundleHitTestResult*, const Vector<WebContextMenuItemData>& defaultMenu, Vector<WebContextMenuItemData>& newMenu, RefPtr<APIObject>& userData);
 };
 
 } // namespace WebKit
