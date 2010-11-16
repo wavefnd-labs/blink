@@ -1,3 +1,48 @@
+2010-11-12  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        ScriptElement rather than HTMLScriptElement and SVGScriptElement should have ScriptElementData
+        https://bugs.webkit.org/show_bug.cgi?id=49469
+
+        Moved m_data, scriptCharset, scriptContent, shouldExecuteAsJavaScript, and executeScript from
+        HTMLScriptElement and SVGScriptElement to ScriptElementData.
+
+        Also made insertedIntoDocument, removedFromDocument, childrenChanged, finishParsingChildren,
+        and handleSourceAttribute of ScriptElement non-static.
+
+        No new tests are added since this is a cleanup.
+
+        * dom/ScriptElement.cpp:
+        (WebCore::ScriptElement::scriptCharset): Added.
+        (WebCore::ScriptElement::scriptContent): Added.
+        (WebCore::ScriptElement::shouldExecuteAsJavaScript): Added.
+        (WebCore::ScriptElement::executeScript): Added.
+        (WebCore::ScriptElement::insertedIntoDocument): Made non-static. Accesses m_data.
+        (WebCore::ScriptElement::removedFromDocument): Ditto.
+        (WebCore::ScriptElement::childrenChanged): Ditto.
+        (WebCore::ScriptElement::finishParsingChildren): Ditto.
+        (WebCore::ScriptElement::handleSourceAttribute): Ditto.
+        * dom/ScriptElement.h: Moved the declaration of ScriptElement after that of ScriptElementData
+        because ScriptElement has to instantiate ScriptElementData.
+        (WebCore::ScriptElement::ScriptElement): Initializes m_data.
+        * html/HTMLScriptElement.cpp: Removed scriptCharset, scriptContent, shouldExecuteAsJavaScript, and executeScript.
+        (WebCore::HTMLScriptElement::HTMLScriptElement): Initializes ScriptElement instead of ScriptElementData.
+        (WebCore::HTMLScriptElement::childrenChanged): Calls ScriptElement::childrenChanged.
+        (WebCore::HTMLScriptElement::parseMappedAttribute): Calls ScriptElement::handleSourceAttribute.
+        (WebCore::HTMLScriptElement::finishParsingChildren): Calls ScriptElement::finishParsingChildren.
+        (WebCore::HTMLScriptElement::insertedIntoDocument): Calls ScriptElement::insertedIntoDocument.
+        (WebCore::HTMLScriptElement::removedFromDocument): Calls ScriptElement::removedFromDocument.
+        * html/HTMLScriptElement.h:
+        * svg/SVGScriptElement.cpp: Removed scriptCharset, scriptContent, shouldExecuteAsJavaScript, and executeScript.
+        (WebCore::SVGScriptElement::SVGScriptElement): Initializes ScriptElement instead of ScriptElementData.
+        (WebCore::SVGScriptElement::svgAttributeChanged): Calls ScriptElement::handleSourceAttribute.
+        (WebCore::SVGScriptElement::insertedIntoDocument): Calls ScriptElement::insertedIntoDocument.
+        (WebCore::SVGScriptElement::removedFromDocument): Calls ScriptElement::removedFromDocument.
+        (WebCore::SVGScriptElement::childrenChanged): Calls ScriptElement::childrenChanged.
+        (WebCore::SVGScriptElement::finishParsingChildren): Calls ScriptElement::finishParsingChildren.
+        * svg/SVGScriptElement.h:
+
 2010-11-15  Kent Tamura  <tkent@chromium.org>
 
         Reviewed by Darin Adler.
