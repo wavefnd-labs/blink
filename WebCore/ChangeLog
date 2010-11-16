@@ -1,3 +1,34 @@
+2010-11-15  Adele Peterson  <adele@apple.com>
+
+        Reviewed by Darin Adler.
+
+        Fix for: https://bugs.webkit.org/show_bug.cgi?id=49452
+        Placeholder should not be swapped in and out of the text control's inner text element
+
+        There's no need to swap the placeholder text in and out of the inner text element.  Instead, just paint the text.
+        This reduces complexity and makes it easier to make independent decisions about the placeholder text and the text control value.
+
+        * html/HTMLInputElement.cpp: (WebCore::HTMLInputElement::setValueFromRenderer):
+        Since updatePlaceholderVisibility checks the value, set the value before calling updatePlaceholderVisibility.
+        * rendering/RenderTextControl.cpp:
+        (WebCore::RenderTextControl::updatePlaceholderVisibility): Remove code that set the inner text value with the placeholder text.
+        (WebCore::RenderTextControl::paintObject):  Paint the placeholder text during the background phase.
+        * rendering/RenderTextControl.h:
+        * rendering/RenderTextControlMultiLine.cpp:
+        (WebCore::RenderTextControlMultiLine::nodeAtPoint): Remove custom hit testing that tried to avoid hitting the placeholder text at the wrong time.
+        (WebCore::RenderTextControlMultiLine::updateFromElement):  Remove code that set the inner text value with the placeholder text.
+        (WebCore::RenderTextControlMultiLine::createInnerTextStyle): Remove code that created the inner text style based on the placeholder pseudoelement.
+        (WebCore::RenderTextControlMultiLine::textBoxInsetLeft): Added.
+        (WebCore::RenderTextControlMultiLine::textBoxInsetRight): Added.
+        * rendering/RenderTextControlMultiLine.h:
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::updateFromElement): Remove code that set the inner text value with the placeholder text.
+        (WebCore::RenderTextControlSingleLine::createInnerTextStyle): Remove code that created the inner text style based on the placeholder pseudoelement.
+        (WebCore::RenderTextControlSingleLine::textBoxInsetLeft): Added.
+        (WebCore::RenderTextControlSingleLine::textBoxInsetRight): Added.
+        * rendering/RenderTextControlSingleLine.h:
+        * rendering/TextControlInnerElements.cpp: Removed custom hit testing that tried to avoid hitting the placeholder text at the wrong time.
+
 2010-11-15  Andreas Kling  <kling@webkit.org>
 
         Unreviewed buildfix (Qt WebKit2 minimal)
