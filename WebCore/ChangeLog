@@ -1,3 +1,27 @@
+2010-11-16  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Simon Fraser.
+
+        <rdar://problem/8672000> REGRESSION (r72040): Error image with alt text can cause style to be frozen in a subtree
+        https://bugs.webkit.org/show_bug.cgi?id=49579
+
+        r72040 introduced a call to setNeedsStyleRecalc() from RenderImage::imageChanged(). When imageChanged()
+        got called beneath recalcStyle() on some ancestor element, the result was that the ancestor’s
+        childNeedsStyleRecalc flag got cleared, but its descendants all the way down to the image did not.
+        Thereafter, setNeedsStyleRecalc() would fail to propagate from that subtree up to the root. The fix
+        is to avoid the newly-added setNeedsStyleRecalc() in most cases, including during reclacStyle(), and
+        just keep it for when it is needed.
+
+        Tests: fast/block/float/015.html
+               fast/images/style-access-during-imageChanged-style-freeze.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::isPendingStyleRecalc): Added.
+        * dom/Document.h:
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::imageChanged): Only defer intrinsic size compoutation if a style recalc
+        is coming (indicating that current style() is stale).
+
 2010-11-11  Zhenyao Mo  <zmo@google.com>
 
         Reviewed by Kenneth Russell.
