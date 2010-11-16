@@ -1,3 +1,93 @@
+2010-11-15  Gavin Barraclough  <barraclough@apple.com>
+
+        Reviewed by Geoff Garen.
+
+        Bug 49488 - Only add source specific information to exceptions in Interpreter::throwException
+
+        Updated results to account for changes in TypeError messages.
+        (e.g. `Result of expression 'b1' [undefined] is not an object.` -> `'undefined' is not an object (evaluating 'b1.property')`).
+
+        * fast/css/font-face-descriptor-multiple-values-parsing-expected.txt:
+        * fast/css/resources/font-face-descriptor-multiple-values-parsing.js:
+        * fast/css/variables/color-hex-test-expected.txt:
+        * fast/dom/HTMLSelectElement/named-options-expected.txt:
+        * fast/dom/Range/getClientRects-expected.txt:
+        * fast/dom/SelectorAPI/dumpNodeList-almost-strict-expected.txt:
+        * fast/dom/SelectorAPI/dumpNodeList-expected.txt:
+        * fast/forms/select-namedItem-expected.txt:
+        * fast/js/basic-strict-mode-expected.txt:
+        * fast/js/date-toisostring-expected.txt:
+        * fast/js/delete-getters-setters-expected.txt:
+        * fast/js/exception-expression-offset-expected.txt:
+        * fast/js/exception-for-nonobject-expected.txt:
+        * fast/js/exception-thrown-from-new-expected.txt:
+        * fast/js/exception-thrown-from-new.html:
+        * fast/js/instance-of-immediates-expected.txt:
+        * fast/js/script-tests/exception-expression-offset.js:
+        (testException):
+        * fast/js/sputnik/Conformance/08_Types/8.6_The_Object_Type/8.6.2_Internal_Properties_and_Methods/S8.6.2_A7-expected.txt:
+        * fast/js/sputnik/Conformance/13_Function_Definition/S13_A17_T2-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.1_The_Global_Object/S15.1_A1_T1-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.1_The_Global_Object/S15.1_A1_T2-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.1_The_Global_Object/S15.1_A2_T1-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/15.2.4.2_Object.prototype.toString/S15.2.4.2_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/15.2.4.3_Object.prototype.toLocaleString/S15.2.4.3_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/15.2.4.4_Object.prototype.valueOf/S15.2.4.4_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/15.2.4.5_Object.prototype.hasOwnProperty/S15.2.4.5_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/15.2.4.6_Object.prototype.isPrototypeOf/S15.2.4.6_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/15.2.4.7_Object.prototype.propertyIsEnumerable/S15.2.4.7_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/S15.2.4_A3-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.2_Object/15.2.4/S15.2.4_A4-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.3_Function/15.3.4/15.3.4.2_Function.prototype.toString/S15.3.4.2_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.3_Function/15.3.4/S15.3.4_A5-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.5_String/15.5.4/15.5.4.10_String.prototype.match/S15.5.4.10_A1_T4-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.5_String/15.5.4/15.5.4.12_String.prototype.search/S15.5.4.12_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.5_String/15.5.4/15.5.4.13_String.prototype.slice/S15.5.4.13_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.5_String/15.5.4/15.5.4.15_String.prototype.substring/S15.5.4.15_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.5_String/15.5.4/15.5.4.17_String.prototype.toLocaleLowerCase/S15.5.4.17_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.5_String/15.5.4/15.5.4.7_String.prototype.indexOf/S15.5.4.7_A7-expected.txt:
+        * fast/js/sputnik/Conformance/15_Native_Objects/15.5_String/15.5.4/15.5.4.8_String.prototype.lastIndexOf/S15.5.4.8_A7-expected.txt:
+        * fast/xsl/transform-xhr-doc-expected.txt:
+        * http/tests/security/aboutBlank/xss-DENIED-navigate-opener-document-write-expected.txt:
+        * http/tests/security/aboutBlank/xss-DENIED-navigate-opener-javascript-url-expected.txt:
+        * http/tests/security/aboutBlank/xss-DENIED-set-opener-expected.txt:
+        * java/lc3/ArrayMethods/byte-001-expected.txt:
+        * java/lc3/CallStatic/object-001-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-007-n-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-008-n-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-009-n-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-010-n-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-011-n-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-012-n-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-013-n-expected.txt:
+        * java/lc3/ConvertBoolean/boolean-014-expected.txt:
+        * java/lc3/ConvertNull/null-001-expected.txt:
+        * java/lc3/ConvertNumber/number-011-expected.txt:
+        * java/lc3/ConvertString/string-006-expected.txt:
+        * java/lc3/ConvertString/string-007-n-expected.txt:
+        * java/lc3/ConvertUndefined/undefined-002-expected.txt:
+        * java/lc3/ConvertUndefined/undefined-003-expected.txt:
+        * java/lc3/JSBoolean/boolean-005-n-expected.txt:
+        * java/lc3/JSNumber/ToDouble-002-expected.txt:
+        * java/lc3/JSObject/ToJSObject-001-expected.txt:
+        * java/lc3/JSObject/ToObject-001-expected.txt:
+        * java/lc3/JavaObject/JavaObjectFieldOrMethod-001-expected.txt:
+        * platform/mac-snowleopard/canvas/philip/tests/2d.imageData.create1.type-expected.txt:
+        * platform/mac-snowleopard/canvas/philip/tests/2d.imageData.create2.type-expected.txt:
+        * platform/mac-snowleopard/canvas/philip/tests/2d.imageData.get.type-expected.txt:
+        * platform/mac/compositing/reflections/reflection-opacity-expected.txt:
+        * platform/mac/fast/css/variables/remove-variable-test-expected.txt:
+        * platform/mac/fast/css/variables/set-variable-test-expected.txt:
+        * platform/mac/fast/css/variables/variable-iteration-test-expected.txt:
+        * platform/mac/fast/events/updateLayoutForHitTest-expected.txt:
+        * platform/mac/svg/custom/createelement-expected.txt:
+        * platform/mac/tables/mozilla/bugs/bug53690-1-expected.txt:
+        * platform/mac/tables/mozilla_expected_failures/bugs/bug92868_1-expected.txt:
+        * plugins/npruntime/object-from-destroyed-plugin-expected.txt:
+        * plugins/npruntime/plugin-scriptable-object-invoke-default-expected.txt:
+        * svg/custom/use-nested-missing-target-removed-expected.txt:
+        * svg/dom/svgpath-out-of-bounds-getPathSeg-expected.txt:
+
 2010-11-15  Alexey Proskuryakov  <ap@apple.com>
 
         Reviewed by Darin Adler.
