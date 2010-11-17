@@ -1,3 +1,45 @@
+2010-11-17  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Merge ScriptElement and ScriptElementData
+        https://bugs.webkit.org/show_bug.cgi?id=49647
+
+        Merged two classes.
+
+        * dom/AsyncScriptRunner.cpp:
+        (WebCore::AsyncScriptRunner::executeScriptSoon): Takes ScriptElement* instead of ScriptElementData*.
+        (WebCore::AsyncScriptRunner::timerFired): Uses ScriptElement* instead of ScriptElementData*.
+        * dom/AsyncScriptRunner.h:
+        * dom/ScriptElement.cpp:
+        (WebCore::ScriptElement::ScriptElement): Merged with ScriptElementData::ScriptElementData.
+        (WebCore::ScriptElement::~ScriptElement): Merged with ScriptElementData::~ScriptElementData.
+        (WebCore::ScriptElement::insertedIntoDocument): Calls createdByParser, isAsynchronous, requestScript, and scriptContent.
+        (WebCore::ScriptElement::removedFromDocument): Calls stopLoadRequest.
+        (WebCore::ScriptElement::childrenChanged): Calls createdByParser and accesses m_element.
+        (WebCore::ScriptElement::finishParsingChildren): Calls scriptContent.
+        (WebCore::ScriptElement::handleSourceAttribute): Calls ignoresLoadRequest and requestScript.
+        (WebCore::ScriptElement::requestScript): Moved from ScriptElementData; calls dispatchErrorEvent.
+        (WebCore::ScriptElement::evaluateScript): Moved from ScriptElementData.
+        (WebCore::ScriptElement::executeScript): Ditto.
+        (WebCore::ScriptElement::stopLoadRequest): Ditto.
+        (WebCore::ScriptElement::execute): Moved from ScriptElementData; calls dispatchErrorEvent and dispatchLoadEvent.
+        (WebCore::ScriptElement::notifyFinished): Moved from ScriptElementData.
+        (WebCore::ScriptElement::ignoresLoadRequest): Ditto.
+        (WebCore::ScriptElement::shouldExecuteAsJavaScript): Moved from ScriptElementData; calls typeAttributeValue, languageAttributeValue,
+        forAttributeValue, and eventAttributeValue.
+        (WebCore::ScriptElement::scriptCharset): Moved from ScriptElementData.
+        (WebCore::ScriptElement::scriptContent): Ditto.
+        (WebCore::ScriptElement::isAsynchronous): Moved from ScriptElementData; calls sourceAttributeValue and asyncAttributeValue.
+        (WebCore::ScriptElement::isDeferred): Moved from ScriptElementData; calls sourceAttributeValue, asyncAttributeValue,
+        and deferAttributeValue.
+        * dom/ScriptElement.h:
+        (WebCore::ScriptElement::element):
+        (WebCore::ScriptElement::haveFiredLoadEvent):
+        (WebCore::ScriptElement::setHaveFiredLoadEvent):
+        (WebCore::ScriptElement::createdByParser):
+        (WebCore::ScriptElement::isEvaluated):
+
 2010-11-17  Tenghui Zhu  <ztenghui@google.com>
 
         Reviewed by Jeremy Orlow.
