@@ -1,3 +1,25 @@
+2010-11-16  Andy Estes  <aestes@apple.com>
+
+        Reviewed by Dave Hyatt.
+
+        WebKit mishandles line boxes where the content height exceeds the
+        specified line-height.
+        https://bugs.webkit.org/show_bug.cgi?id=49410
+
+        If a line height is explicitly specified on a text box and fallback
+        fonts are in use, only the primary font should be considered when
+        computing the box's ascent and descent. This prevents the inline box
+        from being sized larger than the specified line height.
+
+        This patch also fixes a math error when computing a used font's descent
+        in the case where line height isn't explicitly set. This change results
+        in a number of layout tests needing re-baselining.
+
+        Test: fast/css/line-height-determined-by-primary-font.html
+
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::computeLogicalBoxHeights):
+
 2010-11-15  Ryosuke Niwa  <rniwa@webkit.org>
 
         Reviewed by Darin Adler.
