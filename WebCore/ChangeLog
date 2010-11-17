@@ -1,3 +1,35 @@
+2010-11-15  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        ScriptElementData should be a private member of ScriptElement
+        https://bugs.webkit.org/show_bug.cgi?id=49578
+
+        Privatized m_data of ScriptElement. Added haveFiredLoadEvent, setHaveFiredLoadEvent, createdByParser,
+        and isEvaluated to ScriptElement to proxy calls from HTMLScriptElement and SVGScriptElement to ScriptElementData.
+
+        No tests are added since this is a cleanup.
+
+        * dom/ScriptElement.h:
+        (WebCore::ScriptElement::haveFiredLoadEvent): Added.
+        (WebCore::ScriptElement::setHaveFiredLoadEvent): Added.
+        (WebCore::ScriptElement::createdByParser): Added.
+        (WebCore::ScriptElement::isEvaluated): Added.
+        * html/HTMLScriptElement.cpp:
+        (WebCore::HTMLScriptElement::dispatchLoadEvent): Calls haveFiredLoadEvent and setHaveFiredLoadEvent.
+        (WebCore::HTMLScriptElement::cloneElementWithoutAttributesAndChildren): Calls isEvaluated.
+        * html/HTMLScriptElement.h:
+        (WebCore::HTMLScriptElement::text): Calls scriptContent.
+        (WebCore::HTMLScriptElement::haveFiredLoadEvent): Calls haveFiredLoadEvent.
+        * svg/SVGScriptElement.cpp:
+        (WebCore::SVGScriptElement::svgAttributeChanged): Calls haveFiredLoadEvent and createdByParser.
+        (WebCore::SVGScriptElement::insertedIntoDocument): Calls createdByParser.
+        (WebCore::SVGScriptElement::finishParsingChildren): Calls setHaveFiredLoadEvent.
+        (WebCore::SVGScriptElement::haveLoadedRequiredResources): Ditto.
+        (WebCore::SVGScriptElement::dispatchLoadEvent): Calls haveFiredLoadEvent.
+        (WebCore::SVGScriptElement::cloneElementWithoutAttributesAndChildren): Calls createdByParser,
+        haveFiredLoadEvent, and setHaveFiredLoadEvent.
+
 2010-11-16  Antti Koivisto  <antti@apple.com>
 
         Reviewed by Darin Adler.
