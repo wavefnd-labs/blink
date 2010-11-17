@@ -1,3 +1,25 @@
+2010-11-16  Zhenyao Mo  <zmo@google.com>
+
+        Reviewed by Kenneth Russell.
+
+        WebGLRenderingContext needs to zero textures and renderbuffers
+        https://bugs.webkit.org/show_bug.cgi?id=49355
+
+        Test: fast/canvas/webgl/uninitialized-test.html
+
+        * html/canvas/WebGLFramebuffer.cpp:
+        (WebCore::WebGLFramebuffer::onAccess): Use a parameter to decide if renderbuffer initialization is needed.
+        (WebCore::WebGLFramebuffer::initializeRenderbuffers): Don't return false if color buffer doesn't exist.
+        * html/canvas/WebGLFramebuffer.h: Modify onAccess function signature.
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore::WebGLRenderingContext::clear): Call onAccess with an added parameter.
+        (WebCore::WebGLRenderingContext::copyTexImage2D): Ditto.
+        (WebCore::WebGLRenderingContext::copyTexSubImage2D): Ditto.
+        (WebCore::WebGLRenderingContext::drawArrays): Ditto.
+        (WebCore::WebGLRenderingContext::drawElements): Ditto.
+        (WebCore::WebGLRenderingContext::readPixels): Ditto.
+        (WebCore::WebGLRenderingContext::texImage2DBase): Create buffer data of 0s if input is null to initialize textures.
+
 2010-11-17  Ryosuke Niwa  <rniwa@webkit.org>
 
         Reviewed by Darin Adler.
