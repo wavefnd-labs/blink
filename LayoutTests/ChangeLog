@@ -1,3 +1,72 @@
+2010-11-17  Dave Hyatt  <hyatt@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        https://bugs.webkit.org/show_bug.cgi?id=48537
+
+        Fonts with no vertical metrics should synthesize baselines when they appear
+        on lines that do use fonts with vertical metrics.  Basically we want to make
+        sure that English text behaves like vertical-align:middle, i.e., its baseline
+        should be treated as though it cuts through the middle of the ascent+descent.
+        
+        The way this works is that each line in the line box tree is labeled as having
+        a baseline type that is either ideographic or alphabetic for the purposes of
+        vertical alignment.  A line becomes ideographic if any font with vertical tables
+        is either explicitly specified as the primary font or in any of the used fonts
+        in the text on that line.
+        
+        This baselineType is passed down to computeLogicalBoxHeights and placeBoxesInBlockDirection,
+        and passed to the ascent and descent methods of the fonts that are examined.
+        The underlying Font code selects an appropriate baseline given the type passed in.
+        
+        This patch also rewrites vertical alignment to lop 4 bytes off all RenderInlines and
+        to instead carry around the cached vertical positions for RenderInlines in a new
+        VerticalPositionCache object.  This cache only lives for a single layout
+        operation, but it does cache information across all the lines built and placed during the
+        layout.
+        
+        This matches the old behavior, since every call to layoutInlineChildren invalidated
+        all of the vertical positions in all of the RenderInlines anyway.
+        
+        The VerticalPositionCache consists of two HashMaps, and it caches vertical alignment
+        positions for both alphabetic and ideographic baseline types.
+        
+        The vertical-align computation has now been moved out of RenderBoxModelObject and
+        RenderInline and just placed right into verticalPositionForBox in InlineFlowBox.
+        This function has been changed to no longer be recursive when checking parents,
+        and it now relies on the fact that the parent vertical alignment computation result
+        has already been stored in the logicalTop() of that parent's line box.  By checking
+        the line box logicalTop() value instead of recurring, the performance of first lines
+        now significantly improves to no longer have O(n^2) behavior in the depth of the line
+        box tree on the first line.
+        
+        All of the baselinePosition functions on the various RenderObjects have been amended
+        to take a FontBaseline as the first argument.  This patch does not attempt to fix up
+        MathML or form controls yet and just hardcodes AlphabeticBaselines for those renderers.
+        
+        The RenderTableCell baselinePosition virtual method has been made non-virtual and had
+        all arguments removed, since it actually had no real connection with the rest of the 
+        baseline positioning system.  Cell baseline positioning works by calling firstLineBoxBaseline,
+        and that method has been patched to use the cached baselineType for the first line box
+        when computing the baseline of that line.
+         
+        Added fast/blockflow/vertical-baseline-alignment.html and fast/blockflow/vertical-align-table-baseline.html
+
+        * fast/blockflow/vertical-align-table-baseline.html: Added.
+        * fast/blockflow/vertical-baseline-alignment.html: Added.
+        * platform/mac/fast/blockflow/vertical-align-table-baseline-expected.checksum: Added.
+        * platform/mac/fast/blockflow/vertical-align-table-baseline-expected.png: Added.
+        * platform/mac/fast/blockflow/vertical-align-table-baseline-expected.txt: Added.
+        * platform/mac/fast/blockflow/vertical-baseline-alignment-expected.checksum: Added.
+        * platform/mac/fast/blockflow/vertical-baseline-alignment-expected.png: Added.
+        * platform/mac/fast/blockflow/vertical-baseline-alignment-expected.txt: Added.
+        * platform/mac/fast/blockflow/vertical-font-fallback-expected.checksum:
+        * platform/mac/fast/blockflow/vertical-font-fallback-expected.png:
+        * platform/mac/fast/blockflow/vertical-font-fallback-expected.txt:
+        * platform/mac/fast/repaint/repaint-across-writing-mode-boundary-expected.checksum:
+        * platform/mac/fast/repaint/repaint-across-writing-mode-boundary-expected.png:
+        * platform/mac/fast/repaint/repaint-across-writing-mode-boundary-expected.txt:
+
 2010-11-17  Martin Robinson  <mrobinson@igalia.com>
 
         Update the skipped list to skip a newly failing geolocation test (requires
