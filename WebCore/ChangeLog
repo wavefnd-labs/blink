@@ -1,3 +1,35 @@
+2010-11-18  Joseph Pecoraro  <joepeck@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Allow no-store resources to be used for back navigation
+        https://bugs.webkit.org/show_bug.cgi?id=49672
+
+        Test: http/tests/cache/history-only-cached-subresource-loads.html
+
+        HTTP allows "Cache-Control: no-store" resources to "cached" for the
+        purposes of history, such as back/forward navigation. Previously
+        WebCore just immediately evicted these resources, now we leave them in
+        the cache as long as they are not "https". This allows us to use them
+        if they are used in a back navigation, or lazily evict and replace
+        them on other load types expecting non-stale resources.
+
+        (WebCore::CachedResource::CachedResource):
+        (WebCore::CachedResource::removeClient): instead of immediately removing the resource from the cache, leave it in the cache.
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::checkForReload):
+        (WebCore::CachedResourceLoader::requestResource): allow history only resources if the CachePolicy is CachePolicyHistoryBuffer (back/forward navigation).
+        * loader/cache/MemoryCache.cpp:
+        (WebCore::MemoryCache::requestResource): lazily remove history only resources if it is requested for a load type expecting non-stale resources.
+        * loader/cache/MemoryCache.h: default the forHistory parameter to false.
+
+          Rename cache policy CachePolicyAllowStale to CachePolicyHistoryBuffer.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::subresourceCachePolicy):
+        * loader/cache/CachePolicy.h:
+        * loader/cache/CachedResource.cpp:
+
 2010-11-18  Alexey Proskuryakov  <ap@apple.com>
 
         Reviewed by Darin Adler.
