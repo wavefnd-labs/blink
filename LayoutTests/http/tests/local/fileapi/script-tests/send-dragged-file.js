@@ -16,7 +16,7 @@ function onFileDrop(file)
 function runTest()
 {
     setFileInputDropCallback(onFileDrop);
-    eventSender.beginDragWithFiles(["resources/file-for-drag-to-send.txt"]);
+    eventSender.beginDragWithFiles(["../resources/file-for-drag-to-send.txt"]);
     moveMouseToCenterOfElement(fileInput);
     eventSender.mouseUp();
 }

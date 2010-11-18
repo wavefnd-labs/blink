@@ -99,7 +99,7 @@ function onStableFileDrop(file, filePath, fileLength, start, length, contentType
 
 function dragAndSliceStableFile(filePath, fileLength, start, length, contentType)
 {
-    setFileInputDropCallback(function(file) { onStableFileDrop(file, "../local/" + filePath, fileLength, start, length, contentType); });
+    setFileInputDropCallback(function(file) { onStableFileDrop(file, "../local/fileapi/" + filePath, fileLength, start, length, contentType); });
     eventSender.beginDragWithFiles([filePath]);
     moveMouseToCenterOfElement(fileInput);
     eventSender.mouseUp();
@@ -140,18 +140,18 @@ function dragAndSliceUnstableFile(start, length, contentType)
 function runTest()
 {
     debug("Test slicing and sending an empty file.");
-    dragAndSliceStableFile("resources/empty.txt", 0, 0, 10);
+    dragAndSliceStableFile("../resources/empty.txt", 0, 0, 10);
 
     debug("Test slicing and sending a small file.");
-    dragAndSliceStableFile("resources/file-for-drag-to-send.txt", 10, 2, 4, null);
-    dragAndSliceStableFile("resources/file-for-drag-to-send.txt", 10, 2, 20, "type/foo");
-    dragAndSliceStableFile("resources/file-for-drag-to-send.txt", 10, 15, 20, "type/bar");
+    dragAndSliceStableFile("../resources/file-for-drag-to-send.txt", 10, 2, 4, null);
+    dragAndSliceStableFile("../resources/file-for-drag-to-send.txt", 10, 2, 20, "type/foo");
+    dragAndSliceStableFile("../resources/file-for-drag-to-send.txt", 10, 15, 20, "type/bar");
 
     // This is to test a file that exceeds the read buffer limit (2K in Mac).
     debug("Test slicing and sending a big file.");
-    dragAndSliceStableFile("resources/abe.png", 12242, 10, 40);
-    dragAndSliceStableFile("resources/abe.png", 12242, 10, 3000);
-    dragAndSliceStableFile("resources/abe.png", 12242, 3000, 15000);
+    dragAndSliceStableFile("../resources/abe.png", 12242, 10, 40);
+    dragAndSliceStableFile("../resources/abe.png", 12242, 10, 3000);
+    dragAndSliceStableFile("../resources/abe.png", 12242, 3000, 15000);
 
     debug("Test slicing and sending a file that has been changed right before sending.");
     dragAndSliceUnstableFile(3, 5);
