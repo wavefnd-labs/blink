@@ -1,3 +1,25 @@
+2010-11-18  Mario Sanchez Prada  <msanchez@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        [Gtk]  atk_text_get_selection returns the wrong offsets after a link
+        https://bugs.webkit.org/show_bug.cgi?id=49514
+
+        Consider possible embedded objects to calculate startOffset.
+
+        So far we were using offsetInContainerNode() to calculate the
+        value of startOffset when checking the offsets for the current
+        selection, which was wrong because that wouldn't work ok if any
+        embedded object was present in the paragraph before the
+        selection. Thus, we need to consider this fact when calculating
+        the startOffset from the point of view of the object this function
+        is called on, in order to return the right and actual values.
+
+        * accessibility/gtk/AccessibilityObjectWrapperAtk.cpp:
+        (getSelectionOffsetsForObject): Check range length from the first
+        position in the object the function is called on until the first
+        position of current selection, and use it as startOffset.
+
 2010-11-12  Stephen White  <senorblanco@chromium.org>
 
         Reviewed by Simon Fraser.
