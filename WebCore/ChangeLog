@@ -1,3 +1,41 @@
+2010-11-12  Stephen White  <senorblanco@chromium.org>
+
+        Reviewed by Simon Fraser.
+
+        Fix for multiple urls in a background-image causing repeated repaints.
+        https://bugs.webkit.org/show_bug.cgi?id=42390
+
+        Change the key of RenderBoxModelObject's LastPaintSizeMap to include
+        the layer of the element being drawn, so that the same URL used
+        repeated in the same background-image, or another element's
+        background-image, can be uniquely identified.  The layer is a void
+        pointer, since it is only used as part of the key and using a
+        void pointer will discourage dereferencing it.  This pointer is NULL
+        when called from RenderImage (<img> elements).
+
+        Covered by fast/backgrounds/size/contain-and-cover.html
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::ImageQualityController::keyDestroyed):
+        The old objectDestroyed() is renamed to keyDestroyed().
+        (WebCore::ImageQualityController::objectDestroyed):
+        The new objectDestroyed() iterates over all outstanding resizes
+        to remove any resizes pertaining to this object.
+        (WebCore::ImageQualityController::highQualityRepaintTimerFired):
+        Retrieve the RenderBoxModelObject from the pair's "first" member.
+        (WebCore::ImageQualityController::shouldPaintAtLowQuality):
+        Create a key from the {object, layer} pair, and use it to access
+        the repaint size map.
+        (WebCore::RenderBoxModelObject::shouldPaintAtLowQuality):
+        Plumb the layer through to the image quality controller.
+        (WebCore::RenderBoxModelObject::paintFillLayerExtended):
+        Pass the bgLayer when checking 
+        * rendering/RenderBoxModelObject.h:
+        Add the void* layer parameter to shouldPaintAtLowQuality.
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::paintIntoRect):
+        Pass 0 (null) for the layer parameter in this case.
+
 2010-11-18  Chris Rogers  <crogers@google.com>
 
         Reviewed by Dimitri Glazkov.
