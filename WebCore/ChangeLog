@@ -1,3 +1,46 @@
+2010-11-01  MORITA Hajime  <morrita@google.com>
+
+        Reviewed by David Hyatt.
+
+        Navigating dark background websites results in blinding white flashes between pages. 
+        https://bugs.webkit.org/show_bug.cgi?id=45640
+
+        This FOUC is caused by an early layout request before the <body> is ready, 
+        and the page's background style given for <body>, instead of <html>.
+        So many sites have such stylesheets that we should care them.
+        
+        - Some DOM operation such as 'element.offsetLeft' causes page layout.
+        - The page layout results page repaint
+        - The page page repaint makes a white screen. because there is nothing to paint
+          before <body> is available.
+        
+        This change:
+        - extracted existing FOUC check on RenderBlock and RenderLayer to 
+          Document::mayCauseFlashOfUnstyledContent(),
+        - checked non-<head> element availability on mayCauseFlashOfUnstyledContent(), and
+        - added FOUC guards before requesting reapint on FrameView.
+        
+        Note that non-<head> document root children are typically <body>, but possibly
+        some other type of elements in the case of non-HTML documents.
+        
+        No new tests. The data loading speed matters and it cannot be
+        captured by DRT.
+
+        * dom/Document.cpp:
+        (hasHeadSibling): Added.
+        (WebCore::Document::mayCauseFlashOfUnstyledContent): Added.
+        * dom/Document.h:
+        * page/FrameView.cpp:
+        (WebCore::FrameView::invalidateRect): Added a guard.
+        (WebCore::FrameView::repaintContentRectangle): Added a guard.
+        (WebCore::FrameView::doDeferredRepaints): Added a guard.
+        (WebCore::FrameView::shouldUpdate): Added.
+        * page/FrameView.h:
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::paintContents): Replaced FOUC check to use mayCauseFlashOfUnstyledContent
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayer): Replaced FOUC check to use mayCauseFlashOfUnstyledContent
+
 2010-11-18  Kent Tamura  <tkent@chromium.org>
 
         Reviewed by Tony Chang.
