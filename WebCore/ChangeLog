@@ -1,3 +1,230 @@
+2010-11-19  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Convert SVGPathSeg/SVGPathSegList to the new SVGPropertyTearOff concept
+        https://bugs.webkit.org/show_bug.cgi?id=49580
+
+        SVGPathElement.cloneNode loses generated pathSegList
+        https://bugs.webkit.org/show_bug.cgi?id=43388
+
+        SVG Path elements are not correctly updated through pathSegList manipulation on relative values
+        https://bugs.webkit.org/show_bug.cgi?id=30219
+
+        Changing an SVGPathSeg does not update a following Smooth Cubic Curveto
+        https://bugs.webkit.org/show_bug.cgi?id=19741
+
+        SVGPathElement should only build SVGPathSeg* list on demand
+        https://bugs.webkit.org/show_bug.cgi?id=10827
+
+        Tests: svg/W3C-SVG-1.1-SE/paths-dom-02-f.svg
+               svg/dom/SVGPathSegList-appendItem.xhtml
+               svg/dom/SVGPathSegList-clear-and-initialize.xhtml
+               svg/dom/SVGPathSegList-cloning.html
+               svg/dom/SVGPathSegList-insertItemBefore.xhtml
+               svg/dom/SVGPathSegList-removeItem.xhtml
+               svg/dom/SVGPathSegList-replaceItem.xhtml
+               svg/dom/SVGPathSegList-xml-dom-synchronization.xhtml
+               svg/dom/SVGPathSegList-xml-dom-synchronization2.xhtml
+               svg/dom/SVGPathSegList-segment-modification.svg
+
+        Convert SVGPathSeg*/SVGPathSegList to the new SVG(Animated)PropertyTearOff concept.
+        Unlike all other SVG* types that use the SVGPropertyTearOff concept, SVGPathSegs are already refcounted,
+        and don't need to be wrapped in SVGPropertyTearOff objects. The consequence is that SVGPathSegs need to track
+        themselves to which list and path element they belong. Introduce new SVGAnimatedPathSegListPropertyTearOff
+        and SVGPathSegListPropertyTearOff classes, that encapsulate the special needed for SVGPathSegList.
+
+        Each SVGPathSeg now needs to store a RefPtr<SVGPathElement> - this makes it impossible to use SVGPathSegList
+        to represent the 'd' attribute internally in SVGPathElement. SVGPathSegList is now only used in the SVG DOM bindings
+        if someone explicitely requests 'pathElement.pathSegList' (eg. via JS). Switch to use SVGPathByteStream to store
+        the 'd' attribute data in SVGPathElement, which is much more compact, and less memory intensive.
+        Dirk already prepared SVGPathParserFactory some months ago, which allows easy conversion between
+        String/Path/SVGPathSegList/SVGPathByteStream in all directions, including normalizing the lists, when requested.
+
+        As consequence SVGPathSegList is now only built on demand, when explicitely requested. Using the SVGAnimatedProperty
+        concept gives us 'd' attribute <-> SVGPathSegList synchronization for free, fixing several bugs, listed above.
+
+        * Android.mk: Remove obsolete SVGPathSeg*.cpp files and SVGAnimatedPathData.cpp from build.
+        * CMakeLists.txt: Ditto.
+        * DerivedSources.make: Remove SVGAnimatedPathData IDL generation.
+        * GNUmakefile.am: Remove obsolete SVGPathSeg*.cpp files and SVGAnimatedPathData.cpp from build.
+        * WebCore.gyp/WebCore.gyp: Remove SVGAnimatedPathData IDL generation.
+        * WebCore.gypi: Remove obsolete SVGPathSeg*.cpp files and SVGAnimatedPathData.cpp from build.
+        * WebCore.order: Remove no-longer existant SVGAnimatedPathData symbols.
+        * WebCore.pro:  Remove obsolete SVGPathSeg*.cpp files and SVGAnimatedPathData.cpp / JSSVGPathSegCustom.* from build.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/js/JSBindingsAllInOne.cpp: Remove JSSVGPathSegCustom.cpp from build.
+        * bindings/js/JSDOMBinding.cpp: Adapt to toJS() changes, remove context parameter.
+        (WebCore::setDOMException):
+        * bindings/js/JSDOMBinding.h: Remove obsolete CREATE_SVG_OBJECT_WRAPPER macro, the context parameter is not existant anymore.
+        * bindings/js/JSSVGPathSegCustom.cpp: Replace CREATE_SVG_OBJECT_WRAPPER by CREATE_DOM_OBJECT_WRAPPER. Remove context parameter/handling.
+        (WebCore::toJS):
+        * bindings/js/JSSVGPathSegListCustom.cpp: Removed.
+        * bindings/scripts/CodeGenerator.pm: Map 'SVGPathSegList' IDL type to SVG 'SVGPathSegListPropertyTearOff' native type.
+        * bindings/scripts/CodeGeneratorJS.pm: Remove IsSVGTypeNeedingContextParameter() methods and usages. Handle SVGPathSegListPropertyTearOff.
+        * bindings/scripts/CodeGeneratorObjC.pm: Handle SVGPathSegListPropertyTearOff.
+        * bindings/scripts/CodeGeneratorV8.pm: Remove IsSVGTypeNeedingContextParameter() methods and usages.
+        * rendering/SVGRenderTreeAsText.cpp: Build path string from byte stream, not path segment list.
+        (WebCore::operator<<):
+        * svg/SVGAllInOne.cpp: Remove obsolete cpp files.
+        * svg/SVGAnimatedPathData.cpp: Removed.
+        * svg/SVGAnimatedPathData.h: Removed.
+        * svg/SVGAnimatedPathData.idl: Removed.
+        * svg/SVGPathElement.cpp: Build SVGPathList on demand. Use SVGPathByteStream to parse/store the 'd' attribute content.
+        (WebCore::SVGPathElement::SVGPathElement):
+        (WebCore::SVGPathElement::getPathSegAtLength): Use SVGPathByteStream, not SVGPathSegList to determine the getPathSegAtLength() information.
+        (WebCore::SVGPathElement::createSVGPathSegClosePath): Pass SVGPathElement to SVGPathSeg and a SVGPathSegRole parameter and store it to track the list origin.
+        (WebCore::SVGPathElement::createSVGPathSegMovetoAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegMovetoRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegLinetoAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegLinetoRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoCubicAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoCubicRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoQuadraticAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoQuadraticRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegArcAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegArcRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegLinetoHorizontalAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegLinetoHorizontalRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegLinetoVerticalAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegLinetoVerticalRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoCubicSmoothAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoCubicSmoothRel): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoQuadraticSmoothAbs): Ditto.
+        (WebCore::SVGPathElement::createSVGPathSegCurvetoQuadraticSmoothRel): Ditto.
+        (WebCore::SVGPathElement::parseMappedAttribute): Build SVGPathByteStream from 'd' attribute, not a SVGPathSegList.
+        (WebCore::SVGPathElement::svgAttributeChanged): If a SVGPathSegList object has been built, synchronize it with the 'd' attribute.
+        (WebCore::SVGPathElement::synchronizeProperty): Synchronize 'd' attribute with the SVGPathSegList, if needed.
+        (WebCore::SVGPathElement::synchronizeD): Added.
+        (WebCore::SVGPathElement::pathSegList): Use same trick as in SVGPolyElement to expose the 'pathSegList' / 'animatedPathSegList' object to the SVG DOM bindings.
+        (WebCore::SVGPathElement::normalizedPathSegList): Ditto.
+        (WebCore::SVGPathElement::animatedPathSegList): Ditto.
+        (WebCore::SVGPathElement::animatedNormalizedPathSegList): Ditto.
+        (WebCore::SVGPathElement::toPathData): Build 'Path' object from SVGPathByteStream, not from SVGPathSegList.
+        (WebCore::SVGPathElement::pathSegListChanged): Used to synchronize the SVGPathSegLists and the d attribute, as well as any changes from any SVGPathSeg associated with this SVGPathElement.
+        * svg/SVGPathElement.h: Add new accessors...
+        (WebCore::SVGPathElement::pathByteStream): ... needed by SVGRenderTreeAsText.
+        (WebCore::SVGPathElement::animatablePathSegList): ... needed by SVGPathSegListPropertyTearOff.
+        * svg/SVGPathElement.idl: Merge SVGAnimatedPathData interface into SVGPathElement.
+        * svg/SVGPathParserFactory.cpp: Cleanup SVGPathParserFactory, remove obsolete methods, now that SVGPathElement switched to using SVGPathByteStream internally.
+        (WebCore::globalSVGPathSegListBuilder):
+        (WebCore::SVGPathParserFactory::buildSVGPathByteStreamFromSVGPathSegList):
+        (WebCore::SVGPathParserFactory::buildPathFromByteStream):
+        (WebCore::SVGPathParserFactory::buildSVGPathSegListFromByteStream):
+        (WebCore::SVGPathParserFactory::buildStringFromSVGPathSegList):
+        (WebCore::SVGPathParserFactory::buildSVGPathByteStreamFromString):
+        (WebCore::SVGPathParserFactory::buildAnimatedSVGPathByteStream):
+        (WebCore::SVGPathParserFactory::getSVGPathSegAtLengthFromSVGPathByteStream):
+        * svg/SVGPathParserFactory.h:
+        * svg/SVGPathSeg.cpp: Removed.
+        * svg/SVGPathSeg.h: Add new SVGPathSegRole enum, identifying to which list a path segment belongs.
+        (WebCore::SVGPathSeg::SVGPathSeg):
+        * svg/SVGPathSeg.idl: Reindented.
+        * svg/SVGPathSegArc.cpp: Removed.
+        * svg/SVGPathSegArc.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegArcAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegArcRel.idl: Ditto.
+        * svg/SVGPathSegClosePath.cpp: Removed.
+        * svg/SVGPathSegClosePath.h:
+        * svg/SVGPathSegCurvetoCubic.cpp: Removed.
+        * svg/SVGPathSegCurvetoCubic.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegCurvetoCubicAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegCurvetoCubicRel.idl: Ditto.
+        * svg/SVGPathSegCurvetoCubicSmooth.cpp: Removed.
+        * svg/SVGPathSegCurvetoCubicSmooth.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegCurvetoCubicSmoothAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegCurvetoCubicSmoothRel.idl: Ditto.
+        * svg/SVGPathSegCurvetoQuadratic.cpp: Removed.
+        * svg/SVGPathSegCurvetoQuadratic.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegCurvetoQuadraticAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegCurvetoQuadraticRel.idl: Ditto.
+        * svg/SVGPathSegCurvetoQuadraticSmooth.cpp: Removed.
+        * svg/SVGPathSegCurvetoQuadraticSmooth.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegCurvetoQuadraticSmoothAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegCurvetoQuadraticSmoothRel.idl: Ditto.
+        * svg/SVGPathSegLineto.cpp: Removed.
+        * svg/SVGPathSegLineto.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegLinetoAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegLinetoHorizontal.cpp: Removed.
+        * svg/SVGPathSegLinetoHorizontal.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegLinetoHorizontalAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegLinetoHorizontalRel.idl: Ditto.
+        * svg/SVGPathSegLinetoRel.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegLinetoVertical.cpp: Removed.
+        * svg/SVGPathSegLinetoVertical.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegLinetoVerticalAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegLinetoVerticalRel.idl: Ditto.
+        * svg/SVGPathSegList.cpp: Switch from SVGList<RefPtr<SVGPathSeg> > to a plain Vector<RefPtr<SVGPathSeg> >.
+        (WebCore::SVGPathSegList::valueAsString): Utilize SVGPathParserFactory to build a String from a SVGPathSegList.
+        (WebCore::SVGPathSegList::commitChange): Call SVGPathElement::pathSegListChanged().
+        * svg/SVGPathSegList.h:
+        (WebCore::SVGPathSegList::SVGPathSegList):
+        * svg/SVGPathSegList.idl: Remove [JSCCustom] flags, no longer needed. 
+        * svg/SVGPathSegListBuilder.cpp: Adapt to SVGPathSegList API changes.
+        (WebCore::SVGPathSegListBuilder::SVGPathSegListBuilder):
+        (WebCore::SVGPathSegListBuilder::moveTo):
+        (WebCore::SVGPathSegListBuilder::lineTo):
+        (WebCore::SVGPathSegListBuilder::lineToHorizontal):
+        (WebCore::SVGPathSegListBuilder::lineToVertical):
+        (WebCore::SVGPathSegListBuilder::curveToCubic):
+        (WebCore::SVGPathSegListBuilder::curveToCubicSmooth):
+        (WebCore::SVGPathSegListBuilder::curveToQuadratic):
+        (WebCore::SVGPathSegListBuilder::curveToQuadraticSmooth):
+        (WebCore::SVGPathSegListBuilder::arcTo):
+        (WebCore::SVGPathSegListBuilder::closePath):
+        * svg/SVGPathSegListBuilder.h: Ditto.
+        (WebCore::SVGPathSegListBuilder::setCurrentSVGPathElement):
+        (WebCore::SVGPathSegListBuilder::setCurrentSVGPathSegList):
+        (WebCore::SVGPathSegListBuilder::setCurrentSVGPathSegRole):
+        (WebCore::SVGPathSegListBuilder::cleanup):
+        * svg/SVGPathSegListSource.cpp: Ditto.
+        (WebCore::SVGPathSegListSource::SVGPathSegListSource):
+        (WebCore::SVGPathSegListSource::parseSVGSegmentType):
+        (WebCore::SVGPathSegListSource::nextCommand):
+        (WebCore::SVGPathSegListSource::parseMoveToSegment):
+        (WebCore::SVGPathSegListSource::parseLineToSegment):
+        (WebCore::SVGPathSegListSource::parseCurveToQuadraticSmoothSegment):
+        * svg/SVGPathSegListSource.h: Ditto.
+        (WebCore::SVGPathSegListSource::create):
+        * svg/SVGPathSegMoveto.cpp: Removed.
+        * svg/SVGPathSegMoveto.h: All setters now call the commitChange() method.
+        * svg/SVGPathSegMovetoAbs.idl: Enable StrictTypeChecking.
+        * svg/SVGPathSegMovetoRel.idl: Ditto.
+        * svg/SVGPathSegWithContext.h: Added. This is the new base class for all SVGPathSeg derived types, that's associated with a SVGPathElement and a 'role' (normalized/unaltered segment list).
+        (WebCore::SVGPathSegWithContext::SVGPathSegWithContext):
+        (WebCore::SVGPathSegWithContext::animatedProperty):
+        (WebCore::SVGPathSegWithContext::setContextAndRole):
+        (WebCore::SVGPathSegWithContext::commitChange):
+        (WebCore::SVGPathSegSingleCoordinate::x):
+        (WebCore::SVGPathSegSingleCoordinate::setX):
+        (WebCore::SVGPathSegSingleCoordinate::y):
+        (WebCore::SVGPathSegSingleCoordinate::setY):
+        (WebCore::SVGPathSegSingleCoordinate::SVGPathSegSingleCoordinate):
+        * svg/properties/SVGAnimatedPathSegListPropertyTearOff.h: Added. 
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::animVal):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::removeItemFromList):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::create):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::SVGAnimatedPathSegListPropertyTearOff):
+        * svg/properties/SVGPathSegListPropertyTearOff.cpp: Added.
+        (WebCore::SVGPathSegListPropertyTearOff::clear): Added in the cpp file, not in the header, as it needs access to SVGPathSegWithContext, which we can't include from the header.
+        (WebCore::SVGPathSegListPropertyTearOff::getItem): Ditto.
+        (WebCore::SVGPathSegListPropertyTearOff::removeItem): Ditto.
+        (WebCore::SVGPathSegListPropertyTearOff::contextElement): Needs access to SVGPathElement, that's why it lives in the cpp file.
+        (WebCore::SVGPathSegListPropertyTearOff::processIncomingListItemValue): Needs access to SVGPathSegWithContext.
+        * svg/properties/SVGPathSegListPropertyTearOff.h: Added.
+        (WebCore::SVGPathSegListPropertyTearOff::create):
+        (WebCore::SVGPathSegListPropertyTearOff::removeItemFromList):
+        (WebCore::SVGPathSegListPropertyTearOff::numberOfItems):
+        (WebCore::SVGPathSegListPropertyTearOff::initialize):
+        (WebCore::SVGPathSegListPropertyTearOff::insertItemBefore):
+        (WebCore::SVGPathSegListPropertyTearOff::replaceItem):
+        (WebCore::SVGPathSegListPropertyTearOff::appendItem):
+        (WebCore::SVGPathSegListPropertyTearOff::SVGPathSegListPropertyTearOff):
+        (WebCore::SVGPathSegListPropertyTearOff::commitChange):
+        (WebCore::SVGPathSegListPropertyTearOff::processIncomingListItemWrapper):
+
 2010-11-19  Pavel Feldman  <pfeldman@chromium.org>
 
         Not reviewed: one line follow up to r72376.
