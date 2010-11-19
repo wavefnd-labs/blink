@@ -1,3 +1,156 @@
+2010-11-18  Dave Hyatt  <hyatt@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        https://bugs.webkit.org/show_bug.cgi?id=49717
+        
+        Implement better behavior for the logical height and block direction spacing of ruby text and ruby
+        base text.
+
+        Added six new tests: ruby-auto-line-expansion.html (one version for each of the four writing modes) to
+        test ruby text accommodation and quirks-mode-ruby-spacing.html / quirks-mode-ruby-spacing-bt.html to test
+        that ruby doesn't reset line-height.
+
+        * css/html.css:
+        Remove the line-height:normal rule for <ruby>  This behavior was incorrect, since a <ruby> on a line
+        by itself in quirks mode would cause the overall line-height of the enclosing block to not be honored.
+
+        * rendering/InlineBox.h:
+        (WebCore::InlineBox::adjustBlockDirectionPosition):
+        Add adjustBlockDirectionPosition as a shorthand for calling adjustPosition with the correct delta (x or y)
+        depending on orientation.
+        
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::placeBoxesInBlockDirection):
+        placeBoxesInBlockDirection now looks for Ruby runs, and when it encounters them it sets a flag, containsRuby,
+        to true.  This flag is stored as a bit on the RootInlineBox and lets us know whether we need to do a later
+        crawl of the line boxes after they are positioned to see if all the Ruby texts fit or not.
+        
+        Add the notion of a lineTop and lineBottom that include margins, since flipped lines writing modes (lr and bt)
+        mess up the flipping otherwise.  These new variables are lineTopIncludingMargins and lineBottomIncludingMargins.
+        This is only relevant for replaced elements, since the block direction margins of inline flows are always 0.
+        
+        Because RenderRubyRun is implemented as an inline-block (this is probably not a behavior we want to keep long-term),
+        the line-height is propagated into the inline-block, and it ends up being counted as part of the overall lineTop
+        and lineBottom since it is inside the inline-block's height.  To prevent this from happening, we have to fake it
+        as though RenderRubyRun was just a normal inline.  We look at the line boxes of the ruby base and we push lineTop/Bottom
+        in by the leading on either side so that it isn't counted as part of lineTop and lineBottom.  This enables the later
+        Ruby code that examines the spacing between lines to not be fooled into thinking it can't intrude into an inline-block's
+        interior on a previous line.
+
+        (WebCore::InlineFlowBox::computeBlockDirectionRubyAdjustment):
+        This function computes the amount that a line box has to be moved in order to accommodate all of the Ruby texts on the
+        line.  With tb and rl writing modes, the Ruby is trying to fit between the current line and a previous line, and so
+        we're checking some highest previous position and computing the amount we have to move.
+        
+        For lr and bt writing modes, the lines are flipped relative to the block direction, so we are computing how much we have
+        to move the *following* line based off a lowest position.
+        
+        In all writing modes we will allow Ruby text to intrude into the padding of a block.
+        
+        * rendering/InlineFlowBox.h:
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlockChildren):
+        Ruby text is now considered a special child that should be excluded from normal layout, margin collapsing and height
+        computations.  Rename the layoutLegend function to be more generalized and make it apply to both Ruby text and to
+        legends.  This means that the RenderRubyRun computes its logical height without any regard for the ruby text.
+
+        * rendering/RenderBlock.h:
+        (WebCore::RenderBlock::layoutSpecialExcludedChild):
+        layoutSpecialExcludedChild is the new version of layoutLegend and it is implemented by RenderFieldset and RenderRubyRun.
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutInlineChildren):
+        When we hit the end of line layout, if we're in lr or bt writing modes, we have to potentially grow the height of the block
+        to accommodate ruby text along the bottom side of the line.  We call computeBlockDirectionRubyAdjustment here in flipped lines
+        writing mode only, and then we increase the logical height of the block if necessary.
+
+        * rendering/RenderFieldset.cpp:
+        (WebCore::RenderFieldset::layoutSpecialExcludedChild):
+        * rendering/RenderFieldset.h:
+        No changes here other than the function rename.
+
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::staticCreateRubyRun):
+        Remove the hack that locked RenderRubyRun's writing mode to tb or rl, since it didn't really work anyway, and it isn't necessary
+        now that RenderRubyRun has its own layout method.
+    
+        (WebCore::RenderRubyRun::layoutSpecialExcludedChild):
+        RenderRubyRun lays out the ruby text here but doesn't do anything with its placement yet.  We wait until the base is positioned
+        and then handled positioning the RenderRubyText at the end of RenderRubyRun's layout method. 
+
+        (WebCore::RenderRubyRun::layout):
+        * rendering/RenderRubyRun.h:
+        RenderRubyRun now has its own layout method that calls the base class to get the RenderRubyBase positioned and then moves the
+        RenderRubyText such that its bottommost line box's bottom and the RenderRubyBase's topmost line box's line top are flush with
+        one another.  The RenderRubyText will commonly be positioned at a negative coordinate now and spill out of the RenderRubyRun
+        as overflow.
+
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::RootInlineBox):
+        Added the m_containsRuby bit for performance to avoid the extra pass to try to accommodate ruby texts when none are present.
+
+        (WebCore::RootInlineBox::adjustPosition):
+        Fixed a bug in adjustPosition where the lineTop, lineBottom and blockLogicalHeight values were always being augmented by dy
+        even in vertical writing modes (where dx needed to be used instead).
+
+        (WebCore::RootInlineBox::alignBoxesInBlockDirection):
+        (WebCore::RootInlineBox::blockDirectionRubyAdjustment):
+        * rendering/RootInlineBox.h:
+        (WebCore::RootInlineBox::containsRuby):
+        RootInlineBox now calls blockDirectionRubyAdjustment to determine the amount of additional spacing that has to exist between
+        the lines in order to accommodate all Ruby texts, and then it does adjustPosition to move the new line by the amount required.
+
+        * fast/ruby/ruby-line-height-expected.txt:
+        * platform/mac/fast/blockflow/japanese-ruby-horizontal-bt-expected.checksum:
+        * platform/mac/fast/blockflow/japanese-ruby-horizontal-bt-expected.png:
+        * platform/mac/fast/blockflow/japanese-ruby-horizontal-bt-expected.txt:
+        * platform/mac/fast/blockflow/japanese-ruby-vertical-lr-expected.checksum:
+        * platform/mac/fast/blockflow/japanese-ruby-vertical-lr-expected.png:
+        * platform/mac/fast/blockflow/japanese-ruby-vertical-lr-expected.txt:
+        * platform/mac/fast/blockflow/japanese-ruby-vertical-rl-expected.checksum:
+        * platform/mac/fast/blockflow/japanese-ruby-vertical-rl-expected.png:
+        * platform/mac/fast/blockflow/japanese-ruby-vertical-rl-expected.txt:
+        * platform/mac/fast/repaint/repaint-across-writing-mode-boundary-expected.checksum:
+        * platform/mac/fast/repaint/repaint-across-writing-mode-boundary-expected.png:
+        * platform/mac/fast/ruby/quirks-mode-ruby-spacing-bt-expected.checksum: Added.
+        * platform/mac/fast/ruby/quirks-mode-ruby-spacing-bt-expected.png: Added.
+        * platform/mac/fast/ruby/quirks-mode-ruby-spacing-bt-expected.txt: Added.
+        * platform/mac/fast/ruby/quirks-mode-ruby-spacing-expected.checksum: Added.
+        * platform/mac/fast/ruby/quirks-mode-ruby-spacing-expected.png: Added.
+        * platform/mac/fast/ruby/quirks-mode-ruby-spacing-expected.txt: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-bt-expected.checksum: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-bt-expected.png: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-bt-expected.txt: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-expected.checksum: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-expected.png: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-expected.txt: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-lr-expected.checksum: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-lr-expected.png: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-lr-expected.txt: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-rl-expected.checksum: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-rl-expected.png: Added.
+        * platform/mac/fast/ruby/ruby-auto-line-expansion-rl-expected.txt: Added.
+        * platform/mac/fast/ruby/ruby-beforeafter-expected.txt:
+        * platform/mac/fast/ruby/ruby-empty-rt-expected.txt:
+        * platform/mac/fast/ruby/ruby-length-expected.txt:
+        * platform/mac/fast/ruby/ruby-run-break-expected.checksum:
+        * platform/mac/fast/ruby/ruby-run-break-expected.png:
+        * platform/mac/fast/ruby/ruby-run-break-expected.txt:
+        * platform/mac/fast/ruby/ruby-runs-expected.txt:
+        * platform/mac/fast/ruby/ruby-runs-spans-expected.txt:
+        * platform/mac/fast/ruby/ruby-simple-expected.txt:
+        * platform/mac/fast/ruby/ruby-simple-rp-expected.txt:
+        * platform/mac/fast/ruby/ruby-trailing-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-insert-rt-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-insert-text1-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-insert-text2-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-insert-text3-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-remove-rt1-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-remove-rt2-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-remove-text1-expected.txt:
+        * platform/mac/fast/ruby/rubyDOM-remove-text2-expected.txt:
+
 2010-11-18  David Levin  <levin@chromium.org>
 
         [chromium] Test baseline updates.
