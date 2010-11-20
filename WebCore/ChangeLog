@@ -1,3 +1,187 @@
+2010-11-20  Renata Hodovan  <reni@inf.u-szeged.hu>
+
+        Reviewed by Dirk Schulze.
+
+        FilterPrimitives should have a pointer to its Filter object.
+        https://bugs.webkit.org/show_bug.cgi?id=49863
+
+        FilterPrimitives should have a renderer, and they need a member pointer to their Filter objects for Layout() calls.
+        This patch adds this member to FilterEffect.
+
+        No new test is needed because these modifications are covered by all of SVG Filter tests.
+
+        * platform/graphics/filters/FEBlend.cpp:
+        (WebCore::FEBlend::FEBlend):
+        (WebCore::FEBlend::create):
+        (WebCore::FEBlend::apply):
+        * platform/graphics/filters/FEBlend.h:
+        * platform/graphics/filters/FEColorMatrix.cpp:
+        (WebCore::FEColorMatrix::FEColorMatrix):
+        (WebCore::FEColorMatrix::create):
+        (WebCore::FEColorMatrix::apply):
+        * platform/graphics/filters/FEColorMatrix.h:
+        * platform/graphics/filters/FEComponentTransfer.cpp:
+        (WebCore::FEComponentTransfer::FEComponentTransfer):
+        (WebCore::FEComponentTransfer::create):
+        (WebCore::FEComponentTransfer::apply):
+        * platform/graphics/filters/FEComponentTransfer.h:
+        * platform/graphics/filters/FEComposite.cpp:
+        (WebCore::FEComposite::FEComposite):
+        (WebCore::FEComposite::create):
+        (WebCore::FEComposite::determineAbsolutePaintRect):
+        (WebCore::FEComposite::apply):
+        * platform/graphics/filters/FEComposite.h:
+        * platform/graphics/filters/FEConvolveMatrix.cpp:
+        (WebCore::FEConvolveMatrix::FEConvolveMatrix):
+        (WebCore::FEConvolveMatrix::create):
+        (WebCore::FEConvolveMatrix::apply):
+        * platform/graphics/filters/FEConvolveMatrix.h:
+        (WebCore::FEConvolveMatrix::determineAbsolutePaintRect):
+        * platform/graphics/filters/FEDiffuseLighting.cpp:
+        (WebCore::FEDiffuseLighting::FEDiffuseLighting):
+        (WebCore::FEDiffuseLighting::create):
+        * platform/graphics/filters/FEDiffuseLighting.h:
+        * platform/graphics/filters/FEDisplacementMap.cpp:
+        (WebCore::FEDisplacementMap::FEDisplacementMap):
+        (WebCore::FEDisplacementMap::create):
+        (WebCore::FEDisplacementMap::apply):
+        * platform/graphics/filters/FEDisplacementMap.h:
+        (WebCore::FEDisplacementMap::determineAbsolutePaintRect):
+        * platform/graphics/filters/FEFlood.cpp:
+        (WebCore::FEFlood::FEFlood):
+        (WebCore::FEFlood::create):
+        (WebCore::FEFlood::apply):
+        * platform/graphics/filters/FEFlood.h:
+        (WebCore::FEFlood::determineAbsolutePaintRect):
+        * platform/graphics/filters/FEGaussianBlur.cpp:
+        (WebCore::FEGaussianBlur::FEGaussianBlur):
+        (WebCore::FEGaussianBlur::create):
+        (WebCore::FEGaussianBlur::determineAbsolutePaintRect):
+        (WebCore::FEGaussianBlur::apply):
+        * platform/graphics/filters/FEGaussianBlur.h:
+        * platform/graphics/filters/FELighting.cpp:
+        (WebCore::FELighting::FELighting):
+        (WebCore::FELighting::apply):
+        * platform/graphics/filters/FELighting.h:
+        (WebCore::FELighting::determineAbsolutePaintRect):
+        * platform/graphics/filters/FEMerge.cpp:
+        (WebCore::FEMerge::FEMerge):
+        (WebCore::FEMerge::create):
+        (WebCore::FEMerge::apply):
+        * platform/graphics/filters/FEMerge.h:
+        * platform/graphics/filters/FEMorphology.cpp:
+        (WebCore::FEMorphology::FEMorphology):
+        (WebCore::FEMorphology::create):
+        (WebCore::FEMorphology::determineAbsolutePaintRect):
+        (WebCore::FEMorphology::apply):
+        * platform/graphics/filters/FEMorphology.h:
+        * platform/graphics/filters/FEOffset.cpp:
+        (WebCore::FEOffset::FEOffset):
+        (WebCore::FEOffset::create):
+        (WebCore::FEOffset::determineAbsolutePaintRect):
+        (WebCore::FEOffset::apply):
+        * platform/graphics/filters/FEOffset.h:
+        * platform/graphics/filters/FESpecularLighting.cpp:
+        (WebCore::FESpecularLighting::FESpecularLighting):
+        (WebCore::FESpecularLighting::create):
+        * platform/graphics/filters/FESpecularLighting.h:
+        * platform/graphics/filters/FETile.cpp:
+        (WebCore::FETile::FETile):
+        (WebCore::FETile::create):
+        (WebCore::FETile::apply):
+        * platform/graphics/filters/FETile.h:
+        (WebCore::FETile::determineAbsolutePaintRect):
+        * platform/graphics/filters/FETurbulence.cpp:
+        (WebCore::FETurbulence::FETurbulence):
+        (WebCore::FETurbulence::create):
+        (WebCore::FETurbulence::apply):
+        * platform/graphics/filters/FETurbulence.h:
+        (WebCore::FETurbulence::determineAbsolutePaintRect):
+        * platform/graphics/filters/FilterEffect.cpp:
+        (WebCore::FilterEffect::FilterEffect):
+        (WebCore::FilterEffect::determineAbsolutePaintRect):
+        (WebCore::FilterEffect::effectContext):
+        * platform/graphics/filters/FilterEffect.h:
+        (WebCore::FilterEffect::filter):
+        * platform/graphics/filters/SourceAlpha.cpp:
+        (WebCore::SourceAlpha::create):
+        (WebCore::SourceAlpha::determineAbsolutePaintRect):
+        (WebCore::SourceAlpha::apply):
+        * platform/graphics/filters/SourceAlpha.h:
+        (WebCore::SourceAlpha::SourceAlpha):
+        * platform/graphics/filters/SourceGraphic.cpp:
+        (WebCore::SourceGraphic::create):
+        (WebCore::SourceGraphic::determineAbsolutePaintRect):
+        (WebCore::SourceGraphic::apply):
+        * platform/graphics/filters/SourceGraphic.h:
+        (WebCore::SourceGraphic::SourceGraphic):
+        * rendering/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::buildPrimitives):
+        (WebCore::RenderSVGResourceFilter::applyResource):
+        (WebCore::RenderSVGResourceFilter::postApplyResource):
+        * rendering/RenderSVGResourceFilter.h:
+        * rendering/SVGRenderTreeAsText.cpp:
+        (WebCore::writeSVGResourceContainer):
+        * svg/SVGFEBlendElement.cpp:
+        (WebCore::SVGFEBlendElement::build):
+        * svg/SVGFEBlendElement.h:
+        * svg/SVGFEColorMatrixElement.cpp:
+        (WebCore::SVGFEColorMatrixElement::build):
+        * svg/SVGFEColorMatrixElement.h:
+        * svg/SVGFEComponentTransferElement.cpp:
+        (WebCore::SVGFEComponentTransferElement::build):
+        * svg/SVGFEComponentTransferElement.h:
+        * svg/SVGFECompositeElement.cpp:
+        (WebCore::SVGFECompositeElement::build):
+        * svg/SVGFECompositeElement.h:
+        * svg/SVGFEConvolveMatrixElement.cpp:
+        (WebCore::SVGFEConvolveMatrixElement::build):
+        * svg/SVGFEConvolveMatrixElement.h:
+        * svg/SVGFEDiffuseLightingElement.cpp:
+        (WebCore::SVGFEDiffuseLightingElement::build):
+        * svg/SVGFEDiffuseLightingElement.h:
+        * svg/SVGFEDisplacementMapElement.cpp:
+        (WebCore::SVGFEDisplacementMapElement::build):
+        * svg/SVGFEDisplacementMapElement.h:
+        * svg/SVGFEFloodElement.cpp:
+        (WebCore::SVGFEFloodElement::build):
+        * svg/SVGFEFloodElement.h:
+        * svg/SVGFEGaussianBlurElement.cpp:
+        (WebCore::SVGFEGaussianBlurElement::build):
+        * svg/SVGFEGaussianBlurElement.h:
+        * svg/SVGFEImageElement.cpp:
+        (WebCore::SVGFEImageElement::build):
+        * svg/SVGFEImageElement.h:
+        * svg/SVGFEMergeElement.cpp:
+        (WebCore::SVGFEMergeElement::build):
+        * svg/SVGFEMergeElement.h:
+        * svg/SVGFEMorphologyElement.cpp:
+        (WebCore::SVGFEMorphologyElement::build):
+        * svg/SVGFEMorphologyElement.h:
+        * svg/SVGFEOffsetElement.cpp:
+        (WebCore::SVGFEOffsetElement::build):
+        * svg/SVGFEOffsetElement.h:
+        * svg/SVGFESpecularLightingElement.cpp:
+        (WebCore::SVGFESpecularLightingElement::build):
+        * svg/SVGFESpecularLightingElement.h:
+        * svg/SVGFETileElement.cpp:
+        (WebCore::SVGFETileElement::build):
+        * svg/SVGFETileElement.h:
+        * svg/SVGFETurbulenceElement.cpp:
+        (WebCore::SVGFETurbulenceElement::build):
+        * svg/SVGFETurbulenceElement.h:
+        * svg/SVGFilterPrimitiveStandardAttributes.h:
+        * svg/graphics/filters/SVGFEImage.cpp:
+        (WebCore::FEImage::FEImage):
+        (WebCore::FEImage::create):
+        (WebCore::FEImage::determineAbsolutePaintRect):
+        (WebCore::FEImage::apply):
+        * svg/graphics/filters/SVGFEImage.h:
+        * svg/graphics/filters/SVGFilterBuilder.cpp:
+        (WebCore::SVGFilterBuilder::SVGFilterBuilder):
+        * svg/graphics/filters/SVGFilterBuilder.h:
+        (WebCore::SVGFilterBuilder::create):
+
 2010-11-20  Helder Correia  <helder@sencha.com>
 
         Reviewed by Andreas Kling.
