@@ -1,3 +1,25 @@
+2010-11-20  Xan Lopez  <xlopez@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        [GTK] Memory managament for DOM GObject wrappers
+        https://bugs.webkit.org/show_bug.cgi?id=40302
+
+        Initial attempt to have a kind of poor man's garbage collection
+        for GObject DOM objects. We tie the object's lifecycle to their
+        parent Frame and/or its document; that is, all objects will be
+        collected when their parent frame is destroyed or when that frame
+        transitions to a new document. Manual management (calling
+        g_object_unref on them) is also allowed, and is required for
+        objects that are not in the DOM tree (eg NodeLists).
+
+        * GNUmakefile.am:
+        * bindings/gobject/DOMObjectCache.cpp: Added.
+        * bindings/gobject/DOMObjectCache.h: Copied from WebCore/bindings/gobject/WebKitDOMBinding.h.
+        * bindings/gobject/WebKitDOMBinding.cpp: Remove the old cache code.
+        * bindings/gobject/WebKitDOMBinding.h: ditto.
+        * bindings/scripts/CodeGeneratorGObject.pm: include the new DOMObjectCache header.
+
 2010-11-20  Helder Correia  <helder@sencha.com>
 
         Reviewed by Andreas Kling.
