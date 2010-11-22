@@ -1,3 +1,89 @@
+2010-10-21  Luiz Agostini  <luiz.agostini@openbossa.org>
+
+        Reviewed by Darin Adler.
+
+        Implement CSSOM View matchMedia interface
+        https://bugs.webkit.org/show_bug.cgi?id=37205
+
+        New interfaces may be used to evaluate media queries and to associate listeners
+        to media queries. Those listeners are called whenever the associated query changes.
+        Specification may be found at http://dev.w3.org/csswg/cssom-view/#the-mediaquerylist-interface
+
+        operator== added to JS version of ScriptValue.
+        Method isFunction added to JS and V8 versions of ScriptValue.
+
+        * bindings/js/ScriptValue.cpp:
+        (WebCore::ScriptValue::isFunction):
+        * bindings/js/ScriptValue.h:
+        (WebCore::ScriptValue::operator==):
+        * bindings/v8/ScriptValue.h:
+        (WebCore::ScriptValue::isFunction):
+
+        Some changes were needed to the code generators to handle type MediaQueryListListener.
+
+        * bindings/scripts/CodeGeneratorGObject.pm:
+        * bindings/scripts/CodeGeneratorJS.pm:
+        * bindings/scripts/CodeGeneratorV8.pm:
+
+        Some changes to the bindings test results that were previously added.
+
+        * bindings/scripts/test/GObject/WebKitDOMTestMediaQueryListListener.cpp:
+        * bindings/scripts/test/GObject/WebKitDOMTestMediaQueryListListener.h:
+        * bindings/scripts/test/JS/JSTestMediaQueryListListener.cpp:
+        (WebCore::jsTestMediaQueryListListenerPrototypeFunctionMethod):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore::TestMediaQueryListListenerInternal::methodCallback):
+        (WebCore::ConfigureV8TestMediaQueryListListenerTemplate):
+
+        New interfaces:
+
+        * css/MediaQueryList.cpp: Added.
+        * css/MediaQueryList.h: Added.
+        * css/MediaQueryList.idl: Added.
+
+        * css/MediaQueryListListener.cpp: Added.
+        * css/MediaQueryListListener.h: Added.
+        * css/MediaQueryListListener.idl: Added.
+
+        To avoid adding code to classes DOMWindow and Document a new class MediaQueryMatcher was created.
+
+        * css/MediaQueryMatcher.cpp: Added.
+        * css/MediaQueryMatcher.h: Added.
+
+        Document and DOMWindow have changed to support new features. DOMWindow is the class that
+        publishes methods matchMedia but for page cache to work properly the reference to the
+        MediaQueryMatcher must be in Document.
+
+        * dom/Document.cpp:
+        (WebCore::Document::~Document):
+        (WebCore::Document::mediaQueryMatcher):
+        (WebCore::Document::styleSelectorChanged):
+        * dom/Document.h:
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::matchMedia):
+        * page/DOMWindow.h:
+        * page/DOMWindow.idl:
+
+        Build systems
+
+        * CMakeLists.txt:
+        * DerivedSources.make:
+        * GNUmakefile.am:
+        * WebCore.gypi:
+        * WebCore.pri:
+        * WebCore.pro:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/gobject/GNUmakefile.am:
+
+        Tests: fast/media/media-query-list-01.html
+               fast/media/media-query-list-02.html
+               fast/media/media-query-list-03.html
+               fast/media/media-query-list-04.html
+               fast/media/media-query-list-05.html
+               fast/media/media-query-list-06.html
+               fast/media/media-query-list-07.html
+
 2010-11-22  Alexander Pavlov  <apavlov@chromium.org>
 
         Reviewed by Pavel Feldman.
