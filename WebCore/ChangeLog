@@ -1,3 +1,59 @@
+2010-11-22  Yael Aharon  <yael.aharon@nokia.com>, Chang Shu  <chang.shu@nokia.com>
+
+        Reviewed by Antonio Gomes.
+
+        Spatial Navigation: issues with the node selection algorithm.
+        https://bugs.webkit.org/show_bug.cgi?id=49382
+
+        Modify the Spatial Navigation algorithm, to better handle initial focus and
+        navigation between frames.
+        The new algorithm takes the rect of the focused node as the startingRect,
+        instead of the node itself. That allows us to construct a virtual rect if
+        there is no focused node, or if it is off the screen.
+        The virtual rect is the edge of the container in the direction of the navigation.
+
+        With this patch, scrollable containers and frames will scroll regardless of weather
+        they have focusable content. Users will be able to use arrow keys to view all the
+        content of such a container. The only exception is if the container has style overflow:hidden. 
+        We will not scroll in that case.
+
+        With this patch, we handle z-index and positioning so that if there are 2 overlapping focusable nodes,
+        we do a hit test and only the node on top can get focus.
+
+        hasOffScreenRect() was modified so that it can check if a node will be off-screen even after we scrolled
+        its parent container. We do not add the scrolling conditions for containers that have overflow:hidden
+        and cannot scroll.
+
+        calculateScrollbarModesForLayout is used to decide if a frame can scroll or not. We cannot rely on
+        the exsistance of the scrollbar, because it could be removed via the API, while the frame is still
+        allowed to scroll.
+
+        * page/FocusController.cpp:
+        (WebCore::updateFocusCandidateIfNeeded):
+        (WebCore::FocusController::findFocusCandidateInContainer):
+        (WebCore::FocusController::advanceFocusDirectionallyInContainer):
+        (WebCore::FocusController::advanceFocusDirectionally):
+        * page/FocusController.h:
+        * page/FrameView.h:
+        * page/SpatialNavigation.cpp:
+        (WebCore::FocusCandidate::FocusCandidate):
+        (WebCore::distanceDataForNode):
+        (WebCore::alignmentForRects):
+        (WebCore::areRectsMoreThanFullScreenApart):
+        (WebCore::isRectInDirection):
+        (WebCore::hasOffscreenRect):
+        (WebCore::scrollInDirection):
+        (WebCore::isScrollableContainerNode):
+        (WebCore::scrollableEnclosingBoxOrParentFrameForNodeInDirection):
+        (WebCore::canScrollInDirection):
+        (WebCore::rectToAbsoluteCoordinates):
+        (WebCore::nodeRectInAbsoluteCoordinates):
+        (WebCore::frameRectInAbsoluteCoordinates):
+        (WebCore::entryAndExitPointsForDirection):
+        (WebCore::canBeScrolledIntoView):
+        (WebCore::virtualRectForDirection):
+        * page/SpatialNavigation.h:
+
 2010-11-22  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Reviewed by Dirk Schulze.
