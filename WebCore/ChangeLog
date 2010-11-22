@@ -1,3 +1,127 @@
+2010-11-22  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        Fix various problems with the SVG*List code
+        https://bugs.webkit.org/show_bug.cgi?id=49880
+
+        Write tests for SVGNumberList/SVGPointList/SVGStringList/SVGTransformList and extend SVGLengthList tests.
+        SVG DOM <-> XML DOM synchronization is now tested for all these types, and works great. Unify the string format produced
+        by the various valueAsString() functions for maximum compatibility with Firefox / Opera.
+
+        * Build a real transform string for SVGTransformList, instead of dumping the elements of the concatted matrix.
+        * Add SVGStringList XML dom synchronization, only affects SVGTests requiredFeatures/requiredExtensions/systemLanguage.
+        * Make all animVal properties readonly, tested by types-dom-07-f.svg (from SVG 1.1 2nd edition).
+        * Enable StrictTypeChecking/RequiresAllArguments=Raise for all SVGList types.
+
+        Tests: svg/W3C-SVG-1.1-SE/types-dom-07-f.svg
+               svg/dom/SVGNumberList-basics.xhtml
+               svg/dom/SVGPointList-basics.xhtml
+               svg/dom/SVGStringList-basics.xhtml
+               svg/dom/SVGTransformList-basics.xhtml
+
+        * bindings/js/JSSVGLengthCustom.cpp:
+        (WebCore::JSSVGLength::setValue): Throw NO_MODIFICATION_ALLOWED_ERR when the SVGPropertyTearOffs role is AnimValRole.
+        (WebCore::JSSVGLength::convertToSpecifiedUnits): Ditto.
+        * bindings/scripts/CodeGeneratorJS.pm: Ditto.
+        * bindings/scripts/CodeGeneratorObjC.pm: Ditto.
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        * bindings/v8/custom/V8SVGLengthCustom.cpp:
+        (WebCore::V8SVGLength::valueAccessorSetter): Ditto.
+        (WebCore::V8SVGLength::convertToSpecifiedUnitsCallback): Ditto.
+        * svg/SVGAElement.cpp:
+        (WebCore::SVGAElement::synchronizeProperty): Also synchronize the SVGTests SVGStringLists.
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::synchronizeProperty): Ditto.
+        * svg/SVGCircleElement.cpp:
+        (WebCore::SVGCircleElement::synchronizeProperty): Ditto.
+        * svg/SVGClipPathElement.cpp:
+        (WebCore::SVGClipPathElement::synchronizeProperty): Ditto.
+        * svg/SVGCursorElement.cpp:
+        (WebCore::SVGCursorElement::synchronizeProperty): Ditto.
+        * svg/SVGDefsElement.cpp:
+        (WebCore::SVGDefsElement::synchronizeProperty): Ditto.
+        * svg/SVGEllipseElement.cpp:
+        (WebCore::SVGEllipseElement::synchronizeProperty): Ditto.
+        * svg/SVGForeignObjectElement.cpp:
+        (WebCore::SVGForeignObjectElement::synchronizeProperty): Ditto.
+        * svg/SVGGElement.cpp:
+        (WebCore::SVGGElement::synchronizeProperty): Ditto.
+        * svg/SVGImageElement.cpp:
+        (WebCore::SVGImageElement::synchronizeProperty): Ditto.
+        * svg/SVGLengthList.cpp:
+        (WebCore::SVGLengthList::valueAsString): Use ' ' instead of ',' as seperator.
+        * svg/SVGLengthList.idl: Enable StrictTypeChecking, RequiresAllArguments=Raise.
+        * svg/SVGLineElement.cpp:
+        (WebCore::SVGLineElement::synchronizeProperty): Also synchronize the SVGTests SVGStringLists.
+        * svg/SVGMaskElement.cpp:
+        (WebCore::SVGMaskElement::synchronizeProperty): Ditto.
+        * svg/SVGNumberList.cpp:
+        (WebCore::SVGNumberList::valueAsString): Use ' ' instead of ',' as seperator.
+        * svg/SVGNumberList.idl: Enable StrictTypeChecking, RequiresAllArguments=Raise.
+        * svg/SVGPathElement.cpp:
+        (WebCore::SVGPathElement::synchronizeProperty): Also synchronize the SVGTests SVGStringLists.
+        * svg/SVGPatternElement.cpp:
+        (WebCore::SVGPatternElement::synchronizeProperty): Ditto.
+        * svg/SVGPointList.idl: Enable StrictTypeChecking, RequiresAllArguments=Raise.
+        * svg/SVGPolyElement.cpp:
+        (WebCore::SVGPolyElement::synchronizeProperty): Also synchronize the SVGTests SVGStringLists.
+        * svg/SVGRectElement.cpp:
+        (WebCore::SVGRectElement::synchronizeProperty): Ditto.
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::synchronizeProperty): Ditto.
+        * svg/SVGStringList.cpp:
+        (WebCore::SVGStringList::valueAsString): Add valueAsString() implementation, necessary for SVG DOM <-> XML DOM synchronization.
+        * svg/SVGStringList.h:
+        * svg/SVGStringList.idl: Enable StrictTypeChecking, RequiresAllArguments=Raise.
+        * svg/SVGSwitchElement.cpp:
+        (WebCore::SVGSwitchElement::synchronizeProperty): Also synchronize the SVGTests SVGStringLists.
+        * svg/SVGTests.cpp: Rewrite, similar to SVGPolyElement, to synchronize the requiredFeatures/requiredExtension/systemLanguage SVGStringLists with their XML DOM attributes.
+        (WebCore::SVGTests::SVGTests):
+        (WebCore::SVGTests::isValid):
+        (WebCore::SVGTests::parseMappedAttribute):
+        (WebCore::SVGTests::isKnownAttribute):
+        (WebCore::SVGTests::handleAttributeChange):
+        (WebCore::SVGTests::synchronizeProperties): To be called by all classes inheriting from SVGTests, in their synchronizeProperty() methods.
+        (WebCore::SVGTests::synchronizeRequiredFeatures):
+        (WebCore::SVGTests::synchronizeRequiredExtensions):
+        (WebCore::SVGTests::synchronizeSystemLanguage):
+        (WebCore::SVGTests::requiredFeatures):
+        (WebCore::SVGTests::requiredExtensions):
+        (WebCore::SVGTests::systemLanguage):
+        * svg/SVGTests.h:
+        * svg/SVGTextContentElement.cpp:
+        (WebCore::SVGTextContentElement::synchronizeProperty): Also synchronize the SVGTests SVGStringLists.
+        * svg/SVGTransform.cpp:
+        (WebCore::SVGTransform::valueAsString): Added a proper way to serialize a SVGTransform into a String.
+        * svg/SVGTransform.h:
+        * svg/SVGTransformList.cpp:
+        (WebCore::SVGTransformList::valueAsString): Rewrite, to build a real transform list string, instead of dumping the concatted matrix.
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::synchronizeProperty): Also synchronize the SVGTests SVGStringLists.
+        * svg/properties/SVGListProperty.h: s/TYPE_MISMATCH_ERR/SVGException::SVG_WRONG_TYPE_ERR/ for compatibility with Firefox.
+        (WebCore::SVGListProperty::initializeValuesAndWrappers):
+        (WebCore::SVGListProperty::insertItemBeforeValuesAndWrappers):
+        (WebCore::SVGListProperty::replaceItemValues):
+        (WebCore::SVGListProperty::replaceItemValuesAndWrappers):
+        (WebCore::SVGListProperty::removeItemValuesAndWrappers): Handle corner case, the item passed to removeItem() was the only on in the list, list is empty now, nothing to replace.
+        (WebCore::SVGListProperty::appendItemValuesAndWrappers):
+        (WebCore::SVGListProperty::role): Expose the role of this list property.
+        * svg/properties/SVGPathSegListPropertyTearOff.h: s/TYPE_MISMATCH_ERR/SVGException::SVG_WRONG_TYPE_ERR/ for compatibility with Firefox.
+        (WebCore::SVGPathSegListPropertyTearOff::initialize):
+        (WebCore::SVGPathSegListPropertyTearOff::insertItemBefore):
+        (WebCore::SVGPathSegListPropertyTearOff::replaceItem):
+        (WebCore::SVGPathSegListPropertyTearOff::appendItem):
+        * svg/properties/SVGProperty.h: Add new virtual SVGPropertyRole role() accessor.
+        * svg/properties/SVGPropertyTearOff.h:
+        (WebCore::SVGPropertyTearOff::create): Store the passed in SVGProperyRole, instead of ignoring it.
+        (WebCore::SVGPropertyTearOff::role):
+        (WebCore::SVGPropertyTearOff::SVGPropertyTearOff):
+        * svg/properties/SVGStaticPropertyTearOff.h:
+        (WebCore::SVGStaticPropertyTearOff::SVGStaticPropertyTearOff): Pass UndefinedRole as default role to SVGPropertyTearOff.
+        * svg/properties/SVGStaticPropertyWithParentTearOff.h: Ditto.
+        (WebCore::SVGStaticPropertyWithParentTearOff::SVGStaticPropertyWithParentTearOff):
+
 2010-11-22  Yuzo Fujishima  <yuzo@google.com>
 
         Reviewed by Dan Bernstein.
