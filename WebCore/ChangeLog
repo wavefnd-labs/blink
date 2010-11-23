@@ -1,3 +1,34 @@
+2010-11-23  Adam Roben  <aroben@apple.com>
+
+        Don't rely on DocumentLoader outliving the load/unload events
+
+        DocumentLoader::m_documentLoadTiming is used to record how long firing
+        the load event took. But the DocumentLoader was being destroyed while
+        the event was being dispatched (due to a call to document.open), which
+        meant that when we tried to record the time when the load event
+        finished, we were writing into freed memory. We now protect the
+        DocumentLoader using a RefPtr. (I initially made a change where we
+        would only access the DocumentLoader after the event has finished
+        firing, but it seemed possible that a different DocumentLoader could
+        have come into existence by then, which would cause us to record the
+        times on the wrong DocumentLoadTiming struct.)
+
+        I only saw a crash when firing the load event, but the code for timing
+        the unload event seemed like it was vulnerable to the same issue, so I
+        made the same fix for it.
+
+        Fixes <http://webkit.org/b/49972> REGRESSION (r72415?): Crash in
+        DOMWindow::dispatchTimedEvent when running fast/dom/onload-open.html
+
+        Reviewed by Darin Fisher.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::stopLoading):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::dispatchLoadEvent):
+        Protect the DocumentLoader (and thus its DocumentLoadTiming) with a
+        RefPtr.
+
 2010-11-17  Zhenyao Mo  <zmo@google.com>
 
         Reviewed by Kenneth Russell.
