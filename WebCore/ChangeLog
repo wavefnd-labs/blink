@@ -1,3 +1,59 @@
+2010-11-18  Satish Sampath  <satish@chromium.org>
+
+        Reviewed by Jeremy Orlow.
+
+        For speech input event, send an event object containing all the recognition results and metadata.
+        https://bugs.webkit.org/show_bug.cgi?id=49736
+
+        Currently the speech input event 'onwebkitspeechchange' receives no parameters. WebCore already
+        has the full list of recognition results and populates only the top result into the input field
+        automatically. In this patch we pass a SpeechInputEvent object to the event handler, and the JS
+        code can access the full list of results via "event.results.length", "results[i].utterance" and
+        "results[i].confidence". Also updated mock object with appropriate methods to test multiple results.
+
+        Test: fast/speech/input-onspeechchange-event.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.am:
+        * WebCore.gypi:
+        * WebCore.pri:
+        * WebCore.pro:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/JSEventCustom.cpp:
+        (WebCore::toJS): Added new event
+        * bindings/v8/custom/V8EventCustom.cpp:
+        (WebCore::toV8): Added new event
+        * dom/Event.cpp:
+        (WebCore::Event::isSpeechInputEvent):
+        * dom/Event.h:
+        * html/HTMLInputElement.cpp:
+        * html/HTMLInputElement.h:
+        * page/SpeechInputEvent.h: New file implementing SpeechInputEvent.idl
+        (WebCore::SpeechInputEvent::~SpeechInputEvent):
+        (WebCore::SpeechInputEvent::create):
+        (WebCore::SpeechInputEvent::isSpeechInputEvent):
+        (WebCore::SpeechInputEvent::results):
+        (WebCore::SpeechInputEvent::SpeechInputEvent):
+        * page/SpeechInputEvent.idl: New file defining SpeechInputEvent object
+        * page/SpeechInputListener.h:
+        * page/SpeechInputResult.cpp:
+        (WebCore::SpeechInputResult::create):
+        * page/SpeechInputResult.h:
+        * page/SpeechInputResult.idl: New file defining a single SpeechInputResult object
+        * page/SpeechInputResultList.h: New file implementing SpeechInputResultList.idl
+        (WebCore::SpeechInputResultList::create):
+        (WebCore::SpeechInputResultList::length):
+        (WebCore::SpeechInputResultList::item):
+        (WebCore::SpeechInputResultList::SpeechInputResultList):
+        * page/SpeechInputResultList.idl: New file defining a list of SpeechInputResult objects
+        * platform/mock/SpeechInputClientMock.cpp:
+        (WebCore::SpeechInputClientMock::addRecognitionResult): Renamed method and added one parameter.
+        (WebCore::SpeechInputClientMock::clearResults):
+        (WebCore::SpeechInputClientMock::timerFired):
+        * platform/mock/SpeechInputClientMock.h:
+        * rendering/TextControlInnerElements.cpp:
+        (WebCore::InputFieldSpeechButtonElement::setRecognitionResult): Pass new event object to handler.
+
 2010-11-22  Alexey Proskuryakov  <ap@apple.com>
 
         Reviewed by Darin Adler.
