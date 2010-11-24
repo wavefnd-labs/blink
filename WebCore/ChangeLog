@@ -1,3 +1,150 @@
+2010-11-22  Pavel Feldman  <pfeldman@chromium.org>
+
+        Reviewed by Yury Semikhatsky.
+
+        Web Inspector: refactor ResourceView hierarchy.
+        https://bugs.webkit.org/show_bug.cgi?id=49864
+
+        This refactoring splits ResourceView.js into:
+            NetworkItemView.js (tabbed pane)
+            ResourceHeadersView.js (header tab)
+            ResourceCookiesView.js (cookies tab)
+            ResourceView.js (base class for content tab).
+        CookiesTable was extracted from CookieItemsView and
+        brushed up. headersVisible flag has been removed.
+
+        * English.lproj/localizedStrings.js:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/front-end/CookieItemsView.js:
+        (WebInspector.CookieItemsView):
+        (WebInspector.CookieItemsView.prototype.get statusBarItems):
+        (WebInspector.CookieItemsView.prototype.hide):
+        (WebInspector.CookieItemsView.prototype.resize):
+        (WebInspector.CookieItemsView.prototype._updateWithCookies):
+        (WebInspector.CookieItemsView.prototype._filterCookiesForDomain):
+        (WebInspector.CookieItemsView.prototype._deleteCookie):
+        (WebInspector.CookieItemsView.prototype._deleteButtonClicked):
+        (WebInspector.CookieItemsView.prototype._refreshButtonClicked):
+        (WebInspector.SimpleCookiesTable):
+        (WebInspector.SimpleCookiesTable.prototype.setCookies):
+        (WebInspector.SimpleCookiesTable.prototype.resize):
+        * inspector/front-end/CookiesTable.js: Added.
+        (WebInspector.CookiesTable):
+        (WebInspector.CookiesTable.prototype.updateWidths):
+        (WebInspector.CookiesTable.prototype.setCookies):
+        (WebInspector.CookiesTable.prototype.addCookiesFolder):
+        (WebInspector.CookiesTable.prototype.get selectedCookie):
+        (WebInspector.CookiesTable.prototype._rebuildTable):
+        (WebInspector.CookiesTable.prototype.reset):
+        (WebInspector.CookiesTable.prototype._populateNode):
+        (WebInspector.CookiesTable.prototype._totalSize):
+        (WebInspector.CookiesTable.prototype._sortCookies.localeCompare):
+        (WebInspector.CookiesTable.prototype._sortCookies.numberCompare):
+        (WebInspector.CookiesTable.prototype._sortCookies.expiresCompare):
+        (WebInspector.CookiesTable.prototype._sortCookies):
+        (WebInspector.CookiesTable.prototype._createGridNode):
+        (WebInspector.CookiesTable.prototype._onDeleteFromGrid):
+        * inspector/front-end/FileSystemView.js:
+        (WebInspector.FileSystemView.prototype._selectFileSystemTab):
+        (WebInspector.FileSystemView.prototype.selectTemporaryFileSystemTab):
+        * inspector/front-end/FontView.js:
+        (WebInspector.FontView.prototype.hasContent):
+        (WebInspector.FontView.prototype._createContentIfNeeded):
+        (WebInspector.FontView.prototype.show):
+        (WebInspector.FontView.prototype.updateFontPreviewSize):
+        * inspector/front-end/ImageView.js:
+        (WebInspector.ImageView.prototype.hasContent):
+        (WebInspector.ImageView.prototype.show):
+        * inspector/front-end/NetworkItemView.js: Added.
+        (WebInspector.NetworkItemView):
+        (WebInspector.NetworkItemView.prototype.show):
+        (WebInspector.NetworkItemView.prototype._selectTab):
+        (WebInspector.NetworkItemView.prototype._tabSelected):
+        (WebInspector.NetworkItemView.prototype.resize):
+        (WebInspector.NetworkItemView.prototype.selectContentTab):
+        * inspector/front-end/NetworkPanel.js:
+        (WebInspector.NetworkPanel.prototype.show):
+        (WebInspector.NetworkPanel.prototype.refreshResource):
+        (WebInspector.NetworkPanel.prototype._showResource):
+        (WebInspector.NetworkPanel.prototype._closeVisibleResource):
+        * inspector/front-end/ResourceCookiesView.js: Added.
+        (WebInspector.ResourceCookiesView):
+        (WebInspector.ResourceCookiesView.prototype.show):
+        * inspector/front-end/ResourceHeadersView.js: Added.
+        (WebInspector.ResourceHeadersView):
+        (WebInspector.ResourceHeadersView.prototype._refreshURL):
+        (WebInspector.ResourceHeadersView.prototype._refreshQueryString):
+        (WebInspector.ResourceHeadersView.prototype._refreshFormData):
+        (WebInspector.ResourceHeadersView.prototype._refreshRequestPayload):
+        (WebInspector.ResourceHeadersView.prototype._refreshParms):
+        (WebInspector.ResourceHeadersView.prototype._toggleURLdecoding):
+        (WebInspector.ResourceHeadersView.prototype._getHeaderValue):
+        (WebInspector.ResourceHeadersView.prototype._refreshRequestHeaders):
+        (WebInspector.ResourceHeadersView.prototype._refreshResponseHeaders):
+        (WebInspector.ResourceHeadersView.prototype._refreshHTTPInformation):
+        (WebInspector.ResourceHeadersView.prototype._refreshHeaders):
+        * inspector/front-end/ResourceView.js:
+        (WebInspector.ResourceView):
+        (WebInspector.ResourceView.prototype.hasContent):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.ResourcesPanel.prototype.show):
+        (WebInspector.ResourcesPanel.prototype.showResource):
+        (WebInspector.ResourcesPanel.prototype._showResourceView):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype.show):
+        (WebInspector.ScriptsPanel.prototype._showScriptOrResource):
+        * inspector/front-end/SourceView.js:
+        (WebInspector.SourceView):
+        (WebInspector.SourceView.prototype.show):
+        (WebInspector.SourceView.prototype.hide):
+        (WebInspector.SourceView.prototype.resize):
+        (WebInspector.SourceView.prototype.setupSourceFrameIfNeeded):
+        (WebInspector.SourceView.prototype.hasContent):
+        (WebInspector.SourceView.prototype.updateLocalContent):
+        (WebInspector.SourceView.prototype.selectLocalContentTab):
+        * inspector/front-end/StylesSidebarPane.js:
+        * inspector/front-end/TabbedPane.js:
+        (WebInspector.TabbedPane):
+        (WebInspector.TabbedPane.prototype.appendTab):
+        (WebInspector.TabbedPane.prototype.selectTab):
+        (WebInspector.TabbedPane.prototype._showTab):
+        (WebInspector.TabbedPane.prototype._hideTab):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/inspector.css:
+        (.webkit-line-gutter-backdrop):
+        (.resource-view):
+        (.resource-view.visible):
+        (.resource-view.font):
+        (.resource-view.image > .image):
+        (.resource-view.image > .info):
+        (.storage-view):
+        (.storage-view .data-grid):
+        (.storage-empty-view, .storage-view .storage-table-error):
+        (.storage-view .storage-table-error):
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/networkPanel.css:
+        (.network-cell-subtitle):
+        (.network-header-subtitle):
+        (#network-views .network-item-view .tabbed-pane-header):
+        (#network-views.small .network-item-view .tabbed-pane-header):
+        (.network-item-view):
+        (.network-item-view.visible):
+        (.network-item-view .tabbed-pane-header):
+        (.network-item-view .scope-bar li):
+        (.resource-headers-view):
+        (.resource-headers-view.visible):
+        (.resource-headers-view .outline-disclosure .parent):
+        (.resource-headers-view .outline-disclosure .children li):
+        (.resource-headers-view .outline-disclosure li.expanded .header-count):
+        (.resource-headers-view .outline-disclosure .header-name):
+        (.resource-headers-view .outline-disclosure .header-value):
+        (.resource-headers-view .outline-disclosure .raw-form-data):
+        (.resource-cookies-view):
+        (.resource-cookies-view.visible):
+        (.resource-cookies-view .data-grid):
+        (.resource-cookies-view .data-grid .row-group):
+
 2010-11-24  Pavel Feldman  <pfeldman@chromium.org>
 
         Reviewed by Yury Semikhatsky.
