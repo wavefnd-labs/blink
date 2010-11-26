@@ -1,3 +1,43 @@
+2010-11-25  Jeremy Orlow  <jorlow@chromium.org>
+
+        Reviewed by Steve Block.
+
+        Clean up IDBDatabase.transaction and add checks to IDBTransaction.objectStore
+        https://bugs.webkit.org/show_bug.cgi?id=50081
+
+        IDBDatabase.transaction should use the new optional OptionsObject way
+        of taking optional paramters. Modify that object to get numbers and
+        domStringLists from it. Verify that any requested resources exist and
+        return an exception if not.
+
+        When IDBTransaction.objectStore is called, verify that it's one of the
+        requested resources. Also verify that it still exists. Plumb the
+        exception code to make this work.
+
+        Tests: storage/indexeddb/create-and-remove-object-store.html
+               storage/indexeddb/transaction-and-objectstore-calls.html
+
+        * bindings/v8/OptionsObject.cpp:
+        (WebCore::OptionsObject::getKeyInteger):
+        (WebCore::OptionsObject::getKeyString):
+        (WebCore::OptionsObject::getKeyDOMStringList):
+        * bindings/v8/OptionsObject.h:
+        * storage/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::createObjectStore):
+        (WebCore::IDBDatabase::transaction):
+        * storage/IDBDatabase.h:
+        (WebCore::IDBDatabase::transaction):
+        * storage/IDBDatabase.idl:
+        * storage/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::transaction):
+        * storage/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::objectStore):
+        * storage/IDBTransactionBackendImpl.cpp:
+        (WebCore::IDBTransactionBackendImpl::IDBTransactionBackendImpl):
+        (WebCore::IDBTransactionBackendImpl::objectStore):
+        * storage/IDBTransactionBackendImpl.h:
+        * storage/IDBTransactionBackendInterface.h:
+
 2010-11-26  Mario Sanchez Prada  <msanchez@igalia.com>
 
         Reviewed by Xan Lopez.
