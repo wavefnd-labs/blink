@@ -1,3 +1,33 @@
+2010-11-26  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Antti Koivisto.
+
+        <rdar://problem/8681368> Avoid unnecessary calls to CTFontGetPlatformFont()
+        https://bugs.webkit.org/show_bug.cgi?id=50096
+
+        No new test, since functionality is unchanged.
+
+        * platform/graphics/chromium/CrossProcessFontLoading.mm:
+        (WebCore::FontPlatformData::loadFont): Removed the ATSUFontID argument.
+        * platform/graphics/cocoa/FontPlatformData.h:
+        (WebCore::FontPlatformData::FontPlatformData): Ditto.
+        (WebCore::FontPlatformData::operator==): Removed comparison of font IDs.
+        * platform/graphics/cocoa/FontPlatformDataCocoa.mm:
+        (WebCore::FontPlatformData::loadFont): Removed the ATSUFontID argument.
+        (WebCore::FontPlatformData::FontPlatformData): Updated.
+        (WebCore::FontPlatformData::operator=): Removed copying of font ID.
+        (WebCore::FontPlatformData::setFont): Removed setting of font ID.
+        * platform/graphics/mac/ComplexTextControllerATSUI.cpp:
+        (WebCore::initializeATSUStyle): Call CTFontGetPlatformFont() here if necessary.
+        * platform/graphics/mac/FontCustomPlatformData.cpp:
+        (WebCore::FontCustomPlatformData::fontPlatformData): Updated for FontPlatformData change.
+        (WebCore::createFontCustomPlatformData): Updated for FontCustomPlatformData change.
+        * platform/graphics/mac/FontCustomPlatformData.h:
+        (WebCore::FontCustomPlatformData::FontCustomPlatformData): Removed ATSUFontID argument and
+        data member.
+        * platform/graphics/mac/SimpleFontDataATSUI.mm:
+        (WebCore::SimpleFontData::checkShapesArabic): Call CTFontGetPlatformFont() here if necessary.
+
 2010-11-26  François Sausset  <sausset@gmail.com>
 
         Reviewed by Daniel Bates.
