@@ -1,3 +1,41 @@
+2010-11-29  Simon Fraser  <simon.fraser@apple.com>
+
+        Reviewed by Dave Hyatt.
+
+        layer()->currentTransform() is stale when layout changes the box size
+        https://bugs.webkit.org/show_bug.cgi?id=50175
+        
+        RenderLayer::updateTransform() is fairly expensive, so we
+        have to avoid calling it from RenderBox::applyLayerTransformToRect()
+        every time. This requires that we update the layer's transform
+        during layout, instead of from updateLayerPositions() which is too late.
+        
+        So call updateLayerTransform() from the various layout methods
+        on renderers that can be transformed, and remove it from 
+        updateLayerPositions().
+
+        Test: fast/overflow/overflow-update-transform.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::layoutOnlyPositionedObjects):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::applyLayerTransformToRect):
+        (WebCore::RenderBox::updateLayerTransform):
+        * rendering/RenderBox.h:
+        * rendering/RenderEmbeddedObject.cpp:
+        (WebCore::RenderEmbeddedObject::layout):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock):
+        * rendering/RenderIFrame.cpp:
+        (WebCore::RenderIFrame::layout):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPositions):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::layout):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::layout):
+
 2010-11-29  Chris Rogers  <crogers@google.com>
 
         Reviewed by Kenneth Russell.
