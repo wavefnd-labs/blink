@@ -1,3 +1,22 @@
+2010-11-24  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Reviewed by Darin Adler.
+
+        REGRESSION (r71934): Main search field at Apple tech specs does not accept typing
+        https://bugs.webkit.org/show_bug.cgi?id=49868
+
+        The problem here was that the inner text element of search input was first laid out as
+        disabled and thus with a 0-height. This would prevent a hit test to ever reach it, even
+        if it's enabled.
+
+        Test: fast/forms/disabled-search-input.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::hasLineIfEmpty): Removed a check for textarea that is no longer necessary.
+        * rendering/TextControlInnerElements.cpp:
+        (WebCore::RenderTextControlInnerBlock::hasLineIfEmpty): Added an override to ensure that
+            an empty inner text element is always one-line high.
+
 2010-11-29  W. James MacLean  <wjmaclean@chromium.org>
 
        Reviewed by Dirk Schulze.
