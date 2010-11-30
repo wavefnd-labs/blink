@@ -1,36 +1,30 @@
 <html>
   <!--
-    This test ensures the basic traversal correctness of Spatial Navigation
-    algorithm: iframes without any focusable content should be ignored.
+    This test ensures the cross iframe traversal correctness of Spatial Navigation
+    algorithm: focusable elements in an flattened <iframe> should be accessible.
 
     * Pre-conditions:
-    1) DRT support for SNav enable/disable.
+    1) DRT support for Spatial Navigation enable/disable.
+    2) DRT support for Frame flattening enable/disable.
 
     * Navigation steps:
     1) Loads this page, focus goes to "start" automatically.
-    2) Focus moves from "start" to "end" bypassing the two iframes
-       in between them, once both have no focusable elements inside.
+    2) Focus moves along the elements in the two iframes in the
+       Web page, eventually going to outer an southward link, but
+       going back to the iframe on the top later on.
   -->
   <head>
-    <script src="../../js/resources/js-test-pre.js"></script>
+    <script src="../js/resources/js-test-pre.js"></script>
     <script src="resources/spatial-navigation-utils.js"></script>
     <script type="application/javascript">
 
     var resultMap = [
-      ["Down", "start"],
-      ["Down", "start"],
-      ["Down", "start"],
-      ["Down", "start"],
-      ["Down", "start"],
-      ["Down", "start"],
+      ["Down", "1"],
+      ["Down", "2"],
       ["Down", "end"],
-      ["Up"  , "end"],
-      ["Up"  , "end"],
-      ["Up"  , "end"],
-      ["Up"  , "end"],
-      ["Up"  , "end"],
-      ["Up"  , "end"],
-      ["Up"  , "start"],
+      ["Up", "2"],
+      ["Up", "1"],
+      ["Up", "start"],
       ["DONE", "DONE"]
     ];
 
@@ -43,6 +37,9 @@
 
     function runTest()
     {
+      if (window.layoutTestController)
+        layoutTestController.setFrameFlatteningEnabled(true);
+
       // starting the test itself: get to a known place.
       document.getElementById("start").focus();
 
@@ -57,25 +54,21 @@
 
     window.onload = runTest;
     </script>
-    <script src="../js/resources/js-test-post.js"></script>
+    <script src="js/resources/js-test-post.js"></script>
   </head>
   <body id="some-content" xmlns="http://www.w3.org/1999/xhtml">
     <div><a id="start" href="a">a</a></div>
 
     <iframe width="80" height="80" scrolling="auto" src="data:text/html,
       <body>
-        <img width=120 height=200 src='resources/green.png'>
+        <a id='1' href='a'>b</a>
+        <div style='margin-top:120px'>
+          <a id='2' href='a'>d</a>
+        </div>
       </body>
     "></iframe><br>
 
-    <iframe scrolling="auto" src="data:text/html,
-      <body>
-        <img width=120 height=200 src='resources/green.png'>
-      </body>
-    "></iframe><br>
-
-    <a id="end" href="a">e</a>
+    <div><a id="end" href="a">e</a></div>
     <div id="console"></div>
-    This is to test that an iframe with no focusable content still scrolls
   </body>
 </html>

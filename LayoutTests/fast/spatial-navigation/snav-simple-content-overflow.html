@@ -1,20 +1,18 @@
 <html>
   <!--
-    This test ensures the content overflow traversal correctness of spatial navigation:
-    if an element if clipped overflow in a scrollable container (e.g. <div>),
-    scroll-in-direction should happen in the container box, not on the outer view.
+    This test ensures that overflowed content can be focused by Spatial Navigation.
 
     * Pre-conditions:
-    1) DRT support for spatial navigation enable/disable.
+    1) DRT support for SNav enable/disable.
 
     * Navigation steps:
     1) Loads this page, focus goes to "start" automatically.
-    2) Try to move focus down to the visible focusable element in
-       scrollable div.
+    3) Try to traverse the links on page down.
+       and then back up.
 
-    * Expected results: There should have to a scroll action in the container
-    (div) as an attempt to make the clipped overflow node visible and accessible
-    via spatial navigation. -->
+    * Expected results: After 'start' gets the focus, tapping down arrow should scroll its
+      enclosing scrollable container (<div>) down, and *not* move focus to the link whose id is '2'.
+  -->
   <head>
     <style type="text/css">
       div.scroll {
@@ -27,7 +25,7 @@
       }
     </style>
 
-    <script src="../../js/resources/js-test-pre.js"></script>
+    <script src="../js/resources/js-test-pre.js"></script>
     <script src="resources/spatial-navigation-utils.js"></script>
     <script type="application/javascript">
 
@@ -53,8 +51,6 @@
 
     function testCompleted()
     {
-      shouldBeTrue(String(document.getElementById("div").scrollTop != 0));
-
       if (window.layoutTestController)
         layoutTestController.notifyDone();
     }
@@ -62,16 +58,17 @@
     window.onload = runTest;
 
     </script>
-    <script src="../js/resources/js-test-post.js"></script>
+    <script src="js/resources/js-test-post.js"></script>
   </head>
+
   <body id="some-content" xmlns="http://www.w3.org/1999/xhtml">
-    <p>That is is a normal <a id="start" href="a">link</a>.</p>
-    <div class="scroll" id="div">
-      <p>This is a scrollable Div created with the CSS property overflow.</p>
-      <br><br><br><br><br><br><br><br>
-      <p> ... and here we have a clipped overflow <a id="1" href="a">link</a>.</p>
+    <div class="scroll">
+      <p>It has a visible <a id="start" href="a">link_1</a>.</p>
+      <br><br><br><br><br><br><br><br><br>
+      <p>... and an overflowed link like <a id="1" href="a">this</a>.</p>
     </div>
-    <p>And this is another normal <a id="2" href="a">link_2</a>.</p>
+    <br><br><br><br><br><br><br>
+    <p>This link should NOT get <a id="start" href="a">focused</a>.</p>
     <div id="console"></div>
   </body>
 </html>
