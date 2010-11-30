@@ -1,3 +1,57 @@
+2010-11-29  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Darin Adler.
+
+        WebCore part of <rdar://problem/8650085> adding word-prefix search options to the text search API.
+        https://bugs.webkit.org/show_bug.cgi?id=50038
+
+        Test: editing/text-iterator/findString.html
+
+        * GNUmakefile.am: Added FindOptions.h.
+        * WebCore.exp.in: Export the new methods that take FindOptions.
+        * WebCore.gypi: Added FindOptions.h.
+        * WebCore.pro: Added FindOptions.h and TextBoundaries.{cpp,h}.
+        * WebCore.vcproj/WebCore.vcproj: Added FindOptions.h.
+        * WebCore.xcodeproj/project.pbxproj: Added FindOptions.h and TextBoundaries.cpp.
+        * editing/Editor.cpp:
+        (WebCore::Editor::firstVisibleRange): Changed to use FindOptions.
+        (WebCore::Editor::lastVisibleRange): Ditto.
+        (WebCore::Editor::nextVisibleRange): Ditto.
+        (WebCore::Editor::findString): Ditto.
+        (WebCore::Editor::countMatchesForText): Ditto.
+        * editing/Editor.h: Added a version of findString() that takes FindOptions. Changed
+        countMatchesForText() to take FindOptions. Made nextVisibleRange() private and changed it
+        and firstVisibleRange() and lastVisibleRange() to take FindOptions.
+        * editing/FindOptions.h: Added.
+        * editing/TextIterator.cpp:
+        Augmented SearchBuffer with an optional prefix, which is not searched, but provides context
+        for determining word boundaries.
+        (WebCore::isSeparator): Added. Identifies a class of characters used to determine where
+        “words” are embedded in a word.
+        (WebCore::SearchBuffer::SearchBuffer): Changed to take FindOptions. Added initialization of
+        m_options, m_prefixLength and m_needsMoreContext.
+        (WebCore::SearchBuffer::append): Adjust m_prefixLength as part of the prefix gets pushed out
+        of the buffer.
+        (WebCore::SearchBuffer::needsMoreContext): Added.
+        (WebCore::SearchBuffer::prependContext): Added.
+        (WebCore::SearchBuffer::isWordStartMatch): Added.
+        (WebCore::SearchBuffer::search): Changed to account for the context prefix. When searching
+        only for word prefix matches, maintains enough context before a tentative match when moving
+        it to the beginning of the buffer. Reject matches that are not at word starts if requested.
+        Adjust m_prefixLength when pushing characters out of the buffer.
+        (WebCore::findPlainText): Changed to work with FindOptions. Feed the search buffer with context
+        if and as long as it requires more of it.
+        * editing/TextIterator.h: Added a version of findPlainText() that takes FindOptions.
+        * editing/visible_units.cpp: Moved {end,start}Of{First,Last}WordBoundary to TextBoundaries.cpp.
+        * page/Page.cpp:
+        (WebCore::Page::findString): Changed to work with FindOptions.
+        (WebCore::Page::markAllMatchesForText): Ditto.
+        * page/Page.h: Added FindOptions-based findString() and markAllMatchesForText().
+        * platform/text/TextBoundaries.cpp:
+        (WebCore::endOfFirstWordBoundaryContext): Moved here from visible_units.cpp.
+        (WebCore::startOfLastWordBoundaryContext): Ditto.
+        * platform/text/TextBoundaries.h:
+
 2010-11-29  Dai Mikurube  <dmikurube@google.com>
 
         Reviewed by Kent Tamura.

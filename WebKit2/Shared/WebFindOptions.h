@@ -23,23 +23,21 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FindOptions_h
-#define FindOptions_h
+#ifndef WebFindOptions_h
+#define WebFindOptions_h
 
 namespace WebKit {
 
-enum FindDirection { 
-    FindDirectionForward, 
-    FindDirectionBackward
-};
-
 enum FindOptions {
     FindOptionsCaseInsensitive = 1 << 0,
-    FindOptionsWrapAround = 1 << 1,
-    FindOptionsShowOverlay = 1 << 2,
-    FindOptionsShowFindIndicator = 1 << 3,
+    FindOptionsAtWordStarts = 1 << 1,
+    FindOptionsTreatMedialCapitalAsWordStart = 1 << 2,
+    FindOptionsBackwards = 1 << 3,
+    FindOptionsWrapAround = 1 << 4,
+    FindOptionsShowOverlay = 1 << 5,
+    FindOptionsShowFindIndicator = 1 << 6
 };
 
 } // namespace WebKit
 
-#endif // FindOptions_h
+#endif // WebFindOptions_h
