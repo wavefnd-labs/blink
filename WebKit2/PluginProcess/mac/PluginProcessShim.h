@@ -26,6 +26,14 @@
 #ifndef PluginProcessShim_h
 #define PluginProcessShim_h
 
+namespace WebKit {
 
+struct PluginProcessShimCallbacks {
+    bool (*shouldCallRealDebugger)();
+};
+
+typedef void (*PluginProcessShimInitializeFunc)(const PluginProcessShimCallbacks&);
+
+}
 
 #endif // PluginProcessShim_h
