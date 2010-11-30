@@ -1,3 +1,40 @@
+2010-11-30  Vangelis Kokkevis  <vangelis@chromium.org>
+
+        Reviewed by Simon Fraser.
+
+        Provide more fine grained control to ports over when to turn on 
+        accelerated compositing.
+        https://bugs.webkit.org/show_bug.cgi?id=49998
+
+        The RenderLayerCompositor now checks with the chrome client whether
+        3d transforms, video, plugins, canvas and animation require
+        switching over to the composited path. Layers that overlap composited
+        content will still turn into composited layers regardless of the
+        setting.
+
+        * css/MediaQueryEvaluator.cpp:
+        (WebCore::transform_3dMediaFeatureEval):
+        * page/ChromeClient.h:
+        (WebCore::ChromeClient::allowedCompositingTriggers):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::canRender3DTransforms):
+        (WebCore::RenderLayer::updateTransform):
+        (WebCore::RenderLayer::currentTransform):
+        * rendering/RenderLayer.h:
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateLayerTransform):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::RenderLayerCompositor):
+        (WebCore::RenderLayerCompositor::cacheAcceleratedCompositingFlags):
+        (WebCore::RenderLayerCompositor::canRender3DTransforms):
+        (WebCore::RenderLayerCompositor::requiresCompositingLayer):
+        (WebCore::RenderLayerCompositor::requiresCompositingForTransform):
+        (WebCore::RenderLayerCompositor::requiresCompositingForVideo):
+        (WebCore::RenderLayerCompositor::requiresCompositingForCanvas):
+        (WebCore::RenderLayerCompositor::requiresCompositingForPlugin):
+        (WebCore::RenderLayerCompositor::requiresCompositingForAnimation):
+        * rendering/RenderLayerCompositor.h:
+
 2010-11-30  Xan Lopez  <xlopez@igalia.com>
 
         Reviewed by Martin Robinson.
