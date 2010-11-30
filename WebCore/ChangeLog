@@ -1,3 +1,112 @@
+2010-11-30  Andreas Kling  <kling@webkit.org>
+
+        Reviewed by Dirk Schulze.
+
+        GraphicsContext: Remove "current path" and have strokePath, fillPath and clipPath take a Path argument.
+        https://bugs.webkit.org/show_bug.cgi?id=48516
+
+        No new tests, this is refactoring only.
+
+        fillPath() -> fillPath(const Path&)
+        strokePath() -> strokePath(const Path&)
+        clipPath(WindRule) -> clipPath(const Path&, WindRule)
+
+        drawPath() was only used by CG, so made it PLATFORM(CG) specific.
+
+        The Qt, CG and Cairo implementations are best-effort.
+        For the rest, I've put beginPath/addPath and FIXMEs in the three affected methods.
+
+        * WebCore.exp.in:
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::fill):
+        (WebCore::CanvasRenderingContext2D::stroke):
+        * inspector/InspectorController.cpp:
+        (WebCore::drawOutlinedQuad):
+        * mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::paint):
+        * mathml/RenderMathMLSquareRoot.cpp:
+        (WebCore::RenderMathMLSquareRoot::paint):
+        * platform/graphics/GraphicsContext.h:
+        * platform/graphics/GraphicsContextPrivate.h:
+        * platform/graphics/cairo/GraphicsContextCairo.cpp:
+        (WebCore::GraphicsContext::fillPath):
+        (WebCore::GraphicsContext::strokePath):
+        (WebCore::GraphicsContext::clipPath):
+        * platform/graphics/cairo/GraphicsContextPlatformPrivateCairo.h:
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore::GraphicsContext::drawEllipse):
+        (WebCore::addConvexPolygonToPath):
+        (WebCore::GraphicsContext::drawConvexPolygon):
+        (WebCore::GraphicsContext::clipConvexPolygon):
+        (WebCore::GraphicsContext::drawPath):
+        (WebCore::GraphicsContext::fillPath):
+        (WebCore::GraphicsContext::strokePath):
+        (WebCore::GraphicsContext::fillRoundedRect):
+        (WebCore::GraphicsContext::clipPath):
+        * platform/graphics/haiku/GraphicsContextHaiku.cpp:
+        (WebCore::GraphicsContext::strokePath):
+        (WebCore::GraphicsContext::fillPath):
+        * platform/graphics/openvg/GraphicsContextOpenVG.cpp:
+        (WebCore::GraphicsContext::fillPath):
+        (WebCore::GraphicsContext::strokePath):
+        (WebCore::GraphicsContext::clipPath):
+        * platform/graphics/qt/GraphicsContextQt.cpp:
+        (WebCore::GraphicsContext::restorePlatformState):
+        (WebCore::GraphicsContext::fillPath):
+        (WebCore::GraphicsContext::strokePath):
+        (WebCore::GraphicsContext::clipPath):
+        (WebCore::GraphicsContext::strokeRect):
+        (WebCore::GraphicsContext::translate):
+        (WebCore::GraphicsContext::rotate):
+        (WebCore::GraphicsContext::scale):
+        (WebCore::GraphicsContext::concatCTM):
+        * platform/graphics/skia/GraphicsContextSkia.cpp:
+        (WebCore::GraphicsContext::clipPath):
+        (WebCore::GraphicsContext::fillPath):
+        (WebCore::GraphicsContext::strokePath):
+        * platform/graphics/wince/GraphicsContextWinCE.cpp:
+        (WebCore::GraphicsContext::fillPath):
+        (WebCore::GraphicsContext::strokePath):
+        (WebCore::GraphicsContext::clipPath):
+        * platform/graphics/wx/GraphicsContextWx.cpp:
+        (WebCore::GraphicsContext::clipPath):
+        (WebCore::GraphicsContext::fillPath):
+        (WebCore::GraphicsContext::strokePath):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::paintBorder):
+        (WebCore::RenderBoxModelObject::paintBoxShadow):
+        * rendering/RenderEmbeddedObject.cpp:
+        (WebCore::RenderEmbeddedObject::paintReplaced):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::drawBoxSideFromPath):
+        * rendering/RenderSVGResource.h:
+        (WebCore::RenderSVGResource::postApplyResource):
+        * rendering/RenderSVGResourceClipper.cpp:
+        (WebCore::RenderSVGResourceClipper::pathOnlyClipping):
+        * rendering/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::postApplyResource):
+        * rendering/RenderSVGResourceFilter.h:
+        * rendering/RenderSVGResourceGradient.cpp:
+        (WebCore::RenderSVGResourceGradient::applyResource):
+        * rendering/RenderSVGResourceGradient.h:
+        * rendering/RenderSVGResourcePattern.cpp:
+        (WebCore::RenderSVGResourcePattern::postApplyResource):
+        * rendering/RenderSVGResourcePattern.h:
+        * rendering/RenderSVGResourceSolidColor.cpp:
+        (WebCore::RenderSVGResourceSolidColor::postApplyResource):
+        * rendering/RenderSVGResourceSolidColor.h:
+        * rendering/SVGRenderSupport.cpp:
+        (WebCore::SVGRenderSupport::finishRenderSVGContent):
+        * rendering/svg/RenderSVGPath.cpp:
+        (WebCore::RenderSVGPath::fillAndStrokePath):
+        * rendering/svg/SVGInlineTextBox.cpp:
+        (WebCore::SVGInlineTextBox::releasePaintingResource):
+        (WebCore::SVGInlineTextBox::restoreGraphicsContextAfterTextPainting):
+        (WebCore::SVGInlineTextBox::paintDecorationWithStyle):
+        * rendering/svg/SVGInlineTextBox.h:
+        * svg/SVGFont.cpp:
+        (WebCore::Font::drawTextUsingSVGFont):
+
 2010-11-30  Alexey Proskuryakov  <ap@apple.com>
 
         Reviewed by Darin Adler and Geoff Garen.
