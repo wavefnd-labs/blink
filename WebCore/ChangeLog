@@ -1,3 +1,27 @@
+2010-11-30  David Hyatt  <hyatt@apple.com>
+
+        Reviewed by Simon Fraser.
+        
+        https://bugs.webkit.org/show_bug.cgi?id=50183
+        
+        Code got commented out by accident during render tree refactoring last year.  Put the code back in, since
+        it hurts performance to have that line commented out.
+
+        In order to put this code back in, I had to fix some bugs with preferred width computations and
+        overflow: scroll.  Make the pref widths computation create the scrollbar if it doesn't exist yet.
+
+        Make sure the scrollbar size is included prior to checking for defined width/min-width/max-width values.  Otherwise
+        the scrollbar inflates the width beyond the fixed size that was specified.
+        
+        For table cells, there is an additional wrinkle.  Make sure not to include the scrollbar size as part of the minimum
+        intrinsic width so that we don't incorrectly grow.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutPositionedObjects):
+        (WebCore::RenderBlock::computePreferredLogicalWidths):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::computePreferredLogicalWidths):
+
 2010-11-30  Vitaly Repeshko  <vitalyr@chromium.org>
 
         Unreviewed.
