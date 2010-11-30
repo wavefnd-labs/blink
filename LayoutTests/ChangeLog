@@ -1,3 +1,30 @@
+2010-11-29  Xiaomei Ji  <xji@chromium.org>
+
+        Reviewed by David Hyatt.
+
+        Fix tab overflow problem when alignment is not left.
+        https://bugs.webkit.org/show_bug.cgi?id=25459
+
+        I checked WordPad in Windows, TextEdit in Mac, OpenOffice, and Google doc. 
+        In all of them, (when the writing mode is horizontal) when the alignment is not
+        left alignment, the length of tab is computed based on the tab's position
+        relative to the left start of line, not based on the tab's position relative 
+        to the left edge of the document.
+
+        WebKit should follow the same.
+
+        The m_xPos in each TextRun should be relative to the left start of the line, 
+        not left start of its containing block (in right alignment and center alignment,
+        left start of the line is not the same as left start of the containing block).
+        So, when the text is drawn, the width of tab is consistent with the width 
+        computed in RenderBlock::computeInlineDirectionPositionsForLine().
+
+        I did not test vertical writing mode, but I think the same rule should apply.
+
+        * fast/dom/tab-in-right-alignment-expected.txt: Added.
+        * fast/dom/tab-in-right-alignment.html: Added.
+        * platform/qt/Skipped:
+
 2010-11-29  Simon Fraser  <simon.fraser@apple.com>
 
         Add Qt-specific result.
