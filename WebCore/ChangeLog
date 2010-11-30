@@ -1,3 +1,67 @@
+2010-11-29  Dai Mikurube  <dmikurube@google.com>
+
+        Reviewed by Kent Tamura.
+
+        when empty, clicking "down" on outer-spin-button returns "max value"
+        https://bugs.webkit.org/show_bug.cgi?id=45491
+
+        Modified stepping-up/down from renderer
+        - to clamp steps,
+        - to handle empty values (described below), and
+        - to apply them for range type inputs.
+
+        Stepping-up/down for empty values are handled "the empty as 0."
+        For example :
+        * If 0 is in-range, and matches to step value
+          "down" -> -step
+          "up" -> +step
+          If -step or +step is out of range, new value should be 0.
+
+        * If 0 is smaller than the minimum value
+          "down" -> the minimum value
+          "up" -> the minimum value
+
+        * If 0 is larger than the maximum value
+          "down" -> the maximum value
+          "up" -> the maximum value
+
+        * If 0 is in-range, but not matched to step value
+          "down" -> smaler matched value nearest to 0.
+            e.g. <input type=number min=-100 step=3> -> -1
+          "up" -> larger matched value nearest to 0.
+            e.g. <input type=number min=-100 step=3> -> 2
+
+        As for date/datetime-local/month/time/week types, the empty is assumed as "current local date/time".
+        As for datetime type, the empty is assumed as "current date/time in UTC".
+
+        As for range input types, changed stepping from renderer to use stepUpFromRenderer().
+        It was calculated with stepUp() from RangeInputType::handleKeydownEvent().
+
+        Test: fast/forms/input-stepup-stepdown-from-renderer.html
+
+        * html/BaseDateAndTimeInputType.cpp:
+        (WebCore::BaseDateAndTimeInputType::defaultValueForStepUp): Added defaultValueForStepUp() which returns the current local time
+        * html/BaseDateAndTimeInputType.h:
+        * html/DateTimeInputType.cpp:
+        (WebCore::DateTimeInputType::defaultValueForStepUp): Added defaultValueForStepUp() which returns the current UTC time
+        * html/DateTimeInputType.h:
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::stepUpFromRenderer): Modified it to clamp steps, support empty values and support range type inputs
+        * html/HTMLInputElement.h:
+        (WebCore::HTMLInputElement::isRangeControl):
+        * html/InputType.cpp:
+        (WebCore::InputType::defaultValueForStepUp): Added defaultValueForStepUp() which returns 0
+        * html/InputType.h:
+        * html/MonthInputType.cpp:
+        (WebCore::MonthInputType::defaultValueForStepUp): Added defaultValueForStepUp() which returns the current local month
+        * html/MonthInputType.h:
+        * html/RangeInputType.cpp:
+        (WebCore::RangeInputType::handleKeydownEvent): Added comments and modified it to use stepUpFromRenderer()
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::defaultValueForStepUp): Added defaultValueForStepUp() which returns the current local time
+        * html/TimeInputType.h:
+        * manual-tests/input-type-datetime-default-value.html: Added manual tests for default values of date/time inputs since they are "the current local/UTC time", which cannot be tested automatically.
+
 2010-11-29  Adam Barth  <abarth@webkit.org>
 
         Reviewed by Darin Adler.
