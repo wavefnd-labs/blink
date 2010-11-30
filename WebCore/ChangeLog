@@ -1,3 +1,72 @@
+2010-11-30  Mario Sanchez Prada  <msanchez@igalia.com>
+
+        Reviewed by Chris Fleizach.
+
+        [GTK] Implement ROLE_COMBO_BOX
+        https://bugs.webkit.org/show_bug.cgi?id=25678
+
+        Implement the remaining bits for combo boxes.
+
+        This patch finishes the implementation, from the point of view of
+        the Atk library, of those objects exposed to ATK as combo boxes,
+        and their related elements (menus and menu items). It therefore
+        implements the proper interfaces for each type of object related
+        to combo boxes (AtkSelection for the combo box, AtkText for every
+        menu item and AtkAction for the combo box, the menu and the menu
+        items), takes care of emitting the proper signals when focus or a
+        given a selection changes and adds a new unit test to check all
+        this new stuff.
+
+        Make possible to ask an AccessibleMenuListOption for a sensible
+        string representation, so far only available through the private
+        and MSAA related method nameForMSAA. Just moved the implementation
+        of that method to an overriden version of stringValue(), which is
+        platform independent, and called that from nameForMSAA().
+
+        * accessibility/AccessibilityMenuListOption.h:
+        * accessibility/AccessibilityMenuListOption.cpp:
+        (WebCore::AccessibilityMenuListOption::nameForMSAA): Just call to
+        stringValue(), which holds from now on that used to be here.
+        (WebCore::AccessibilityMenuListOption::stringValue): New, override
+        of AccessibilityObject::stringValue() to return a proper string.
+
+        Emit the missing signals when a selection is made.
+
+        * accessibility/gtk/AXObjectCacheAtk.cpp:
+        (WebCore::AXObjectCache::postPlatformNotification): Emit the usual
+        'focus' signals when a selection is made over the combo box.
+
+        * accessibility/gtk/AccessibilityObjectWrapperAtk.cpp:
+        (setAtkStateSetFromCoreObject): Ensure the EXPANDABLE and EXPANDED
+        Atk states are added to the state set when needed.
+        (listObjectForSelection): New, returns the proper list object (the
+        one holding the list of available options as its children) for an
+        specific AtkObject implementing AtkSelection. This is needed
+        because sometimes the selectable options are not directly children
+        of the AtkSelection object (i.e. a combo box has a 'menu' object
+        as its only child of it, holding the list of options as children).
+        (optionFromList): Use listObjectForSelection() to get the actual
+        object holding the list of children as the available options.
+        (optionFromSelection): Add support for combo boxes.
+        (webkit_accessible_selection_add_selection): Ditto.
+        (webkit_accessible_selection_clear_selection): Ditto.
+        (webkit_accessible_selection_get_selection_count): Ditto.
+        (webkit_accessible_selection_is_child_selected): Ditto.
+        (webkit_accessible_selection_remove_selection): Ditto.
+        (webkit_accessible_text_get_text): Makes sure stringValue() is
+        considered to get the result substring when it was already
+        considered when checking the maximum text length for the object.
+        (getInterfaceMaskFromObject): Make sure the AtkSelection interface
+        is implemented for the combo boxes, that the AtkText is
+        implemented for the menu items and that the AtkAction interface is
+        now implemented for every object (WebCore will decide what to do).
+
+        Avoid a segfault crash when using this from unit tests.
+
+        * platform/gtk/PopupMenuGtk.cpp:
+        (WebCore::PopupMenuGtk::show): Make sure we got a valid GdkWindow
+        before calling gdk_window_get_origin() over it.
+
 2010-11-30  Andreas Kling  <kling@webkit.org>
 
         Reviewed by Tor Arne Vestbø.
