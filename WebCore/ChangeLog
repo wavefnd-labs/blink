@@ -1,3 +1,49 @@
+2010-11-30  Kent Tamura  <tkent@chromium.org>
+
+        Reviewed by Darin Adler.
+
+        Refactor HTMLInputElement: Move a part of HTMLInputElement::
+        defaultEventHandler() to InputTypes
+        https://bugs.webkit.org/show_bug.cgi?id=50097
+
+        Move all of keyboard-related event handling to InputType.
+
+        No new tests because this should not change any behavior.
+
+        * html/BaseButtonInputType.cpp:
+        (WebCore::BaseButtonInputType::handleKeydownEvent):
+        (WebCore::BaseButtonInputType::handleKeypressEvent):
+        (WebCore::BaseButtonInputType::handleKeyupEvent):
+        * html/BaseButtonInputType.h:
+        * html/BaseCheckableInputType.cpp:
+        (WebCore::BaseCheckableInputType::handleKeydownEvent):
+        (WebCore::BaseCheckableInputType::handleKeypressEvent):
+        * html/BaseCheckableInputType.h:
+        * html/CheckboxInputType.cpp:
+        (WebCore::CheckboxInputType::handleKeyupEvent):
+        * html/CheckboxInputType.h:
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::defaultEventHandler):
+         We remove !implicitSubmission check for callBaseClassEarly because
+         implicitSubmission can not be true for keydown event and keypress
+         event at this point.
+        * html/InputType.cpp:
+        (WebCore::InputType::shouldSubmitImplicitly):
+         Returns true for a keypress event with "\r". Note that we don't overload
+         this function for BUTTON, FILE, IMAGE, RESET, and SUBMIT because a
+         keypress event with "\r" for these types returns from HTMLInputElement::defaultEventHandler()
+         before implicit submission checking.
+        (WebCore::InputType::handleKeypressEvent):
+        (WebCore::InputType::handleKeyupEvent):
+        * html/InputType.h:
+        * html/RadioInputType.cpp:
+        (WebCore::RadioInputType::handleKeydownEvent):
+        (WebCore::RadioInputType::handleKeyupEvent):
+        * html/RadioInputType.h:
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::shouldSubmitImplicitly):
+        * html/TextFieldInputType.h:
+
 2010-11-30  Patrick Gansterer  <paroga@webkit.org>
 
         Reviewed by Andreas Kling.
