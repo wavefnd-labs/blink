@@ -1,3 +1,31 @@
+2010-12-01  Philippe Normand  <pnormand@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        Volume control not correctly initialized
+        https://bugs.webkit.org/show_bug.cgi?id=36299
+
+        Replaced the mute/volume Timers with g_timeouts which are (for
+        now, at least) more reliable than Timers for one-shot-fire-now
+        actions.
+
+        Test: media/video-volume.html
+
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::MediaPlayer::~MediaPlayer): Reset the raw pointers to 0
+        when destructing the player.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::mediaPlayerPrivateVolumeChangeTimeoutCallback):
+        (WebCore::mediaPlayerPrivateMuteChangeTimeoutCallback):
+        (WebCore::MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::notifyPlayerOfVolumeChange):
+        (WebCore::MediaPlayerPrivateGStreamer::volumeChanged):
+        (WebCore::MediaPlayerPrivateGStreamer::notifyPlayerOfMute):
+        (WebCore::MediaPlayerPrivateGStreamer::muteChanged):
+        (WebCore::MediaPlayerPrivateGStreamer::createGSTPlayBin): Set
+        playbin2 volume/mute base on MediaPlayer related values.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h:
+
 2010-12-01  Patrick Gansterer  <paroga@webkit.org>
 
         Reviewed by Andreas Kling.
