@@ -1,3 +1,58 @@
+2010-11-30  Darin Adler  <darin@apple.com>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Make ProgressEvent 64-bit instead of 32-bit
+        https://bugs.webkit.org/show_bug.cgi?id=50289
+
+        * dom/ProgressEvent.cpp:
+        (WebCore::ProgressEvent::ProgressEvent): Changed arguments to unsigned long long.
+        (WebCore::ProgressEvent::initProgressEvent): Ditto.
+
+        * dom/ProgressEvent.h: Fixed formatting. Changed types to unsigned long long.
+        Made isProgressEvent override private.
+
+        * dom/ProgressEvent.idl: Tweaked formatting and changed types to unsigned long long.
+
+        * fileapi/FileReader.cpp: Removed unneeded includes.
+        Used static on const so we'd get an error if the same constant was in a header.
+        (WebCore::FileReader::didReceiveData): Removed unneeded WTF prefix.
+        (WebCore::FileReader::fireEvent): Got rid of local variables that would narrow
+        bytes loaded and total bytes to 32-bit.
+
+        * fileapi/FileReaderLoader.cpp:
+        (WebCore::FileReaderLoader::didReceiveResponse): Restructured code a bit and
+        added comments. Also added handling for when ArrayBuffer::create returns 0.
+        (WebCore::FileReaderLoader::didReceiveData): Fixed handling of case where more
+        data arrives than is expected so it won't overrun the buffer. Also broke an
+        assertion into two and improved a comment.
+
+        * fileapi/FileReaderLoader.h: Changed bytesLoaded and totalBytes to unsigned long long.
+
+        * fileapi/FileWriter.cpp:
+        (WebCore::FileWriter::fireEvent): Removed narrowing casts in call to
+        ProgressEvent::create.
+
+        * html/canvas/ArrayBuffer.cpp:
+        (WebCore::ArrayBuffer::tryAllocate): Added a comment because the code here seems wrong.
+
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::didSendData): Removed narrowing casts in call to
+        XMLHttpRequestProgressEvent::create.
+        (WebCore::XMLHttpRequest::didReceiveData): Removed narrowing casts in call to
+        dispatchProgressEvent.
+
+        * xml/XMLHttpRequestProgressEvent.h: Fixed formatting. Changed types to unsigned long long.
+        Made isXMLHttpRequestProgressEvent override private.
+
+        * xml/XMLHttpRequestProgressEvent.idl: Tweaked formatting and changed types to unsigned long long.
+
+        * xml/XMLHttpRequestProgressEventThrottle.cpp:
+        (WebCore::XMLHttpRequestProgressEventThrottle::dispatchProgressEvent): Changed types to
+        unsigned long long.
+
+        * xml/XMLHttpRequestProgressEventThrottle.h: Changed types to unsigned long long.
+
 2010-11-30  Yael Aharon  <yael.aharon@nokia.com>
 
         Reviewed by Darin Adler.
