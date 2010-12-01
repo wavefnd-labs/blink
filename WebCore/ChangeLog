@@ -1,3 +1,23 @@
+2010-12-01  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler, Tony Chang, and unofficially by Enrica Casucci.
+
+        The crash was caused by moveParagraphWithClones' not copying the entire paragraph
+        when called by doApplyForSingleParagraph, which was induced by a bug in
+        cloneParagraphUnderNewElement which ended the cloning process early when the start node
+        and the end node didn't share the same parent node. Fixed the bug in cloneParagraphUnderNewElement
+        by calling traverseNextSibling(outerNode) instead of nextSibling().
+
+        Also added an early exit to InsertListCommand::doApply when lastSelectionRange is null.
+
+        Tests: editing/execCommand/switch-multiple-list-items-crash.html
+               editing/execCommand/switch-multiple-list-items.html
+
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::cloneParagraphUnderNewElement):
+        * editing/InsertListCommand.cpp:
+        (WebCore::InsertListCommand::doApply):
+
 2010-12-01  Grace Kloba  <klobag@chromium.org>
 
         Reviewed by Kenneth Russell.
