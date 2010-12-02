@@ -1,3 +1,21 @@
+2010-12-02  Hironori Bono  <hbono@chromium.org>
+
+        Reviewed by Darin Fisher.
+
+        [Chromium] Fix possible crashes in FontFallbackFont::determinePitch().
+        https://bugs.webkit.org/show_bug.cgi?id=25770
+
+        When all of "Arial", "Courier New", and "Times New Roman" fonts are corrupted,
+        FontCache::getLastResortFallbackFont() returns 0 and it causes this crash. To
+        avoid this crash, this change falls back to system fonts (Windows ensures they
+        are sane) as Win Safari does. Unfortunately, I don't have any ideas how I can
+        write a layout test for this issue because this crash happens on a PC some of
+        its system fonts are corrupted.
+
+        * platform/graphics/chromium/FontCacheChromiumWin.cpp:
+        (WebCore::fontDataFromDescriptionAndLogFont):
+        (WebCore::FontCache::getLastResortFallbackFont):
+
 2010-12-02  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Reviewed by Kent Tamura.
