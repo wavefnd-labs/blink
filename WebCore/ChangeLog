@@ -1,3 +1,42 @@
+2010-12-02  Noel Gordon  <noel.gordon@gmail.com>
+
+        Reviewed by David Levin.
+
+        [chromium] Add canvas.toDataURL("image/jpeg", quality) support
+        https://bugs.webkit.org/show_bug.cgi?id=49365
+
+        Adds a libjpeg-based image encoder for Skia bitmaps.  Default encoding quality
+        is 92 to match Mozilla, also Safari, though the actual value used by Safari is
+        undocumented, and it appears to pre-blur images prior to compression.
+
+        The preMultipliedBGRAtoRGB() routine restores the un-premultiplied RGB colors
+        where there is non-zero alpha.  Again, this matches Firefox and Safari, but no
+        browser conforms to the HTML5 canvas standard here, I believe, considering the
+        result of canvas/philip/tests/toDataURL.jpeg.alpha.html; that test ignores the
+        alpha channel when extracting an "image/jpeg".toDataURL().  The correct answer
+        needs more investigation, bug http://webkit.org/b/40147.
+
+        Canvas toDataURL is covered by existing tests canvas/philip/tests/toDataURL.*,
+        and fast/canvas/*toDataURL* tests.
+
+        * WebCore.gypi:
+        * bindings/v8/custom/V8HTMLCanvasElementCustom.cpp:
+        (WebCore::V8HTMLCanvasElement::toDataURLCallback): don't set encoding quality
+        here, just pass the toDataURL parameters through to the canvas layer.
+        * platform/chromium/MIMETypeRegistryChromium.cpp:
+        (WebCore::MIMETypeRegistry::isSupportedImageMIMETypeForEncoding): implement
+        the supported mimeTypes for encoding in-place.
+        * platform/graphics/skia/ImageBufferSkia.cpp:
+        (WebCore::ImageBuffer::toDataURL): add jpeg encoding and quality support.
+        * platform/image-encoders/skia/JPEGImageEncoder.cpp: Added.
+        (WebCore::prepareOutput):
+        (WebCore::writeOutput):
+        (WebCore::finishOutput):
+        (WebCore::handleError):
+        (WebCore::preMultipliedBGRAtoRGB): FIXME: bug 40147.
+        (WebCore::JPEGImageEncoder::encode):
+        * platform/image-encoders/skia/JPEGImageEncoder.h: Added.
+
 2010-12-02  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r73152.
