@@ -25,7 +25,7 @@
 
 #include "WebPageCreationParameters.h"
 
-#include "ArgumentCoders.h"
+#include "WebCoreArgumentCoders.h"
 
 namespace WebKit {
 
