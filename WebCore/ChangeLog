@@ -1,3 +1,28 @@
+2010-12-02  Yuqiang Xian  <yuqiang.xian@intel.com>
+
+        Reviewed by Pavel Feldman.
+
+        [V8] Speed up data property access for ImageData.
+        https://bugs.webkit.org/show_bug.cgi?id=49999
+
+        We create a normal V8 object which has a PixelArray as the backing storage,
+        and set the "data" property of the ImageData object to it. 
+        This way "data" becomes a pure JS property and we don't need to call through
+        the C++ bindings for ImageData "data" access. 
+        This eliminates big overhead in switching between JavaScript and native
+        contexts and performing object bindings.
+
+        No new tests. Relying on existing Canvas tests.
+
+        * WebCore.gypi:
+        * bindings/scripts/CodeGeneratorV8.pm:
+        * bindings/v8/custom/V8CanvasPixelArrayCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8ImageDataCustom.cpp: Added.
+        (WebCore::toV8):
+        * html/ImageData.idl:
+        * html/canvas/CanvasPixelArray.idl:
+
 2010-12-02  Kent Tamura  <tkent@chromium.org>
 
         Unreviewed. Run sort-Xcode-project-file.
