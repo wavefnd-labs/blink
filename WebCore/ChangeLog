@@ -1,3 +1,63 @@
+2010-12-01  Jia Pu  <jpu@apple.com>
+
+        Reviewed by Darin Adler.
+
+        Support multiple correction candidates panel for misspelled word on Mac OS X.
+        https://bugs.webkit.org/show_bug.cgi?id=50137
+        <rdar://problem/8568059>
+
+        Test: platform/mac/editing/spelling/delete-autocorrected-word-1.html
+        Manual test: WebCore/manual-tests/autocorrection/dismiss-multiple-guesses.html
+                     WebCore/manual-tests/autocorrection/select-from-multiple-guesses.html
+
+        This patch is for supporting multiple correction suggestion panel on Mac OS X.
+        The behavior and implementation is similar to that of reversion candiate panel.
+
+        * WebCore.exp.in: Added and removed symbols.
+
+        * editing/CorrectionPanelInfo.h: Added new correction panel type, PanelTypeSpellingSuggestions.
+
+        * editing/Editor.cpp:
+        (WebCore::markerTypesForAutocorrection): Convenient function for getting marker types to
+          be added to autocorrected word.
+        (WebCore::boundingBoxForRange): Convenient function for calculating the bounding box of a range.
+        (WebCore::markerTypesForReplacement): Convenient function for getting marker types to
+          be added to word that has been replaced by various correction panel.
+        (WebCore::Editor::respondToChangedSelection): Added code to trigger timer for multiple
+          suggestion panel.
+        (WebCore::Editor::guessesForMisspelledSelection): Adopted new signature of EditorClient::getGuessesForWord().
+        (WebCore::Editor::markMisspellingsAfterTypingToWord): Adopted new signature of applyCorrectionPanelInfo().
+        (WebCore::Editor::markAllMisspellingsAndBadGrammarInRanges): Ditto.
+        (WebCore::Editor::correctionPanelTimerFired): Added code to handle new multiple suggestion panel.
+        (WebCore::Editor::handleCorrectionPanelResult): Replaced handleRejectedCorrection(), since
+          with new AppKit correction panel API, not only rejection, but also confirmation can be
+          handled in callback.
+        (WebCore::Editor::stopCorrectionPanelTimer): Moved the code that clears correction panel info
+          from dismissCorrectionPanel() to this function to fix a bug that would occur when deleting
+          autocorrected word.
+        (WebCore::Editor::dismissCorrectionPanel): Ditto.
+        (WebCore::Editor::applyCorrectionPanelInfo): Added code to handle new multiple suggestion panel.
+
+        * editing/Editor.h: Replaced handleRejectedCorrection() with handleCorrectionPanelResult().
+          Changed the signature of applyCorrectionPanelInfo() to hanlde new correction panel type.
+
+        * editing/TextCheckingHelper.cpp:
+        (WebCore::TextCheckingHelper::guessesForMisspelledOrUngrammaticalRange): Adopted new EditorClient::getGuessesForWord().
+
+        * editing/TextCheckingHelper.h: Made paragraphRange() public.
+
+        * loader/EmptyClients.h:
+        (WebCore::EmptyEditorClient::showCorrectionPanel): Adopted new signature defined in base class.
+        (WebCore::EmptyEditorClient::getGuessesForWord): Ditto.
+
+        * manual-tests/autocorrection/dismiss-multiple-guesses.html: Added.
+
+        * manual-tests/autocorrection/select-from-multiple-guesses.html: Added.
+
+        * page/EditorClient.h:  Changed showCorrectionPanel() to allow passing multiple correction
+          candidates. Changed getGuessesForWord() to allow passing in contextual text for better
+          correction suggestions (for those spellcheckers that utilizes such contextual information).
+
 2010-12-01  David Hyatt  <hyatt@apple.com>
 
         Reviewed by James Robinson.
