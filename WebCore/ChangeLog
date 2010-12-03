@@ -1,3 +1,194 @@
+2010-12-02  Simon Fraser  <simon.fraser@apple.com>
+
+        Revert r73217 and r73227 because of continued bustage.
+
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/GraphicsLayer.h:
+        (WebCore::GraphicsLayer::nativeLayer):
+        * platform/graphics/ca/PlatformCAAnimation.h: Removed.
+        * platform/graphics/ca/PlatformCALayer.h: Removed.
+        * platform/graphics/ca/mac/PlatformCAAnimationMac.mm: Removed.
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm: Removed.
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        (WebCore::GraphicsLayerChromium::nativeLayer):
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        * platform/graphics/mac/GraphicsLayerMac.h: Renamed from WebCore/platform/graphics/ca/GraphicsLayerCA.h.
+        (WebCore::GraphicsLayerMac::hasContentsLayer):
+        (WebCore::GraphicsLayerMac::primaryLayer):
+        (WebCore::GraphicsLayerMac::isReplicatedRootClone):
+        (WebCore::GraphicsLayerMac::primaryLayerClones):
+        (WebCore::GraphicsLayerMac::animationIsRunning):
+        (WebCore::GraphicsLayerMac::contentsLayer):
+        (WebCore::GraphicsLayerMac::ReplicaState::ReplicaState):
+        (WebCore::GraphicsLayerMac::ReplicaState::push):
+        (WebCore::GraphicsLayerMac::ReplicaState::setBranchType):
+        (WebCore::GraphicsLayerMac::ReplicaState::pop):
+        (WebCore::GraphicsLayerMac::ReplicaState::depth):
+        (WebCore::GraphicsLayerMac::ReplicaState::replicaDepth):
+        (WebCore::GraphicsLayerMac::hasCloneLayers):
+        (WebCore::GraphicsLayerMac::LayerPropertyAnimation::LayerPropertyAnimation):
+        (WebCore::GraphicsLayerMac::AnimationProcessingAction::AnimationProcessingAction):
+        * platform/graphics/mac/GraphicsLayerMac.mm: Renamed from WebCore/platform/graphics/ca/GraphicsLayerCA.cpp.
+        (WebCore::currentTimeToMediaTime):
+        (WebCore::mediaTimeToCurrentTime):
+        (-[WebAnimationDelegate animationDidStart:]):
+        (-[WebAnimationDelegate WebCore::]):
+        (-[WebAnimationDelegate setLayer:WebCore::]):
+        (WebCore::copyTransform):
+        (WebCore::getTransformFunctionValue):
+        (WebCore::getValueFunctionNameForTransformOperation):
+        (WebCore::propertyIdToString):
+        (WebCore::animationIdentifier):
+        (WebCore::getCAMediaTimingFunction):
+        (WebCore::setLayerBorderColor):
+        (WebCore::clearBorderColor):
+        (WebCore::setLayerBackgroundColor):
+        (WebCore::clearLayerBackgroundColor):
+        (WebCore::safeSetSublayers):
+        (WebCore::caValueFunctionSupported):
+        (WebCore::forceSoftwareAnimation):
+        (WebCore::nullActionsDictionary):
+        (WebCore::animationHasStepsTimingFunction):
+        (WebCore::GraphicsLayer::create):
+        (WebCore::GraphicsLayerMac::GraphicsLayerMac):
+        (WebCore::GraphicsLayerMac::~GraphicsLayerMac):
+        (WebCore::GraphicsLayerMac::setName):
+        (WebCore::GraphicsLayerMac::nativeLayer):
+        (WebCore::GraphicsLayerMac::setChildren):
+        (WebCore::GraphicsLayerMac::addChild):
+        (WebCore::GraphicsLayerMac::addChildAtIndex):
+        (WebCore::GraphicsLayerMac::addChildBelow):
+        (WebCore::GraphicsLayerMac::addChildAbove):
+        (WebCore::GraphicsLayerMac::replaceChild):
+        (WebCore::GraphicsLayerMac::removeFromParent):
+        (WebCore::GraphicsLayerMac::setMaskLayer):
+        (WebCore::GraphicsLayerMac::setReplicatedLayer):
+        (WebCore::GraphicsLayerMac::setReplicatedByLayer):
+        (WebCore::GraphicsLayerMac::setPosition):
+        (WebCore::GraphicsLayerMac::setAnchorPoint):
+        (WebCore::GraphicsLayerMac::setSize):
+        (WebCore::GraphicsLayerMac::setTransform):
+        (WebCore::GraphicsLayerMac::setChildrenTransform):
+        (WebCore::GraphicsLayerMac::moveOrCopyLayerAnimation):
+        (WebCore::GraphicsLayerMac::moveOrCopyAnimationsForProperty):
+        (WebCore::GraphicsLayerMac::setPreserves3D):
+        (WebCore::GraphicsLayerMac::setMasksToBounds):
+        (WebCore::GraphicsLayerMac::setDrawsContent):
+        (WebCore::GraphicsLayerMac::setBackgroundColor):
+        (WebCore::GraphicsLayerMac::clearBackgroundColor):
+        (WebCore::GraphicsLayerMac::setContentsOpaque):
+        (WebCore::GraphicsLayerMac::setBackfaceVisibility):
+        (WebCore::GraphicsLayerMac::setOpacity):
+        (WebCore::GraphicsLayerMac::setNeedsDisplay):
+        (WebCore::GraphicsLayerMac::setNeedsDisplayInRect):
+        (WebCore::GraphicsLayerMac::setContentsNeedsDisplay):
+        (WebCore::GraphicsLayerMac::setContentsRect):
+        (WebCore::GraphicsLayerMac::addAnimation):
+        (WebCore::GraphicsLayerMac::pauseAnimation):
+        (WebCore::GraphicsLayerMac::removeAnimation):
+        (WebCore::GraphicsLayerMac::animationDidStart):
+        (WebCore::GraphicsLayerMac::setContentsToImage):
+        (WebCore::GraphicsLayerMac::setContentsToMedia):
+        (WebCore::GraphicsLayerMac::didDisplay):
+        (WebCore::GraphicsLayerMac::syncCompositingState):
+        (WebCore::GraphicsLayerMac::syncCompositingStateForThisLayerOnly):
+        (WebCore::GraphicsLayerMac::recursiveCommitChanges):
+        (WebCore::GraphicsLayerMac::commitLayerChangesBeforeSublayers):
+        (WebCore::GraphicsLayerMac::commitLayerChangesAfterSublayers):
+        (WebCore::GraphicsLayerMac::updateLayerNames):
+        (WebCore::GraphicsLayerMac::updateSublayerList):
+        (WebCore::GraphicsLayerMac::updateLayerPosition):
+        (WebCore::GraphicsLayerMac::updateLayerSize):
+        (WebCore::GraphicsLayerMac::updateAnchorPoint):
+        (WebCore::GraphicsLayerMac::updateTransform):
+        (WebCore::GraphicsLayerMac::updateChildrenTransform):
+        (WebCore::GraphicsLayerMac::updateMasksToBounds):
+        (WebCore::GraphicsLayerMac::updateContentsOpaque):
+        (WebCore::GraphicsLayerMac::updateBackfaceVisibility):
+        (WebCore::GraphicsLayerMac::updateStructuralLayer):
+        (WebCore::GraphicsLayerMac::ensureStructuralLayer):
+        (WebCore::GraphicsLayerMac::structuralLayerPurpose):
+        (WebCore::GraphicsLayerMac::updateLayerDrawsContent):
+        (WebCore::GraphicsLayerMac::updateLayerBackgroundColor):
+        (WebCore::GraphicsLayerMac::updateContentsImage):
+        (WebCore::GraphicsLayerMac::updateContentsMediaLayer):
+        (WebCore::GraphicsLayerMac::updateContentsCanvasLayer):
+        (WebCore::GraphicsLayerMac::updateContentsRect):
+        (WebCore::GraphicsLayerMac::updateMaskLayer):
+        (WebCore::GraphicsLayerMac::updateReplicatedLayers):
+        (WebCore::GraphicsLayerMac::ReplicaState::cloneID):
+        (WebCore::GraphicsLayerMac::replicatedLayerRoot):
+        (WebCore::GraphicsLayerMac::updateLayerAnimations):
+        (WebCore::GraphicsLayerMac::setCAAnimationOnLayer):
+        (WebCore::bug7311367Workaround):
+        (WebCore::GraphicsLayerMac::removeCAAnimationFromLayer):
+        (WebCore::copyAnimationProperties):
+        (WebCore::GraphicsLayerMac::pauseCAAnimationOnLayer):
+        (WebCore::GraphicsLayerMac::setContentsToCanvas):
+        (WebCore::GraphicsLayerMac::repaintLayerDirtyRects):
+        (WebCore::GraphicsLayerMac::updateContentsNeedsDisplay):
+        (WebCore::GraphicsLayerMac::createAnimationFromKeyframes):
+        (WebCore::GraphicsLayerMac::createTransformAnimationsFromKeyframes):
+        (WebCore::GraphicsLayerMac::createBasicAnimation):
+        (WebCore::GraphicsLayerMac::createKeyframeAnimation):
+        (WebCore::GraphicsLayerMac::setupAnimation):
+        (WebCore::GraphicsLayerMac::timingFunctionForAnimationValue):
+        (WebCore::GraphicsLayerMac::setAnimationEndpoints):
+        (WebCore::GraphicsLayerMac::setAnimationKeyframes):
+        (WebCore::GraphicsLayerMac::setTransformAnimationEndpoints):
+        (WebCore::GraphicsLayerMac::setTransformAnimationKeyframes):
+        (WebCore::GraphicsLayerMac::suspendAnimations):
+        (WebCore::GraphicsLayerMac::resumeAnimations):
+        (WebCore::GraphicsLayerMac::hostLayerForSublayers):
+        (WebCore::GraphicsLayerMac::layerForSuperlayer):
+        (WebCore::GraphicsLayerMac::animatedLayer):
+        (WebCore::GraphicsLayerMac::animatedLayerClones):
+        (WebCore::GraphicsLayerMac::platformLayer):
+        (WebCore::GraphicsLayerMac::setDebugBackgroundColor):
+        (WebCore::GraphicsLayerMac::setDebugBorder):
+        (WebCore::GraphicsLayerMac::constrainedSize):
+        (WebCore::GraphicsLayerMac::requiresTiledLayer):
+        (WebCore::GraphicsLayerMac::swapFromOrToTiledLayer):
+        (WebCore::GraphicsLayerMac::defaultContentsOrientation):
+        (WebCore::GraphicsLayerMac::updateContentsTransform):
+        (WebCore::GraphicsLayerMac::setupContentsLayer):
+        (WebCore::GraphicsLayerMac::findOrMakeClone):
+        (WebCore::GraphicsLayerMac::ensureCloneLayers):
+        (WebCore::GraphicsLayerMac::removeCloneLayers):
+        (WebCore::GraphicsLayerMac::positionForCloneRootLayer):
+        (WebCore::GraphicsLayerMac::propagateLayerChangeToReplicas):
+        (WebCore::GraphicsLayerMac::fetchCloneLayers):
+        (WebCore::GraphicsLayerMac::cloneLayer):
+        (WebCore::GraphicsLayerMac::setOpacityInternal):
+        (WebCore::GraphicsLayerMac::updateOpacityOnLayer):
+        (WebCore::GraphicsLayerMac::noteSublayersChanged):
+        (WebCore::GraphicsLayerMac::noteLayerPropertyChanged):
+        * platform/graphics/mac/WebLayer.h:
+        * platform/graphics/mac/WebLayer.mm:
+        (-[WebLayer initWithLayer:]):
+        (-[WebLayer setNeedsDisplay]):
+        (-[WebLayer setNeedsDisplayInRect:]):
+        (-[WebLayer display]):
+        (-[WebLayer drawInContext:]):
+        (-[WebLayer setLayerOwner:]):
+        (-[WebLayer layerOwner]):
+        * platform/graphics/mac/WebTiledLayer.h:
+        * platform/graphics/mac/WebTiledLayer.mm:
+        (-[WebTiledLayer initWithLayer:]):
+        (-[WebTiledLayer setNeedsDisplay]):
+        (-[WebTiledLayer setNeedsDisplayInRect:]):
+        (-[WebTiledLayer display]):
+        (-[WebTiledLayer drawInContext:]):
+        (-[WebTiledLayer setLayerOwner:]):
+        (-[WebTiledLayer layerOwner]):
+        * platform/graphics/qt/GraphicsLayerQt.cpp:
+        (WebCore::GraphicsLayerQtImpl::flushChanges):
+        (WebCore::GraphicsLayerQt::nativeLayer):
+        * platform/graphics/qt/GraphicsLayerQt.h:
+        * platform/graphics/win/GraphicsLayerCACF.cpp:
+        (WebCore::GraphicsLayerCACF::nativeLayer):
+        * platform/graphics/win/GraphicsLayerCACF.h:
+
 2010-12-02  Noel Gordon  <noel.gordon@gmail.com>
 
         Reviewed by David Levin.
