@@ -1,3 +1,38 @@
+2010-12-02  Philippe Normand  <pnormand@igalia.com>
+
+        Reviewed by Martin Robinson.
+
+        [GStreamer] hasVideo/Audio return false until the pipeline reaches PAUSED
+        https://bugs.webkit.org/show_bug.cgi?id=50382
+
+        Go to PAUSED even if preload is deactivated. In that case don't
+        process the GStreamer state changes until commitLoad() has been
+        called. This patch also fixes hasVideo and hasAudio methods,
+        making them reactive to the playbin2 audio/video tags-changed
+        signals.
+
+        Test: media/controls-without-preload.html
+
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::mediaPlayerPrivateMessageCallback):
+        (WebCore::mediaPlayerPrivateVideoTagsChangedCallback):
+        (WebCore::mediaPlayerPrivateAudioTagsChangedCallback):
+        (WebCore::mediaPlayerPrivateAudioTagsChangeTimeoutCallback):
+        (WebCore::mediaPlayerPrivateVideoTagsChangeTimeoutCallback):
+        (WebCore::MediaPlayerPrivateGStreamer::MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::load):
+        (WebCore::MediaPlayerPrivateGStreamer::commitLoad):
+        (WebCore::MediaPlayerPrivateGStreamer::videoTagsChanged):
+        (WebCore::MediaPlayerPrivateGStreamer::notifyPlayerOfVideoTags):
+        (WebCore::MediaPlayerPrivateGStreamer::audioTagsChanged):
+        (WebCore::MediaPlayerPrivateGStreamer::notifyPlayerOfAudioTags):
+        (WebCore::MediaPlayerPrivateGStreamer::createGSTPlayBin):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h:
+        (WebCore::MediaPlayerPrivateGStreamer::hasVideo):
+        (WebCore::MediaPlayerPrivateGStreamer::hasAudio):
+        (WebCore::MediaPlayerPrivateGStreamer::loadDelayed):
+
 2010-12-03  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Reviewed by Dirk Schulze.
