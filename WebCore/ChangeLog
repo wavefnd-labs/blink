@@ -1,3 +1,34 @@
+2010-12-03  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        REGRESSION: Crash when deleting text after textarea's value is modified on input event
+        https://bugs.webkit.org/show_bug.cgi?id=49962
+
+        The crash was caused by TypingCommand::deleteKeyPressed's reusing a typing command for
+        textarea's shadow DOM after its input event handler rewrote the value set by the typing command.
+        Because the reused typing command's ending selection was pointing at a shadow node
+        that has been detached from the document when the event handler set the new value,
+        rootEditableElement of the ending selection was null and caused the crash.
+
+        Fixed the bug by updating the ending selection of the last typing command when it differsfrom
+        that of the current selection held by the SelectionController in TypingCommand::deleteKeyPressed.
+        Also fixed similar bugs in forwardDeleteKeyPressed and insertText, and insertTextRunWithoutNewlines.
+
+        Tests: editing/input/set-value-on-input-and-delete.html
+               editing/input/set-value-on-input-and-forward-delete.html
+               editing/input/set-value-on-input-and-type-input.html
+               editing/input/set-value-on-input-and-type-textarea.html
+
+        * editing/InsertTextCommand.h: Added TypingCommand as a friend because it needs to update selection.
+        * editing/TypingCommand.cpp:
+        (WebCore::TypingCommand::deleteKeyPressed): Updates the last typing command's selection as needed.
+        (WebCore::TypingCommand::forwardDeleteKeyPressed): Ditto.
+        (WebCore::TypingCommand::insertText): Ditto.
+        (WebCore::TypingCommand::updateSelectionIfDifferentFromCurrentSelection): Added.
+        (WebCore::TypingCommand::insertTextRunWithoutNewlines): Updates InsertTextCommand's selection as needed.
+        * editing/TypingCommand.h:
+
 2010-12-03  Daniel Cheng  <dcheng@chromium.org>
 
         Reviewed by Tony Chang.
