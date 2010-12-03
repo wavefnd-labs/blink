@@ -1,3 +1,24 @@
+2010-12-03  Noel Gordon  <noel.gordon@gmail.com>
+
+        Reviewed by Darin Fisher.
+
+        [chromium] PNG encoder leaks memory on png_write_row errors.
+        https://bugs.webkit.org/show_bug.cgi?id=50439
+
+        Move the creation of needed C++ objects before the setjmp() point so
+        those objects have their destructors called if libpng errors invoke
+        the setjmp() return path.
+   
+        Other minor cleanup: use the skia bitmap locker class, and remove the
+        PNGDestroyer class - instead directly call png_destroy_write_struct()
+        at each of the encodeImpl() return points.
+
+        No change in behaviour, so no new tests.
+
+        * platform/image-encoders/skia/PNGImageEncoder.cpp:
+        (WebCore::encodeImpl):
+        (WebCore::PNGImageEncoder::encode):
+
 2010-12-02  Philippe Normand  <pnormand@igalia.com>
 
         Reviewed by Eric Carlson.
