@@ -1,3 +1,36 @@
+2010-12-05  Robert Hogan  <robert@webkit.org>
+
+        Reviewed by Andreas Kling.
+
+        [Qt] Zero-sized font does not yet work
+
+        Fix fast/text/font-size-zero.html
+
+        Copy other ports by setting minimumFontSize to 0 for DRT runs,
+        copy a fix to SimpleFontData from chromium/safari, and set font
+        size in FontPlatformData to zero if size zero is requested
+        and QFont::pixelSize otherwise. (Note that QFont doesn't accept
+        a pixel size of zero).
+
+        Also fix QFont::setPixelSize in FontPlatformData to use
+        description.computedPixelSize rather than computedSize and
+        pixelSize() rather than pointSizeF - since the latter gets
+        set to -1 if pixelSize is set at all.
+
+        https://bugs.webkit.org/show_bug.cgi?id=49759
+
+        * platform/graphics/qt/FontPlatformData.h:
+        (WebCore::FontPlatformDataPrivate::FontPlatformDataPrivate):
+        (WebCore::FontPlatformData::pixelSize):
+        * platform/graphics/qt/FontPlatformDataQt.cpp:
+        (WebCore::FontPlatformData::FontPlatformData):
+        * platform/graphics/qt/FontQt.cpp:
+        (WebCore::drawTextCommon):
+        * platform/graphics/qt/SimpleFontDataQt.cpp:
+        (WebCore::SimpleFontData::platformInit):
+        (WebCore::SimpleFontData::platformGlyphInit):
+        (WebCore::SimpleFontData::platformCharWidthInit):
+
 2010-12-04  Daniel Bates  <dbates@rim.com>
 
         Reviewed by Darin Adler.
