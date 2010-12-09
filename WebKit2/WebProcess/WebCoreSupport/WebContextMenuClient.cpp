@@ -28,6 +28,9 @@
 #include "WebContextMenuItemData.h"
 #include "WebPage.h"
 #include <WebCore/ContextMenu.h>
+#include <WebCore/Frame.h>
+#include <WebCore/Page.h>
+#include <WebCore/UserGestureIndicator.h>
 
 #define DISABLE_NOT_IMPLEMENTED_WARNINGS 1
 #include "NotImplemented.h"
@@ -54,40 +57,25 @@ void WebContextMenuClient::contextMenuItemSelected(ContextMenuItem*, const Conte
 
 void WebContextMenuClient::downloadURL(const KURL& url)
 {
+    // FIXME <rdar://problem/8750248> - Need the ability to start a Download from an arbitrary URL
     notImplemented();
 }
 
-void WebContextMenuClient::searchWithGoogle(const Frame*)
+void WebContextMenuClient::searchWithGoogle(const Frame* frame)
 {
-    notImplemented();
-}
+    String searchString = frame->editor()->selectedText();
+    searchString.stripWhiteSpace();
+    String encoded = encodeWithURLEscapeSequences(searchString);
+    encoded.replace("%20", "+");
+    
+    String url("http://www.google.com/search?q=");
+    url.append(encoded);
+    url.append("&ie=UTF-8&oe=UTF-8");
 
-void WebContextMenuClient::lookUpInDictionary(Frame*)
-{
-    notImplemented();
+    if (Page* page = frame->page()) {
+        UserGestureIndicator indicator(DefinitelyProcessingUserGesture);
+        page->mainFrame()->loader()->urlSelected(KURL(ParsedURLString, url), String(), 0, false, false, SendReferrer);
+    }
 }
-
-bool WebContextMenuClient::isSpeaking()
-{
-    notImplemented();
-    return false;
-}
-
-void WebContextMenuClient::speak(const String&)
-{
-    notImplemented();
-}
-
-void WebContextMenuClient::stopSpeaking()
-{
-    notImplemented();
-}
-
-#if PLATFORM(MAC)
-void WebContextMenuClient::searchWithSpotlight()
-{
-    notImplemented();
-}
-#endif
 
 } // namespace WebKit
