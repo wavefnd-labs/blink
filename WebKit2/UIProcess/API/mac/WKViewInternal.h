@@ -51,4 +51,8 @@ namespace WebKit {
 - (void)_pageDidEnterAcceleratedCompositing;
 - (void)_pageDidLeaveAcceleratedCompositing;
 #endif
+
+- (void)_setPageHasCustomRepresentation:(BOOL)pageHasCustomRepresentation;
+- (void)_didFinishLoadingDataForCustomRepresentation:(const CoreIPC::DataReference&)dataReference;
+
 @end
