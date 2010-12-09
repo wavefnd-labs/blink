@@ -26,6 +26,8 @@
 #include "WKAuthenticationChallenge.h"
 
 #include "AuthenticationChallengeProxy.h"
+#include "WebCredential.h"
+#include "WebProtectionSpace.h"
 #include "WKAPICast.h"
 
 using namespace WebKit;
@@ -33,4 +35,24 @@ using namespace WebKit;
 WKTypeID WKAuthenticationChallengeGetTypeID()
 {
     return toAPI(AuthenticationChallengeProxy::APIType);
+}
+
+WKAuthenticationDecisionListenerRef WKAuthenticationChallengeGetDecisionListener(WKAuthenticationChallengeRef challenge)
+{
+    return toAPI(toImpl(challenge)->listener());
+}
+
+WKProtectionSpaceRef WKAuthenticationChallengeGetProtectionSpace(WKAuthenticationChallengeRef challenge)
+{
+    return toAPI(toImpl(challenge)->protectionSpace());
+}
+
+WKCredentialRef WKAuthenticationChallengeGetProposedCredential(WKAuthenticationChallengeRef challenge)
+{
+    return toAPI(toImpl(challenge)->proposedCredential());
+}
+
+int WKAuthenticationChallengeGetPreviousFailureCount(WKAuthenticationChallengeRef challenge)
+{
+    return toImpl(challenge)->previousFailureCount();
 }
