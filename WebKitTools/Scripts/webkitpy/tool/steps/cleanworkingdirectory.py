@@ -45,8 +45,10 @@ class CleanWorkingDirectory(AbstractStep):
         ]
 
     def run(self, state):
+        if not self._options.clean:
+            return
+        # FIXME: This chdir should not be necessary.
         os.chdir(self._tool.scm().checkout_root)
         if not self._allow_local_commits:
             self._tool.scm().ensure_no_local_commits(self._options.force_clean)
-        if self._options.clean:
-            self._tool.scm().ensure_clean_working_directory(force_clean=self._options.force_clean)
+        self._tool.scm().ensure_clean_working_directory(force_clean=self._options.force_clean)
