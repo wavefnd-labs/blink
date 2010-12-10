@@ -26,8 +26,15 @@
 #ifndef WebDatabaseManager_h
 #define WebDatabaseManager_h
 
+#include "Arguments.h"
 #include <wtf/Noncopyable.h>
 #include <wtf/text/WTFString.h>
+
+namespace CoreIPC {
+class ArgumentDecoder;
+class Connection;
+class MessageID;
+}
 
 namespace WebKit {
 
@@ -35,12 +42,16 @@ class WebDatabaseManager : public Noncopyable {
 public:
     static WebDatabaseManager& shared();
 
-    // FIXME: Add methods to get the origins for which there are databases, delete the databases
-    // for an origin, and delete all the databases.
-    // https://bugs.webkit.org/show_bug.cgi?id=50606
+    void getDatabaseOrigins(uint64_t callbackID) const;
+    void deleteDatabasesForOrigin(const String& originIdentifier) const;
+    void deleteAllDatabases() const;
+
+    void didReceiveMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*);
 
 private:
     WebDatabaseManager();
+
+    void didReceiveWebDatabaseManagerMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*);
 
     String databaseDirectory() const;
 };
