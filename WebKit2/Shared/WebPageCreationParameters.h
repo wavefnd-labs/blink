@@ -30,6 +30,7 @@
 #include "WebPageGroupData.h"
 #include "WebPreferencesStore.h"
 #include <WebCore/IntSize.h>
+#include <wtf/text/WTFString.h>
 
 namespace CoreIPC {
     class ArgumentDecoder;
@@ -49,6 +50,8 @@ struct WebPageCreationParameters {
 
     bool drawsBackground;
     bool drawsTransparentBackground;
+
+    String userAgent;
 
 #if PLATFORM(WIN)
     HWND nativeWindow;
