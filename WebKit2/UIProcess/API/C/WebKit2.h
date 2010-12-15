@@ -43,6 +43,8 @@
 #include <WebKit2/WKMutableDictionary.h>
 #include <WebKit2/WKNavigationData.h>
 #include <WebKit2/WKNumber.h>
+#include <WebKit2/WKOpenPanelParameters.h>
+#include <WebKit2/WKOpenPanelResultListener.h>
 #include <WebKit2/WKPage.h>
 #include <WebKit2/WKPageGroup.h>
 #include <WebKit2/WKPreferences.h>
