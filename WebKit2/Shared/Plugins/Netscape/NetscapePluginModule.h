@@ -27,6 +27,7 @@
 #define NetscapePluginModule_h
 
 #include "Module.h"
+#include "PluginQuirks.h"
 #include <WebCore/npfunctions.h>
 #include <wtf/RefCounted.h>
 #include <wtf/text/WTFString.h>
@@ -50,8 +51,12 @@ public:
 
     static bool getPluginInfo(const String& pluginPath, PluginInfoStore::Plugin&);
 
+    const PluginQuirks& pluginQuirks() const { return m_pluginQuirks; }
+
 private:
     explicit NetscapePluginModule(const String& pluginPath);
+
+    void determineQuirks();
 
     bool tryLoad();
     bool load();
@@ -62,6 +67,8 @@ private:
     String m_pluginPath;
     bool m_isInitialized;
     unsigned m_pluginCount;
+
+    PluginQuirks m_pluginQuirks;
 
     NPP_ShutdownProcPtr m_shutdownProcPtr;
     NPPluginFuncs m_pluginFuncs;
