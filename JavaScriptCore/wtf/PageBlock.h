@@ -44,7 +44,13 @@ public:
 
     operator bool() const { return !!m_base; }
 
-protected:
+    bool contains(void* containedBase, size_t containedSize)
+    {
+        return containedBase >= m_base
+            && (static_cast<char*>(containedBase) + containedSize) <= (static_cast<char*>(m_base) + m_size);
+    }
+
+private:
     void* m_base;
     size_t m_size;
 };
