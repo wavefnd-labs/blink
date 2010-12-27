@@ -1,4 +1,4 @@
-MODULES = JavaScriptGlue
+MODULES = JavaScriptGlue ThirdParty/ANGLE
 
 all:
 	@for dir in $(MODULES); do ${MAKE} $@ -C $$dir; exit_status=$$?; \
