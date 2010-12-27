@@ -38,20 +38,25 @@ class MessageID;
 
 namespace WebKit {
 
-class WebDatabaseManager : public Noncopyable {
+class WebDatabaseManager {
+    WTF_MAKE_NONCOPYABLE(WebDatabaseManager);
 public:
     static WebDatabaseManager& shared();
-
-    void getDatabaseOrigins(uint64_t callbackID) const;
-    void deleteDatabasesForOrigin(const String& originIdentifier) const;
-    void deleteAllDatabases() const;
 
     void didReceiveMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*);
 
 private:
     WebDatabaseManager();
 
+    // Implemented in generated WebDatabaseManagerMessageReceiver.cpp
     void didReceiveWebDatabaseManagerMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*);
+
+    void getDatabasesByOrigin(uint64_t callbackID) const;
+    void getDatabaseOrigins(uint64_t callbackID) const;
+    void deleteDatabaseWithNameForOrigin(const String& databaseIdentifier, const String& originIdentifier) const;
+    void deleteDatabasesForOrigin(const String& originIdentifier) const;
+    void deleteAllDatabases() const;
+    void setQuotaForOrigin(const String& originIdentifier, unsigned long long quota) const;
 
     String databaseDirectory() const;
 };
