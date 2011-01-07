@@ -34,7 +34,8 @@ class WebGLExtension : public RefCounted<WebGLExtension> {
 public:
     // Extension names are needed to properly wrap instances in JavaScript objects.
     enum ExtensionName {
-        OESTextureFloatName
+        WebKitLoseContextName,
+        OESTextureFloatName,
     };
 
     virtual ~WebGLExtension();
