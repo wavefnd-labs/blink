@@ -27,6 +27,11 @@
 
 // Subclasses
 #include "ChunkedUpdateDrawingArea.h"
+
+#ifdef __APPLE__
+#include "DrawingAreaImpl.h"
+#endif
+
 #if USE(ACCELERATED_COMPOSITING)
 #include "LayerBackedDrawingArea.h"
 #endif
@@ -45,8 +50,11 @@ PassRefPtr<DrawingArea> DrawingArea::create(DrawingAreaInfo::Type type, DrawingA
             break;
 
         case DrawingAreaInfo::Impl:
+#ifdef __APPLE__
+            return DrawingAreaImpl::create(identifier, webPage);
+#else
             return 0;
-
+#endif
         case DrawingAreaInfo::ChunkedUpdate:
             return adoptRef(new ChunkedUpdateDrawingArea(identifier, webPage));
 
