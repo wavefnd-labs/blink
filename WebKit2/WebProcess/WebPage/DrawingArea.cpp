@@ -44,6 +44,9 @@ PassRefPtr<DrawingArea> DrawingArea::create(DrawingAreaInfo::Type type, DrawingA
             ASSERT_NOT_REACHED();
             break;
 
+        case DrawingAreaInfo::Impl:
+            return 0;
+
         case DrawingAreaInfo::ChunkedUpdate:
             return adoptRef(new ChunkedUpdateDrawingArea(identifier, webPage));
 
