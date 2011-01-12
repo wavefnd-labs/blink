@@ -26,6 +26,7 @@
 #ifndef DrawingAreaProxyImpl_h
 #define DrawingAreaProxyImpl_h
 
+#include "BackingStore.h"
 #include "DrawingAreaProxy.h"
 
 namespace WebKit {
@@ -34,6 +35,8 @@ class DrawingAreaProxyImpl : public DrawingAreaProxy {
 public:
     static PassOwnPtr<DrawingAreaProxyImpl> create(WebPageProxy*);
     virtual ~DrawingAreaProxyImpl();
+
+    void paint(BackingStore::PlatformGraphicsContext, const WebCore::IntRect&);
 
 private:
     explicit DrawingAreaProxyImpl(WebPageProxy*);
@@ -51,7 +54,10 @@ private:
     virtual void update(const UpdateInfo&);
     virtual void didSetSize();
     
+    void incorporateUpdate(const UpdateInfo&);
     void sendSetSize();
+
+    OwnPtr<BackingStore> m_backingStore;
 };
 
 } // namespace WebKit
