@@ -34,29 +34,24 @@ namespace WebKit {
 
 void WebDragClient::willPerformDragDestinationAction(DragDestinationAction, DragData*)
 {
-    notImplemented();
 }
 
 void WebDragClient::willPerformDragSourceAction(DragSourceAction, const IntPoint&, Clipboard*)
 {
-    notImplemented();
 }
 
 DragDestinationAction WebDragClient::actionMaskForDrag(DragData*)
 {
-    notImplemented();
-    return DragDestinationActionNone;
+    return DragDestinationActionAny;
 }
 
 DragSourceAction WebDragClient::dragSourceActionMaskForPoint(const IntPoint& windowPoint)
 {
-    notImplemented();
-    return DragSourceActionNone;
+    return DragSourceActionAny;
 }
 
 void WebDragClient::startDrag(DragImageRef, const IntPoint&, const IntPoint&, Clipboard*, Frame*, bool)
 {
-    notImplemented();
 }
 
 DragImageRef WebDragClient::createDragImageForLink(KURL&, const String&, Frame*)
