@@ -27,6 +27,7 @@
 
 #include <WebCore/GraphicsContext.h>
 #include <wtf/RetainPtr.h>
+#include "CGUtilities.h"
 
 using namespace WebCore;
 
@@ -45,37 +46,11 @@ PassOwnPtr<GraphicsContext> ShareableBitmap::createGraphicsContext()
     return adoptPtr(new GraphicsContext(bitmapContext.get()));
 }
 
-void ShareableBitmap::paint(WebCore::GraphicsContext& context, const WebCore::IntPoint& dstPoint, const WebCore::IntRect& srcRect)
+void ShareableBitmap::paint(WebCore::GraphicsContext& context, const IntPoint& dstPoint, const IntRect& srcRect)
 {
     OwnPtr<GraphicsContext> sourceContext(createGraphicsContext());
 
-    CGContextRef sourceCGContext = sourceContext->platformContext();
-
-    RetainPtr<CGDataProviderRef> dataProvider(AdoptCF, CGDataProviderCreateWithData(0, data(), sizeInBytes(), 0));
-    RetainPtr<CGImageRef> image(AdoptCF, CGImageCreate(CGBitmapContextGetWidth(sourceCGContext), 
-                                                       CGBitmapContextGetHeight(sourceCGContext),
-                                                       CGBitmapContextGetBitsPerComponent(sourceCGContext),
-                                                       CGBitmapContextGetBitsPerPixel(sourceCGContext),
-                                                       CGBitmapContextGetBytesPerRow(sourceCGContext),
-                                                       CGBitmapContextGetColorSpace(sourceCGContext),
-                                                       CGBitmapContextGetBitmapInfo(sourceCGContext),
-                                                       dataProvider.get(), 0, false, kCGRenderingIntentDefault));
-
-    CGContextRef cgContext = context.platformContext();
-    
-    CGContextSaveGState(cgContext);
-
-    CGContextClipToRect(cgContext, CGRectMake(dstPoint.x(), dstPoint.y(), srcRect.width(), srcRect.height()));
-    CGContextScaleCTM(cgContext, 1, -1);
-
-    CGFloat imageHeight = CGImageGetHeight(image.get());
-    CGFloat imageWidth = CGImageGetWidth(image.get());
-
-    CGFloat destX = dstPoint.x() - srcRect.x();
-    CGFloat destY = -imageHeight - dstPoint.y() + srcRect.y();
-
-    CGContextDrawImage(cgContext, CGRectMake(destX, destY, imageWidth, imageHeight), image.get());
-    CGContextRestoreGState(cgContext);
+    paintBitmapContext(context.platformContext(), sourceContext->platformContext(), dstPoint, srcRect);
 }
         
 } // namespace WebKit
