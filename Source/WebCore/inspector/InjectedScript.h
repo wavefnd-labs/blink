@@ -51,9 +51,10 @@ public:
     bool hasNoValue() const { return m_injectedScriptObject.hasNoValue(); }
 
     void evaluate(const String& expression, const String& objectGroup, RefPtr<InspectorValue>* result);
-    void evaluateInCallFrame(long callFrame, const String& expression, const String& objectGroup, RefPtr<InspectorValue>* result);
+    void evaluateOnCallFrame(PassRefPtr<InspectorObject> callFrameId, const String& expression, const String& objectGroup, RefPtr<InspectorValue>* result);
     void evaluateOnSelf(const String& functionBody, PassRefPtr<InspectorArray> argumentsArray, RefPtr<InspectorValue>* result);
-    void getCompletions(const String& expression, bool includeInspectorCommandLineAPI, long callFrameId, RefPtr<InspectorValue>* result);
+    void getCompletions(const String& expression, bool includeInspectorCommandLineAPI, RefPtr<InspectorValue>* result);
+    void getCompletionsOnCallFrame(PassRefPtr<InspectorObject> callFrameId, const String& expression, bool includeInspectorCommandLineAPI, RefPtr<InspectorValue>* result);
     void getProperties(PassRefPtr<InspectorObject> objectId, bool ignoreHasOwnProperty, bool abbreviate, RefPtr<InspectorValue>* result);
     void pushNodeToFrontend(PassRefPtr<InspectorObject> objectId, RefPtr<InspectorValue>* result);
     void resolveNode(long nodeId, RefPtr<InspectorValue>* result);
