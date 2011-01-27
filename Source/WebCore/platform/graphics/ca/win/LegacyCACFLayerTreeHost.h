@@ -60,6 +60,7 @@ private:
     virtual void destroyRenderer();
     virtual CFTimeInterval lastCommitTime() const;
     virtual void flushContext();
+    virtual void contextDidChange();
     virtual void paint();
     virtual void render(const Vector<CGRect>& dirtyRects = Vector<CGRect>());
 
