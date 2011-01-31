@@ -31,13 +31,24 @@
 #include <WebCore/Page.h>
 #include "WebPage.h"
 
-#if !PLATFORM(MAC)
+#if PLATFORM(MAC)
+#include "LayerTreeHostMac.h"
+#else
 #error "This class is not ready for use by other ports yet."
 #endif
 
 using namespace WebCore;
 
 namespace WebKit {
+
+PassOwnPtr<LayerTreeHost> LayerTreeHost::create(WebPage* webPage, GraphicsLayer* graphicsLayer)
+{
+#if PLATFORM(MAC)
+    return adoptPtr(static_cast<LayerTreeHost*>(new LayerTreeHostMac(webPage, graphicsLayer)));
+#endif
+
+    return 0;
+}
 
 LayerTreeHost::LayerTreeHost(WebPage* webPage)
     : m_webPage(webPage)
@@ -46,17 +57,6 @@ LayerTreeHost::LayerTreeHost(WebPage* webPage)
 
 LayerTreeHost::~LayerTreeHost()
 {
-    platformInvalidate();
-}
-
-void LayerTreeHost::attachRootCompositingLayer(GraphicsLayer* graphicsLayer)
-{
-    // FIXME: Implement.
-}
-
-void LayerTreeHost::detachRootCompositingLayer()
-{
-    // FIXME: Implement.
 }
 
 bool LayerTreeHost::flushPendingLayerChanges()
