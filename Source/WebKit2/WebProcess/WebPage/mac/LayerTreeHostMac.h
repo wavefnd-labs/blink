@@ -29,6 +29,8 @@
 #include "LayerTreeHost.h"
 #include <wtf/RetainPtr.h>
 
+typedef struct __WKCARemoteLayerClientRef* WKCARemoteLayerClientRef;
+
 namespace WebKit {
 
 class LayerTreeHostMac : public LayerTreeHost {
@@ -48,6 +50,8 @@ private:
     bool flushPendingLayerChanges();
 
     bool m_isValid;
+
+    RetainPtr<WKCARemoteLayerClientRef> m_remoteLayerClient;
     RetainPtr<CFRunLoopObserverRef> m_flushPendingLayerChangesRunLoopObserver;
 };
 
