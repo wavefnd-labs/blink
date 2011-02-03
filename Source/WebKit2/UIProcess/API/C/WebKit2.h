@@ -42,6 +42,7 @@
 #include <WebKit2/WKGeolocationManager.h>
 #include <WebKit2/WKGeolocationPermissionRequest.h>
 #include <WebKit2/WKGeolocationPosition.h>
+#include <WebKit2/WKGraphicsContext.h>
 #include <WebKit2/WKMutableArray.h>
 #include <WebKit2/WKMutableDictionary.h>
 #include <WebKit2/WKNavigationData.h>
