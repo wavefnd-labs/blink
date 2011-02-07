@@ -39,11 +39,8 @@ namespace WebCore {
 
 class TextCodecWinCE : public TextCodec {
 public:
-    static void registerBaseEncodingNames(EncodingNameRegistrar);
-    static void registerBaseCodecs(TextCodecRegistrar);
-
-    static void registerExtendedEncodingNames(EncodingNameRegistrar);
-    static void registerExtendedCodecs(TextCodecRegistrar);
+    static void registerEncodingNames(EncodingNameRegistrar);
+    static void registerCodecs(TextCodecRegistrar);
 
     TextCodecWinCE(UINT codePage);
     virtual ~TextCodecWinCE();
