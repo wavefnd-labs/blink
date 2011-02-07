@@ -55,6 +55,8 @@ public:
 
 #if PLATFORM(MAC)
     typedef CGContextRef PlatformGraphicsContext;
+#elif PLATFORM(WIN)
+    typedef HDC PlatformGraphicsContext;
 #endif
 
     void paint(PlatformGraphicsContext, const WebCore::IntRect&);
