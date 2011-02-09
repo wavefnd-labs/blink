@@ -33,6 +33,8 @@ namespace WebKit {
 WebGraphicsContext::WebGraphicsContext(GraphicsContext* graphicsContext)
 #if PLATFORM(CG)
     : m_platformContext(graphicsContext->platformContext())
+#elif PLATFORM(GTK)
+    : m_platformContext(graphicsContext->platformContext())
 #endif
 {
 }
