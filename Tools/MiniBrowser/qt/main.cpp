@@ -27,46 +27,46 @@
  */
 
 #include "BrowserWindow.h"
+
+#include "MiniBrowserApplication.h"
+#include "UrlLoader.h"
 #include <QLatin1String>
 #include <QRegExp>
 #include <qgraphicswkview.h>
 #include <QtGui>
 
-int main(int argc, char** argv) {
-    QApplication app(argc, argv);
+int main(int argc, char** argv)
+{
+    MiniBrowserApplication app(argc, argv);
 
-    QStringList args = QApplication::arguments();
-    args.removeAt(0);
-
-    int indexOfTiledOption;
-    if ((indexOfTiledOption = args.indexOf(QString::fromLatin1("-tiled"))) != -1) {
-        BrowserWindow::backingStoreTypeForNewWindow = QGraphicsWKView::Tiled;
-        args.removeAt(indexOfTiledOption);
+    if (app.isRobotized()) {
+        QWKContext* context = new QWKContext;
+        BrowserWindow* window = new BrowserWindow(context, &app.m_windowOptions);
+        UrlLoader loader(window, app.urls().at(0), app.robotTimeout(), app.robotExtraTime());
+        loader.loadNext();
+        window->show();
+        return app.exec();
     }
 
-    int indexOfSeparateWebProcessOption;
-    if ((indexOfSeparateWebProcessOption = args.indexOf(QString::fromLatin1("-separate-web-process-per-window"))) != -1) {
-        BrowserWindow::useSeparateWebProcessPerWindow = true;
-        args.removeAt(indexOfSeparateWebProcessOption);
-    }
+    QStringList urls = app.urls();
 
-    if (args.isEmpty()) {
+    if (urls.isEmpty()) {
         QString defaultUrl = QString("file://%1/%2").arg(QDir::homePath()).arg(QLatin1String("index.html"));
         if (QDir(defaultUrl).exists())
-            args.append(defaultUrl);
+            urls.append(defaultUrl);
         else
-            args.append("http://www.google.com");
+            urls.append("http://www.google.com");
     }
 
     QWKContext* context = new QWKContext;
-    BrowserWindow* window = new BrowserWindow(context);
-    if (BrowserWindow::useSeparateWebProcessPerWindow)
+    BrowserWindow* window = new BrowserWindow(context, &app.m_windowOptions);
+    if (app.m_windowOptions.useSeparateWebProcessPerWindow)
         context->setParent(window);
 
-    window->load(args[0]);
+    window->load(urls.at(0));
 
-    for (int i = 1; i < args.size(); ++i)
-        window->newWindow(args[i]);
+    for (int i = 1; i < urls.size(); ++i)
+        window->newWindow(urls.at(i));
 
     app.exec();
 
