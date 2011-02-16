@@ -27,11 +27,8 @@
 #include "WKPluginSiteDataManager.h"
 
 #include "WKAPICast.h"
-#include <WebKit/npapi.h>
-
-#ifdef __BLOCKS__
-#include <Block.h>
-#endif
+#include "WebPluginSiteDataManager.h"
+#include <WebCore/npapi.h>
 
 using namespace WebKit;
 
@@ -41,9 +38,9 @@ WKTypeID WKPluginSiteDataManagerGetTypeID()
     return 0;
 }
 
-void WKPluginSiteDataManagerGetSitesWithData(WKPluginSiteDataManagerRef manager, void* context, WKPluginSiteDataManagerGetSitesWithDataFunction callback)
+void WKPluginSiteDataManagerGetSitesWithData(WKPluginSiteDataManagerRef managerRef, void* context, WKPluginSiteDataManagerGetSitesWithDataFunction callback)
 {
-    // FIXME: Implement.
+    toImpl(managerRef)->getSitesWithData(ArrayCallback::create(context, callback));
 }
 
 void WKPluginSiteDataManagerClearSiteData(WKPluginSiteDataManagerRef manager, WKArrayRef sites, WKClearSiteDataFlags flags, uint64_t maxAgeInSeconds)
