@@ -49,6 +49,7 @@ public:
     virtual void onSuccess(WebKit::WebIDBObjectStore*);
     virtual void onSuccess(WebKit::WebIDBTransaction*);
     virtual void onSuccess(const WebKit::WebSerializedScriptValue&);
+    virtual void onBlocked();
 
 private:
     RefPtr<IDBCallbacks> m_callbacks;
