@@ -33,4 +33,6 @@
 - (void)enableFrameSizeUpdates;
 - (BOOL)frameSizeUpdatesDisabled;
 
+- (void)performLookupAtCurrentMouseLocation;
+
 @end
