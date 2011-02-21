@@ -28,6 +28,7 @@
 
 #include "Arguments.h"
 #include <wtf/Noncopyable.h>
+#include <wtf/RetainPtr.h>
 #include <wtf/text/WTFString.h>
 
 namespace CoreIPC {
@@ -57,6 +58,11 @@ private:
     void getCacheOrigins(uint64_t callbackID) const;
     void clearCacheForOrigin(SecurityOriginData origin) const;
     void clearCacheForAllOrigins() const;
+
+#if USE(CFURLCACHE)
+    static RetainPtr<CFArrayRef> cfURLCacheHostNames();
+    static void clearCFURLCacheForHostNames(CFArrayRef);
+#endif
 };
 
 } // namespace WebKit
