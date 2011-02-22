@@ -71,24 +71,7 @@ void WebResourceCacheManagerProxy::getCacheOrigins(PassRefPtr<ArrayCallback> prp
 void WebResourceCacheManagerProxy::didGetCacheOrigins(const Vector<SecurityOriginData>& origins, uint64_t callbackID)
 {
     RefPtr<ArrayCallback> callback = m_arrayCallbacks.take(callbackID);
-    if (!callback) {
-        // FIXME: Log error or assert.
-        return;
-    }
-
-    size_t originIdentifiersCount = origins.size();
-    Vector<RefPtr<APIObject> > securityOrigins;
-    securityOrigins.reserveCapacity(originIdentifiersCount);
-
-    for (size_t i = 0; i < originIdentifiersCount; ++i) {
-        SecurityOriginData originData = origins[i];
-        RefPtr<APIObject> origin = WebSecurityOrigin::create(originData.protocol, originData.host, originData.port);
-        if (!origin)
-            continue;
-        securityOrigins.uncheckedAppend(origin);
-    }
-
-    callback->performCallbackWithReturnValue(ImmutableArray::adopt(securityOrigins).get());
+    performAPICallbackWithSecurityOriginDataVector(origins, callback.get());
 }
 
 void WebResourceCacheManagerProxy::clearCacheForOrigin(WebSecurityOrigin* origin)

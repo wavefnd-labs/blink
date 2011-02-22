@@ -26,6 +26,8 @@
 #ifndef SecurityOriginData_h
 #define SecurityOriginData_h
 
+#include "APIObject.h"
+#include "GenericCallback.h"
 #include <wtf/text/WTFString.h>
 
 namespace CoreIPC {
@@ -34,6 +36,8 @@ namespace CoreIPC {
 }
 
 namespace WebKit {
+
+typedef GenericCallback<WKArrayRef> ArrayCallback;
 
 struct SecurityOriginData {
     void encode(CoreIPC::ArgumentEncoder*) const;
@@ -46,6 +50,8 @@ struct SecurityOriginData {
     String host;
     int port;
 };
+
+void performAPICallbackWithSecurityOriginDataVector(const Vector<SecurityOriginData>&, ArrayCallback*);
 
 } // namespace WebKit
 

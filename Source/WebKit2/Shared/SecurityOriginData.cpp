@@ -26,7 +26,10 @@
 #include "config.h"
 #include "SecurityOriginData.h"
 
+#include "APIObject.h"
+#include "ImmutableArray.h"
 #include "WebCoreArgumentCoders.h"
+#include "WebSecurityOrigin.h"
 
 using namespace WebCore;
 
@@ -40,6 +43,28 @@ void SecurityOriginData::encode(CoreIPC::ArgumentEncoder* encoder) const
 bool SecurityOriginData::decode(CoreIPC::ArgumentDecoder* decoder, SecurityOriginData& securityOriginData)
 {
     return decoder->decode(CoreIPC::Out(securityOriginData.protocol, securityOriginData.host, securityOriginData.port));
+}
+
+void performAPICallbackWithSecurityOriginDataVector(const Vector<SecurityOriginData>& originDatas, ArrayCallback* callback)
+{
+    if (!callback) {
+        // FIXME: Log error or assert.
+        return;
+    }
+    
+    size_t originDataCount = originDatas.size();
+    Vector<RefPtr<APIObject> > securityOrigins;
+    securityOrigins.reserveCapacity(originDataCount);
+
+    for (size_t i = 0; i < originDataCount; ++i) {
+        SecurityOriginData originData = originDatas[i];
+        RefPtr<APIObject> origin = WebSecurityOrigin::create(originData.protocol, originData.host, originData.port);
+        if (!origin)
+            continue;
+        securityOrigins.uncheckedAppend(origin);
+    }
+
+    callback->performCallbackWithReturnValue(ImmutableArray::adopt(securityOrigins).get());
 }
 
 } // namespace WebKit
