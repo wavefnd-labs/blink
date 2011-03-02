@@ -29,7 +29,7 @@
 #if ENABLE(JAVA_BRIDGE)
 
 #include "JNIBridge.h" // For JavaString
-#include "JavaInstanceV8.h" // For JObjectWrapper
+#include "JobjectWrapper.h"
 
 namespace JSC {
 
@@ -48,7 +48,7 @@ private:
     JavaString m_name;
     JavaString m_type;
     JNIType m_JNIType;
-    RefPtr<JObjectWrapper> m_field;
+    RefPtr<JobjectWrapper> m_field;
 };
 
 } // namespace Bindings
