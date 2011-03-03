@@ -33,13 +33,13 @@
 
 namespace WebCore {
 
-PassRefPtr<IDBVersionChangeEvent> IDBVersionChangeEvent::create(const String& version)
+PassRefPtr<IDBVersionChangeEvent> IDBVersionChangeEvent::create(const String& version, const AtomicString& eventType)
 {
-    return adoptRef(new IDBVersionChangeEvent(version));
+    return adoptRef(new IDBVersionChangeEvent(version, eventType));
 }
 
-IDBVersionChangeEvent::IDBVersionChangeEvent(const String& version)
-    : Event(eventNames().blockedEvent, false /*canBubble*/, false /*cancelable*/)
+IDBVersionChangeEvent::IDBVersionChangeEvent(const String& version, const AtomicString& eventType)
+    : Event(eventType, false /*canBubble*/, false /*cancelable*/)
     , m_version(version)
 {
 }
