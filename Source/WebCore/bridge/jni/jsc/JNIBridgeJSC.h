@@ -30,8 +30,9 @@
 #if ENABLE(JAVA_BRIDGE)
 
 #include "BridgeJSC.h"
-#include "JNIBridge.h"
 #include "JNIUtility.h"
+#include "JavaMethod.h"
+#include "JavaString.h"
 #include "JobjectWrapper.h"
 
 namespace JSC {
@@ -87,4 +88,4 @@ private:
 
 #endif // ENABLE(JAVA_BRIDGE)
 
-#endif // JNIBridge_h
+#endif // JNIBridgeJSC_h
