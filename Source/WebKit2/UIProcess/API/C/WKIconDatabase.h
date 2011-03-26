@@ -34,6 +34,10 @@ extern "C" {
 
 WK_EXPORT WKTypeID WKIconDatabaseGetTypeID();
 
+WK_EXPORT void WKIconDatabaseRetainIconForURL(WKIconDatabaseRef iconDatabase, WKURLRef pageURL);
+WK_EXPORT void WKIconDatabaseReleaseIconForURL(WKIconDatabaseRef iconDatabase, WKURLRef pageURL);
+WK_EXPORT void WKIconDatabaseEnableDatabaseCleanup(WKIconDatabaseRef iconDatabase);
+
 #ifdef __cplusplus
 }
 #endif
