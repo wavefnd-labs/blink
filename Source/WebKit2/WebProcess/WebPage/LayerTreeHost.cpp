@@ -27,10 +27,10 @@
 #include "LayerTreeHost.h"
 
 #if PLATFORM(MAC)
-#include "LayerTreeHostCA.h"
-#endif
-
-#if !PLATFORM(MAC) && !PLATFORM(WIN)
+#include "LayerTreeHostCAMac.h"
+#elif PLATFORM(WIN)
+#include "LayerTreeHostCAWin.h"
+#else
 #error "This class is not ready for use by other ports yet."
 #endif
 
@@ -41,10 +41,10 @@ namespace WebKit {
 PassRefPtr<LayerTreeHost> LayerTreeHost::create(WebPage* webPage)
 {
 #if PLATFORM(MAC)
-    return LayerTreeHostCA::create(webPage);
+    return LayerTreeHostCAMac::create(webPage);
+#elif PLATFORM(WIN)
+    return LayerTreeHostCAWin::create(webPage);
 #endif
-
-    return 0;
 }
 
 LayerTreeHost::LayerTreeHost(WebPage* webPage)
