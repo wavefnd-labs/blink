@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-WK_EXPORT CGImageRef WKIconDatabaseGetCGImageForURL(WKIconDatabaseRef iconDatabase, WKURLRef urlString);
+WK_EXPORT CGImageRef WKIconDatabaseTryGetCGImageForURL(WKIconDatabaseRef iconDatabase, WKURLRef urlString);
 
 #ifdef __cplusplus
 }
