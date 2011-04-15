@@ -45,12 +45,18 @@ class StorageInfoUsageCallback;
 
 class StorageInfo : public RefCounted<StorageInfo> {
 public:
+    enum {
+        TEMPORARY,
+        PERSISTENT,
+    };
+
     static PassRefPtr<StorageInfo> create()
     {
         return adoptRef(new StorageInfo());
     }
 
     void queryUsageAndQuota(ScriptExecutionContext*, int storageType, PassRefPtr<StorageInfoUsageCallback>, PassRefPtr<StorageInfoErrorCallback>);
+
     void requestQuota(ScriptExecutionContext*, int storageType, unsigned long long newQuotaInBytes, PassRefPtr<StorageInfoQuotaCallback>, PassRefPtr<StorageInfoErrorCallback>);
 
 private:
