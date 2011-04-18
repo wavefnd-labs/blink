@@ -33,6 +33,8 @@
 OBJC_CLASS NSView;
 #elif PLATFORM(QT)
 #include <qgraphicssceneevent.h>
+#elif PLATFORM(GTK)
+typedef union _GdkEvent GdkEvent;
 #endif
 
 namespace WebKit {
@@ -45,6 +47,8 @@ public:
     NativeWebMouseEvent(HWND, UINT message, WPARAM, LPARAM, bool);
 #elif PLATFORM(QT)
     explicit NativeWebMouseEvent(QGraphicsSceneMouseEvent*, int);
+#elif PLATFORM(GTK)
+    NativeWebMouseEvent(GdkEvent*, int);
 #endif
 
 #if PLATFORM(MAC)
@@ -53,6 +57,8 @@ public:
     const MSG* nativeEvent() const { return &m_nativeEvent; }
 #elif PLATFORM(QT)
     const QGraphicsSceneMouseEvent* nativeEvent() const { return m_nativeEvent; }
+#elif PLATFORM(GTK)
+    GdkEvent* nativeEvent() const { return m_nativeEvent; }
 #endif
 
 private:
@@ -62,6 +68,8 @@ private:
     MSG m_nativeEvent;
 #elif PLATFORM(QT)
     QGraphicsSceneMouseEvent* m_nativeEvent;
+#elif PLATFORM(GTK)
+    GdkEvent* m_nativeEvent;
 #endif
 };
 
