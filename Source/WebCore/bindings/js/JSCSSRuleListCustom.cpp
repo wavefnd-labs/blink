@@ -26,22 +26,53 @@
 #include "config.h"
 #include "JSCSSRuleList.h"
 
+#include "CSSRule.h"
 #include "CSSRuleList.h"
+#include "JSNode.h"
+#include "StyleList.h"
 
 using namespace JSC;
 
 namespace WebCore {
 
-void JSCSSRuleList::markChildren(MarkStack& markStack)
+class JSCSSRuleListOwner : public JSC::WeakHandleOwner {
+    virtual bool isReachableFromOpaqueRoots(JSC::Handle<JSC::Unknown>, void* context, JSC::MarkStack&);
+    virtual void finalize(JSC::Handle<JSC::Unknown>, void* context);
+};
+
+bool JSCSSRuleListOwner::isReachableFromOpaqueRoots(JSC::Handle<JSC::Unknown> handle, void*, MarkStack& markStack)
 {
-    Base::markChildren(markStack);
+    JSCSSRuleList* jsCSSRuleList = static_cast<JSCSSRuleList*>(handle.get().asCell());
+    if (!jsCSSRuleList->hasCustomProperties())
+        return false;
+    if (StyleList* styleList = jsCSSRuleList->impl()->styleList())
+        return markStack.containsOpaqueRoot(root(styleList));
+    if (CSSRule* cssRule = jsCSSRuleList->impl()->item(0))
+        return markStack.containsOpaqueRoot(root(cssRule));
+    return false;
+}
 
-    CSSRuleList* list = impl();
-    JSGlobalData& globalData = *Heap::heap(this)->globalData();
+void JSCSSRuleListOwner::finalize(JSC::Handle<JSC::Unknown> handle, void* context)
+{
+    JSCSSRuleList* jsCSSRuleList = static_cast<JSCSSRuleList*>(handle.get().asCell());
+    DOMWrapperWorld* world = static_cast<DOMWrapperWorld*>(context);
+    uncacheWrapper(world, jsCSSRuleList->impl(), jsCSSRuleList);
+}
 
-    unsigned length = list->length();
-    for (unsigned i = 0; i < length; ++i)
-        markDOMObjectWrapper(markStack, globalData, list->item(i));
+inline JSC::WeakHandleOwner* wrapperOwner(DOMWrapperWorld*, CSSRuleList*)
+{
+    DEFINE_STATIC_LOCAL(JSCSSRuleListOwner, jsCSSRuleListOwner, ());
+    return &jsCSSRuleListOwner;
+}
+
+inline void* wrapperContext(DOMWrapperWorld* world, CSSRuleList*)
+{
+    return world;
+}
+
+JSValue toJS(ExecState* exec, JSDOMGlobalObject* globalObject, CSSRuleList* impl)
+{
+    return wrap<JSCSSRuleList>(exec, globalObject, impl);
 }
 
 }
