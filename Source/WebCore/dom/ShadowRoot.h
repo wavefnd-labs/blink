@@ -40,6 +40,9 @@ public:
     virtual bool isShadowBoundary() const { return true; }
     virtual void recalcStyle(StyleChange = NoChange);
 
+    ContainerNode* contentContainerFor(Node*);
+    void hostChildrenChanged();
+
 private:
     ShadowRoot(Document*);
     virtual ~ShadowRoot();
@@ -48,6 +51,8 @@ private:
     virtual NodeType nodeType() const;
     virtual PassRefPtr<Node> cloneNode(bool deep);
     virtual bool childTypeAllowed(NodeType) const;
+
+    ContainerNode* firstContentElement() const;
 };
 
 inline PassRefPtr<ShadowRoot> ShadowRoot::create(Document* document)
