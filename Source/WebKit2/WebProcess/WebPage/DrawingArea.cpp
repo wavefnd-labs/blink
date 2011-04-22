@@ -29,7 +29,7 @@
 // Subclasses
 #include "ChunkedUpdateDrawingArea.h"
 
-#if PLATFORM(MAC) || PLATFORM(WIN)
+#if PLATFORM(MAC) || PLATFORM(WIN) || PLATFORM(QT)
 #include "DrawingAreaImpl.h"
 #endif
 
@@ -45,14 +45,13 @@ PassOwnPtr<DrawingArea> DrawingArea::create(WebPage* webPage, const WebPageCreat
 {
     switch (parameters.drawingAreaType) {
     case DrawingAreaTypeImpl:
-#if PLATFORM(MAC) || PLATFORM(WIN)
+#if PLATFORM(MAC) || PLATFORM(WIN) || PLATFORM(QT)
         return DrawingAreaImpl::create(webPage, parameters);
 #else
         return 0;
 #endif
     case DrawingAreaTypeChunkedUpdate:
         return adoptPtr(new ChunkedUpdateDrawingArea(webPage));
-
 #if ENABLE(TILED_BACKING_STORE)
     case DrawingAreaTypeTiled:
         return adoptPtr(new TiledDrawingArea(webPage));

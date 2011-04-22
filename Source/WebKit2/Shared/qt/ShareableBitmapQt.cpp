@@ -51,9 +51,7 @@ void ShareableBitmap::paint(GraphicsContext& context, const IntPoint& dstPoint, 
 {
     QImage image = createQImage(data(), m_size.width(), m_size.height());
     QPainter* painter = context.platformContext();
-    painter->translate(-srcRect.x(), -srcRect.y());
     painter->drawImage(dstPoint, image, QRect(srcRect));
-    painter->translate(srcRect.x(), srcRect.y());
 }
 
 } // namespace WebKit
