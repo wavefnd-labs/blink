@@ -28,14 +28,12 @@
 #ifndef WebKitWebViewBase_h
 #define WebKitWebViewBase_h
 
-#include "WebPageProxy.h"
+#include <WebKit2/WKBase.h>
 #include <gtk/gtk.h>
-
-using namespace WebKit;
 
 G_BEGIN_DECLS
 
-#define WEBKIT_TYPE_WEB_VIEW_BASE              (webkitWebViewBaseGetType())
+#define WEBKIT_TYPE_WEB_VIEW_BASE              (webkit_web_view_base_get_type())
 #define WEBKIT_WEB_VIEW_BASE(object)           (G_TYPE_CHECK_INSTANCE_CAST((object), WEBKIT_TYPE_WEB_VIEW_BASE, WebKitWebViewBase))
 #define WEBKIT_WEB_VIEW_BASE_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST((klass), WEBKIT_TYPE_WEB_VIEW_BASE, WebKitWebViewBaseClass))
 #define WEBKIT_IS_WEB_VIEW_BASE(object)        (G_TYPE_CHECK_INSTANCE_TYPE((object), WEBKIT_TYPE_WEB_VIEW_BASE))
@@ -54,15 +52,16 @@ struct _WebKitWebViewBase {
 
 struct _WebKitWebViewBaseClass {
     GtkContainerClass parentClass;
+
+    /* Padding for future expansion */
+    void (*_webkit_reserved0) (void);
+    void (*_webkit_reserved1) (void);
+    void (*_webkit_reserved2) (void);
+    void (*_webkit_reserved3) (void);
 };
 
-GType webkitWebViewBaseGetType();
-
-WebKitWebViewBase* webkitWebViewBaseCreate(WebContext*, WebPageGroup*);
-
-GtkIMContext* webkitWebViewBaseGetIMContext(WebKitWebViewBase*);
-
-WebPageProxy* webkitWebViewBaseGetPage(WebKitWebViewBase*);
+WK_EXPORT GType
+webkit_web_view_base_get_type();
 
 G_END_DECLS
 
