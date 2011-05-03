@@ -39,9 +39,9 @@
 
 namespace WebCore {
 
-PassRefPtr<Clipboard> Editor::newGeneralClipboard(ClipboardAccessPolicy policy, Frame*)
+PassRefPtr<Clipboard> Editor::newGeneralClipboard(ClipboardAccessPolicy policy, Frame* frame)
 {
-    return ClipboardQt::create(policy);
+    return ClipboardQt::create(policy, frame);
 }
 
 } // namespace WebCore
