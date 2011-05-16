@@ -27,13 +27,14 @@
 
 #if ENABLE(MEDIA_STREAM)
 
+#include "CallbackTask.h"
+#include "NavigatorUserMediaError.h"
 #include <wtf/RefCounted.h>
 
 namespace WebCore {
 
-class NavigatorUserMediaError;
-
-class NavigatorUserMediaErrorCallback : public RefCounted<NavigatorUserMediaErrorCallback> {
+class NavigatorUserMediaErrorCallback : public RefCounted<NavigatorUserMediaErrorCallback>,
+                                        public CallbackTask1<NavigatorUserMediaErrorCallback, NavigatorUserMediaError>::Scheduler {
 public:
     virtual ~NavigatorUserMediaErrorCallback() { }
     virtual bool handleEvent(NavigatorUserMediaError*) = 0;
