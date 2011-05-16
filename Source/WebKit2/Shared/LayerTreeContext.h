@@ -31,8 +31,6 @@ namespace CoreIPC {
     class ArgumentEncoder;
 }
 
-#if USE(ACCELERATED_COMPOSITING)
-
 namespace WebKit {
 
 class LayerTreeContext {
@@ -58,7 +56,5 @@ inline bool operator!=(const LayerTreeContext& a, const LayerTreeContext& b)
 }
 
 };
-
-#endif // USE(ACCELERATED_COMPOSITING)
 
 #endif // LayerTreeContext_h
