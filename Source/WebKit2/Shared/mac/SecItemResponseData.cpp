@@ -35,7 +35,7 @@ SecItemResponseData::SecItemResponseData()
 {
 }
 
-SecItemResponseData::SecItemResponseData(CFTypeRef resultObject, OSStatus resultCode)
+SecItemResponseData::SecItemResponseData(OSStatus resultCode, CFTypeRef resultObject)
     : m_resultObject(resultObject)
     , m_resultCode(resultCode)
 {
