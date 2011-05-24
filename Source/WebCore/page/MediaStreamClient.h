@@ -49,6 +49,9 @@ public:
     // Generate a new local stream.
     virtual void generateStream(int requestId, GenerateStreamOptionFlags, PassRefPtr<SecurityOrigin>) = 0;
 
+    // Stop a generated stream.
+    virtual void stopGeneratedStream(const String& streamLabel) = 0;
+
 protected:
     virtual ~MediaStreamClient() { }
 };
