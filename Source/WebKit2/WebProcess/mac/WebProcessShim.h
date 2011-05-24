@@ -28,14 +28,18 @@
 
 namespace WebKit {
 
-struct WebProcessShimCallbacks {
+#if !defined(BUILDING_ON_SNOW_LEOPARD)
+
+struct WebProcessSecItemShimCallbacks {
     OSStatus (*secItemCopyMatching)(CFDictionaryRef query, CFTypeRef *result);
     OSStatus (*secItemAdd)(CFDictionaryRef attributes, CFTypeRef *result);
     OSStatus (*secItemUpdate)(CFDictionaryRef query, CFDictionaryRef attributesToUpdate);
     OSStatus (*secItemDelete)(CFDictionaryRef query);
 };
 
-typedef void (*WebProcessShimInitializeFunc)(const WebProcessShimCallbacks& callbacks);
+typedef void (*WebProcessSecItemShimInitializeFunc)(const WebProcessSecItemShimCallbacks& callbacks);
+
+#endif // BUILDING_ON_SNOW_LEOPARD
 
 }
 
