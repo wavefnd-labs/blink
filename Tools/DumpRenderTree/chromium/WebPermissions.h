@@ -35,17 +35,21 @@
 
 class WebPermissions : public WebKit::WebPermissionClient {
 public:
-    WebPermissions() : m_storageAllowed(true) { }
+    WebPermissions();
+    virtual ~WebPermissions();
 
-    virtual bool allowStorage(WebKit::WebFrame*, bool local) { return m_storageAllowed; }
+    virtual bool allowImages(WebKit::WebFrame*, bool enabledPerSettings);
+    virtual bool allowStorage(WebKit::WebFrame*, bool local);
 
-    // Sets the policy whether to allow storage or not.
-    void setStorageAllowed(bool storageAllowed) { m_storageAllowed = storageAllowed; }
+    // Sets the different policies.
+    void setImagesAllowed(bool);
+    void setStorageAllowed(bool);
 
     // Resets the policy to allow all access.
-    void reset() { m_storageAllowed = true; }
+    void reset();
 
 private:
+    bool m_imagesAllowed;
     bool m_storageAllowed;
 };
 
