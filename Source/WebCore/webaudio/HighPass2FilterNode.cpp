@@ -33,7 +33,7 @@ namespace WebCore {
 HighPass2FilterNode::HighPass2FilterNode(AudioContext* context, double sampleRate)
     : AudioBasicProcessorNode(context, sampleRate)
 {
-    m_processor = adoptPtr(new BiquadProcessor(BiquadProcessor::HighPass2, sampleRate, 1, false));
+    m_processor = adoptPtr(new BiquadProcessor(BiquadProcessor::HighPass, sampleRate, 1, false));
     biquadProcessor()->parameter1()->setContext(context);
     biquadProcessor()->parameter2()->setContext(context);
     biquadProcessor()->parameter3()->setContext(context);
