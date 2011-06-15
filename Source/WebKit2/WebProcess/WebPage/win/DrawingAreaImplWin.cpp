@@ -26,9 +26,14 @@
 #include "config.h"
 #include "DrawingAreaImpl.h"
 
+#include "ShareableBitmap.h"
+#include "UpdateInfo.h"
 #include "WebPage.h"
 #include "WebPageProxyMessages.h"
 #include "WindowGeometry.h"
+#include <WebCore/GraphicsContext.h>
+
+using namespace WebCore;
 
 namespace WebKit {
 
@@ -46,4 +51,11 @@ void DrawingAreaImpl::scheduleChildWindowGeometryUpdate(const WindowGeometry& ge
     m_webPage->send(Messages::WebPageProxy::ScheduleChildWindowGeometryUpdate(geometry));
 }
 
+PassOwnPtr<GraphicsContext> DrawingAreaImpl::createGraphicsContext(ShareableBitmap* bitmap)
+{
+    HDC bitmapDC = bitmap->windowsContext();
+    return adoptPtr(new GraphicsContext(bitmapDC, true));
+}
+
 } // namespace WebKit
+
