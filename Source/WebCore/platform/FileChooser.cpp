@@ -29,27 +29,21 @@
 #include "config.h"
 #include "FileChooser.h"
 
-#include "Icon.h"
-
 namespace WebCore {
-    
+
 FileChooserClient::~FileChooserClient()
 {
 }
 
 inline FileChooser::FileChooser(FileChooserClient* client, const Vector<String>& initialFilenames)
     : m_client(client)
-    , m_isInitializing(true)
 {
     m_filenames = initialFilenames;
 }
 
 PassRefPtr<FileChooser> FileChooser::create(FileChooserClient* client, const Vector<String>& initialFilenames)
 {
-    RefPtr<FileChooser> chooser(adoptRef(new FileChooser(client, initialFilenames)));
-    chooser->loadIcon();
-    chooser->m_isInitializing = false;
-    return chooser;
+    return adoptRef(new FileChooser(client, initialFilenames));
 }
 
 FileChooser::~FileChooser()
@@ -59,7 +53,6 @@ FileChooser::~FileChooser()
 void FileChooser::clear()
 {
     m_filenames.clear();
-    m_icon = 0;
 }
 
 void FileChooser::chooseFile(const String& filename)
@@ -74,22 +67,8 @@ void FileChooser::chooseFiles(const Vector<String>& filenames)
     if (m_filenames == filenames)
         return;
     m_filenames = filenames;
-    loadIcon();
     if (m_client)
         m_client->valueChanged();
-}
-
-void FileChooser::loadIcon()
-{
-    if (m_filenames.size() && m_client)
-        m_client->chooseIconForFiles(this, m_filenames);
-}
-
-void FileChooser::iconLoaded(PassRefPtr<Icon> icon)
-{
-    m_icon = icon;
-    if (!m_isInitializing && m_icon && m_client)
-        m_client->repaint();
 }
 
 }
