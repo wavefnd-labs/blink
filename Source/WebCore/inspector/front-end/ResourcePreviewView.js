@@ -28,40 +28,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-WebInspector.ResourcePreviewView = function(resource, sourceView)
+WebInspector.ResourcePreviewView = function(resource, responseView)
 {
-    WebInspector.ResourceView.call(this, resource);
-    this._sourceView = sourceView;
+    WebInspector.ResourceContentView.call(this, resource);
+    this._responseView = responseView;
 }
 
 WebInspector.ResourcePreviewView.prototype = {
-    hasContent: function()
+    contentLoaded: function()
     {
-        return true;
-    },
-
-    show: function(parentElement)
-    {
-        WebInspector.ResourceView.prototype.show.call(this, parentElement);
-        this._ensureInnerViewShown();
-    },
-
-    _ensureInnerViewShown: function()
-    {
-        if (this._innerViewShowRequested)
-            return;
-        this._innerViewShowRequested = true;
-
-        function callback()
-        {
-            this._createInnerView(callback).show(this.element);
-            this._innerViewShowRequested = false;
+        if (!this.resource.content) {
+            if (!this._emptyView) {
+                this._emptyView = new WebInspector.EmptyView(WebInspector.UIString("This request has no preview available."));
+                this._emptyView.show(this.element);
+            }
+        } else {
+            if (this._emptyView) {
+                this._emptyView.detach();
+                delete this._emptyView;
+            }
+            var view = this._createInnerView();
+            view.show(this.element);
         }
-
-        this.resource.requestContent(callback.bind(this));
     },
 
-    _createInnerView: function(callback)
+    _createInnerView: function()
     {
         if (this.resource.hasErrorStatusCode() && this.resource.content)
             return new WebInspector.ResourceHTMLView(this.resource);
@@ -72,13 +63,11 @@ WebInspector.ResourcePreviewView.prototype = {
                 return new WebInspector.ResourceJSONView(this.resource, parsedJSON);
         }
 
-        if (WebInspector.ResourceView.hasTextContent(this.resource))
-            return this._sourceView;
+        if (this._responseView.sourceView)
+            return this._responseView.sourceView;
 
         return WebInspector.ResourceView.nonSourceViewForResource(this.resource);
-    },
-    
-    
+    }
 }
 
-WebInspector.ResourcePreviewView.prototype.__proto__ = WebInspector.ResourceView.prototype;
+WebInspector.ResourcePreviewView.prototype.__proto__ = WebInspector.ResourceContentView.prototype;
