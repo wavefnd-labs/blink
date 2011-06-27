@@ -27,6 +27,7 @@
 #include "CCThread.h"
 
 #include "LayerRendererChromium.h"
+#include "TraceEvent.h"
 #include <wtf/CurrentTime.h>
 #include <wtf/PassOwnPtr.h>
 #include <wtf/ThreadingPrimitives.h>
@@ -64,6 +65,7 @@ void* CCThread::compositorThreadStart(void* userdata)
 
 void* CCThread::runLoop()
 {
+    TRACE_EVENT("CCThread::runLoop", this, 0);
     {
         // Wait for CCThread::start() to complete to have m_threadID
         // established before starting the main loop.
