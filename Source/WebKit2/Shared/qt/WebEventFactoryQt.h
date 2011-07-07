@@ -45,7 +45,7 @@ public:
     static WebWheelEvent createWebWheelEvent(QGraphicsSceneWheelEvent* event);
     static WebKeyboardEvent createWebKeyboardEvent(QKeyEvent* event);
 #if ENABLE(TOUCH_EVENTS)
-    static WebTouchEvent createWebTouchEvent(QTouchEvent* event);
+    static WebTouchEvent createWebTouchEvent(const QTouchEvent*);
 #endif
 };
 
