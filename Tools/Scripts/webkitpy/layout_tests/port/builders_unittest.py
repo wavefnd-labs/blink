@@ -38,7 +38,7 @@ class BuildersTest(unittest.TestCase):
             '(.) ': '____',
         }
         for name, expected in tests.items():
-            self.assertEquals(expected, builders._path_from_name(name))
+            self.assertEquals(expected, builders.builder_path_from_name(name))
 
 if __name__ == '__main__':
     unittest.main()
