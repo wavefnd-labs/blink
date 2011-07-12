@@ -29,11 +29,16 @@
 import unittest
 
 from webkitpy.common.system.filesystem_mock import MockFileSystem
+from webkitpy.common.system.outputcapture import OutputCapture
 from webkitpy.layout_tests.port.qt import QtPort
+from webkitpy.layout_tests.port import port_testcase
 from webkitpy.tool.mocktool import MockOptions, MockUser, MockExecutive
 
 
-class QtPortTest(unittest.TestCase):
+class QtPortTest(port_testcase.PortTestCase):
+    def port_maker(self, platform):
+        return QtPort
+
     def _assert_search_path(self, search_paths, sys_platform, use_webkit2=False):
         # FIXME: Port constructors should not "parse" the port name, but
         # rather be passed components (directly or via setters).  Once
@@ -56,3 +61,9 @@ class QtPortTest(unittest.TestCase):
         self._assert_search_path(['qt-wk2', 'qt-mac', 'qt'], 'darwin', use_webkit2=True)
         self._assert_search_path(['qt-wk2', 'qt-win', 'qt'], 'cygwin', use_webkit2=True)
         self._assert_search_path(['qt-wk2', 'qt-linux', 'qt'], 'linux2', use_webkit2=True)
+
+    def test_show_results_html_file(self):
+        port = self.make_port()
+        port._executive = MockExecutive(should_log=True)
+        expected_stderr = "MOCK run_command: ['Tools/Scripts/run-launcher', '--release', '--qt', 'file://test.html']\n"
+        OutputCapture().assert_outputs(self, port.show_results_html_file, ["test.html"], expected_stderr=expected_stderr)
