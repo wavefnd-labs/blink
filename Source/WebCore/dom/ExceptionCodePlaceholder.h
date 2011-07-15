@@ -72,20 +72,7 @@ public:
 private:
     const char* m_file;
     int m_line;
-    const char* m_function;
 };
-
-inline NoExceptionAssertionChecker::NoExceptionAssertionChecker(const char* file, int line)
-    : ExceptionCodePlaceholder(0)
-    , m_file(file)
-    , m_line(line)
-{
-}
-
-inline NoExceptionAssertionChecker::~NoExceptionAssertionChecker()
-{
-    ASSERT_AT(!m_code, m_file, m_line, "");
-}
 
 #define ASSERT_NO_EXCEPTION ::WebCore::NoExceptionAssertionChecker(__FILE__, __LINE__)
 
