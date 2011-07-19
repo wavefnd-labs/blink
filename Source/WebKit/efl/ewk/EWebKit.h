@@ -35,6 +35,7 @@
 #include "ewk_frame.h"
 #include "ewk_history.h"
 #include "ewk_main.h"
+#include "ewk_network.h"
 #include "ewk_settings.h"
 #include "ewk_view.h"
 #include "ewk_window_features.h"
