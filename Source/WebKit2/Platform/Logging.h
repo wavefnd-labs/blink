@@ -26,6 +26,7 @@
 #ifndef WebKitLogging_h
 #define WebKitLogging_h
 
+#include "PlatformString.h"
 #include <wtf/Assertions.h>
 
 #if !LOG_DISABLED
@@ -45,6 +46,9 @@ extern WTFLogChannel LogView;
 
 void initializeLogChannel(WTFLogChannel*);
 void initializeLogChannelsIfNecessary(void);
+#if PLATFORM(GTK)
+WTFLogChannel* getChannelFromName(const String& channelName);
+#endif
 
 } // namespace WebKit
 
