@@ -25,6 +25,7 @@
 #if ENABLE(SVG_FONTS)
 #include "SVGTextPositioningElement.h"
 #include "SVGURIReference.h"
+#include <wtf/Vector.h>
 
 namespace WebCore {
 
@@ -40,7 +41,7 @@ public:
     const AtomicString& format() const;
     void setFormat(const AtomicString&, ExceptionCode&);
 
-    bool hasValidGlyphElement(String& glyphName) const;
+    bool hasValidGlyphElements(Vector<String>& glyphNames) const;
 
 private:
     SVGAltGlyphElement(const QualifiedName&, Document*);
