@@ -39,14 +39,14 @@
 
 namespace WebCore {
 
-class CCLayerImpl;
+class LayerChromium;
 class LayerRendererChromium;
 class LayerTexture;
 
 class RenderSurfaceChromium {
     WTF_MAKE_NONCOPYABLE(RenderSurfaceChromium);
 public:
-    explicit RenderSurfaceChromium(CCLayerImpl*);
+    explicit RenderSurfaceChromium(LayerChromium*);
     ~RenderSurfaceChromium();
 
     bool prepareContentsTexture();
@@ -60,9 +60,6 @@ public:
     // Returns the rect that encloses the RenderSurface including any reflection.
     FloatRect drawableContentRect() const;
 
-    Vector<RefPtr<CCLayerImpl> >& layerList() { return m_layerList; }
-    void clearLayerList();
-
     const IntRect& contentRect() const { return m_contentRect; }
     void setContentRect(const IntRect& contentRect) { m_contentRect = contentRect; }
 
@@ -71,9 +68,6 @@ public:
 
     const TransformationMatrix& drawTransform() const { return m_drawTransform; }
     void setDrawTransform(const TransformationMatrix& drawTransform) { m_drawTransform = drawTransform; }
-
-    CCLayerImpl* maskLayer() const { return m_maskLayer; }
-    void setMaskLayer(CCLayerImpl* maskLayer) { m_maskLayer = maskLayer; }
 
     const TransformationMatrix& originTransform() const { return m_originTransform; }
     void setOriginTransform(const TransformationMatrix& originTransform) { m_originTransform = originTransform; }
@@ -87,28 +81,26 @@ public:
     bool skipsDraw() const { return m_skipsDraw; }
     void setSkipsDraw(bool skipsDraw) { m_skipsDraw = skipsDraw; }
 
-    LayerTexture* contentsTexture() const { return m_contentsTexture.get(); }
+    void clearLayerList() { m_layerList.clear(); }
+    Vector<RefPtr<LayerChromium> >& layerList() { return m_layerList; }
 
-    typedef ProgramBinding<VertexShaderPosTex, FragmentShaderRGBATexAlpha> Program;
-    typedef ProgramBinding<VertexShaderPosTex, FragmentShaderRGBATexAlphaMask> MaskProgram;
+    void setMaskLayer(LayerChromium* maskLayer) { m_maskLayer = maskLayer; }
 
 private:
     LayerRendererChromium* layerRenderer();
-    void drawSurface(CCLayerImpl* maskLayer, const TransformationMatrix& drawTransform);
 
-    CCLayerImpl* m_owningLayer;
-    CCLayerImpl* m_maskLayer;
+    LayerChromium* m_owningLayer;
+    LayerChromium* m_maskLayer;
 
     IntRect m_contentRect;
     bool m_skipsDraw;
 
-    OwnPtr<LayerTexture> m_contentsTexture;
     float m_drawOpacity;
     TransformationMatrix m_drawTransform;
     TransformationMatrix m_replicaDrawTransform;
     TransformationMatrix m_originTransform;
     IntRect m_scissorRect;
-    Vector<RefPtr<CCLayerImpl> > m_layerList;
+    Vector<RefPtr<LayerChromium> > m_layerList;
 };
 
 }
