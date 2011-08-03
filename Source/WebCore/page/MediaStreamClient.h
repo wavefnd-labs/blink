@@ -43,17 +43,20 @@ typedef unsigned GenerateStreamOptionFlags;
 
 class MediaStreamClient {
 public:
-    // Notify the embedder client about the page controller being destroyed.
+    // MediaStream functions.
     virtual void mediaStreamDestroyed() = 0;
-
-    // Generate a new local stream.
     virtual void generateStream(int requestId, GenerateStreamOptionFlags, PassRefPtr<SecurityOrigin>) = 0;
-
-    // Stop a generated stream.
     virtual void stopGeneratedStream(const String& streamLabel) = 0;
-
-    // Enable/disable an track.
     virtual void setMediaStreamTrackEnabled(const String& trackId, bool enabled) = 0;
+
+    // PeerConnection functions.
+    virtual void newPeerConnection(int peerConnectionId, const String& configuration) = 0;
+    virtual void startNegotiation(int peerConnectionId) = 0;
+    virtual void processSignalingMessage(int peerConnectionId, const String& message) = 0;
+    virtual void message(int peerConnectionId, const String& message) = 0;
+    virtual void addStream(int peerConnectionId, const String& streamLabel) = 0;
+    virtual void removeStream(int peerConnectionId, const String& streamLabel) = 0;
+    virtual void closePeerConnection(int peerConnectionId) = 0;
 
 protected:
     virtual ~MediaStreamClient() { }
