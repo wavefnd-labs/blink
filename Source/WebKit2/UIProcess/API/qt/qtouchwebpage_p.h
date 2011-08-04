@@ -21,11 +21,13 @@
 #ifndef qtouchwebpage_p_h
 #define qtouchwebpage_p_h
 
-#include <QMenu>
+#include "SGAgent.h"
 #include "qtouchwebpage.h"
 #include "qwebnavigationcontroller.h"
+#include <QMenu>
 
 class QRectF;
+class QSGNode;
 class QString;
 class QTouchWebPage;
 class QTouchWebPageProxy;
@@ -44,6 +46,7 @@ public:
     QTouchWebPage* const q;
     QTouchWebPageProxy* page;
     QWebNavigationController* navigationController;
+    WebKit::SGAgent sgAgent;
 };
 
 #endif /* qtouchwebpage_p_h */
