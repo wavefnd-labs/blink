@@ -66,6 +66,8 @@ public:
     void dispatchMessageFromFrontend(const String&);
 
 private:
+    friend InstrumentingAgents* instrumentationForWorkerContext(WorkerContext*);
+
     WorkerContext* m_workerContext;
     OwnPtr<InspectorState> m_state;
     OwnPtr<InstrumentingAgents> m_instrumentingAgents;
