@@ -18,14 +18,12 @@ var ws = new WebSocket("ws://127.0.0.1:8880/websocket/tests/hybi/protocol-test?p
 var closeEvent;
 var receivedMessage;
 
-// FIXME: Implement WebSocket.protocol.
-// shouldBeEqualToString("ws.protocol", "");
+shouldBeEqualToString("ws.protocol", "");
 
 ws.onopen = function()
 {
     debug("Connected");
-    // FIXME: Ditto.
-    // shouldBeEqualToString("ws.protocol", "superchat");
+    shouldBeEqualToString("ws.protocol", "superchat");
 };
 
 ws.onmessage = function(event)
@@ -38,10 +36,18 @@ ws.onmessage = function(event)
 ws.onclose = function(event)
 {
     debug("Closed");
+    shouldBeEqualToString("ws.protocol", "superchat");
     closeEvent = event;
     shouldBeTrue("closeEvent.wasClean");
-    finishJSTest();
+    setTimeout("checkAfterOnClose()", 0);
 };
+
+function checkAfterOnClose()
+{
+    debug("Exited onclose handler");
+    shouldBeEqualToString("ws.protocol", "superchat");
+    finishJSTest();
+}
 
 var successfullyParsed = true;
 </script>
