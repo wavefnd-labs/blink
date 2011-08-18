@@ -56,9 +56,9 @@ unsigned computeCrc(const Vector<unsigned char>& buffer)
         crcTableComputed = true;
     }
 
-    unsigned crc = 0xffffffffL;
+    unsigned crc = 0xffffffffU;
     for (size_t i = 0; i < buffer.size(); ++i)
-        crc = crcTable[(crc ^ buffer[i]) & 0xff] ^ ((crc >> 8) & 0x00ffffffL);
-    return crc ^ 0xffffffffL;
+        crc = crcTable[(crc ^ buffer[i]) & 0xff] ^ ((crc >> 8) & 0x00ffffffU);
+    return crc ^ 0xffffffffU;
 }
 
