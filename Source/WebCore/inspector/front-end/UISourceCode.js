@@ -28,6 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @constructor
+ */
 WebInspector.UISourceCode = function(id, url, isContentScript, contentProvider)
 {
     this._id = id;
@@ -76,13 +79,10 @@ WebInspector.UISourceCode.prototype = {
     }
 }
 
-WebInspector.ContentProvider = function()
-{
-}
-
+/**
+ * @interface
+ */
+WebInspector.ContentProvider = function() { }
 WebInspector.ContentProvider.prototype = {
-    requestContent: function(callback)
-    {
-        // Should be implemented by subclasses.
-    }
+    requestContent: function(callback) { }
 }
