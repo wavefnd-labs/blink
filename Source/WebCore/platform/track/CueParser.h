@@ -69,6 +69,9 @@ public:
     void fetchParsedCues(Vector<RefPtr<TextTrackCue> >&);
     void newCuesParsed();
 
+protected:
+    ScriptExecutionContext* m_scriptExecutionContext;
+
 private:
     void createWebVTTParser();
  
