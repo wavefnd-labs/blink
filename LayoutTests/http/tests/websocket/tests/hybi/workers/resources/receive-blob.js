@@ -1,4 +1,4 @@
-function createHelloWorldValue()
+function createArrayBufferContainingHelloWorld()
 {
     var hello = "Hello, world!";
     var array = new Uint8Array(hello.length);
@@ -7,13 +7,12 @@ function createHelloWorldValue()
     return array.buffer;
 }
 
-function createEmptyValue()
+function createEmptyArrayBuffer()
 {
     return new ArrayBuffer(0);
 }
 
-// Create an ArrayBuffer containing all distinct bytes ("\x00" to "\xFF").
-function createAllBytesValue()
+function createArrayBufferContainingAllDistinctBytes()
 {
     var array = new Uint8Array(256);
     for (var i = 0; i < 256; ++i)
@@ -28,7 +27,7 @@ else
     postMessage("FAIL: ws.binaryType should be \"blob\" but was \"" + ws.binaryType + "\"");
 
 var receivedMessages = [];
-var expectedValues = [createHelloWorldValue(), createEmptyValue(), createAllBytesValue()];
+var expectedValues = [createArrayBufferContainingHelloWorld(), createEmptyArrayBuffer(), createArrayBufferContainingAllDistinctBytes()];
 
 ws.onmessage = function(event)
 {
