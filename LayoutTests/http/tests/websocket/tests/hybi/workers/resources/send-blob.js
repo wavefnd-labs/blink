@@ -1,8 +1,3 @@
-function startsWith(target, prefix)
-{
-    return target.indexOf(prefix) === 0;
-}
-
 function createBlobContainingHelloWorld()
 {
     var builder = new WebKitBlobBuilder();
@@ -26,7 +21,7 @@ function createBlobContainingAllDistinctBytes()
     return builder.getBlob();
 }
 
-var url = "ws://127.0.0.1:8880/websocket/tests/hybi/workers/resources/send-blob";
+var url = "ws://127.0.0.1:8880/websocket/tests/hybi/workers/resources/check-binary-messages";
 var ws = new WebSocket(url);
 
 ws.onopen = function()
