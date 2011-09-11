@@ -29,11 +29,13 @@
 #include "config.h"
 #include "InitializeThreading.h"
 
+#include "ExecutableAllocator.h"
 #include "Heap.h"
 #include "Identifier.h"
 #include "JSGlobalObject.h"
 #include "UString.h"
 #include "WriteBarrier.h"
+#include "dtoa.h"
 #include <wtf/DateMath.h>
 #include <wtf/Threading.h>
 #include <wtf/dtoa/cached-powers.h>
@@ -54,6 +56,7 @@ static void initializeThreadingOnce()
     WriteBarrierCounters::initialize();
 #endif
     JSGlobalData::storeVPtrs();
+    ExecutableAllocator::initializeAllocator();
 #if ENABLE(JSC_MULTIPLE_THREADS)
     RegisterFile::initializeThreading();
 #endif
