@@ -48,6 +48,8 @@ public:
     void mouseMoveTo(int x, int y);
     void leapForward(int milliseconds);
 
+    void keyDown(JSStringRef key, JSValueRef modifierArray, int location);
+
     // Zoom functions.
     void textZoomIn();
     void textZoomOut();
