@@ -28,6 +28,7 @@
 #include "DFGSpeculativeJIT.h"
 
 #if ENABLE(DFG_JIT)
+#if USE(JSVALUE64)
 
 namespace JSC { namespace DFG {
 
@@ -2346,4 +2347,5 @@ ValueRecovery SpeculativeJIT::computeValueRecoveryFor(const ValueSource& valueSo
 
 } } // namespace JSC::DFG
 
+#endif
 #endif

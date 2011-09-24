@@ -27,6 +27,7 @@
 #include "DFGJITCodeGenerator.h"
 
 #if ENABLE(DFG_JIT)
+#if USE(JSVALUE64)
 
 #include "DFGSpeculativeJIT.h"
 #include "LinkBuffer.h"
@@ -2268,4 +2269,5 @@ FPRTemporary::FPRTemporary(JITCodeGenerator* jit, SpeculateDoubleOperand& op1, S
 
 } } // namespace JSC::DFG
 
+#endif
 #endif

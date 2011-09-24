@@ -27,6 +27,7 @@
 #include "DFGJITCompiler.h"
 
 #if ENABLE(DFG_JIT)
+#if USE(JSVALUE64)
 
 #include "CodeBlock.h"
 #include "DFGJITCodeGenerator.h"
@@ -771,4 +772,5 @@ void JITCompiler::clearSamplingFlag(int32_t flag)
 
 } } // namespace JSC::DFG
 
+#endif
 #endif
