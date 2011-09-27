@@ -26,6 +26,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from webkitpy.common.checkout.diff_parser import DiffParser
 
 class WatchList(object):
     def __init__(self):
@@ -33,3 +34,21 @@ class WatchList(object):
 
     def set_definitions(self, definitions):
         self._definitions = definitions
+
+    def find_matching_definitions(self, diff):
+        matching_definitions = set()
+        patch_files = DiffParser(diff.splitlines()).files
+
+        for path, diff_file in patch_files.iteritems():
+            for definition in self._definitions:
+                # If a definition has already matched, there is no need to process it.
+                if definition in matching_definitions:
+                    continue
+
+                # See if the definition matches.
+                for pattern in self._definitions[definition]:
+                    if not pattern.match(path, diff_file):
+                        break
+                else:
+                    matching_definitions.add(definition)
+        return matching_definitions
