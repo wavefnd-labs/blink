@@ -20,6 +20,8 @@
 #ifndef __WEBKIT2_H__
 #define __WEBKIT2_H__
 
+#include <webkit2/WebKitEnumTypes.h>
+#include <webkit2/WebKitError.h>
 #include <webkit2/WebKitWebContext.h>
 #include <webkit2/WebKitWebViewBase.h>
 #include <webkit2/WebKitWebView.h>
