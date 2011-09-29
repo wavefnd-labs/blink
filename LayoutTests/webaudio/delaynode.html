@@ -4,6 +4,7 @@
 <head>
 <link rel="stylesheet" href="../fast/js/resources/js-test-style.css"/>
 <script src="../fast/js/resources/js-test-pre.js"></script>
+<script src="resources/delay-testing.js"></script>
 </head>
 
 <body>
@@ -14,75 +15,6 @@
 <script>
 description("Tests basic functionality of DelayNode.");
 
-var sampleRate = 44100.0;
-
-var context;
-var toneBuffer;
-
-var renderLengthSeconds = 4;
-var delayTimeSeconds = 0.5;
-var toneLengthSeconds = 2;
-
-function createToneBuffer(frequency, numberOfCycles, sampleRate) {
-    var duration = numberOfCycles / frequency;
-    var sampleFrameLength = duration * sampleRate;
-    
-    var audioBuffer = context.createBuffer(1, sampleFrameLength, sampleRate);
-
-    var n = audioBuffer.length;
-    var data = audioBuffer.getChannelData(0);
-
-    for (var i = 0; i < n; ++i)
-        data[i] = Math.sin(frequency * 2.0*Math.PI * i / sampleRate);
-
-    return audioBuffer;
-}
-
-function checkDelayedResult(event) {
-    var renderedBuffer = event.renderedBuffer;
-
-    var sourceData = toneBuffer.getChannelData(0);
-    var renderedData = renderedBuffer.getChannelData(0);
-    
-    var delayTimeFrames = delayTimeSeconds * sampleRate;
-    var toneLengthFrames = toneLengthSeconds * sampleRate;
-
-    var success = true;
-    
-    var n = renderedBuffer.length;
-    
-    for (var i = 0; i < n; ++i) {
-        if (i < delayTimeFrames) {
-            // Check that initial portion is 0 (since signal is delayed).
-            if (renderedData[i] != 0) {
-                success = false;
-                break;
-            }
-        } else if (i >= delayTimeFrames && i < delayTimeFrames + toneLengthFrames) {
-            // Make sure that the tone data is delayed by exactly the expected number of frames.
-            var j = i - delayTimeFrames;
-            if (renderedData[i] != sourceData[j]) {
-                success = false;
-                break;
-            }
-        } else {
-            // Make sure we have silence after the delayed tone.
-            if (renderedData[i] != 0) {
-                success = false;
-                break;
-            }
-        }    
-    }
-
-    if (success) {
-        testPassed("Test signal was correctly delayed.");
-    } else {
-        testFailed("Test signal was not correctly delayed.");
-    }
-
-    finishJSTest();
-}
-
 function runTest() {
     if (window.layoutTestController) {
         layoutTestController.dumpAsText();
@@ -92,8 +24,8 @@ function runTest() {
     window.jsTestIsAsync = true;
         
     // Create offline audio context.
-    context = new webkitAudioContext(1, sampleRate * renderLengthSeconds, sampleRate);
-    toneBuffer = createToneBuffer(20, 20 * toneLengthSeconds, sampleRate); // 20Hz tone
+    var context = new webkitAudioContext(1, sampleRate * renderLengthSeconds, sampleRate);
+    var toneBuffer = createToneBuffer(context, 20, 20 * toneLengthSeconds, sampleRate); // 20Hz tone
     
     var bufferSource = context.createBufferSource();
     bufferSource.buffer = toneBuffer;
@@ -105,7 +37,7 @@ function runTest() {
     delay.connect(context.destination);
     bufferSource.noteOn(0);
     
-    context.oncomplete = checkDelayedResult;
+    context.oncomplete = checkDelayedResult(toneBuffer);
     context.startRendering();
 }
 
