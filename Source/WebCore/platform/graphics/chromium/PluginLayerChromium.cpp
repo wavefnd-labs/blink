@@ -44,6 +44,7 @@ PassRefPtr<PluginLayerChromium> PluginLayerChromium::create(CCLayerDelegate* del
 PluginLayerChromium::PluginLayerChromium(CCLayerDelegate* delegate)
     : LayerChromium(delegate)
     , m_textureId(0)
+    , m_flipped(true)
 {
 }
 
@@ -55,6 +56,13 @@ PassRefPtr<CCLayerImpl> PluginLayerChromium::createCCLayerImpl()
 void PluginLayerChromium::setTextureId(unsigned id)
 {
     m_textureId = id;
+    setNeedsCommit();
+}
+
+void PluginLayerChromium::setFlipped(bool flipped)
+{
+    m_flipped = flipped;
+    setNeedsCommit();
 }
 
 void PluginLayerChromium::pushPropertiesTo(CCLayerImpl* layer)
@@ -63,6 +71,7 @@ void PluginLayerChromium::pushPropertiesTo(CCLayerImpl* layer)
 
     CCPluginLayerImpl* pluginLayer = static_cast<CCPluginLayerImpl*>(layer);
     pluginLayer->setTextureId(m_textureId);
+    pluginLayer->setFlipped(m_flipped);
 }
 
 }
