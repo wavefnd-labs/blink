@@ -26,6 +26,8 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit2/WKBase.h>
 
+@class WKBrowsingContextController;
+@class WKProcessCluster;
 @class WKViewData;
 
 WK_EXPORT
@@ -33,6 +35,10 @@ WK_EXPORT
     WKViewData *_data;
     unsigned _unused;
 }
+
+- (id)initWithFrame:(NSRect)frame processCluster:(WKProcessCluster *)processCluster;
+
+@property(readonly) WKBrowsingContextController *browsingContextController;
 
 @property BOOL drawsBackground;
 @property BOOL drawsTransparentBackground;
