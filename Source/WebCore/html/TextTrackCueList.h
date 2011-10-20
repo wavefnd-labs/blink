@@ -43,6 +43,7 @@ public:
     }
 
     unsigned long length() const;
+    TextTrackCue* item(unsigned index) const;
     TextTrackCue* getCueById(const String&) const;
     PassRefPtr<TextTrackCueList> activeCues();
 
