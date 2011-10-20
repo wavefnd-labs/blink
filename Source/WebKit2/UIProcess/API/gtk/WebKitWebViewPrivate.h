@@ -31,6 +31,4 @@
 
 void webkitWebViewSetEstimatedLoadProgress(WebKitWebView*, double estimatedLoadProgress);
 
-void attachLoaderClientToPage(WKPageRef, WebKitWebLoaderClient*);
-
 #endif // WebKitWebViewPrivate_h
