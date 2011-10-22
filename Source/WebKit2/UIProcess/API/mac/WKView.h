@@ -27,6 +27,7 @@
 #import <WebKit2/WKBase.h>
 
 @class WKBrowsingContextController;
+@class WKBrowsingContextGroup;
 @class WKProcessGroup;
 @class WKViewData;
 
@@ -37,7 +38,7 @@ WK_EXPORT
     unsigned _unused;
 }
 
-- (id)initWithFrame:(NSRect)frame processCluster:(WKProcessGroup *)processCluster;
+- (id)initWithFrame:(NSRect)frame processGroup:(WKProcessGroup *)processGroup browsingContextGroup:(WKBrowsingContextGroup *)browsingContextGroup;
 
 @property(readonly) WKBrowsingContextController *browsingContextController;
 
