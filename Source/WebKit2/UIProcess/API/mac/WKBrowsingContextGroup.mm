@@ -28,6 +28,7 @@
 #import "WKBrowsingContextGroupInternal.h"
 
 #import "WKPageGroup.h"
+#import "WKPreferences.h"
 #import "WKRetainPtr.h"
 #import "WKStringCF.h"
 
@@ -58,6 +59,16 @@
 {
     [_data release];
     [super dealloc];
+}
+
+- (BOOL)isJavaScriptEnabled
+{
+    return WKPreferencesGetJavaScriptEnabled(WKPageGroupGetPreferences(self.pageGroupRef));
+}
+
+- (void)setJavaScriptEnabled:(BOOL)javaScriptEnabled
+{
+    WKPreferencesSetJavaScriptEnabled(WKPageGroupGetPreferences(self.pageGroupRef), javaScriptEnabled);
 }
 
 @end
