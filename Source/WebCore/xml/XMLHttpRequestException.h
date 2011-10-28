@@ -48,6 +48,8 @@ public:
         ABORT_ERR
     };
 
+    static bool initializeDescription(ExceptionCode, ExceptionCodeDescription*);
+
 private:
     XMLHttpRequestException(const ExceptionCodeDescription& description)
         : ExceptionBase(description)
