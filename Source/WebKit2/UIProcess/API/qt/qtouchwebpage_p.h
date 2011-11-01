@@ -22,6 +22,7 @@
 #define qtouchwebpage_p_h
 
 #include "QtSGUpdateQueue.h"
+#include "QtTouchWebPageProxy.h"
 #include "qtouchwebpage.h"
 #include "qwebnavigationcontroller.h"
 #include <QMenu>
@@ -30,20 +31,20 @@ class QRectF;
 class QSGNode;
 class QString;
 class QTouchWebPage;
-class QtTouchWebPageProxy;
 
 class QTouchWebPagePrivate {
 public:
     QTouchWebPagePrivate(QTouchWebPage* view);
 
-    void setPage(QtTouchWebPageProxy*);
+    void setPageProxy(QtWebPageProxy*);
 
     void _q_onAfterSceneRender();
     void _q_onSceneGraphInitialized();
     void paintToCurrentGLContext();
+    QtTouchWebPageProxy* touchPageProxy() { return static_cast<QtTouchWebPageProxy*>(pageProxy); }
 
     QTouchWebPage* const q;
-    QtTouchWebPageProxy* page;
+    QtWebPageProxy* pageProxy;
     QWebNavigationController* navigationController;
     WebKit::QtSGUpdateQueue sgUpdateQueue;
     bool paintingIsInitialized;
