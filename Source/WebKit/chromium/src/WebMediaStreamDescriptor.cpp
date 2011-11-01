@@ -29,11 +29,16 @@
 #include "WebMediaStreamDescriptor.h"
 
 #include "MediaStreamDescriptor.h"
+#include "MediaStreamSource.h"
+#include "WebMediaStreamSource.h"
 #include "WebString.h"
+#include <wtf/Vector.h>
+
+using namespace WebCore;
 
 namespace WebKit {
 
-WebMediaStreamDescriptor::WebMediaStreamDescriptor(const WTF::PassRefPtr<WebCore::MediaStreamDescriptor>& mediaStreamDescriptor)
+WebMediaStreamDescriptor::WebMediaStreamDescriptor(const PassRefPtr<WebCore::MediaStreamDescriptor>& mediaStreamDescriptor)
     : m_private(mediaStreamDescriptor)
 {
 }
@@ -43,13 +48,13 @@ void WebMediaStreamDescriptor::reset()
     m_private.reset();
 }
 
-WebMediaStreamDescriptor& WebMediaStreamDescriptor::operator=(const WTF::PassRefPtr<WebCore::MediaStreamDescriptor>& mediaStreamDescriptor)
+WebMediaStreamDescriptor& WebMediaStreamDescriptor::operator=(const PassRefPtr<WebCore::MediaStreamDescriptor>& mediaStreamDescriptor)
 {
     m_private = mediaStreamDescriptor;
     return *this;
 }
 
-WebMediaStreamDescriptor::operator WTF::PassRefPtr<WebCore::MediaStreamDescriptor>() const
+WebMediaStreamDescriptor::operator PassRefPtr<WebCore::MediaStreamDescriptor>() const
 {
     return m_private.get();
 }
@@ -57,6 +62,16 @@ WebMediaStreamDescriptor::operator WTF::PassRefPtr<WebCore::MediaStreamDescripto
 WebMediaStreamDescriptor::operator WebCore::MediaStreamDescriptor*() const
 {
     return m_private.get();
+}
+
+void WebMediaStreamDescriptor::initialize(const WebString& label, const WebVector<WebMediaStreamSource>& sources)
+{
+    MediaStreamSourceVector s;
+    for (size_t i = 0; i < sources.size(); ++i) {
+        MediaStreamSource* curr = sources[i];
+        s.append(curr);
+    }
+    m_private = MediaStreamDescriptor::create(label, s);
 }
 
 } // namespace WebKit
