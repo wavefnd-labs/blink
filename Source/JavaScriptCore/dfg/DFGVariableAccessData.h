@@ -26,18 +26,12 @@
 #ifndef DFGVariableAccessData_h
 #define DFGVariableAccessData_h
 
+#include "PredictedType.h"
+#include "VirtualRegister.h"
 #include <wtf/Platform.h>
-
-#if ENABLE(DFG_JIT)
-
 #include <wtf/UnionFind.h>
 
 namespace JSC { namespace DFG {
-
-// Type for a virtual register number (spill location).
-// Using an enum to make this type-checked at compile time, to avert programmer errors.
-enum VirtualRegister { InvalidVirtualRegister = -1 };
-COMPILE_ASSERT(sizeof(VirtualRegister) == sizeof(int), VirtualRegister_is_32bit);
 
 class VariableAccessData: public UnionFind<VariableAccessData> {
 public:
@@ -85,7 +79,5 @@ private:
 };
 
 } } // namespace JSC::DFG
-
-#endif // ENABLE(DFG_JIT)
 
 #endif // DFGVariableAccessData_h
