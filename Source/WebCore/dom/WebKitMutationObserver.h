@@ -33,21 +33,22 @@
 
 #if ENABLE(MUTATION_OBSERVERS)
 
-#include <wtf/HashMap.h>
 #include <wtf/HashSet.h>
-#include <wtf/PassOwnPtr.h>
+#include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
-#include <wtf/Vector.h>
+#include <wtf/text/AtomicString.h>
+#include <wtf/text/AtomicStringHash.h>
 
 namespace WebCore {
 
 class MutationCallback;
+class MutationObserverRegistration;
 class MutationRecord;
 class Node;
 
 typedef unsigned char MutationObserverOptions;
-typedef HashSet<RefPtr<Node> > NodeHashSet;
+typedef unsigned char MutationRecordDeliveryOptions;
 
 class WebKitMutationObserver : public RefCounted<WebKitMutationObserver> {
 public:
@@ -57,11 +58,14 @@ public:
         CharacterData = 1 << 2
     };
 
-    enum OptionFlags {
+    enum ObservationFlags  {
         Subtree = 1 << 3,
-        AttributeOldValue = 1 << 4,
-        CharacterDataOldValue = 1 << 5,
-        AttributeFilter = 1 << 6
+        AttributeFilter = 1 << 4
+    };
+
+    enum DeliveryFlags {
+        AttributeOldValue = 1 << 5,
+        CharacterDataOldValue = 1 << 6,
     };
 
     static PassRefPtr<WebKitMutationObserver> create(PassRefPtr<MutationCallback>);
@@ -71,22 +75,17 @@ public:
 
     void observe(Node*, MutationObserverOptions);
     void disconnect();
-    void willDetachNodeInObservedSubtree(PassRefPtr<Node> registrationNode, MutationObserverOptions, PassRefPtr<Node> detachingNode);
-    void observedNodeDestructed(Node*);
+    void observationStarted(MutationObserverRegistration*);
+    void observationEnded(MutationObserverRegistration*);
     void enqueueMutationRecord(PassRefPtr<MutationRecord>);
 
 private:
     WebKitMutationObserver(PassRefPtr<MutationCallback>);
-
-    void clearAllTransientObservations();
     void deliver();
 
     RefPtr<MutationCallback> m_callback;
     Vector<RefPtr<MutationRecord> > m_records;
-    Vector<Node*> m_observedNodes; // NodeRareData has a RefPtr to this, so use a weak pointer to avoid a cycle.
-
-    // FIXME: Change this to be OwnPtr<NodeHashSet> when OwnPtr supports being contained as map values.
-    HashMap<RefPtr<Node>, NodeHashSet*> m_transientObservedNodes;
+    HashSet<MutationObserverRegistration*> m_registrations;
 };
 
 }
