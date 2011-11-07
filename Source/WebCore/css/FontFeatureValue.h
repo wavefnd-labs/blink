@@ -44,7 +44,6 @@ public:
 
 private:
     FontFeatureValue(const String&, int);
-    virtual bool isFontFeatureValue() const { return true; }
 
     String m_tag;
     const int m_value;
