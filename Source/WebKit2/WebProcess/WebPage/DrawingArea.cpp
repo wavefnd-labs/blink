@@ -33,6 +33,10 @@
 #include "TiledDrawingArea.h"
 #endif
 
+#if PLATFORM(MAC)
+#include "TiledCoreAnimationDrawingArea.h"
+#endif
+
 #include "WebPageCreationParameters.h"
 
 namespace WebKit {
@@ -45,6 +49,10 @@ PassOwnPtr<DrawingArea> DrawingArea::create(WebPage* webPage, const WebPageCreat
 #if USE(TILED_BACKING_STORE)
     case DrawingAreaTypeTiled:
         return adoptPtr(new TiledDrawingArea(webPage));
+#endif
+#if PLATFORM(MAC)
+    case DrawingAreaTypeTiledCoreAnimation:
+        return TiledCoreAnimationDrawingArea::create(webPage, parameters);
 #endif
     }
 
