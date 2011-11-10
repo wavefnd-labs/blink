@@ -32,8 +32,13 @@
 
 #include "DFGAssemblyHelpers.h"
 #include "DFGOSRExit.h"
+#include "DFGOperations.h"
 
-namespace JSC { namespace DFG {
+namespace JSC {
+
+class ExecState;
+
+namespace DFG {
 
 class OSRExitCompiler {
 public:
@@ -47,6 +52,10 @@ public:
 private:
     AssemblyHelpers& m_jit;
 };
+
+extern "C" {
+void DFG_OPERATION compileOSRExit(ExecState*);
+}
 
 } } // namespace JSC::DFG
 
