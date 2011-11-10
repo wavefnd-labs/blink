@@ -48,14 +48,12 @@ CCTextureUpdater::~CCTextureUpdater()
 {
 }
 
-void CCTextureUpdater::append(ManagedTexture* texture, LayerTextureUpdater* updater, const IntRect& sourceRect, const IntRect& destRect)
+void CCTextureUpdater::append(LayerTextureUpdater::Texture* texture, const IntRect& sourceRect, const IntRect& destRect)
 {
     ASSERT(texture);
-    ASSERT(updater);
 
     UpdateEntry entry;
     entry.m_texture = texture;
-    entry.m_updater = updater;
     entry.m_sourceRect = sourceRect;
     entry.m_destRect = destRect;
     m_entries.append(entry);
@@ -71,7 +69,7 @@ bool CCTextureUpdater::update(GraphicsContext3D* context, size_t count)
     size_t maxIndex = min(m_entryIndex + count, m_entries.size());
     for (; m_entryIndex < maxIndex; ++m_entryIndex) {
         UpdateEntry& entry = m_entries[m_entryIndex];
-        entry.m_updater->updateTextureRect(context, m_allocator, entry.m_texture, entry.m_sourceRect, entry.m_destRect);
+        entry.m_texture->updateRect(context, m_allocator, entry.m_sourceRect, entry.m_destRect);
     }
 
     if (maxIndex < m_entries.size())
