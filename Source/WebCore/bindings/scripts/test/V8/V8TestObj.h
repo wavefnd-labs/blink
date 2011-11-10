@@ -78,6 +78,7 @@ inline v8::Handle<v8::Value> toV8(PassRefPtr< TestObj > impl)
 {
     return toV8(impl.get());
 }
+
 }
 
 #endif // V8TestObj_h
