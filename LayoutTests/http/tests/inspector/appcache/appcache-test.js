@@ -2,7 +2,7 @@ var framesCount = 0;
 
 function createAndNavigateIFrame(url)
 {
-    iframe = document.createElement("iframe");
+    var iframe = document.createElement("iframe");
     iframe.src = url;
     iframe.name = "frame" + ++framesCount;
     iframe.id = iframe.name;
@@ -11,14 +11,20 @@ function createAndNavigateIFrame(url)
 
 function removeIFrame(name)
 {
-    iframe = document.querySelector("#" + name);
+    var iframe = document.querySelector("#" + name);
     iframe.parentElement.removeChild(iframe);
 }
 
 function navigateIFrame(name, url)
 {
-    iframe = document.querySelector("#" + name);
+    var iframe = document.querySelector("#" + name);
     iframe.src = url;
+}
+
+function swapFrameCache(name)
+{
+    var iframe = document.querySelector("#" + name);
+    iframe.contentWindow.applicationCache.swapCache();
 }
 
 var initialize_ApplicationCacheTest = function() {
@@ -57,6 +63,13 @@ InspectorTest.removeIFrame = function(frameId, callback)
         callback(frame.id);
     }
 }
+
+InspectorTest.swapFrameCache = function(frameId)
+{
+    var frame = WebInspector.resourceTreeModel.frameForId(frameId);
+    InspectorTest.evaluateInPage("swapFrameCache(unescape('" + escape(frame.name) +"'))");
+}
+
 
 InspectorTest.dumpApplicationCache = function()
 {
@@ -117,9 +130,8 @@ InspectorTest.dumpApplicationCacheModel = function()
     var model = WebInspector.panels.resources._applicationCacheModel;
 
     var frameIds = [];
-    for (var frameId in model._manifestURLsByFrame) {
+    for (var frameId in model._manifestURLsByFrame)
         frameIds.push(frameId);
-    }
 
     function compareFunc(a, b) {
         return InspectorTest.frameIdToString(a).localeCompare(InspectorTest.frameIdToString(b));
@@ -168,63 +180,31 @@ InspectorTest.startApplicationCacheStatusesRecording = function()
         if (!InspectorTest.applicationCacheStatusesRecords[frameId])
             InspectorTest.applicationCacheStatusesRecords[frameId] = [];
         InspectorTest.applicationCacheStatusesRecords[frameId].push(record);
-        if (InspectorTest.awaitedFrameManifestStatuses && InspectorTest.awaitedFrameManifestStatuses[frameId].status === status)
-            InspectorTest.awaitedFrameManifestStatuses[frameId].callback();
+
+        if (InspectorTest.awaitedFrameStatusEventsCount && InspectorTest.awaitedFrameStatusEventsCount[frameId]) {
+            InspectorTest.awaitedFrameStatusEventsCount[frameId].count--;
+            if (!InspectorTest.awaitedFrameStatusEventsCount[frameId].count)
+                InspectorTest.awaitedFrameStatusEventsCount[frameId].callback();
+        }
     }
 
     InspectorTest.addSniffer(WebInspector.ApplicationCacheModel.prototype, "_frameManifestUpdated", addRecord, true);
 }
 
-InspectorTest.ensureFrameManifestStatusEventReceived = function(frameId, status, callback)
+InspectorTest.ensureFrameStatusEventsReceived = function(frameId, count, callback)
 {
     var records = InspectorTest.applicationCacheStatusesRecords[frameId] || [];
-    for (var i = 0; i < records.length; ++i) {
-        if (records[i].status === status) {
-            callback();
-            return;
-        }
-    }
-    if (!InspectorTest.awaitedFrameManifestStatuses)
-        InspectorTest.awaitedFrameManifestStatuses = {};
-    InspectorTest.awaitedFrameManifestStatuses[frameId] = { status: status, callback: callback };
-}
+    var eventsLeft = count - records.length;
 
-InspectorTest.dumpApplicationCacheStatusesRecords = function()
-{
-    InspectorTest.addResult("Dumping application cache statuses records:");
-    var frameIds = [];
-    for (var frameId in InspectorTest.applicationCacheStatusesRecords) {
-        frameIds.push(frameId);
-    }
-
-    function compareFunc(a, b) {
-        return InspectorTest.frameIdToString(a).localeCompare(InspectorTest.frameIdToString(b));
-    }
-    frameIds.sort(compareFunc);
-
-    if (!frameIds.length) {
-        InspectorTest.addResult("    (empty)");
-    InspectorTest.addResult("");
+    if (!eventsLeft) {
+        callback();
         return;
     }
-    for (var i = 0; i < frameIds.length; ++i) {
-        var frameId = frameIds[i];
-        InspectorTest.addResult("    Frame: " + InspectorTest.frameIdToString(frameId));
-        var records = InspectorTest.applicationCacheStatusesRecords[frameId];
 
-        if (!records.length) {
-            InspectorTest.addResult("    (empty)");
-            continue;
-        }
-        for (var j = 0; j < records.length; ++j) {
-            var manifestURL = records[j].manifestURL;
-            var status = records[j].status;
-            InspectorTest.addResult("        manifest url: " + manifestURL);
-            InspectorTest.addResult("        status:       " + InspectorTest.applicationCacheStatusToString(status));
-        }
-    }
-    InspectorTest.applicationCacheStatusesRecords = {};
-    InspectorTest.addResult("");
+    if (!InspectorTest.awaitedFrameStatusEventsCount)
+        InspectorTest.awaitedFrameStatusEventsCount = {};
+    InspectorTest.awaitedFrameStatusEventsCount[frameId] = { count: eventsLeft, callback: callback };
 }
 
 };
+

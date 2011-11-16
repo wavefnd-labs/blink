@@ -17,9 +17,9 @@ function test()
     function step1(frameId)
     {
         frameId1 = frameId;
-        // We are waiting for DOWNLOADING event here, because it is the one that
-        // is sent both in chromium and webcore application cache implementation.
-        InspectorTest.ensureFrameManifestStatusEventReceived(frameId, applicationCache.DOWNLOADING, step2)
+        // Waiting for at least two status events notifications from backend, to make sure
+        // we are not completing test before loading application cache.
+        InspectorTest.ensureFrameStatusEventsReceived(frameId, 2, step2)
     }
 
     function step2()
@@ -30,7 +30,6 @@ function test()
     function step3()
     {
         InspectorTest.dumpApplicationCache();
-        InspectorTest.dumpApplicationCacheStatusesRecords();
         InspectorTest.completeTest();
     }
 }
