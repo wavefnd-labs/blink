@@ -1,3 +1,23 @@
+2011-11-15  Erik Arvidsson  <arv@chromium.org>
+
+        JS Test Harness: Remove need to load external css file to reduce flakiness
+        https://bugs.webkit.org/show_bug.cgi?id=72295
+
+        Reviewed by Ojan Vafai.
+
+        Before this patch we pulled in the external CSS file using a link tag. Since this was created dynamically
+        it might not be loaded and applied when we dump the text for the test. Since the CSS contains white-space
+        pre-wrap the output was therefore different depending on this race condition. By changing this to use a
+        style element with the CSS inline there is no longer a race condition.
+
+        * css3/font-feature-settings-parsing.html: Change the order of script and stylesheets so that the injected style element does not affect the test.
+        * fast/css/counters/counter-cssText.html: Ditto.
+        * fast/css/counters/getCounterValue.html: Ditto.
+        * fast/dom/StyleSheet/gc-styleheet-wrapper.xhtml: Ditto.
+        * traversal/script-tests/exception-forwarding.js: Ditto.
+        * fast/dom/script-tests/domListEnumeration.js: Update the tests to use the right style elements.
+        * fast/js/resources/js-test-pre.js: Insert a style element with the css instead of a link element pointing to an external css file.
+
 2011-11-15  Peter Kasting  <pkasting@google.com>
 
         Mark a test as flakily failing.
