@@ -4,7 +4,7 @@
 <script src="../../http/tests/inspector/extensions-test.js"></script>
 <script type="text/javascript">
 
-function initialize_extensionsUITest()
+function initialize_extensionsSidebarTest()
 {
     InspectorTest.dumpSidebarContent = function(callback)
     {
@@ -16,58 +16,23 @@ function initialize_extensionsUITest()
             callback();
         });
     }
-
-    InspectorTest.panelCallback = function(width, height)
-    {
-        InspectorTest.checkPanelSize(width, height);
-        var callback = InspectorTest._pendingPanelSizeTestCallback;
-        if (callback) {
-            delete InspectorTest._pendingPanelSizeTestCallback;
-            callback();
-        }
-    }
-
-    InspectorTest.waitForPanel = function(callback)
-    {
-         InspectorTest._pendingPanelSizeTestCallback = callback;
-    }
-
-    InspectorTest.checkPanelSize = function(width, height)
-    {
-        var extensionPanel = WebInspector.inspectorView._panelOrder[WebInspector.inspectorView._panelOrder.length - 1];
-        var boundingRect = document.getElementById("main-panels").getBoundingClientRect();
-        InspectorTest.assertEquals(boundingRect.width, width, "panel width mismatch");
-        InspectorTest.assertEquals(boundingRect.height, height, "panel height mismatch");
-        InspectorTest.addResult("Extension panel size correct");
-    }
 }
 
-function extension_testCreatePanel(nextTest)
-{
-    var callbackCount = 0;
-
-    function onPanelCreated(panel)
-    {
-        output("Panel created");
-        dumpObject(panel);
-        // This will force extension iframe to be really loaded and will cause waitForPanel() callback below.
-        extension_showPanel("extension");
-    }
-    // The panel code is expected to report its size via InspectorTest.panelCallback()
-    evaluateOnFrontend("InspectorTest.waitForPanel(reply);", nextTest);
-    var basePath = location.pathname.replace(/\/[^/]*$/, "/");
-    webInspector.panels.create("Test Panel", basePath + "extension-panel.png", basePath + "extension-panel.html", onPanelCreated);
-}
-
-function extension_testSidebarPage(nextTest)
+function extension_testSidebarSetPage(nextTest)
 {
     function onSidebarCreated(sidebar)
     {
         output("Sidebar created");
         dumpObject(sidebar);
-        sidebar.onUpdated.addListener(nextTest);
+        function onShown()
+        {
+            sidebar.onShown.removeListener(onShown);
+            nextTest();
+        }
+        sidebar.onShown.addListener(onShown);
         var basePath = location.pathname.replace(/\/[^/]*$/, "/");
         sidebar.setPage(basePath + "extension-sidebar.html");
+        extension_showPanel("elements");
     }
     webInspector.panels.elements.createSidebarPane("Test Sidebar", onSidebarCreated);
 }
@@ -77,13 +42,12 @@ function extension_dumpSidebarContent(nextTest)
     evaluateOnFrontend("InspectorTest.dumpSidebarContent(reply);", nextTest);
 }
 
-function extension_testSidebarWatchObject(nextTest)
+function extension_testSidebarSetObject(nextTest)
 {
     function onSidebarCreated(sidebar)
     {
         output("Watch sidebar created, callback arguments dump follows:");
         dumpObject(Array.prototype.slice.call(arguments));
-        sidebar.onUpdated.addListener(bind(extension_dumpSidebarContent, this, nextTest));
         sidebar.setObject({
             f0: "object",
             f1: undefined,
@@ -93,16 +57,15 @@ function extension_testSidebarWatchObject(nextTest)
             f5: ["aa", "bb", "cc"],
             f6: { f60: 42, f61: "foo", f62: [] },
             f7: 42
-        });
+        }, null, extension_dumpSidebarContent.bind(this, nextTest));
     }
     webInspector.panels.elements.createSidebarPane("Watch Test: Object", onSidebarCreated);
 }
 
-function extension_testSidebarWatchExpression(nextTest)
+function extension_testSidebarSetExpression(nextTest)
 {
     function onSidebarCreated(sidebar)
     {
-        sidebar.onUpdated.addListener(bind(extension_dumpSidebarContent, this, nextTest));
         function expression()
         {
             document.body.testProperty = 'foo';
@@ -124,7 +87,7 @@ function extension_testSidebarWatchExpression(nextTest)
         // Do an extra round-trip to the inspected page to assure inspect()'s round-trip to
         // front-end is complete and $0 is properly updated with currently inspected node.
         webInspector.inspectedWindow.eval("", function() {
-            sidebar.setExpression("(" + expression.toString() + ")();", "title");
+            sidebar.setExpression("(" + expression.toString() + ")();", "title", extension_dumpSidebarContent.bind(this, nextTest));
         });
     }
     webInspector.inspectedWindow.eval("inspect(document.body)", function() {
@@ -132,9 +95,36 @@ function extension_testSidebarWatchExpression(nextTest)
     });
 }
 
+function extension_testSidebarPageReplacedWithObject(nextTest)
+{
+     var basePath = location.pathname.replace(/\/[^/]*$/, "/");
+     var sidebar;
+
+     function onSidebarCreated(aSidebar)
+     {
+         sidebar = aSidebar;
+         sidebar.onShown.addListener(onShown);
+         sidebar.setPage(basePath + "extension-sidebar.html");
+         extension_showPanel("elements");
+     }
+     var didSetObject = false;
+     function onShown(frame)
+     {
+         output("Got onShown(), frame " + (frame ? "defined" : "not defined"));
+         if (!didSetObject) {
+             didSetObject = true;
+             sidebar.setObject({ foo: 'bar' });
+         } else {
+            sidebar.onShown.removeListener(onShown);
+            nextTest();
+         }
+     }
+     webInspector.panels.elements.createSidebarPane("Sidebar Test: replace page with object", onSidebarCreated);
+}
+
 </script>
 </head>
 <body onload="runTest()">
-<p>Tests WebInspector extension API</p>
+<p>Tests sidebars in WebInspector extensions API</p>
 </body>
 </html>
