@@ -20,8 +20,7 @@
 #include "config.h"
 #include "../util.h"
 
-#include "qquickwebpage.h"
-#include "qquickwebview.h"
+#include "qquickwebpage_p.h"
 #include "qquickwebview_p.h"
 
 #include <QtQuickTest/quicktest.h>
@@ -32,7 +31,7 @@ public:
     DesktopWebView(QQuickItem* parent = 0)
         : QQuickWebView(parent)
     {
-        QQuickWebViewPrivate::get(this)->setUseTraditionalDesktopBehaviour(true);
+        experimental()->setUseTraditionalDesktopBehaviour(true);
     }
 };
 
