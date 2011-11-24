@@ -31,10 +31,11 @@
 #ifndef WebIntentServiceInfo_h
 #define WebIntentServiceInfo_h
 
-namespace WebKit {
+#include "WebCommon.h"
+#include "WebString.h"
+#include "WebURL.h"
 
-class WebString;
-class WebURL;
+namespace WebKit {
 
 // Holds data used to initialize a Web Intents service (handler).
 // See spec at http://www.chromium.org/developers/design-documents/webintentsapi
@@ -64,6 +65,17 @@ public:
     // context (the default).
     WEBKIT_EXPORT WebString disposition() const;
     WEBKIT_EXPORT void setDisposition(const WebString&);
+
+#if WEBKIT_IMPLEMENTATION
+    WebIntentServiceInfo();
+#endif
+
+private:
+    WebString m_action;
+    WebString m_type;
+    WebURL m_href;
+    WebString m_title;
+    WebString m_disposition;
 };
 
 } // namespace WebKit
