@@ -1,3 +1,37 @@
+2011-12-01  Benjamin Poulain  <benjamin@webkit.org>
+
+        URLs are encoded in UTF-8, then decoded as if they are Latin1
+        https://bugs.webkit.org/show_bug.cgi?id=71758
+
+        Reviewed by Darin Adler.
+
+        * fast/url/invalid-urls-utf8-expected.txt: Added.
+        * fast/url/invalid-urls-utf8.html: Added.
+        New test for invalid URL where the Unicode characters were mangled
+        by the parsing.
+
+        * fast/url/file-expected.txt:
+        * fast/url/file-http-base-expected.txt:
+        Two urls where expended by their base URL before found invalid. The partial
+        parsed result was saved as the new URL.
+
+        * fast/url/host-expected.txt:
+        The host of two urls were invalid, and partially modified by the parsing.
+
+        * fast/url/idna2003-expected.txt:
+        The first 'http://www.lookout.net⩴80/' encoded for parsing is http://www.lookout.net::=80/
+        and fails as invalid. The new result does not modify the original string.
+
+        The whitespace in 'http://www .lookout.net/' causes the parsing to fail when parsing
+        the username because a space is not a UserInfoChar.
+
+        * fast/url/port-expected.txt:
+        The unicode characters used as the port number were transformed due to
+        the encoding UTF-8 -> Unicode through the Latin1 codec.
+
+        * platform/chromium/test_expectations.txt: Skip the test on Chromium for now since Google URL
+        does not implement the extended version of parse().
+
 2011-12-01  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r101691.
