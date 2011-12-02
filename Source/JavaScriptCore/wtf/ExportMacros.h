@@ -32,6 +32,9 @@
 
 #include "Platform.h"
 
+// See note in wtf/Platform.h for more info on EXPORT_MACROS.
+#if USE(EXPORT_MACROS)
+
 #if !PLATFORM(CHROMIUM) && OS(WINDOWS) && !COMPILER(GCC)
 #define WTF_EXPORT __declspec(dllexport)
 #define WTF_IMPORT __declspec(dllimport)
@@ -46,4 +49,22 @@
 #define WTF_HIDDEN
 #endif
 
-#endif /* ExportMacros_h */
+#else // !USE(EXPORT_MACROS)
+
+#define WTF_EXPORT
+#define WTF_IMPORT
+#define WTF_HIDDEN
+
+#endif // USE(EXPORT_MACROS)
+
+#if defined(BUILDING_WTF)
+#define WTF_EXPORT_PRIVATE WTF_EXPORT
+#else
+#define WTF_EXPORT_PRIVATE WTF_IMPORT
+#endif
+
+#define WTF_EXPORTDATA WTF_EXPORT_PRIVATE
+#define WTF_EXPORT_HIDDEN WTF_HIDDEN
+#define WTF_INLINE WTF_EXPORT_HIDDEN inline
+
+#endif // ExportMacros_h
