@@ -26,7 +26,7 @@
 #ifndef WebLayerTreeViewImpl_h
 #define WebLayerTreeViewImpl_h
 
-#include "WebLayerTreeView.h"
+#include "platform/WebLayerTreeView.h"
 #include "cc/CCLayerTreeHost.h"
 #include <wtf/PassRefPtr.h>
 
