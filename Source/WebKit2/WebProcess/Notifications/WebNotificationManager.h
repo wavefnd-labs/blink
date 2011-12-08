@@ -38,7 +38,7 @@ class Connection;
 }
 
 namespace WebCore {
-class Notification;    
+class Notification;
 }
 
 namespace WebKit {
