@@ -46,6 +46,8 @@ public:
 protected:
     virtual Type type() const { return APIType; }
 
+    void forwardDidReceiveMessageToClient(const String&, APIObject*);
+
     WebConnectionClient m_client;
 };
 
