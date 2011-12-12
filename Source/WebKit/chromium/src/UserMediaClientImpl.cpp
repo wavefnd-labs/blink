@@ -33,11 +33,11 @@
 
 #include "UserMediaClientImpl.h"
 
-#include "WebMediaStreamSource.h"
 #include "WebUserMediaClient.h"
 #include "WebUserMediaRequest.h"
 #include "WebViewClient.h"
 #include "WebViewImpl.h"
+#include "platform/WebMediaStreamSource.h"
 
 using namespace WebCore;
 
