@@ -33,7 +33,7 @@ namespace WebKit {
 
 class WebProcess;
 
-class WebConnectionToUIProcess : public WebConnection, CoreIPC::Connection::Client, CoreIPC::Connection::QueueClient {
+class WebConnectionToUIProcess : public WebConnection, CoreIPC::Connection::Client {
 public:
     static PassRefPtr<WebConnectionToUIProcess> create(WebProcess*, CoreIPC::Connection::Identifier, RunLoop*);
 
@@ -56,9 +56,6 @@ private:
 #if PLATFORM(WIN)
     virtual Vector<HWND> windowsToReceiveSentMessagesWhileWaitingForSyncReply();
 #endif
-
-    // CoreIPC::Connection::QueueClient
-    virtual void didReceiveMessageOnConnectionWorkQueue(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*, bool& didHandleMessage) OVERRIDE;
 
     WebProcess* m_process;
     RefPtr<CoreIPC::Connection> m_connection;
