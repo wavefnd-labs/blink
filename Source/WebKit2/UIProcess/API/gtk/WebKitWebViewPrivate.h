@@ -28,14 +28,13 @@
 #define WebKitWebViewPrivate_h
 
 #include "WebKitWebView.h"
-#include <wtf/text/CString.h>
 #include <WebKit2/WebKit2.h>
 #include <wtf/text/CString.h>
 
 void webkitWebViewSetEstimatedLoadProgress(WebKitWebView*, double estimatedLoadProgress);
 void webkitWebViewSetTitle(WebKitWebView*, const CString&);
 void webkitWebViewUpdateURI(WebKitWebView*);
-WKPageRef webkitWebViewCreateNewPage(WebKitWebView*);
+WKPageRef webkitWebViewCreateNewPage(WebKitWebView*, WKDictionaryRef wkWindowFeatures);
 void webkitWebViewReadyToShowPage(WebKitWebView*);
 void webkitWebViewClosePage(WebKitWebView*);
 void webkitWebViewRunJavaScriptAlert(WebKitWebView*, const CString& message);
