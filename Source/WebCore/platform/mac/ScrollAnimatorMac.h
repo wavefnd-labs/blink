@@ -46,7 +46,9 @@ class WebScrollbarPainterControllerDelegate;
 class WebScrollbarPainterDelegate;
 #endif
 
+#if USE(SCROLLBAR_PAINTER)
 typedef id ScrollbarPainterController;
+#endif
 
 #if !ENABLE(RUBBER_BANDING)
 class ScrollElasticityControllerClient { };
@@ -84,11 +86,13 @@ public:
 
     virtual void setIsActive();
 
+#if USE(SCROLLBAR_PAINTER)
     void updateScrollerStyle();
 
     bool scrollbarPaintTimerIsActive() const;
     void startScrollbarPaintTimer();
     void stopScrollbarPaintTimer();
+#endif
 
     void setVisibleScrollerThumbRect(const IntRect&);
 
@@ -96,6 +100,7 @@ private:
     RetainPtr<id> m_scrollAnimationHelper;
     RetainPtr<WebScrollAnimationHelperDelegate> m_scrollAnimationHelperDelegate;
 
+#if USE(SCROLLBAR_PAINTER)
     RetainPtr<ScrollbarPainterController> m_scrollbarPainterController;
     RetainPtr<WebScrollbarPainterControllerDelegate> m_scrollbarPainterControllerDelegate;
     RetainPtr<WebScrollbarPainterDelegate> m_horizontalScrollbarPainterDelegate;
@@ -103,6 +108,7 @@ private:
 
     void initialScrollbarPaintTimerFired(Timer<ScrollAnimatorMac>*);
     Timer<ScrollAnimatorMac> m_initialScrollbarPaintTimer;
+#endif
     
     virtual void notifyPositionChanged();
     virtual void contentAreaWillPaint() const;
