@@ -33,6 +33,8 @@
 
 #include "CrossThreadTask.h"
 
+#include "WebWorkerClient.h"
+
 #include "WorkerContext.h"
 #include "WorkerLoaderProxy.h"
 #include "WorkerThread.h"
