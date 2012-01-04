@@ -52,7 +52,7 @@ Rectangle {
 
     Item {
         id: staticContent
-
+        anchors.centerIn: parent
         anchors.fill: parent
         anchors.margins: 10
 
@@ -74,6 +74,7 @@ Rectangle {
 
         Column {
             id: dynamicColumn
+            spacing: 5
             anchors {
                 margins: 10
                 bottom: staticContent.bottom
