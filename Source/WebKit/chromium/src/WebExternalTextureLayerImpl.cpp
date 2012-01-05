@@ -42,6 +42,7 @@ WebExternalTextureLayerImpl::WebExternalTextureLayerImpl()
     : PluginLayerChromium(this)
 {
     setFlipped(false);
+    setIsDrawable(true);
 }
 
 WebExternalTextureLayerImpl::~WebExternalTextureLayerImpl()
