@@ -24,7 +24,7 @@
 #ifndef HTMLKeygenElement_h
 #define HTMLKeygenElement_h
 
-#include "HTMLFormControlElement.h"
+#include "HTMLFormControlElementWithState.h"
 
 namespace WebCore {
 
