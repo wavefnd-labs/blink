@@ -31,9 +31,8 @@
 #define CustomFilterOperation_h
 
 #if ENABLE(CSS_SHADERS)
-
+#include "CustomFilterProgram.h"
 #include "FilterOperation.h"
-#include "StyleShader.h"
 
 namespace WebCore {
 
@@ -53,17 +52,12 @@ public:
         DETACHED
     };
     
-    static PassRefPtr<CustomFilterOperation> create(PassRefPtr<StyleShader> vertexShader, PassRefPtr<StyleShader> fragmentShader,
-                                                    unsigned meshRows, unsigned meshColumns, MeshBoxType meshBoxType, MeshType meshType)
+    static PassRefPtr<CustomFilterOperation> create(PassRefPtr<CustomFilterProgram> program, unsigned meshRows, unsigned meshColumns, MeshBoxType meshBoxType, MeshType meshType)
     {
-        return adoptRef(new CustomFilterOperation(vertexShader, fragmentShader, meshRows, meshColumns, meshBoxType, meshType));
+        return adoptRef(new CustomFilterOperation(program, meshRows, meshColumns, meshBoxType, meshType));
     }
     
-    void setVertexShader(PassRefPtr<StyleShader> shader) { m_vertexShader = shader; }
-    StyleShader* vertexShader() const { return m_vertexShader.get(); }
-    
-    void setFragmentShader(PassRefPtr<StyleShader> shader) { m_fragmentShader = shader; }
-    StyleShader* fragmentShader() const { return m_fragmentShader.get(); }
+    CustomFilterProgram* program() const { return m_program.get(); }
     
     unsigned meshRows() const { return m_meshRows; }
     unsigned meshColumns() const { return m_meshColumns; }
@@ -78,19 +72,16 @@ private:
             return false;
 
         const CustomFilterOperation* other = static_cast<const CustomFilterOperation*>(&o);
-        return m_vertexShader.get() == other->m_vertexShader.get()
-               && m_fragmentShader.get() == other->m_fragmentShader.get()
+        return m_program.get() == other->m_program.get()
                && m_meshRows == other->m_meshRows
                && m_meshColumns == other->m_meshColumns
                && m_meshBoxType == other->m_meshBoxType
                && m_meshType == other->m_meshType;
     }
     
-    CustomFilterOperation(PassRefPtr<StyleShader> vertexShader, PassRefPtr<StyleShader> fragmentShader,
-                          unsigned meshRows, unsigned meshColumns, MeshBoxType meshBoxType, MeshType meshType)
+    CustomFilterOperation(PassRefPtr<CustomFilterProgram> program, unsigned meshRows, unsigned meshColumns, MeshBoxType meshBoxType, MeshType meshType)
         : FilterOperation(CUSTOM)
-        , m_vertexShader(vertexShader)
-        , m_fragmentShader(fragmentShader)
+        , m_program(program)
         , m_meshRows(meshRows)
         , m_meshColumns(meshColumns)
         , m_meshBoxType(meshBoxType)
@@ -98,8 +89,7 @@ private:
     {
     }
 
-    RefPtr<StyleShader> m_vertexShader;
-    RefPtr<StyleShader> m_fragmentShader;
+    RefPtr<CustomFilterProgram> m_program;
     
     unsigned m_meshRows;
     unsigned m_meshColumns;
