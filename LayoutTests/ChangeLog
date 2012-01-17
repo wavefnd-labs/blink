@@ -1,3 +1,27 @@
+2012-01-16  Robert Hogan  <robert@webkit.org>
+
+        Heap-use-after-free in WebCore::RenderBlock::selectionGaps
+        https://bugs.webkit.org/show_bug.cgi?id=75013
+
+        Reviewed by David Hyatt.
+
+        In multiple-captions-crash3.html a floating object is added as a child to a caption element, then removed and
+        added as a child to another caption element. When added to the first caption element it is added
+        to the floating objects list of both the parent tbody element and the keygen element, as it intrudes 
+        into the latter. When removed, a stale reference to the floating object remains in the keygen element. 
+        When the keygen element is in layout it attempts to access the stale reference to the floating object and 
+        crashes. The fix is to ensure that any floats added as intruding floats to sibling blocks are removed 
+        when the child is removed from the tree.
+
+        multiple-captions-crash4.html and multiple-captions-crash5.html are variants of this scenario.
+
+        * fast/table/multiple-captions-crash3-expected.html: Added.
+        * fast/table/multiple-captions-crash3.html: Added.
+        * fast/table/multiple-captions-crash4-expected.html: Added.
+        * fast/table/multiple-captions-crash4.html: Added.
+        * fast/table/multiple-captions-crash5-expected.html: Added.
+        * fast/table/multiple-captions-crash5.html: Added.
+
 2012-01-16  Filip Pizlo  <fpizlo@apple.com>
 
         DFG should be able to do JS and custom getter caching
