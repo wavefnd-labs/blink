@@ -22,9 +22,16 @@
 #ifndef WebKitAccessibleUtil_h
 #define WebKitAccessibleUtil_h
 
+#include <atk/atk.h>
 #include <wtf/text/WTFString.h>
 
-// Returns a const char* pointing to a statically allocated string.
+namespace WebCore {
+class AccessibilityObject;
+class IntRect;
+}
+
+void contentsRelativeToAtkCoordinateType(WebCore::AccessibilityObject*, AtkCoordType, WebCore::IntRect, gint* x, gint* y, gint* width = 0, gint* height = 0);
+
 const char* returnString(const String&);
 
 #endif // WebKitAccessibleUtil_h
