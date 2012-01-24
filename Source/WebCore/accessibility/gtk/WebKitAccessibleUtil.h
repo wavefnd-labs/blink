@@ -30,6 +30,8 @@ class AccessibilityObject;
 class IntRect;
 }
 
+AtkAttributeSet* addToAtkAttributeSet(AtkAttributeSet*, const char* name, const char* value);
+
 void contentsRelativeToAtkCoordinateType(WebCore::AccessibilityObject*, AtkCoordType, WebCore::IntRect, gint* x, gint* y, gint* width = 0, gint* height = 0);
 
 const char* returnString(const String&);
