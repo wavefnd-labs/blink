@@ -30,6 +30,8 @@
 
 #include "ScrollingCoordinator.h"
 #include "ScrollingThread.h"
+#include "ScrollingTreeNode.h"
+#include "ScrollingTreeState.h"
 
 namespace WebCore {
 
@@ -40,6 +42,7 @@ PassRefPtr<ScrollingTree> ScrollingTree::create(ScrollingCoordinator* scrollingC
 
 ScrollingTree::ScrollingTree(ScrollingCoordinator* scrollingCoordinator)
     : m_scrollingCoordinator(scrollingCoordinator)
+    , m_rootNode(ScrollingTreeNode::create(this))
 {
 }
 
@@ -55,6 +58,13 @@ void ScrollingTree::invalidate()
     // ScrollingCoordinator's page is destroyed.
     ASSERT(ScrollingThread::isCurrentThread());
     m_scrollingCoordinator = nullptr;
+}
+
+void ScrollingTree::commitNewTreeState(PassOwnPtr<ScrollingTreeState> scrollingTreeState)
+{
+    ASSERT(ScrollingThread::isCurrentThread());
+
+    m_rootNode->update(scrollingTreeState.get());
 }
 
 } // namespace WebCore
