@@ -28,8 +28,13 @@
 
 #if ENABLE(THREADED_SCROLLING)
 
+#include "GraphicsLayer.h"
 #include "IntRect.h"
 #include <wtf/PassOwnPtr.h>
+
+#if PLATFORM(MAC)
+#include <wtf/RetainPtr.h>
+#endif
 
 namespace WebCore {
 
@@ -44,7 +49,8 @@ public:
 
     enum ChangedProperty {
         ViewportRect = 1 << 0,
-        ContentsSize = 1 << 1
+        ContentsSize = 1 << 1,
+        ScrollLayer = 1 << 2,
     };
 
     const IntRect& viewportRect() const { return m_viewportRect; }
@@ -53,6 +59,9 @@ public:
     const IntSize& contentsSize() const { return m_contentsSize; }
     void setContentsSize(const IntSize&);
 
+    PlatformLayer* platformScrollLayer() const;
+    void setScrollLayer(const GraphicsLayer*);
+
 private:
     ScrollingTreeState();
 
@@ -60,6 +69,11 @@ private:
 
     IntRect m_viewportRect;
     IntSize m_contentsSize;
+
+#if PLATFORM(MAC)
+    RetainPtr<PlatformLayer> m_platformScrollLayer;
+#endif
+
 };
 
 } // namespace WebCore
