@@ -1,3 +1,255 @@
+2012-02-05  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Rewrite SVG tests to make extensive use of display() in repaint tests
+        https://bugs.webkit.org/show_bug.cgi?id=77736
+
+        Reviewed by Andreas Kling.
+
+        Convert all tests in svg/ (except svg/custom & svg/dynamic-updates) that exercise repainting to use the
+        fast/repaint/resources/repaint.js harness, which forces a layout, and calls layoutTestController.display()
+        before executing the actual repaint test, so that repaint rectangles are properly tracked and shown (white
+        areas that are redrawn, on top of the gray background, painted over the web view after the initial painting).
+
+        Previously SVG tests used to work like this: (using an HTML example, but it doesn't matter)
+        <html><body><svg><rect/><script>function change() { rect.setAttribute(...); layoutTestController.notifyDone(); } setTimeout(change, 0); </script></svg></body></html>
+
+        We expected that the initial painting was done, before change() as called. This is unreliable for various reasons:
+        - the timeout is not guaranteed to fire after the document loaded, it may happen inbetween on eg. a slow connection.
+        - nor is it guaranteed that the document has painted initially before we enter change().
+          This leads to the current regressions -- if we break repainting, we can't see it in the current layout tests, as the
+          initial painting always happens after change() executed in trunk, at least on a fast machine.
+
+        In order to make repaint testing reliable we have to use following scheme:
+        <html><body onload="runRepaintTest()"><svg><rect/><script>function repaintTest() { rect.setAttribute(...); }</script></svg></body></html>
+
+        runRepaintTest() is provided by the repaint.js harness and does:
+        if (window.layoutTestController) {
+            document.body.offsetTop;
+            layoutTestController.display();
+            repaintTest();
+        } else {
+            setTimeout(repaintTest, 100);
+        }
+
+        Using this harness outside of DRT allows to test SVG repainting tests in the browser as well, as the repainting changes
+        aren't immediately fired (0ms timer) but instead delayed by 100ms, so a visual "flash" is visible, if something changes.
+        For DRT it does two things. First it forces Document::updateLayout() to be called, and then forces the web view to paint
+        immediately, and then it starts tracking any repaint rects, that are fired _after_ the initial painting, which are then
+        highlighted in the pixel test dump later on. Using display() is the only way to get reliable painting results across
+        DRT/WebKitTestRunner, and to get rid of the flakiness.
+
+        All *.xml/*.html/*.htm/*.xhtml tests which excersise repainting can be moved to use runRepaintTest() from repaint.js.
+        <body> needs to be changed to <body onload="runRepaintTest()">, and the timeouts & waitUntilDone/notifyDone calls can
+        be removed from the tests, leading to much nicer testcases, removing lots of boilerplate.
+
+        Pure *.svg tests unfortunately can't use <svg onload="runRepaintTest()"> at the moment, due timing differences between
+        the HTML load and the SVGLoad event, that's out of scope for this bug report. To remove any hacks from the testcases
+        themselves, I centralized following work-around in a new function in repaint.js, and let all *.svg tests use it.
+
+        function runSVGRepaintTest() {
+            if (window.layoutTestController) {
+                layoutTestController.waitUntilDone();
+                setTimeout(runRepaintTest, 0);
+            } else
+                runRepaintTest();
+        }
+
+        runRepaintTest() has to be called from a timer at the moment, as the SVGLoad event fires earlier as HTML load event.
+        Before that is fixed, we have to use <svg onload="runSVGRepaintTest()"> instead of <svg onload="runRepaintTest()">
+        and append: layoutTestController.notifyDone() to the repaintTest() functions in the testcases. That should explain
+        the testcase differences between pure-SVG and non-pure-SVG tests, and why I treated them differently. This approach
+        is unfortunately as flakey as the old, so to make pure *.svg tests test repainting reliable, the bug needs to be fixed.
+
+        Note that svg/custom, and svg/dynamic-updates will be fixed in another chunk, as they also require large amounts
+        of rebaselines.
+
+        * fast/repaint/resources/repaint.js:
+        (runRepaintTest):
+        (runSVGRepaintTest):
+        * platform/chromium/test_expectations.txt:
+        * platform/mac/svg/as-background-image/animated-svg-as-background-expected.png:
+        * platform/mac/svg/as-image/animated-svg-as-image-expected.png:
+        * platform/mac/svg/as-image/animated-svg-as-image-no-fixed-intrinsic-size-expected.png:
+        * platform/mac/svg/as-image/animated-svg-as-image-same-image-expected.png:
+        * platform/mac/svg/as-image/svg-image-change-content-size-expected.png:
+        * platform/mac/svg/as-object/deep-nested-embedded-svg-size-changes-no-layout-triggers-1-expected.png:
+        * platform/mac/svg/as-object/deep-nested-embedded-svg-size-changes-no-layout-triggers-1-expected.txt:
+        * platform/mac/svg/as-object/deep-nested-embedded-svg-size-changes-no-layout-triggers-2-expected.png:
+        * platform/mac/svg/as-object/deep-nested-embedded-svg-size-changes-no-layout-triggers-2-expected.txt:
+        * platform/mac/svg/as-object/embedded-svg-immediate-offsetWidth-query-expected.png:
+        * platform/mac/svg/as-object/embedded-svg-size-changes-expected.png:
+        * platform/mac/svg/as-object/embedded-svg-size-changes-no-layout-triggers-expected.png:
+        * platform/mac/svg/as-object/embedded-svg-size-changes-no-layout-triggers-expected.txt:
+        * platform/mac/svg/as-object/nested-embedded-svg-size-changes-expected.png:
+        * platform/mac/svg/as-object/nested-embedded-svg-size-changes-no-layout-triggers-1-expected.png:
+        * platform/mac/svg/as-object/nested-embedded-svg-size-changes-no-layout-triggers-1-expected.txt:
+        * platform/mac/svg/as-object/nested-embedded-svg-size-changes-no-layout-triggers-2-expected.png:
+        * platform/mac/svg/as-object/nested-embedded-svg-size-changes-no-layout-triggers-2-expected.txt:
+        * platform/mac/svg/carto.net/tabgroup-expected.png:
+        * platform/mac/svg/carto.net/tabgroup-expected.txt:
+        * platform/mac/svg/carto.net/window-expected.png:
+        * platform/mac/svg/carto.net/window-expected.txt:
+        * platform/mac/svg/css/shadow-changes-expected.png:
+        * platform/mac/svg/dom/SVGPathSegList-segment-modification-expected.png:
+        * platform/mac/svg/dom/SVGPathSegList-segment-modification-expected.txt:
+        * platform/mac/svg/dom/SVGPathSegList-xml-dom-synchronization-expected.png:
+        * platform/mac/svg/dom/SVGPathSegList-xml-dom-synchronization2-expected.png:
+        * platform/mac/svg/dom/SVGRectElement/rect-modify-rx-expected.png:
+        * platform/mac/svg/filters/filter-refresh-expected.png:
+        * platform/mac/svg/filters/filter-width-update-expected.png:
+        * platform/mac/svg/filters/filter-width-update-expected.txt:
+        * platform/mac/svg/filters/invalidate-on-child-layout-expected.png:
+        * platform/mac/svg/hixie/perf/001-expected.png:
+        * platform/mac/svg/hixie/perf/002-expected.png:
+        * platform/mac/svg/hixie/perf/003-expected.png:
+        * platform/mac/svg/hixie/perf/003-expected.txt:
+        * platform/mac/svg/hixie/perf/004-expected.png:
+        * platform/mac/svg/hixie/perf/004-expected.txt:
+        * platform/mac/svg/hixie/perf/005-expected.png:
+        * platform/mac/svg/hixie/perf/005-expected.txt:
+        * platform/mac/svg/hixie/perf/006-expected.png:
+        * platform/mac/svg/hixie/perf/006-expected.txt:
+        * platform/mac/svg/hixie/perf/007-expected.png:
+        * platform/mac/svg/hixie/perf/007-expected.txt:
+        * platform/mac/svg/repaint/filter-child-repaint-expected.png:
+        * platform/mac/svg/repaint/image-href-change-expected.png:
+        * platform/mac/svg/repaint/image-with-clip-path-expected.png:
+        * platform/mac/svg/text/append-text-node-to-tspan-expected.png:
+        * platform/mac/svg/text/modify-text-node-in-tspan-expected.png:
+        * platform/mac/svg/text/remove-text-node-from-tspan-expected.png:
+        * platform/mac/svg/text/remove-tspan-from-text-expected.png:
+        * platform/mac/svg/text/text-text-05-t-expected.png:
+        * platform/mac/svg/text/text-text-05-t-expected.txt:
+        * platform/mac/svg/transforms/animated-path-inside-transformed-html-expected.png:
+        * platform/mac/svg/zoom/page/absolute-sized-document-no-scrollbars-expected.png:
+        * platform/mac/svg/zoom/page/relative-sized-document-scrollbars-expected.png:
+        * platform/mac/svg/zoom/page/zoom-background-images-expected.txt:
+        * platform/mac/svg/zoom/page/zoom-foreignObject-expected.png:
+        * platform/mac/svg/zoom/page/zoom-hixie-mixed-008-expected.txt:
+        * platform/mac/svg/zoom/page/zoom-hixie-rendering-model-004-expected.png:
+        * platform/mac/svg/zoom/page/zoom-hixie-rendering-model-004-expected.txt:
+        * platform/mac/svg/zoom/page/zoom-mask-with-percentages-expected.png:
+        * platform/mac/svg/zoom/page/zoom-svg-as-background-with-relative-size-and-viewBox-expected.png:
+        * platform/mac/svg/zoom/page/zoom-svg-as-background-with-relative-size-expected.png:
+        * platform/mac/svg/zoom/page/zoom-svg-as-image-expected.png:
+        * platform/mac/svg/zoom/page/zoom-svg-as-object-expected.png:
+        * platform/mac/svg/zoom/page/zoom-svg-as-relative-image-expected.png:
+        * platform/mac/svg/zoom/page/zoom-svg-through-object-with-auto-size-expected.txt:
+        * platform/mac/svg/zoom/page/zoom-svg-through-object-with-override-size-expected.txt:
+        * platform/mac/svg/zoom/text/absolute-sized-document-no-scrollbars-expected.png:
+        * platform/mac/svg/zoom/text/absolute-sized-document-scrollbars-expected.png:
+        * platform/mac/svg/zoom/text/relative-sized-document-scrollbars-expected.png:
+        * platform/mac/svg/zoom/text/zoom-foreignObject-expected.png:
+        * platform/mac/svg/zoom/text/zoom-hixie-mixed-008-expected.png:
+        * platform/mac/svg/zoom/text/zoom-hixie-mixed-008-expected.txt:
+        * platform/mac/svg/zoom/text/zoom-hixie-mixed-009-expected.png:
+        * platform/mac/svg/zoom/text/zoom-hixie-rendering-model-004-expected.png:
+        * platform/mac/svg/zoom/text/zoom-hixie-rendering-model-004-expected.txt:
+        * svg/as-background-image/animated-svg-as-background.html:
+        * svg/as-background-image/resources/animated-rect-relative-size.svg:
+        * svg/as-background-image/svg-as-background-5.html:
+        * svg/as-background-image/svg-background-partial-redraw.html:
+        * svg/as-image/animated-svg-as-image-no-fixed-intrinsic-size.html:
+        * svg/as-image/animated-svg-as-image-same-image.html:
+        * svg/as-image/animated-svg-as-image.html:
+        * svg/as-image/resources/animated-rect-fixed-size-2.svg: Copied from LayoutTests/svg/as-image/resources/animated-rect-same-image.svg.
+        * svg/as-image/resources/animated-rect-fixed-size.svg:
+        * svg/as-image/resources/animated-rect-relative-size.svg:
+        * svg/as-image/resources/animated-rect-same-image.svg:
+        * svg/as-image/svg-image-change-content-size.xhtml:
+        * svg/as-object/embedded-svg-immediate-offsetWidth-query.html:
+        * svg/as-object/embedded-svg-size-changes-no-layout-triggers.html:
+        * svg/as-object/embedded-svg-size-changes.html:
+        * svg/as-object/nested-embedded-svg-size-changes-no-layout-triggers-1.html:
+        * svg/as-object/nested-embedded-svg-size-changes-no-layout-triggers-2.html:
+        * svg/as-object/nested-embedded-svg-size-changes.html:
+        * svg/as-object/resources/embedded-svg-size-changes-no-layout-triggers.svg:
+        * svg/as-object/resources/nested-embedded-svg-size-changes-target-no-layout-triggers-1.html:
+        * svg/carto.net/tabgroup.svg:
+        * svg/carto.net/window.svg:
+        * svg/css/shadow-changes.svg:
+        * svg/dom/SVGPathSegList-segment-modification.svg:
+        * svg/dom/SVGPathSegList-xml-dom-synchronization.xhtml:
+        * svg/dom/SVGPathSegList-xml-dom-synchronization2.xhtml:
+        * svg/dom/SVGRectElement/rect-modify-rx.svg:
+        * svg/filters/animate-fill-expected.png:
+        * svg/filters/animate-fill.svg:
+        * svg/filters/feImage-reference-invalidation-expected.png:
+        * svg/filters/feImage-reference-invalidation.svg:
+        * svg/filters/feImage-target-add-to-document-expected.png:
+        * svg/filters/feImage-target-add-to-document.svg:
+        * svg/filters/feImage-target-changes-id-expected.png:
+        * svg/filters/feImage-target-changes-id.svg:
+        * svg/filters/feImage-target-id-change-expected.png:
+        * svg/filters/feImage-target-id-change.svg:
+        * svg/filters/feImage-target-reappend-to-document-expected.png:
+        * svg/filters/feImage-target-reappend-to-document.svg:
+        * svg/filters/feImage-target-remove-from-document-expected.png:
+        * svg/filters/feImage-target-remove-from-document.svg:
+        * svg/filters/filter-refresh.svg:
+        * svg/filters/filter-width-update.svg:
+        * svg/filters/invalidate-on-child-layout.svg:
+        * svg/hixie/perf/001.xml:
+        * svg/hixie/perf/002.xml:
+        * svg/hixie/perf/003.xml:
+        * svg/hixie/perf/004.xml:
+        * svg/hixie/perf/005.xml:
+        * svg/hixie/perf/006.xml:
+        * svg/hixie/perf/007.xml:
+        * svg/hixie/perf/resources/smallcats.gif: Added.
+        * svg/repaint/container-repaint-expected.png:
+        * svg/repaint/container-repaint.svg:
+        * svg/repaint/filter-child-repaint.svg:
+        * svg/repaint/image-href-change.svg:
+        * svg/repaint/image-with-clip-path.svg:
+        * svg/text/append-text-node-to-tspan.html:
+        * svg/text/modify-text-node-in-tspan.html:
+        * svg/text/remove-text-node-from-tspan.html:
+        * svg/text/remove-tspan-from-text.html:
+        * svg/text/text-text-05-t.svg:
+        * svg/transforms/animated-path-inside-transformed-html.xhtml:
+        * svg/zoom/page/absolute-sized-document-no-scrollbars.svg:
+        * svg/zoom/page/absolute-sized-document-scrollbars.svg:
+        * svg/zoom/page/relative-sized-document-scrollbars.svg:
+        * svg/zoom/page/zoom-background-image-tiled.html:
+        * svg/zoom/page/zoom-background-images.html:
+        * svg/zoom/page/zoom-coords-viewattr-01-b.svg:
+        * svg/zoom/page/zoom-foreignObject.svg:
+        * svg/zoom/page/zoom-getBoundingClientRect.xhtml:
+        * svg/zoom/page/zoom-hixie-mixed-008.xml:
+        * svg/zoom/page/zoom-hixie-mixed-009.xml:
+        * svg/zoom/page/zoom-hixie-rendering-model-004.xhtml:
+        * svg/zoom/page/zoom-img-preserveAspectRatio-support-1.html:
+        * svg/zoom/page/zoom-mask-with-percentages.svg:
+        * svg/zoom/page/zoom-replaced-intrinsic-ratio-001.htm:
+        * svg/zoom/page/zoom-svg-as-background-with-relative-size-and-viewBox.html:
+        * svg/zoom/page/zoom-svg-as-background-with-relative-size.html:
+        * svg/zoom/page/zoom-svg-as-image.html:
+        * svg/zoom/page/zoom-svg-as-object.html:
+        * svg/zoom/page/zoom-svg-as-relative-image.html:
+        * svg/zoom/page/zoom-svg-float-border-padding.xml:
+        * svg/zoom/page/zoom-svg-through-object-with-absolute-size-2.xhtml:
+        * svg/zoom/page/zoom-svg-through-object-with-absolute-size.xhtml:
+        * svg/zoom/page/zoom-svg-through-object-with-auto-size.html:
+        * svg/zoom/page/zoom-svg-through-object-with-huge-size.xhtml:
+        * svg/zoom/page/zoom-svg-through-object-with-override-size.html:
+        * svg/zoom/page/zoom-svg-through-object-with-percentage-size.xhtml:
+        * svg/zoom/page/zoom-svg-through-object-with-text.xhtml-disabled:
+        * svg/zoom/page/zoom-zoom-coords.xhtml:
+        * svg/zoom/resources/testPageZoom.js:
+        (repaintTest):
+        * svg/zoom/resources/testTextZoom.js:
+        (repaintTest):
+        * svg/zoom/text/absolute-sized-document-no-scrollbars.svg:
+        * svg/zoom/text/absolute-sized-document-scrollbars.svg:
+        * svg/zoom/text/relative-sized-document-scrollbars.svg:
+        * svg/zoom/text/zoom-coords-viewattr-01-b.svg:
+        * svg/zoom/text/zoom-foreignObject.svg:
+        * svg/zoom/text/zoom-hixie-mixed-008.xml:
+        * svg/zoom/text/zoom-hixie-mixed-009.xml:
+        * svg/zoom/text/zoom-hixie-rendering-model-004.xhtml:
+        * svg/zoom/text/zoom-svg-float-border-padding.xml:
+
 2012-02-07  Kaustubh Atrawalkar  <kaustubh@motorola.com>
 
         GTK & QT Rebaseline after r106912.
