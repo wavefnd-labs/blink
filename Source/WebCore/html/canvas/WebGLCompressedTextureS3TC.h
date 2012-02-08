@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc. All rights reserved.
+ * Copyright (C) 2012 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,54 +23,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebGLCompressedTextures_h
-#define WebGLCompressedTextures_h
+#ifndef WebGLCompressedTextureS3TC_h
+#define WebGLCompressedTextureS3TC_h
 
 #include "ExceptionCode.h"
 #include "WebGLExtension.h"
-#include <wtf/ArrayBufferView.h>
 #include <wtf/PassOwnPtr.h>
 
 namespace WebCore {
 
 class WebGLTexture;
 
-class WebGLCompressedTextures : public WebGLExtension {
+class WebGLCompressedTextureS3TC : public WebGLExtension {
 public:
-    static PassOwnPtr<WebGLCompressedTextures> create(WebGLRenderingContext*);
+    static PassOwnPtr<WebGLCompressedTextureS3TC> create(WebGLRenderingContext*);
 
     static bool supported(WebGLRenderingContext*);
 
-    virtual ~WebGLCompressedTextures();
+    virtual ~WebGLCompressedTextureS3TC();
     virtual ExtensionName getName() const;
 
-    void compressedTexImage2D(GC3Denum target, GC3Dint level, GC3Denum internalformat, GC3Dsizei width,
-                              GC3Dsizei height, GC3Dint border, ArrayBufferView* data);
-    void compressedTexSubImage2D(GC3Denum target, GC3Dint level, GC3Dint xoffset, GC3Dint yoffset,
-                                 GC3Dsizei width, GC3Dsizei height, GC3Denum format, ArrayBufferView* data);
-
-    WebGLGetInfo getCompressedTextureFormats();
-
 private:
-    WebGLCompressedTextures(WebGLRenderingContext*);
-
-    bool validateCompressedTexFuncData(const char* functionName,
-                                       GC3Dsizei width, GC3Dsizei height,
-                                       GC3Denum format, ArrayBufferView* pixels);
-
-    bool validateCompressedTexFormat(GC3Denum format);
-
-    bool validateCompressedTexSubDimensions(GC3Denum target, GC3Dint level, GC3Dint xoffset, GC3Dint yoffset,
-                                            GC3Dsizei width, GC3Dsizei height, GC3Denum format, WebGLTexture*);
-
-    bool m_supportsDxt1;
-    bool m_supportsDxt5;
-    bool m_supportsEtc1;
-    bool m_supportsPvrtc;
-
-    Vector<int> m_formats;
+    WebGLCompressedTextureS3TC(WebGLRenderingContext*);
 };
 
 } // namespace WebCore
 
-#endif // WebGLCompressedTextures_h
+#endif // WebGLCompressedTextureS3TC_h
