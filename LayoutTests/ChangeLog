@@ -1,3 +1,22 @@
+2012-02-10  Ami Fischman  <fischman@chromium.org>
+
+        Add keyframes to LayoutTests/media/content/test.ogv to hasten test completion & avoid timeouts.
+        https://bugs.webkit.org/show_bug.cgi?id=78058
+
+        Reviewed by Eric Carlson.
+        File was created with ffmpeg2theora v0.24, command-line:
+        ffmpeg2theora --no-upscaling --no-skeleton -e 6.02 -K 21 test.mp4 -o test.ogv
+        The important bit was the addition of "-K 21" to force keyframe creation.
+        The other flags are important to minimize breakage of tests that hardcode 
+        expectations like "the first 100k will contain the metadata" etc.
+
+        Before this, seeking to 5.6s would use the (only) keyframe at 2.4s and
+        have to decode all the way forward from there, which would be sometimes
+        timeout (presumably on overloaded bots).
+
+        * media/content/test.ogv:
+        * platform/chromium/test_expectations.txt:
+
 2012-02-10  Adam Langley  <agl@chromium.org>
 
         Don't lowercase ping URLs.
