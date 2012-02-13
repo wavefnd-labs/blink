@@ -36,7 +36,6 @@ namespace WebCore {
 class Page;
 class Frame;
 
-
 class PageSupplement {
 public:
     virtual ~PageSupplement();
@@ -44,8 +43,6 @@ public:
     static void provideTo(Page*, const AtomicString&, PassOwnPtr<PageSupplement>);
     static PageSupplement* from(Page*, const AtomicString&);
     static PageSupplement* from(Frame*, const AtomicString&);
-private:
-    OwnPtr<PageSupplement> m_self;
 };
 
 } // namespace WebCore
