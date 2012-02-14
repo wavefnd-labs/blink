@@ -1,5 +1,34 @@
 2012-02-14  Nikolas Zimmermann  <nzimmermann@rim.com>
 
+        svg/hixie/perf has different repaint region in debug vs release
+        https://bugs.webkit.org/show_bug.cgi?id=78516
+
+        Reviewed by Hajime Morita.
+
+        Based on patch by Tony Chang <tony@chromium.org>.
+
+        The problem is the progress text in the lower right.  It says,
+        "Test in progress... X of 10".  Depending on how fast the test runs,
+        this text is never painted and the repaint region changes.  Disable
+        painting of the intermediate text and only include the final text.
+
+        Extended Tonys original patch to cover all svg/hixie/perf tests that
+        suffered from this issue - also avoid using setTimeout between the
+        individual steps, as we're only interessted in the final repaint
+        region, not the intermediate ones.
+
+        * platform/mac/svg/hixie/perf/001-expected.png:
+        * platform/mac/svg/hixie/perf/002-expected.png:
+        * platform/mac/svg/hixie/perf/003-expected.png:
+        * svg/hixie/perf/001.xml:
+        * svg/hixie/perf/002.xml:
+        * svg/hixie/perf/003.xml:
+        * svg/hixie/perf/004.xml:
+        * svg/hixie/perf/005.xml:
+        * svg/hixie/perf/006.xml:
+
+2012-02-14  Nikolas Zimmermann  <nzimmermann@rim.com>
+
         Not reviewed. Add mixing Lion pixel test result for a svg/carto.net test.
 
         * platform/mac/svg/carto.net/scrollbar-expected.png: Added.
