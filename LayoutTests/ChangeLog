@@ -1,3 +1,420 @@
+2012-02-11  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Convert svg/animations to use SMIL methods for driving the timeline
+        https://bugs.webkit.org/show_bug.cgi?id=78422
+
+        Reviewed by Dirk Schulze.
+
+        Switch the svg/animations tests to use SVGSVGElement.setCurrentTime to drive the animation timeline.
+        This should fix all flakiness we previously had with these tests - and as nice side-effect we're now
+        using the standard SVG methods to drive the timeline, and thus have more coverage for these methods.
+        It already exposed several SMIL bugs, that had to be fixed, before this worked.
+
+        This also unifies & cleans up the tests, to use the same formatting and the same shouldBeCloseEnough helpers.
+
+        * svg/animations/animVal-basics-expected.txt:
+        * svg/animations/animVal-basics.html:
+        * svg/animations/animate-calcMode-spline-by-expected.txt:
+        * svg/animations/animate-calcMode-spline-by.html:
+        * svg/animations/animate-calcMode-spline-from-by-expected.txt:
+        * svg/animations/animate-calcMode-spline-from-by.html:
+        * svg/animations/animate-calcMode-spline-from-to-expected.txt:
+        * svg/animations/animate-calcMode-spline-from-to.html:
+        * svg/animations/animate-calcMode-spline-to-expected.txt:
+        * svg/animations/animate-calcMode-spline-to.html:
+        * svg/animations/animate-calcMode-spline-values-expected.txt:
+        * svg/animations/animate-calcMode-spline-values.html:
+        * svg/animations/animate-color-calcMode-discrete.html:
+        * svg/animations/animate-color-fill-currentColor.html:
+        * svg/animations/animate-color-fill-from-by.html:
+        * svg/animations/animate-color-rgba-calcMode-discrete.html:
+        * svg/animations/animate-color-transparent.html:
+        * svg/animations/animate-currentColor.html:
+        * svg/animations/animate-dynamic-update-attributeName.html:
+        * svg/animations/animate-end-attribute-expected.txt:
+        * svg/animations/animate-end-attribute.html:
+        * svg/animations/animate-endElement-beginElement.html:
+        * svg/animations/animate-from-to-keyTimes.html:
+        * svg/animations/animate-gradient-transform.html:
+        * svg/animations/animate-inherit-css-property.html:
+        * svg/animations/animate-insert-begin.html:
+        * svg/animations/animate-insert-no-begin.html:
+        * svg/animations/animate-keySplines.html:
+        * svg/animations/animate-mpath-insert.html:
+        * svg/animations/animate-number-calcMode-discrete-expected.txt:
+        * svg/animations/animate-number-calcMode-discrete-keyTimes.html:
+        * svg/animations/animate-number-calcMode-discrete.html:
+        * svg/animations/animate-path-animation-Cc-Ss-expected.txt:
+        * svg/animations/animate-path-animation-Cc-Ss.html:
+        * svg/animations/animate-path-animation-Ll-Vv-Hh-expected.txt:
+        * svg/animations/animate-path-animation-Ll-Vv-Hh.html:
+        * svg/animations/animate-path-animation-Qq-Tt.html:
+        * svg/animations/animate-path-animation-cC-sS-inverse-expected.txt:
+        * svg/animations/animate-path-animation-cC-sS-inverse.html:
+        * svg/animations/animate-path-animation-lL-vV-hH-inverse-expected.txt:
+        * svg/animations/animate-path-animation-lL-vV-hH-inverse.html:
+        * svg/animations/animate-path-animation-qQ-tT-inverse.html:
+        * svg/animations/animate-path-nested-transforms-expected.txt:
+        * svg/animations/animate-path-nested-transforms.html:
+        * svg/animations/animate-path-to-animation-expected.txt:
+        * svg/animations/animate-path-to-animation.html:
+        * svg/animations/animate-text-nested-transforms-expected.txt:
+        * svg/animations/animate-text-nested-transforms.html:
+        * svg/animations/animateTransform-pattern-transform.html:
+        * svg/animations/resources/SVGAnimationTestCase.js:
+        (isCloseEnough):
+        (shouldBeCloseEnough):
+        (moveAnimationTimelineAndSample):
+        (sampleAnimation):
+        (runSMILTest):
+        (runAnimationTest):
+        * svg/animations/script-tests/TEMPLATE.html: Removed.
+        * svg/animations/script-tests/animVal-basics.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-by.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-from-by.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-from-to.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-to.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-values.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-color-calcMode-discrete.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-color-fill-currentColor.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-color-fill-from-by.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-color-rgba-calcMode-discrete.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-color-transparent.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-currentColor.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-dynamic-update-attributeName.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-end-attribute.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-endElement-beginElement.js:
+        (executeTest):
+        (end):
+        (begin):
+        * svg/animations/script-tests/animate-from-to-keyTimes.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-gradient-transform.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-inherit-css-property.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-insert-begin.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-insert-no-begin.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-keySplines.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-mpath-insert.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-number-calcMode-discrete-keyTimes.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-number-calcMode-discrete.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-Cc-Ss.js:
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-Ll-Vv-Hh.js:
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-Qq-Tt.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-cC-sS-inverse.js:
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-lL-vV-hH-inverse.js:
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-qQ-tT-inverse.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-path-nested-transforms.js:
+        (g.setAttribute.rect.createSVGElement.rect.setAttribute.rect.setAttribute.rect.setAttribute.rect.setAttribute.rect.setAttribute.g.appendChild.animateMotion.createSVGElement.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.g.appendChild.rootSVGElement.appendChild.startSample):
+        (endSample):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-to-animation.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-text-nested-transforms.js:
+        (rootSVGElement.setAttribute.text.createSVGElement.text.setAttribute.text.textContent.string_appeared_here.text.setAttribute.animateMotion.createSVGElement.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.animateMotion.setAttribute.text.appendChild.rootSVGElement.appendChild.startSample):
+        (endSample):
+        (executeTest):
+        * svg/animations/script-tests/animateTransform-pattern-transform.js:
+        (executeTest):
+        * svg/animations/script-tests/svgPreserveAspectRatio-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-deg-to-grad.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-deg-to-rad.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-grad-to-deg.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-grad-to-rad.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-rad-to-deg.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-rad-to-grad.js:
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgboolean-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svginteger-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-LengthModeHeight.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-LengthModeOther.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-LengthModeWidth.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-invalid-value-1.js:
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-invalid-value-2.js:
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-invalid-value-3.js:
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-number-to-number.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-cm.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-ems.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-exs.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-in.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-number.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-pc.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-percentage.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-pt.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-px.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-unitType.js:
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-values.js:
+        (sample5):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-2.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-3.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-4.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-5.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumber-animation-1.js:
+        (executeTest):
+        * svg/animations/script-tests/svgnumber-animation-2.js:
+        (executeTest):
+        * svg/animations/script-tests/svgnumber-animation-3.js:
+        (executeTest):
+        * svg/animations/script-tests/svgnumberlist-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberlist-animation-2.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-2.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-3.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-4.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgpath-animation-1.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgpointlist-animation-1.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgpointlist-animation-2.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgrect-animation-1.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgrect-animation-2.js:
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgstring-animation-fallback-to-discrete.js:
+        (executeTest):
+        * svg/animations/script-tests/svgtransform-animation-1.js:
+        (executeTest):
+        * svg/animations/script-tests/svgtransform-animation-discrete.js:
+        (executeTest):
+        * svg/animations/smil-element-not-removed-crash.html:
+        * svg/animations/svgPreserveAspectRatio-animation-1.html:
+        * svg/animations/svgangle-animation-deg-to-grad-expected.txt:
+        * svg/animations/svgangle-animation-deg-to-grad.html:
+        * svg/animations/svgangle-animation-deg-to-rad-expected.txt:
+        * svg/animations/svgangle-animation-deg-to-rad.html:
+        * svg/animations/svgangle-animation-grad-to-deg-expected.txt:
+        * svg/animations/svgangle-animation-grad-to-deg.html:
+        * svg/animations/svgangle-animation-grad-to-rad-expected.txt:
+        * svg/animations/svgangle-animation-grad-to-rad.html:
+        * svg/animations/svgangle-animation-rad-to-deg-expected.txt:
+        * svg/animations/svgangle-animation-rad-to-deg.html:
+        * svg/animations/svgangle-animation-rad-to-grad-expected.txt:
+        * svg/animations/svgangle-animation-rad-to-grad.html:
+        * svg/animations/svgboolean-animation-1.html:
+        * svg/animations/svginteger-animation-1.html:
+        * svg/animations/svglength-animation-LengthModeHeight-expected.txt:
+        * svg/animations/svglength-animation-LengthModeHeight.html:
+        * svg/animations/svglength-animation-LengthModeOther-expected.txt:
+        * svg/animations/svglength-animation-LengthModeOther.html:
+        * svg/animations/svglength-animation-LengthModeWidth-expected.txt:
+        * svg/animations/svglength-animation-LengthModeWidth.html:
+        * svg/animations/svglength-animation-invalid-value-1.html:
+        * svg/animations/svglength-animation-invalid-value-2.html:
+        * svg/animations/svglength-animation-invalid-value-3.html:
+        * svg/animations/svglength-animation-number-to-number-expected.txt:
+        * svg/animations/svglength-animation-number-to-number.html:
+        * svg/animations/svglength-animation-px-to-cm-expected.txt:
+        * svg/animations/svglength-animation-px-to-cm.html:
+        * svg/animations/svglength-animation-px-to-ems-expected.txt:
+        * svg/animations/svglength-animation-px-to-ems.html:
+        * svg/animations/svglength-animation-px-to-exs-expected.txt:
+        * svg/animations/svglength-animation-px-to-exs.html:
+        * svg/animations/svglength-animation-px-to-in-expected.txt:
+        * svg/animations/svglength-animation-px-to-in.html:
+        * svg/animations/svglength-animation-px-to-number-expected.txt:
+        * svg/animations/svglength-animation-px-to-number.html:
+        * svg/animations/svglength-animation-px-to-pc-expected.txt:
+        * svg/animations/svglength-animation-px-to-pc.html:
+        * svg/animations/svglength-animation-px-to-percentage-expected.txt:
+        * svg/animations/svglength-animation-px-to-percentage.html:
+        * svg/animations/svglength-animation-px-to-pt-expected.txt:
+        * svg/animations/svglength-animation-px-to-pt.html:
+        * svg/animations/svglength-animation-px-to-px-expected.txt:
+        * svg/animations/svglength-animation-px-to-px.html:
+        * svg/animations/svglength-animation-unitType.html:
+        * svg/animations/svglength-animation-values-expected.txt:
+        * svg/animations/svglength-animation-values.html:
+        * svg/animations/svglengthlist-animation-1.html:
+        * svg/animations/svglengthlist-animation-2-expected.txt:
+        * svg/animations/svglengthlist-animation-2.html:
+        * svg/animations/svglengthlist-animation-3.html:
+        * svg/animations/svglengthlist-animation-4.html:
+        * svg/animations/svglengthlist-animation-5.html:
+        * svg/animations/svgnumber-animation-1.html:
+        * svg/animations/svgnumber-animation-2.html:
+        * svg/animations/svgnumber-animation-3.html:
+        * svg/animations/svgnumberlist-animation-1-expected.txt:
+        * svg/animations/svgnumberlist-animation-1.html:
+        * svg/animations/svgnumberlist-animation-2-expected.txt:
+        * svg/animations/svgnumberlist-animation-2.html:
+        * svg/animations/svgnumberoptionalnumber-animation-1.html:
+        * svg/animations/svgnumberoptionalnumber-animation-2.html:
+        * svg/animations/svgnumberoptionalnumber-animation-3.html:
+        * svg/animations/svgnumberoptionalnumber-animation-4.html:
+        * svg/animations/svgpath-animation-1-expected.txt:
+        * svg/animations/svgpath-animation-1.html:
+        * svg/animations/svgpointlist-animation-1-expected.txt:
+        * svg/animations/svgpointlist-animation-1.html:
+        * svg/animations/svgpointlist-animation-2-expected.txt:
+        * svg/animations/svgpointlist-animation-2.html:
+        * svg/animations/svgrect-animation-1-expected.txt:
+        * svg/animations/svgrect-animation-1.html:
+        * svg/animations/svgrect-animation-2-expected.txt:
+        * svg/animations/svgrect-animation-2.html:
+        * svg/animations/svgstring-animation-fallback-to-discrete-expected.txt:
+        * svg/animations/svgstring-animation-fallback-to-discrete.html:
+        * svg/animations/svgtransform-animation-1.html:
+        * svg/animations/svgtransform-animation-discrete-expected.txt:
+        * svg/animations/svgtransform-animation-discrete.html:
+
 2012-02-14  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: [REGRESSION] Copy Stack Trace is broken
