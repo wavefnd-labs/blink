@@ -1,3 +1,251 @@
+2012-02-14  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Convert svg/animations to use SMIL methods for driving the timeline
+        https://bugs.webkit.org/show_bug.cgi?id=78422
+
+        Rubber-stamped by Simon Hausmann.
+
+        Further cleanup of the svg/animation tests. Always use "0.001" as sampling time
+        for "just-after-anim-begin" instead of 0.1/0.01 variations. Use "3.999" as
+        "just-before-anim-end" time instead of 3.9/3.99 variations.
+
+        Use a default tolerance of 0.1, instead of the strict 0.01, to avoid having
+        to expect values like "199.98". Use "200" instead. That doesn't reduce the
+        value of any of the tests, but its likely to be more stable.
+
+        Changed some real-quick running animamtions to have a higher duration.
+        This minimizes the sampling time error when sampling the animation right after
+        it started (svg/animation/*nested-transforms*). This doesn't affect the runtime
+        of the tests at all, as we manually drive the timeline anyways.
+
+        Always use shouldBe() instead of shouldBeCloseEnough() if the sampling time
+        is an integer, like 2.0 for animations that eg. animate x from 0 to 200.
+        Sampling exactly at 2.0, yields 100, so there's no need to check for equal
+        with tolerance.
+
+        * platform/chromium/test_expectations.txt:
+        * svg/animations/animate-calcMode-spline-by-expected.txt:
+        * svg/animations/animate-calcMode-spline-from-by-expected.txt:
+        * svg/animations/animate-calcMode-spline-from-to-expected.txt:
+        * svg/animations/animate-calcMode-spline-to-expected.txt:
+        * svg/animations/animate-calcMode-spline-values-expected.txt:
+        * svg/animations/animate-path-animation-Cc-Ss-expected.txt:
+        * svg/animations/animate-path-animation-Ll-Vv-Hh-expected.txt:
+        * svg/animations/animate-path-animation-cC-sS-inverse-expected.txt:
+        * svg/animations/animate-path-animation-lL-vV-hH-inverse-expected.txt:
+        * svg/animations/animate-path-nested-transforms-expected.txt:
+        * svg/animations/animate-path-to-animation-expected.txt:
+        * svg/animations/animate-text-nested-transforms-expected.txt:
+        * svg/animations/resources/SVGAnimationTestCase.js:
+        (shouldBeCloseEnough):
+        * svg/animations/script-tests/animVal-basics.js:
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-by.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-from-by.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-from-to.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-to.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-values.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-color-rgba-calcMode-discrete.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-dynamic-update-attributeName.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-end-attribute.js:
+        (sample3):
+        * svg/animations/script-tests/animate-mpath-insert.js:
+        (endSample):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-Cc-Ss.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-path-animation-Ll-Vv-Hh.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-path-animation-Qq-Tt.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-path-animation-cC-sS-inverse.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-path-animation-lL-vV-hH-inverse.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-path-animation-qQ-tT-inverse.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-path-nested-transforms.js:
+        (endSample):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-to-animation.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-text-nested-transforms.js:
+        (endSample):
+        (executeTest):
+        * svg/animations/script-tests/animateTransform-pattern-transform.js:
+        (sample3):
+        * svg/animations/script-tests/svgangle-animation-deg-to-grad.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgangle-animation-deg-to-rad.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgangle-animation-grad-to-deg.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgangle-animation-grad-to-rad.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgangle-animation-rad-to-deg.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgangle-animation-rad-to-grad.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svginteger-animation-1.js:
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-LengthModeHeight.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-LengthModeOther.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-LengthModeWidth.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-number-to-number.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-cm.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-ems.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-exs.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-in.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-number.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-pc.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-percentage.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-pt.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-px.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-values.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        * svg/animations/script-tests/svglengthlist-animation-1.js:
+        (sample3):
+        * svg/animations/script-tests/svglengthlist-animation-2.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglengthlist-animation-3.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglengthlist-animation-4.js:
+        (sample3):
+        * svg/animations/script-tests/svglengthlist-animation-5.js:
+        (sample3):
+        * svg/animations/script-tests/svgnumber-animation-1.js:
+        (sample3):
+        * svg/animations/script-tests/svgnumber-animation-2.js:
+        (sample3):
+        * svg/animations/script-tests/svgnumberlist-animation-1.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgnumberlist-animation-2.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-1.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-2.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-3.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-4.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgpath-animation-1.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgpointlist-animation-1.js:
+        (sample3):
+        * svg/animations/script-tests/svgpointlist-animation-2.js:
+        (sample3):
+        * svg/animations/script-tests/svgrect-animation-1.js:
+        (sample3):
+        * svg/animations/script-tests/svgrect-animation-2.js:
+        (sample3):
+        * svg/animations/script-tests/svgtransform-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svgtransform-animation-discrete.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/svgangle-animation-deg-to-grad-expected.txt:
+        * svg/animations/svgangle-animation-deg-to-rad-expected.txt:
+        * svg/animations/svgangle-animation-grad-to-deg-expected.txt:
+        * svg/animations/svgangle-animation-grad-to-rad-expected.txt:
+        * svg/animations/svgangle-animation-rad-to-deg-expected.txt:
+        * svg/animations/svgangle-animation-rad-to-grad-expected.txt:
+        * svg/animations/svglength-animation-LengthModeHeight-expected.txt:
+        * svg/animations/svglength-animation-LengthModeOther-expected.txt:
+        * svg/animations/svglength-animation-LengthModeWidth-expected.txt:
+        * svg/animations/svglength-animation-number-to-number-expected.txt:
+        * svg/animations/svglength-animation-px-to-cm-expected.txt:
+        * svg/animations/svglength-animation-px-to-ems-expected.txt:
+        * svg/animations/svglength-animation-px-to-exs-expected.txt:
+        * svg/animations/svglength-animation-px-to-in-expected.txt:
+        * svg/animations/svglength-animation-px-to-number-expected.txt:
+        * svg/animations/svglength-animation-px-to-pc-expected.txt:
+        * svg/animations/svglength-animation-px-to-percentage-expected.txt:
+        * svg/animations/svglength-animation-px-to-pt-expected.txt:
+        * svg/animations/svglength-animation-px-to-px-expected.txt:
+        * svg/animations/svglength-animation-values-expected.txt:
+        * svg/animations/svglengthlist-animation-2-expected.txt:
+        * svg/animations/svgnumberlist-animation-1-expected.txt:
+        * svg/animations/svgnumberlist-animation-2-expected.txt:
+        * svg/animations/svgpath-animation-1-expected.txt:
+        * svg/animations/svgpointlist-animation-1-expected.txt:
+        * svg/animations/svgpointlist-animation-2-expected.txt:
+        * svg/animations/svgrect-animation-1-expected.txt:
+        * svg/animations/svgrect-animation-2-expected.txt:
+        * svg/animations/svgtransform-animation-1-expected.txt:
+
 2012-02-15  Philippe Normand  <pnormand@igalia.com>
 
         Unreviewed, GTK rebaseline after r107785 and r107762. Also
