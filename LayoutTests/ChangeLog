@@ -1,3 +1,43 @@
+2012-02-15  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Switch svg/dynamic-updates tests to repaint harness
+        https://bugs.webkit.org/show_bug.cgi?id=78219
+
+        Make all tests that exercise repainting use the fast/repaint/resources/repaint.js harness.
+        This is the last step, all svg tests have been converted.
+
+        The only relevant change to look at is svg/dynamic-updates/resources/SVGTestCase.js, the rest is mechanic, done by a script.
+        Ran following magic in svg/dynamic-updates: (inject repaint.js in all *.html files in that folder, and register onload handler)
+        find . -type f -name "*.html" | xargs perl -pi -e "s/js-test-pre\.js\"><\/script\>/js-test-pre\.js\"><\/script\>\n\<script src=\"..\/..\/fast\/repaint\/resources\/repaint\.js\"\>\<\/script\>/"
+        find . -type f -name "*.html" | xargs perl -pi -e "s/<body>/<body onload=\"runRepaintTest()\">/"
+
+        And in svg/dynamic-updates/script-tests: (remove manual startTest function calls, and rename executeTest to repaintTest).
+        find . -type f -name "*.js" | xargs perl -pi -e "s/startTest\(.*\);\n//"
+        find . -type f -name "*.js" | xargs perl -pi -e "s/function\ executeTest/function\ repaintTest/"
+
+        Only a few tests needed other adjustments.
+
+        * platform/chromium/test_expectations.txt:
+        * svg/animations/resources/SVGAnimationTestCase.js:
+        (runSMILTest):
+        ...
+        * platform/mac/svg/dynamic-updates/SVGCircleElement-dom-cx-attr-expected.png:
+        * platform/mac/svg/dynamic-updates/SVGCircleElement-dom-cy-attr-expected.png:
+        ...
+        * svg/dynamic-updates/SVG-dynamic-css-transform.html:
+        * svg/dynamic-updates/SVGAElement-dom-href-attr.html:
+        ...
+        * svg/dynamic-updates/resources/SVGTestCase.js: Changed to utilize the repaint.js harness.
+        (createSVGTestCase):
+        (clickAt):
+        * svg/dynamic-updates/resources/linkTarget.svg:
+        * svg/dynamic-updates/script-tests/SVGAElement-dom-href-attr.js:
+        (repaintTest):
+        * svg/dynamic-updates/script-tests/SVGAElement-dom-target-attr.js:
+        (repaintTest):
+        ...
+        * svg/dynamic-updates/script-tests/TEMPLATE.html: Removed.
+
 2012-02-15  Kent Tamura  <tkent@chromium.org>
 
         Unreviewed, correct svn:mime-type of a test.
