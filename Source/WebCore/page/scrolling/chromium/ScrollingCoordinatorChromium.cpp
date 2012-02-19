@@ -29,6 +29,11 @@
 
 namespace WebCore {
 
+PassRefPtr<ScrollingCoordinator> ScrollingCoordinator::create(Page* page)
+{
+    return adoptRef(new ScrollingCoordinator(page));
+}
+
 void ScrollingCoordinator::frameViewHorizontalScrollbarLayerDidChange(FrameView*, GraphicsLayer* horizontalScrollbarLayer)
 {
     ASSERT_NOT_REACHED();
