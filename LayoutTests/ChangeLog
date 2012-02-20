@@ -1,3 +1,32 @@
+2012-02-16  Gavin Barraclough  <barraclough@apple.com>
+
+        Move special __proto__ property to Object.prototype
+        https://bugs.webkit.org/show_bug.cgi?id=78409
+
+        Reviewed by Oliver Hunt.
+
+        Re-implement this as a regular accessor property.  This has three key benefits:
+        1) It makes it possible for objects to be given properties named __proto__.
+        2) Object.prototype.__proto__ can be deleted, preventing object prototypes from being changed.
+        3) This largely removes the magic used the implement __proto__, it can just be made a regular accessor property.
+
+        * fast/js/Object-getOwnPropertyNames-expected.txt:
+        * fast/js/cyclic-prototypes-expected.txt:
+        * fast/js/parser-syntax-check-expected.txt:
+        * fast/js/preventExtensions-expected.txt:
+        * fast/js/prototypes-expected.txt:
+            - Update results
+        * fast/js/script-tests/Object-getOwnPropertyNames.js:
+            - __proto__ is now a property of Object Prototype.
+        * fast/js/script-tests/cyclic-prototypes.js:
+            - setting an object's prototype to null removes __proto__ setter, future usage won't set prototype.
+        * fast/js/script-tests/parser-syntax-check.js:
+            - Allow functions named __proto__
+        * fast/js/script-tests/preventExtensions.js:
+            - Setting __proto__ should not throw.
+        * fast/js/script-tests/prototypes.js:
+            - Objects may contained own properties named __proto__, add new test cases.
+
 2012-02-20  Benjamin Poulain  <benjamin@webkit.org>
 
         Make JSCSSStyleDeclaration work directly with CSS Property ID
