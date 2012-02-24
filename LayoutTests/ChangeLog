@@ -1,3 +1,31 @@
+2012-02-24  Adrienne Walker  <enne@google.com>
+
+        Fix flaky tests by removing call to dumpResourceResponseMIMETypes
+        https://bugs.webkit.org/show_bug.cgi?id=79505
+
+        Reviewed by Daniel Bates.
+
+        It appears to be a race condition (on Chromium at least) between when
+        script executes and the style sheet resource response occurs. This
+        prevents some of the text to be output if the response occurs before
+        the call to set the flag to dump responses. Since the tests themselves
+        already test the results of loading stylesheets properly, this extra
+        text is superfluous and can be removed.
+
+        This change modifies all tests using link-load-utilities.js to dump
+        stylesheet resource responses. Other tests are using
+        dumpResponseResponseMIMEType, but for things other than stylesheets.
+
+        * fast/dom/HTMLLinkElement/link-onerror-stylesheet-with-existent-and-non-existent-import-expected.txt:
+        * fast/dom/HTMLLinkElement/link-onerror-stylesheet-with-non-existent-import-expected.txt:
+        * fast/dom/HTMLLinkElement/link-onload-before-page-load-expected.txt:
+        * fast/dom/HTMLLinkElement/link-onload-expected.txt:
+        * fast/dom/HTMLLinkElement/link-onload-stylesheet-with-import-expected.txt:
+        * fast/dom/HTMLLinkElement/link-onload2-expected.txt:
+        * fast/dom/HTMLLinkElement/programmatically-add-link-with-onload-handler-expected.txt:
+        * fast/dom/HTMLLinkElement/resources/link-load-utilities.js:
+        * fast/dom/HTMLStyleElement/style-onerror-with-existent-and-non-existent-import-expected.txt:
+
 2012-02-24  Elliot Poger  <epoger@google.com>
 
         Make fast/canvas/canvas-strokePath-shadow.html allow for pixel tolerance
