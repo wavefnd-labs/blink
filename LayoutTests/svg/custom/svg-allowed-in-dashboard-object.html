@@ -1,10 +1,11 @@
 <html>
-<body onload="timeOut()">
-<p>This test makes sure we can't open SVG documents in Dashboard compatibility mode.  It can not be tested manually.</p>
+<body onload="runTest()">
+<p>This test makes sure we can open SVG documents in Dashboard compatibility mode.  It can not be tested manually.</p>
 <script>
     if (window.layoutTestController) {
         layoutTestController.setUseDashboardCompatibilityMode(true);
         layoutTestController.dumpAsText();
+        layoutTestController.waitUntilDone();
     }
     
     function debug(str) {
@@ -12,7 +13,7 @@
         c.appendChild(document.createTextNode(str + '\n'));
     }
     
-    function timeOut() {
+    function runTest() {
         try {
             var failed = false;
             var svgDoc = null;
@@ -22,10 +23,10 @@
                 svgDoc = null;
             }
             if (svgDoc) {
-                debug("FAIL: Loaded SVG document in <object> tag."); 
+                debug("PASS: Loaded SVG document in <object> tag."); 
                 failed = true;
             } else 
-                debug("PASS: Did not load SVG document in <object> tag");
+                debug("FAIL: Did not load SVG document in <object> tag");
             
             try {
                 svgDoc = document.getElementById('svgEmbed').getSVGDocument();
@@ -33,10 +34,10 @@
                 svgDoc = null;
             }
             if (svgDoc) {
-                debug("FAIL: Loaded SVG document in <element> tag."); 
+                debug("PASS: Loaded SVG document in <element> tag."); 
                 failed = true;
             } else 
-                debug("PASS: Did not load SVG document in <element> tag");
+                debug("FAIL: Did not load SVG document in <element> tag");
             
             try {
                 svgDoc = document.getElementById('svgIFrame').getSVGDocument();
@@ -44,23 +45,25 @@
                 svgDoc = null;
             }
             if (svgDoc) {
-                debug("FAIL: Loaded SVG document in <iframe> tag."); 
+                debug("PASS: Loaded SVG document in <iframe> tag."); 
                 failed = true;
             } else 
-                debug("PASS: Did not load SVG document in <iframe> tag");
+                debug("FAIL: Did not load SVG document in <iframe> tag");
             
             if (failed)
-                debug("FAIL: SVG Documents were loaded");
+                debug("PASS: SVG Documents were loaded");
             else
-                debug("PASS: SVG Documents were not loaded");
+                debug("FAIL: SVG Documents were not loaded");
         } catch (e) {
             debug("FAIL: Exception thrown: " + e)
         }
+        if (window.layoutTestController) 
+            layoutTestController.notifyDone();
     }
 </script>
     
    <object id="svgObject" data="../W3C-SVG-1.1/text-ws-02-t.svg" width="100px" height="100px"></object>
-   <embed id="svgElement" src="../W3C-SVG-1.1/text-ws-02-t.svg" width="100px" height="100px"></embed>
+   <embed id="svgEmbed" src="../W3C-SVG-1.1/text-ws-02-t.svg" width="100px" height="100px"></embed>
    <iframe id="svgIFrame" src="../W3C-SVG-1.1/text-ws-02-t.svg" width="100px" height="100px"></iframe>
    <pre id="console"></pre>    
 </body>
