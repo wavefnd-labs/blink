@@ -23,42 +23,14 @@
 #define CSSStyleRule_h
 
 #include "CSSRule.h"
-#include "CSSSelectorList.h"
-#include "StylePropertySet.h"
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefPtr.h>
 
 namespace WebCore {
 
 class CSSSelector;
-class CSSStyleRule;
-    
-class StyleRule {
-    WTF_MAKE_NONCOPYABLE(StyleRule); WTF_MAKE_FAST_ALLOCATED;
-public:
-    StyleRule(int sourceLine, CSSStyleRule*);
-    ~StyleRule();
-            
-    const CSSSelectorList& selectorList() const { return m_selectorList; }
-    StylePropertySet* properties() const { return m_properties.get(); }
-    
-    void addSubresourceStyleURLs(ListHashSet<KURL>& urls, CSSStyleSheet*);
-
-    int sourceLine() const { return m_sourceLine; }
-    
-    CSSStyleRule* ensureCSSStyleRule() const;
-    
-    void adoptSelectorVector(Vector<OwnPtr<CSSParserSelector> >& selectors) { m_selectorList.adoptSelectorVector(selectors); }
-    void adoptSelectorList(CSSSelectorList& selectors) { m_selectorList.adopt(selectors); }
-    void setProperties(PassRefPtr<StylePropertySet> properties) { m_properties = properties; }
-    
-private:
-    RefPtr<StylePropertySet> m_properties;
-    CSSSelectorList m_selectorList;
-    signed m_sourceLine;
-
-    CSSStyleRule* m_cssomWrapper;
-};
+class CSSStyleDeclaration;
+class StyleRule;
 
 class CSSStyleRule : public CSSRule {
 public:
@@ -71,7 +43,7 @@ public:
     String selectorText() const;
     void setSelectorText(const String&);
 
-    CSSStyleDeclaration* style() const { return m_styleRule->properties()->ensureRuleCSSStyleDeclaration(this); }
+    CSSStyleDeclaration* style() const;
 
     String cssText() const;
     
