@@ -1,3 +1,192 @@
+2012-02-28  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Add harness to sample W3C SVG animation tests
+        https://bugs.webkit.org/show_bug.cgi?id=79784
+
+        Reviewed by Hajime Morita.
+
+        Make it possible to load external SVG documents within the svg/animations testing harness,
+        to sample the vanilla testcases from W3C-SVG-1.1 at certain points, specific to each file.
+        The only thing we have to change is to give the <animate> elements an id, so that its start
+        time and duration can be queried. This is the only change needed in the *.svg files that we
+        want to sample.
+
+        We can now compare the animation in Opera/FF and WebKit, thus making automatized tests of
+        these SMIL testcases possible (baseVal/animVal dump at certain time, computedStyle etc.).
+
+        Add tests covering the first ~ 20 W3C animation tests. Already found one regresion:
+        - animate-elem-14-t.svg:
+          <animate attributeName="width" calcMode="discrete" values="300;255;180;30" keyTimes="0;.2;.4;.6" begin="0s" dur="10s" fill="freeze"/>
+
+        - animate-elem-18-t.svg
+          <animate attributeName="width" calcMode="discrete" values="300;255;180;30" keyTimes="0;.2;.6;.8" begin="0s" dur="10s" fill="freeze"/>
+
+        The last keyTime isn't correctly respected, seems to be equal to 1.0 - filed bug 79786.
+        The baseVal tests are still commented out, as we fail them all, as we animate the baseVal, instead of the animVal.
+        This will be fixed in the next follow-up patches.
+
+        * svg/W3C-SVG-1.1/animate-elem-03-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-04-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-05-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-06-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-07-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-08-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-09-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-10-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-11-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-12-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-13-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-14-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-15-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-16-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-17-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-18-t.svg:
+        * svg/W3C-SVG-1.1/animate-elem-19-t.svg:
+        * svg/animations/animate-elem-02-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-02-t-drt.html: Added.
+        * svg/animations/animate-elem-03-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-03-t-drt.html: Added.
+        * svg/animations/animate-elem-04-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-04-t-drt.html: Added.
+        * svg/animations/animate-elem-05-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-05-t-drt.html: Added.
+        * svg/animations/animate-elem-06-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-06-t-drt.html: Added.
+        * svg/animations/animate-elem-07-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-07-t-drt.html: Added.
+        * svg/animations/animate-elem-08-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-08-t-drt.html: Added.
+        * svg/animations/animate-elem-09-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-09-t-drt.html: Added.
+        * svg/animations/animate-elem-10-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-10-t-drt.html: Added.
+        * svg/animations/animate-elem-11-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-11-t-drt.html: Added.
+        * svg/animations/animate-elem-12-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-12-t-drt.html: Added.
+        * svg/animations/animate-elem-13-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-13-t-drt.html: Added.
+        * svg/animations/animate-elem-14-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-14-t-drt.html: Added.
+        * svg/animations/animate-elem-15-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-15-t-drt.html: Added.
+        * svg/animations/animate-elem-16-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-16-t-drt.html: Added.
+        * svg/animations/animate-elem-17-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-17-t-drt.html: Added.
+        * svg/animations/animate-elem-18-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-18-t-drt.html: Added.
+        * svg/animations/animate-elem-19-t-drt-expected.txt: Added.
+        * svg/animations/animate-elem-19-t-drt.html: Added.
+        * svg/animations/resources/SVGAnimationTestCase.js:
+        (expectMatrix):
+        (expectTranslationMatrix):
+        (moveAnimationTimelineAndSample):
+        * svg/animations/script-tests/animate-elem-02-t-drt.js: Added.
+        (sampleAfterBegin):
+        (sampleAfterMid):
+        (sampleAfterBeginOfFirstRepetition):
+        (sampleAfterMidOfFirstRepetition):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-03-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-04-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-05-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-06-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-07-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-08-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-09-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-10-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-11-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-12-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-13-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-14-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-15-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-16-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-17-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-18-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-19-t-drt.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/dynamic-updates/resources/SVGTestCase.js:
+        (embedSVGTestCase):
+        (iframeLoaded):
+
 2012-02-29  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Not reviewed. Next chunk of SL pixel test updates.
