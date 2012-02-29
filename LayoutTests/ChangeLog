@@ -1,3 +1,31 @@
+2012-02-29  Gavin Barraclough  <barraclough@apple.com>
+
+        'source' property of RegExp instance cannot be ""
+        https://bugs.webkit.org/show_bug.cgi?id=79938
+
+        Reviewed by Oliver Hunt.
+
+        15.10.6.4 specifies that RegExp.prototype.toString must return '/' + source + '/',
+        and also states that the result must be a valid RegularExpressionLiteral. '//' is
+        not a valid RegularExpressionLiteral (since it is a single line comment), and hence
+        source cannot ever validly be "". If the source is empty, return a different Pattern
+        that would match the same thing.
+
+        * fast/js/kde/RegExp-expected.txt:
+        * fast/js/kde/script-tests/RegExp.js:
+        * fast/regex/script-tests/toString.js:
+        * fast/regex/toString-expected.txt:
+            - Update these tests to check for the correct result.
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A3_T1-expected.txt:
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A3_T2-expected.txt:
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A3_T3-expected.txt:
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A3_T4-expected.txt:
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A3_T5-expected.txt:
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A4_T2-expected.txt:
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A4_T3-expected.txt:
+        * sputnik/Conformance/15_Native_Objects/15.10_RegExp/15.10.4/S15.10.4.1_A4_T5-expected.txt:
+            - Check in failing results, these tests are all incorrect.
+
 2012-02-29  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Resource leak with IDBObjectStore.openCursor
