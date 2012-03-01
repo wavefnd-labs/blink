@@ -1,3 +1,29 @@
+2012-03-01  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Move pageScaleDirty logic from LayerChromium to GraphicsLayerChromium
+        https://bugs.webkit.org/show_bug.cgi?id=79714
+
+        Reviewed by Adrienne Walker.
+
+        When the page scale changes on a composited layer we need to invalidate all of the contents on the layer in
+        order to repaint them at the new scale. The sequence of calls we get make this a bit tricky, since we first
+        receive a page scale changed notification and then receive the new layer bounds. The solution is to defer the
+        invalidation until we have the new layer bounds, which landed in r99774.
+
+        This moves that logic from LayerChromium into GraphicsLayerChromium since IMO this is pretty particular to the
+        way WebCore is passing us invalidations and not something fundamental to the compositor.
+
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        (WebCore::GraphicsLayerChromium::GraphicsLayerChromium):
+        (WebCore::GraphicsLayerChromium::setSize):
+        (WebCore::GraphicsLayerChromium::deviceOrPageScaleFactorChanged):
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        (WebCore::LayerChromium::setBounds):
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+
 2012-03-01  Joe Thomas  <joethomas@motorola.com>
 
         :empty still applies to elements made non-empty via page dynamics.
