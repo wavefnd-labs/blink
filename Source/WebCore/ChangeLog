@@ -1,3 +1,40 @@
+2012-02-29  Shinya Kawanaka  <shinyak@chromium.org>
+
+        Refactoring: HTMLContentSelector should be InsertionPoint-aware.
+        https://bugs.webkit.org/show_bug.cgi?id=79901
+
+        Reviewed by Hajime Morita.
+
+        ContentSelectorQuery took HTMLContentElement as argument, but patch changes it to take InsertionPoint instead.
+        If InsertionPoint is not HTMLContentElement, ContentSelectorQuery will selects the rest of light children.
+
+        Now InsertionPoint has pure virtual method 'select'. <shadow> will implement this as a method returning empty string.
+
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::hasInsertionPoint):
+        * dom/ShadowRoot.h:
+        (ShadowRoot):
+        * dom/ShadowTree.cpp:
+        (WebCore::ShadowTree::needsReattachHostChildrenAndShadow):
+        (WebCore::ShadowTree::hostChildrenChanged):
+        * html/shadow/ContentSelectorQuery.cpp:
+        (WebCore::ContentSelectorQuery::ContentSelectorQuery):
+        (WebCore::ContentSelectorQuery::matches):
+        * html/shadow/ContentSelectorQuery.h:
+        (WebCore):
+        (ContentSelectorQuery):
+        * html/shadow/HTMLContentElement.cpp:
+        (WebCore::HTMLContentElement::detach):
+        * html/shadow/HTMLContentElement.h:
+        (WebCore::toHTMLContentElement):
+        (WebCore):
+        * html/shadow/HTMLContentSelector.cpp:
+        (WebCore::HTMLContentSelector::select):
+        * html/shadow/HTMLContentSelector.h:
+        (HTMLContentSelector):
+        * html/shadow/InsertionPoint.h:
+        (InsertionPoint):
+
 2012-02-29  Luke Macpherson   <macpherson@chromium.org>
 
         Handle CSSPropertySpeak in CSSStyleApplyProperty.
