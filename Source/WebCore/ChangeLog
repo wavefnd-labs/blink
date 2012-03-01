@@ -1,3 +1,82 @@
+2012-03-01  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Lazily allocate overflow: hidden layers if we have overflowing content
+        https://bugs.webkit.org/show_bug.cgi?id=75568
+
+        Reviewed by David Hyatt.
+
+        Change covered by the existing tests and the tons of rebaselines.
+
+        This change makes us lazily allocate our RenderLayer for overflow: hidden layers only.
+
+        Apart from saving some memory, it will also speed up the rendering as we don't need to
+        go through the layer's machinery when painting and hit testing.
+
+        On http://dglazkov.github.com/performance-tests/biggrid.html benchmark, this puts the
+        overflow: hidden case in par with the overflow: visible case when scrolling that is a
+        very-smooth scrolling vs a jerky one currently (mostly due to the painting speedup).
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::updateScrollInfoAfterLayout):
+        Changed this method to update our size cache if needed.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::paint):
+        (WebCore::RenderBlock::isPointInOverflowControl):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleDidChange):
+        (WebCore::RenderBox::scrollWidth):
+        (WebCore::RenderBox::scrollHeight):
+        (WebCore::RenderBox::scrollLeft):
+        (WebCore::RenderBox::scrollTop):
+        (WebCore::RenderBox::setScrollLeft):
+        (WebCore::RenderBox::setScrollTop):
+        (WebCore::RenderBox::includeVerticalScrollbarSize):
+        (WebCore::RenderBox::includeHorizontalScrollbarSize):
+        (WebCore::RenderBox::pushContentsClip):
+        (WebCore::RenderBox::popContentsClip):
+        (WebCore::RenderBox::addLayoutOverflow):
+        Added layer() check to the previous call sites.
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::ensureLayer):
+        Added this function to create and add a new layer.
+
+        (WebCore::RenderBoxModelObject::willBeDestroyed):
+        (WebCore):
+        (WebCore::RenderBoxModelObject::styleDidChange):
+        Patched those method to handle updating / removing
+        cached size entries.
+
+        (WebCore::cachedSizeForOverflowClipMap):
+        (WebCore::RenderBoxModelObject::cachedSizeForOverflowClip):
+        (WebCore::RenderBoxModelObject::updateCachedSizeForOverflowClip):
+        (WebCore::RenderBoxModelObject::clearCachedSizeForOverflowClip):
+        This logic stores the size information for later repainting.
+        It is in practice replicating what RenderLayer is doing.
+
+        * rendering/RenderBoxModelObject.h:
+        (WebCore::RenderBoxModelObject::requiresLayer):
+        Updated to call requiresLayerForOverflowClip.
+
+        (WebCore::RenderBoxModelObject::requiresLayerForOverflowClip):
+        Added this method to check if we can lazily allocate the layer.
+
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutBlock):
+        Removed some checks as they are part of updateScrollInfoAfterLayout.
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::scrolledContentOffset):
+        Added a layer() check.
+
+        * rendering/RenderTableRow.h:
+        (RenderTableRow):
+        Added a comment about why we need a layout for table rows.
+
 2012-03-01  Abhishek Arya  <inferno@chromium.org>
 
         Protect functions using two container node function, each of which can fire mutation events.
