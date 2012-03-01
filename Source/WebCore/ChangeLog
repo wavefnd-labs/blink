@@ -1,3 +1,77 @@
+2012-02-29  Adam Barth  <abarth@webkit.org>
+
+        ScriptExecutionContext has too many ifdef ENABLE(SQL_DATABASE)
+        https://bugs.webkit.org/show_bug.cgi?id=79633
+
+        Reviewed by Eric Seidel.
+
+        This class creates a DatabaseContext object to supplement the
+        ScriptExecutionContext with database-specific information.  This new
+        object lets us remove a bunch of database-specific (and ifdefed) logic
+        from ScriptExecutionContext.(cpp|h).
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/ScriptExecutionContext.cpp:
+        (WebCore::ScriptExecutionContext::ScriptExecutionContext):
+        (WebCore::ScriptExecutionContext::~ScriptExecutionContext):
+        (WebCore):
+        * dom/ScriptExecutionContext.h:
+        (WebCore):
+        (ScriptExecutionContext):
+        * history/PageCache.cpp:
+        (WebCore::logCanCacheFrameDecision):
+        (WebCore::PageCache::canCachePageContainingThisFrame):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::stopLoading):
+        * platform/Supplementable.h:
+        (WebCore::Supplementable::provideSupplement):
+        (WebCore::Supplementable::requireSupplement):
+        (Supplementable):
+        * storage/AbstractDatabase.cpp:
+        (WebCore::AbstractDatabase::AbstractDatabase):
+        * storage/AbstractDatabase.h:
+        (WebCore):
+        (WebCore::AbstractDatabase::databaseContext):
+        (AbstractDatabase):
+        * storage/Database.cpp:
+        (WebCore::Database::openDatabase):
+        (WebCore::Database::Database):
+        (WebCore::Database::openAndVerifyVersion):
+        (WebCore::Database::markAsDeletedAndClose):
+        (WebCore::Database::close):
+        (WebCore::Database::closeImmediately):
+        (WebCore::Database::performOpenAndVerify):
+        (WebCore::Database::scheduleTransaction):
+        (WebCore::Database::scheduleTransactionStep):
+        (WebCore::Database::transactionClient):
+        (WebCore::Database::transactionCoordinator):
+        (WebCore::Database::tableNames):
+        (WebCore::Database::securityOrigin):
+        * storage/DatabaseContext.cpp: Added.
+        (WebCore):
+        (WebCore::existingDatabaseContextFrom):
+        (WebCore::DatabaseContext::DatabaseContext):
+        (WebCore::DatabaseContext::~DatabaseContext):
+        (WebCore::DatabaseContext::from):
+        (WebCore::DatabaseContext::databaseThread):
+        (WebCore::DatabaseContext::hasOpenDatabases):
+        (WebCore::DatabaseContext::stopDatabases):
+        * storage/DatabaseContext.h: Added.
+        (WebCore):
+        (DatabaseContext):
+        (WebCore::DatabaseContext::setHasOpenDatabases):
+        * storage/SQLTransaction.cpp:
+        (WebCore::SQLTransaction::checkAndHandleClosedOrInterruptedDatabase):
+        (WebCore::SQLTransaction::notifyDatabaseThreadIsShuttingDown):
+        * workers/WorkerThread.cpp:
+        (WebCore::WorkerThreadShutdownStartTask::performTask):
+
 2012-02-29  Shinya Kawanaka  <shinyak@chromium.org>
 
         Refactoring: HTMLContentSelector should be InsertionPoint-aware.
