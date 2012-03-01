@@ -1,3 +1,35 @@
+2012-03-01  Kenneth Rohde Christiansen  <kenneth@webkit.org>
+
+        Make the tiling code slightly smarter
+        https://bugs.webkit.org/show_bug.cgi?id=80015
+
+        Reviewed by Simon Hausmann.
+
+        Avoid doing the same tranformations all over in each call to
+        tileRectForCoordinate.
+
+        Do not resize tiles and then drop them because they are not out of
+        the keep rect; instead drop before resizing.
+
+        Rename dropTilesOutsideRect to setKeepRect as it now stored the keep
+        rect. This is used to avoid unneeded iteration of all tiles for
+        invalidates outside the keep rect.
+
+        * platform/graphics/TiledBackingStore.cpp:
+        (WebCore::TiledBackingStore::invalidate):
+        (WebCore):
+        (WebCore::TiledBackingStore::commitScaleChange):
+        (WebCore::TiledBackingStore::coverageRatio):
+        (WebCore::TiledBackingStore::createTiles):
+        (WebCore::TiledBackingStore::adjustForContentsRect):
+        (WebCore::TiledBackingStore::resizeEdgeTiles):
+        (WebCore::TiledBackingStore::setKeepRect):
+        (WebCore::TiledBackingStore::removeAllNonVisibleTiles):
+        (WebCore::TiledBackingStore::tileRectForCoordinate):
+        (WebCore::TiledBackingStore::setSupportsAlpha):
+        * platform/graphics/TiledBackingStore.h:
+        (TiledBackingStore):
+
 2012-02-29  Kinuko Yasuda  <kinuko@chromium.org>
 
         Use the new createSnapshotFileAndReadMetadata API for FileEntry.file()
