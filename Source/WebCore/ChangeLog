@@ -1,5 +1,54 @@
 2012-03-01  Nikolas Zimmermann  <nzimmermann@rim.com>
 
+        Introduce SMIL overrideStyle, to make SVG stop mutating CSS styles directly
+        https://bugs.webkit.org/show_bug.cgi?id=79790
+
+        Reviewed by Zoltan Herczeg.
+
+        Next step towards enabling animVal support for XML attribute animations.
+        When SVG CSS properties are animated using SMIL, we currently mutate
+        the target elements style, and have to keep a baseValue around as String
+        to be able to recover from the DOM mutations at the end, if fill!="freeze".
+
+        The approach required by SMIL is to keep around an override style declaration
+        set and apply it right after the inline style declarations. Implement that
+        finally, to avoid mutating styles directly.
+
+        Test: svg/animations/attributeTypes.html
+
+        * css/CSSStyleSelector.cpp: Model "SMIL animation style" applying just like "inline style" declarations.
+        (WebCore::CSSStyleSelector::addElementStyleProperties): Refactored common code from matchAllRules().
+        (WebCore::CSSStyleSelector::matchAllRules): Apply "SMIL animation style" after "inline style" declarations, as specified in SMIL2.
+        * css/CSSStyleSelector.h: Add new addElementStyleProperties() helper.
+        * svg/SVGAnimateElement.cpp: Keep track of animation state, if it's about to end, clear "SMIL animation style" upon next applyResultToTarget() call.
+        (WebCore::SVGAnimateElement::SVGAnimateElement):
+        (WebCore::SVGAnimateElement::applyResultsToTarget): Reset the CSS property we're animating int the "SMIL animation style", after animation ends.
+                                                            (Instead of resetting target->style() properties to the old baseValue, as we used to do).
+        (WebCore::SVGAnimateElement::endedActiveInterval): Set m_aboutToStopAnimation to true, so next call to applyResultsToTarget() knows the animation ends.
+        * svg/SVGAnimateElement.h: Store bool m_aboutToSTopAnimation;
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::setTargetAttributeAnimatedCSSValue):
+        (WebCore::setTargetAttributeAnimatedXMLValue):
+            Refactored both of these methods from setTargetAttributeAnimatedValue().
+            Changed the CSS part, to apply property changes to the "SMIL animation style" instead of the regular StylePropertySet.
+        (WebCore::SVGAnimationElement::setTargetAttributeAnimatedValue): Refactored code, use shouldApplyAnimation() to determine whether this animation should run.
+        (WebCore::SVGAnimationElement::resetAnimationState): New helper calling setTargetAttributeAnimatedValue with a null-string for CSS attributes, when the animation ends.
+                                                             This is used to detect that the CSS property should be removed from the "SMIL animation style".
+        (WebCore::SVGAnimationElement::shouldApplyAnimation): Refactored from existing code, and make it more obvious how attributeType influences the animation, all according to SVG 1.1/SMIL2.
+        * svg/SVGAnimationElement.h:
+        * svg/SVGElement.cpp: Manage the "SMIL animation style", in SVGElementRareData, if needed. Only gets created if SMIL animations on CSS properties run.
+        (WebCore::SVGElement::~SVGElement): Destroy SMIL animation style, upon destruction.
+        (WebCore::SVGElement::animatedSMILStyleProperties): Returns the StylePropertySet for the "SMIL animation style", if it's available.
+        (WebCore::SVGElement::ensureAnimatedSMILStyleProperties): Enforces creating the StylePropertySet for the "SMIL animation style".
+        * svg/SVGElement.h: Expose new methods.
+        * svg/SVGElementRareData.h: Stores the "SMIL animation style", actual managment is done by SVGElement, if needed.
+        (WebCore::SVGElementRareData::animatedSMILStyleProperties): Retrieve it.
+        (WebCore::SVGElementRareData::ensureAnimatedSMILStyleProperties): Create it.
+        (WebCore::SVGElementRareData::destroyAnimatedSMILStyleProperties): Destroy it.
+        * svg/animation/SVGSMILElement.h: Make endedActiveInterval() virtual again, its needed by SVGAnimateElement now.
+
+2012-03-01  Nikolas Zimmermann  <nzimmermann@rim.com>
+
         Unreviewed, rolling out r109255.
         http://trac.webkit.org/changeset/109255
         https://bugs.webkit.org/show_bug.cgi?id=79932
