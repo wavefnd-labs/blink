@@ -1,3 +1,59 @@
+2012-03-01  Levi Weintraub  <leviw@chromium.org>
+
+        Add roundToInt method for LayoutUnits
+        https://bugs.webkit.org/show_bug.cgi?id=79283
+
+        Reviewed by Eric Seidel.
+
+        Adding a roundToInt method that rounds a LayoutUnit to the nearest integer. This
+        only has an effect once we switch to sub-pixel positioning. Points and offsets
+        are rounded for painting and hit testing.
+
+        No new tests. No change in behavior.
+
+        * dom/MouseRelatedEvent.cpp:
+        (WebCore::MouseRelatedEvent::offsetX):
+        (WebCore::MouseRelatedEvent::offsetY):
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlTextTrackContainerElement::updateSizes):
+        * rendering/LayoutState.cpp:
+        (WebCore::LayoutState::computeLineGridPaginationOrigin):
+        * rendering/LayoutTypes.h:
+        (WebCore::roundToInt): Stub until we switch to sub-pixel LayoutUnits.
+        (WebCore):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::pageLogicalTopForOffset):
+        * rendering/RenderBlock.h:
+        (WebCore::RenderBlock::pixelSnappedLogicalLeftOffsetForLine): Correcting to use the
+        pixel snapped methods on FloatingObjects and removing the fixme.
+        (WebCore::RenderBlock::pixelSnappedLogicalTopForFloat): Ditto.
+        (WebCore::RenderBlock::pixelSnappedLogicalBottomForFloat): Ditto.
+        (WebCore::RenderBlock::pixelSnappedLogicalLeftForFloat): Ditto.
+        (WebCore::RenderBlock::pixelSnappedLogicalRightForFloat): Ditto.
+        (WebCore::RenderBlock::pixelSnappedLogicalWidthForFloat): Ditto.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::LineWidth::updateAvailableWidth):
+        (WebCore::RenderBlock::computeInlineDirectionPositionsForLine): Using
+        pixelSnappedLogicalLeft/RightOffsetForLine convenience methods for line layout. When
+        we switch to sub-pixel positioning, we still pixel snap blocks before painting them,
+        but text is rendered using floats. We need to ensure the text is laid out using the
+        actual pixel width of the containing block to avoid bleeding out of the block.
+        * rendering/RenderBoxModelObject.h: Moving the fixme to pixelSnappedWidth/Height and
+        adding the necessary rounding for Left/Top.
+        (WebCore::RenderBoxModelObject::pixelSnappedOffsetLeft):
+        (WebCore::RenderBoxModelObject::pixelSnappedOffsetTop):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::scrollRectToVisible):
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::scrollHeight): Rounding the height for scrollHeight. Scrolling
+        always uses rounded values.
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::localToParentTransform): Similar to the line box tree, since
+        SVG renders using floats, we need to start with pixel snapped values from the render
+        tree or we'll end up with the contents not properly aligned to the rest of the page.
+        * rendering/svg/SVGRenderSupport.cpp:
+        (WebCore::SVGRenderSupport::prepareToRenderSVGContent):
+
 2012-03-01  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: arrays in object properties sections do not scale.
