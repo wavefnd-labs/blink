@@ -1,3 +1,274 @@
+2012-03-01  Peter Kotwicz  <pkotwicz@google.com>
+
+        Decouple scrollbar painting from Scrollbar object
+        https://bugs.webkit.org/show_bug.cgi?id=78028
+
+        Reviewed by James Robinson.
+
+        Added interface ScrollbarThemeClient which Scrollbar inherits from.
+        This allows painting via ScrollbarTheme with a proxy to a Scrollbar
+        object.
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/Scrollbar.cpp:
+        (WebCore::Scrollbar::scrollbarOverlayStyle):
+        (WebCore):
+        (WebCore::Scrollbar::getTickmarks):
+        (WebCore::Scrollbar::isScrollableAreaActive):
+        (WebCore::Scrollbar::isScrollViewScrollbar):
+        (WebCore::Scrollbar::setFrameRect):
+        * platform/Scrollbar.h:
+        (Scrollbar):
+        (WebCore::Scrollbar::x):
+        (WebCore::Scrollbar::y):
+        (WebCore::Scrollbar::width):
+        (WebCore::Scrollbar::height):
+        (WebCore::Scrollbar::size):
+        (WebCore::Scrollbar::location):
+        (WebCore::Scrollbar::parent):
+        (WebCore::Scrollbar::root):
+        (WebCore::Scrollbar::frameRect):
+        (WebCore::Scrollbar::invalidate):
+        (WebCore::Scrollbar::convertFromContainingWindow):
+        (WebCore::Scrollbar::isCustomScrollbar):
+        (WebCore::Scrollbar::orientation):
+        (WebCore::Scrollbar::value):
+        (WebCore::Scrollbar::currentPos):
+        (WebCore::Scrollbar::visibleSize):
+        (WebCore::Scrollbar::totalSize):
+        (WebCore::Scrollbar::maximum):
+        (WebCore::Scrollbar::controlSize):
+        (WebCore::Scrollbar::lineStep):
+        (WebCore::Scrollbar::pageStep):
+        (WebCore::Scrollbar::pressedPart):
+        (WebCore::Scrollbar::hoveredPart):
+        (WebCore::Scrollbar::styleChanged):
+        (WebCore::Scrollbar::enabled):
+        * platform/ScrollbarTheme.h:
+        (WebCore):
+        (WebCore::ScrollbarTheme::updateEnabledState):
+        (WebCore::ScrollbarTheme::paint):
+        (WebCore::ScrollbarTheme::hitTest):
+        (WebCore::ScrollbarTheme::updateScrollbarOverlayStyle):
+        (WebCore::ScrollbarTheme::invalidateParts):
+        (WebCore::ScrollbarTheme::invalidatePart):
+        (WebCore::ScrollbarTheme::shouldCenterOnThumb):
+        (WebCore::ScrollbarTheme::shouldSnapBackToDragOrigin):
+        (WebCore::ScrollbarTheme::shouldDragDocumentInsteadOfThumb):
+        (WebCore::ScrollbarTheme::thumbPosition):
+        (WebCore::ScrollbarTheme::thumbLength):
+        (WebCore::ScrollbarTheme::trackPosition):
+        (WebCore::ScrollbarTheme::trackLength):
+        (WebCore::ScrollbarTheme::registerScrollbar):
+        (WebCore::ScrollbarTheme::unregisterScrollbar):
+        * platform/ScrollbarThemeClient.h: Added.
+        (WebCore):
+        (ScrollbarThemeClient):
+        (WebCore::ScrollbarThemeClient::~ScrollbarThemeClient):
+        * platform/ScrollbarThemeComposite.cpp:
+        (WebCore::ScrollbarThemeComposite::paint):
+        (WebCore::ScrollbarThemeComposite::hitTest):
+        (WebCore::ScrollbarThemeComposite::invalidatePart):
+        (WebCore::ScrollbarThemeComposite::splitTrack):
+        (WebCore::usedTotalSize):
+        (WebCore::ScrollbarThemeComposite::thumbPosition):
+        (WebCore::ScrollbarThemeComposite::thumbLength):
+        (WebCore::ScrollbarThemeComposite::minimumThumbLength):
+        (WebCore::ScrollbarThemeComposite::trackPosition):
+        (WebCore::ScrollbarThemeComposite::trackLength):
+        * platform/ScrollbarThemeComposite.h:
+        (ScrollbarThemeComposite):
+        (WebCore::ScrollbarThemeComposite::paintScrollbarBackground):
+        (WebCore::ScrollbarThemeComposite::paintTrackBackground):
+        (WebCore::ScrollbarThemeComposite::paintTrackPiece):
+        (WebCore::ScrollbarThemeComposite::paintButton):
+        (WebCore::ScrollbarThemeComposite::paintThumb):
+        (WebCore::ScrollbarThemeComposite::paintTickmarks):
+        (WebCore::ScrollbarThemeComposite::constrainTrackRectToTrackPieces):
+        * platform/chromium/ScrollbarThemeChromium.cpp:
+        (WebCore::ScrollbarThemeChromium::hasThumb):
+        (WebCore::ScrollbarThemeChromium::backButtonRect):
+        (WebCore::ScrollbarThemeChromium::forwardButtonRect):
+        (WebCore::ScrollbarThemeChromium::trackRect):
+        (WebCore::ScrollbarThemeChromium::paintTrackBackground):
+        (WebCore::ScrollbarThemeChromium::paintTickmarks):
+        * platform/chromium/ScrollbarThemeChromium.h:
+        (WebCore::ScrollbarThemeChromium::hasButtons):
+        (ScrollbarThemeChromium):
+        * platform/chromium/ScrollbarThemeChromiumAndroid.cpp:
+        (WebCore::ScrollbarThemeChromiumAndroid::paintScrollbarBackground):
+        (WebCore::ScrollbarThemeChromiumAndroid::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeChromiumAndroid::buttonSize):
+        (WebCore::ScrollbarThemeChromiumAndroid::minimumThumbLength):
+        * platform/chromium/ScrollbarThemeChromiumAndroid.h:
+        (ScrollbarThemeChromiumAndroid):
+        * platform/chromium/ScrollbarThemeChromiumLinux.cpp:
+        (WebCore::ScrollbarThemeChromiumLinux::paintTrackPiece):
+        (WebCore::ScrollbarThemeChromiumLinux::paintButton):
+        (WebCore::ScrollbarThemeChromiumLinux::paintThumb):
+        (WebCore::ScrollbarThemeChromiumLinux::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeChromiumLinux::buttonSize):
+        (WebCore::ScrollbarThemeChromiumLinux::minimumThumbLength):
+        * platform/chromium/ScrollbarThemeChromiumLinux.h:
+        (ScrollbarThemeChromiumLinux):
+        * platform/chromium/ScrollbarThemeChromiumMac.h:
+        (ScrollbarThemeChromiumMac):
+        * platform/chromium/ScrollbarThemeChromiumMac.mm:
+        (WebCore::scrollbarStateToThemeState):
+        (WebCore::ScrollbarThemeChromiumMac::paint):
+        (WebCore::ScrollbarThemeChromiumMac::paintGivenTickmarks):
+        * platform/chromium/ScrollbarThemeChromiumWin.cpp:
+        (WebCore::ScrollbarThemeChromiumWin::shouldSnapBackToDragOrigin):
+        (WebCore::ScrollbarThemeChromiumWin::paintTrackPiece):
+        (WebCore::ScrollbarThemeChromiumWin::paintButton):
+        (WebCore::ScrollbarThemeChromiumWin::paintThumb):
+        (WebCore::ScrollbarThemeChromiumWin::getThemeState):
+        (WebCore::ScrollbarThemeChromiumWin::getThemeArrowState):
+        (WebCore::ScrollbarThemeChromiumWin::getClassicThemeState):
+        (WebCore::ScrollbarThemeChromiumWin::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeChromiumWin::buttonSize):
+        * platform/chromium/ScrollbarThemeChromiumWin.h:
+        (ScrollbarThemeChromiumWin):
+        * platform/efl/ScrollbarThemeEfl.cpp:
+        (WebCore::ScrollbarThemeEfl::registerScrollbar):
+        (WebCore::ScrollbarThemeEfl::unregisterScrollbar):
+        * platform/efl/ScrollbarThemeEfl.h:
+        (ScrollbarThemeEfl):
+        * platform/gtk/ScrollbarThemeGtk.cpp:
+        (WebCore):
+        (WebCore::ScrollbarThemeGtk::registerScrollbar):
+        (WebCore::ScrollbarThemeGtk::unregisterScrollbar):
+        (WebCore::ScrollbarThemeGtk::updateScrollbarsFrameThickness):
+        (WebCore::ScrollbarThemeGtk::hasThumb):
+        (WebCore::ScrollbarThemeGtk::backButtonRect):
+        (WebCore::ScrollbarThemeGtk::forwardButtonRect):
+        (WebCore::ScrollbarThemeGtk::trackRect):
+        (WebCore::ScrollbarThemeGtk::thumbRect):
+        (WebCore::ScrollbarThemeGtk::paint):
+        (WebCore::ScrollbarThemeGtk::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeGtk::buttonSize):
+        (WebCore::ScrollbarThemeGtk::minimumThumbLength):
+        * platform/gtk/ScrollbarThemeGtk.h:
+        (WebCore::ScrollbarThemeGtk::hasButtons):
+        (ScrollbarThemeGtk):
+        * platform/gtk/ScrollbarThemeGtk2.cpp:
+        (WebCore::getWidgetForScrollbar):
+        (WebCore::ScrollbarThemeGtk::paintTrackBackground):
+        (WebCore::ScrollbarThemeGtk::paintScrollbarBackground):
+        (WebCore::ScrollbarThemeGtk::paintThumb):
+        (WebCore::ScrollbarThemeGtk::paintButton):
+        * platform/gtk/ScrollbarThemeGtk3.cpp:
+        (WebCore::ScrollbarThemeGtk::paintTrackBackground):
+        (WebCore::ScrollbarThemeGtk::paintScrollbarBackground):
+        (WebCore::ScrollbarThemeGtk::paintThumb):
+        (WebCore::ScrollbarThemeGtk::paintButton):
+        * platform/mac/ScrollbarThemeMac.h:
+        (ScrollbarThemeMac):
+        * platform/mac/ScrollbarThemeMac.mm:
+        (WebCore):
+        (WebCore::ScrollbarThemeMac::registerScrollbar):
+        (WebCore::ScrollbarThemeMac::unregisterScrollbar):
+        (WebCore::ScrollbarThemeMac::setNewPainterForScrollbar):
+        (WebCore::ScrollbarThemeMac::painterForScrollbar):
+        (WebCore::ScrollbarThemeMac::updateScrollbarOverlayStyle):
+        (WebCore::ScrollbarThemeMac::hasButtons):
+        (WebCore::ScrollbarThemeMac::hasThumb):
+        (WebCore::ScrollbarThemeMac::backButtonRect):
+        (WebCore::ScrollbarThemeMac::forwardButtonRect):
+        (WebCore::ScrollbarThemeMac::trackRect):
+        (WebCore::ScrollbarThemeMac::minimumThumbLength):
+        (WebCore::ScrollbarThemeMac::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeMac::shouldDragDocumentInsteadOfThumb):
+        (WebCore::ScrollbarThemeMac::updateEnabledState):
+        (WebCore::ScrollbarThemeMac::paint):
+        * platform/mock/ScrollbarThemeMock.cpp:
+        (WebCore::ScrollbarThemeMock::trackRect):
+        (WebCore::ScrollbarThemeMock::paintTrackBackground):
+        (WebCore::ScrollbarThemeMock::paintThumb):
+        * platform/mock/ScrollbarThemeMock.h:
+        (WebCore::ScrollbarThemeMock::hasButtons):
+        (WebCore::ScrollbarThemeMock::hasThumb):
+        (WebCore::ScrollbarThemeMock::backButtonRect):
+        (WebCore::ScrollbarThemeMock::forwardButtonRect):
+        (ScrollbarThemeMock):
+        * platform/qt/ScrollbarThemeQt.cpp:
+        (WebCore::styleOptionSlider):
+        (WebCore::ScrollbarThemeQt::paint):
+        (WebCore::ScrollbarThemeQt::hitTest):
+        (WebCore::ScrollbarThemeQt::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeQt::invalidatePart):
+        (WebCore::ScrollbarThemeQt::thumbPosition):
+        (WebCore::ScrollbarThemeQt::thumbLength):
+        (WebCore::ScrollbarThemeQt::trackPosition):
+        (WebCore::ScrollbarThemeQt::trackLength):
+        * platform/qt/ScrollbarThemeQt.h:
+        (ScrollbarThemeQt):
+        * platform/win/ScrollbarThemeSafari.cpp:
+        (WebCore::ScrollbarThemeSafari::hasButtons):
+        (WebCore::ScrollbarThemeSafari::hasThumb):
+        (WebCore::ScrollbarThemeSafari::backButtonRect):
+        (WebCore::ScrollbarThemeSafari::forwardButtonRect):
+        (WebCore::ScrollbarThemeSafari::trackRect):
+        (WebCore::ScrollbarThemeSafari::minimumThumbLength):
+        (WebCore::ScrollbarThemeSafari::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeSafari::paintTrackBackground):
+        (WebCore::ScrollbarThemeSafari::paintButton):
+        (WebCore::ScrollbarThemeSafari::paintThumb):
+        * platform/win/ScrollbarThemeSafari.h:
+        (ScrollbarThemeSafari):
+        * platform/win/ScrollbarThemeWin.cpp:
+        (WebCore::ScrollbarThemeWin::hasThumb):
+        (WebCore::ScrollbarThemeWin::backButtonRect):
+        (WebCore::ScrollbarThemeWin::forwardButtonRect):
+        (WebCore::ScrollbarThemeWin::trackRect):
+        (WebCore::ScrollbarThemeWin::shouldCenterOnThumb):
+        (WebCore::ScrollbarThemeWin::shouldSnapBackToDragOrigin):
+        (WebCore::ScrollbarThemeWin::paintTrackBackground):
+        (WebCore::ScrollbarThemeWin::paintTrackPiece):
+        (WebCore::ScrollbarThemeWin::paintButton):
+        (WebCore::paintGripper):
+        (WebCore::ScrollbarThemeWin::paintThumb):
+        * platform/win/ScrollbarThemeWin.h:
+        (WebCore::ScrollbarThemeWin::hasButtons):
+        (ScrollbarThemeWin):
+        * platform/wx/ScrollbarThemeWx.cpp:
+        (WebCore::ScrollbarThemeWx::hasThumb):
+        (WebCore::ScrollbarThemeWx::minimumThumbLength):
+        (WebCore::ScrollbarThemeWx::buttonSize):
+        (WebCore::ScrollbarThemeWx::splitTrack):
+        (WebCore::ScrollbarThemeWx::backButtonRect):
+        (WebCore::ScrollbarThemeWx::forwardButtonRect):
+        (WebCore::ScrollbarThemeWx::trackRect):
+        (WebCore::ScrollbarThemeWx::paint):
+        * platform/wx/ScrollbarThemeWx.h:
+        (ScrollbarThemeWx):
+        (WebCore::ScrollbarThemeWx::hasButtons):
+        * rendering/RenderScrollbar.h:
+        (WebCore::toRenderScrollbar):
+        * rendering/RenderScrollbarTheme.cpp:
+        (WebCore::RenderScrollbarTheme::buttonSizesAlongTrackAxis):
+        (WebCore::RenderScrollbarTheme::hasButtons):
+        (WebCore::RenderScrollbarTheme::hasThumb):
+        (WebCore::RenderScrollbarTheme::minimumThumbLength):
+        (WebCore::RenderScrollbarTheme::backButtonRect):
+        (WebCore::RenderScrollbarTheme::forwardButtonRect):
+        (WebCore::RenderScrollbarTheme::trackRect):
+        (WebCore::RenderScrollbarTheme::constrainTrackRectToTrackPieces):
+        (WebCore::RenderScrollbarTheme::paintScrollbarBackground):
+        (WebCore::RenderScrollbarTheme::paintTrackBackground):
+        (WebCore::RenderScrollbarTheme::paintTrackPiece):
+        (WebCore::RenderScrollbarTheme::paintButton):
+        (WebCore::RenderScrollbarTheme::paintThumb):
+        * rendering/RenderScrollbarTheme.h:
+        (WebCore::RenderScrollbarTheme::shouldCenterOnThumb):
+        (WebCore::RenderScrollbarTheme::registerScrollbar):
+        (WebCore::RenderScrollbarTheme::unregisterScrollbar):
+        (RenderScrollbarTheme):
+
 2012-03-01  Luke Macpherson   <macpherson@chromium.org>
 
         Implement CSSPropertyImageRendering in CSSStyleApplyProperty.
