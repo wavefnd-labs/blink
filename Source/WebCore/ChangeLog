@@ -1,3 +1,33 @@
+2012-03-02  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
+        Suspend/Resume API for pausing timers and animations.
+        https://bugs.webkit.org/show_bug.cgi?id=76063
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        * dom/ActiveDOMObject.h:
+            New ReasonForSuspension: PageWillBePaused.
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::suspend): Handle new ReasonForSuspension.
+        * page/Frame.cpp:
+        (WebCore::Frame::Frame):
+        (WebCore::Frame::setDocument):
+        (WebCore::Frame::suspendActiveDOMObjectsAndAnimations):
+        (WebCore::Frame::resumeActiveDOMObjectsAndAnimations):
+        * page/Frame.h:
+        (WebCore::Frame::activeDOMObjectsAndAnimationsSuspended):
+            Frame now maintains a state of suspending animation and ActiveDOMObjects,
+            which is inherited to all child-frames.
+        * page/Page.cpp:
+        (WebCore::Page::suspendActiveDOMObjectsAndAnimations):
+        (WebCore::Page::resumeActiveDOMObjectsAndAnimations):
+        * page/Page.h:
+            Functions for suspending and resuming active DOM objects and animations in all frames.
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::willRenderImage):
+            WillRenderImage now checks for suspension. This causes animated images to pause
+            together with all other types of animations.
+
 2012-03-02  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Make order of attribute/method in HTMLFieldSetElement.idl as same as specification
