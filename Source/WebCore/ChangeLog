@@ -1,3 +1,36 @@
+2012-03-01  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Make opaque paint tracker aware of SkCanvas layers
+        https://bugs.webkit.org/show_bug.cgi?id=79145
+
+        Reviewed by Stephen White.
+
+        The current opaque paint tracker ignored SkCanvas layers entirely. But
+        SkCanvas layers can be used to apply things like alpha. So we make it
+        know about layers, and apply any clipping and SkPaint objects for layers
+        when tracking a paint.
+
+        Image clipping is done via a layer, so we can now also remove the
+        special-case code around image clipping in PlatformContextSkia and
+        OpaqueRegionSkia.
+
+        Unit test: PlatformContextSkiaTest.contextTransparencyLayerTest
+
+        Test: compositing/culling/clear-fixed-iframe.html
+
+        * platform/graphics/skia/OpaqueRegionSkia.cpp:
+        (WebCore::OpaqueRegionSkia::didDrawRect):
+        (WebCore::OpaqueRegionSkia::didDrawPath):
+        (WebCore::OpaqueRegionSkia::didDrawPoints):
+        (WebCore::OpaqueRegionSkia::didDrawBounded):
+        (WebCore::OpaqueRegionSkia::didDraw):
+        (WebCore):
+        * platform/graphics/skia/OpaqueRegionSkia.h:
+        (OpaqueRegionSkia):
+        * platform/graphics/skia/PlatformContextSkia.cpp:
+        * platform/graphics/skia/PlatformContextSkia.h:
+        (PlatformContextSkia):
+
 2012-03-02  Kent Tamura  <tkent@chromium.org>
 
         Add HTML-capable popup API to ChromeClient
