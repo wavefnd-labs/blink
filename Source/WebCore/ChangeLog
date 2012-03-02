@@ -1,3 +1,190 @@
+2012-03-01  Adam Barth  <abarth@webkit.org>
+
+        Move WebCore/storage/IDB* files into WebCore/Modules/indexeddb
+        https://bugs.webkit.org/show_bug.cgi?id=80071
+
+        Reviewed by Kentaro Hara.
+
+        Now that we've removed all the ENABLE(INDEXED_DATABASE) ifdefs from
+        WebCore proper, we can move IndexedDB into its own module.
+
+        * CMakeLists.txt:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Modules/indexeddb/IDBAny.cpp: Copied from Source/WebCore/storage/IDBAny.cpp.
+        * Modules/indexeddb/IDBAny.h: Copied from Source/WebCore/storage/IDBAny.h.
+        * Modules/indexeddb/IDBAny.idl: Copied from Source/WebCore/storage/IDBAny.idl.
+        * Modules/indexeddb/IDBBackingStore.h: Copied from Source/WebCore/storage/IDBBackingStore.h.
+        * Modules/indexeddb/IDBCallbacks.h: Copied from Source/WebCore/storage/IDBCallbacks.h.
+        * Modules/indexeddb/IDBCursor.cpp: Copied from Source/WebCore/storage/IDBCursor.cpp.
+        * Modules/indexeddb/IDBCursor.h: Copied from Source/WebCore/storage/IDBCursor.h.
+        * Modules/indexeddb/IDBCursor.idl: Copied from Source/WebCore/storage/IDBCursor.idl.
+        * Modules/indexeddb/IDBCursorBackendImpl.cpp: Copied from Source/WebCore/storage/IDBCursorBackendImpl.cpp.
+        * Modules/indexeddb/IDBCursorBackendImpl.h: Copied from Source/WebCore/storage/IDBCursorBackendImpl.h.
+        * Modules/indexeddb/IDBCursorBackendInterface.h: Copied from Source/WebCore/storage/IDBCursorBackendInterface.h.
+        * Modules/indexeddb/IDBCursorWithValue.cpp: Copied from Source/WebCore/storage/IDBCursorWithValue.cpp.
+        * Modules/indexeddb/IDBCursorWithValue.h: Copied from Source/WebCore/storage/IDBCursorWithValue.h.
+        * Modules/indexeddb/IDBCursorWithValue.idl: Copied from Source/WebCore/storage/IDBCursorWithValue.idl.
+        * Modules/indexeddb/IDBDatabase.cpp: Copied from Source/WebCore/storage/IDBDatabase.cpp.
+        * Modules/indexeddb/IDBDatabase.h: Copied from Source/WebCore/storage/IDBDatabase.h.
+        * Modules/indexeddb/IDBDatabase.idl: Copied from Source/WebCore/storage/IDBDatabase.idl.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp: Copied from Source/WebCore/storage/IDBDatabaseBackendImpl.cpp.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h: Copied from Source/WebCore/storage/IDBDatabaseBackendImpl.h.
+        * Modules/indexeddb/IDBDatabaseBackendInterface.h: Copied from Source/WebCore/storage/IDBDatabaseBackendInterface.h.
+        * Modules/indexeddb/IDBDatabaseCallbacks.h: Copied from Source/WebCore/storage/IDBDatabaseCallbacks.h.
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.cpp: Copied from Source/WebCore/storage/IDBDatabaseCallbacksImpl.cpp.
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.h: Copied from Source/WebCore/storage/IDBDatabaseCallbacksImpl.h.
+        * Modules/indexeddb/IDBDatabaseError.h: Copied from Source/WebCore/storage/IDBDatabaseError.h.
+        * Modules/indexeddb/IDBDatabaseError.idl: Copied from Source/WebCore/storage/IDBDatabaseError.idl.
+        * Modules/indexeddb/IDBDatabaseException.cpp: Copied from Source/WebCore/storage/IDBDatabaseException.cpp.
+        * Modules/indexeddb/IDBDatabaseException.h: Copied from Source/WebCore/storage/IDBDatabaseException.h.
+        * Modules/indexeddb/IDBDatabaseException.idl: Copied from Source/WebCore/storage/IDBDatabaseException.idl.
+        * Modules/indexeddb/IDBEventDispatcher.cpp: Copied from Source/WebCore/storage/IDBEventDispatcher.cpp.
+        * Modules/indexeddb/IDBEventDispatcher.h: Copied from Source/WebCore/storage/IDBEventDispatcher.h.
+        * Modules/indexeddb/IDBFactory.cpp: Copied from Source/WebCore/storage/IDBFactory.cpp.
+        * Modules/indexeddb/IDBFactory.h: Copied from Source/WebCore/storage/IDBFactory.h.
+        * Modules/indexeddb/IDBFactory.idl: Copied from Source/WebCore/storage/IDBFactory.idl.
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp: Copied from Source/WebCore/storage/IDBFactoryBackendImpl.cpp.
+        * Modules/indexeddb/IDBFactoryBackendImpl.h: Copied from Source/WebCore/storage/IDBFactoryBackendImpl.h.
+        * Modules/indexeddb/IDBFactoryBackendInterface.cpp: Copied from Source/WebCore/storage/IDBFactoryBackendInterface.cpp.
+        * Modules/indexeddb/IDBFactoryBackendInterface.h: Copied from Source/WebCore/storage/IDBFactoryBackendInterface.h.
+        * Modules/indexeddb/IDBIndex.cpp: Copied from Source/WebCore/storage/IDBIndex.cpp.
+        * Modules/indexeddb/IDBIndex.h: Copied from Source/WebCore/storage/IDBIndex.h.
+        * Modules/indexeddb/IDBIndex.idl: Copied from Source/WebCore/storage/IDBIndex.idl.
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp: Copied from Source/WebCore/storage/IDBIndexBackendImpl.cpp.
+        * Modules/indexeddb/IDBIndexBackendImpl.h: Copied from Source/WebCore/storage/IDBIndexBackendImpl.h.
+        * Modules/indexeddb/IDBIndexBackendInterface.h: Copied from Source/WebCore/storage/IDBIndexBackendInterface.h.
+        * Modules/indexeddb/IDBKey.cpp: Copied from Source/WebCore/storage/IDBKey.cpp.
+        * Modules/indexeddb/IDBKey.h: Copied from Source/WebCore/storage/IDBKey.h.
+        * Modules/indexeddb/IDBKey.idl: Copied from Source/WebCore/storage/IDBKey.idl.
+        * Modules/indexeddb/IDBKeyPath.cpp: Copied from Source/WebCore/storage/IDBKeyPath.cpp.
+        * Modules/indexeddb/IDBKeyPath.h: Copied from Source/WebCore/storage/IDBKeyPath.h.
+        * Modules/indexeddb/IDBKeyPathBackendImpl.cpp: Copied from Source/WebCore/storage/IDBKeyPathBackendImpl.cpp.
+        * Modules/indexeddb/IDBKeyPathBackendImpl.h: Copied from Source/WebCore/storage/IDBKeyPathBackendImpl.h.
+        * Modules/indexeddb/IDBKeyRange.cpp: Copied from Source/WebCore/storage/IDBKeyRange.cpp.
+        * Modules/indexeddb/IDBKeyRange.h: Copied from Source/WebCore/storage/IDBKeyRange.h.
+        * Modules/indexeddb/IDBKeyRange.idl: Copied from Source/WebCore/storage/IDBKeyRange.idl.
+        * Modules/indexeddb/IDBLevelDBBackingStore.cpp: Copied from Source/WebCore/storage/IDBLevelDBBackingStore.cpp.
+        * Modules/indexeddb/IDBLevelDBBackingStore.h: Copied from Source/WebCore/storage/IDBLevelDBBackingStore.h.
+        * Modules/indexeddb/IDBLevelDBCoding.cpp: Copied from Source/WebCore/storage/IDBLevelDBCoding.cpp.
+        * Modules/indexeddb/IDBLevelDBCoding.h: Copied from Source/WebCore/storage/IDBLevelDBCoding.h.
+        * Modules/indexeddb/IDBObjectStore.cpp: Copied from Source/WebCore/storage/IDBObjectStore.cpp.
+        * Modules/indexeddb/IDBObjectStore.h: Copied from Source/WebCore/storage/IDBObjectStore.h.
+        * Modules/indexeddb/IDBObjectStore.idl: Copied from Source/WebCore/storage/IDBObjectStore.idl.
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp: Copied from Source/WebCore/storage/IDBObjectStoreBackendImpl.cpp.
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.h: Copied from Source/WebCore/storage/IDBObjectStoreBackendImpl.h.
+        * Modules/indexeddb/IDBObjectStoreBackendInterface.h: Copied from Source/WebCore/storage/IDBObjectStoreBackendInterface.h.
+        * Modules/indexeddb/IDBPendingTransactionMonitor.cpp: Copied from Source/WebCore/storage/IDBPendingTransactionMonitor.cpp.
+        * Modules/indexeddb/IDBPendingTransactionMonitor.h: Copied from Source/WebCore/storage/IDBPendingTransactionMonitor.h.
+        * Modules/indexeddb/IDBRequest.cpp: Copied from Source/WebCore/storage/IDBRequest.cpp.
+        * Modules/indexeddb/IDBRequest.h: Copied from Source/WebCore/storage/IDBRequest.h.
+        * Modules/indexeddb/IDBRequest.idl: Copied from Source/WebCore/storage/IDBRequest.idl.
+        * Modules/indexeddb/IDBTracing.h: Copied from Source/WebCore/storage/IDBTracing.h.
+        * Modules/indexeddb/IDBTransaction.cpp: Copied from Source/WebCore/storage/IDBTransaction.cpp.
+        * Modules/indexeddb/IDBTransaction.h: Copied from Source/WebCore/storage/IDBTransaction.h.
+        * Modules/indexeddb/IDBTransaction.idl: Copied from Source/WebCore/storage/IDBTransaction.idl.
+        * Modules/indexeddb/IDBTransactionBackendImpl.cpp: Copied from Source/WebCore/storage/IDBTransactionBackendImpl.cpp.
+        * Modules/indexeddb/IDBTransactionBackendImpl.h: Copied from Source/WebCore/storage/IDBTransactionBackendImpl.h.
+        * Modules/indexeddb/IDBTransactionBackendInterface.h: Copied from Source/WebCore/storage/IDBTransactionBackendInterface.h.
+        * Modules/indexeddb/IDBTransactionCallbacks.h: Copied from Source/WebCore/storage/IDBTransactionCallbacks.h.
+        * Modules/indexeddb/IDBTransactionCoordinator.cpp: Copied from Source/WebCore/storage/IDBTransactionCoordinator.cpp.
+        * Modules/indexeddb/IDBTransactionCoordinator.h: Copied from Source/WebCore/storage/IDBTransactionCoordinator.h.
+        * Modules/indexeddb/IDBVersionChangeEvent.cpp: Copied from Source/WebCore/storage/IDBVersionChangeEvent.cpp.
+        * Modules/indexeddb/IDBVersionChangeEvent.h: Copied from Source/WebCore/storage/IDBVersionChangeEvent.h.
+        * Modules/indexeddb/IDBVersionChangeEvent.idl: Copied from Source/WebCore/storage/IDBVersionChangeEvent.idl.
+        * Modules/indexeddb/IDBVersionChangeRequest.cpp: Copied from Source/WebCore/storage/IDBVersionChangeRequest.cpp.
+        * Modules/indexeddb/IDBVersionChangeRequest.h: Copied from Source/WebCore/storage/IDBVersionChangeRequest.h.
+        * Modules/indexeddb/IDBVersionChangeRequest.idl: Copied from Source/WebCore/storage/IDBVersionChangeRequest.idl.
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * storage/IDBAny.cpp: Removed.
+        * storage/IDBAny.h: Removed.
+        * storage/IDBAny.idl: Removed.
+        * storage/IDBBackingStore.h: Removed.
+        * storage/IDBCallbacks.h: Removed.
+        * storage/IDBCursor.cpp: Removed.
+        * storage/IDBCursor.h: Removed.
+        * storage/IDBCursor.idl: Removed.
+        * storage/IDBCursorBackendImpl.cpp: Removed.
+        * storage/IDBCursorBackendImpl.h: Removed.
+        * storage/IDBCursorBackendInterface.h: Removed.
+        * storage/IDBCursorWithValue.cpp: Removed.
+        * storage/IDBCursorWithValue.h: Removed.
+        * storage/IDBCursorWithValue.idl: Removed.
+        * storage/IDBDatabase.cpp: Removed.
+        * storage/IDBDatabase.h: Removed.
+        * storage/IDBDatabase.idl: Removed.
+        * storage/IDBDatabaseBackendImpl.cpp: Removed.
+        * storage/IDBDatabaseBackendImpl.h: Removed.
+        * storage/IDBDatabaseBackendInterface.h: Removed.
+        * storage/IDBDatabaseCallbacks.h: Removed.
+        * storage/IDBDatabaseCallbacksImpl.cpp: Removed.
+        * storage/IDBDatabaseCallbacksImpl.h: Removed.
+        * storage/IDBDatabaseError.h: Removed.
+        * storage/IDBDatabaseError.idl: Removed.
+        * storage/IDBDatabaseException.cpp: Removed.
+        * storage/IDBDatabaseException.h: Removed.
+        * storage/IDBDatabaseException.idl: Removed.
+        * storage/IDBEventDispatcher.cpp: Removed.
+        * storage/IDBEventDispatcher.h: Removed.
+        * storage/IDBFactory.cpp: Removed.
+        * storage/IDBFactory.h: Removed.
+        * storage/IDBFactory.idl: Removed.
+        * storage/IDBFactoryBackendImpl.cpp: Removed.
+        * storage/IDBFactoryBackendImpl.h: Removed.
+        * storage/IDBFactoryBackendInterface.cpp: Removed.
+        * storage/IDBFactoryBackendInterface.h: Removed.
+        * storage/IDBIndex.cpp: Removed.
+        * storage/IDBIndex.h: Removed.
+        * storage/IDBIndex.idl: Removed.
+        * storage/IDBIndexBackendImpl.cpp: Removed.
+        * storage/IDBIndexBackendImpl.h: Removed.
+        * storage/IDBIndexBackendInterface.h: Removed.
+        * storage/IDBKey.cpp: Removed.
+        * storage/IDBKey.h: Removed.
+        * storage/IDBKey.idl: Removed.
+        * storage/IDBKeyPath.cpp: Removed.
+        * storage/IDBKeyPath.h: Removed.
+        * storage/IDBKeyPathBackendImpl.cpp: Removed.
+        * storage/IDBKeyPathBackendImpl.h: Removed.
+        * storage/IDBKeyRange.cpp: Removed.
+        * storage/IDBKeyRange.h: Removed.
+        * storage/IDBKeyRange.idl: Removed.
+        * storage/IDBLevelDBBackingStore.cpp: Removed.
+        * storage/IDBLevelDBBackingStore.h: Removed.
+        * storage/IDBLevelDBCoding.cpp: Removed.
+        * storage/IDBLevelDBCoding.h: Removed.
+        * storage/IDBObjectStore.cpp: Removed.
+        * storage/IDBObjectStore.h: Removed.
+        * storage/IDBObjectStore.idl: Removed.
+        * storage/IDBObjectStoreBackendImpl.cpp: Removed.
+        * storage/IDBObjectStoreBackendImpl.h: Removed.
+        * storage/IDBObjectStoreBackendInterface.h: Removed.
+        * storage/IDBPendingTransactionMonitor.cpp: Removed.
+        * storage/IDBPendingTransactionMonitor.h: Removed.
+        * storage/IDBRequest.cpp: Removed.
+        * storage/IDBRequest.h: Removed.
+        * storage/IDBRequest.idl: Removed.
+        * storage/IDBTracing.h: Removed.
+        * storage/IDBTransaction.cpp: Removed.
+        * storage/IDBTransaction.h: Removed.
+        * storage/IDBTransaction.idl: Removed.
+        * storage/IDBTransactionBackendImpl.cpp: Removed.
+        * storage/IDBTransactionBackendImpl.h: Removed.
+        * storage/IDBTransactionBackendInterface.h: Removed.
+        * storage/IDBTransactionCallbacks.h: Removed.
+        * storage/IDBTransactionCoordinator.cpp: Removed.
+        * storage/IDBTransactionCoordinator.h: Removed.
+        * storage/IDBVersionChangeEvent.cpp: Removed.
+        * storage/IDBVersionChangeEvent.h: Removed.
+        * storage/IDBVersionChangeEvent.idl: Removed.
+        * storage/IDBVersionChangeRequest.cpp: Removed.
+        * storage/IDBVersionChangeRequest.h: Removed.
+        * storage/IDBVersionChangeRequest.idl: Removed.
+
 2012-03-01  Luke Macpherson   <macpherson@chromium.org>
 
         Handle CSSPropertyWebkitBorderFit in CSSStyleApplyProperty.
