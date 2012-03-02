@@ -1,3 +1,34 @@
+2012-03-02  Martin Robinson  <mrobinson@igalia.com>
+
+        [GTK] [AC] Connect WebGL to the TextureMapperGL code
+        https://bugs.webkit.org/show_bug.cgi?id=78968
+
+        Reviewed by Gustavo Noronha Silva.
+
+        No new tests. This is covered by existing accelerated compositing and
+        WebGL tests.
+
+        Rely on the shared version of GL acquisition from GLContext. This reduces
+        a lot of code and now allows us to connect WebGL into the accelerated compositing
+        rendering path.
+
+        * GNUmakefile.list.am: GLContext should be included for all X11 builds now.
+        There are no longer GTK+ specific versions of GraphicsContext3D.
+        * platform/graphics/GraphicsContext3D.h: Add a default argument for
+        resolveMultisamplingIfNecessary. This will resolve the entire texture.
+        * platform/graphics/cairo/GraphicsContext3DCairo.cpp: GraphicsContext3D is
+        now responsible for creating GraphicsContext3DPrivate in the constructor.
+        (WebCore::GraphicsContext3D::platformLayer): Now return m_private.
+        * platform/graphics/cairo/GraphicsContext3DPrivate.cpp: Added.
+        * platform/graphics/cairo/GraphicsContext3DPrivate.h: Renamed from Source/WebCore/platform/graphics/glx/GraphicsContext3DPrivate.h.
+        * platform/graphics/glx/GraphicsContext3DPrivate.cpp: Removed.
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::resolveMultisamplingIfNecessary): Properly
+        handle the default argument.
+        * platform/graphics/opengl/GraphicsContext3DOpenGLCommon.cpp:
+        (WebCore::GraphicsContext3D::prepareTexture): Use the new default argument now.
+        (WebCore::GraphicsContext3D::readRenderingResults): Ditto.
+
 2012-02-18  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] [AC] Generalize WindowContextGL

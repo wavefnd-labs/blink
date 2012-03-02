@@ -20,39 +20,37 @@
 #ifndef GraphicsContext3DPrivate_h
 #define GraphicsContext3DPrivate_h
 
+#include "GLContext.h"
+#include "GraphicsContext3D.h"
 #include <wtf/PassOwnPtr.h>
 
-typedef struct __GLXcontextRec *GLXContext;
-typedef unsigned long GLXPbuffer;
-typedef unsigned long GLXPixmap;
-typedef unsigned char GLubyte;
-typedef unsigned long Pixmap;
+#if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
+#include "TextureMapper.h"
+#endif
 
 namespace WebCore {
 
-class GraphicsContext3D;
-
-class GraphicsContext3DPrivate {
+class GraphicsContext3DPrivate
+#if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
+    : public TextureMapperPlatformLayer
+#endif
+{
 public:
-    static PassOwnPtr<GraphicsContext3DPrivate> create();
+    static PassOwnPtr<GraphicsContext3DPrivate> create(GraphicsContext3D*, HostWindow*);
     ~GraphicsContext3DPrivate();
     bool makeContextCurrent();
+    PlatformGraphicsContext3D platformContext();
+
+#if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
+    virtual void paintToTextureMapper(TextureMapper*, const FloatRect& target, const TransformationMatrix&, float opacity, BitmapTexture* mask);
+#endif
 
 private:
-    friend class GraphicsContext3D;
-    static GraphicsContext3DPrivate* createPbufferContext();
-    static GraphicsContext3DPrivate* createPixmapContext();
-    GraphicsContext3DPrivate(GLXContext, GLXPbuffer);
-    GraphicsContext3DPrivate(GLXContext, Pixmap, GLXPixmap);
+    GraphicsContext3DPrivate(GraphicsContext3D*, HostWindow*);
 
-    static void addActiveGraphicsContext(GraphicsContext3D*);
-    static void removeActiveGraphicsContext(GraphicsContext3D*);
-    static void cleanupActiveContextsAtExit();
-
-    GLXContext m_context;
-    GLXPbuffer m_pbuffer;
-    Pixmap m_pixmap;
-    GLXPixmap m_glxPixmap;
+    GraphicsContext3D* m_context;
+    HostWindow* m_window;
+    GLContext* m_glContext;
 };
 
 }
