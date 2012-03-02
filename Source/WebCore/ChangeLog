@@ -1,3 +1,39 @@
+2012-03-01  Hironori Bono  <hbono@chromium.org>
+
+        Render overflow controls of an RTL element to its left-side.
+        https://bugs.webkit.org/show_bug.cgi?id=54623
+
+        This change adds a new flag WTF_USE_RTL_SCROLLBAR and render the
+        vertical scrollbars and resizers of RTL elements to their left side if
+        this new flag is enabled.
+
+        Reviewed by Ryosuke Niwa.
+
+        Test: platform/chromium/fast/events/rtl-scrollbar.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::addOverflowFromPositionedObjects): Move child elements right.
+        (WebCore::RenderBlock::determineLogicalLeftPositionForChild): ditto.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::overflowClipRect): Move the content rectangle right.
+        * rendering/RenderLayer.cpp:
+        (WebCore::cornerStart): Added a function that calculates the X position of a resizer.
+        (WebCore):
+        (WebCore::cornerRect): Use cornerStart to move a resizer.
+        (WebCore::RenderLayer::verticalScrollbarStart): Added a function that calculates
+        the X position of a vertical scrollbar.
+        (WebCore::RenderLayer::horizontalScrollbarStart): Added a function that calculates
+        the X position of a horizontal scrollbar.
+        (WebCore::RenderLayer::scrollbarOffset): Render a vertical scrollbar to the left side
+        and move a horizontal scrollbar right by the width of the vertical scrollbar.
+        (WebCore::RenderLayer::invalidateScrollbarRect): ditto.
+        (WebCore::RenderLayer::positionOverflowControls): ditto.
+        (WebCore::RenderLayer::hitTestOverflowControls): ditto.
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/style/RenderStyle.h: Added shouldPlaceBlockDirectionScrollbarOnLogicalLeft,
+        which returns if we need to move a left scrollbar to its right side.
+
 2012-03-01  Kent Tamura  <tkent@chromium.org>
 
         REGRESSION(90089): Input type='search' text shakes up and down when the style is changed.
