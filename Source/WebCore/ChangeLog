@@ -1,3 +1,40 @@
+2012-03-02  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Move the 'overflow' event dispatching logic out of RenderLayer
+        https://bugs.webkit.org/show_bug.cgi?id=80090
+
+        Reviewed by Simon Fraser.
+
+        Test: fast/events/overflow-events-writing-mode.html
+
+        This moves the 'overflow' event dispatch from RenderLayer to an helper class
+        OverflowEventDispatcher. For now, the class lives in RenderBlock as it matches
+        the existing code but it may be moved later to its own class as FrameView could
+        benefit from it too or if we need to support 'overflow' events on RenderBoxes.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore):
+        (OverflowEventDispatcher):
+        (WebCore::OverflowEventDispatcher::OverflowEventDispatcher):
+        (WebCore::OverflowEventDispatcher::~OverflowEventDispatcher):
+        (WebCore::OverflowEventDispatcher::computeOverflowStatus):
+        RAII dispatcher class that stores the information before layout and compare
+        them after to dispatch the right information.
+
+        (WebCore::RenderBlock::layout): Added an instance of OverflowEventDispatcher.
+
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::hasHorizontalLayoutOverflow):
+        (WebCore::RenderBox::hasVerticalLayoutOverflow):
+        Helper method to know if we have an horizontal / vertical layout overflow.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::RenderLayer):
+        (WebCore::RenderLayer::updateScrollInfoAfterLayout):
+        * rendering/RenderLayer.h:
+        Removed the scroll tracking logic as we don't need it anymore. This removes
+        3 booleans from RenderLayer.
+
 2012-03-02  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
 
         Create a method in Element to compare attributes with other Element
