@@ -1,5 +1,38 @@
 2012-03-01  James Robinson  <jamesr@chromium.org>
 
+        [chromium] LayerChromium::contentChanged is redundant with setNeedsDisplay
+        https://bugs.webkit.org/show_bug.cgi?id=79708
+
+        Reviewed by Adrienne Walker.
+
+        Some layer types need special handling when they receive damage. WebGL layers need to know if their texture is
+        updated for clear-on-swap behavior and both WebGL and canvas 2d layers have rate limiting mechanisms tied to
+        receiving invalidations. This mechanism was implemented by LayerChromium::contentChanged(), but this is
+        redundant with setNeedsDisplay().
+
+        Covered by existing tests.
+
+        * platform/graphics/chromium/Canvas2DLayerChromium.cpp:
+        (WebCore::Canvas2DLayerChromium::setNeedsDisplay):
+        * platform/graphics/chromium/Canvas2DLayerChromium.h:
+        (Canvas2DLayerChromium):
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        (WebCore::GraphicsLayerChromium::setContentsNeedsDisplay):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::setNeedsDisplay):
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+        * platform/graphics/chromium/VideoLayerChromium.cpp:
+        (WebCore::VideoLayerChromium::setNeedsDisplay):
+        * platform/graphics/chromium/VideoLayerChromium.h:
+        (VideoLayerChromium):
+        * platform/graphics/chromium/WebGLLayerChromium.cpp:
+        (WebCore::WebGLLayerChromium::setNeedsDisplay):
+        * platform/graphics/chromium/WebGLLayerChromium.h:
+        (WebGLLayerChromium):
+
+2012-03-01  James Robinson  <jamesr@chromium.org>
+
         [chromium] Rename LayerChromium::name to debugName to be more consistent with other debug properties, make threadsafe
         https://bugs.webkit.org/show_bug.cgi?id=79723
 
