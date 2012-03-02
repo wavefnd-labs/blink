@@ -1,3 +1,59 @@
+2012-03-02  Roland Steiner  <rolandsteiner@chromium.org>
+
+        Scoped stylesheets don't appear to work in Shadow DOM
+        https://bugs.webkit.org/show_bug.cgi?id=79549
+
+        Make the scope stack in CSSStyleSelector use ContainerNode* instead of Element*.
+        Adapt using sites accordingly.
+        Push the ShadowRoot to the scope stack in the same way that elements are pushed.
+        Fix an issue with removedFromDocument() on destruction.
+
+        Reviewed by Antti Koivisto.
+
+        Test: fast/css/style-scoped/style-scoped-in-shadow.html
+
+        * css/CSSStyleSelector.cpp:
+        (RuleSet):
+        (WebCore::CSSStyleSelector::CSSStyleSelector):
+        (WebCore::CSSStyleSelector::determineScope):
+        (WebCore::CSSStyleSelector::ruleSetForScope):
+        (WebCore::CSSStyleSelector::appendAuthorStylesheets):
+        (WebCore::CSSStyleSelector::setupScopeStack):
+        (WebCore::CSSStyleSelector::pushScope):
+        (WebCore):
+        (WebCore::CSSStyleSelector::popScope):
+        (WebCore::CSSStyleSelector::pushParentElement):
+        (WebCore::CSSStyleSelector::popParentElement):
+        (WebCore::CSSStyleSelector::pushParentShadowRoot):
+        (WebCore::CSSStyleSelector::popParentShadowRoot):
+        (WebCore::CSSStyleSelector::matchScopedAuthorRules):
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        (WebCore::CSSStyleSelector::pushScope):
+        (WebCore::CSSStyleSelector::popScope):
+        (WebCore::CSSStyleSelector::MatchOptions::MatchOptions):
+        (MatchOptions):
+        (WebCore::CSSStyleSelector::scopeStackIsConsistent):
+        (WebCore::CSSStyleSelector::ScopeStackFrame::ScopeStackFrame):
+        (ScopeStackFrame):
+        * css/SelectorChecker.h:
+        (SelectorCheckingContext):
+        * dom/Element.cpp:
+        (WebCore::StyleSelectorParentPusher::push):
+        (WebCore::StyleSelectorParentPusher::~StyleSelectorParentPusher):
+        (WebCore::Element::beginParsingChildren):
+        (WebCore::Element::finishParsingChildren):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::attach):
+        (WebCore):
+        * dom/ShadowRoot.h:
+        (ShadowRoot):
+        * dom/ShadowTree.cpp:
+        (WebCore::ShadowTree::recalcShadowTreeStyle):
+        * html/HTMLStyleElement.cpp:
+        (WebCore::HTMLStyleElement::removedFromDocument):
+
 2012-03-02  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Make order of attribute/method in HTMLSelectElement.idl as same as specification
