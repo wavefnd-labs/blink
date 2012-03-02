@@ -1,3 +1,22 @@
+2012-03-01  Anders Carlsson  <andersca@apple.com>
+
+        Crash when doing repeated double-tap-to-zoom gesture on apple startpage
+        https://bugs.webkit.org/show_bug.cgi?id=80081
+        <rdar://problem/10966391>
+
+        Reviewed by Sam Weinig.
+
+        Setting the contents scale on the tile cache layer was creating a WebTileCacheLayer presentation layer copy with a null _tileCache.
+
+        Implement -[WebTileCacheLayer actionForKey:] and have it always return nil so we'll avoid implicit animations, and thus creating presentation layers.
+
+        * platform/graphics/ca/mac/WebTileCacheLayer.mm:
+        (-[WebTileCacheLayer initWithLayer:]):
+        Implement this and assert that it's never reached. We should never create presentation layers since we don't animate this layer.
+
+        (-[WebTileCacheLayer actionForKey:]):
+        Implement this and always return nil.
+
 2012-03-01  Hajime Morrita  <morrita@chromium.org>
 
         Custom scrollbars do not support transparency
