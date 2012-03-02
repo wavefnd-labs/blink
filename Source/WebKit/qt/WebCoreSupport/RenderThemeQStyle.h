@@ -1,7 +1,7 @@
 /*
  * This file is part of the theme implementation for form controls in WebCore.
  *
- * Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2011-2012 Nokia Corporation and/or its subsidiary(-ies).
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -36,7 +36,7 @@ QT_END_NAMESPACE
 
 namespace WebCore {
 
-class ScrollbarThemeQt;
+class ScrollbarThemeQStyle;
 
 class RenderThemeQStyle : public RenderThemeQt {
 private:
@@ -119,7 +119,7 @@ private:
 class StylePainterQStyle : public StylePainter {
 public:
     explicit StylePainterQStyle(RenderThemeQStyle*, const PaintInfo&);
-    explicit StylePainterQStyle(ScrollbarThemeQt*, GraphicsContext*);
+    explicit StylePainterQStyle(ScrollbarThemeQStyle*, GraphicsContext*);
 
     bool isValid() const { return style && StylePainter::isValid(); }
 

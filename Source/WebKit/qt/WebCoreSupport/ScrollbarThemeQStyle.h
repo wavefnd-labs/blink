@@ -20,11 +20,11 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScrollbarThemeQt_h
-#define ScrollbarThemeQt_h
+#ifndef ScrollbarThemeQStyle_h
+#define ScrollbarThemeQStyle_h
 
 #include "ScrollbarTheme.h"
 
@@ -36,11 +36,11 @@ QT_END_NAMESPACE
 
 namespace WebCore {
 
-class ScrollbarThemeQt : public ScrollbarTheme {
+class ScrollbarThemeQStyle : public ScrollbarTheme {
 public:
-    virtual ~ScrollbarThemeQt();
+    virtual ~ScrollbarThemeQStyle();
 
-    virtual bool paint(ScrollbarThemeClient*, GraphicsContext*, const IntRect& damageRect);
+    virtual bool paint(ScrollbarThemeClient*, GraphicsContext*, const IntRect& dirtyRect);
     virtual void paintScrollCorner(ScrollView*, GraphicsContext*, const IntRect& cornerRect);
 
     virtual ScrollbarPart hitTest(ScrollbarThemeClient*, const PlatformMouseEvent&);

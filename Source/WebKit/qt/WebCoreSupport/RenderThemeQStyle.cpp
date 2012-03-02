@@ -1,7 +1,7 @@
 /*
  * This file is part of the WebKit project.
  *
- * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
+ * Copyright (C) 2008-2012 Nokia Corporation and/or its subsidiary(-ies)
  *
  * Copyright (C) 2006 Zack Rusin <zack@kde.org>
  *               2006 Dirk Mueller <mueller@kde.org>
@@ -52,7 +52,7 @@
 #include "RenderProgress.h"
 #endif
 #include "RenderSlider.h"
-#include "ScrollbarThemeQt.h"
+#include "ScrollbarThemeQStyle.h"
 #include "SliderThumbElement.h"
 #include "UserAgentStyleSheets.h"
 
@@ -80,15 +80,13 @@ namespace WebCore {
 
 using namespace HTMLNames;
 
-inline static void initStyleOption(QWidget *widget, QStyleOption& option)
+inline static void initStyleOption(QWidget* widget, QStyleOption& option)
 {
     if (widget)
         option.initFrom(widget);
     else {
-        /*
-          If a widget is not directly available for rendering, we fallback to default
-          value for an active widget.
-         */
+        // If a widget is not directly available for rendering, we fallback to default
+        // value for an active widget.
         option.state = QStyle::State_Active | QStyle::State_Enabled;
     }
 }
@@ -105,7 +103,7 @@ StylePainterQStyle::StylePainterQStyle(RenderThemeQStyle* theme, const PaintInfo
     init(paintInfo.context ? paintInfo.context : 0, theme->qStyle());
 }
 
-StylePainterQStyle::StylePainterQStyle(ScrollbarThemeQt* theme, GraphicsContext* context)
+StylePainterQStyle::StylePainterQStyle(ScrollbarThemeQStyle* theme, GraphicsContext* context)
     : StylePainter()
 {
     init(context, theme->style());
