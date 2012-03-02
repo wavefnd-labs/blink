@@ -1,3 +1,86 @@
+2012-03-01  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        Make parser code not depend on NamedNodeMap
+        https://bugs.webkit.org/show_bug.cgi?id=79963
+
+        Reviewed by Adam Barth.
+
+        Instead of creating Element-less NamedNodeMaps, the parsing code now creates
+        AttributeVectors, that are used to fill Element via the parserSetAttributes()
+        method. This allows us to remove even more methods from the NamedNodeMap.
+
+        The AttributeVector class contains convenience methods that take the attribute's
+        QualifiedName as parameter. This class is also used inside ElementAttributeData.
+
+        * dom/Attr.h:
+        (Attr):
+        * dom/Element.cpp:
+        (WebCore::Element::getAttribute):
+        (WebCore::Element::parserSetAttributes): Now we have to create the attribute
+        storage, and fill it (by Vector::swap()) with the passed attributes. Also use an
+        early return to reduce indentation.
+        (WebCore::Element::insertedIntoDocument):
+        (WebCore::Element::removedFromDocument):
+        (WebCore::Element::getURLAttribute):
+        (WebCore::Element::getNonEmptyURLAttribute):
+        * dom/Element.h:
+        (Element):
+        (WebCore::Element::fastHasAttribute):
+        (WebCore::Element::fastGetAttribute):
+        (WebCore::Element::hasAttributesWithoutUpdate):
+        (WebCore::Element::attributeItem):
+        (WebCore::Element::getAttributeItem):
+        * dom/ElementAttributeData.cpp:
+        (WebCore::AttributeVector::removeAttribute):
+        (WebCore):
+        * dom/ElementAttributeData.h:
+        (AttributeVector):
+        (WebCore::AttributeVector::create):
+        (WebCore::AttributeVector::attributeItem):
+        (WebCore::AttributeVector::AttributeVector):
+        (WebCore):
+        (WebCore::AttributeVector::getAttributeItem):
+        (WebCore::AttributeVector::getAttributeItemIndex):
+        (WebCore::AttributeVector::insertAttribute): Boolean parameter isn't necessary
+        since all the callers used 'false', indicating that duplicates were not allowed.
+        (WebCore::ElementAttributeData::attributeItem):
+        (WebCore::ElementAttributeData::getAttributeItem):
+        (WebCore::ElementAttributeData::getAttributeItemIndex):
+        (ElementAttributeData):
+        * dom/NamedNodeMap.cpp:
+        (WebCore::NamedNodeMap::getNamedItem):
+        (WebCore::NamedNodeMap::setNamedItem):
+        (WebCore::NamedNodeMap::removeNamedItem):
+        (WebCore::NamedNodeMap::mapsEquivalent):
+        * dom/NamedNodeMap.h:
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::insertHTMLHtmlStartTagBeforeHTML):
+        (WebCore::HTMLConstructionSite::mergeAttributesFromTokenIntoElement):
+        (WebCore::HTMLConstructionSite::insertScriptElement):
+        (WebCore::HTMLConstructionSite::createElement):
+        (WebCore::HTMLConstructionSite::createHTMLElement):
+        (WebCore):
+        * html/parser/HTMLToken.h:
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processFakeStartTag):
+        (WebCore::HTMLTreeBuilder::attributesForIsindexInput):
+        (WebCore):
+        * html/parser/HTMLTreeBuilder.h:
+        * html/parser/TextDocumentParser.cpp:
+        (WebCore::TextDocumentParser::insertFakePreElement):
+        * xml/parser/MarkupTokenBase.h:
+        (WebCore::AtomicMarkupTokenBase::AtomicMarkupTokenBase):
+        (WebCore::AtomicMarkupTokenBase::attributes):
+        (WebCore::AtomicMarkupTokenBase::takeAttributes):
+        (AtomicMarkupTokenBase):
+        (WebCore::::initializeAttributes):
+        * xml/parser/XMLToken.h:
+        (WebCore::AtomicXMLToken::AtomicXMLToken):
+        * xml/parser/XMLTreeBuilder.cpp:
+        (WebCore::XMLTreeBuilder::processNamespaces):
+        (WebCore::XMLTreeBuilder::processAttributes):
+
 2012-03-02  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: assertion failure in JSMainThreadExecState::instrumentedCall
