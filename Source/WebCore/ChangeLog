@@ -1,3 +1,26 @@
+2012-03-02  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        Implement NamedNodeMap::setNamedItem() in terms of Element::setAttributeNode() instead of the other way round
+        https://bugs.webkit.org/show_bug.cgi?id=80188
+
+        Reviewed by Ryosuke Niwa.
+
+        Using setNamedItem() in setAttributeNode() implementation made us do unnecessary
+        checks like whether the element existed or whether the given node was an
+        attribute. So now setAttributeNode() do less work.
+
+        No new tests were added, functionality should be unchanged.
+
+        * dom/Element.cpp:
+        (WebCore::Element::setAttributeNode):
+        (WebCore::Element::setAttributeNodeNS):
+        * dom/Element.h:
+        (Element):
+        (WebCore::Element::attributes): We got rid of ensureUpdatedAttributes(), next in
+        line will be updatedAttributes().
+        * dom/NamedNodeMap.cpp:
+        (WebCore::NamedNodeMap::setNamedItem):
+
 2012-03-02  SravanKumar Sandela  <ssandela@innominds.com>
 
         Layout issue with fieldset legend element
