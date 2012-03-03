@@ -1,3 +1,159 @@
+2012-03-03  Joe Thomas  <joethomas@motorola.com>
+
+        Implement vw/vh/vmin (viewport sizes) from CSS 3 Values and Units
+        https://bugs.webkit.org/show_bug.cgi?id=27160
+
+        The specification related to this implementation is located at http://dev.w3.org/csswg/css3-values/#viewport-relative-lengths.
+        vw/vh/vmin are implemented as primitive length units. Added the parsing logic for these new units and creation of primitive values.
+
+        Added new Length types such as ViewportRelativeWidth, ViewportRelativeHeight and ViewportRelativeMin for viewport-relative lengths
+        and included the support for fetching the value of these relative length units based on the current viewport size.
+
+        Reviewed by Antti Koivisto.
+
+        Tests: css3/viewport-relative-lengths/css3-viewport-relative-lengths-getStyle.html
+               css3/viewport-relative-lengths/css3-viewport-relative-lengths-vh-absolute.html
+               css3/viewport-relative-lengths/css3-viewport-relative-lengths-vh.html
+               css3/viewport-relative-lengths/css3-viewport-relative-lengths-vmin-absolute.html
+               css3/viewport-relative-lengths/css3-viewport-relative-lengths-vmin.html
+               css3/viewport-relative-lengths/css3-viewport-relative-lengths-vw-absolute.html
+               css3/viewport-relative-lengths/css3-viewport-relative-lengths-vw.html
+
+        * css/CSSComputedStyleDeclaration.cpp: Modified to support viewport relative Length types.
+        (WebCore::getPositionOffsetValue): Ditto.
+        (WebCore::getBorderRadiusCornerValues): Ditto.
+        (WebCore::getBorderRadiusCornerValue): Ditto.
+        (WebCore::getBorderRadiusShorthandValue): Ditto.
+        (WebCore::lineHeightFromStyle): Ditto.
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue): Ditto.
+        * css/CSSGrammar.y: Added vw/vh/vmin support.
+        * css/CSSParser.cpp: Parsing of relative units and creation of CSSPrimitiveValue.
+        (WebCore::CSSParser::validUnit): Added vw/vh/vmin to the valid units.
+        (WebCore::CSSParser::createPrimitiveNumericValue): Added vw/vh/vmin as valid primitive units.
+        (WebCore::unitFromString):
+        (WebCore::CSSParser::parseValidPrimitive): Creation of CSSPrimitiveValue for vw/vh/vmin.
+        (WebCore::CSSParser::detectNumberToken): Parsing the vw/vh/vmin tokens.
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::isValidCSSUnitTypeForDoubleConversion): Added support for vw/vh/vmin.
+        (WebCore::unitCategory): Ditto.
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore::CSSPrimitiveValue::canonicalUnitTypeForCategory): Added support for vw/vh/vmin.
+        (WebCore::CSSPrimitiveValue::customCssText): Ditto.
+        (WebCore::CSSPrimitiveValue::viewportRelativeLength): Function to create the Length structure for the viewport-relative unit types.
+        (WebCore):
+        * css/CSSPrimitiveValue.h:
+        (WebCore::CSSPrimitiveValue::isViewportRelativeLength): Checks whether the primitive value is ViewportRelative Lengths.
+        (CSSPrimitiveValue):
+        * css/CSSPrimitiveValue.idl: Added support for vw/vh/vmin.
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::ApplyPropertyLength::applyValue): Applying relative viewport length units to the specific CSS property.
+        (WebCore::ApplyPropertyBorderRadius::applyValue): Ditto.
+        (WebCore::ApplyPropertyFontSize::applyValue): Ditto.
+        (WebCore::ApplyPropertyLineHeight::applyValue): Ditto.
+        (WebCore::ApplyPropertyVerticalAlign::applyValue): Ditto.
+        * css/CSSStyleSelector.cpp:
+        (WebCore::convertToLength): Added support for viewport relative units.
+        (WebCore::createGridTrackBreadth): Ditto.
+        (WebCore::CSSStyleSelector::mapFillSize): Ditto.
+        (WebCore::CSSStyleSelector::mapFillXPosition): Ditto.
+        (WebCore::CSSStyleSelector::mapFillYPosition): Ditto.
+        * dom/Document.cpp:
+        (WebCore::Document::pageSizeAndMarginsInPixels): Modified to support viewport relative Length types.
+        (WebCore::Document::viewportSize): New function to fetch the current viewport size.
+        (WebCore):
+        * dom/Document.h: Ditto.
+        (Document):
+        * html/HTMLAreaElement.cpp:
+        (WebCore::HTMLAreaElement::getRegion): Modified to support viewport relative Length types.
+        * platform/Length.h: New LengthTypes such as ViewportRelativeWidth, ViewportRelativeHeight and ViewportRelativeMin added.
+        (WebCore::Length::calcValue): Modified to support viewport relative Length types.
+        (WebCore::Length::calcMinValue): Ditto.
+        (WebCore::Length::calcFloatValue): Ditto.
+        (Length):
+        (WebCore::Length::isViewportRelative): To check the Length is of type ViewportRelative.
+        (WebCore::Length::viewportRelativeLength): To get the relative value.
+        * rendering/RenderBR.cpp:
+        (WebCore::RenderBR::lineHeight): Modified to support viewport relative Length types.
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::lineHeight): Ditto.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::reflectionOffset): Ditto.
+        (WebCore::RenderBox::paintBoxDecorations): Ditto.
+        (WebCore::RenderBox::clipRect): Ditto.
+        (WebCore::RenderBox::computeLogicalWidthInRegion): Ditto.
+        (WebCore::RenderBox::computeLogicalWidthInRegionUsing): Ditto.
+        (WebCore::RenderBox::computeInlineDirectionMargins): Ditto.
+        (WebCore::RenderBox::computeLogicalHeightUsing): Ditto.
+        (WebCore::RenderBox::computePercentageLogicalHeight): Ditto.
+        (WebCore::RenderBox::computeReplacedLogicalHeightUsing): Ditto.
+        (WebCore::RenderBox::computeBlockDirectionMargins): Ditto.
+        (WebCore::RenderBox::computePositionedLogicalWidthUsing): Ditto.
+        (WebCore::RenderBox::computePositionedLogicalHeightUsing): Ditto.
+        (WebCore::RenderBox::computePositionedLogicalWidthReplaced): Ditto.
+        (WebCore::RenderBox::computePositionedLogicalHeightReplaced): Ditto.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::relativePositionOffsetX): Ditto.
+        (WebCore::RenderBoxModelObject::relativePositionOffsetY): Ditto.
+        (WebCore::RenderBoxModelObject::paddingTop): Ditto.
+        (WebCore::RenderBoxModelObject::paddingBottom): Ditto.
+        (WebCore::RenderBoxModelObject::paddingLeft): Ditto.
+        (WebCore::RenderBoxModelObject::paddingRight): Ditto.
+        (WebCore::RenderBoxModelObject::paddingBefore): Ditto.
+        (WebCore::RenderBoxModelObject::paddingAfter): Ditto.
+        (WebCore::RenderBoxModelObject::paddingStart): Ditto.
+        (WebCore::RenderBoxModelObject::paddingEnd): Ditto.
+        (WebCore::RenderBoxModelObject::getBackgroundRoundedRect): Ditto.
+        (WebCore::RenderBoxModelObject::calculateFillTileSize): Ditto.
+        (WebCore::RenderBoxModelObject::calculateBackgroundImageGeometry): Ditto.
+        (WebCore::computeBorderImageSide): Ditto.
+        (WebCore::RenderBoxModelObject::paintNinePieceImage): Ditto.
+        (WebCore::RenderBoxModelObject::paintBorder): Ditto.
+        (WebCore::RenderBoxModelObject::paintBoxShadow): Ditto.
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::preferredMainAxisContentExtentForChild): Ditto.
+        (WebCore::RenderFlexibleBox::computeMainAxisPreferredSizes): Ditto.
+        (WebCore::RenderFlexibleBox::runFreeSpaceAllocationAlgorithm): Ditto.
+        * rendering/RenderInline.cpp:
+        (WebCore::computeMargin): Ditto.
+        (WebCore::RenderInline::lineHeight): Ditto.
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::updateOptionsWidth): Ditto.
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::repaintAfterLayoutIfNeeded): Ditto.
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::viewportSize): New function to fetch the current viewport size.
+        (RenderObject):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::paint): Modified to support viewport relative Length types.
+        * rendering/RenderScrollbarPart.cpp:
+        (WebCore::calcScrollbarThicknessUsing): Ditto.
+        (WebCore::RenderScrollbarPart::computeScrollbarWidth): Ditto.
+        (WebCore::RenderScrollbarPart::computeScrollbarHeight): Ditto.
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::computeLogicalWidth): Ditto.
+        (WebCore::RenderTable::convertStyleLogicalWidthToComputedWidth): Ditto.
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::logicalHeightForRowSizing): Ditto.
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight): Ditto.
+        * rendering/RenderText.h:
+        (WebCore::RenderText::marginLeft): Ditto.
+        (WebCore::RenderText::marginRight): Ditto.
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::paintMenuListButtonGradients): Ditto.
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::paint): Ditto.
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::verticalPositionForBox): Ditto.
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::calcRadiiFor): Ditto.
+        (WebCore::RenderStyle::getRoundedBorderFor): Ditto.
+        * rendering/style/RenderStyle.h: Ditto.
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::resolveLengthAttributeForSVG): Ditto.
+        (WebCore::RenderSVGRoot::computeReplacedLogicalWidth): Ditto.
+        (WebCore::RenderSVGRoot::computeReplacedLogicalHeight): Ditto.
+
 2012-03-02  Pablo Flouret  <pablof@motorola.com>
 
         Editor's default paragraph separator is not reset when a frame's document is changed
