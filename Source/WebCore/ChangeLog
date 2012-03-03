@@ -1,5 +1,43 @@
 2012-03-03  Raymond Toy  <rtoy@google.com>
 
+        DelayNode has a fixed one second max delay time
+        https://bugs.webkit.org/show_bug.cgi?id=78758
+
+        Change DelayNode to accept an optional parameter to specify the
+        maximum delay allowed. If not specified, the default is 1 sec.
+        
+        Reviewed by Chris Rogers.
+
+        Test: webaudio/delaynode-maxdelay.html
+              webaudio/delaynode-maxdelay-expected.txt
+
+        * webaudio/AudioContext.cpp:
+        (WebCore::AudioContext::createDelayNode): Allow maxDelayTime
+        parameter to specify max delay.
+        * webaudio/AudioContext.h: Allow maxDelayTime
+        parameter to specify max delay but default to 1.
+        (AudioContext):
+        * webaudio/AudioContext.idl: createDelayNode takes optional max
+        delay time parameter.
+        * webaudio/DelayDSPKernel.cpp:
+        (WebCore::DelayDSPKernel::DelayDSPKernel): Remove unused
+        DefaultMaxDelayTime. Set m_maxDelayTime from processor
+        maxDelayTime. 
+        * webaudio/DelayNode.cpp:
+        (WebCore::DelayNode::DelayNode): Add maxDelayTime parameter. 
+        * webaudio/DelayNode.h:
+        (WebCore::DelayNode::create): Add maxDelayTime parameter. 
+        (DelayNode): Add maxDelayTime parameter. 
+        * webaudio/DelayProcessor.cpp:
+        (WebCore::DelayProcessor::DelayProcessor): Add maxDelayTime
+        parameter.  
+        * webaudio/DelayProcessor.h:
+        (DelayProcessor): Add maxDelayTime parameter. 
+        (WebCore::DelayProcessor::maxDelayTime): New slot to hold
+        maxDelayTime. 
+
+2012-03-03  Raymond Toy  <rtoy@google.com>
+
         Simplified discreteTimeConstantForSampleRate
         https://bugs.webkit.org/show_bug.cgi?id=78051
 
