@@ -1,3 +1,26 @@
+2012-03-04  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Introduce SMIL overrideStyle, to make SVG stop mutating CSS styles directly
+        https://bugs.webkit.org/show_bug.cgi?id=79790
+
+        Reviewed by Dirk Schulze.
+
+        Restore SMIL animation behavior back to pre-r109342.
+        1) Always animate presentation attributes as CSS properties, regardless of the
+        attributeTypes value. Matches Opera/FF, and makes the attribute optional again
+        as specified in both SMIL & SVG.
+
+        Extend existing svg/animations/attributesTypes.html to verify this.
+
+        2) Switch setInstancesUpdatesBlocked calls to the right locations again, to
+        avoid chromium assertions (and/or extra work being done). Fixing that reveals another
+        problem: in the instance updating code path, we always called setTargetAttributeAnimatedCSSValue
+        even for XML animations.
+
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::shouldApplyAnimation): Restore old logic.
+        (WebCore::SVGAnimationElement::setTargetAttributeAnimatedValue): Fix typo, move setInstancesUpdatesBlocked calls.
+
 2012-03-04  Jonathan Dong  <jonathan.dong@torchmobile.com.cn>
 
         [BlackBerry] upstream MediaPlayerPrivateBlackBerry.[cpp|h]
