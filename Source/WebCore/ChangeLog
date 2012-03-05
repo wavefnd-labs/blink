@@ -1,3 +1,32 @@
+2012-03-05  Tony Chang  <tony@chromium.org>
+
+        Implement flex-wrap: wrap
+        https://bugs.webkit.org/show_bug.cgi?id=79930
+
+        Reviewed by David Hyatt.
+
+        Tests: css3/flexbox/multiline-align.html
+               css3/flexbox/multiline.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::sizesToIntrinsicLogicalWidth): Don't apply column+stretch optimization to multiline.
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::FlexOrderIterator::FlexOrderIterator):
+        (WebCore::RenderFlexibleBox::FlexOrderIterator::currentChild): Expose the current child so we can pause
+        in the middle of iteration and resume later.
+        (RenderFlexibleBox::FlexOrderIterator):
+        (WebCore::RenderFlexibleBox::isMultiline):
+        (WebCore):
+        (WebCore::RenderFlexibleBox::layoutFlexItems): Loop per line.
+        (WebCore::RenderFlexibleBox::availableAlignmentSpaceForChild): Use the line space, not the whole container space.
+        (WebCore::RenderFlexibleBox::computeFlexOrder): Return true for each line.
+        (WebCore::RenderFlexibleBox::layoutAndPlaceChildren): Use the line offset. Also compute the line height as we go.
+        (WebCore::RenderFlexibleBox::layoutColumnReverse): Use the line offset.
+        (WebCore::RenderFlexibleBox::alignChildren): Align based on the line height. For multiline + column, we have to relayout
+        since the width may change (same as the row case above). We'll have to do something smarter when we implement flex-line-pack.
+        * rendering/RenderFlexibleBox.h:
+        (RenderFlexibleBox):
+
 2012-03-05  Ben Vanik  <benvanik@google.com>
 
         Implement WebGL extension EXT_texture_filter_anisotropic
