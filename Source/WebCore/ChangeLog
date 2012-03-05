@@ -1,3 +1,33 @@
+2012-03-05  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] The "optgroup" element should not be a form-associated element
+        https://bugs.webkit.org/show_bug.cgi?id=80234
+
+        Reviewed by Kent Tamura.
+
+        This patch changes base class of HTMLOptGroup to HTMLElement from
+        HTMLFormControlElement to avoid the "optgroup" element in form-associate
+        elements collection.
+
+        This patch doesn't affect HTMLOptionElement::disabled's static_cast. However,
+        it doesn't good at coding style. This patch also fix it.
+
+
+        No new tests. No behavior changes.
+
+        * html/HTMLOptGroupElement.cpp:
+        (WebCore::HTMLOptGroupElement::HTMLOptGroupElement): Remove "form" parameter.
+        (WebCore::HTMLOptGroupElement::create): Remove "form" parameter.
+        (WebCore::HTMLOptGroupElement::childrenChanged): Replace base method call.
+        (WebCore::HTMLOptGroupElement::parseAttribute): Replace base method call.
+        (WebCore::HTMLOptGroupElement::attach): Replace base method call.
+        (WebCore::HTMLOptGroupElement::detach): Replace base method call.
+        * html/HTMLOptGroupElement.h:
+        (HTMLOptGroupElement): Change base class to HTMLElement.
+        * html/HTMLOptionElement.cpp:
+        (WebCore::HTMLOptionElement::disabled): Replace static_cast<HTMLFormControlElement*> to static_cast<HTMLElement*> with checking isHTMLElement.
+        * html/HTMLTagNames.in: Remove "constructorNeedsFormElement" for not passing "form" parameter in HTMLElementFactory.
+
 2012-03-05  Pavel Podivilov  <podivilov@chromium.org>
 
         Web Inspector: fix extensions-resource.html test.
