@@ -1,3 +1,61 @@
+2012-03-05  Ryosuke Niwa  <rniwa@webkit.org>
+
+        unicode-bidi should support isolate override and override isolate
+        https://bugs.webkit.org/show_bug.cgi?id=73164
+
+        Reviewed by Eric Seidel.
+
+        Updated CSS parser and CSS style selector to support the union of bidi-override and isolate in
+        unicode-bidi property. Added OverrideIsolate to EUnicodeBidi instead of turning Override and Isolate
+        into bit flags to avoid increasing the number of bits required to store the unicodeBidi flag.
+
+        Also fixed a bug in RenderBlock::constructTextRun to actually check whether an isolated run's direction
+        is overridden or not when constructing one.
+
+        Tests: fast/css/unicode-bidi-computed-value.html
+               fast/text/bidi-override-isolate.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::renderUnicodeBidiFlagsToCSSValue): Added; Create a CSSValueList when unicode-bidi has both
+        isolate and bidi-override specified.
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):  Calls renderUnicodeBidiFlagsToCSSValue.
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue): Support parsing combinations of -webkit-isolate and bidi-override;
+        Create a CSSValueList in such cases.
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore):
+        * css/CSSStyleApplyProperty.cpp:
+        (ApplyPropertyUnicodeBidi):
+        (WebCore::ApplyPropertyUnicodeBidi::applyValue): Support combinations of -webkit-isolate and
+        bidi-override. Set the unicodeBidi flag to OverrideIsolate in such cases.
+        (WebCore::ApplyPropertyUnicodeBidi::createHandler):
+        (WebCore):
+        (WebCore::CSSStyleApplyProperty::CSSStyleApplyProperty):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::drawTextInternal):
+        * platform/text/UnicodeBidi.h: Added OverrideIsolate. We don't use bit flags to avoid increasing the
+        number of bits required to store flags especially because isolate and bidi-override are only values
+        that can be combined.
+        (WebCore::isIsolated):
+        (WebCore):
+        (WebCore::isOverride):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::constructTextRun):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::statusWithDirection): Takes isOverride; we used to assume it's always false.
+        (WebCore::constructBidiRuns): Instantiate isolatedResolver with a proper value of isOverride.
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange):
+        (WebCore::RenderBlock::determineStartPosition):
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::paintItemForeground):
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::itemStyle):
+        (WebCore::RenderMenuList::menuStyle):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::menuStyle):
+        * rendering/svg/SVGTextMetrics.cpp:
+        (WebCore::SVGTextMetrics::constructTextRun):
+
 2012-03-05  Emil A Eklund  <eae@chromium.org>
 
         Replace uses of x(), y() and width(), height() pairs with locationOffset and size()
