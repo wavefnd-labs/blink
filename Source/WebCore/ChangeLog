@@ -1,3 +1,38 @@
+2012-03-05  Anders Carlsson  <andersca@apple.com>
+
+        Let RenderLayerCompositor set the tile cache visible rect
+        https://bugs.webkit.org/show_bug.cgi?id=80317
+
+        Reviewed by Simon Fraser.
+
+        We can't compute the visible rect from CALayers, because that breaks when we're updating
+        the scroll layer position on the main thread (since by the time visibleRectChanged() is called,
+        the CALayers won't yet have been updated).
+
+        * platform/graphics/GraphicsLayer.h:
+        (WebCore::GraphicsLayer::visibleRectChanged):
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::visibleRectChanged):
+        * platform/graphics/ca/GraphicsLayerCA.h:
+        (GraphicsLayerCA):
+        * platform/graphics/ca/PlatformCALayer.h:
+        (PlatformCALayer):
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm:
+        (PlatformCALayer::visibleRectChanged):
+        * platform/graphics/ca/mac/TileCache.h:
+        (TileCache):
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::visibleRectChanged):
+        (WebCore::TileCache::revalidateTiles):
+        * platform/graphics/ca/mac/WebTileCacheLayer.h:
+        (WebCore):
+        * platform/graphics/ca/mac/WebTileCacheLayer.mm:
+        (-[WebTileCacheLayer visibleRectChanged:]):
+        * platform/graphics/ca/win/PlatformCALayerWin.cpp:
+        (PlatformCALayer::visibleRectChanged):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::frameViewDidScroll):
+
 2012-03-05  Kangil Han  <kangil.han@samsung.com>
 
         [CMake][DRT] Add WebCoreTestSupport.
