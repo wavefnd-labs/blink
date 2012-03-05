@@ -1,3 +1,36 @@
+2012-03-01  MORITA Hajime  <morrita@google.com>
+
+        REGRESSION(r108758): Assertion failure in WebCore::RenderMenuList::addChild
+        https://bugs.webkit.org/show_bug.cgi?id=80096
+
+        Reviewed by Dimitri Glazkov.
+
+        After r108758 RenderBlock allowed <select> to have generated
+        contents. But it shouldn't. This change stops allowing it again by
+        replacing some canHaveChildren() invocations with
+        less permissive canHaveGeneratedChildren().
+
+        This change also pulls back original canHaveChildren() logic to
+        RenderButton to allow <button> to have generated contents.
+
+        Then RenderDeprecatedFlexibleBox::buttonText() is morphed to
+        more intention revealing canHaveGeneratedChildren().
+
+        Test: fast/forms/select-generated-content.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore):
+        (WebCore::canHaveGeneratedChildren):
+        (WebCore::RenderBlock::styleDidChange):
+        (WebCore::findFirstLetterBlock):
+        (WebCore::RenderBlock::updateFirstLetter):
+        * rendering/RenderButton.cpp:
+        * rendering/RenderButton.h:
+        (RenderButton):
+        * rendering/RenderDeprecatedFlexibleBox.h:
+        (WebCore::RenderDeprecatedFlexibleBox::canHaveGeneratedChildren):
+        * rendering/RenderMenuList.h:
+
 2012-03-04  Robin Cao  <robin.cao@torchmobile.com.cn>
 
         [BlackBerry] Upstream two helper files from platform/graphics/blackberry
