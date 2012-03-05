@@ -1,3 +1,47 @@
+2012-03-05  Adam Barth  <abarth@webkit.org>
+
+        Geolocation should use a ScriptExecutionContext as its context object
+        https://bugs.webkit.org/show_bug.cgi?id=80248
+
+        Reviewed by Kentaro Hara.
+
+        This patch updates Geolocation to use some more modern WebCore
+        mechanisms.  Previously, Geolocation used a Frame as a context object,
+        which required a bunch of manual integration with the PageCache as well
+        as custom signaling for Geolocation::reset().  After this patch,
+        Geolocation subclasses ActiveDOMObject, which does all this work
+        automatically.
+
+        * Modules/geolocation/Geolocation.cpp:
+        (WebCore::Geolocation::create):
+        (WebCore):
+        (WebCore::Geolocation::Geolocation):
+        (WebCore::Geolocation::~Geolocation):
+        (WebCore::Geolocation::document):
+        (WebCore::Geolocation::frame):
+        (WebCore::Geolocation::page):
+        (WebCore::Geolocation::stop):
+        (WebCore::Geolocation::getCurrentPosition):
+        (WebCore::Geolocation::watchPosition):
+        (WebCore::Geolocation::requestPermission):
+        (WebCore::Geolocation::clearWatch):
+        (WebCore::Geolocation::setIsAllowed):
+        * Modules/geolocation/Geolocation.h:
+        (WebCore):
+        (Geolocation):
+        * Modules/geolocation/NavigatorGeolocation.cpp:
+        (WebCore):
+        (WebCore::NavigatorGeolocation::geolocation):
+        * Modules/geolocation/NavigatorGeolocation.h:
+        (NavigatorGeolocation):
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        * dom/Document.h:
+        (Document):
+        * history/PageCache.cpp:
+        (WebCore::logCanCacheFrameDecision):
+        (WebCore::PageCache::canCachePageContainingThisFrame):
+
 2012-03-05  Martin Robinson  <mrobinson@igalia.com>
 
         [soup] Crash while loading http://www.jusco.cn
