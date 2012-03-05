@@ -1,3 +1,20 @@
+2012-03-05  Adam Klein  <adamk@chromium.org>
+
+        Never dispatch mutation events in shadow DOM
+        https://bugs.webkit.org/show_bug.cgi?id=79278
+
+        Reviewed by Ryosuke Niwa.
+
+        Test: fast/dom/shadow/suppress-mutation-events-in-shadow.html
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::removeChildren): Move allowEventDispatch() call later,
+        now that childrenChanged won't trigger mutation events in shadow dom.
+        (WebCore::dispatchChildInsertionEvents): Bail out if in shadow tree.
+        (WebCore::dispatchChildRemovalEvents): ditto.
+        * dom/Node.cpp:
+        (WebCore::Node::dispatchSubtreeModifiedEvent): ditto.
+
 2012-03-05  Alexey Proskuryakov  <ap@apple.com>
 
         BlobResourceHandle should keep a reference to itself when calling client code.
