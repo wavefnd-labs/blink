@@ -1,3 +1,32 @@
+2012-03-05  Sami Kyostila  <skyostil@chromium.org>
+
+        Partially loaded JPEGs should have alpha channel
+        https://bugs.webkit.org/show_bug.cgi?id=78239
+
+        Reviewed by Kenneth Russell.
+
+        While a JPEG image is loading, the area outside the decoded region
+        should be fully transparent. Since currently all JPEG frames are marked
+        as opaque, a renderer respecting this flag will draw the partially
+        loaded image with garbage outside the valid image region.
+
+        Hence, a partially loaded JPEG image should be marked as having an alpha
+        channel while decoding is in progress. For performance reasons we mark
+        the image opaque after decoding has finished.
+
+        Graphics corruption caused by this bug was recently observed on
+        Chromium (http://code.google.com/p/chromium/issues/detail?id=113171). A
+        recent Skia change (r3036) changed SkBitmap::extractSubset() to produce
+        a bitmap with the same opaqueness flag as the parent. This meant that
+        the renderer was now seeing an opaque image from the JPEG decoder, and
+        drawing it appropriately resulted in garbage outside the decoded region.
+
+        Test: http/tests/incremental/partial-jpeg.html
+
+        * platform/image-decoders/jpeg/JPEGImageDecoder.cpp:
+        (WebCore::JPEGImageDecoder::outputScanlines):
+        (WebCore::JPEGImageDecoder::jpegComplete):
+
 2012-03-05  James Robinson  <jamesr@chromium.org>
 
         [chromium] Initialize CCOverdrawCounts struct to zero

@@ -1,3 +1,27 @@
+2012-03-05  Sami Kyostila  <skyostil@chromium.org>
+
+        Partially loaded JPEGs should have alpha channel
+        https://bugs.webkit.org/show_bug.cgi?id=78239
+
+        Reviewed by Kenneth Russell.
+
+        While a JPEG image is being loaded, the parts which have not been
+        decoded yet should show whatever is behind the image. This tests
+        verifies this by displaying a JPEG which never fully completes
+        loading. This is achieved by serving the JPEG from a PHP script that
+        strips the end of image marker (ff d9) from the data.
+
+        The test image is 32x32 pixels, so compresses to 4x4 JPEG MCU blocks.
+        The expected result is that the final row of MCU blocks (32x4 pixels)
+        never finishes loading due to the missing end of image marker and the
+        indicator div is shown through this area.
+
+        * http/tests/incremental/partial-jpeg-expected.png: Added.
+        * http/tests/incremental/partial-jpeg-expected.txt: Added.
+        * http/tests/incremental/partial-jpeg.html: Added.
+        * http/tests/incremental/resources/checkerboard.jpg: Added.
+        * http/tests/incremental/resources/partial-jpeg.php: Added.
+
 2012-03-05  Adam Klein  <adamk@chromium.org>
 
         Unreviewed test expectations update: widen slowness of jquery/offset.html.
