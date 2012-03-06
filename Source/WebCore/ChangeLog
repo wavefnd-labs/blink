@@ -1,3 +1,52 @@
+2012-03-05  Joseph Pecoraro  <pecoraro@apple.com>
+
+        <http://webkit.org/b/78575> Web Inspector: Hide dock button when not allowed to dock
+
+        There are times when an undocked inspector frontend is not allowed to
+        attach to the main window. We can remove the dock button in those cases.
+
+        Reviewed by Timothy Hatcher.
+
+        No new tests. This functionality is port specific right now.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::performPostLayoutTasks):
+        When the main frame is resized we let the inspector frontend client
+        update its docked availablility.
+
+        * WebCore.exp.in:
+        * inspector/InspectorInstrumentation.h:
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore::InspectorInstrumentation::didResizeMainFrameImpl):
+        (WebCore::InspectorInstrumentation::didResizeMainFrame):
+        * inspector/InspectorClient.h:
+        (WebCore::InspectorClient::updateDockingAvailability):
+        * inspector/InspectorController.h:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::resume):
+        (WebCore::InspectorController::updateDockingAvailability):
+        When the main frame is resized call up to the InspectorClient to let
+        it update docking availability of the inspector frontend.
+
+        * inspector/InspectorFrontendClient.h:
+        * inspector/InspectorFrontendClientLocal.h:
+        * inspector/InspectorFrontendClientLocal.cpp:
+        (WebCore::InspectorFrontendClientLocal::frontendLoaded):
+        (WebCore::InspectorFrontendClientLocal::setDockingUnavailable):
+        On ports where the inspector frontend client is local, provide a 
+        setDockingUnavailable InspectorFrontendAPI to update the docking state.
+        Automatically update availablity when the frontend completes loading.
+
+        * inspector/front-end/InspectorFrontendAPI.js:
+        (InspectorFrontendAPI.setDockingUnavailable):
+        * inspector/front-end/inspector.js:
+        (WebInspector._createGlobalStatusBarItems):
+        (WebInspector.setAttachedWindow):
+        (WebInspector.setDockingUnavailable):
+        (WebInspector.updateDockToggleButtonVisibility):
+        Update the dock button's visibility when its created, when the attached
+        state changes, when get a frontend API notification that we cannot attach.
+
 2012-03-05  Adrienne Walker  <enne@google.com>
 
         Compositing overlap testing can throw layers into compositing when they should not be.
