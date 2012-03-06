@@ -25,6 +25,9 @@
  */
 
 #include "config.h"
+
+#if ENABLE(SQL_DATABASE)
+
 #include "DOMWindowSQLDatabase.h"
 
 #include "AbstractDatabase.h"
@@ -34,8 +37,6 @@
 #include "Document.h"
 #include "Frame.h"
 #include "SecurityOrigin.h"
-
-#if ENABLE(SQL_DATABASE)
 
 namespace WebCore {
 
