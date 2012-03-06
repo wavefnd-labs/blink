@@ -1,3 +1,21 @@
+2012-03-05  Leo Yang  <leo.yang@torchmobile.com.cn>
+
+        GraphicsContext3D.h should include RefCounted.h explicitly
+        https://bugs.webkit.org/show_bug.cgi?id=80251
+
+        Reviewed by Rob Buis.
+
+        GraphicsContext3D.h was using RefCounted but including RefCounted.h indirectly
+        through GraphicsLayer.h through Animation.h. However Animation.h is included
+        by GraphicsLayer.h only when ACCELERATED_COMPOSITING is on. For some configurations
+        that don't use ACCELERATED_COMPOSITING but use GraphicsContext3D, like the
+        BlackBerry x86 configuration, the indirect inclusion will fail.
+
+        This patch is adding explicit inclusion of RefCounted.h to avoid that kind of
+        problem.
+
+        * platform/graphics/GraphicsContext3D.h:
+
 2012-03-05  Kenichi Ishibashi  <bashi@chromium.org>
 
         [WebSocket] Should raise SYNTAX_ERR when message contains unpaired surrogates
