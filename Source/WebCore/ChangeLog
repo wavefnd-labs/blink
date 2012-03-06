@@ -1,3 +1,21 @@
+2012-03-05  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [WebSocket] Should raise SYNTAX_ERR when message contains unpaired surrogates
+        https://bugs.webkit.org/show_bug.cgi?id=80103
+
+        Reviewed by Kent Tamura.
+
+        Add UTF8 validation checks for WebSocket message and close reason.
+
+        Tests: http/tests/websocket/tests/hybi/unpaired-surrogates-in-close-reason.html
+               http/tests/websocket/tests/hybi/unpaired-surrogates-in-message.html
+
+        * Modules/websockets/WebSocket.cpp:
+        (WebCore::WebSocket::send): Raise SYNTAX_ERR if the message is invalid.
+        (WebCore::WebSocket::close):Raise SYNTAX_ERR if the reason is invalid.
+        * Modules/websockets/WebSocketChannel.cpp:
+        (WebCore::WebSocketChannel::send): Check whether message is a valid UTF8 string.
+
 2012-03-05  Kenneth Russell  <kbr@google.com>
 
         [chromium] Notify CCLayerImpl tree of context loss and restoration
