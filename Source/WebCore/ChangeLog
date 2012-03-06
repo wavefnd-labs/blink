@@ -1,3 +1,35 @@
+2012-03-05  Stephen Chenney  <schenney@chromium.org>
+
+        [Chromium] SVG Composite of Offset crashes
+        https://bugs.webkit.org/show_bug.cgi?id=77245
+
+        Reviewed by Stephen White.
+
+        The feComposite arithmetic mode filter could readily be made to
+        generate invalid pre-multiplied pixel values which would then go on to
+        pollute other filters and cause invalid final output pixels. This
+        patch checks for filters that require valid inputs, and checks that a
+        result is valid, and corrects the result if necessary. This matches
+        the behavior of FF and Opera while preventing crashes or other
+        undesirable behavior.
+
+        Test: svg/filters/feComposite-arithmetic-invalid-rgba.svg
+
+        * platform/graphics/filters/FEComposite.h: Override the default validity checks and image cleanup methods.
+        * platform/graphics/filters/FEComposite.cpp:
+        (WebCore::FEComposite::correctFilterResultIfNeeded): Force valid pixels if this is an arithmetic filter
+        * platform/graphics/filters/FilterEffect.cpp:
+        (WebCore::FilterEffect::apply): Check for validity status and correct
+        (WebCore::FilterEffect::forceValidPremultipliedPixels): Make an image valid
+        (WebCore):
+        * platform/graphics/filters/FilterEffect.h: New virtual methods for image validity.
+        (FilterEffect):
+        (WebCore::FilterEffect::requiresValidPreMulultipliedPixels):
+        (WebCore::FilterEffect::forceValidPremultipliedPixels):
+        (WebCore::FilterEffect::correctFilterResultIfNeeded):
+        * rendering/svg/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::postApplyResource): Check that the final filter result is valid
+
 2012-03-05  Alexis Menard  <alexis.menard@openbossa.org>
 
         getComputedStyle gives incorrect information for 'height' property
