@@ -1,3 +1,49 @@
+2012-03-05  Joseph Pecoraro  <pecoraro@apple.com>
+
+        <http://webkit.org/b/78575> Web Inspector: Disable dock button when not allowed to dock
+
+        There are times when an undocked inspector frontend is not allowed to
+        attach to the main window. We can disable the dock button in those cases.
+
+        Reviewed by Pavel Feldman.
+
+        No new tests. This functionality is port specific right now.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::performPostLayoutTasks):
+        When the main frame is resized we let the inspector client know,
+        so that it can react to it as needed.
+
+        * WebCore.exp.in:
+        * inspector/InspectorClient.h:
+        (WebCore::InspectorClient::didResizeMainFrame):
+        * inspector/InspectorController.cpp:
+        * inspector/InspectorController.h:
+        (WebCore::InspectorController::inspectorClient):
+        Call up to the port though to the InspectorClient.
+
+        * inspector/InspectorFrontendClientLocal.cpp:
+        (WebCore::InspectorFrontendClientLocal::frontendLoaded):
+        (WebCore::InspectorFrontendClientLocal::setDockingUnavailable):
+        * inspector/InspectorFrontendClientLocal.h:
+        On ports where the inspector frontend client is local, provide a 
+        setDockingUnavailable InspectorFrontendAPI to update the docking state.
+        Automatically update availability when the frontend completes loading.
+
+        * inspector/front-end/InspectorFrontendAPI.js:
+        (InspectorFrontendAPI.setDockingUnavailable):
+        * inspector/front-end/inspector.js:
+        (WebInspector._createGlobalStatusBarItems):
+        (WebInspector.setAttachedWindow):
+        (WebInspector.setDockingUnavailable):
+        (WebInspector.updateDockToggleButton):
+        Update the dock button's enabled/disabled state when its created,
+        when the attached state changes, when get a frontend API notification
+        that we cannot attach.
+
+        * inspector/front-end/InspectorFrontendHostStub.js:
+        Remove unused canAttachWindow method.
+
 2012-03-06  Hans Wennborg  <hans@chromium.org>
 
         Speech JavaScript API: add SpeechRecognitionError
