@@ -1,3 +1,38 @@
+2012-03-05  Kent Tamura  <tkent@chromium.org>
+
+        Do not reformat strings in <input type=number> on platforms using LocalizedNumberICU.
+        https://bugs.webkit.org/show_bug.cgi?id=78326
+
+        Reviewed by Hajime Morita.
+
+        We had bugs such as stripping leading zeros, dropping lower digits
+        of large numbers because we parse a user-input string to a double
+        value, and generate a string from the double value.
+
+        In order to avoid such reformatting, we converts number strings by
+        replacing standard digits to corresponding localized digits.
+
+        * WebCore.gypi: Added LocalizedNumberICU.h
+        * platform/text/LocalizedNumberICU.cpp:
+        (WebCore::ICULocale::ICULocale): Added.
+        (WebCore::ICULocale::create): A testing factory function.
+        (WebCore::ICULocale::createForCurrentLocale): A practical factory function.
+        (WebCore::ICULocale::setDecimalSymbol): Initialize a symbol table.
+        (WebCore::ICULocale::initializeDecimalFormat): Initialize ICU DecimalFormat.
+        (WebCore::ICULocale::convertToLocalizedNumber):
+         Replace characters to corresponding localized characters.
+        (WebCore::matches): A helper function for convertFromLocalizedNumber.
+        (WebCore::endsWith): ditto.
+        (WebCore::ICULocale::determineStartPosition): ditto.
+        (WebCore::ICULocale::matchedDecimalSymbolIndex): ditto.
+        (WebCore::ICULocale::convertFromLocalizedNumber):
+         Replace characters to corresponding standard characters.
+        (WebCore::currentLocale): Added.
+        (WebCore::convertToLocalizedNumber): Uses ICULocale::convertToLocalizedNumber.
+        (WebCore::convertFromLocalizedNumber): Uses ICULocale::convertFromLocalizedNumber.
+        * platform/text/LocalizedNumberICU.h: Added.
+        (ICULocale): Added. This is exposed to WebKit/chromium/tests/LocalizedNumberICUTest.cpp.
+
 2012-03-06  Adam Barth  <abarth@webkit.org>
 
         Attempt to fix the GTK minimal build
