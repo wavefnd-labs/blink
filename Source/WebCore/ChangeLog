@@ -1,3 +1,66 @@
+2012-03-05  Adrienne Walker  <enne@google.com>
+
+        Compositing overlap testing can throw layers into compositing when they should not be.
+        https://bugs.webkit.org/show_bug.cgi?id=50192
+
+        Reviewed by Simon Fraser.
+
+        The previous overlap map behavior was that a non-composited query
+        layer would become composited due to overlap if and only if the query
+        layer's absolute bounds overlapped the absolute bounds of some other
+        layer which:
+            - draws before the query layer
+            - is or has a compositing ancestor
+
+        This behavior, while correct, was too permissive in throwing layers
+        into compositing, causing many layers to get their own backing when
+        they could have just gone into their compositing ancestor's backing.
+
+        The correct logic is that non-composited query layer needs to be
+        composited due to overlap if and only if the query layer's absolute
+        bounds overlap the absolute bounds of some other layer which:
+            - draws before the query layer
+            - has a different compositing ancestor than the query layer
+            - is or has a compositing ancestor that is a descendent of the
+              query layer's compositing ancestor
+
+        This patch changes the semantics of the overlap map to enable this
+        behavior.
+
+        Rather than having one global overlap map, there is now a stack of
+        overlap maps. New (empty) overlap maps are pushed onto the stack
+        whenever a layer becomes a compositing ancestor and popped after all
+        of the compositing requirements for that layer's children have been
+        computed.
+
+        The compositing ancestor and all of its non-composited children of a
+        compositing ancestor do not get considered for overlap until their
+        composited ancestor has been popped off the stack. If a compositing
+        ancestor has a compositing subtree, then any descendents of that
+        compositing ancestor that draw after that subtree will consider
+        everything in the compositing subtree for overlap.
+
+        Test: compositing/layer-creation/stacking-context-overlap.html
+
+        * platform/graphics/Region.cpp:
+        (WebCore::Region::intersects):
+        (WebCore):
+        * platform/graphics/Region.h:
+        (Region):
+        * rendering/RenderLayerCompositor.cpp:
+        (RenderLayerCompositor::OverlapMap):
+        (WebCore::RenderLayerCompositor::OverlapMap::OverlapMap):
+        (WebCore::RenderLayerCompositor::OverlapMap::add):
+        (WebCore::RenderLayerCompositor::OverlapMap::contains):
+        (WebCore::RenderLayerCompositor::OverlapMap::overlapsLayers):
+        (WebCore::RenderLayerCompositor::OverlapMap::isEmpty):
+        (WebCore::RenderLayerCompositor::OverlapMap::popCompositingContainer):
+        (WebCore::RenderLayerCompositor::OverlapMap::pushCompositingContainer):
+        (WebCore::RenderLayerCompositor::addToOverlapMapRecursive):
+        (WebCore::RenderLayerCompositor::computeCompositingRequirements):
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+
 2012-03-05  Anders Carlsson  <andersca@apple.com>
 
         Address review comments from https://bugs.webkit.org/show_bug.cgi?id=80368
