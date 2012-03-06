@@ -1,3 +1,29 @@
+2012-03-05  Kentaro Hara  <haraken@chromium.org>
+
+        [JSC] Cache the CSSPropertyID in JSCSSStyleDeclaration
+        https://bugs.webkit.org/show_bug.cgi?id=80250
+
+        Reviewed by Benjamin Poulain.
+
+        V8CSSStyleDeclaration caches the calculated CSSPropertyID.
+        Similarly, we can implement the cache in JSCSSStyleDeclaration.
+
+        In my local Mac environment, this optimization improves the performance
+        of CSS property getters by 35%, and the performance of CSS property setters
+        by 8%.
+
+        CSS property getter: for (var i = 0; i < 1000000; i++) span.style.fontWeight;
+        CSS property setter: for (var i = 0; i < 1000000; i++) span.style.fontWeight = "bold";
+
+        Tests: fast/dom/CSSStyleDeclaration/* (No change in test results)
+
+        * bindings/js/JSCSSStyleDeclarationCustom.cpp:
+        (CSSPropertyInfo):
+        (WebCore):
+        (WebCore::cssPropertyIDForJSCSSPropertyName):
+        (WebCore::JSCSSStyleDeclaration::nameGetter):
+        (WebCore::JSCSSStyleDeclaration::putDelegate):
+
 2012-03-05  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Handle LevelDB database corruption
