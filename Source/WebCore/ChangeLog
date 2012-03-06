@@ -1,3 +1,59 @@
+2012-03-05  Levi Weintraub  <leviw@chromium.org>
+
+        Update usage of LayoutUnits in RenderBox
+        https://bugs.webkit.org/show_bug.cgi?id=80039
+
+        Reviewed by Julien Chaffraix.
+
+        Updating the usage of integers versus LayoutUnits in RenderBox to mirror the
+        subpixellayout branch. This reverts absoluteRects, intrinsicSize, and focusRingRects
+        methods to use integers, and flipForWritingMode functions to LayoutUnits.
+
+        No new tests. No change in behavior.
+
+        * platform/graphics/FractionalLayoutRect.h:
+        (WebCore::FractionalLayoutRect::pixelSnappedX): Convenience methods that only calculate
+        the needed values. This requires less computation than pixelSnappedIntRect(r).x().
+        (WebCore::FractionalLayoutRect::pixelSnappedY): Ditto.
+        (WebCore::FractionalLayoutRect::pixelSnappedWidth): Ditto.
+        (WebCore::FractionalLayoutRect::pixelSnappedHeight): Ditto.
+        (WebCore::FractionalLayoutRect::pixelSnappedMaxX): Ditto.
+        (WebCore::FractionalLayoutRect::pixelSnappedMaxY): Ditto.
+        (FractionalLayoutRect):
+        * platform/graphics/IntRect.h:
+        (IntRect):
+        (WebCore::IntRect::pixelSnappedX): Stub methods to allow us to use IntRects like we do
+        FractionalLayoutRects.
+        (WebCore::IntRect::pixelSnappedY): Ditto.
+        (WebCore::IntRect::pixelSnappedMaxX): Ditto.
+        (WebCore::IntRect::pixelSnappedMaxY): Ditto.
+        (WebCore::IntRect::pixelSnappedWidth): Ditto.
+        (WebCore::IntRect::pixelSnappedHeight): Ditto.
+        * rendering/LayoutTypes.h:
+        (WebCore::pixelSnappedIntRect): Convenience method for building a pixelSnappedIntRect from
+        a LayoutPoint and LayoutSize without constructing an intermediate LayoutRect.
+        (WebCore):
+        (WebCore::snapSizeToPixel): Stub method for snapping a LayoutUnit representing a size to
+        its pixel value using its location.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::pixelSnappedClientWidth): Changing to actually call snapSizeToPixel.
+        (WebCore::RenderBox::pixelSnappedClientHeight): Ditto.
+        (WebCore::RenderBox::absoluteRects): Switching to return IntRects that represent the actual
+        rendered location on screen.
+        (WebCore::RenderBox::addFocusRingRects): Ditto.
+        (WebCore::RenderBox::paintFillLayer): One-liner switching an IntSize() to LayoutSize() to
+        avoid unnecessary conversion.
+        (WebCore::RenderBox::shrinkLogicalWidthToAvoidFloats): Preparing for the conversion by
+        replacing 0 with zeroLayoutUnit.
+        (WebCore::RenderBox::positionLineBox): Preparing for conversion by replacing lroundf
+        with roundedLayoutUnit.
+        (WebCore::RenderBox::flipForWritingMode): Switching to use LayoutUnits.
+        * rendering/RenderBox.h:
+        (RenderBox):
+        (WebCore::RenderBox::pixelSnappedBorderBoxRect): Convenience method.
+        (WebCore::RenderBox::borderBoundingBox): Converting to a pixelSnappedIntRect.
+        (WebCore::RenderBox::intrinsicSize): Intrinsic sizes should always be integers.
+
 2012-03-05  Adam Barth  <abarth@webkit.org>
 
         WorkerContext shouldn't need to know about SQLDatabase
