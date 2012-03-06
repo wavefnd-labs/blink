@@ -1,3 +1,181 @@
+2012-03-06  Adam Barth  <abarth@webkit.org>
+
+        Move SQLDatabase code into Modules/webdatabase
+        https://bugs.webkit.org/show_bug.cgi?id=80393
+
+        Reviewed by Kentaro Hara.
+
+        There are still a couple (minor) SQLDatabase references from WebCore
+        proper, but we've gotten this code to the point where it makes sense to
+        move it into the Modules directory.  (This patch just moves code---no
+        behavior change.)
+
+        * CMakeLists.txt:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.am:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase: Added.
+        * Modules/webdatabase/AbstractDatabase.cpp: Copied from Source/WebCore/storage/AbstractDatabase.cpp.
+        * Modules/webdatabase/AbstractDatabase.h: Copied from Source/WebCore/storage/AbstractDatabase.h.
+        * Modules/webdatabase/ChangeVersionWrapper.cpp: Copied from Source/WebCore/storage/ChangeVersionWrapper.cpp.
+        * Modules/webdatabase/ChangeVersionWrapper.h: Copied from Source/WebCore/storage/ChangeVersionWrapper.h.
+        * Modules/webdatabase/DOMWindowSQLDatabase.cpp: Copied from Source/WebCore/storage/DOMWindowSQLDatabase.cpp.
+        * Modules/webdatabase/DOMWindowSQLDatabase.h: Copied from Source/WebCore/storage/DOMWindowSQLDatabase.h.
+        * Modules/webdatabase/DOMWindowSQLDatabase.idl: Copied from Source/WebCore/storage/DOMWindowSQLDatabase.idl.
+        * Modules/webdatabase/Database.cpp: Copied from Source/WebCore/storage/Database.cpp.
+        * Modules/webdatabase/Database.h: Copied from Source/WebCore/storage/Database.h.
+        * Modules/webdatabase/Database.idl: Copied from Source/WebCore/storage/Database.idl.
+        * Modules/webdatabase/DatabaseAuthorizer.cpp: Copied from Source/WebCore/storage/DatabaseAuthorizer.cpp.
+        * Modules/webdatabase/DatabaseAuthorizer.h: Copied from Source/WebCore/storage/DatabaseAuthorizer.h.
+        * Modules/webdatabase/DatabaseCallback.h: Copied from Source/WebCore/storage/DatabaseCallback.h.
+        * Modules/webdatabase/DatabaseCallback.idl: Copied from Source/WebCore/storage/DatabaseCallback.idl.
+        * Modules/webdatabase/DatabaseContext.cpp: Copied from Source/WebCore/storage/DatabaseContext.cpp.
+        * Modules/webdatabase/DatabaseContext.h: Copied from Source/WebCore/storage/DatabaseContext.h.
+        * Modules/webdatabase/DatabaseDetails.h: Copied from Source/WebCore/storage/DatabaseDetails.h.
+        * Modules/webdatabase/DatabaseSync.cpp: Copied from Source/WebCore/storage/DatabaseSync.cpp.
+        * Modules/webdatabase/DatabaseSync.h: Copied from Source/WebCore/storage/DatabaseSync.h.
+        * Modules/webdatabase/DatabaseSync.idl: Copied from Source/WebCore/storage/DatabaseSync.idl.
+        * Modules/webdatabase/DatabaseTask.cpp: Copied from Source/WebCore/storage/DatabaseTask.cpp.
+        * Modules/webdatabase/DatabaseTask.h: Copied from Source/WebCore/storage/DatabaseTask.h.
+        * Modules/webdatabase/DatabaseThread.cpp: Copied from Source/WebCore/storage/DatabaseThread.cpp.
+        * Modules/webdatabase/DatabaseThread.h: Copied from Source/WebCore/storage/DatabaseThread.h.
+        * Modules/webdatabase/DatabaseTracker.cpp: Copied from Source/WebCore/storage/DatabaseTracker.cpp.
+        * Modules/webdatabase/DatabaseTracker.h: Copied from Source/WebCore/storage/DatabaseTracker.h.
+        * Modules/webdatabase/DatabaseTrackerClient.h: Copied from Source/WebCore/storage/DatabaseTrackerClient.h.
+        * Modules/webdatabase/OriginQuotaManager.cpp: Copied from Source/WebCore/storage/OriginQuotaManager.cpp.
+        * Modules/webdatabase/OriginQuotaManager.h: Copied from Source/WebCore/storage/OriginQuotaManager.h.
+        * Modules/webdatabase/OriginUsageRecord.cpp: Copied from Source/WebCore/storage/OriginUsageRecord.cpp.
+        * Modules/webdatabase/OriginUsageRecord.h: Copied from Source/WebCore/storage/OriginUsageRecord.h.
+        * Modules/webdatabase/SQLCallbackWrapper.h: Copied from Source/WebCore/storage/SQLCallbackWrapper.h.
+        * Modules/webdatabase/SQLError.h: Copied from Source/WebCore/storage/SQLError.h.
+        * Modules/webdatabase/SQLError.idl: Copied from Source/WebCore/storage/SQLError.idl.
+        * Modules/webdatabase/SQLException.cpp: Copied from Source/WebCore/storage/SQLException.cpp.
+        * Modules/webdatabase/SQLException.h: Copied from Source/WebCore/storage/SQLException.h.
+        * Modules/webdatabase/SQLException.idl: Copied from Source/WebCore/storage/SQLException.idl.
+        * Modules/webdatabase/SQLResultSet.cpp: Copied from Source/WebCore/storage/SQLResultSet.cpp.
+        * Modules/webdatabase/SQLResultSet.h: Copied from Source/WebCore/storage/SQLResultSet.h.
+        * Modules/webdatabase/SQLResultSet.idl: Copied from Source/WebCore/storage/SQLResultSet.idl.
+        * Modules/webdatabase/SQLResultSetRowList.cpp: Copied from Source/WebCore/storage/SQLResultSetRowList.cpp.
+        * Modules/webdatabase/SQLResultSetRowList.h: Copied from Source/WebCore/storage/SQLResultSetRowList.h.
+        * Modules/webdatabase/SQLResultSetRowList.idl: Copied from Source/WebCore/storage/SQLResultSetRowList.idl.
+        * Modules/webdatabase/SQLStatement.cpp: Copied from Source/WebCore/storage/SQLStatement.cpp.
+        * Modules/webdatabase/SQLStatement.h: Copied from Source/WebCore/storage/SQLStatement.h.
+        * Modules/webdatabase/SQLStatementCallback.h: Copied from Source/WebCore/storage/SQLStatementCallback.h.
+        * Modules/webdatabase/SQLStatementCallback.idl: Copied from Source/WebCore/storage/SQLStatementCallback.idl.
+        * Modules/webdatabase/SQLStatementErrorCallback.h: Copied from Source/WebCore/storage/SQLStatementErrorCallback.h.
+        * Modules/webdatabase/SQLStatementErrorCallback.idl: Copied from Source/WebCore/storage/SQLStatementErrorCallback.idl.
+        * Modules/webdatabase/SQLStatementSync.cpp: Copied from Source/WebCore/storage/SQLStatementSync.cpp.
+        * Modules/webdatabase/SQLStatementSync.h: Copied from Source/WebCore/storage/SQLStatementSync.h.
+        * Modules/webdatabase/SQLTransaction.cpp: Copied from Source/WebCore/storage/SQLTransaction.cpp.
+        * Modules/webdatabase/SQLTransaction.h: Copied from Source/WebCore/storage/SQLTransaction.h.
+        * Modules/webdatabase/SQLTransaction.idl: Copied from Source/WebCore/storage/SQLTransaction.idl.
+        * Modules/webdatabase/SQLTransactionCallback.h: Copied from Source/WebCore/storage/SQLTransactionCallback.h.
+        * Modules/webdatabase/SQLTransactionCallback.idl: Copied from Source/WebCore/storage/SQLTransactionCallback.idl.
+        * Modules/webdatabase/SQLTransactionClient.cpp: Copied from Source/WebCore/storage/SQLTransactionClient.cpp.
+        * Modules/webdatabase/SQLTransactionClient.h: Copied from Source/WebCore/storage/SQLTransactionClient.h.
+        * Modules/webdatabase/SQLTransactionCoordinator.cpp: Copied from Source/WebCore/storage/SQLTransactionCoordinator.cpp.
+        * Modules/webdatabase/SQLTransactionCoordinator.h: Copied from Source/WebCore/storage/SQLTransactionCoordinator.h.
+        * Modules/webdatabase/SQLTransactionErrorCallback.h: Copied from Source/WebCore/storage/SQLTransactionErrorCallback.h.
+        * Modules/webdatabase/SQLTransactionErrorCallback.idl: Copied from Source/WebCore/storage/SQLTransactionErrorCallback.idl.
+        * Modules/webdatabase/SQLTransactionSync.cpp: Copied from Source/WebCore/storage/SQLTransactionSync.cpp.
+        * Modules/webdatabase/SQLTransactionSync.h: Copied from Source/WebCore/storage/SQLTransactionSync.h.
+        * Modules/webdatabase/SQLTransactionSync.idl: Copied from Source/WebCore/storage/SQLTransactionSync.idl.
+        * Modules/webdatabase/SQLTransactionSyncCallback.h: Copied from Source/WebCore/storage/SQLTransactionSyncCallback.h.
+        * Modules/webdatabase/SQLTransactionSyncCallback.idl: Copied from Source/WebCore/storage/SQLTransactionSyncCallback.idl.
+        * Modules/webdatabase/WorkerContextSQLDatabase.cpp: Copied from Source/WebCore/storage/WorkerContextSQLDatabase.cpp.
+        * Modules/webdatabase/WorkerContextSQLDatabase.h: Copied from Source/WebCore/storage/WorkerContextSQLDatabase.h.
+        * Modules/webdatabase/WorkerContextSQLDatabase.idl: Copied from Source/WebCore/storage/WorkerContextSQLDatabase.idl.
+        * Modules/webdatabase/chromium: Added.
+        * Modules/webdatabase/chromium/DatabaseObserver.h: Copied from Source/WebCore/storage/chromium/DatabaseObserver.h.
+        * Modules/webdatabase/chromium/DatabaseTrackerChromium.cpp: Copied from Source/WebCore/storage/chromium/DatabaseTrackerChromium.cpp.
+        * Modules/webdatabase/chromium/QuotaTracker.cpp: Copied from Source/WebCore/storage/chromium/QuotaTracker.cpp.
+        * Modules/webdatabase/chromium/QuotaTracker.h: Copied from Source/WebCore/storage/chromium/QuotaTracker.h.
+        * Modules/webdatabase/chromium/SQLTransactionClientChromium.cpp: Copied from Source/WebCore/storage/chromium/SQLTransactionClientChromium.cpp.
+        * Target.pri:
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        * WebCore.pri:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcproj/WebCoreCommon.vsprops:
+        * WebCore.vcproj/copyForwardingHeaders.cmd:
+        * WebCore.xcodeproj/project.pbxproj:
+        * storage/AbstractDatabase.cpp: Removed.
+        * storage/AbstractDatabase.h: Removed.
+        * storage/ChangeVersionWrapper.cpp: Removed.
+        * storage/ChangeVersionWrapper.h: Removed.
+        * storage/DOMWindowSQLDatabase.cpp: Removed.
+        * storage/DOMWindowSQLDatabase.h: Removed.
+        * storage/DOMWindowSQLDatabase.idl: Removed.
+        * storage/Database.cpp: Removed.
+        * storage/Database.h: Removed.
+        * storage/Database.idl: Removed.
+        * storage/DatabaseAuthorizer.cpp: Removed.
+        * storage/DatabaseAuthorizer.h: Removed.
+        * storage/DatabaseCallback.h: Removed.
+        * storage/DatabaseCallback.idl: Removed.
+        * storage/DatabaseContext.cpp: Removed.
+        * storage/DatabaseContext.h: Removed.
+        * storage/DatabaseDetails.h: Removed.
+        * storage/DatabaseSync.cpp: Removed.
+        * storage/DatabaseSync.h: Removed.
+        * storage/DatabaseSync.idl: Removed.
+        * storage/DatabaseTask.cpp: Removed.
+        * storage/DatabaseTask.h: Removed.
+        * storage/DatabaseThread.cpp: Removed.
+        * storage/DatabaseThread.h: Removed.
+        * storage/DatabaseTracker.cpp: Removed.
+        * storage/DatabaseTracker.h: Removed.
+        * storage/DatabaseTrackerClient.h: Removed.
+        * storage/OriginQuotaManager.cpp: Removed.
+        * storage/OriginQuotaManager.h: Removed.
+        * storage/OriginUsageRecord.cpp: Removed.
+        * storage/OriginUsageRecord.h: Removed.
+        * storage/SQLCallbackWrapper.h: Removed.
+        * storage/SQLError.h: Removed.
+        * storage/SQLError.idl: Removed.
+        * storage/SQLException.cpp: Removed.
+        * storage/SQLException.h: Removed.
+        * storage/SQLException.idl: Removed.
+        * storage/SQLResultSet.cpp: Removed.
+        * storage/SQLResultSet.h: Removed.
+        * storage/SQLResultSet.idl: Removed.
+        * storage/SQLResultSetRowList.cpp: Removed.
+        * storage/SQLResultSetRowList.h: Removed.
+        * storage/SQLResultSetRowList.idl: Removed.
+        * storage/SQLStatement.cpp: Removed.
+        * storage/SQLStatement.h: Removed.
+        * storage/SQLStatementCallback.h: Removed.
+        * storage/SQLStatementCallback.idl: Removed.
+        * storage/SQLStatementErrorCallback.h: Removed.
+        * storage/SQLStatementErrorCallback.idl: Removed.
+        * storage/SQLStatementSync.cpp: Removed.
+        * storage/SQLStatementSync.h: Removed.
+        * storage/SQLTransaction.cpp: Removed.
+        * storage/SQLTransaction.h: Removed.
+        * storage/SQLTransaction.idl: Removed.
+        * storage/SQLTransactionCallback.h: Removed.
+        * storage/SQLTransactionCallback.idl: Removed.
+        * storage/SQLTransactionClient.cpp: Removed.
+        * storage/SQLTransactionClient.h: Removed.
+        * storage/SQLTransactionCoordinator.cpp: Removed.
+        * storage/SQLTransactionCoordinator.h: Removed.
+        * storage/SQLTransactionErrorCallback.h: Removed.
+        * storage/SQLTransactionErrorCallback.idl: Removed.
+        * storage/SQLTransactionSync.cpp: Removed.
+        * storage/SQLTransactionSync.h: Removed.
+        * storage/SQLTransactionSync.idl: Removed.
+        * storage/SQLTransactionSyncCallback.h: Removed.
+        * storage/SQLTransactionSyncCallback.idl: Removed.
+        * storage/WorkerContextSQLDatabase.cpp: Removed.
+        * storage/WorkerContextSQLDatabase.h: Removed.
+        * storage/WorkerContextSQLDatabase.idl: Removed.
+        * storage/chromium/DatabaseObserver.h: Removed.
+        * storage/chromium/DatabaseTrackerChromium.cpp: Removed.
+        * storage/chromium/QuotaTracker.cpp: Removed.
+        * storage/chromium/QuotaTracker.h: Removed.
+        * storage/chromium/SQLTransactionClientChromium.cpp: Removed.
+
 2012-03-05  Kent Tamura  <tkent@chromium.org>
 
         Do not reformat strings in <input type=number> on platforms using LocalizedNumberICU.
