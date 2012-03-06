@@ -1,3 +1,38 @@
+2012-03-05  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [WebSocket] Introduce ThreadableWebSocketChannel::SendResult
+        https://bugs.webkit.org/show_bug.cgi?id=80356
+
+        Reviewed by Kent Tamura.
+
+        Introduced ThreadableWebSocketChannel::SendResult type so that
+        WebSocketChannel can pass the validation result.
+
+        No new test. No changes in behavior.
+
+        * Modules/websockets/ThreadableWebSocketChannel.h: Added SendResult.
+        * Modules/websockets/ThreadableWebSocketChannelClientWrapper.cpp:
+        (WebCore::ThreadableWebSocketChannelClientWrapper::ThreadableWebSocketChannelClientWrapper):
+        (WebCore::ThreadableWebSocketChannelClientWrapper::sendRequestResult): Use ThreadableWebSocketChannel::SendResult instead of bool.
+        (WebCore::ThreadableWebSocketChannelClientWrapper::setSendRequestResult): Ditto.
+        * Modules/websockets/ThreadableWebSocketChannelClientWrapper.h:
+        (ThreadableWebSocketChannelClientWrapper):
+        * Modules/websockets/WebSocketChannel.cpp:
+        (WebCore::WebSocketChannel::send): Use ThreadableWebSocketChannel::SendResult instead of bool. Pass Cstring to enqueTextFrame instead of String.
+        (WebCore::WebSocketChannel::enqueueTextFrame): Ditto.
+        (WebCore::WebSocketChannel::processOutgoingFrameQueue): Ditto.
+        * Modules/websockets/WebSocketChannel.h:
+        (WebSocketChannel):
+        (QueuedFrame): Changed the type of stringData from String to CString.
+        * Modules/websockets/WorkerThreadableWebSocketChannel.cpp:
+        (WebCore::WorkerThreadableWebSocketChannel::send): Use ThreadableWebSocketChannel::SendResult instead of bool.
+        (WebCore::workerContextDidSend): Ditto.
+        (WebCore::WorkerThreadableWebSocketChannel::Peer::send): Ditto.
+        (WebCore::WorkerThreadableWebSocketChannel::Bridge::send): Ditto.
+        * Modules/websockets/WorkerThreadableWebSocketChannel.h:
+        (WorkerThreadableWebSocketChannel): ditto.
+        (Bridge): Ditto.
+
 2012-03-05  Kentaro Hara  <haraken@chromium.org>
 
         [JSC] Cache the CSSPropertyID in JSCSSStyleDeclaration
