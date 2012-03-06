@@ -1,3 +1,45 @@
+2012-03-05  Anders Carlsson  <andersca@apple.com>
+
+        pinch-to-zoom and double-tap flicker when using the new scrolling model
+        https://bugs.webkit.org/show_bug.cgi?id=80368
+        <rdar://problem/10866221>
+
+        Reviewed by Sam Weinig.
+
+        In order to work better with zooming, make the tile cache undo the scale transformation
+        and handle the scaling manually. This avoids creating huge tile backing stores when zoomed in.
+
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::TileCache):
+        Initialize m_scale to 1.
+
+        (WebCore::TileCache::setNeedsDisplayInRect):
+        Scale the given rect appropriately.
+
+        (WebCore::TileCache::drawLayer):
+        Apply a scale context transform.
+
+        (WebCore::TileCache::setScale):
+        No longer set the contents scale. Instead, update the scale and revalidate the tiles.
+
+        (WebCore::TileCache::revalidateTiles):
+        Return early if the bounds are empty. This avoids showing a single tile if that happens due to a race condition.
+
+        (WebCore::TileCache::getTileIndexRangeForRect):
+        Apply the scale to the bounds.
+
+        (WebCore::TileCache::createTileLayer):
+        Don't set the contents scale.
+
+        * platform/graphics/ca/mac/WebTileCacheLayer.mm:
+        (-[WebTileCacheLayer setContentsScale:]):
+        Call TileCache::setScale.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateCompositedBounds):
+        Make sure to give the tile cache layer sane composited bounds, even if the page has absolutely positioned
+        elements that are outside of the page.
+
 2012-03-05  Leo Yang  <leo.yang@torchmobile.com.cn>
 
         GraphicsContext3D.h should include RefCounted.h explicitly
