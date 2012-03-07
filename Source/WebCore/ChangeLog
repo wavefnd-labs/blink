@@ -1,3 +1,55 @@
+2012-03-07  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Introduce LabelableElement to share "labels" attribute implementation
+        https://bugs.webkit.org/show_bug.cgi?id=80392
+
+        Reviewed by Kent Tamura.
+
+        This patch introduces new class LabelableElement as base class of
+        HTMLFormControlElement for sharing implementation of "labels" 
+        attribute among form-associate elements, "meter" element, and 
+        "progress" element.
+
+        This patch allows us to change base class of HTMLMeterElement and
+        HTMLProgressElement dervied from HTMLFormControlElement to 
+        HTMLElement for remove them from HTMLFormElement::m_associatedFormElements
+        where we don't need to put "meter" and "progress" elements(bug 80381.)
+
+        This patch also changes implementation of isLabelable using virtual
+        method rather than sequence of hasTagName for execution speed and
+        better readability.
+
+        No new tests are required. No behavior changes.
+
+        * CMakeLists.txt: Add LabelableElement.cpp and .h
+        * GNUmakefile.list.am:  Add LabelableElement.cpp and .h
+        * Target.pri: Add LabelableElement.cpp and .h
+        * WebCore.gypi: Add LabelableElement.cpp and .h
+        * WebCore.vcproj/WebCore.vcproj: Add LabelableElement.cpp and .h
+        * WebCore.xcodeproj/project.pbxproj: Add LabelableElement.cpp and .h
+        * html/HTMLButtonElement.h: Implement isLabelable.
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::HTMLFormControlElement): Change direct base class.
+        * html/HTMLFormControlElement.h:
+        (HTMLFormControlElement): Change direct base class.
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::isLabelable): Removed to use virtual method instead of hasTagName.
+        (WebCore):
+        * html/HTMLInputElement.h: Declaration of isLabelable.
+        * html/HTMLKeygenElement.h: Implement isLabelable.
+        * html/HTMLMeterElement.h: Implement isLabelable.
+        * html/HTMLProgressElement.h: Implement isLabelable.
+        * html/HTMLSelectElement.h: Implement isLabelable.
+        * html/HTMLTextAreaElement.h: Implement isLabelable.
+        * html/LabelableElement.cpp: Added.
+        (WebCore):
+        (WebCore::LabelableElement::LabelableElement):
+        (WebCore::LabelableElement::~LabelableElement):
+        (WebCore::LabelableElement::labels): Moved from HTMLFormControlElement.
+        * html/LabelableElement.h: Added.
+        (WebCore):
+        (LabelableElement):
+
 2012-03-07  Arun Patole  <bmf834@motorola.com>
 
         HTMLTrackElement.idl doesn't have default attribute.
