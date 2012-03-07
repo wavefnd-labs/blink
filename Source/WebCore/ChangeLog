@@ -1,3 +1,43 @@
+2012-03-07  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Cull occluded tiles during paint
+        https://bugs.webkit.org/show_bug.cgi?id=76838
+
+        Reviewed by Adrienne Walker.
+
+        Using CCOcclusionTracker instead of the old custom paint occlusion
+        tracking. Stops painting tiles when the tile is not visible.
+
+        CCOcclusionTracker only uses Layer::opaque() for determining
+        occlusion so far. The Layer::addSelfToOccludedRegion is being
+        replaced by a superior method in CCOcclusionTracker that will
+        work for both threads, so removing that support here.
+
+        Unit test: TiledLayerChromiumTest.cpp
+
+        * platform/graphics/chromium/ContentLayerChromium.cpp:
+        (WebCore::ContentLayerChromium::paintContentsIfDirty):
+        (WebCore::ContentLayerChromium::idlePaintContentsIfDirty):
+        * platform/graphics/chromium/ContentLayerChromium.h:
+        (ContentLayerChromium):
+        * platform/graphics/chromium/ImageLayerChromium.cpp:
+        (WebCore::ImageLayerChromium::paintContentsIfDirty):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore::LayerChromium::idlePaintContentsIfDirty):
+        (LayerChromium):
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore):
+        (WebCore::contentToLayerTransform):
+        (WebCore::TiledLayerChromium::prepareToUpdateTiles):
+        (WebCore::TiledLayerChromium::prepareToUpdate):
+        (WebCore::TiledLayerChromium::prepareToUpdateIdle):
+        * platform/graphics/chromium/TiledLayerChromium.h:
+        (TiledLayerChromium):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::paintContentsIfDirty):
+        (WebCore::CCLayerTreeHost::paintLayerContents):
+
 2012-03-07  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
 
         Implement removeAttributeNode() in terms of ElementAttributeData instead of NamedNodeMap
