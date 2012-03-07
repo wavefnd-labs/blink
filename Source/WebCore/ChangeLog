@@ -1,3 +1,34 @@
+2012-03-06  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Fix threaded compositing issues in WebGLLayerChromium (except for printing)
+        https://bugs.webkit.org/show_bug.cgi?id=80459
+
+        Reviewed by Kenneth Russell.
+
+        This fixes a few wrong-thread issues in WebGLLayerChromium for threaded compositing.  The key requirements that
+        threaded compositing imposes on LayerChromium subclasses are that the compositor's context can only be used from
+        the compositor thread, meaning inside of updateCompositorResources() and pushPropertiesTo(), and that
+        non-compositor contexts can only be used from the main thread. This means specifically that we can't use the
+        DrawingBuffer's context in either of these two functions.
+
+        Summary of changes:
+        *) Move the publishToPlatformLayer() call and related logic inside of paintContentsIfDirty(), which is called
+        on the main thread.
+        *) Move lost context tracking outside of drawsContent(), since that function is called from both threads, to a
+        separate bool that is updated after each WebGL composite and setDrawingBuffer call.
+
+        Printing still doesn't work in threaded mode with this patch, I'll address that separately. Printing and lost
+        context recovery still work as they did in the single-threaded path.
+
+        * platform/graphics/chromium/WebGLLayerChromium.cpp:
+        (WebCore::WebGLLayerChromium::WebGLLayerChromium):
+        (WebCore::WebGLLayerChromium::drawsContent):
+        (WebCore::WebGLLayerChromium::paintContentsIfDirty):
+        (WebCore::WebGLLayerChromium::updateCompositorResources):
+        (WebCore::WebGLLayerChromium::setDrawingBuffer):
+        * platform/graphics/chromium/WebGLLayerChromium.h:
+        (WebGLLayerChromium):
+
 2012-03-06  Anders Carlsson  <andersca@apple.com>
 
         Cracks between tiles when zoomed in
