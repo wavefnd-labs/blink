@@ -1,3 +1,39 @@
+2012-03-07  Kent Tamura  <tkent@chromium.org>
+
+        Cleanup of RenderTextControl::adjustControlHeightBasedOnLineHeight()
+        https://bugs.webkit.org/show_bug.cgi?id=80480
+
+        Reviewed by Hajime Morita.
+
+        The callsite of adjustControlHeightBasedOnLineHeight() stored
+        padding+border+margin height of the inner text in height(), and
+        adjustControlHeightBasedOnLineHeight() implementations refered it. It
+        was unreasonable and hard to understand.
+
+        The purpose of adjustControlHeightBasedOnLineHeight() is to compute
+        - the maximum height of line-heights of the inner text and decorations
+        - the maximum height of padding+border+margin heights of the inner text and decorations,
+        and to sum them up. This patch rewrites the code to make it understood easily.
+
+        adjustControlHeightBasedOnLineHeight() is renamed to
+        computeControlheight(), it takes additional parameter of
+        padding+boder+margin height, and returns the sum of them.
+
+        No behavior change.
+
+        * rendering/RenderTextControl.cpp:
+        (WebCore::RenderTextControl::computeLogicalHeight):
+        * rendering/RenderTextControl.h:
+        (RenderTextControl):
+        * rendering/RenderTextControlMultiLine.cpp:
+        (WebCore::RenderTextControlMultiLine::computeControlHeight):
+        * rendering/RenderTextControlMultiLine.h:
+        (RenderTextControlMultiLine):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::computeControlHeight):
+        * rendering/RenderTextControlSingleLine.h:
+        (RenderTextControlSingleLine):
+
 2012-03-06  Eric Seidel  <eric@webkit.org>
 
         Make WTF public headers use fully-qualified include paths and remove ForwardingHeaders/wtf
