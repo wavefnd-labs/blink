@@ -1,3 +1,31 @@
+2012-03-07  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        Implement removeAttributeNode() in terms of ElementAttributeData instead of NamedNodeMap
+        https://bugs.webkit.org/show_bug.cgi?id=80522
+
+        Reviewed by Andreas Kling.
+
+        DOM methods exposed in Element and NamedNodeMap are now implemented in terms of
+        ElementAttributeData. A helper function takeAttribute() was added to increase
+        code sharing. Also removed some unneeded methods.
+
+        * dom/Element.cpp:
+        (WebCore::Element::removeAttribute): Use ElementAttributeData function directly.
+        (WebCore::Element::removeAttributeNode): Get the index manually and use new
+        takeAttribute() directly.
+        * dom/Element.h:
+        (Element): Remove unused removeAttribute(unsigned index).
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::takeAttribute): Like removeAttribute() but
+        returns a reference to old Attr.
+        (WebCore):
+        * dom/ElementAttributeData.h:
+        (ElementAttributeData):
+        * dom/NamedNodeMap.cpp:
+        (WebCore::NamedNodeMap::removeNamedItem): Avoid looking up the property twice by
+        getting the index directly from the name, instead of going through the qualified name.
+        * dom/NamedNodeMap.h: Remove now unused internal methods for removing attributes.
+
 2012-03-07  Alexey Proskuryakov  <ap@apple.com>
 
         Merge AsyncFileStream with FileStreamProxy
