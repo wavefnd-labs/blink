@@ -1,3 +1,33 @@
+2012-03-07  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] The "legend" element should not be a form-associated element.
+        https://bugs.webkit.org/show_bug.cgi?id=80239
+
+        Reviewed by Kent Tamura.
+
+        This patch changes base class of HTMLLegendElement to HTMLElement from
+        HTMLFormControlElement for saving memory space and iteration time of
+        extra "legend" elements in HTMLFormElement::m_formAssociatedElements
+        and matching the HTML5 specification for ease of maintenance.
+
+        Changes of TextIterator is lead by usage of isFormControlElement. This
+        changes will be replaced with more meaningful predicate as part of
+        https://bugs.webkit.org/show_bug.cgi?id=80381
+
+        No new tests are required. No behavior changes.
+
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::advance): Check HTMLLegendElement in addition to isFormControlElement. This change is for text dump in LayoutTests implemented by document.innerText attribute.
+        * html/HTMLLegendElement.cpp:
+        (WebCore::HTMLLegendElement::HTMLLegendElement): Remove form parameter.
+        (WebCore::HTMLLegendElement::create): Remove form parameter.
+        (WebCore::HTMLLegendElement::associatedControl): Stop checking legend element, because HTMLLegendElement is no longer HTMLFormControlElement.
+        (WebCore::HTMLLegendElement::supportFocus): Removed. It called HTMLElement::supportFocus.
+        (WebCore::HTMLLegendElement::formControlType): Remove implementation of virtual method declared in HTMLFormControlElement.
+        * html/HTMLLegendElement.h:
+        (HTMLLegendElement): Change base class to HTMLElement.
+        * html/HTMLTagNames.in: Remove "constructorNeedsFormElement" for not passing "form" parameter in HTMLElementFactory.
+
 2012-03-06  Raphael Kubo da Costa  <kubo@profusion.mobi>
 
         [CMake] Make the removal of transitive library dependencies work with CMake < 2.8.7.
