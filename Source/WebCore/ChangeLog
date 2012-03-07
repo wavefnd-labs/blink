@@ -1,3 +1,62 @@
+2012-03-07  Kentaro Hara  <haraken@chromium.org>
+
+        [V8][Performance] Optimize Element.firstElementChild, Element.lastElementChild,
+        Element.previousElementSibling, Element.nextElementSibling, Node.parentElement
+        https://bugs.webkit.org/show_bug.cgi?id=80506
+
+        Reviewed by Adam Barth.
+
+        This patch improves the performance of Element.firstElementChild by 5.8 times,
+        Element.lastElementChild by 6.2 times, Element.previousElementSibling by 7.1 times,
+        Element.nextElementSibling by 7.1 times, and Node.parentElement by 6.7 times.
+
+        Previously, while toV8(Node*) caches a wrapper object on a node object
+        (i.e. node->wrapper(), node->setWrapper()), toV8(Element*) does not
+        cache a wrapper object.
+
+        This patch removes toV8(Element*), so that DOM attribute getters that return
+        Element* use toV8(Node*). This change makes these DOM attribute getters
+        cache the wrapper object on a node object. This optimization is already
+        implemented in JavaScriptCore.
+
+        Performance tests: https://bugs.webkit.org/attachment.cgi?id=130594
+
+        The test results in my local Mac environment are as follows:
+
+        AppleWebKit/JavaScriptCore:
+        div.firstElementChild : 1162ms
+        div.lastElementChild : 1016ms
+        div.previousElementSibling : 918ms
+        div.nextElementSibling : 900ms
+        div.parentElement : 901ms
+
+        Chromium/V8 (without this patch):
+        div.firstElementChild : 9515ms
+        div.lastElementChild : 9449ms
+        div.previousElementSibling : 9254ms
+        div.nextElementSibling : 9315ms
+        div.parentElement : 9380ms
+
+        Chromium/V8 (with this patch):
+        div.firstElementChild : 1628ms
+        div.lastElementChild : 1527ms
+        div.previousElementSibling : 1310ms
+        div.nextElementSibling : 1310ms
+        div.parentElement : 1410ms
+
+        No tests. No change in behavior.
+
+        * dom/Element.idl: Removed toV8(Element*)
+        * bindings/v8/custom/V8NodeCustom.cpp: Ditto.
+        (WebCore::toV8Slow):
+        * bindings/scripts/CodeGeneratorV8.pm: Ditto.
+        (GenerateHeader):
+
+        * bindings/v8/custom/V8ElementCustom.cpp: Removed.
+        * Target.pri: Removed V8ElementCustom.cpp.
+        * UseV8.cmake: Ditto.
+        * WebCore.gypi: Ditto.
+
 2012-03-07  Joshua Bell  <jsbell@chromium.org>
 
         [Chromium] IndexedDB: V8LocalContext creation in IDBKey extraction/injection is slow
