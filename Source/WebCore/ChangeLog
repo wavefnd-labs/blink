@@ -1,3 +1,29 @@
+2012-03-07  Joshua Bell  <jsbell@chromium.org>
+
+        [Chromium] IndexedDB: V8LocalContext creation in IDBKey extraction/injection is slow
+        https://bugs.webkit.org/show_bug.cgi?id=80358
+
+        Cache a re-usable context (per isolate) for cases like IDB's key/SSV extraction/injection,
+        where no user script is run. This yields a 3x-4x performance improvement in basic IDB
+        operations.
+
+        Reviewed by Tony Chang.
+
+        No new tests - no behavior changes.
+
+        * bindings/v8/IDBBindingUtilities.cpp:
+        (WebCore::createIDBKeyFromSerializedValueAndKeyPath):
+        (WebCore::injectIDBKeyIntoSerializedValue):
+        * bindings/v8/V8Binding.h:
+        (WebCore::V8BindingPerIsolateData::auxiliaryContext):
+        (V8BindingPerIsolateData):
+        * bindings/v8/V8Utilities.cpp:
+        (WebCore::V8AuxiliaryContext::V8AuxiliaryContext):
+        (WebCore::V8AuxiliaryContext::~V8AuxiliaryContext):
+        (WebCore::V8AuxiliaryContext::auxiliaryContext):
+        * bindings/v8/V8Utilities.h:
+        (V8AuxiliaryContext):
+
 2012-03-07  Nat Duca  <nduca@chromium.org>
 
         [chromium] Remove unused wasRecreate variable
