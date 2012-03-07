@@ -1,3 +1,24 @@
+2012-03-06  Raphael Kubo da Costa  <kubo@profusion.mobi>
+
+        undefined reference to JSC::IdentifierTable::~IdentifierTable() on EFL port
+        https://bugs.webkit.org/show_bug.cgi?id=80282
+
+        Reviewed by Antonio Gomes.
+
+        No new tests, this is a buildsystem change.
+
+        Remove transitive library dependencies; they are especially
+        dangerous when one ends up linking against WTF, JSC and then WTF
+        again, since some symbols will not be defined.
+
+        Passing --no-copy-dt-needed-entries and --as-needed to the linker
+        (which some recent Linux distros do by default) makes the issue
+        even more evident.
+
+        * CMakeLists.txt: Explicitly link to WTF as WebCore uses symbols
+        from it.
+        * PlatformEfl.cmake: Explicitly link against libjpeg and libpng.
+
 2012-03-06  James Robinson  <jamesr@chromium.org>
 
         [chromium] REGRESSION(109469): WebGL printing busted
