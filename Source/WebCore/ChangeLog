@@ -1,3 +1,40 @@
+2012-03-07  Levi Weintraub  <leviw@chromium.org>
+
+        Update usage of LayoutUnits in InlineBox and InlineFlowBox
+        https://bugs.webkit.org/show_bug.cgi?id=80051
+
+        Reviewed by Eric Seidel.
+
+        Updating LayoutUnit vs Integer usage in InlineBox and InlineFlowBox. While the
+        line box tree remains floating point, margins are now subpixel, and rects from
+        the render tree use LayoutUnits. For more information, see the LayoutUnit wiki
+        page: https://trac.webkit.org/wiki/LayoutUnit
+
+        No new tests. No change in behavior.
+
+        * rendering/InlineBox.cpp:
+        (WebCore::InlineBox::flipForWritingMode): Changing over to LayoutUnits.
+        * rendering/InlineBox.h:
+        (InlineBox):
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::getFlowSpacingLogicalWidth): Returning a LayoutUnit
+        instead of an integer, as it uses margin which is a LayoutUnit.
+        (WebCore::InlineFlowBox::placeBoxesInInlineDirection): Using a LayoutUnit for
+        margin.
+        (WebCore::InlineFlowBox::placeBoxesInBlockDirection): Build fixes for when
+        LayoutUnits are subpixel.
+        (WebCore::InlineFlowBox::paintFillLayer): Ditto.
+        * rendering/InlineFlowBox.h:
+        (WebCore::InlineFlowBox::marginBorderPaddingLogicalLeft): Returning a LayoutUnit
+        instead of an integer since margin is a LayoutUnit.
+        (WebCore::InlineFlowBox::marginBorderPaddingLogicalRight): Ditto.
+        (InlineFlowBox):
+        (WebCore::InlineFlowBox::logicalLeftLayoutOverflow): Adding a static_cast that's
+        redundant now, but required when we switch to subpixel LayoutUnits.
+        (WebCore::InlineFlowBox::logicalRightLayoutOverflow): Ditto.
+        (WebCore::InlineFlowBox::logicalLeftVisualOverflow): Ditto.
+        (WebCore::InlineFlowBox::logicalRightVisualOverflow): Ditto.
+
 2012-03-07  Qi Zhang  <qi.2.zhang@nokia.com>
 
         [Qt] Unskip http/tests/websocket/tests/hixie76/long-invalid-header.html
