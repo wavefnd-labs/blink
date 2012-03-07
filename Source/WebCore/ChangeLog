@@ -1,3 +1,97 @@
+2012-03-07  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Lazily allocate overflow: hidden layers if we have overflowing content
+        https://bugs.webkit.org/show_bug.cgi?id=75568
+
+        Reviewed by David Hyatt.
+
+        Change covered by the existing tests and the tons of rebaselines.
+
+        This change makes us lazily allocate our RenderLayer for overflow: hidden layers only.
+
+        Apart from saving some memory, it will also speed up the rendering as we don't need to
+        go through the layer's machinery when painting and hit testing.
+
+        On http://dglazkov.github.com/performance-tests/biggrid.html benchmark, this puts the
+        overflow: hidden case in par with the overflow: visible case when scrolling that is a
+        very-smooth scrolling vs a jerky one currently (mostly due to the painting speedup).
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::updateScrollInfoAfterLayout):
+        Changed this method to update our size cache if needed.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::paint):
+        (WebCore::RenderBlock::isPointInOverflowControl):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::willBeDestroyed):
+        (WebCore::RenderBox::styleDidChange):
+        (WebCore::RenderBox::layout):
+        (WebCore::RenderBox::scrollWidth):
+        (WebCore::RenderBox::scrollHeight):
+        (WebCore::RenderBox::scrollLeft):
+        (WebCore::RenderBox::scrollTop):
+        (WebCore::RenderBox::setScrollLeft):
+        (WebCore::RenderBox::setScrollTop):
+        (WebCore::RenderBox::includeVerticalScrollbarSize):
+        (WebCore::RenderBox::includeHorizontalScrollbarSize):
+        (WebCore::RenderBox::scrolledContentOffset):
+        (WebCore::RenderBox::pushContentsClip):
+        (WebCore::RenderBox::popContentsClip):
+        (WebCore::RenderBox::addLayoutOverflow):
+        Added layer() check to the previous call sites.
+
+        (WebCore::cachedSizeForOverflowClipMap):
+        (WebCore::RenderBox::cachedSizeForOverflowClip):
+        (WebCore::RenderBox::updateCachedSizeForOverflowClip):
+        (WebCore::RenderBox::clearCachedSizeForOverflowClip):
+        This logic stores the size information for later repainting.
+        It is in practice replicating what RenderLayer is doing.
+        I had to disable an ASSERT here as it would trigger in NRWT but
+        not under DRT. I haven't found by code inspection what was wrong.
+
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::hasOverflowClipWithLayer):
+        Helper function.
+
+        (WebCore::RenderBox::requiresLayerForOverflowClip):
+        This determines if we can survive without a RenderLayer. For the moment,
+        it is very conservative.
+
+        (WebCore::RenderBox::requiresLayer):
+        Updated to call requiresLayerForOverflowClip.
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::ensureLayer):
+        Added this function to create and add a new layer.
+
+        (WebCore::RenderBoxModelObject::willBeDestroyed):
+        (WebCore::RenderBoxModelObject::styleDidChange):
+        Patched those method to handle updating / removing
+        cached size entries.
+
+        * rendering/RenderBoxModelObject.h:
+        (WebCore::RenderBoxModelObject::requiresLayer):
+        Pushed the overflowClip check down to RenderBox as only RenderBoxes can have
+        overflow clips.
+
+        * rendering/RenderTableRow.h:
+        (WebCore::RenderTableRow::requiresLayer):
+        Added a comment about why we need a layout for table rows.
+
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutBlock):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::layout):
+        Updated those call sites to use RenderBlock::updateScrollInfoAfterLayout
+        or RenderBox::updateCachedSizeForOverflowClip. The current logic is really
+        not tight proof and would need to be rethought to not avoid cases.
+
 2012-03-07  Konrad Piascik  <kpiascik@rim.com>
 
         [BlackBerry] Fix warnings in CookieMap
