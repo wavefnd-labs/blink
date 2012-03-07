@@ -1,3 +1,30 @@
+2012-03-07  ChangSeok Oh  <shivamidow@gmail.com>
+
+        [EFL] Key press event is not processed properly.
+        https://bugs.webkit.org/show_bug.cgi?id=80491
+
+        Reviewed by Gustavo Noronha Silva.
+
+        This issue is related with mutation observer feature.
+        If enter key is pressed, then a keyboard event should be processed
+        and reach to the mutation observer, but it doesn't.
+        Some special keys like Enter, Backspace and Tab key should be processed
+        and change to a single character code, but EFL port hasn't handled like that.
+
+        At least we can verify this with following two tests as I know. but they require another
+        functionality for bug79601. I'm going to submit the patch for it after this one.
+
+        Test: fast/mutation/end-of-task-delivery.html
+              fast/mutation/inline-event-listener.html
+
+        * platform/efl/EflKeyboardUtilities.cpp:
+        (WebCore::singleCharacterString):
+        (WebCore):
+        * platform/efl/EflKeyboardUtilities.h:
+        (WebCore):
+        * platform/efl/PlatformKeyboardEventEfl.cpp:
+        (WebCore::PlatformKeyboardEvent::PlatformKeyboardEvent):
+
 2012-03-07  Gavin Peters  <gavinp@chromium.org>
 
         Add Histograms for reporting on PageCache reject reasons
