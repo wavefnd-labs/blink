@@ -1,3 +1,87 @@
+2012-03-05  Alexey Proskuryakov  <ap@apple.com>
+
+        Merge AsyncFileStream with FileStreamProxy
+        https://bugs.webkit.org/show_bug.cgi?id=80325
+
+        Reviewed by Filip Pizlo.
+
+        AsyncFileStream sounds like a platform concept, but the implementation is web specific.
+        Better to just keep it in one place.
+
+        This is a step toward decoupling blob scheme support from ResourceHandle, which is supposed
+        to be an interface to platform networking APIs only, and definitely shouldn't know about
+        Web concepts.
+
+        No change in functionality, so no tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        Updated for moved and removed files. Namely, platform/AsyncFileStream is dead, and
+        fileapi/FileStreamProxy is now fileapi/AsyncFileStream.
+
+        * fileapi/AsyncFileStream.cpp: Copied from Source/WebCore/fileapi/FileStreamProxy.cpp.
+        (WebCore::AsyncFileStream::AsyncFileStream):
+        (WebCore::AsyncFileStream::create):
+        (WebCore::AsyncFileStream::~AsyncFileStream):
+        (WebCore::AsyncFileStream::fileThread):
+        (WebCore::didStart):
+        (WebCore::AsyncFileStream::startOnFileThread):
+        (WebCore::AsyncFileStream::stop):
+        (WebCore::derefProxyOnContext):
+        (WebCore::AsyncFileStream::stopOnFileThread):
+        (WebCore::didGetSize):
+        (WebCore::AsyncFileStream::getSize):
+        (WebCore::AsyncFileStream::getSizeOnFileThread):
+        (WebCore::didOpen):
+        (WebCore::AsyncFileStream::openForRead):
+        (WebCore::AsyncFileStream::openForReadOnFileThread):
+        (WebCore::AsyncFileStream::openForWrite):
+        (WebCore::AsyncFileStream::openForWriteOnFileThread):
+        (WebCore::AsyncFileStream::close):
+        (WebCore::AsyncFileStream::closeOnFileThread):
+        (WebCore::didRead):
+        (WebCore::AsyncFileStream::read):
+        (WebCore::AsyncFileStream::readOnFileThread):
+        (WebCore::didWrite):
+        (WebCore::AsyncFileStream::write):
+        (WebCore::AsyncFileStream::writeOnFileThread):
+        (WebCore::didTruncate):
+        (WebCore::AsyncFileStream::truncate):
+        (WebCore::AsyncFileStream::truncateOnFileThread):
+        * fileapi/AsyncFileStream.h: Copied from Source/WebCore/fileapi/FileStreamProxy.h.
+        (WebCore):
+        (AsyncFileStream):
+        (WebCore::AsyncFileStream::client):
+        (WebCore::AsyncFileStream::setClient):
+        * fileapi/FileStreamProxy.cpp: Removed.
+        * fileapi/FileStreamProxy.h: Removed.
+        * loader/ResourceLoader.cpp:
+        (WebCore::ResourceLoader::createAsyncFileStream):
+        * platform/AsyncFileStream.h: Removed.
+        Fewer files!
+
+        * platform/network/BlobRegistry.h: Removed createResourceHandle(). It's logically a method
+        on in-process BlobRegistryImpl only, and we no longer need to call this from platform code.
+
+        * platform/network/BlobRegistryImpl.cpp:
+        (WebCore::createResourceHandle):
+        (WebCore::registerBlobResourceHandleConstructor):
+        (WebCore::BlobRegistryImpl::registerBlobURL):
+        * platform/network/BlobRegistryImpl.h:
+        Except for chromium, "blob" is a scheme that's handled internally. Added hooks for that.
+
+        * platform/network/ResourceHandle.cpp:
+        (WebCore::builtinResourceHandleConstructorMap):
+        (WebCore::ResourceHandle::registerBuiltinConstructor):
+        (WebCore::ResourceHandle::create):
+        * platform/network/ResourceHandle.h:
+        Added a way for other code to register handlers for URL schemes. Non-Chromium platforms
+        use this for blob: now.
+
 2012-03-07  Dan Bernstein  <mitz@apple.com>
 
         <rdar://problem/10923294> REGRESSION (r100847): Entries are clipped out in Day One
