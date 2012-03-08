@@ -1,3 +1,95 @@
+2012-03-08  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        Make elements with attributes smaller by eliminating the m_element back pointer in NamedNodeMap
+        https://bugs.webkit.org/show_bug.cgi?id=75069
+
+        Reviewed by Ryosuke Niwa.
+
+        NamedNodeMap is an exposed DOM representation of an element's attribute storage. As part of
+        its implementation it keeps a pointer to its associated Element plus all the attribute
+        storage.
+
+        This commit separate the two things: NamedNodeMap is now a wrapper to Element, containing
+        only the pointer, and the attribute storage is now owned by Element directly. Since usage
+        of NamedNodeMap is not very common, it can be stored in ElementRareData. As a result, most
+        elements with attributes now don't need to allocate memory for that extra pointer in
+        NamedNodeMap.
+
+        One consequence of this implementation is that now we explicitly don't support
+        DocumentType.notations and DocumentType.entities. They weren't supported before, a
+        NamedNodeMap was never created for those attributes -- and some NamedNodeMap functions
+        wouldn't work correctly without an associated Element.
+
+        NamedNodeMap itself was cleaned up, as well as unnecessary references to it removed in the
+        code and comments.
+
+        No new tests and should not change results for existing tests.
+
+        * dom/Attribute.h:
+        (WebCore):
+        * dom/DocumentType.h:
+        (DocumentType): Point out that we don't support does attributes yet.
+        * dom/Element.cpp:
+        (WebCore::Element::~Element): Detaching the NamedNodeMap is no longer necessary because it
+        will be destroyed. We still detach the potential Attrs inside our Attributes by using
+        clearAttributes().
+        (WebCore::Element::attributes): Looks in ElementRareData now. Note we ensure the creation
+        of the attribute storage.
+        (WebCore):
+        (WebCore::Element::getAttribute):
+        (WebCore::Element::setAttributeInternal):
+        (WebCore::Element::parserSetAttributes):
+        (WebCore::Element::hasAttributes):
+        (WebCore::Element::createAttributeData):
+        (WebCore::Element::insertedIntoDocument):
+        (WebCore::Element::removedFromDocument):
+        (WebCore::Element::getURLAttribute):
+        (WebCore::Element::getNonEmptyURLAttribute):
+        (WebCore::Element::hasNamedNodeMap): Helper function for Node::dumpStatistics().
+        * dom/Element.h:
+        (Element):
+        (WebCore::Element::attributeData):
+        (WebCore::Element::ensureAttributeData):
+        (WebCore::Element::fastHasAttribute):
+        (WebCore::Element::fastGetAttribute):
+        (WebCore::Element::hasAttributesWithoutUpdate):
+        (WebCore::Element::idForStyleResolution):
+        (WebCore::Element::attributeCount):
+        (WebCore::Element::attributeItem):
+        (WebCore::Element::getAttributeItem):
+        * dom/ElementAttributeData.h:
+        (WebCore::ElementAttributeData::create):
+        (ElementAttributeData):
+        * dom/ElementRareData.h:
+        (ElementRareData):
+        * dom/NamedNodeMap.cpp: Rewriting now that m_attributeData is not a member, using m_element
+        methods when possible.
+        (WebCore::NamedNodeMap::ref):
+        (WebCore::NamedNodeMap::deref):
+        (WebCore::NamedNodeMap::getNamedItem):
+        (WebCore::NamedNodeMap::getNamedItemNS):
+        (WebCore::NamedNodeMap::removeNamedItem):
+        (WebCore::NamedNodeMap::removeNamedItemNS):
+        (WebCore::NamedNodeMap::setNamedItem):
+        (WebCore::NamedNodeMap::item):
+        (WebCore::NamedNodeMap::length):
+        * dom/NamedNodeMap.h:
+        (WebCore):
+        (WebCore::NamedNodeMap::create):
+        (NamedNodeMap):
+        (WebCore::NamedNodeMap::NamedNodeMap): Instead of asserting m_element in every function, we
+        now assert only in the constructor.
+        * dom/Node.cpp:
+        (WebCore::Node::dumpStatistics): Add a counter for elements with rare data, this allows us
+        compare more clearly the impact of moving NamedNodeMap there.
+        (WebCore::Node::isEqualNode): Remove use of mapsEquivalent(). It was dead code, because
+        both entities and notations were always NULL.
+        (WebCore::Node::compareDocumentPosition):
+        * inspector/DOMPatchSupport.h:
+        (WebCore):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::attributeChanged):
+
 2012-03-08  Robin Cao  <robin.cao@torchmobile.com.cn>
 
         [BlackBerry] Upstream WebGL related files from platform/graphics
