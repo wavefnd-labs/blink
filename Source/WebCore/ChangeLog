@@ -1,3 +1,96 @@
+2012-03-07  Mike Lawther  <mikelawther@chromium.org>
+
+        CSS3 calc: mixed absolute/percentages work for width, height, margin and padding
+        https://bugs.webkit.org/show_bug.cgi?id=79621
+
+        Reviewed by Andreas Kling.
+
+        ApplyPropertyLength in CSSStyleApplyPropery now handles mixed absolute/percentage
+        length expressions. All property handlers using this template now work with
+        mixed expressions.
+
+        This patch adds a new expression evaluator in CalculationValue.cpp. This is because
+        Length.[cpp|h] (in platform) cannot refer to CSSCalculationValue.[cpp|h] (in css) 
+        due to layering restrictions.
+
+        Lengths can be copied, and so the expressions are stored in a hashmap, and only their
+        ids are copied along with Length. The expressions are RefCounted, and will get 
+        cleaned up when the last referring Length is destructed.
+
+        * WebCore.exp.in:
+        * css/CSSCalculationValue.cpp:
+        (WebCore::CSSCalcPrimitiveValue::toCalcValue):
+        (CSSCalcPrimitiveValue):
+        (WebCore::CSSCalcBinaryOperation::toCalcValue):
+        (CSSCalcBinaryOperation):
+        * css/CSSCalculationValue.h:
+        (WebCore):
+        (CSSCalcExpressionNode):
+        (CSSCalcValue):
+        (WebCore::CSSCalcValue::toCalcValue):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::ApplyPropertyLength::applyValue):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        * platform/CalculationValue.cpp:
+        (WebCore::CalcExpressionBinaryOperation::evaluate):
+        (WebCore):
+        (WebCore::CalculationValue::create):
+        (WebCore::CalculationValue::evaluate):
+        * platform/CalculationValue.h:
+        (CalcExpressionNode):
+        (WebCore::CalcExpressionNode::~CalcExpressionNode):
+        (WebCore):
+        (CalculationValue):
+        (WebCore::CalculationValue::CalculationValue):
+        (CalcExpressionNumber):
+        (WebCore::CalcExpressionNumber::CalcExpressionNumber):
+        (WebCore::CalcExpressionNumber::evaluate):
+        (CalcExpressionLength):
+        (WebCore::CalcExpressionLength::CalcExpressionLength):
+        (WebCore::CalcExpressionLength::evaluate):
+        (CalcExpressionBinaryOperation):
+        (WebCore::CalcExpressionBinaryOperation::CalcExpressionBinaryOperation):
+        * platform/Length.cpp:
+        (WebCore):
+        (WebCore::Length::~Length):
+        (CalculationValueHandleMap):
+        (WebCore::CalculationValueHandleMap::CalculationValueHandleMap):
+        (WebCore::CalculationValueHandleMap::insert):
+        (WebCore::CalculationValueHandleMap::remove):
+        (WebCore::CalculationValueHandleMap::get):
+        (WebCore::calcHandles):
+        (WebCore::Length::Length):
+        (WebCore::Length::calculationValue):
+        (WebCore::Length::calculatedValue):
+        (WebCore::Length::calculatedMinValue):
+        (WebCore::Length::calculatedFloatValue):
+        (WebCore::Length::incrementCalculatedRef):
+        (WebCore::Length::decrementCalculatedRef):
+        (WebCore::Length::nonNanCalculatedValue):
+        * platform/Length.h:
+        (Length):
+        (WebCore::Length::Length):
+        (WebCore::Length::operator=):
+        (WebCore::Length::operator*=):
+        (WebCore::Length::value):
+        (WebCore::Length::setValue):
+        (WebCore::Length::calcValue):
+        (WebCore::Length::calcMinValue):
+        (WebCore::Length::calcFloatValue):
+        (WebCore::Length::isZero):
+        (WebCore::Length::isPositive):
+        (WebCore::Length::isNegative):
+        (WebCore::Length::isPercent):
+        (WebCore::Length::isSpecified):
+        (WebCore::Length::isCalculated):
+        (WebCore::Length::initFromLength):
+        (WebCore::Length::calculationHandle):
+
 2012-03-07  Emil A Eklund  <eae@chromium.org>
 
         Change remaining scroll methods to integers
