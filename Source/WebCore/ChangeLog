@@ -1,3 +1,27 @@
+2012-03-08  Adam Klein  <adamk@chromium.org>
+
+        Remove InDocumentFlag manipulation methods from Node interface
+        https://bugs.webkit.org/show_bug.cgi?id=80612
+
+        Reviewed by Ryosuke Niwa.
+
+        This is a first step towards tightening up Node::inDocument() to match
+        the actual in-document-tree state (see r108152 for the sort of bug
+        resulting from those not matching).
+
+        No new tests, refactoring only.
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::removedFromDocument): Remove duplicate call to clearInDocument:
+        the call to Node::removedFromDocument three lines above will clear the flag.
+        * dom/Document.cpp:
+        (WebCore::Document::Document): Call ContainerNode constructor with InDocumentFlag always set
+        instead of calling setInDocument.
+        * dom/Node.cpp:
+        (WebCore::Node::insertedIntoDocument): Inline setInDocument (now the only caller).
+        (WebCore::Node::removedFromDocument): Inline clearInDocument (now the only caller).
+        * dom/Node.h: Remove setInDocument & clearInDocument, add new CreateDocument ConstructionType.
+
 2012-03-08  Tor Arne Vestbø  <tor.arne.vestbo@nokia.com>
 
         [Qt] Try to fix the Snow Leopard build
