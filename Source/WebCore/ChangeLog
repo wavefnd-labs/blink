@@ -1,3 +1,65 @@
+2012-03-07  Kentaro Hara  <haraken@chromium.org>
+
+        [V8][Performance] Optimize V8 bindings for HTMLElement.classList,
+        Element.dataset and Node.attributes
+        https://bugs.webkit.org/show_bug.cgi?id=80376
+
+        Reviewed by Adam Barth.
+
+        This patch improves the performance of HTMLElement.classList, Element.dataset
+        and Node.attributes by 6.4 times, 7.1 times and 10.9 times, respectively.
+
+        Previously, a 'hiddenReferenceName' string was allocated on v8::Handle and
+        created every time the DOM attribute is accessed, in spite of the fact that
+        the 'hiddenReferenceName' string is static.
+
+        This patch moves the 'hiddenReferenceName' string to v8::Persistent and makes it static.
+        Also, this patch removes 'if (!elementValue.IsEmpty() && elementValue->IsObject())',
+        since if 'element' exists, it is guaranteed that 'elementValue' is not empty
+        and is an Object.
+
+        Performance tests: https://bugs.webkit.org/attachment.cgi?id=130283
+
+        AppleWebKit/JavaScriptCore:
+        div.classList : 382ms
+        div.classList.foo = 123 : 335ms
+        div.dataset : 403ms
+        div.dataset.foo = 123 : 5250ms
+        div.attributes : 183ms
+
+        Chromium/V8 (without this patch):
+        div.classList : 9140ms
+        div.classList.foo = 123 : 9086ms
+        div.dataset : 9930ms
+        div.dataset.foo = 123 : 49698ms
+        div.attributes : 13489ms
+
+        Chromium/V8 (with this patch):
+        div.classList : 1435ms
+        div.classList.foo = 123 : 1470ms
+        div.dataset : 1400ms
+        div.dataset.foo = 123 : 30396ms
+        div.attributes : 1242ms
+
+        No tests. No change in behavior.
+
+        * bindings/v8/custom/V8DOMStringMapCustom.cpp: Modified as described above.
+        (WebCore::toV8):
+        * bindings/v8/custom/V8DOMTokenListCustom.cpp: Ditto.
+        (WebCore::toV8):
+        * bindings/v8/custom/V8NamedNodeMapCustom.cpp: Ditto.
+        (WebCore::toV8):
+
+        * bindings/v8/V8HiddenPropertyName.cpp: Defined a hidden property name string statically
+        to optimize the macro.
+        (WebCore):
+        (WebCore::V8HiddenPropertyName::hiddenReferenceName):
+        * bindings/v8/V8HiddenPropertyName.h: Modified to switch two prefixes "WebCore::HiddenProperty::"
+        and "WebCore::HiddenReference::", depending on whether a given name represents a hidden property
+        or a hidden reference.
+        (WebCore):
+        (V8HiddenPropertyName):
+
 2012-03-07  Kent Tamura  <tkent@chromium.org>
 
         Add RenderBoxModelObject::marginWidth() and marginHeight()
