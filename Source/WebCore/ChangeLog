@@ -1,3 +1,100 @@
+2012-03-08  Antti Koivisto  <antti@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=80370
+        Enable matched declaration caching for elements with a style attribute
+
+        Reviewed by Andreas Kling
+
+        Make the property set for style attribute immutable as long as there is no CSSOM
+        wrapper for it. If the style attribute changes we create a new property set instead
+        of recycling the old one. This way the property sets can be made cacheable as long
+        as there is no CSSOM wrapper that would allow uncontrolled modifications. Constructing
+        the wrapper disables caching.
+        
+        Made StyledElement::inlineStyle() and StyledElement::ensureInlineStyle() return a const
+        StylePropertySet so making accidental modifications difficult. Also dropped *Decl from
+        the names.
+        
+        Fixed two unrelated bugs that this exposed.
+
+        * css/CSSStyleSelector.cpp:
+        
+            Don't allow caching of document element style if writingModeSetOnDocumentElement() bit is set.
+            Tested by fast/multicol/vertical-rl/break-properties.html.
+        
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        (WebCore::StylePropertySet::hasCSSOMWrapper):
+        * dom/Element.cpp:
+        (WebCore::Element::recalcStyle):
+        
+            Invalidate the matched properties cache if the document has rem units and the root font changes.
+            Tested by fast/css/rem-dynamic-scaling.html.
+        
+        * dom/ElementAttributeData.cpp:
+        (WebCore):
+        (WebCore::ElementAttributeData::ensureInlineStyle):
+        (WebCore::ElementAttributeData::ensureMutableInlineStyle):
+        (WebCore::ElementAttributeData::updateInlineStyleAvoidingMutation):
+        (WebCore::ElementAttributeData::destroyInlineStyle):
+        * dom/ElementAttributeData.h:
+        (WebCore::ElementAttributeData::inlineStyle):
+        (ElementAttributeData):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::updateStyleAttribute):
+        (WebCore::StyledElement::~StyledElement):
+        (WebCore):
+        (WebCore::StyledElement::style):
+        (WebCore::StyledElement::parseAttribute):
+        (WebCore::StyledElement::setInlineStyleProperty):
+        (WebCore::StyledElement::removeInlineStyleProperty):
+        (WebCore::StyledElement::addSubresourceAttributeURLs):
+        * dom/StyledElement.h:
+        (WebCore::StyledElement::inlineStyle):
+        (WebCore::StyledElement::ensureInlineStyle):
+        (StyledElement):
+        (WebCore::StyledElement::destroyInlineStyle):
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::hasNoAttributeOrOnlyStyleAttribute):
+        (WebCore::ApplyStyleCommand::applyRelativeFontStyleChange):
+        (WebCore::ApplyStyleCommand::removeEmbeddingUpToEnclosingBlock):
+        (WebCore::ApplyStyleCommand::applyInlineStyleToNodeRange):
+        (WebCore::ApplyStyleCommand::removeCSSStyle):
+        (WebCore::ApplyStyleCommand::applyInlineStyleToPushDown):
+        (WebCore::ApplyStyleCommand::addBlockStyle):
+        (WebCore::ApplyStyleCommand::addInlineStyleIfNeeded):
+        * editing/EditingStyle.cpp:
+        (WebCore::HTMLElementEquivalent::propertyExistsInStyle):
+        (HTMLTextDecorationEquivalent):
+        (WebCore::HTMLTextDecorationEquivalent::propertyExistsInStyle):
+        (WebCore::EditingStyle::conflictsWithInlineStyleOfElement):
+        (WebCore::EditingStyle::elementIsStyledSpanOrHTMLEquivalent):
+        (WebCore::EditingStyle::mergeInlineStyleOfElement):
+        (WebCore::elementMatchesAndPropertyIsNotInInlineStyleDecl):
+        (WebCore::EditingStyle::mergeStyle):
+        * editing/EditingStyle.h:
+        (EditingStyle):
+        * editing/RemoveCSSPropertyCommand.cpp:
+        (WebCore::RemoveCSSPropertyCommand::doApply):
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplaceSelectionCommand::removeRedundantStylesAndKeepStyleSpanInline):
+        (WebCore::ReplaceSelectionCommand::handleStyleSpans):
+        * editing/markup.cpp:
+        (WebCore::StyledMarkupAccumulator::appendElement):
+        (WebCore::styleFromMatchedRulesAndInlineDecl):
+        * html/HTMLElement.cpp:
+        (WebCore::StyledElement::copyNonAttributeProperties):
+        * html/canvas/CanvasStyle.cpp:
+        (WebCore::currentColor):
+        * page/PageSerializer.cpp:
+        (WebCore::PageSerializer::serializeFrame):
+        (WebCore::PageSerializer::retrieveResourcesForProperties):
+        * page/PageSerializer.h:
+        (PageSerializer):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::isEmptyOrUnstyledAppleStyleSpan):
+
 2012-03-08  Scott Byer  <scottbyer@chromium.org>
 
         Have ScrollAnimatorNone use requestAnimationFrame
