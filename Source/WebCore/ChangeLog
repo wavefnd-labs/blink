@@ -1,3 +1,52 @@
+2012-03-07  Michael Nordman  <michaeln@google.com>
+
+        [Chromium] Don't be so CRASH() happy in the bindings layer.
+        https://bugs.webkit.org/show_bug.cgi?id=75111
+        - change the v8 bindings generated code to check for the 'worker is terminating'
+          condition prior to committing a suicidal CRASH()
+        - fixup custom v8 bindings accordingly
+        - simplify bindings/generic/ActiveDOMCallback, there is no need for it to support
+          destruction on a different thread
+
+        Reviewed by David Levin.
+
+        No new tests, existing tests apply.
+
+        * bindings/generic/ActiveDOMCallback.cpp: Simplified in general.
+        (WebCore):
+        (WebCore::ActiveDOMCallback::ActiveDOMCallback):
+        (WebCore::ActiveDOMCallback::~ActiveDOMCallback):
+        (WebCore::ActiveDOMCallback::canInvokeCallback):
+        (WebCore::ActiveDOMCallback::isScriptControllerTerminating): New method to avoid CRASH()ing in exceptional conditions in v8 bindings.
+        * bindings/generic/ActiveDOMCallback.h: Derive from ContextDestructionObserver.
+        * bindings/js/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::scheduleExecutionTermination): Use a mutex to provide a memory barrier.
+        (WebCore::WorkerScriptController::isExecutionTerminating): New supporting method to avoid CRASH()ing in exceptional conditions.
+        * bindings/js/WorkerScriptController.h:
+        (WorkerScriptController):
+        * bindings/scripts/CodeGeneratorV8.pm: Generates v8 bindding code that uses isScriptControllerTerminating to avoid CRASH()ing.
+        (GenerateCallbackImplementation):
+        * bindings/scripts/test/V8/V8TestCallback.cpp: Fixup expected outputs of the modified CodeGeneratorV8.pm script.
+        (WebCore::V8TestCallback::callbackWithClass1Param):
+        (WebCore::V8TestCallback::callbackWithClass2Param):
+        (WebCore::V8TestCallback::callbackWithStringList):
+        * bindings/v8/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::WorkerScriptController): Initialize a new data member.
+        (WebCore::WorkerScriptController::scheduleExecutionTermination): Use a mutex to provide a memory barrier.
+        (WebCore::WorkerScriptController::isExecutionTerminating): New supporting method to avoid CRASH()ing in exceptional conditions.
+        * bindings/v8/WorkerScriptController.h: Add a pair of new data members, bool + mutex.
+        (WorkerScriptController):
+        * bindings/v8/custom/V8CustomSQLStatementErrorCallback.cpp:
+        (WebCore::V8SQLStatementErrorCallback::handleEvent):
+        * bindings/v8/custom/V8MutationCallbackCustom.cpp:
+        (WebCore::V8MutationCallback::handleEvent):
+        * dom/ScriptExecutionContext.cpp:
+        (WebCore::ScriptExecutionContext::ScriptExecutionContext): Initilaize data members.
+        (WebCore::ScriptExecutionContext::stopActiveDOMObjects): Set m_activeDOMObjectsAreStopped.
+        * dom/ScriptExecutionContext.h: Add m_activeDOMObjectsAreStopped data member.
+        (WebCore::ScriptExecutionContext::activeDOMObjectsAreStopped): Simple getter.
+        (ScriptExecutionContext):
+
 2012-03-07  Kent Tamura  <tkent@chromium.org>
 
         Remove meaningless code in RenderTextControlSingleLine::preferredContentWidth()
