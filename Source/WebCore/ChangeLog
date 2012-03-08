@@ -1,3 +1,31 @@
+2012-03-08  Tony Chang  <tony@chromium.org>
+
+        implement flexbox wrap-reverse
+        https://bugs.webkit.org/show_bug.cgi?id=80552
+
+        Reviewed by Ojan Vafai.
+
+        No new tests, but additional coverage in:
+            css3/flexbox/multiline-align.html
+            css3/flexbox/multiline-pack.html
+            css3/flexbox/multiline.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::WrapReverseContext::WrapReverseContext): Helper struct to hold information needed for reversing
+        the order of lines.
+        (RenderFlexibleBox::WrapReverseContext):
+        (WebCore::RenderFlexibleBox::WrapReverseContext::addCrossAxisOffset):
+        (WebCore::RenderFlexibleBox::WrapReverseContext::addNumberOfChildrenOnLine):
+        (WebCore::RenderFlexibleBox::WrapReverseContext::lineCrossAxisDelta): Computes the number of pixels to move a line.
+        (WebCore):
+        (WebCore::RenderFlexibleBox::layoutFlexItems): Call flipForWrapReverse if needed. This happens
+        before flipForRightToLeftColumn because otherwise the crossAxisOffsets will be wrong.
+        (WebCore::flexAlignForChild):
+        (WebCore::RenderFlexibleBox::alignChildren): Flip alignment in wrap-reverse because the cross directions are flipped.
+        (WebCore::RenderFlexibleBox::flipForWrapReverse): Flip each line.
+        * rendering/RenderFlexibleBox.h:
+        (RenderFlexibleBox):
+
 2012-03-08  Adam Klein  <adamk@chromium.org>
 
         Remove InDocumentFlag manipulation methods from Node interface
