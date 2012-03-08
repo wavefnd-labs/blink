@@ -33,6 +33,8 @@
 
 #if ENABLE(FULLSCREEN_API)
 
+using namespace WebCore;
+
 namespace WebKit {
 
 void WebFullScreenManagerProxy::invalidate()
@@ -58,6 +60,18 @@ void WebFullScreenManagerProxy::exitFullScreen()
     [[m_webView fullScreenWindowController] exitFullScreen];
 }
     
+void WebFullScreenManagerProxy::beganEnterFullScreen(const IntRect& initialFrame, const IntRect& finalFrame)
+{
+    if (m_webView)
+        [[m_webView fullScreenWindowController] beganEnterFullScreenWithInitialFrame:initialFrame finalFrame:finalFrame];
+}
+
+void WebFullScreenManagerProxy::beganExitFullScreen(const IntRect& initialFrame, const IntRect& finalFrame)
+{
+    if (m_webView)
+        [[m_webView fullScreenWindowController] beganExitFullScreenWithInitialFrame:initialFrame finalFrame:finalFrame];
+}
+
 } // namespace WebKit
 
 #endif
