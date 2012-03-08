@@ -1,3 +1,23 @@
+2012-03-08  Tim Horton  <timothy_horton@apple.com>
+
+        No-op filter changes color output because of colorspace issues
+        https://bugs.webkit.org/show_bug.cgi?id=72411
+        <rdar://problem/10588374>
+
+        Reviewed by Dean Jackson.
+
+        Redefine "linear RGB" color space on Mac to mean linearized sRGB, instead of linear
+        Generic RGB. This makes existing CG color matching equivalent to what other ports do via
+        ImageBuffer::transformColorSpace (which only adjusts gamma, as we will now). Previously,
+        we were also causing actual (non-gamma) color adjustments which were not reversible.
+
+        No new tests, covered by all existing SVG and CSS filter tests.
+
+        * Resources/linearSRGB.icc: Added.
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore::linearRGBColorSpaceRef):
+
 2012-03-08  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=80463
