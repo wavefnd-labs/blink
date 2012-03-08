@@ -1,3 +1,63 @@
+2012-03-08  Shinya Kawanaka  <shinyak@chromium.org>
+
+        <shadow> should be rendered correctly.
+        https://bugs.webkit.org/show_bug.cgi?id=78596
+
+        Reviewed by Hajime Morita.
+
+        This patch supports <shadow> element rendering.
+
+        When attaching <shadow> element, if it is in the oldest shadow tree, it runs a part of
+        distribution algorithm. If it is in non-oldest shadow tree, it runs tree a part of
+        tree composition algorithm to assign a older shadow root. In this patch, InsertionPonit
+        try to treat the distributed host children and the assigned shadow children similarly.
+
+        NodeRenderingContext supports rendering <shadow> element. Since the assigned shadow children
+        are treated like distributed host children, that change is to consider non-youngest shadow
+        tree basically also.
+
+        Tests: fast/dom/shadow/shadow-element-rendering-multiple.html
+               fast/dom/shadow/shadow-element-rendering-single.html
+
+        * dom/NodeRenderingContext.cpp:
+        (WebCore):
+        (WebCore::NodeRenderingContext::NodeRenderingContext):
+          Does not ignore non-youngest shadow tree.
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::ShadowRoot):
+        * dom/ShadowRoot.h:
+        (ShadowRoot):
+        (WebCore::ShadowRoot::assignedTo):
+        (WebCore):
+        (WebCore::ShadowRoot::setAssignedTo):
+        (WebCore::ShadowRoot::isUsedForRendering):
+          Returns true if ShadowRoot is youngest or assigned to some InsertionPoint.
+        (WebCore::toShadowRoot):
+        * dom/ShadowTree.cpp:
+        (WebCore::ShadowTree::insertionPointFor):
+          Returns InsertionPoint to which node is distributed.
+        * dom/ShadowTree.h:
+        (ShadowTree):
+        * html/shadow/HTMLContentElement.h:
+        (WebCore::HTMLContentElement::doesSelectFromHostChildren):
+        (HTMLContentElement):
+        * html/shadow/HTMLShadowElement.cpp:
+        (WebCore::HTMLShadowElement::HTMLShadowElement):
+        (WebCore::HTMLShadowElement::select):
+        (WebCore::HTMLShadowElement::doesSelectFromHostChildren):
+        (WebCore):
+        * html/shadow/HTMLShadowElement.h:
+        (HTMLShadowElement):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::attach):
+        (WebCore::InsertionPoint::detach):
+        (WebCore::InsertionPoint::assignedFrom):
+        (WebCore):
+        (WebCore::InsertionPoint::assignShadowRoot):
+        (WebCore::InsertionPoint::clearAssignment):
+        * html/shadow/InsertionPoint.h:
+        (InsertionPoint):
+
 2012-03-06  Hans Wennborg  <hans@chromium.org>
 
         Speech JavaScript API: SpeechRecognitionAlternative, Result and ResultList
