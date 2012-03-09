@@ -1,3 +1,65 @@
+2012-03-09  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Use opaque paints in CCOcclusionTracker
+        https://bugs.webkit.org/show_bug.cgi?id=80173
+
+        Reviewed by Adrienne Walker.
+
+        Use tracked opaque paints in the tiles when tracking occlusion in
+        CCOcclusionTracker. Moves the Tile::m_opaqueRect up to the super-
+        class in CCLayerTilingData rather than having it declared in both
+        TiledLayerChromium and CCTiledLayerImpl. This lets the CCLayerTilingData
+        class compute the opaque region for its tiles, sharing code between the
+        two tiled layer implementations.
+
+        Use of this feature is guarded behind a runtime flag and turned off for
+        paint culling. We will enable it in the future once we're comfortable
+        with the paint culling.
+
+        Unit test: CCOcclusionTrackerTest.opaqueContentsRegionEmpty
+                   CCOcclusionTrackerTest.opaqueContentsRegionNonEmpty
+                   TiledLayerChromiumTest.opaqueContentsRegion
+
+        All existing CCOcclusionTrackerTest.* duplicated with opaque painted
+        rects.
+
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore::LayerChromium::opaqueContentsRegion):
+        (LayerChromium):
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (UpdatableTile):
+        (WebCore::TiledLayerChromium::pushPropertiesTo):
+        (WebCore::TiledLayerChromium::prepareToUpdateTiles):
+        (WebCore::TiledLayerChromium::addSelfToOccludedScreenSpace):
+        (WebCore::TiledLayerChromium::opaqueContentsRegion):
+        (WebCore):
+        * platform/graphics/chromium/TiledLayerChromium.h:
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (WebCore::CCLayerImpl::opaqueContentsRegion):
+        (CCLayerImpl):
+        * platform/graphics/chromium/cc/CCLayerTilingData.cpp:
+        (WebCore::CCLayerTilingData::opaqueRegionInLayerRect):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTilingData.h:
+        (WebCore):
+        (Tile):
+        (WebCore::CCLayerTilingData::Tile::opaqueRect):
+        (WebCore::CCLayerTilingData::Tile::setOpaqueRect):
+        (CCLayerTilingData):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.cpp:
+        (WebCore::::CCOcclusionTrackerBase):
+        (WebCore::computeOcclusionBehindLayer):
+        (WebCore::::markOccludedBehindLayer):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.h:
+        (CCOcclusionTrackerBase):
+        (WebCore::CCOcclusionTrackerBase::setUsePaintTracking):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.cpp:
+        (DrawableTile):
+        (WebCore::CCTiledLayerImpl::opaqueContentsRegion):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.h:
+        (CCTiledLayerImpl):
+
 2012-03-09  Antti Koivisto  <antti@apple.com>
 
         Presentation attribute cache
