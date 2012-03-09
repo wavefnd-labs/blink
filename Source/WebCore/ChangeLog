@@ -1,3 +1,37 @@
+2012-03-08  Erik Arvidsson  <arv@chromium.org>
+
+        [V8] Fix object scope for inline event attribute handlers
+        https://bugs.webkit.org/show_bug.cgi?id=80329
+
+        Reviewed by Ojan Vafai.
+
+        We now create the funciton inside the with-statements with the current scope objects.
+        This is important for a few reasons:
+
+        - We need to use the real objects and not just lookup the JS properties because these might have been overridden.
+        - We need to use the node, form and document at the time of the preparation and not at the time of calling.
+        - We need to ensure that event/evt is bound closer than a property with the same name in the object environment
+          created by the with-statements.
+
+        Tests: fast/dom/inline-event-attributes-lookup-removed-form.html
+               fast/dom/inline-event-attributes-lookup-removed.html
+               fast/dom/inline-event-attributes-lookup.html
+
+        * bindings/v8/ScriptEventListener.cpp:
+        (WebCore::eventParameterName):
+        (WebCore):
+        (WebCore::createAttributeEventListener):
+        * bindings/v8/V8LazyEventListener.cpp:
+        (WebCore::V8LazyEventListener::V8LazyEventListener):
+        (WebCore):
+        (WebCore::toObjectWrapper):
+        (WebCore::V8LazyEventListener::callListenerFunction):
+        (WebCore::V8LazyEventListener::prepareListenerObject):
+        * bindings/v8/V8LazyEventListener.h:
+        (WebCore):
+        (WebCore::V8LazyEventListener::create):
+        (V8LazyEventListener):
+
 2012-03-09  Stephen Chenney  <schenney@chromium.org>
 
         Crash in WebCore::SVGUseElement::instanceForShadowTreeElement
