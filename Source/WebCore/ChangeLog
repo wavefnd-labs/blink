@@ -1,3 +1,32 @@
+2012-03-09  Antti Koivisto  <antti@apple.com>
+
+        Presentation attribute cache
+        https://bugs.webkit.org/show_bug.cgi?id=80707
+        
+        Reviewed by Andreas Kling.
+
+        It is common for the same presentation attribute values repeat. We should introduce a cache that uses 
+        presentation attribute names and values as key. This will help to avoid repeated parsing of the 
+        same attribute values, reduce memory consumption and speed up the style resolve.
+        
+        This patch introduces a simple and small (128 entries) global cache. In general web browsing it seems
+        to give sharing rate of >75% (an average presentation attribute property set is shared between >4 elements).
+
+        * dom/StyledElement.cpp:
+        (WebCore::PresentationAttributeCacheKey::PresentationAttributeCacheKey):
+        (PresentationAttributeCacheKey):
+        (WebCore):
+        (WebCore::operator!=):
+        (PresentationAttributeCacheEntry):
+        (WebCore::presentationAttributeCache):
+        (WebCore::attributeNameSort):
+        (WebCore::StyledElement::makePresentationAttributeCacheKey):
+        (WebCore::computePresentationAttributeCacheHash):
+        (WebCore::StyledElement::updateAttributeStyle):
+        * dom/StyledElement.h:
+        (WebCore):
+        (StyledElement):
+
 2012-03-08  Erik Arvidsson  <arv@chromium.org>
 
         [V8] Fix object scope for inline event attribute handlers
