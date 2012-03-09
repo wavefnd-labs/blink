@@ -1,3 +1,50 @@
+2012-03-09  Andreas Kling  <awesomekling@apple.com>
+
+        CSSParser: Use Vector for intermediate property storage.
+        <http://webkit.org/b/80653>
+
+        Reviewed by Antti Koivisto.
+
+        Remove the custom memory management for intermediate CSSProperties in CSSParser
+        and replace it by a Vector<CSSProperty, 256>.
+        This avoids heap allocations and removes a bunch of unnecessary complexity.
+
+        Remove WTF_MAKE_FAST_ALLOCATED from CSSProperty since they are only created on
+        the stack now.
+
+        * css/CSSGrammar.y:
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::CSSParser):
+        (WebCore::CSSParser::~CSSParser):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseColor):
+        (WebCore::CSSParser::parseDeclaration):
+        (WebCore::CSSParser::addProperty):
+        (WebCore::CSSParser::rollbackLastProperties):
+        (WebCore::CSSParser::clearProperties):
+        (WebCore::CSSParser::parse4Values):
+        (WebCore::CSSParser::parseFlowThread):
+        (WebCore::CSSParser::createStyleRule):
+        (WebCore::CSSParser::createFontFaceRule):
+        (WebCore::CSSParser::createPageRule):
+        (WebCore::CSSParser::createMarginAtRule):
+        (WebCore::CSSParser::startDeclarationsForMarginBox):
+        (WebCore::CSSParser::endDeclarationsForMarginBox):
+        (WebCore::CSSParser::deleteFontFaceOnlyValues):
+        (WebCore::CSSParser::createKeyframeRule):
+        * css/CSSParser.h:
+        (WebCore::CSSParser::hasProperties):
+        (CSSParser):
+        * css/CSSProperty.h:
+        * css/SVGCSSParser.cpp:
+        (WebCore::CSSParser::parseSVGValue):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::StylePropertySet):
+        (WebCore::StylePropertySet::addParsedProperties):
+        * css/StylePropertySet.h:
+        (WebCore::StylePropertySet::create):
+        (StylePropertySet):
+
 2012-03-09  Nate Chapin  <japhet@chromium.org>
 
         CachedRawResource breaks when trying to load
