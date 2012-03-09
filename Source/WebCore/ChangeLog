@@ -1,3 +1,39 @@
+2012-03-09  Levi Weintraub  <leviw@chromium.org>
+
+        Move TransformationMatrix and TransformState to LayoutUnits.
+        https://bugs.webkit.org/show_bug.cgi?id=80632
+
+        Reviewed by Simon Fraser.
+
+        When we move layout to sub-pixel precision, we want to preserve that precision through
+        transformations. This change readies TransformState and TransformationMatrix to make
+        use of this additional precision in accumulating transforms, and in returning rects that
+        preserve it.
+
+        No new tests. No change in behavior.
+
+        * platform/graphics/transforms/TransformState.cpp:
+        (WebCore::TransformState::move): Changed to pass along LayoutUnits to the contained
+        TransformationMatrix. The values of the LayoutUnits will be implicitly converted to
+        floats to be applied.
+        * platform/graphics/transforms/TransformState.h:
+        (WebCore::TransformState::move): Ditto.
+        (TransformState):
+        * platform/graphics/transforms/TransformationMatrix.cpp:
+        (WebCore::clampEdgeValue): Limiting edges to the maximum LayoutUnit value to prevent
+        overflow..
+        (WebCore::TransformationMatrix::clampedBoundsOfProjectedQuad): Same as above, but also
+        returning a LayoutRect which preserves additional precision than the previous IntRect.
+        (WebCore::TransformationMatrix::mapRect): Adding a version of this method that operates
+        specifically on FractionalLayoutRects.
+        (WebCore):
+        * platform/graphics/transforms/TransformationMatrix.h:
+        (WebCore):
+        (TransformationMatrix):
+        * rendering/LayoutTypes.h:
+        (WebCore::clampToLayoutUnit):
+        (WebCore):
+
 2012-03-09  Ryosuke Niwa  <rniwa@webkit.org>
 
         Remove a bogus assertion. This condition is no longer true for non-document tree scopes.
