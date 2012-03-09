@@ -1,3 +1,27 @@
+2012-03-09  Stephen Chenney  <schenney@chromium.org>
+
+        Crash in WebCore::SVGUseElement::instanceForShadowTreeElement
+        https://bugs.webkit.org/show_bug.cgi?id=80406
+
+        Reviewed by Nikolas Zimmermann.
+
+        Code assumes that an object that is an SVG Element and in a shadow
+        tree must be in an SVG use shadow tree, and casts the shadow host with
+        a static_cast. It may be that an SVG element appears in a non-use
+        shadow tree, in which case bad things happen. While it appears that
+        the current code prevents such a situation from arising (checks are
+        made within the shadow tree code to prevent it) there are also
+        indications that the situation may change.
+
+        No new tests. I believe that the problem here cannot currently be
+        reproduced. That is, other code prevents SVG elements from appearing
+        in non-svg shadow trees.
+
+        * dom/EventDispatcher.cpp:
+        (WebCore::eventTargetRespectingSVGTargetRules):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::title):
+
 2012-03-09  Jon Lee  <jonlee@apple.com>
 
         Add support for ENABLE(LEGACY_NOTIFICATIONS)
