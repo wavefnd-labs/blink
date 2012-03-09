@@ -1,3 +1,36 @@
+2012-03-07  Jon Lee  <jonlee@apple.com>
+
+        Support [Custom] for static functions
+        https://bugs.webkit.org/show_bug.cgi?id=80573
+
+        Reviewed by Kentaro Hara.
+
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateHeader): If the function is static, add static qualifier to cpp function.
+        (GenerateImplementation): Reorganize the function to split out based on the static
+        attribute, instead of checking for it at every line we output.
+            If the function is static and not custom, the listed code should be the code in
+        the rest of the function that did not have the static check. If it is custom, then
+        we check the number of arguments, and then call the static impl function directly.
+            If the function is not static, all of the "unless ($function->isStatic)" checks
+        are removed since it is not necessary.
+
+        * bindings/scripts/test/TestObj.idl: Added new test case.
+
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore):
+        (WebCore::jsTestObjConstructorFunctionClassMethod2):
+        * bindings/scripts/test/JS/JSTestObj.h:
+        (JSTestObj):
+        (WebCore):
+        * bindings/scripts/test/ObjC/DOMTestObj.h:
+        * bindings/scripts/test/ObjC/DOMTestObj.mm:
+        (-[DOMTestObj classMethod2]):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::ConfigureV8TestObjTemplate):
+        * bindings/scripts/test/V8/V8TestObj.h:
+        (V8TestObj):
+
 2012-03-08  Mark Pilgrim  <pilgrim@chromium.org>
 
         Collapse ENABLE(BLOB)|ENABLE(FILE_SYSTEM) to just ENABLE(BLOB)
