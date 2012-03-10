@@ -1,3 +1,44 @@
+2012-03-09  Kentaro Hara  <haraken@chromium.org>
+
+        [V8][Performance] Inline hot methods in V8Bindings.h
+        https://bugs.webkit.org/show_bug.cgi?id=80685
+
+        Reviewed by Adam Barth.
+
+        This patch slightly improves DOM binding performance by inlining hot
+        methods in V8Binding.cpp, e.g. isUndefinedOrNull(), v8StringOrNull(), v8Boolean().
+        For example, this patch improves div.nodeName by 5.0%, and div.nodeValue by 4.1%.
+
+        Performance tests: https://bugs.webkit.org/attachment.cgi?id=131006
+
+        The performance test results in my Mac environment are as follows:
+
+        Chromium/V8 without this patch:
+        div.nodeName : 3417.4 ms
+        div.nodeValue : 2069.6 ms
+
+        Chromium/V8 with this patch:
+        div.nodeName : 3245.6 ms
+        div.nodeValue : 1983.1 ms
+
+        No tests. No change in behavior.
+
+        * bindings/v8/V8Binding.cpp:
+        * bindings/v8/V8Binding.h:
+        (WebCore::toWebCoreString):
+        (WebCore::isUndefinedOrNull):
+        (WebCore::isHostObject):
+        (WebCore::v8Boolean):
+        (WebCore::toWebCoreStringWithNullCheck):
+        (WebCore::toAtomicWebCoreStringWithNullCheck):
+        (WebCore::toWebCoreStringWithNullOrUndefinedCheck):
+        (WebCore::v8UndetectableString):
+        (WebCore::v8StringOrNull):
+        (WebCore::v8StringOrUndefined):
+        (WebCore::v8StringOrFalse):
+        (WebCore::toWebCoreDate):
+        (WebCore::v8DateOrNull):
+
 2012-03-09  W. James MacLean  <wjmaclean@chromium.org>
 
         [chromium] Implement scroll physics architecture for impl/main thread
