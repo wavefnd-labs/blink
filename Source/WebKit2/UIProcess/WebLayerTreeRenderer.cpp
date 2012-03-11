@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies)
+    Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,11 +19,13 @@
 
 #include "config.h"
 
-#include "LayerTreeHostProxy.h"
+#if USE(UI_SIDE_COMPOSITING)
+
+#include "WebLayerTreeRenderer.h"
 
 #include "GraphicsLayerTextureMapper.h"
 #include "LayerBackingStore.h"
-#include "LayerTreeHostMessages.h"
+#include "LayerTreeHostProxy.h"
 #include "MainThread.h"
 #include "MessageID.h"
 #include "ShareableBitmap.h"
@@ -31,18 +33,57 @@
 #include "TextureMapperBackingStore.h"
 #include "TextureMapperLayer.h"
 #include "UpdateInfo.h"
-#include "WebCoreArgumentCoders.h"
-#include "WebLayerTreeInfo.h"
-#include "WebPageProxy.h"
-#include "WebProcessProxy.h"
 #include <OpenGLShims.h>
-#include <QDateTime>
+#include <wtf/Atomics.h>
 
 namespace WebKit {
 
 using namespace WebCore;
 
-PassOwnPtr<GraphicsLayer> LayerTreeHostProxy::createLayer(WebLayerID layerID)
+template<class T> class MainThreadGuardedInvoker {
+public:
+    static void call(PassRefPtr<T> objectToGuard, const Function<void()>& function)
+    {
+        MainThreadGuardedInvoker<T>* invoker = new MainThreadGuardedInvoker<T>(objectToGuard, function);
+        callOnMainThread(invoke, invoker);
+    }
+
+private:
+    MainThreadGuardedInvoker(PassRefPtr<T> object, const Function<void()>& newFunction)
+        : objectToGuard(object)
+        , function(newFunction)
+    {
+    }
+
+    RefPtr<T> objectToGuard;
+    Function<void()> function;
+    static void invoke(void* data)
+    {
+        MainThreadGuardedInvoker<T>* invoker = static_cast<MainThreadGuardedInvoker<T>*>(data);
+        invoker->function();
+        delete invoker;
+    }
+};
+
+void WebLayerTreeRenderer::callOnMainTread(const Function<void()>& function)
+{
+    if (isMainThread())
+        function();
+    else
+        MainThreadGuardedInvoker<WebLayerTreeRenderer>::call(this, function);
+}
+
+WebLayerTreeRenderer::WebLayerTreeRenderer(LayerTreeHostProxy* layerTreeHostProxy)
+    : m_layerTreeHostProxy(layerTreeHostProxy)
+    , m_rootLayerID(0)
+{
+}
+
+WebLayerTreeRenderer::~WebLayerTreeRenderer()
+{
+}
+
+PassOwnPtr<GraphicsLayer> WebLayerTreeRenderer::createLayer(WebLayerID layerID)
 {
     GraphicsLayer* newLayer = new GraphicsLayerTextureMapper(this);
     TextureMapperLayer* layer = toTextureMapperLayer(newLayer);
@@ -50,18 +91,7 @@ PassOwnPtr<GraphicsLayer> LayerTreeHostProxy::createLayer(WebLayerID layerID)
     return adoptPtr(newLayer);
 }
 
-LayerTreeHostProxy::LayerTreeHostProxy(DrawingAreaProxy* drawingAreaProxy)
-    : m_drawingAreaProxy(drawingAreaProxy)
-    , m_rootLayerID(0)
-{
-}
-
-LayerTreeHostProxy::~LayerTreeHostProxy()
-{
-}
-
-// This function needs to be reentrant.
-void LayerTreeHostProxy::paintToCurrentGLContext(const TransformationMatrix& matrix, float opacity, const FloatRect& clipRect)
+void WebLayerTreeRenderer::paintToCurrentGLContext(const TransformationMatrix& matrix, float opacity, const FloatRect& clipRect)
 {
     if (!m_textureMapper)
         m_textureMapper = TextureMapper::create(TextureMapper::OpenGLMode);
@@ -95,17 +125,17 @@ void LayerTreeHostProxy::paintToCurrentGLContext(const TransformationMatrix& mat
     syncAnimations();
 }
 
-void LayerTreeHostProxy::syncAnimations()
+void WebLayerTreeRenderer::syncAnimations()
 {
     TextureMapperLayer* layer = toTextureMapperLayer(rootLayer());
     ASSERT(layer);
 
     layer->syncAnimationsRecursively();
     if (layer->descendantsOrSelfHaveRunningAnimations())
-        updateViewport();
+        callOnMainThread(bind(&WebLayerTreeRenderer::updateViewport, this));
 }
 
-void LayerTreeHostProxy::paintToGraphicsContext(QPainter* painter)
+void WebLayerTreeRenderer::paintToGraphicsContext(QPainter* painter)
 {
     if (!m_textureMapper)
         m_textureMapper = TextureMapper::create();
@@ -125,12 +155,19 @@ void LayerTreeHostProxy::paintToGraphicsContext(QPainter* painter)
     m_textureMapper->setGraphicsContext(0);
 }
 
-void LayerTreeHostProxy::updateViewport()
+void WebLayerTreeRenderer::setVisibleContentsRectForScaling(const IntRect& rect, float scale)
 {
-    m_drawingAreaProxy->updateViewport();
+    m_visibleContentsRect = rect;
+    m_contentsScale = scale;
 }
 
-void LayerTreeHostProxy::syncLayerParameters(const WebLayerInfo& layerInfo)
+void WebLayerTreeRenderer::updateViewport()
+{
+    if (m_layerTreeHostProxy)
+        m_layerTreeHostProxy->updateViewport();
+}
+
+void WebLayerTreeRenderer::syncLayerParameters(const WebLayerInfo& layerInfo)
 {
     WebLayerID id = layerInfo.id;
     ensureLayer(id);
@@ -196,7 +233,7 @@ void LayerTreeHostProxy::syncLayerParameters(const WebLayerInfo& layerInfo)
         setRootLayerID(id);
 }
 
-void LayerTreeHostProxy::deleteLayer(WebLayerID layerID)
+void WebLayerTreeRenderer::deleteLayer(WebLayerID layerID)
 {
     GraphicsLayer* layer = layerByID(layerID);
     if (!layer)
@@ -208,7 +245,7 @@ void LayerTreeHostProxy::deleteLayer(WebLayerID layerID)
 }
 
 
-void LayerTreeHostProxy::ensureLayer(WebLayerID id)
+void WebLayerTreeRenderer::ensureLayer(WebLayerID id)
 {
     // We have to leak the new layer's pointer and manage it ourselves,
     // because OwnPtr is not copyable.
@@ -216,7 +253,7 @@ void LayerTreeHostProxy::ensureLayer(WebLayerID id)
         m_layers.add(id, createLayer(id).leakPtr());
 }
 
-void LayerTreeHostProxy::setRootLayerID(WebLayerID layerID)
+void WebLayerTreeRenderer::setRootLayerID(WebLayerID layerID)
 {
     if (layerID == m_rootLayerID)
         return;
@@ -235,7 +272,7 @@ void LayerTreeHostProxy::setRootLayerID(WebLayerID layerID)
     m_rootLayer->addChild(layer);
 }
 
-PassRefPtr<LayerBackingStore> LayerTreeHostProxy::getBackingStore(WebLayerID id)
+PassRefPtr<LayerBackingStore> WebLayerTreeRenderer::getBackingStore(WebLayerID id)
 {
     ensureLayer(id);
     TextureMapperLayer* layer = toTextureMapperLayer(layerByID(id));
@@ -248,17 +285,17 @@ PassRefPtr<LayerBackingStore> LayerTreeHostProxy::getBackingStore(WebLayerID id)
     return backingStore;
 }
 
-void LayerTreeHostProxy::createTile(WebLayerID layerID, int tileID, float scale)
+void WebLayerTreeRenderer::createTile(WebLayerID layerID, int tileID, float scale)
 {
     getBackingStore(layerID)->createTile(tileID, scale);
 }
 
-void LayerTreeHostProxy::removeTile(WebLayerID layerID, int tileID)
+void WebLayerTreeRenderer::removeTile(WebLayerID layerID, int tileID)
 {
     getBackingStore(layerID)->removeTile(tileID);
 }
 
-void LayerTreeHostProxy::updateTile(WebLayerID layerID, int tileID, const IntRect& sourceRect, const IntRect& targetRect, PassRefPtr<ShareableBitmap> weakBitmap)
+void WebLayerTreeRenderer::updateTile(WebLayerID layerID, int tileID, const IntRect& sourceRect, const IntRect& targetRect, PassRefPtr<ShareableBitmap> weakBitmap)
 {
     RefPtr<ShareableBitmap> bitmap = weakBitmap;
     RefPtr<LayerBackingStore> backingStore = getBackingStore(layerID);
@@ -266,7 +303,7 @@ void LayerTreeHostProxy::updateTile(WebLayerID layerID, int tileID, const IntRec
     m_backingStoresWithPendingBuffers.add(backingStore);
 }
 
-void LayerTreeHostProxy::createImage(int64_t imageID, PassRefPtr<ShareableBitmap> weakBitmap)
+void WebLayerTreeRenderer::createImage(int64_t imageID, PassRefPtr<ShareableBitmap> weakBitmap)
 {
     RefPtr<ShareableBitmap> bitmap = weakBitmap;
     RefPtr<TextureMapperTiledBackingStore> backingStore = TextureMapperTiledBackingStore::create();
@@ -274,19 +311,19 @@ void LayerTreeHostProxy::createImage(int64_t imageID, PassRefPtr<ShareableBitmap
     m_directlyCompositedImages.set(imageID, backingStore);
 }
 
-void LayerTreeHostProxy::destroyImage(int64_t imageID)
+void WebLayerTreeRenderer::destroyImage(int64_t imageID)
 {
     m_directlyCompositedImages.remove(imageID);
 }
 
-void LayerTreeHostProxy::assignImageToLayer(GraphicsLayer* layer, int64_t imageID)
+void WebLayerTreeRenderer::assignImageToLayer(GraphicsLayer* layer, int64_t imageID)
 {
     HashMap<int64_t, RefPtr<TextureMapperBackingStore> >::iterator it = m_directlyCompositedImages.find(imageID);
     ASSERT(it != m_directlyCompositedImages.end());
     layer->setContentsToMedia(it->second.get());
 }
 
-void LayerTreeHostProxy::swapBuffers()
+void WebLayerTreeRenderer::swapBuffers()
 {
     HashSet<RefPtr<LayerBackingStore> >::iterator end = m_backingStoresWithPendingBuffers.end();
     for (HashSet<RefPtr<LayerBackingStore> >::iterator it = m_backingStoresWithPendingBuffers.begin(); it != end; ++it)
@@ -295,19 +332,28 @@ void LayerTreeHostProxy::swapBuffers()
     m_backingStoresWithPendingBuffers.clear();
 }
 
-void LayerTreeHostProxy::flushLayerChanges()
+void WebLayerTreeRenderer::flushLayerChanges()
 {
     m_rootLayer->syncCompositingState(FloatRect());
     swapBuffers();
 
     // The pending tiles state is on its way for the screen, tell the web process to render the next one.
-    m_drawingAreaProxy->page()->process()->send(Messages::LayerTreeHost::RenderNextFrame(), m_drawingAreaProxy->page()->pageID());
+    callOnMainThread(bind(&WebLayerTreeRenderer::renderNextFrame, this));
 }
 
-void LayerTreeHostProxy::ensureRootLayer()
+void WebLayerTreeRenderer::renderNextFrame()
+{
+    if (m_layerTreeHostProxy)
+        m_layerTreeHostProxy->renderNextFrame();
+}
+
+void WebLayerTreeRenderer::ensureRootLayer()
 {
     if (m_rootLayer)
         return;
+    if (!m_textureMapper)
+        m_textureMapper = TextureMapper::create(TextureMapper::OpenGLMode);
+
     m_rootLayer = createLayer(InvalidWebLayerID);
     m_rootLayer->setMasksToBounds(false);
     m_rootLayer->setDrawsContent(false);
@@ -315,12 +361,10 @@ void LayerTreeHostProxy::ensureRootLayer()
 
     // The root layer should not have zero size, or it would be optimized out.
     m_rootLayer->setSize(FloatSize(1.0, 1.0));
-    if (!m_textureMapper)
-        m_textureMapper = TextureMapper::create(TextureMapper::OpenGLMode);
     toTextureMapperLayer(m_rootLayer.get())->setTextureMapper(m_textureMapper.get());
 }
 
-void LayerTreeHostProxy::syncRemoteContent()
+void WebLayerTreeRenderer::syncRemoteContent()
 {
     // We enqueue messages and execute them during paint, as they require an active GL context.
     ensureRootLayer();
@@ -331,77 +375,7 @@ void LayerTreeHostProxy::syncRemoteContent()
     m_renderQueue.clear();
 }
 
-void LayerTreeHostProxy::dispatchUpdate(const Function<void()>& function)
-{
-    m_renderQueue.append(function);
-    updateViewport();
-}
-
-void LayerTreeHostProxy::createTileForLayer(int layerID, int tileID, const WebKit::UpdateInfo& updateInfo)
-{
-    dispatchUpdate(bind(&LayerTreeHostProxy::createTile, this, layerID, tileID, updateInfo.updateScaleFactor));
-    updateTileForLayer(layerID, tileID, updateInfo);
-}
-
-void LayerTreeHostProxy::updateTileForLayer(int layerID, int tileID, const WebKit::UpdateInfo& updateInfo)
-{
-    ASSERT(updateInfo.updateRects.size() == 1);
-    IntRect sourceRect = updateInfo.updateRects.first();
-    IntRect targetRect = updateInfo.updateRectBounds;
-    RefPtr<ShareableBitmap> bitmap = ShareableBitmap::create(updateInfo.bitmapHandle);
-    dispatchUpdate(bind(&LayerTreeHostProxy::updateTile, this, layerID, tileID, sourceRect, targetRect, bitmap));
-}
-
-void LayerTreeHostProxy::removeTileForLayer(int layerID, int tileID)
-{
-    dispatchUpdate(bind(&LayerTreeHostProxy::removeTile, this, layerID, tileID));
-}
-
-
-void LayerTreeHostProxy::deleteCompositingLayer(WebLayerID id)
-{
-    dispatchUpdate(bind(&LayerTreeHostProxy::deleteLayer, this, id));
-}
-
-void LayerTreeHostProxy::setRootCompositingLayer(WebLayerID id)
-{
-    dispatchUpdate(bind(&LayerTreeHostProxy::setRootLayerID, this, id));
-}
-
-void LayerTreeHostProxy::syncCompositingLayerState(const WebLayerInfo& info)
-{
-    dispatchUpdate(bind(&LayerTreeHostProxy::syncLayerParameters, this, info));
-}
-
-void LayerTreeHostProxy::didRenderFrame()
-{
-    dispatchUpdate(bind(&LayerTreeHostProxy::flushLayerChanges, this));
-}
-
-void LayerTreeHostProxy::createDirectlyCompositedImage(int64_t key, const WebKit::ShareableBitmap::Handle& handle)
-{
-    RefPtr<ShareableBitmap> bitmap = ShareableBitmap::create(handle);
-    dispatchUpdate(bind(&LayerTreeHostProxy::createImage, this, key, bitmap));
-}
-
-void LayerTreeHostProxy::destroyDirectlyCompositedImage(int64_t key)
-{
-    dispatchUpdate(bind(&LayerTreeHostProxy::destroyImage, this, key));
-}
-
-void LayerTreeHostProxy::setVisibleContentsRectForPanning(const IntRect& rect, const FloatPoint& trajectoryVector)
-{
-    m_drawingAreaProxy->page()->process()->send(Messages::LayerTreeHost::SetVisibleContentsRectForPanning(rect, trajectoryVector), m_drawingAreaProxy->page()->pageID());
-}
-
-void LayerTreeHostProxy::setVisibleContentsRectForScaling(const IntRect& rect, float scale)
-{
-    m_visibleContentsRect = rect;
-    m_contentsScale = scale;
-    m_drawingAreaProxy->page()->process()->send(Messages::LayerTreeHost::SetVisibleContentsRectForScaling(rect, scale), m_drawingAreaProxy->page()->pageID());
-}
-
-void LayerTreeHostProxy::purgeGLResources()
+void WebLayerTreeRenderer::purgeGLResources()
 {
     TextureMapperLayer* layer = toTextureMapperLayer(rootLayer());
 
@@ -411,7 +385,26 @@ void LayerTreeHostProxy::purgeGLResources()
     m_directlyCompositedImages.clear();
     m_textureMapper.clear();
     m_backingStoresWithPendingBuffers.clear();
-    m_drawingAreaProxy->page()->process()->send(Messages::LayerTreeHost::PurgeBackingStores(), m_drawingAreaProxy->page()->pageID());
+
+    callOnMainThread(bind(&WebLayerTreeRenderer::purgeBackingStores, this));
 }
 
+void WebLayerTreeRenderer::purgeBackingStores()
+{
+    if (m_layerTreeHostProxy)
+        m_layerTreeHostProxy->purgeBackingStores();
 }
+
+void WebLayerTreeRenderer::detach()
+{
+    m_layerTreeHostProxy = 0;
+}
+
+void WebLayerTreeRenderer::appendUpdate(const Function<void()>& function)
+{
+    m_renderQueue.append(function);
+}
+
+} // namespace WebKit
+
+#endif // USE(UI_SIDE_COMPOSITING)
