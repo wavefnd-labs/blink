@@ -1,5 +1,37 @@
 2012-03-12  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
 
+        [TexMapGL] Use textures sized exactly to their contents.
+        https://bugs.webkit.org/show_bug.cgi?id=80845
+
+        Reviewed by Noam Rosenthal.
+
+        This fixes a regression introduced in r108273 as well as the bug it fixed.
+        The regressing behavior was that textures were rendered shrunk by 1 pixel
+        and thus would appear blurry on the screen.
+        The original problem was that garbage contents would appear on filtered
+        textures since we would reuse textures of different sizes by giving them
+        a slightly bigger size.
+
+        This patch will reuse the texture only if the size matches exactly to allow
+        edge clamping to work properly when redering with linear filtering.
+        Reusing textures would only saves us the allocation of graphic memory
+        anyway, which is negligeable compared to texture upload.
+
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::drawTexture):
+        (WebCore::BitmapTextureGL::didReset):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (BitmapTextureGL):
+        * platform/graphics/texmap/TextureMapperShaderManager.cpp:
+        (WebCore::TextureMapperShaderProgramOpacityAndMask::TextureMapperShaderProgramOpacityAndMask):
+        (WebCore::TextureMapperShaderProgramOpacityAndMask::prepare):
+        * platform/graphics/texmap/TextureMapperShaderManager.h:
+        (TextureMapperShaderProgramOpacityAndMask):
+
+2012-03-12  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
+
         [TexMap] Remove BitmapTexture::destroy.
         https://bugs.webkit.org/show_bug.cgi?id=80844
 
