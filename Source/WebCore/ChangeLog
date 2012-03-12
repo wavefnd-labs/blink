@@ -1,3 +1,39 @@
+2012-03-12  Kent Tamura  <tkent@chromium.org>
+
+        Use ICU C API instead of C++ API in LocalizedNumberICU
+        https://bugs.webkit.org/show_bug.cgi?id=80815
+        https://bugs.gentoo.org/show_bug.cgi?id=407401
+
+        Reviewed by Hajime Morita.
+
+        ICU 4.8 doesn't have kNumberStyle. We had better to use ICU C API in
+        general to avoid such issues.
+
+        This patch should not make any behavior change.
+
+        * platform/text/LocalizedNumberICU.cpp:
+        (WebCore::ICULocale::ICULocale):
+        Change the argument type: icu::Locale -> const char*
+        (WebCore::ICULocale::~ICULocale): Delete m_numberFormat with unum_close().
+        (WebCore::ICULocale::create): Do not create icu::Locale.
+        (WebCore::ICULocale::createForCurrentLocale): ditto.
+        (WebCore::ICULocale::setDecimalSymbol):
+        Use unum_getSymbol() instead of DecimalFormatSymbols::getSymbol().
+        (WebCore::ICULocale::setDecimalTextAttribute):
+        Added. A utility function to store prefixes and suffixes.
+        (WebCore::ICULocale::initializeDecimalFormat):
+        - unum_open(), instead of NumberFormat::createInstance().
+        - Use C API symbols.
+        - Cache positive/negative prefixes/suffixes.
+        (WebCore::ICULocale::convertToLocalizedNumber): Use cached prefixes and suffixes.
+        (WebCore::matches): Stop using template because we don't use UString anymore.
+        (WebCore::ICULocale::detectSignAndGetDigitRange):
+        - Use cached prefixes and suffixes.
+        - Use String::startsWith() and endsWith().
+        (WebCore::ICULocale::convertFromLocalizedNumber):
+        * platform/text/LocalizedNumberICU.h:
+        (ICULocale):
+
 2012-03-11  Pavel Podivilov  <podivilov@chromium.org>
 
         Web Inspector: decouple LiveLocation from RawSourceCode.
