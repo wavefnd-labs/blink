@@ -1,3 +1,41 @@
+2012-03-12  Levi Weintraub  <leviw@chromium.org>
+
+        Update LayoutUnit usage in RenderMathML* classes
+        https://bugs.webkit.org/show_bug.cgi?id=77916
+
+        Reviewed by Eric Seidel.
+
+        The purpose of this patch is to ensure MathML rendering does not regress when
+        we switch to sub-pixel layout. A subsequent patch can likely improve MathML's
+        rendering when zoom is applied.
+
+        To accomplish this without changing the current heuristics for positioning,
+        we continue to use integers for sizes and locations, using pixel snapping
+        when communicating with other Rendering classes.
+
+        No new tests. No change in behavior.
+
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::paint): Cleaning up debug painting to be on
+        pixel boundaries instead of subpixel.
+        * rendering/mathml/RenderMathMLFraction.cpp:
+        (WebCore::RenderMathMLFraction::paint): Reverting to integers for determining
+        the vertical offset.
+        (WebCore::RenderMathMLFraction::baselinePosition):
+        * rendering/mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::paint): Using integers for height and width
+        and only accumulating pixel snapped values.
+        (WebCore::RenderMathMLRoot::layout): Setting padding with integers to
+        avoid inconsistent rounding based on the root's location.
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::layout):
+        * rendering/mathml/RenderMathMLSquareRoot.cpp:
+        (WebCore::RenderMathMLSquareRoot::paint): See RenderMathMLRoot.
+        (WebCore::RenderMathMLSquareRoot::layout): Ditto.
+        * rendering/mathml/RenderMathMLUnderOver.cpp:
+        (WebCore::getOffsetHeight):
+        (WebCore::RenderMathMLUnderOver::layout):
+
 2012-03-12  Anders Carlsson  <andersca@apple.com>
 
         Use smaller tiles for right and bottom edges
