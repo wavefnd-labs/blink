@@ -1,3 +1,87 @@
+2012-03-11  Victor Carbune  <vcarbune@adobe.com>
+
+        The main code structure for placing future text track cue rendering
+        code and main outer rendering steps.
+        https://bugs.webkit.org/show_bug.cgi?id=79746
+
+        Reviewed by Eric Carlson.
+
+        No new tests. Only refactoring, but some chromium tests require rebaselining
+        and have been marked accordingly.
+
+        * css/mediaControls.css:
+        (::-webkit-media-controls): Changed the default display to -webkit-box, as
+        captions need to always be rendered on top of the controls, if they are visible.
+        (audio::-webkit-media-controls-panel, video::-webkit-media-controls-panel):
+        Default position attribute is now relative, handled by the parent -webkit-box
+        (video::-webkit-media-text-track-container): The position of the container is
+        now relative, handled by -webkit-box.
+        (video::-webkit-media-text-track-display): Adjusted text color to match
+        the color required in the WebVTT spec (section 3.5.1 'color' property)
+        * css/mediaControlsChromium.css:
+        (audio::-webkit-media-controls-panel, video::-webkit-media-controls-panel):
+        Default position attribute is now relative, handled by the parent -webkit-box
+
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlPanelElement::MediaControlPanelElement): Added a timer
+        for the webkit fade out transition event. This timer is required for setting
+        the display property to 'none', when the fade out transition is over. Otherwise,
+        captions would not be displayed at the bottom of the video.
+        (WebCore::MediaControlPanelElement::startTimer): Added.
+        (WebCore):
+        (WebCore::MediaControlPanelElement::stopTimer): Added.
+        (WebCore::MediaControlPanelElement::transitionTimerFired): Added. If the current
+        state of the controls is transparent, the display property is set to 'none'.
+        (WebCore::MediaControlPanelElement::makeOpaque): The inline display:'none' property
+        is removed before the fade in transition.
+        (WebCore::MediaControlPanelElement::makeTransparent): Added the timer start.
+        (WebCore::MediaControlTextTrackContainerElement::MediaControlTextTrackContainerElement):
+        Removed m_bottom as it is not needed anymore.
+        (WebCore::MediaControlTextTrackContainerElement::updateDisplay): Added. Main
+        function for the rendering rules.
+        (WebCore::MediaControlTextTrackContainerElement::updateSizes): The bottom position
+        needs not to be set anymore.
+        * html/shadow/MediaControlElements.h:
+        (MediaControlPanelElement): Added timer internals.
+        (MediaControlTextTrackContainerElement): Added updateDisplay() and removed unused
+        variables.
+
+        (WebCore):
+        * html/shadow/MediaControlRootElement.cpp: Removed m_textTrackDisplay
+        and duplicated code with MediaControlRootElementChromium (only minimum
+        function calls to the main text track container)
+        (WebCore::MediaControlRootElement::MediaControlRootElement):
+        (WebCore::MediaControlRootElement::setMediaController):
+        (WebCore::MediaControlRootElement::createTextTrackDisplay):
+        (WebCore::MediaControlRootElement::updateTextTrackDisplay):
+
+        * html/shadow/MediaControlRootElementChromium.cpp: Removed m_textTrackDisplay
+        and duplicate code with MediaControlRootElement (only minimum function calls
+        to the main text track container remained)
+        (WebCore::MediaControlRootElementChromium::MediaControlRootElementChromium):
+        (WebCore::MediaControlRootElementChromium::setMediaController):
+        (WebCore::MediaControlRootElementChromium::createTextTrackDisplay):
+        (WebCore::MediaControlRootElementChromium::updateTextTrackDisplay):
+
+        (WebCore):
+        * html/track/TextTrackCue.cpp: Enhanced structure for supporting more complex
+        rendering required by the WebVTT spec.
+        (WebCore::TextTrackCue::TextTrackCue):
+        (WebCore::TextTrackCue::cueDidChange): Mark the display tree as obsolete, so that
+        it needs to be re-computed.
+        (WebCore::TextTrackCue::setIsActive): The display tree needs to be removed as
+        soon as the cue becomes inactive. Adjusted this method to support the functionality.
+        (WebCore):
+        (WebCore::TextTrackCue::determineDisplayParameters): Added. This method will hold
+        main positioning parameter computations for a TextTrackCue
+        (WebCore):
+        (WebCore::TextTrackCue::getDisplayTree): Added. This method returns the root node
+        of the CSS boxes that need to be displayed on top of the video, for the current
+        instance.
+        * html/track/TextTrackCue.h:
+        (WebCore):
+        (TextTrackCue):
+
 2012-03-11  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r110359.
