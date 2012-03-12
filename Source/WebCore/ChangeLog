@@ -1,5 +1,30 @@
 2012-03-12  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
 
+        [TexMapGL] Pixel-align the transform of textures that fit pixel-for-pixel on the frame buffer.
+        https://bugs.webkit.org/show_bug.cgi?id=80848
+
+        Reviewed by Noam Rosenthal.
+
+        When rendering a transformed texture on the screen with a fractional
+        coordinate with linear filtering, the resulting pixel will be blended from
+        the texels around this fractional position according to their cover ratio.
+        This produces a slight blur of pixels which give no benefit when rendering
+        a texture that isn't scaled.
+
+        This patch offsets the transform by rounding the translation part of the
+        layer's transform to align the result to integer coordinates.
+        Applying the adjustment on the layer transform makes sure that all the tiles
+        get the same adjustment.
+
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::drawTexture):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (WebCore::BitmapTextureGL::textureSize):
+
+2012-03-12  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
+
         [TexMapGL] Use textures sized exactly to their contents.
         https://bugs.webkit.org/show_bug.cgi?id=80845
 
