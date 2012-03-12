@@ -1,3 +1,27 @@
+2012-03-12  Andreas Kling  <awesomekling@apple.com>
+
+        Restore Attr::style() functionality.
+        <http://webkit.org/b/80678>
+        <rdar://problem/10933904>
+
+        Reviewed by Antti Koivisto.
+
+        The neutering of Attr::style() in r106740 broke some internal clients of the Obj-C API,
+        so this was definitely premature.
+
+        Since we no longer have a per-Attribute style object, synthesize one in style() and
+        hang it off of the Attr. This grows Attr by one pointer, but it's a low-volume object
+        so it shouldn't matter much.
+
+        We recreate the StylePropertySet object on every call to style(), to avoid complicating
+        things with custom invalidation code.
+
+        * dom/Attr.cpp:
+        (WebCore::Attr::style):
+        * dom/Attr.h:
+        * dom/StyledElement.h:
+        (WebCore::StyledElement::collectStyleForAttribute):
+
 2012-03-12  Ryosuke Niwa  <rniwa@webkit.org>
 
         REGRESSION(r109285): Crash in WebCore::Document::nodeChildrenWillBeRemoved
