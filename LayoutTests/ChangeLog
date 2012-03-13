@@ -1,3 +1,371 @@
+2012-03-13  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        [Qt] svg/animations tests are very flaky
+        https://bugs.webkit.org/show_bug.cgi?id=80703
+
+        Reviewed by Rob Buis.
+
+        Overhaul the svg/animation frameworks, to be more stable.
+        Especially discrete animations were flaky on Qt, because some tests still sampled
+        at integral times like 2.0s, instead of 1.999s (before change), and 2.001s (after change).
+
+        Always use shouldBeCloseEnough() when comparing font-sizes/color values/, as there's
+        always an uncertainity about the actual sampling time (low but may lead to 40.01px values, instead of 40px).
+
+        This makes these tests also stable in Firefox/Opera, which was the ultimate goal!
+
+        * platform/qt/Skipped: Unskip svg/animation tests.
+        * svg/animations/additive-values-width-animation-expected.txt:
+        * svg/animations/animate-color-calcMode-discrete-expected.txt:
+        * svg/animations/animate-color-fill-currentColor-expected.txt:
+        * svg/animations/animate-color-fill-from-by-expected.txt:
+        * svg/animations/animate-color-rgba-calcMode-discrete-expected.txt:
+        * svg/animations/animate-color-transparent-expected.txt:
+        * svg/animations/animate-currentColor-expected.txt:
+        * svg/animations/animate-dynamic-update-attributeName-expected.txt:
+        * svg/animations/animate-elem-03-t-drt-expected.txt:
+        * svg/animations/animate-end-attribute-expected.txt:
+        * svg/animations/animate-from-to-keyTimes-expected.txt:
+        * svg/animations/animate-inherit-css-property-expected.txt:
+        * svg/animations/animate-keySplines-expected.txt:
+        * svg/animations/animate-number-calcMode-discrete-expected.txt:
+        * svg/animations/animate-number-calcMode-discrete-keyTimes-expected.txt:
+        * svg/animations/attributeTypes-expected.txt:
+        * svg/animations/resources/SVGAnimationTestCase.js:
+        (expectColor):
+        (expectFillColor):
+        (moveAnimationTimelineAndSample):
+        * svg/animations/script-tests/additive-values-width-animation.js:
+        (executeTest):
+        * svg/animations/script-tests/animVal-basics.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-by.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-from-by.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-from-to.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-to.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/animate-calcMode-spline-values.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/animate-color-calcMode-discrete.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-color-fill-currentColor.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-color-fill-from-by.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-color-rgba-calcMode-discrete.js:
+        (parseAlphaFromColor):
+        (red):
+        * svg/animations/script-tests/animate-color-transparent.js:
+        (expectTransparent):
+        (expectOtherColor):
+        * svg/animations/script-tests/animate-currentColor.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-dynamic-update-attributeName.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-elem-03-t-drt.js:
+        (parseFontSizeFromString):
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-end-attribute.js:
+        (sample1):
+        (sample2):
+        * svg/animations/script-tests/animate-endElement-beginElement.js:
+        (sample1):
+        * svg/animations/script-tests/animate-from-to-keyTimes.js:
+        * svg/animations/script-tests/animate-gradient-transform.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-inherit-css-property.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-insert-begin.js:
+        (sample1):
+        (sample2):
+        * svg/animations/script-tests/animate-insert-no-begin.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/animate-keySplines.js:
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/animate-number-calcMode-discrete-keyTimes.js:
+        (executeTest):
+        * svg/animations/script-tests/animate-number-calcMode-discrete.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-Cc-Ss.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-Ll-Vv-Hh.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-Qq-Tt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-cC-sS-inverse.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-lL-vV-hH-inverse.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-animation-qQ-tT-inverse.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/animate-path-to-animation.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/animateTransform-pattern-transform.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/attributeTypes.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/multiple-animations-fill-freeze.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        (sample6):
+        (sample7):
+        (sample8):
+        * svg/animations/script-tests/svgPreserveAspectRatio-animation-1.js:
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-deg-to-grad.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-deg-to-rad.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-grad-to-deg.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-grad-to-rad.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-rad-to-deg.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgangle-animation-rad-to-grad.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgboolean-animation-1.js:
+        (executeTest):
+        * svg/animations/script-tests/svginteger-animation-1.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-LengthModeHeight.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-LengthModeOther.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-LengthModeWidth.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-invalid-value-1.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-invalid-value-2.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-invalid-value-3.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-number-to-number.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-cm.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-ems.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-exs.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-in.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-number.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-pc.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-percentage.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-pt.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-px-to-px.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-unitType.js:
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-values.js:
+        (sample1):
+        (sample2):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-1.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-2.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-3.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-4.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svglengthlist-animation-5.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgnumber-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumber-animation-2.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumber-animation-3.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberlist-animation-1.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberlist-animation-2.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-1.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-2.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-3.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgnumberoptionalnumber-animation-4.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgpath-animation-1.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgpointlist-animation-1.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgpointlist-animation-2.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/svgrect-animation-1.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgrect-animation-2.js:
+        (sample1):
+        (sample2):
+        (executeTest):
+        * svg/animations/script-tests/svgstring-animation-fallback-to-discrete.js:
+        (executeTest):
+        * svg/animations/script-tests/svgtransform-animation-1.js:
+        (sample1):
+        (sample2):
+        * svg/animations/script-tests/svgtransform-animation-discrete.js:
+        (sample1):
+        (executeTest):
+        * svg/animations/svglength-animation-invalid-value-1-expected.txt:
+        * svg/animations/svglength-animation-invalid-value-2-expected.txt:
+        * svg/animations/svglength-animation-invalid-value-3-expected.txt:
+        * svg/animations/svglength-animation-unitType-expected.txt:
+        * svg/animations/svgnumber-animation-1-expected.txt:
+        * svg/animations/svgnumber-animation-2-expected.txt:
+        * svg/animations/svgnumber-animation-3-expected.txt:
+        * svg/animations/svgtransform-animation-discrete-expected.txt:
+
 2012-03-12  Brady Eidson  <beidson@apple.com>
 
         <rdar://problem/7908830> and https://bugs.webkit.org/show_bug.cgi?id=34679
