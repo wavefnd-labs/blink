@@ -1,3 +1,35 @@
+2012-03-13  Kinuko Yasuda  <kinuko@chromium.org>
+
+        Allow WebFileChooser to return extra file info (like displayName) in addition to mere file paths
+        https://bugs.webkit.org/show_bug.cgi?id=80719
+
+        Reviewed by Kent Tamura.
+
+        No new tests: this change itself shouldn't change existing behavior.
+
+        * fileapi/File.cpp:
+        (WebCore::createBlobDataForFileWithName): Renamed from createBlobDataForFileSystemFile.
+        * fileapi/File.h:
+        * html/FileInputType.cpp:
+        (WebCore::FileInputType::saveFormControlState): Updated to handle File.name.
+        (WebCore::FileInputType::restoreFormControlState): Ditto.
+        (WebCore::FileInputType::setFileList): Changed the signature to take
+        FileChooserFileInfo.
+        (WebCore::FileInputType::filesChosen): Ditto.
+        (WebCore::FileInputType::receiveDroppedFiles):
+        * html/FileInputType.h:
+        (FileInputType):
+        * platform/FileChooser.cpp:
+        (WebCore::FileChooser::chooseFiles): Added an overloaded method that
+        takes FileChooserFileInfo.
+        (WebCore):
+        * platform/FileChooser.h:
+        (WebCore::FileChooserFileInfo::FileChooserFileInfo): Added.
+        * platform/MIMETypeRegistry.cpp:
+        (WebCore::MIMETypeRegistry::getWellKnownMIMETypeForExtension): Removed surrouonding ifdefs as this function is now used even if FILE_SYSTEM is not enabled.
+        * platform/MIMETypeRegistry.h:
+        (MIMETypeRegistry):
+
 2012-03-13  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Unreviewed inspector compilation module name fix after r110550.
