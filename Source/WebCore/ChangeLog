@@ -1,3 +1,25 @@
+2012-03-13  Levi Weintraub  <leviw@chromium.org>
+
+        Revert RenderLayer::absoluteBoundingBox to an IntRect
+        https://bugs.webkit.org/show_bug.cgi?id=81017
+
+        Reviewed by Eric Seidel.
+
+        Reverting RenderLayer::absoluteBoundingBox to an (pixel snapped) IntRect. Whenever
+        possible, we use integers representing for absolute coordinates. This is especially
+        relevant for methods, such as this one, that are exported and used in platform code.
+
+        No new tests. No change in behavior.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::absoluteBoundingBox):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::requiresCompositingForPosition): This intersects
+        the absolute bounding box with the FrameView, which uses all integer values. It's
+        the only use of absoluteBoundingBox in WebCore.
+
 2012-03-13  Nat Duca  <nduca@chromium.org>
 
         [chromium] vsync ticks are needed in invisible tabs when we are still updating resources
