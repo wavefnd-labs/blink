@@ -1,3 +1,275 @@
+2012-03-12  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        SVG Animations update baseVal instead of animVal
+        https://bugs.webkit.org/show_bug.cgi?id=12437
+
+        Reviewed by Dirk Schulze.
+
+        Begin implementing the last missing core piece of the SVG DOM: proper animVal support.
+        Most SVG DOM interfaces exposing eg. lengths use SVGAnimatedLength. eg. from SVGRectElement:
+        "readonly attribute SVGAnimatedLength x;" SVGAnimatedXXX contains following methods:
+        "readonly attribute SVGLength baseVal; readonly attribute SVGLength animVal;"
+        From SVG DOM perspective, animVal and baseVal are two distinctive objects, animVal != baseVal.
+        Its underlying value is the same though, if no animation is running on that attribute.
+
+        As soon as a SMIL animation starts animating an SVGAnimated* target attribute, its
+        baseVal and animVal may begin to differ. The animVal always reflect the current animated
+        value (including all effects of additive/accumulated animations) which is shown on screen
+        when eg animating the width of a <rect>. The baseVal is is equal to the underlying XML
+        property value / SVG DOM value, but may be influenced through dynamic changes.
+        (Consider changing rect1.width.baseVal.value while 'width' is animated)
+
+        During the last year we prepared our animation code to turn on animVal support.
+        This patch adds the last missing pieces to turn on animVal support for the SVGLength.
+        SVGLengthList and all other types will follow, one after the other.
+
+        I've decided to write an exhaustive ChangeLog, as this as the base for any future
+        work in this area - hopefully making this more reviewable.
+
+        Tests: svg/animations/additive-from-to-width-animation.html
+               svg/animations/additive-values-width-animation.html
+               svg/animations/change-baseVal-while-animating-fill-freeze-2.html
+               svg/animations/change-baseVal-while-animating-fill-freeze.html
+               svg/animations/change-baseVal-while-animating-fill-remove-2.html
+               svg/animations/change-baseVal-while-animating-fill-remove.html
+               svg/animations/change-target-while-animating-SVG-property.html
+               svg/animations/multiple-animations-fill-freeze.html
+               svg/animations/remove-animation-element-while-animation-is-running.html
+               svg/repaint/repainting-after-animation-element-removal.svg
+
+        * svg/SVGAnimateElement.cpp: Remove unnecessary std namespace inclusion.
+        (WebCore::SVGAnimateElement::SVGAnimateElement): Remove now-obsolete m_aboutToStopAnimation.
+        (WebCore::SVGAnimateElement::calculateAnimatedValue): Swap assertion order, to test hasTagName() _before_ casting.
+        (WebCore::SVGAnimateElement::resetToBaseValue):
+            Stop relying on the cached baseValue (breaking additive="sum"+values animation) for SVG DOM primitive animations.
+            Avoid any string roundtrips previously needed to reset the SVGAnimatedType to the base value. Just grab the
+            currentBaseValue() from the associated SVGAnimatedProperty, which includes all dynamic changes to the baseVal
+            either by SVG DOM or setAttribute() calls - this way we don't need to utilize the buggy cache in SMILTimeContainer,
+            which can be removed once all SVG DOM primitive types switched to the new animVal concept.
+
+            NOTE: When multiple animations of the same attribute are applied to a target element, resetToBaseValue() will be called
+            for the highest priority SVGSMILElement, on every animation step! Consider two <animate> elements, applied to a target
+            <rect> which both animate the 'x' attribute, one from 0s to 2s, the other from 4s to 6s. The last <animate> element
+            will reuse the SVGAnimatedType m_animatedType from the first <animate> element, and never create an own m_animatedType.
+            When the animation starts the first time at 0s, we update the rect.x.animVals SVGLength* pointer, to point to the
+            SVGAnimatedType of the first <animate> element, owning the m_animatedType. From that point on each call to rect.x.animVal
+            will always return the same value as the SVGAnimatedType of the first <animate> element holds. Now after 2s the first
+            <animate> element becomes inactive, but its m_animatedType remains alive. The bindings don't notice this change at all.
+            Now at 4s, the second animation element gets active. It reuses the SVGAnimatedType of the first <animate> element, and
+            applies its animation changes to that SVGAnimatedType, which is immediately reflected in the bindings w/o any additional
+            work. It's very important for the understanding when animationStarted/animationEnded need to be called.
+
+        (WebCore::SVGAnimateElement::applyResultsToTarget): Remove now-obsolete m_aboutToStopAnimation logic. No need to know it at this point.
+        (WebCore::SVGAnimateElement::targetElementWillChange):
+            Renamed from targetElementDidChange(). This method is called from SVGSMILElement for following conditions:
+            - animation element is destructed
+            - animation element is removed from document
+            - target element of animation is destructed
+            - target element of animation is removed from document
+            - target element of animation changes id
+
+            Whenever any of this happens, we need to reset the animVal. Resetting the animVal involves resetting the PropertyType* pointer,
+            eg. SVGLength*, from the animVal property tear off, belonging to a certain SVGAnimatedProperty (eg. rect.x) to the initial
+            value again, which is the 'm_x' of the SVGRectElement. This is needed as the SVGAnimatedType the animVal currently points to,
+            if an animation is/was running, is destructed in targetElementWillChange(), to reset the SVGAnimateElement to the initial
+            state before it received a target. This is the only place which destructed the m_animatedType, and thus the only place that
+            needs to take care of resetting the animVal pointers.
+
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::constructFromCopy):
+            Add a new constructFromCopy(SVGGenericAnimatedType) function to SVGAnimatedLengthAnimator.
+            It takes a type-unsafe SVGGenericAnimatedType - the caller has to guarantee the type matches.
+            This is strictly enforced for the single caller of constructFromCopy, and guaranteed to be safe.
+
+        * svg/SVGAnimatedLength.h: Add new constructFromCopy method, which is used to avoid string-roundtrips when resetting to base values.
+        * svg/SVGAnimatedType.cpp:
+        (WebCore::SVGAnimatedType::supportsAnimVal): Only returns true for AnimatedLength, for now.
+        (WebCore::SVGAnimatedType::setVariantValue): Takes a SVGGenericAnimatedType, assuming the type matches. Callers have to guarantee type-safety!
+        * svg/SVGAnimatedType.h:
+        (SVGAnimatedType): Add new static supportsAnimVal(AnimatedPropertyType) function.
+        (WebCore::SVGAnimatedType::variantValue): Add a generic accessor for all animated types, called variant(). Only one place uses this.
+        * svg/SVGAnimatedTypeAnimator.h:
+        (WebCore::SVGAnimatedTypeAnimator::constructFromCopy):
+            New method to construct an eg. SVGAnimatedLengthAnimator right from a SVGLength, instead of a String.
+            In that case the SVGAnimatedType just stores a pointer to the underlying SVGLength, no copying and or other roundtrips involved.
+
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::svgAttributeChanged):
+            Implement this instead of attributeChanged. The previous implementation reset the animation state to Inactive, causing a full
+            rebuild, whenever any attribute changes, even though it might not be related for the animation element, eg.
+            animate.setAttribute("stdDeviationX", "foobar"). Fix that by checking if we support the attribute (keyTimes/keySplines/etc..)
+            , if not pass it on to SVGSMILElement (which supports begin/end/etc..) to check if it can handle that.
+
+        (WebCore::SVGAnimationElement::animationAttributeChanged):
+            Called from our svgAttributeChanged, and/or from SVGSMILElement::svgAttributeChanged, whenever a _known_ attribute has changed.
+            This sledgehammer should be used with care, instead of each time attributeChanged() is called :-)
+
+        (WebCore::setTargetAttributeAnimatedCSSValue):
+            Remove support for removing properties from the override style sheet. I've added this optimization too early, we should reevaluate
+            this once more types support animVal. It currently complexifies the logic too much, requiring setAttributeAnimatedValue to know
+            if the animation ends (and that's not easy to figure out, at least not using started/endedActiveInterval, as I anticipated).
+
+        (WebCore::findMatchingAnimatedProperty):
+            Add helper functions which retrieves a SVGAnimatedProperty* for a given SVGElement* targetElement, an attributeName, and an attribute
+            type. eg. findMatchingAnimatedProperty(myRectElement, SVGNames::xAttr, AnimatedLength) returns the SVGAnimatedProperty which is
+            exposed to JS, that holds: SVGProperty* baseVal, and SVGProperty* animVal. (Lazily created if they got accessed from JS.). This is
+            used to update the animVal pointing to a new eg. SVGLength* value, once animation has started, to make rect->x() return that new
+            SVGLength* value (internally), and to reflect the current animated value in rect.x.animVal.value from JS.
+
+        (WebCore::SVGAnimationElement::applyAnimatedValue): Refactored from setTargetAttributeAnimatedValue, to simplify the code.
+        (WebCore::notifyAnimatedPropertyAboutAnimationBeginEnd):
+            Helper function to share code betweeen animationStarted/animationEnded.
+            It takes a SVGAnimatedProperty* and a SVGAnimatedType* which may be zero, indicating that the animation ended.
+            It calls animationStarted/animationEnded on the given SVGAnimatedProperty, to update the animVal state.
+            It also figures out all instances of the target element, and their SVGAnimatedProperties that may need updating.
+
+        (WebCore::SVGAnimationElement::animationStarted): Uses the helper above, passing on the given animatedType.
+        (WebCore::SVGAnimationElement::animationEnded): Uses the helper above, passing 0 as animatedType.
+        (WebCore::InstanceUpdateBlocker::InstanceUpdateBlocker):
+            Added new helper struct, doing element->setInstancesUpdatedBlock(true) on construction and setInstancesUpdatesBlocked(false) on
+            destruction, making it impossible to forget one. If we ever rewrite svgAttributeChanged & co to auto-update the cloned instances,
+            this can go away.
+
+        (WebCore::SVGAnimationElement::setTargetAttributeAnimatedValue):
+            Now takes an SVGAnimatedType* instead of a String parameter. In order to avoid string-roundtrips for animVal support, let us
+            decide if we need to construct a String out of it, or not. For animations supporting animVal (only SVGLength) we don't need
+            to update any attribute or animVal pointer here, that happens automatically! We only need to notify the targetElement eg,
+            that its xAttr changed! Previously we had to call targetElement->setAttribute("x", "...") on every animation step for
+            SVGLength animations - that's gone now! The SVGAnimatedType pointers remains the same during the whole animation, so there's
+            no need to call animationStarted() at each animated step!
+
+        (WebCore::SVGAnimationElement::animatedPropertyForType):
+            Helper function returning a SVGAnimatedProperty* for the current target element & current target attribute, if the
+            current animation is running on a type supporting animVal (SVGLength), or returning 0. This is needed for SVGAnimateElement.
+            Reuses the existing findMatchingAnimatedProperty code.
+
+        * svg/SVGAnimationElement.h:
+        * svg/animation/SMILTimeContainer.cpp:
+        (WebCore::SMILTimeContainer::updateAnimations):
+            Add comment to clarify why caching baseValues is just wrong. For SVGLength animations the problem is now gone.
+            This is exercised using the new additive-from-to-width-animation.html & additive-values-width-animation.html tests.
+
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::removedFromDocument):
+            Since animVal requires that the SVGAnimatedProperties are correctly reset if an animation element is removed from the document,
+            we have to call targetElementWillChange(0) from here. That requires to move the "m_attributeName = anyQName()" line down,
+            otherwise targetElementWillChange() would early exit, as no valid attributeName was specified.
+            
+            This is verified using the new svg/animations/remove-animation-element-while-animation-is-running.html
+            and svg/repaint/repainting-after-animation-element-removal.svg tests.
+
+        (WebCore::SVGSMILElement::isSupportedAttribute): Add function like all SVG*Elements have identifying their supported attributes.
+        (WebCore::SVGSMILElement::svgAttributeChanged):
+            Implement svgAttributeChanged instead of attributeChanged. Only take action if the attribute is actually supported.
+            If one of the common attributes like begin/end/etc. changed, be sure to call animationAttributeChanged() so that our
+            ancestor-classes get notified about this and can take action as well. NOTE: This is not about animating begin/end attributes,
+            but about pure DOM changes. begin/end/et.. are not exposed to the SVG DOM, we still reuse the svgAttributeChanged logic
+            for consistency. (This does NOT make those attributes animatable, nothing this here as it came up while reviewing).
+    
+        (WebCore::SVGSMILElement::targetElement): Adapt logic to targetElementDidChange -> targetElementWillChange change.
+        (WebCore::SVGSMILElement::targetElementWillChange):
+            Renamed from targetElementDidChange. Added "oldTarget" as parameter as well. Our ancestor-classes like SVGAnimateElement
+            use this to properly deregister the animVal in the old target, before resetting the SVGAnimatedType, otherwise we'd leave
+            dangling pointers around (verified manually by guard malloc runs, that none of this happens).
+
+            Also add a default implementation here in targetElementWillChange, that ancestor classes have to call.
+            Now we properly call endedActiveInterval() if the m_activeState is currently Active, so that animations are shut-down
+            just like if the animation properly ends (use the same cleanup routines, etc.). Not doing that now leads to assertions.
+
+        (WebCore::SVGSMILElement::resetTargetElement):
+            Instead of forcing m_activeState to be inactive, use the standard methods to end the animation.
+            targetElementWillChange(m_targetElement, 0) and animationAttributeChanged().
+
+            resetTargetElement() is only called by SVGDocumentExtensions::removeAllAnimationElementsFromTarget() for following conditions:
+            - targetElement gets destructed
+            - targetElement gets removed from the document
+            - targetElement id changes
+
+            If the targetElement gets destructed or removed, no actions need to be taken, as the SVGAnimatedPropertys are teared down
+            as well. But if only the id changes, we still have to properly disconnect the animVals - this is all handled through
+            targetElementWillChange now - that's why this has to be called from here as well.
+            That explains why targetElementWillChange() now needs to check if the targetElement is destructing or not.
+
+        * svg/properties/SVGAnimatedEnumerationPropertyTearOff.h:
+            Pass the AnimatedPropertyType from the SVGPropertyInfo to the SVGAnimatedProperties.
+            Requires mechanic changes in all SVGAnimated* classes. We need acccess to the AnimatedPropertyType
+            to verify the SVGAnimatedType objects, passed to animationStarted, match our type. This is to enforce
+            strict type-checking, whenever SVGGenericAnimatedTypes are passed around.
+
+        (WebCore::SVGAnimatedEnumerationPropertyTearOff::create):
+        (WebCore::SVGAnimatedEnumerationPropertyTearOff::SVGAnimatedEnumerationPropertyTearOff):
+        * svg/properties/SVGAnimatedListPropertyTearOff.h: Ditto.
+        (WebCore::SVGAnimatedListPropertyTearOff::create):
+        (WebCore::SVGAnimatedListPropertyTearOff::SVGAnimatedListPropertyTearOff):
+        * svg/properties/SVGAnimatedPathSegListPropertyTearOff.h: Ditto.
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::create):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::SVGAnimatedPathSegListPropertyTearOff):
+        * svg/properties/SVGAnimatedProperty.h: Store AnimatedPropertyType, add accessors.
+        (WebCore::SVGAnimatedProperty::animatedPropertyType): Add accessor.
+        (WebCore::SVGAnimatedProperty::animationValueChanged): New animVal related functions to be implemented in the animated tear offs.
+        (WebCore::SVGAnimatedProperty::animationStarted): Ditto.
+        (WebCore::SVGAnimatedProperty::animationEnded): Ditto.
+        (WebCore::SVGAnimatedProperty::currentBaseValue):
+            Generic accessor for the baseVal: returns a SVGGenericAnimatedType.
+            It takes an AnimatedPropertyType as input, that's only needed to verify that the type we're returning matches
+            the expectation of the caller. If not, return 0 to avoid any potential casting mistakes, which would lead to crashes.
+
+        (WebCore::SVGAnimatedProperty::SVGAnimatedProperty): Store m_animatedPropertyType.
+        * svg/properties/SVGAnimatedPropertyTearOff.h:
+        (WebCore::SVGAnimatedPropertyTearOff::create): Same changes as in the other tear offs: pass around AnimatedPropertyType.
+        (WebCore::SVGAnimatedPropertyTearOff::currentBaseValue): Returns &m_property, if the type matches (see above).
+        (SVGAnimatedPropertyTearOff): Pass around AnimatedPropertyType.
+        (WebCore::SVGAnimatedPropertyTearOff::animationValueChanged): No-op for non list types, don't need to do anything here.
+        (WebCore::SVGAnimatedPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedPropertyTearOff::animationEnded):
+            Store the currently animated value in the animVal() property tear off, that's also re-used as-is for the JS bindings.
+            As this is important, here's an example of how this affects methods like rect->x() used in the renderers.
+
+            Setting m_isAnimating to true, redirects any rect->x() calls that previously returned rect->m_x, to
+            rect->xAnimated()->animVal()->propertyReference() (which returns the same SVGLength& that the SVGAnimatedElement
+            m_animatedType contains). Calling rect->setXBaseValue() still modifies rect->m_x, and is used by all parseAttribute()
+            methods in svg/ as setAttribute() calls only ever modify the "baseValue", never the current animated value.
+            rect.x.baseVal will return a SVGLength object corresponding to rect->m_x.
+            rect.x.animVal will return a SVGLength object corresponding to rect->xAnimated()->animVal()->propertyReference().
+
+            These implementation details are all hidden in the SVGAnimatedPropertyMacros. Here's an example from SVGRectElement:
+            DECLARE_ANIMATED_LENGTH(X, x) -> Replace PropertyType with 'SVGLength', LowerProperty with 'x', and UpperProperty with 'X'.
+
+            PropertyType& LowerProperty() const
+            {
+                if (TearOffType* wrapper = SVGAnimatedProperty::lookupWrapper<UseOwnerType, TearOffType, IsDerivedFromSVGElement<UseOwnerType>::value>(this, LowerProperty##PropertyInfo())) {
+                    if (wrapper->isAnimating())
+                        return wrapper->currentAnimatedValue();
+                }
+                return m_##LowerProperty.value;
+            }
+
+            PropertyType& LowerProperty##BaseValue() const
+            {
+                return m_##LowerProperty.value;
+            }
+
+            void set##UpperProperty##BaseValue(const PropertyType& type)
+            {
+                m_##LowerProperty.value = type;
+            }
+
+            Any code outside of svg/, eg. in rendering/svg, does not need to care about any baseVal/animVal differences.
+            During layout eg. RenderSVGRect calls rect->x().value(someLengthContext) to get the current 'x' as float. If an animation
+            is running on that rect element it will automatically retrieve the last set animated value here - all under the hood.
+            I hope that sheds some light in those myserious functions, they were designed with animVal in mind, but we never had that until now :-)
+
+        (WebCore::SVGAnimatedPropertyTearOff::SVGAnimatedPropertyTearOff): Pass around AnimatedPropertyType.
+        (WebCore::SVGAnimatedPropertyTearOff::~SVGAnimatedPropertyTearOff): Add destructor to debug builds veryifing that m_isAnimating is false.
+        * svg/properties/SVGAnimatedStaticPropertyTearOff.h: Ditto.
+        (WebCore::SVGAnimatedStaticPropertyTearOff::create):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::SVGAnimatedStaticPropertyTearOff):
+        * svg/properties/SVGAnimatedTransformListPropertyTearOff.h: Ditto.
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::create):
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::SVGAnimatedTransformListPropertyTearOff):
+        * svg/properties/SVGPropertyInfo.h: Add SVGGenericAnimatedType definition.
+        * svg/properties/SVGPropertyTearOff.h: Remove obsolete updateAnimVal method - switched to using setValue directly.
+
 2012-03-13  Luke Macpherson   <macpherson@chromium.org>
 
         Implement CSSPropertyTextOverflow in CSSStyleApplyProperty.

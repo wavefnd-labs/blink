@@ -1,3 +1,308 @@
+2012-03-12  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        SVG Animations update baseVal instead of animVal
+        https://bugs.webkit.org/show_bug.cgi?id=12437
+
+        Reviewed by Dirk Schulze.
+
+        Update test expectations after turning on animVal support for SVGLength, the first primitive now support animVal.
+        Added several new tests, checking additive behaviour with SVGLength objects, removing animation elements
+        while animations are running (+ test repainting of those cases), etc.
+
+        * platform/mac/svg/repaint/repainting-after-animation-element-removal-expected.png: Added.
+        * platform/mac/svg/repaint/repainting-after-animation-element-removal-expected.txt: Added.
+        * svg/animations/additive-from-to-width-animation-expected.txt: Added.
+        * svg/animations/additive-from-to-width-animation.html: Added.
+        * svg/animations/additive-values-width-animation-expected.txt: Added.
+        * svg/animations/additive-values-width-animation.html: Added.
+        * svg/animations/animVal-basics-expected.txt:
+        * svg/animations/animate-calcMode-spline-by-expected.txt:
+        * svg/animations/animate-calcMode-spline-from-by-expected.txt:
+        * svg/animations/animate-calcMode-spline-from-to-expected.txt:
+        * svg/animations/animate-calcMode-spline-to-expected.txt:
+        * svg/animations/animate-calcMode-spline-values-expected.txt:
+        * svg/animations/animate-elem-02-t-drt-expected.txt:
+        * svg/animations/animate-elem-09-t-drt-expected.txt:
+        * svg/animations/animate-elem-10-t-drt-expected.txt:
+        * svg/animations/animate-elem-11-t-drt-expected.txt:
+        * svg/animations/animate-elem-12-t-drt-expected.txt:
+        * svg/animations/animate-elem-13-t-drt-expected.txt:
+        * svg/animations/animate-elem-14-t-drt-expected.txt:
+        * svg/animations/animate-elem-15-t-drt-expected.txt:
+        * svg/animations/animate-elem-16-t-drt-expected.txt:
+        * svg/animations/animate-elem-17-t-drt-expected.txt:
+        * svg/animations/animate-elem-18-t-drt-expected.txt:
+        * svg/animations/animate-elem-19-t-drt-expected.txt:
+        * svg/animations/animate-end-attribute-expected.txt:
+        * svg/animations/animate-endElement-beginElement-expected.txt:
+        * svg/animations/animate-from-to-keyTimes-expected.txt:
+        * svg/animations/animate-insert-begin-expected.txt:
+        * svg/animations/animate-insert-no-begin-expected.txt:
+        * svg/animations/animate-keySplines-expected.txt:
+        * svg/animations/animate-number-calcMode-discrete-keyTimes-expected.txt:
+        * svg/animations/attributeTypes-expected.txt:
+        * svg/animations/change-baseVal-while-animating-fill-freeze-2-expected.txt: Added.
+        * svg/animations/change-baseVal-while-animating-fill-freeze-2.html: Added.
+        * svg/animations/change-baseVal-while-animating-fill-freeze-expected.txt: Added.
+        * svg/animations/change-baseVal-while-animating-fill-freeze.html: Added.
+        * svg/animations/change-baseVal-while-animating-fill-remove-2-expected.txt: Added.
+        * svg/animations/change-baseVal-while-animating-fill-remove-2.html: Added.
+        * svg/animations/change-baseVal-while-animating-fill-remove-expected.txt: Added.
+        * svg/animations/change-baseVal-while-animating-fill-remove.html: Added.
+        * svg/animations/change-target-while-animating-SVG-property-expected.txt: Added.
+        * svg/animations/change-target-while-animating-SVG-property.html: Added.
+        * svg/animations/multiple-animations-fill-freeze-expected.txt: Added.
+        * svg/animations/multiple-animations-fill-freeze.html: Added.
+        * svg/animations/remove-animation-element-while-animation-is-running-expected.txt: Added.
+        * svg/animations/remove-animation-element-while-animation-is-running.html: Added.
+        * svg/animations/resources/additive-from-to-width-animation.svg: Added.
+        * svg/animations/resources/additive-values-width-animation.svg: Added.
+        * svg/animations/resources/change-baseVal-while-animating-fill-freeze.svg: Added.
+        * svg/animations/resources/change-baseVal-while-animating-fill-remove.svg: Added.
+        * svg/animations/resources/change-target-while-animating-SVG-property.svg: Added.
+        * svg/animations/resources/multiple-animations-fill-freeze.svg: Added.
+        * svg/animations/resources/remove-animation-element-while-animation-is-running.svg: Added.
+        * svg/animations/script-tests/additive-from-to-width-animation.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (executeTest):
+        * svg/animations/script-tests/additive-values-width-animation.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (changeBaseVal):
+        (sample4):
+        (sample5):
+        (executeTest):
+        * svg/animations/script-tests/animVal-basics.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-by.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-from-by.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-from-to.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-to.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-calcMode-spline-values.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-elem-02-t-drt.js:
+        (sampleAfterBegin):
+        (sampleAfterMid):
+        (sampleAfterBeginOfFirstRepetition):
+        (sampleAfterMidOfFirstRepetition):
+        * svg/animations/script-tests/animate-elem-09-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-10-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-11-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-12-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-13-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-elem-14-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-15-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-16-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-17-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-18-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-elem-19-t-drt.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        * svg/animations/script-tests/animate-end-attribute.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-endElement-beginElement.js:
+        (sample1):
+        * svg/animations/script-tests/animate-from-to-keyTimes.js:
+        (sample1):
+        (sample2):
+        * svg/animations/script-tests/animate-insert-begin.js:
+        (sample1):
+        (sample2):
+        * svg/animations/script-tests/animate-insert-no-begin.js:
+        (sample1):
+        (sample2):
+        * svg/animations/script-tests/animate-keySplines.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/animate-number-calcMode-discrete-keyTimes.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/attributeTypes.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/change-baseVal-while-animating-fill-freeze-2.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        (executeTest):
+        * svg/animations/script-tests/change-baseVal-while-animating-fill-freeze.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        (executeTest):
+        * svg/animations/script-tests/change-baseVal-while-animating-fill-remove-2.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        (executeTest):
+        * svg/animations/script-tests/change-baseVal-while-animating-fill-remove.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        (executeTest):
+        * svg/animations/script-tests/change-target-while-animating-SVG-property.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        (executeTest):
+        * svg/animations/script-tests/multiple-animations-fill-freeze.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        (sample6):
+        (sample7):
+        (sample8):
+        (executeTest):
+        * svg/animations/script-tests/remove-animation-element-while-animation-is-running.js: Added.
+        (sample1):
+        (sample2):
+        (sample3):
+        (sample4):
+        (executeTest):
+        * svg/animations/script-tests/svglength-animation-LengthModeHeight.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-LengthModeOther.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-LengthModeWidth.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-invalid-value-1.js:
+        (sample2):
+        * svg/animations/script-tests/svglength-animation-invalid-value-2.js:
+        (sample2):
+        * svg/animations/script-tests/svglength-animation-invalid-value-3.js:
+        (sample2):
+        * svg/animations/script-tests/svglength-animation-number-to-number.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-cm.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-ems.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-exs.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-in.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-number.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-pc.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-percentage.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-pt.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-px-to-px.js:
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-unitType.js:
+        (sample1):
+        (sample2):
+        (sample3):
+        * svg/animations/script-tests/svglength-animation-values.js:
+        (sample2):
+        (sample3):
+        (sample4):
+        (sample5):
+        * svg/animations/svglength-animation-LengthModeHeight-expected.txt:
+        * svg/animations/svglength-animation-LengthModeOther-expected.txt:
+        * svg/animations/svglength-animation-LengthModeWidth-expected.txt:
+        * svg/animations/svglength-animation-invalid-value-1-expected.txt:
+        * svg/animations/svglength-animation-invalid-value-2-expected.txt:
+        * svg/animations/svglength-animation-invalid-value-3-expected.txt:
+        * svg/animations/svglength-animation-number-to-number-expected.txt:
+        * svg/animations/svglength-animation-px-to-cm-expected.txt:
+        * svg/animations/svglength-animation-px-to-ems-expected.txt:
+        * svg/animations/svglength-animation-px-to-exs-expected.txt:
+        * svg/animations/svglength-animation-px-to-in-expected.txt:
+        * svg/animations/svglength-animation-px-to-number-expected.txt:
+        * svg/animations/svglength-animation-px-to-pc-expected.txt:
+        * svg/animations/svglength-animation-px-to-percentage-expected.txt:
+        * svg/animations/svglength-animation-px-to-pt-expected.txt:
+        * svg/animations/svglength-animation-px-to-px-expected.txt:
+        * svg/animations/svglength-animation-unitType-expected.txt:
+        * svg/animations/svglength-animation-values-expected.txt:
+        * svg/repaint/repainting-after-animation-element-removal.svg: Added.
+
 2012-03-13  Philippe Normand  <pnormand@igalia.com>
 
         Unreviewed, inspector test rebaseline after r110532.
