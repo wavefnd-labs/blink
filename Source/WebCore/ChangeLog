@@ -1,3 +1,23 @@
+2012-03-13  Jacky Jiang  <zhajiang@rim.com>
+
+        MathML crash in WebCore::Node::previousSibling()
+        https://bugs.webkit.org/show_bug.cgi?id=80773
+
+        Reviewed by Julien Chaffraix.
+
+        When adding child for msub render, if the child is mtr or mtd render,
+        we will creat an anonymous render as the container. As the anonymous
+        render's node is 0, accessing it directly can cause crash.
+        We should do a valid check of the node before using. In addition to
+        that, for msub, attach the anonymous render and it's children to render
+        tree. For msubsup, such kind of situation should never happen based on
+        the current codebase.
+
+        Test: mathml/msub-anonymous-child-render-crash.html
+
+        * rendering/mathml/RenderMathMLSubSup.cpp:
+        (WebCore::RenderMathMLSubSup::addChild):
+
 2012-03-13  Mihnea Ovidenie  <mihnea@adobe.com>
 
         [CSSRegions]NamedFlow::getRegionsByContentNode should not return a live NodeList
