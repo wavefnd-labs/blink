@@ -1,3 +1,78 @@
+2012-03-12  Brady Eidson  <beidson@apple.com>
+
+        <rdar://problem/7908830> and https://bugs.webkit.org/show_bug.cgi?id=34679
+        Location and other objects are dysfunctional after a document gets restored from page cache
+
+        Reviewed by Adam Barth.
+
+        Test: fast/loader/window-properties-restored-from-page-cache.html
+
+        Give DOMWindowProperties the ability to reconnect to their Frame:
+        * page/DOMWindowProperty.cpp:
+        (WebCore::DOMWindowProperty::reconnectFrame):
+        * page/DOMWindowProperty.h:
+        (DOMWindowProperty):
+
+        Let ApplicationCache do some extra work when reconnecting:
+        * loader/appcache/DOMApplicationCache.cpp:
+        (WebCore::DOMApplicationCache::reconnectFrame):
+        (WebCore):
+        * loader/appcache/DOMApplicationCache.h:
+        (DOMApplicationCache):
+
+        Let IndexDB do some extra work when reconnecting:
+        * Modules/indexeddb/DOMWindowIndexedDatabase.cpp:
+        (WebCore::DOMWindowIndexedDatabase::disconnectFrame):
+        (WebCore::DOMWindowIndexedDatabase::reconnectFrame):
+        (WebCore::DOMWindowIndexedDatabase::webkitIndexedDB):
+        * Modules/indexeddb/DOMWindowIndexedDatabase.h:
+        (DOMWindowIndexedDatabase):
+
+        Tell the DOMWindow to suspend to the page cache:
+        * history/CachedFrame.cpp:
+        (WebCore::CachedFrame::CachedFrame):
+
+        Tell the DOMWindow to resume from the page cache:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::open):
+
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::DOMWindow):
+        (WebCore::DOMWindow::~DOMWindow): Call clearDOMWindowProperties directly instead of clear()
+        (WebCore::DOMWindow::frameDestroyed): Ditto.
+        (WebCore::DOMWindow::clear): Only clear if the DOMWindow is not suspended for the page cache.
+        (WebCore::DOMWindow::suspendForPageCache): Disconnect properties and set the page cache flag.
+        (WebCore::DOMWindow::resumeFromPageCache): Reconnect properties and revert the page cache flag.
+        (WebCore::DOMWindow::disconnectDOMWindowProperties): Only disconnect the registered properties.
+        (WebCore::DOMWindow::reconnectDOMWindowProperties):
+        (WebCore::DOMWindow::clearDOMWindowProperties): Disconnect the registered properties then clear them out.
+
+        For all of the following, if the DOMWindow is not displayed in a frame (i.e., it is suspended), do nothing:
+        (WebCore::DOMWindow::screen):
+        (WebCore::DOMWindow::history):
+        (WebCore::DOMWindow::crypto):
+        (WebCore::DOMWindow::locationbar):
+        (WebCore::DOMWindow::menubar):
+        (WebCore::DOMWindow::personalbar):
+        (WebCore::DOMWindow::scrollbars):
+        (WebCore::DOMWindow::statusbar):
+        (WebCore::DOMWindow::toolbar):
+        (WebCore::DOMWindow::console):
+        (WebCore::DOMWindow::applicationCache):
+        (WebCore::DOMWindow::navigator):
+        (WebCore::DOMWindow::performance):
+        (WebCore::DOMWindow::location):
+        (WebCore::DOMWindow::sessionStorage):
+        (WebCore::DOMWindow::localStorage):
+        (WebCore::DOMWindow::webkitNotifications):
+        (WebCore::DOMWindow::postMessageTimerFired):
+        (WebCore::DOMWindow::getSelection):
+        (WebCore::DOMWindow::styleMedia):
+        (WebCore::DOMWindow::webkitStorageInfo):
+        * page/DOMWindow.h:
+
+
+
 2012-03-13  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Use projectQuad to apply inverse mapRect
