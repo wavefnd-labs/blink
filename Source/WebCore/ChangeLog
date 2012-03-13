@@ -1,3 +1,43 @@
+2012-03-12  Hans Muller  <hmuller@adobe.com>
+
+        SVG should support transform-origin and relative values
+        https://bugs.webkit.org/show_bug.cgi?id=79068
+
+        Reviewed by Dirk Schulze.
+
+        Added SVG support for the CSS 'transform-origin' property and for percentage
+        values in the transform translate function.  The changes conform to
+        http://dev.w3.org/csswg/css3-transforms/.
+
+        Tests: svg/transforms/percent-transform-values.xhtml
+               svg/transforms/transform-origin-css-property.xhtml
+
+        * css/svg.css:
+        (*):
+        (html|* > svg):
+        Default transform-origin for SVG elements is 0 0.
+
+        * platform/Length.h:
+        (WebCore::Length::calcFloatValue):
+        Added a calcFloatValue overload whose max parameter (for percent lengths) is a float.
+        The original version will be obsolete when the sub-pixel layout support is completed.
+
+        * rendering/style/RenderStyle.cpp:
+        * rendering/style/RenderStyle.h:
+        (WebCore):
+        (WebCore::requireTransformOrigin):
+        Transforms that only include translations don't depend on the transform-origin.
+
+        (WebCore::RenderStyle::applyTransform):
+        SVG elements interpret non-percentage/keyword transform-origin values relative to their viewport,
+        unlike HTML which interprets all transform-origin values relative to the element's origin.
+        The new FloatRect applyTransform() function handles SVG semantics. Similarly, SVG elements interpret
+        percentage/keyword transform-origin values relative to the origin of their objectBoundingBox(), HTML
+        uses the borderBox.  All this per http://dev.w3.org/csswg/css3-transforms/.
+
+        * svg/SVGStyledTransformableElement.cpp:
+        (WebCore::SVGStyledTransformableElement::animatedLocalTransform):
+
 2012-03-12  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Use projectQuad to apply inverse mapRect
