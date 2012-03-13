@@ -1,3 +1,79 @@
+2012-03-12  Benjamin Poulain  <bpoulain@apple.com>
+
+        Fix IndexedDB build with JSC
+        https://bugs.webkit.org/show_bug.cgi?id=80207
+
+        Reviewed by Adam Barth.
+
+        This fixes the build of WebKit when IndexedDB is enabled. Most functions were added
+        empty implementation, it compiles but IndexedDB is not working.
+
+        * DerivedSources.make: Added missing IDL files.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h: Fix warnings and build errors.
+        (IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.cpp: ditto.
+        (WebCore::IDBDatabaseCallbacksImpl::unregisterDatabase): ditto.
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp: ditto.
+        (WebCore::IDBFactoryBackendImpl::openBackingStore):
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp: ditto.
+        (WebCore::IDBIndexBackendImpl::countInternal):
+        * Modules/indexeddb/IDBKeyPathBackendImpl.cpp: Fix the method signature and add
+        an empty implementation.
+        (WebCore):
+        (WebCore::IDBKeyPathBackendImpl::createIDBKeysFromSerializedValuesAndKeyPath):
+        (WebCore::IDBKeyPathBackendImpl::injectIDBKeyIntoSerializedValue):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp: Fix warnings.
+        (WebCore::IDBObjectStoreBackendImpl::countInternal):
+        * Modules/indexeddb/IDBPendingTransactionMonitor.cpp: ditto.
+        (WebCore::transactions):
+        * Modules/indexeddb/IDBRequest.cpp: ditto.
+        (WebCore::IDBRequest::resetReadyState):
+        * Modules/indexeddb/IDBRequest.h: ditto.
+        (WebCore::IDBRequest::onSuccessWithPrefetch):
+        (WebCore):
+        (WebCore::JSIDBVersionChangeRequest::visitChildren):
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/IDBBindingUtilities.cpp:
+        (WebCore::createIDBKeyFromValue): Fix the creation of IDBKeys.
+        (WebCore::createOptionsObjectFromValue): Add an empty implementation of
+        the handling of database options (IDBObjectStoreParameters).
+        (WebCore):
+        * bindings/js/IDBBindingUtilities.h:
+        (WebCore):
+        * bindings/js/JSIDBAnyCustom.cpp:
+        (WebCore::toJS): Add the missing IDBAny's types.
+        * bindings/js/JSIDBKeyCustom.cpp:
+        (WebCore::toJS): Add the missing IDBKey's types.
+        * bindings/js/JSIDBVersionChangeRequestCustom.cpp: Added.
+        IDBVersionChangeRequest has the attribute EventTarget so it requires
+        the visitChildren() function. An empty implementation was added.
+        * bindings/js/OptionsObject.h: Add an empty implementation.
+        (WebCore):
+        (OptionsObject):
+        (WebCore::OptionsObject::OptionsObject):
+        (WebCore::OptionsObject::isObject):
+        (WebCore::OptionsObject::isUndefinedOrNull):
+        (WebCore::OptionsObject::get):
+        (WebCore::OptionsObject::getWithUndefinedOrNullCheck):
+        * bindings/js/SerializedScriptValue.cpp: Add the missing functions needed by IndexedDB.
+        (WebCore):
+        (WebCore::SerializedScriptValue::create):
+        (WebCore::SerializedScriptValue::toWireString):
+        (WebCore::SerializedScriptValue::createFromWire):
+        (WebCore::SerializedScriptValue::numberValue):
+        (WebCore::SerializedScriptValue::deserialize):
+        * bindings/js/SerializedScriptValue.h:
+        (SerializedScriptValue):
+        * bindings/scripts/CodeGeneratorJS.pm: Modify the code generator to:
+        -Support the IDBKey type correctly.
+        -Support the OptionsObject type.
+        -Generate valid function call for static functions.
+        (GenerateImplementationFunctionCall):
+        (JSValueToNative):
+        (NativeToJSValue):
+        * inspector/InspectorIndexedDBAgent.cpp:
+        (WebCore):
+
 2012-03-12  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r110529.
