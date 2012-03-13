@@ -1,3 +1,35 @@
+2012-03-12  Kinuko Yasuda  <kinuko@chromium.org>
+
+        File upload control should use File.name() rather than File.path() to show chosen filenames
+        https://bugs.webkit.org/show_bug.cgi?id=80970
+
+        In some rare cases (e.g. files from FileSystem API or files created
+        using the newly added WebKit API) File.name has different displayName
+        from the basename of file.path, and in the file uploader controller we
+        should use File.name rather than File.path.
+
+        Reviewed by Kent Tamura.
+
+        No new tests: existing tests should pass as this should not change
+        behavior in regular use cases.  (New behavior where File.name differs
+        from File.path can be only tested in chromeos environment, therefore
+        not adding new tests for that)
+
+        * platform/gtk/RenderThemeGtk.cpp:
+        (WebCore::RenderThemeGtk::fileListNameForWidth): Updated to handle FileList.
+        * platform/gtk/RenderThemeGtk.h:
+        * platform/qt/RenderThemeQt.cpp:
+        (WebCore::RenderThemeQt::fileListNameForWidth): Updated to handle FileList.
+        * platform/qt/RenderThemeQt.h:
+        * rendering/RenderFileUploadControl.cpp:
+        (WebCore::RenderFileUploadControl::fileTextValue): Changed to pass FileList rather than FileList->paths().
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::fileListNameForWidth): Updated to handle FileList and use File.name for displaying the file name.
+        * rendering/RenderTheme.h:
+        * rendering/RenderThemeMac.h:
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::fileListNameForWidth): Updated to handle FileList.
+
 2012-03-13  Kinuko Yasuda  <kinuko@chromium.org>
 
         Allow WebFileChooser to return extra file info (like displayName) in addition to mere file paths
