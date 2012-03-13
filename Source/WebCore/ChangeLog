@@ -1,3 +1,35 @@
+2012-03-13  Igor Oliveira  <igor.o@sisa.samsung.com>
+
+        animation-iteration-count does not handle floating point values correctly.
+        https://bugs.webkit.org/show_bug.cgi?id=69531
+
+        Implements support for non-integers animation-iteration-count numbers.
+        Non-integer numbers will cause the animation to end part-way through a cycle.
+
+        Reviewed by Dean Jackson.
+
+        Tests: animations/fill-mode-iteration-count-non-integer.html
+               animations/keyframes-iteration-count-non-integer.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseAnimationIterationCount):
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::CSSStyleApplyProperty::CSSStyleApplyProperty):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * page/animation/AnimationBase.cpp:
+        (WebCore::AnimationBase::fractionalTime):
+        (WebCore::AnimationBase::progress):
+        * page/animation/CompositeAnimation.cpp:
+        (WebCore::CompositeAnimation::pauseAnimationAtTime):
+        * platform/animation/Animation.h:
+        (WebCore::Animation::iterationCount):
+        (WebCore::Animation::setIterationCount):
+        (Animation):
+        (WebCore::Animation::initialAnimationIterationCount):
+
 2012-03-13  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Rename PeerConnection to DeprecatedPeerConnection
