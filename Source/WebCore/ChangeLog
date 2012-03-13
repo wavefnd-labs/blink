@@ -1,3 +1,90 @@
+2012-03-12  Jer Noble  <jer.noble@apple.com>
+
+        WebCore: Add support for AudioNode "tailTime()" and "latencyTime()"
+        https://bugs.webkit.org/show_bug.cgi?id=74750
+
+        Reviewed by Chris Rogers.
+
+        No new tests; optimization of existing code path, so covered by existing tests.
+
+        To account for AudioNodes which may generate non-silent audio when fed silent input
+        for a certain amount of time after the last non-silent audio data, add two new virtual
+        functions tailTime() and latencyTime().
+
+        * webaudio/AudioNode.h:
+        (WebCore::AudioNode::tailTime): Added. Pure virtual.
+        (WebCore::AudioNode::latencyTime): Added. Pure virtual.
+        * platform/audio/AudioProcessor.h:
+        (WebCore::AudioProcessor::tailTime): Added. Pure virtual.
+        (WebCore::AudioProcessor::latencyTime): Added. Pure virtual.
+        * platform/audio/AudioDSPKernel.h:
+        (WebCore::AudioDSPKernel::tailTime): Added. Pure virtual.
+        (WebCore::AudioDSPKernel::latencyTime): Added. Pure virtual.
+
+        Added tailTime() and latencyTime() overrides to the following classes:
+        * platform/audio/AudioDSPKernelProcessor.cpp:
+        (WebCore::AudioDSPKernelProcessor::tailTime):
+        (WebCore::AudioDSPKernelProcessor::latencyTime):
+        * platform/audio/AudioDSPKernelProcessor.h:
+        * platform/audio/DynamicsCompressor.h:
+        (WebCore::DynamicsCompressor::tailTime):
+        (WebCore::DynamicsCompressor::latencyTime):
+        * platform/audio/EqualPowerPanner.h:
+        * platform/audio/HRTFPanner.cpp:
+        (WebCore::HRTFPanner::tailTime):
+        (WebCore::HRTFPanner::latencyTime):
+        * platform/audio/HRTFPanner.h:
+        * platform/audio/Panner.h:
+        * webaudio/AudioBasicProcessorNode.cpp:
+        (WebCore::AudioBasicProcessorNode::tailTime):
+        (WebCore::AudioBasicProcessorNode::latencyTime):
+        * webaudio/AudioBasicProcessorNode.h:
+        * webaudio/AudioChannelMerger.h:
+        * webaudio/AudioChannelSplitter.h:
+        * webaudio/AudioDestinationNode.h:
+        * webaudio/AudioGainNode.h:
+        * webaudio/AudioPannerNode.h:
+        * webaudio/AudioSourceNode.h:
+        * webaudio/BiquadDSPKernel.cpp:
+        (WebCore::BiquadDSPKernel::tailTime):
+        (WebCore::BiquadDSPKernel::latencyTime):
+        * webaudio/BiquadDSPKernel.h:
+        * webaudio/BiquadFilterNode.h:
+        * webaudio/ConvolverNode.cpp:
+        (WebCore::ConvolverNode::tailTime):
+        (WebCore::ConvolverNode::latencyTime):
+        * webaudio/ConvolverNode.h:
+        * webaudio/DelayDSPKernel.cpp:
+        (WebCore::DelayDSPKernel::tailTime):
+        (WebCore::DelayDSPKernel::latencyTime):
+        * webaudio/DelayDSPKernel.h:
+        * webaudio/DelayProcessor.h:
+        * webaudio/DynamicsCompressorNode.cpp:
+        (WebCore::DynamicsCompressorNode::tailTime):
+        (WebCore::DynamicsCompressorNode::latencyTime):
+        * webaudio/DynamicsCompressorNode.h:
+        * webaudio/JavaScriptAudioNode.cpp:
+        (WebCore::JavaScriptAudioNode::tailTime):
+        (WebCore::JavaScriptAudioNode::latencyTime):
+        * webaudio/JavaScriptAudioNode.h:
+        * webaudio/RealtimeAnalyserNode.h:
+        * webaudio/WaveShaperDSPKernel.h:
+
+        The following functions were added as support for the new AudioNode and AudioProcessor functions:
+        * platform/audio/Biquad.cpp:
+        (WebCore::Biquad::latencyFrames):
+        * platform/audio/Biquad.h:
+        * platform/audio/Reverb.cpp:
+        (WebCore::Reverb::latencyFrames):
+        * platform/audio/ReverbConvolver.h:
+        (WebCore::ReverbConvolver::latencyFrames):
+
+        The following functions were made const-correct:
+        * platform/audio/HRTFPanner.h:
+        (WebCore::HRTFPanner::fftSize):
+        * platform/audio/Reverb.h:
+        (WebCore::Reverb::impulseResponseLength):
+
 2012-03-12  Anders Carlsson  <andersca@apple.com>
 
         WebTileLayers should be opaque
