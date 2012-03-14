@@ -1,3 +1,41 @@
+2012-03-14  Raul Hudea  <rhudea@adobe.com>
+
+        [CSSRegions][CSSOM] Implement regionLayoutEvent
+        https://bugs.webkit.org/show_bug.cgi?id=78882
+
+        Reviewed by David Hyatt.
+
+        Adding the regionLayoutEvent that is dispatch for all regions after each flow-thread layout.
+
+        Tests: fast/regions/region-event-add-to-flow.html
+               fast/regions/region-event-remove-from-dom.html
+               fast/regions/region-event-remove-from-flow.html
+               fast/regions/region-event.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::addListenerTypeIfNeeded): Added check for regionLayoutUpdate listeners
+        * dom/Document.h:
+        * dom/EventNames.h:
+        (WebCore):
+        * dom/Node.cpp:
+        (WebCore::Node::dispatchRegionLayoutUpdateEvent):
+        (WebCore):
+        * dom/Node.h:
+        (Node):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        (WebCore::RenderFlowThread::layout): Start the event dispatch timer but only if there are regionLayoutUpdate listeners and there is at least one region that had its layout updated.
+        (WebCore::RenderFlowThread::computeOverflowStateForRegions): Mark regions that might had a layout update
+        (WebCore::RenderFlowThread::regionLayoutUpdateEventTimerFired):
+        (WebCore):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::RenderRegion):
+        * rendering/RenderRegion.h:
+        (WebCore::RenderRegion::setDispatchRegionLayoutUpdateEvent):
+        (WebCore::RenderRegion::shouldDispatchRegionLayoutUpdateEvent):
+        (RenderRegion):
+
 2012-03-14  Pierre Rossi  <pierre.rossi@gmail.com>
 
         [Qt] Add support for vertical sliders in mobile theme
