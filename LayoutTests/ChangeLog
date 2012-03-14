@@ -1,3 +1,295 @@
+2012-03-14  David Grogan  <dgrogan@chromium.org>
+
+        IndexedDB layout tests: factor out prefix-handling-code
+        https://bugs.webkit.org/show_bug.cgi?id=80664
+
+        This makes our tests vendor neutral so that we can load them in any
+        browser to check what that browser does.
+
+        Also changed some instances of 'window' to 'self' so that they are more
+        worker friendly.
+
+        Reviewed by Tony Chang.
+
+        * storage/indexeddb/basics-expected.txt:
+        * storage/indexeddb/basics-shared-workers-expected.txt:
+        * storage/indexeddb/basics-workers-expected.txt:
+        * storage/indexeddb/constants-expected.txt:
+        * storage/indexeddb/constants.html:
+        * storage/indexeddb/create-and-remove-object-store-expected.txt:
+        * storage/indexeddb/create-and-remove-object-store.html:
+        * storage/indexeddb/create-object-store-options-expected.txt:
+        * storage/indexeddb/create-object-store-options.html:
+        * storage/indexeddb/createObjectStore-name-argument-required-expected.txt:
+        * storage/indexeddb/createObjectStore-name-argument-required.html:
+        * storage/indexeddb/createObjectStore-null-name-expected.txt:
+        * storage/indexeddb/createObjectStore-null-name.html:
+        * storage/indexeddb/cursor-continue-expected.txt:
+        * storage/indexeddb/cursor-continue.html:
+        * storage/indexeddb/cursor-delete-expected.txt:
+        * storage/indexeddb/cursor-delete.html:
+        * storage/indexeddb/cursor-inconsistency-expected.txt:
+        * storage/indexeddb/cursor-inconsistency.html:
+        * storage/indexeddb/cursor-index-delete-expected.txt:
+        * storage/indexeddb/cursor-index-delete.html:
+        * storage/indexeddb/cursor-key-order-expected.txt:
+        * storage/indexeddb/cursor-key-order.html:
+        * storage/indexeddb/cursor-primary-key-order-expected.txt:
+        * storage/indexeddb/cursor-primary-key-order.html:
+        * storage/indexeddb/cursor-reverse-bug-expected.txt:
+        * storage/indexeddb/cursor-reverse-bug.html:
+        * storage/indexeddb/cursor-skip-deleted-expected.txt:
+        * storage/indexeddb/cursor-skip-deleted.html:
+        * storage/indexeddb/cursor-update-expected.txt:
+        * storage/indexeddb/cursor-update-value-argument-required-expected.txt:
+        * storage/indexeddb/cursor-update-value-argument-required.html:
+        * storage/indexeddb/cursor-update.html:
+        * storage/indexeddb/data-corruption-expected.txt:
+        * storage/indexeddb/data-corruption.html:
+        * storage/indexeddb/database-basics-expected.txt:
+        * storage/indexeddb/database-basics.html:
+        * storage/indexeddb/database-name-undefined-expected.txt:
+        * storage/indexeddb/database-name-undefined.html:
+        * storage/indexeddb/database-odd-names-expected.txt:
+        * storage/indexeddb/database-odd-names.html:
+        * storage/indexeddb/database-quota-expected.txt:
+        * storage/indexeddb/database-quota.html:
+        * storage/indexeddb/delete-closed-database-object-expected.txt:
+        * storage/indexeddb/delete-closed-database-object.html:
+        * storage/indexeddb/delete-range-expected.txt:
+        * storage/indexeddb/delete-range.html:
+        * storage/indexeddb/deleteIndex-expected.txt:
+        * storage/indexeddb/deleteIndex.html:
+        * storage/indexeddb/deleteObjectStore-name-argument-required-expected.txt:
+        * storage/indexeddb/deleteObjectStore-name-argument-required.html:
+        * storage/indexeddb/deleteObjectStore-null-name-expected.txt:
+        * storage/indexeddb/deleteObjectStore-null-name.html:
+        * storage/indexeddb/duplicates-expected.txt:
+        * storage/indexeddb/duplicates.html:
+        * storage/indexeddb/error-causes-abort-by-default-expected.txt:
+        * storage/indexeddb/error-causes-abort-by-default.html:
+        * storage/indexeddb/exception-in-event-aborts-expected.txt:
+        * storage/indexeddb/exception-in-event-aborts.html:
+        * storage/indexeddb/factory-basics-expected.txt:
+        * storage/indexeddb/factory-basics.html:
+        * storage/indexeddb/factory-cmp-expected.txt:
+        * storage/indexeddb/factory-cmp.html:
+        * storage/indexeddb/factory-deletedatabase-expected.txt:
+        * storage/indexeddb/factory-deletedatabase-interactions-expected.txt:
+        * storage/indexeddb/factory-deletedatabase-interactions.html:
+        * storage/indexeddb/factory-deletedatabase.html:
+        * storage/indexeddb/index-basics-expected.txt:
+        * storage/indexeddb/index-basics-workers-expected.txt:
+        * storage/indexeddb/index-count-expected.txt:
+        * storage/indexeddb/index-count.html:
+        * storage/indexeddb/index-cursor-expected.txt:
+        * storage/indexeddb/index-cursor.html:
+        * storage/indexeddb/index-get-key-argument-required-expected.txt:
+        * storage/indexeddb/index-get-key-argument-required.html:
+        * storage/indexeddb/index-multientry-expected.txt:
+        * storage/indexeddb/index-multientry.html:
+        * storage/indexeddb/index-population-expected.txt:
+        * storage/indexeddb/index-population.html:
+        * storage/indexeddb/index-unique-expected.txt:
+        * storage/indexeddb/index-unique.html:
+        * storage/indexeddb/invalid-keys-expected.txt:
+        * storage/indexeddb/invalid-keys.html:
+        * storage/indexeddb/key-generator-expected.txt:
+        * storage/indexeddb/key-generator.html:
+        * storage/indexeddb/key-sort-order-across-types-expected.txt:
+        * storage/indexeddb/key-sort-order-across-types.html:
+        * storage/indexeddb/key-sort-order-date-expected.txt:
+        * storage/indexeddb/key-sort-order-date.html:
+        * storage/indexeddb/key-type-array-expected.txt:
+        * storage/indexeddb/key-type-array.html:
+        * storage/indexeddb/key-type-infinity-expected.txt:
+        * storage/indexeddb/key-type-infinity.html:
+        * storage/indexeddb/keypath-basics-expected.txt:
+        * storage/indexeddb/keypath-basics.html:
+        * storage/indexeddb/keypath-edges-expected.txt:
+        * storage/indexeddb/keypath-edges.html:
+        * storage/indexeddb/keypath-fetch-key-expected.txt:
+        * storage/indexeddb/keypath-fetch-key.html:
+        * storage/indexeddb/keyrange-expected.txt:
+        * storage/indexeddb/keyrange-required-arguments-expected.txt:
+        * storage/indexeddb/keyrange-required-arguments.html:
+        * storage/indexeddb/keyrange.html:
+        * storage/indexeddb/list-ordering-expected.txt:
+        * storage/indexeddb/list-ordering.html:
+        * storage/indexeddb/mozilla/add-twice-failure-expected.txt:
+        * storage/indexeddb/mozilla/add-twice-failure.html:
+        * storage/indexeddb/mozilla/autoincrement-indexes-expected.txt:
+        * storage/indexeddb/mozilla/autoincrement-indexes.html:
+        * storage/indexeddb/mozilla/bad-keypath-expected.txt:
+        * storage/indexeddb/mozilla/bad-keypath.html:
+        * storage/indexeddb/mozilla/clear-expected.txt:
+        * storage/indexeddb/mozilla/clear.html:
+        * storage/indexeddb/mozilla/create-index-unique-expected.txt:
+        * storage/indexeddb/mozilla/create-index-unique.html:
+        * storage/indexeddb/mozilla/create-index-with-integer-keys-expected.txt:
+        * storage/indexeddb/mozilla/create-index-with-integer-keys.html:
+        * storage/indexeddb/mozilla/create-objectstore-basics-expected.txt:
+        * storage/indexeddb/mozilla/create-objectstore-basics.html:
+        * storage/indexeddb/mozilla/create-objectstore-null-name-expected.txt:
+        * storage/indexeddb/mozilla/create-objectstore-null-name.html:
+        * storage/indexeddb/mozilla/cursor-mutation-expected.txt:
+        * storage/indexeddb/mozilla/cursor-mutation-objectstore-only-expected.txt:
+        * storage/indexeddb/mozilla/cursor-mutation-objectstore-only.html:
+        * storage/indexeddb/mozilla/cursor-mutation.html:
+        * storage/indexeddb/mozilla/cursor-update-updates-indexes-expected.txt:
+        * storage/indexeddb/mozilla/cursor-update-updates-indexes.html:
+        * storage/indexeddb/mozilla/cursors-expected.txt:
+        * storage/indexeddb/mozilla/cursors.html:
+        * storage/indexeddb/mozilla/delete-result-expected.txt:
+        * storage/indexeddb/mozilla/delete-result.html:
+        * storage/indexeddb/mozilla/event-source-expected.txt:
+        * storage/indexeddb/mozilla/event-source.html:
+        * storage/indexeddb/mozilla/global-data-expected.txt:
+        * storage/indexeddb/mozilla/global-data.html:
+        * storage/indexeddb/mozilla/indexes-expected.txt:
+        * storage/indexeddb/mozilla/indexes.html:
+        * storage/indexeddb/mozilla/key-requirements-delete-null-key-expected.txt:
+        * storage/indexeddb/mozilla/key-requirements-delete-null-key.html:
+        * storage/indexeddb/mozilla/key-requirements-expected.txt:
+        * storage/indexeddb/mozilla/key-requirements-inline-and-passed-expected.txt:
+        * storage/indexeddb/mozilla/key-requirements-inline-and-passed.html:
+        * storage/indexeddb/mozilla/key-requirements-put-no-key-expected.txt:
+        * storage/indexeddb/mozilla/key-requirements-put-no-key.html:
+        * storage/indexeddb/mozilla/key-requirements-put-null-key-expected.txt:
+        * storage/indexeddb/mozilla/key-requirements-put-null-key.html:
+        * storage/indexeddb/mozilla/key-requirements.html:
+        * storage/indexeddb/mozilla/object-cursors-expected.txt:
+        * storage/indexeddb/mozilla/object-cursors.html:
+        * storage/indexeddb/mozilla/object-identity-expected.txt:
+        * storage/indexeddb/mozilla/object-identity.html:
+        * storage/indexeddb/mozilla/object-store-inline-autoincrement-key-added-on-put-expected.txt:
+        * storage/indexeddb/mozilla/object-store-inline-autoincrement-key-added-on-put.html:
+        * storage/indexeddb/mozilla/object-store-remove-values-expected.txt:
+        * storage/indexeddb/mozilla/object-store-remove-values.html:
+        * storage/indexeddb/mozilla/objectstorenames-expected.txt:
+        * storage/indexeddb/mozilla/objectstorenames.html:
+        * storage/indexeddb/mozilla/odd-result-order-expected.txt:
+        * storage/indexeddb/mozilla/odd-result-order.html:
+        * storage/indexeddb/mozilla/open-database-null-name-expected.txt:
+        * storage/indexeddb/mozilla/open-database-null-name.html:
+        * storage/indexeddb/mozilla/put-get-values-expected.txt:
+        * storage/indexeddb/mozilla/put-get-values.html:
+        * storage/indexeddb/mozilla/readonly-transactions-expected.txt:
+        * storage/indexeddb/mozilla/readonly-transactions.html:
+        * storage/indexeddb/mozilla/readwrite-transactions-expected.txt:
+        * storage/indexeddb/mozilla/readwrite-transactions.html:
+        * storage/indexeddb/mozilla/readyState-expected.txt:
+        * storage/indexeddb/mozilla/readyState.html:
+        * storage/indexeddb/mozilla/remove-index-expected.txt:
+        * storage/indexeddb/mozilla/remove-index.html:
+        * storage/indexeddb/mozilla/remove-objectstore-expected.txt:
+        * storage/indexeddb/mozilla/remove-objectstore.html:
+        * storage/indexeddb/mozilla/versionchange-abort-expected.txt:
+        * storage/indexeddb/mozilla/versionchange-abort.html:
+        * storage/indexeddb/mozilla/versionchange-expected.txt:
+        * storage/indexeddb/mozilla/versionchange.html:
+        * storage/indexeddb/mutating-cursor-expected.txt:
+        * storage/indexeddb/mutating-cursor.html:
+        * storage/indexeddb/objectStore-required-arguments-expected.txt:
+        * storage/indexeddb/objectStore-required-arguments.html:
+        * storage/indexeddb/objectstore-autoincrement-expected.txt:
+        * storage/indexeddb/objectstore-autoincrement.html:
+        * storage/indexeddb/objectstore-basics-expected.txt:
+        * storage/indexeddb/objectstore-basics-workers-expected.txt:
+        * storage/indexeddb/objectstore-clear-expected.txt:
+        * storage/indexeddb/objectstore-clear.html:
+        * storage/indexeddb/objectstore-count-expected.txt:
+        * storage/indexeddb/objectstore-count.html:
+        * storage/indexeddb/objectstore-cursor-expected.txt:
+        * storage/indexeddb/objectstore-cursor.html:
+        * storage/indexeddb/objectstore-removeobjectstore-expected.txt:
+        * storage/indexeddb/objectstore-removeobjectstore.html:
+        * storage/indexeddb/odd-strings-expected.txt:
+        * storage/indexeddb/odd-strings.html:
+        * storage/indexeddb/open-close-version-expected.txt:
+        * storage/indexeddb/open-close-version.html:
+        * storage/indexeddb/open-cursor-expected.txt:
+        * storage/indexeddb/open-cursor.html:
+        * storage/indexeddb/open-during-transaction-expected.txt:
+        * storage/indexeddb/open-during-transaction.html:
+        * storage/indexeddb/prefetch-bugfix-108071-expected.txt:
+        * storage/indexeddb/prefetch-bugfix-108071.html:
+        * storage/indexeddb/queued-commands-expected.txt:
+        * storage/indexeddb/queued-commands.html:
+        * storage/indexeddb/readonly-expected.txt:
+        * storage/indexeddb/readonly-properties-expected.txt:
+        * storage/indexeddb/readonly-properties.html:
+        * storage/indexeddb/readonly.html:
+        * storage/indexeddb/request-event-propagation-expected.txt:
+        * storage/indexeddb/request-event-propagation.html:
+        * storage/indexeddb/resources/basics.js:
+        (test):
+        (openCallback):
+        * storage/indexeddb/resources/index-basics.js:
+        (test):
+        * storage/indexeddb/resources/objectstore-basics.js:
+        (test):
+        (setVersionSuccess):
+        (createIndex):
+        (addData):
+        (addAgainFailure):
+        (removeSuccessButNotThere):
+        (testPreConditions.request.onsuccess):
+        (testPreConditions):
+        * storage/indexeddb/resources/shared.js:
+        (removeVendorPrefixes):
+        * storage/indexeddb/resources/transaction-abort-workers.js:
+        (transactionAborted):
+        (transactionCompleted):
+        (timeoutTest.transaction.onabort):
+        (timeoutTest):
+        (errorTransactionAborted):
+        * storage/indexeddb/setVersion-null-expected.txt:
+        * storage/indexeddb/setVersion-null.html:
+        * storage/indexeddb/setVersion-undefined-expected.txt:
+        * storage/indexeddb/setVersion-undefined.html:
+        * storage/indexeddb/set_version_blocked-expected.txt:
+        * storage/indexeddb/set_version_blocked.html:
+        * storage/indexeddb/set_version_queue-expected.txt:
+        * storage/indexeddb/set_version_queue.html:
+        * storage/indexeddb/structured-clone-expected.txt:
+        * storage/indexeddb/structured-clone.html:
+        * storage/indexeddb/transaction-abort-expected.txt:
+        * storage/indexeddb/transaction-abort-with-js-recursion-cross-frame-expected.txt:
+        * storage/indexeddb/transaction-abort-with-js-recursion-cross-frame.html:
+        * storage/indexeddb/transaction-abort-with-js-recursion-expected.txt:
+        * storage/indexeddb/transaction-abort-with-js-recursion.html:
+        * storage/indexeddb/transaction-abort-workers-expected.txt:
+        * storage/indexeddb/transaction-abort.html:
+        * storage/indexeddb/transaction-after-close-expected.txt:
+        * storage/indexeddb/transaction-after-close.html:
+        * storage/indexeddb/transaction-and-objectstore-calls-expected.txt:
+        * storage/indexeddb/transaction-and-objectstore-calls.html:
+        * storage/indexeddb/transaction-basics-expected.txt:
+        * storage/indexeddb/transaction-basics.html:
+        * storage/indexeddb/transaction-crash-on-abort-expected.txt:
+        * storage/indexeddb/transaction-crash-on-abort.html:
+        * storage/indexeddb/transaction-event-propagation-expected.txt:
+        * storage/indexeddb/transaction-event-propagation.html:
+        * storage/indexeddb/transaction-read-only-expected.txt:
+        * storage/indexeddb/transaction-read-only.html:
+        * storage/indexeddb/transaction-rollback-expected.txt:
+        * storage/indexeddb/transaction-rollback.html:
+        * storage/indexeddb/transaction-storeNames-required-expected.txt:
+        * storage/indexeddb/transaction-storeNames-required.html:
+        * storage/indexeddb/two-version-changes-expected.txt:
+        * storage/indexeddb/two-version-changes.html:
+        * storage/indexeddb/value-undefined-expected.txt:
+        * storage/indexeddb/value-undefined.html:
+        * storage/indexeddb/values-odd-types-expected.txt:
+        * storage/indexeddb/values-odd-types.html:
+        * storage/indexeddb/version-change-abort-expected.txt:
+        * storage/indexeddb/version-change-abort.html:
+        * storage/indexeddb/version-change-exclusive-expected.txt:
+        * storage/indexeddb/version-change-exclusive.html:
+        * storage/indexeddb/versionchangerequest-activedomobject-expected.txt:
+        * storage/indexeddb/versionchangerequest-activedomobject.html:
+
 2012-03-14  Tony Chang  <tony@chromium.org>
 
         multiline column flexbox with auto height wrap too much
