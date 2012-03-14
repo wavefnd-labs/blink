@@ -1,3 +1,32 @@
+2012-03-14  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        External <use> xlink:href references do not work
+        https://bugs.webkit.org/show_bug.cgi?id=12499
+
+        Reviewed by Zoltan Herczeg.
+
+        Follow-up fix after r110676.
+        Assertions are firing due last minute changes in isExternalURIReference.
+
+        Fix detecting local resources properly, when the given iri contains a /complex/path.
+        Use document->completeURL() instead, and compare with the document->url() to decide
+        if its a local reference or not.
+
+        If an external document load fails with an error (eg. file missing) don't assert
+        in debug builds, instead handle it gracefully.
+
+        I decided to clean the code up as well, to make it more safe & obvious.
+
+        Test: svg/custom/use-external-crash.svg
+
+        * svg/SVGURIReference.cpp:
+        (WebCore::SVGURIReference::targetElementFromIRIString):
+        * svg/SVGURIReference.h:
+        (WebCore::SVGURIReference::isExternalURIReference):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::externalDocument):
+        (WebCore::SVGUseElement::buildPendingResource):
+
 2012-03-14  Lars Knudsen  <lars.knudsen@nokia.com>
 
         3D transformed surfaces with z>0 gets cropped
