@@ -1,3 +1,49 @@
+2012-03-14  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: small improvement for HeapSnapshot performance ~12%.
+        https://bugs.webkit.org/show_bug.cgi?id=81033
+
+        Reviewed by Yury Semikhatsky.
+
+        * inspector/front-end/HeapSnapshot.js:
+        (WebInspector.HeapSnapshot.prototype.get nodeCount):
+        (WebInspector.HeapSnapshot.prototype.get maxNodeId):
+        (WebInspector.HeapSnapshot.prototype._buildReverseIndex):
+        (WebInspector.HeapSnapshot.prototype.get nodeIndexes):
+        (WebInspector.HeapSnapshot.prototype._buildNodeIndex):
+
+2012-03-14  Kentaro Hara  <haraken@chromium.org>
+
+        Return null when shouldAllowAccessToNode() fails
+        https://bugs.webkit.org/show_bug.cgi?id=80205
+
+        Reviewed by Adam Barth.
+
+        shouldAllowAccessToNode() is used for window.frameElement, HTMLFrameElement.contentDocument,
+        and getSVGDocument(). The spec of window.frameElement and HTMLFrameElement.contentDocument
+        requires that they should return null when the security check fails.
+        Thus this patch changes the return value from undefined to null.
+
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/browsers.html#navigating-nested-browsing-contexts-in-the-dom
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/the-iframe-element.html#dom-iframe-contentdocument
+
+        Tests: http/tests/security/local-iFrame-from-remote.html
+               http/tests/security/cross-frame-access-frameelement.html
+               http/tests/security/cross-frame-access-put.html
+
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateImplementation):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNormalAttrGetter):
+        (GenerateFunctionCallback):
+
+        * bindings/scripts/test/JS/JSTestObj.cpp: Updated run-bindings-tests results.
+        (WebCore::jsTestObjContentDocument):
+        (WebCore::jsTestObjPrototypeFunctionGetSVGDocument):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjInternal::contentDocumentAttrGetter):
+        (WebCore::TestObjInternal::getSVGDocumentCallback):
+
 2012-03-14  Sudarsana Nagineni  <sudarsana.nagineni@linux.intel.com>
 
         Build error: DNSSoup.cpp:30: fatal error: CString.h: No such file or
