@@ -1,3 +1,32 @@
+2012-03-14  Zalan Bujtas  <zbujtas@gmail.com>
+
+        Frame flattening ASSERT(!needsLayout()) in FrameView::paintContents()
+        https://bugs.webkit.org/show_bug.cgi?id=80155
+
+        Reviewed by Antti Koivisto.
+
+        This patch ensures that an iframe only schedules and calls parent's layout,
+        when it is going to be flattened. Non-flattened iframe does not affect
+        parent's layout, so normal layout flow applies. isInSubframeLayoutWithFrameFlattening()
+        function has been added to test whether a particular child frame is changing
+        parent's layout. This function also ensures that scheduleRelayout() and layout()
+        are in sync of checking againts frame flattening.
+
+        Test: fast/frames/flattening/iframe-flattening-fixed-width-and-height-no-scrolling-with-js-forced-layout.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::avoidScrollbarCreation):
+        (WebCore::FrameView::layout):
+        (WebCore::FrameView::scheduleRelayout):
+        (WebCore::FrameView::isInChildFrameWithFrameFlattening):
+        (WebCore):
+        (WebCore::FrameView::updateLayoutAndStyleIfNeededRecursive):
+        * page/FrameView.h:
+        (FrameView):
+        * rendering/RenderIFrame.h:
+        (RenderIFrame):
+        (WebCore::RenderIFrame::renderName):
+
 2012-03-14  Anders Carlsson  <andersca@apple.com>
 
         Don't cap the scroll position if layout happens when a FrameView's overhangAmount is non-zero
