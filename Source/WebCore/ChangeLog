@@ -1,3 +1,67 @@
+2012-03-14  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Make SVGUseElement respect & support externalResourcesRequired
+        https://bugs.webkit.org/show_bug.cgi?id=81109
+
+        Reviewed by Rob Buis.
+
+        Generalize the existing externalResourcesRequired support from SVGScriptElement
+        into SVGExternalResourcesRequired, so it can be shared with SVGUseElement, which
+        was lacking proper externalResourcesRequired support.
+
+        <use xlink:href="external.svg" onload="alert('hi')" externalResourcesRequired="true"/>
+        The onload handler now fires _after_ the external resources loaded, making it possible
+        to write reliable tests that switch from internal to external resources or the other
+        way around. Converted the new tests in svg/dynamic-updates/SVGUseElement* to listen
+        to SVGLoad events, to make them reliable.
+
+        We may be able to generalize this to cover SVGImageElement as well (the only other class which
+        is currently supporting externalResourcesRequired - but that's more involved, so I left it TODO).
+
+        Covered by existing tests and the changes to the new SVGUseElement tests.
+
+        * svg/SVGElement.h:
+        (SVGElement): Make haveLoadedRequiredResources() public so SVGExternalResourcesRequired can call it.
+        * svg/SVGExternalResourcesRequired.cpp: Refactored code from SVGScriptElement, 1:1 copies w/o changes.
+        (WebCore::SVGExternalResourcesRequired::handleAttributeChange):
+        (WebCore::SVGExternalResourcesRequired::dispatchLoadEvent):
+        (WebCore::SVGExternalResourcesRequired::insertedIntoDocument):
+        (WebCore::SVGExternalResourcesRequired::finishParsingChildren):
+        (WebCore::SVGExternalResourcesRequired::haveLoadedRequiredResources):
+        * svg/SVGExternalResourcesRequired.h: Add new virtual functions, that must be available in classes that inherit from SVGExternalResourcesRequired.
+        (WebCore::SVGExternalResourcesRequired::setHaveFiredLoadEvent):
+        (WebCore::SVGExternalResourcesRequired::isParserInserted):
+        (WebCore::SVGExternalResourcesRequired::haveFiredLoadEvent):
+        * svg/SVGScriptElement.cpp: Refactored externalResourcesRequired handling into SVGExternalResourcesRequired.
+        (WebCore::SVGScriptElement::svgAttributeChanged):
+        (WebCore::SVGScriptElement::insertedIntoDocument):
+        (WebCore::SVGScriptElement::finishParsingChildren):
+        * svg/SVGScriptElement.h: Ditto.
+        (WebCore::SVGScriptElement::haveLoadedRequiredResources):
+        (WebCore::SVGScriptElement::dispatchLoadEvent):
+        (WebCore::SVGScriptElement::setHaveFiredLoadEvent):
+        (WebCore::SVGScriptElement::isParserInserted):
+        (WebCore::SVGScriptElement::haveFiredLoadEvent):
+        * svg/SVGTests.cpp: Fix obvious typo, that leads to an assertion. Always return true if we know the attributeName.
+        (WebCore::SVGTests::handleAttributeChange):
+        * svg/SVGTests.h:
+        * svg/SVGTextPathElement.cpp:
+        (WebCore::SVGTextPathElement::insertedIntoDocument): Remove ambigous call warning.
+        * svg/SVGUseElement.cpp: Support externalResourcesRequired="true/false" + dynamic changes of it. Covered by existing tests.
+        (WebCore::SVGUseElement::SVGUseElement):
+        (WebCore::SVGUseElement::create):
+        (WebCore::SVGUseElement::insertedIntoDocument):
+        (WebCore::SVGUseElement::svgAttributeChanged):
+        (WebCore::SVGUseElement::notifyFinished):
+        (WebCore::SVGUseElement::finishParsingChildren):
+        (WebCore):
+        * svg/SVGUseElement.h: Ditto.
+        (WebCore::SVGUseElement::haveLoadedRequiredResources):
+        (WebCore::SVGUseElement::setHaveFiredLoadEvent):
+        (WebCore::SVGUseElement::isParserInserted):
+        (WebCore::SVGUseElement::haveFiredLoadEvent):
+        * svg/svgtags.in: Pass "bool wasInsertedByParser" to SVGUseElement constructor.
+
 2012-03-14  Andrew Lo  <anlo@rim.com>
 
         [BlackBerry] Implement REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR using AnimationFrameRateController
