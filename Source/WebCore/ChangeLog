@@ -1,3 +1,39 @@
+2012-03-14  Grace Ku  <gracek@codeaurora.org>
+
+        Incorrect handling of sizes in "em" when first-line changes font size
+        https://bugs.webkit.org/show_bug.cgi?id=79526
+
+        Reviewed by Eric Seidel.
+
+        When a first-line pseudo class changes the font size, the "em" unit is handled incorrectly.
+        It uses the paragraph's original font size (the size of the rest of the paragraph) rather than
+        the font-size of the first-line of the paragraph.
+
+        This was corrected by checking if the InlineFlowBox was the first line using the existing
+        InlineFlowBox::isFirstLineStyle() function. The corrected behaviour matches Gecko and Presto.
+        Trident seems to get it half-wrong in the use case we are testing, painting the correct width for
+        the border but leaving the wrong amount of space.
+
+        The CSS specification doc at the time of this patch specifies that ':first-line' should only support
+        certain properties, though UAs may choose to apply more properties. Furthermore, the spec does not
+        define the exact rendering of all cases of ':first-line'. It notes that a more precise definition
+        may appear in future revisions.
+
+        Test: fast/css/pseudo-first-line-border-width.html
+
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::paintBoxDecorations):
+        * rendering/InlineFlowBox.h:
+        (WebCore::InlineFlowBox::borderLogicalLeft):
+        (WebCore::InlineFlowBox::borderLogicalRight):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::paintBorder):
+        (WebCore::RenderBoxModelObject::getBorderEdgeInfo):
+        (WebCore::RenderBoxModelObject::borderObscuresBackgroundEdge):
+        (WebCore::RenderBoxModelObject::borderObscuresBackground):
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+
 2012-03-14  Martin Robinson  <mrobinson@igalia.com>
 
         Fix the TextureMapper build for GTK+.
