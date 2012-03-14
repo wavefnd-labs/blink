@@ -1,3 +1,21 @@
+2012-03-14  James Robinson  <jamesr@chromium.org>
+
+        [Chromium] Layout Test compositing/repaint/opacity-between-absolute.html is flaky
+        https://bugs.webkit.org/show_bug.cgi?id=79823
+
+        Reviewed by Adrienne Walker.
+
+        LayerRendererChromium was storing a weak pointer to the current render surface in m_currentRenderSurface and
+        using this in useRenderSurface() to avoid rebinding if we called useRenderSurface() multiple times in a row on
+        the same surface. This pointer was never cleared, so if any subsequent surface landed at the same address this
+        caching would misbehave and we'd fail to correctly initialize the new render surface. The caching wasn't
+        actually buying us anything anyway since we only call useRenderSurface() once per surface per frame and we
+        always set the viewport for the default render surface.
+
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::beginDrawingFrame):
+        (WebCore::LayerRendererChromium::useRenderSurface):
+
 2012-03-14  Zalan Bujtas  <zbujtas@gmail.com>
 
         Frame flattening ASSERT(!needsLayout()) in FrameView::paintContents()
