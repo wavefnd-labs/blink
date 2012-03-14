@@ -1,3 +1,122 @@
+2012-03-14  Renata Hodovan  <reni@webkit.org>
+
+        External <use> xlink:href references do not work
+        https://bugs.webkit.org/show_bug.cgi?id=12499
+
+        Reviewed by Nikolas Zimmermann.
+
+        Adding tests to check the new functionality of SVGUseElement what can use
+        sources from external URIs too. New tests in this patch cover the corner cases
+        of this feature: referencing resources directly and indirectly, changing
+        the referenced URI from an internal to an external one, handling
+        security issues like self referencing, self referencing across document, etc.
+        Furthermore the patch infer some rebaseline in svg/batik directory because
+        they use external resources.
+
+        * platform/chromium/test_expectations.txt:
+        * platform/mac/svg/W3C-SVG-1.2-Tiny/struct-use-recursion-01-t-expected.png: Added.
+        * platform/mac/svg/W3C-SVG-1.2-Tiny/struct-use-recursion-01-t-expected.txt: Added.
+        * platform/mac/svg/W3C-SVG-1.2-Tiny/struct-use-recursion-02-t-expected.png: Added.
+        * platform/mac/svg/W3C-SVG-1.2-Tiny/struct-use-recursion-02-t-expected.txt: Added.
+        * platform/mac/svg/W3C-SVG-1.2-Tiny/struct-use-recursion-03-t-expected.png: Added.
+        * platform/mac/svg/W3C-SVG-1.2-Tiny/struct-use-recursion-03-t-expected.txt: Added.
+        * platform/mac/svg/batik/filters/feTile-expected.png:
+        * platform/mac/svg/batik/filters/feTile-expected.txt:
+        * platform/mac/svg/batik/filters/filterRegions-expected.png:
+        * platform/mac/svg/batik/filters/filterRegions-expected.txt:
+        * platform/mac/svg/batik/masking/maskRegions-expected.png:
+        * platform/mac/svg/batik/masking/maskRegions-expected.txt:
+        * platform/mac/svg/batik/paints/gradientLimit-expected.png:
+        * platform/mac/svg/batik/paints/gradientLimit-expected.txt:
+        * platform/mac/svg/batik/paints/patternPreserveAspectRatioA-expected.png:
+        * platform/mac/svg/batik/paints/patternPreserveAspectRatioA-expected.txt:
+        * platform/mac/svg/batik/paints/patternRegionA-expected.png:
+        * platform/mac/svg/batik/paints/patternRegionA-expected.txt:
+        * platform/mac/svg/batik/paints/patternRegions-expected.png:
+        * platform/mac/svg/batik/paints/patternRegions-expected.txt:
+        * platform/mac/svg/batik/paints/patternRegions-positioned-objects-expected.png:
+        * platform/mac/svg/batik/paints/patternRegions-positioned-objects-expected.txt:
+        * platform/mac/svg/batik/text/longTextOnPath-expected.png:
+        * platform/mac/svg/batik/text/longTextOnPath-expected.txt:
+        * platform/mac/svg/batik/text/smallFonts-expected.png:
+        * platform/mac/svg/batik/text/smallFonts-expected.txt:
+        * platform/mac/svg/batik/text/textAnchor-expected.png:
+        * platform/mac/svg/batik/text/textAnchor-expected.txt:
+        * platform/mac/svg/batik/text/textDecoration-expected.png:
+        * platform/mac/svg/batik/text/textDecoration-expected.txt:
+        * platform/mac/svg/batik/text/textEffect-expected.png:
+        * platform/mac/svg/batik/text/textEffect-expected.txt:
+        * platform/mac/svg/batik/text/textEffect2-expected.png:
+        * platform/mac/svg/batik/text/textEffect2-expected.txt:
+        * platform/mac/svg/batik/text/textEffect3-expected.png:
+        * platform/mac/svg/batik/text/textEffect3-expected.txt:
+        * platform/mac/svg/batik/text/textFeatures-expected.png:
+        * platform/mac/svg/batik/text/textFeatures-expected.txt:
+        * platform/mac/svg/batik/text/textLayout-expected.png:
+        * platform/mac/svg/batik/text/textLayout-expected.txt:
+        * platform/mac/svg/batik/text/textLayout2-expected.png:
+        * platform/mac/svg/batik/text/textLayout2-expected.txt:
+        * platform/mac/svg/batik/text/textLength-expected.png:
+        * platform/mac/svg/batik/text/textLength-expected.txt:
+        * platform/mac/svg/batik/text/textOnPath-expected.png:
+        * platform/mac/svg/batik/text/textOnPath-expected.txt:
+        * platform/mac/svg/batik/text/textOnPathSpaces-expected.png:
+        * platform/mac/svg/batik/text/textOnPathSpaces-expected.txt:
+        * platform/mac/svg/batik/text/textPosition-expected.png:
+        * platform/mac/svg/batik/text/textPosition-expected.txt:
+        * platform/mac/svg/batik/text/textPosition2-expected.png:
+        * platform/mac/svg/batik/text/textPosition2-expected.txt:
+        * platform/mac/svg/batik/text/textProperties-expected.png:
+        * platform/mac/svg/batik/text/textProperties-expected.txt:
+        * platform/mac/svg/batik/text/textProperties2-expected.png:
+        * platform/mac/svg/batik/text/textProperties2-expected.txt:
+        * platform/mac/svg/batik/text/textStyles-expected.png:
+        * platform/mac/svg/batik/text/textStyles-expected.txt:
+        * platform/mac/svg/batik/text/verticalText-expected.png:
+        * platform/mac/svg/batik/text/verticalText-expected.txt:
+        * platform/mac/svg/batik/text/verticalTextOnPath-expected.png:
+        * platform/mac/svg/batik/text/verticalTextOnPath-expected.txt:
+        * platform/mac/svg/custom/use-extern-href-expected.png: Added.
+        * platform/mac/svg/custom/use-extern-href-expected.txt: Added.
+        * platform/mac/svg/dynamic-updates/SVGUseElement-dom-href1-attr-expected.png: Added.
+        * platform/mac/svg/dynamic-updates/SVGUseElement-dom-href2-attr-expected.png: Added.
+        * platform/mac/svg/dynamic-updates/SVGUseElement-svgdom-href1-prop-expected.png: Added.
+        * platform/mac/svg/dynamic-updates/SVGUseElement-svgdom-href2-prop-expected.png: Added.
+        * platform/mac/svg/hixie/error/014-expected.txt:
+        * platform/mac/svg/hixie/use/002-expected.png:
+        * platform/mac/svg/hixie/use/002-expected.txt:
+        * svg/W3C-SVG-1.2-Tiny/struct-use-recursion-01-t.svg: Added.
+        * svg/W3C-SVG-1.2-Tiny/struct-use-recursion-02-t.svg: Added.
+        * svg/W3C-SVG-1.2-Tiny/struct-use-recursion-03-t.svg: Added.
+        * svg/batik/filters/filterRegions.svg:
+        * svg/batik/text/textProperties.svg:
+        * svg/batik/text/textProperties2.svg:
+        * svg/batik/text/textStyles.svg:
+        * svg/custom/resources/rgb.svg:
+        * svg/custom/use-extern-href.svg: Added.
+        * svg/custom/use-referencing-an-image-expected.svg: Added.
+        * svg/custom/use-referencing-an-image.svg: Added.
+        * svg/custom/use-referencing-indirectly-itself-expected.svg: Added.
+        * svg/custom/use-referencing-indirectly-itself.svg: Added.
+        * svg/custom/use-referencing-itself-expected.svg: Added.
+        * svg/custom/use-referencing-itself.svg: Added.
+        * svg/dynamic-updates/SVGUseElement-dom-href1-attr-expected.txt: Added.
+        * svg/dynamic-updates/SVGUseElement-dom-href1-attr.html: Added.
+        * svg/dynamic-updates/SVGUseElement-dom-href2-attr-expected.txt: Added.
+        * svg/dynamic-updates/SVGUseElement-dom-href2-attr.html: Added.
+        * svg/dynamic-updates/SVGUseElement-svgdom-href1-prop-expected.txt: Added.
+        * svg/dynamic-updates/SVGUseElement-svgdom-href1-prop.html: Added.
+        * svg/dynamic-updates/SVGUseElement-svgdom-href2-prop-expected.txt: Added.
+        * svg/dynamic-updates/SVGUseElement-svgdom-href2-prop.html: Added.
+        * svg/dynamic-updates/script-tests/SVGUseElement-dom-href1-attr.js: Added.
+        (repaintTest):
+        * svg/dynamic-updates/script-tests/SVGUseElement-dom-href2-attr.js: Added.
+        (repaintTest):
+        * svg/dynamic-updates/script-tests/SVGUseElement-svgdom-href1-prop.js: Added.
+        (repaintTest):
+        * svg/dynamic-updates/script-tests/SVGUseElement-svgdom-href2-prop.js: Added.
+        (repaintTest):
+
 2012-03-14  Philippe Normand  <pnormand@igalia.com>
 
         Unreviewed, skip a new failing inspector test in GTK and add new

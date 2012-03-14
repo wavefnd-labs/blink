@@ -1,3 +1,75 @@
+2012-03-14  Renata Hodovan  <reni@webkit.org>
+
+        External <use> xlink:href references do not work
+        https://bugs.webkit.org/show_bug.cgi?id=12499
+
+        Reviewed by Nikolas Zimmermann.
+
+        This is a follow-up patch after r108785.
+        In this patch we bind the previously introduced CachedSVGDocument class
+        into the caching mechanism of SVGUseElement. The mode how external resources
+        are handled is similar to the processing of internal ones. We build the instance
+        and shadow tree the same way but we have to keep in mind that the requested resources
+        maybe not loaded yet. We can check it with cachedDocumentIsStillLoading() function.
+
+        SVGURIReference::targetElementFromIRIString() also need to be extended. The baseURI
+        computation needs to take the referenced documents URL into account, instead of the current documents.
+
+        The patch affects a lot of tests which have external resources especially in svg/batik. Because
+        of the size of that test refactor they will be commited in a follow-up patch.
+
+        Tests: svg/W3C-SVG-1.2-Tiny/struct-use-recursion-01-t.svg
+               svg/W3C-SVG-1.2-Tiny/struct-use-recursion-02-t.svg
+               svg/W3C-SVG-1.2-Tiny/struct-use-recursion-03-t.svg
+               svg/custom/use-extern-href.svg
+               svg/custom/use-referencing-an-image-expected.svg
+               svg/custom/use-referencing-an-image.svg
+               svg/custom/use-referencing-indirectly-itself-expected.svg
+               svg/custom/use-referencing-indirectly-itself.svg
+               svg/custom/use-referencing-itself-expected.svg
+               svg/custom/use-referencing-itself.svg
+               svg/dynamic-updates/SVGUseElement-dom-href1-attr.html
+               svg/dynamic-updates/SVGUseElement-dom-href2-attr.html
+               svg/dynamic-updates/SVGUseElement-svgdom-href1-prop.html
+               svg/dynamic-updates/SVGUseElement-svgdom-href2-prop.html
+
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore):
+        (WebCore::CachedResourceLoader::requestSVGDocument):
+        * loader/cache/CachedResourceLoader.h:
+        (WebCore):
+        (CachedResourceLoader):
+        * page/ContentSecurityPolicy.h:
+        * platform/KURL.cpp:
+        (WebCore::equalIgnoringFragmentIdentifier):
+        * platform/network/chromium/ResourceRequest.h:
+        * svg/SVGURIReference.cpp:
+        (WebCore::urlFromIRIStringWithFragmentIdentifier):
+        (WebCore):
+        (WebCore::SVGURIReference::targetElementFromIRIString):
+        * svg/SVGURIReference.h:
+        (SVGURIReference):
+        (WebCore::SVGURIReference::isExternalURIReference):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::SVGUseElement):
+        (WebCore::SVGUseElement::~SVGUseElement):
+        (WebCore):
+        (WebCore::SVGUseElement::referencedDocument):
+        (WebCore::SVGUseElement::externalDocument):
+        (WebCore::SVGUseElement::svgAttributeChanged):
+        (WebCore::dumpInstanceTree):
+        (WebCore::SVGUseElement::buildPendingResource):
+        (WebCore::SVGUseElement::buildShadowAndInstanceTree):
+        (WebCore::SVGUseElement::hasCycleUseReferencing):
+        (WebCore::SVGUseElement::expandUseElementsInShadowTree):
+        (WebCore::SVGUseElement::expandSymbolElementsInShadowTree):
+        (WebCore::SVGUseElement::notifyFinished):
+        (WebCore::SVGUseElement::cachedDocumentIsStillLoading):
+        (WebCore::SVGUseElement::instanceTreeIsLoading):
+        * svg/SVGUseElement.h:
+        (WebCore):
+        (SVGUseElement):
+
 2012-03-14  Peter Rybin  <peter.rybin@gmail.com>
 
         Web Inspector: TypeBuilder: Introduce OptOutput class for optional output parameters
