@@ -1,5 +1,29 @@
 2012-03-13  Yosifumi Inoue  <yosin@chromium.org>
 
+        [Forms] Hidden input element should not have labels. 
+        https://bugs.webkit.org/show_bug.cgi?id=80403
+
+        Reviewed by Kent Tamura.
+
+        This patch changes "labels" attribute behavior for hidden input type.
+        It returns null instead of NodeList of labels or empty node list.
+
+        Note: The HTML5 specification isn't clear for non-labelable element's "labels"
+        attribute return value. Firefox and Opera return empty node list. IE returns null.
+
+        No new tests. Existing tests are updated.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::isLabelable): Added. Dispatch to InputType.
+        * html/HiddenInputType.h:  Added isLabelable returning false.
+        * html/InputType.cpp:
+        (WebCore::InputType::isLabelable): Added. Returning true for all input types except for "hidden" type.
+        (WebCore):
+        * html/InputType.h:
+        (InputType): Added isLabelable declaration.
+
+2012-03-13  Yosifumi Inoue  <yosin@chromium.org>
+
         [Forms] The "output" element should have labels.
         https://bugs.webkit.org/show_bug.cgi?id=80466
 
