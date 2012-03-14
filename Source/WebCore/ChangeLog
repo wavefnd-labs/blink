@@ -1,3 +1,26 @@
+2012-03-14  Stephen White  <senorblanco@chromium.org>
+
+        [chromium] Fix accelerated Canvas2D with threaded compositing.
+        https://bugs.webkit.org/show_bug.cgi?id=80998
+
+        Reviewed by James Robinson.
+
+        Covered by unit tests Canvas2DLayerChromiumTest and
+        TreeSynchronizerTest.
+
+        * platform/graphics/chromium/Canvas2DLayerChromium.cpp:
+        (WebCore::Canvas2DLayerChromium::paintContentsIfDirty):
+        (WebCore):
+        Delay creation of the front texture for double-buffering until the
+        first call to paintContentsIfDirty().
+        * platform/graphics/chromium/Canvas2DLayerChromium.h:
+        (Canvas2DLayerChromium):
+        Remove setTextureManager() and setLayerTreeHost(), since their job
+        has been subsumed by paintContentsIfDirty().
+        * platform/graphics/chromium/TreeSynchronizer.cpp:
+        (WebCore::TreeSynchronizer::updateScrollbarLayerPointersRecursive):
+        Perform an early-out if the passed-in layer is NULL.
+
 2012-03-14  Mark Pilgrim  <pilgrim@chromium.org>
 
         Move EntriesCallback to Modules/filesystem/
