@@ -1,3 +1,137 @@
+2012-03-13  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Enable animVal support for SVGLengthList
+        https://bugs.webkit.org/show_bug.cgi?id=80750
+
+        Reviewed by Zoltan Herczeg.
+
+        Introduce animVal support for generic SVGList types. This aligns SVGListProperty with SVGProperty
+        in terms of animVal/baseVal support. Use this to turn on animVal support for SVGLengthList.
+
+        Extend all existing SVGLengthList tests to correctly differentiate between baseVal/animVal.
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        * svg/SVGAnimateTransformElement.cpp:
+        (WebCore::SVGAnimateTransformElement::resetToBaseValue):
+        (WebCore::SVGAnimateTransformElement::calculateAnimatedValue):
+        (WebCore::SVGAnimateTransformElement::applyResultsToTarget):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::constructFromCopy):
+        (WebCore):
+        * svg/SVGAnimatedLengthList.h:
+        (WebCore):
+        (SVGAnimatedLengthListAnimator):
+        * svg/SVGAnimatedType.cpp:
+        (WebCore::SVGAnimatedType::supportsAnimVal):
+        (WebCore::SVGAnimatedType::setVariantValue):
+        * svg/SVGAnimatedType.h:
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::applyAnimatedValue):
+        * svg/properties/SVGAnimatedListPropertyTearOff.h:
+        (SVGAnimatedListPropertyTearOff):
+        (WebCore::SVGAnimatedListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedListPropertyTearOff::animVal):
+        (WebCore::SVGAnimatedListPropertyTearOff::removeItemFromList):
+        (WebCore::SVGAnimatedListPropertyTearOff::detachListWrappers):
+        (WebCore::SVGAnimatedListPropertyTearOff::currentAnimatedValue):
+        (WebCore::SVGAnimatedListPropertyTearOff::currentBaseValue):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedListPropertyTearOff::synchronizeWrappersIfNeeded):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationValueWillChange):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationValueDidChange):
+        * svg/properties/SVGAnimatedPathSegListPropertyTearOff.h:
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::animVal):
+        * svg/properties/SVGAnimatedProperty.h:
+        (WebCore::SVGAnimatedProperty::isAnimating):
+        (SVGAnimatedProperty):
+        (WebCore::SVGAnimatedProperty::animationValueWillChange):
+        (WebCore::SVGAnimatedProperty::animationValueDidChange):
+        (WebCore::SVGAnimatedProperty::~SVGAnimatedProperty):
+        (WebCore::SVGAnimatedProperty::SVGAnimatedProperty):
+        * svg/properties/SVGAnimatedPropertyTearOff.h:
+        (SVGAnimatedPropertyTearOff):
+        (WebCore::SVGAnimatedPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedPropertyTearOff::animVal):
+        (WebCore::SVGAnimatedPropertyTearOff::currentAnimatedValue):
+        (WebCore::SVGAnimatedPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedPropertyTearOff::animationValueWillChange):
+        (WebCore::SVGAnimatedPropertyTearOff::animationValueDidChange):
+        (WebCore::SVGAnimatedPropertyTearOff::SVGAnimatedPropertyTearOff):
+        * svg/properties/SVGAnimatedTransformListPropertyTearOff.h:
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::animVal):
+        * svg/properties/SVGListProperty.h:
+        (WebCore::SVGListProperty::detachListWrappers):
+        (SVGListProperty):
+        (WebCore::SVGListProperty::setValuesAndWrappers):
+        (WebCore::SVGListProperty::clearValues):
+        (WebCore::SVGListProperty::clearValuesAndWrappers):
+        (WebCore::SVGListProperty::numberOfItems):
+        (WebCore::SVGListProperty::initializeValues):
+        (WebCore::SVGListProperty::initializeValuesAndWrappers):
+        (WebCore::SVGListProperty::canGetItem):
+        (WebCore::SVGListProperty::getItemValues):
+        (WebCore::SVGListProperty::getItemValuesAndWrappers):
+        (WebCore::SVGListProperty::insertItemBeforeValues):
+        (WebCore::SVGListProperty::insertItemBeforeValuesAndWrappers):
+        (WebCore::SVGListProperty::canReplaceItem):
+        (WebCore::SVGListProperty::replaceItemValues):
+        (WebCore::SVGListProperty::replaceItemValuesAndWrappers):
+        (WebCore::SVGListProperty::canRemoveItem):
+        (WebCore::SVGListProperty::removeItemValues):
+        (WebCore::SVGListProperty::removeItemValuesAndWrappers):
+        (WebCore::SVGListProperty::appendItemValues):
+        (WebCore::SVGListProperty::appendItemValuesAndWrappers):
+        (WebCore::SVGListProperty::values):
+        (WebCore::SVGListProperty::wrappers):
+        (WebCore::SVGListProperty::SVGListProperty):
+        * svg/properties/SVGListPropertyTearOff.h:
+        (SVGListPropertyTearOff):
+        (WebCore::SVGListPropertyTearOff::create):
+        (WebCore::SVGListPropertyTearOff::removeItemFromList):
+        (WebCore::SVGListPropertyTearOff::clear):
+        (WebCore::SVGListPropertyTearOff::initialize):
+        (WebCore::SVGListPropertyTearOff::insertItemBefore):
+        (WebCore::SVGListPropertyTearOff::replaceItem):
+        (WebCore::SVGListPropertyTearOff::appendItem):
+        (WebCore::SVGListPropertyTearOff::SVGListPropertyTearOff):
+        (WebCore::SVGListPropertyTearOff::commitChange):
+        * svg/properties/SVGPathSegListPropertyTearOff.cpp:
+        (WebCore::SVGPathSegListPropertyTearOff::clear):
+        (WebCore::SVGPathSegListPropertyTearOff::getItem):
+        (WebCore::SVGPathSegListPropertyTearOff::removeItem):
+        * svg/properties/SVGPathSegListPropertyTearOff.h:
+        (WebCore::SVGPathSegListPropertyTearOff::create):
+        (WebCore::SVGPathSegListPropertyTearOff::removeItemFromList):
+        (SVGPathSegListPropertyTearOff):
+        (WebCore::SVGPathSegListPropertyTearOff::initialize):
+        (WebCore::SVGPathSegListPropertyTearOff::insertItemBefore):
+        (WebCore::SVGPathSegListPropertyTearOff::replaceItem):
+        (WebCore::SVGPathSegListPropertyTearOff::appendItem):
+        (WebCore::SVGPathSegListPropertyTearOff::SVGPathSegListPropertyTearOff):
+        (WebCore::SVGPathSegListPropertyTearOff::commitChange):
+        * svg/properties/SVGPropertyInfo.h:
+        * svg/properties/SVGStaticListPropertyTearOff.h:
+        (SVGStaticListPropertyTearOff):
+        (WebCore::SVGStaticListPropertyTearOff::clear):
+        (WebCore::SVGStaticListPropertyTearOff::initialize):
+        (WebCore::SVGStaticListPropertyTearOff::getItem):
+        (WebCore::SVGStaticListPropertyTearOff::insertItemBefore):
+        (WebCore::SVGStaticListPropertyTearOff::replaceItem):
+        (WebCore::SVGStaticListPropertyTearOff::removeItem):
+        (WebCore::SVGStaticListPropertyTearOff::appendItem):
+        (WebCore::SVGStaticListPropertyTearOff::SVGStaticListPropertyTearOff):
+        (WebCore::SVGStaticListPropertyTearOff::commitChange):
+        * svg/properties/SVGTransformListPropertyTearOff.h:
+        (WebCore::SVGTransformListPropertyTearOff::create):
+        (WebCore::SVGTransformListPropertyTearOff::createSVGTransformFromMatrix):
+        (WebCore::SVGTransformListPropertyTearOff::consolidate):
+        (WebCore::SVGTransformListPropertyTearOff::SVGTransformListPropertyTearOff):
+
 2012-03-14  Chris Fleizach  <cfleizach@apple.com>
 
         AXDescription for HTML5 footer
