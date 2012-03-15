@@ -1,3 +1,60 @@
+2012-03-12  Ryosuke Niwa  <rniwa@webkit.org>
+
+        (register|unregister)DynamicSubtreeNodeList should be called only for labels and regions node lists
+        https://bugs.webkit.org/show_bug.cgi?id=80900
+
+        Reviewed by Antti Koivisto.
+
+        Cleaned up invalidation code for dynamic node lists. It seems like the existing code was utterly confused
+        about the lifetime of node lists and caches within them. First, register/unregsiterDynamicSubtreeNodeList
+        are called for all dynamic node lists even though it's only useful for labels and region node lists since
+        it's a mechanism to allow node lists to be invalidated at a node to which the node list doesn't belong.
+
+        Second, some node lists had dedicated member functions on Node to explicitly invalidate caches in
+        parsedAttribute. However, this is redundant because invalidateNodeListsCacheAfterAttributeChanged should be
+        able to invalidate caches when the attribute value changes. This patch gets rid of the last instance of such
+        function in HTMLLabelElement.
+
+        And finally, this patch restricts the callers of DynamicSubtreeNodeList::invalidateCache to be member
+        functions of NodeListsNodeData (now friends of DynamicSubtreeNodeList) to allow futher refactoring.
+
+        * dom/DynamicNodeList.cpp:
+        (WebCore::DynamicSubtreeNodeList::DynamicSubtreeNodeList): Don't register the node list since it's only
+        useful for labels and region node lists.
+        (WebCore::DynamicSubtreeNodeList::~DynamicSubtreeNodeList): Ditto.
+        * dom/DynamicNodeList.h:
+        (DynamicSubtreeNodeList):
+        * dom/Node.cpp:
+        (WebCore):
+        (WebCore::Node::registerDynamicSubtreeNodeList): The comment about now we have to invalidate caches
+        when there had no caches is incorrect because registerDynamicSubtreeNodeList is called when a node list
+        is initially created. Also, if the tree scope didn't have any caches, then this is the first node list
+        to be added to the list, so there's no point in calling InvalidateCaches (no-op).
+        (WebCore::Node::unregisterDynamicSubtreeNodeList):
+        (WebCore::Node::invalidateNodeListsCacheAfterAttributeChanged): Take care of "for" content attribute.
+        Also remove the redundant call to removeNodeListCacheIfPossible since we only invalidates node lists
+        and never remove entries from NodeListsNodeData in this function.
+        (WebCore::Node::invalidateNodeListsCacheAfterChildrenChanged): The call to removeNodeListCacheIfPossible
+        is also redundant here. Also removed the invalidation of m_listsWithCaches since it's already done in
+        invalidateCaches via invalidateCachesThatDependOnAttributes.
+        (WebCore::NodeListsNodeData::invalidateCaches): Removed the invalidation of m_labelsNodeListCache. It's
+        done in invalidateCachesThatDependOnAttributes.
+        (WebCore::NodeListsNodeData::invalidateCachesThatDependOnAttributes): Invalidate
+        m_listsInvalidatedAtDocument, which is renamed from m_listsWithCaches.
+        (WebCore::NodeListsNodeData::isEmpty):
+        * dom/Node.h:
+        (Node):
+        * dom/NodeRareData.h:
+        (NodeListsNodeData):
+        * html/HTMLLabelElement.cpp:
+        (WebCore): Removed parseAttribute since the invalidation labels node list is now done by
+        invalidateNodeListsCacheAfterAttributeChanged and invalidateNodeListsCacheAfterChildrenChanged.
+        * html/HTMLLabelElement.h:
+        (HTMLLabelElement):
+        * html/LabelsNodeList.cpp:
+        (WebCore::LabelsNodeList::LabelsNodeList):
+        (WebCore::LabelsNodeList::~LabelsNodeList):
+
 2012-03-14  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r110565.
