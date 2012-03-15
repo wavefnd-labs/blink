@@ -1,3 +1,96 @@
+2012-03-15  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Enable animVal support for SVGTransformList
+        https://bugs.webkit.org/show_bug.cgi?id=80758
+
+        Reviewed by Antti Koivisto.
+
+        Enable animVal support for SVGTransformList. SVGTransformLists are only animatable
+        via <animateTransform>, not via <animate> directly. Still we can handle it in the
+        same framework as all other types used for <animate>, as we also need proper animVal
+        support for <animateTransform>.
+
+        This patch removes the special <animateTransform> implementation, and lets
+        SVGAnimateTransformElement inherit from SVGAnimateElement, just like its done
+        for SVGAnimateColorElement & SVGSetElement.
+
+        All existing code (calculateFromAndToValues/FromAndByValues/etc..) are moved from
+        SVGAnimateTransform right into the SVGAnimatedTransformListAnimator.
+
+        This doesn't change <animateTransform> behavior, it just simplies the code
+        and enables animVal support for SVGTransformLists - all covered by existing tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * svg/SVGAllInOne.cpp:
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::SVGAnimateElement):
+        (WebCore::SVGAnimateElement::determineAnimatedPropertyType):
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        (WebCore::SVGAnimateElement::applyResultsToTarget):
+        * svg/SVGAnimateTransformElement.cpp:
+        (WebCore::SVGAnimateTransformElement::SVGAnimateTransformElement):
+        (WebCore::SVGAnimateTransformElement::hasValidAttributeType):
+        (WebCore::SVGAnimateTransformElement::parseAttribute):
+        * svg/SVGAnimateTransformElement.h:
+        (WebCore::SVGAnimateTransformElement::transformType):
+        (SVGAnimateTransformElement):
+        * svg/SVGAnimatedTransformList.cpp: Added.
+        (WebCore):
+        (WebCore::SVGAnimatedTransformListAnimator::SVGAnimatedTransformListAnimator):
+        (WebCore::SVGAnimatedTransformListAnimator::constructFromString):
+        (WebCore::SVGAnimatedTransformListAnimator::constructFromCopy):
+        (WebCore::SVGAnimatedTransformListAnimator::calculateFromAndToValues):
+        (WebCore::SVGAnimatedTransformListAnimator::calculateFromAndByValues):
+        (WebCore::SVGAnimatedTransformListAnimator::calculateAnimatedValue):
+        (WebCore::SVGAnimatedTransformListAnimator::calculateDistance):
+        * svg/SVGAnimatedTransformList.h:
+        (WebCore):
+        (SVGAnimatedTransformListAnimator):
+        (WebCore::SVGAnimatedTransformListAnimator::~SVGAnimatedTransformListAnimator):
+        * svg/SVGAnimatedType.cpp:
+        (WebCore::SVGAnimatedType::~SVGAnimatedType):
+        (WebCore::SVGAnimatedType::createTransformList):
+        (WebCore):
+        (WebCore::SVGAnimatedType::transformList):
+        (WebCore::SVGAnimatedType::valueAsString):
+        (WebCore::SVGAnimatedType::setValueAsString):
+        (WebCore::SVGAnimatedType::supportsAnimVal):
+        (WebCore::SVGAnimatedType::setVariantValue):
+        * svg/SVGAnimatedType.h:
+        (WebCore):
+        (SVGAnimatedType):
+        * svg/SVGAnimatorFactory.h:
+        (WebCore::SVGAnimatorFactory::create):
+        * svg/SVGGradientElement.cpp:
+        (WebCore::SVGGradientElement::parseAttribute):
+        * svg/SVGPatternElement.cpp:
+        (WebCore::SVGPatternElement::parseAttribute):
+        * svg/SVGStyledTransformableElement.cpp:
+        (WebCore::SVGStyledTransformableElement::parseAttribute):
+        * svg/SVGTextElement.cpp:
+        (WebCore::SVGTextElement::parseAttribute):
+        * svg/SVGTransform.cpp:
+        (WebCore::SVGTransform::transformTypePrefixForParsing):
+        (WebCore):
+        (WebCore::SVGTransform::valueAsString):
+        * svg/SVGTransform.h:
+        (SVGTransform):
+        * svg/SVGTransformList.cpp:
+        (WebCore::SVGTransformList::parse):
+        (WebCore):
+        * svg/SVGTransformList.h:
+        (SVGTransformList):
+        * svg/SVGTransformable.cpp:
+        (WebCore::SVGTransformable::parseTransformType):
+        * svg/SVGTransformable.h:
+        (WebCore):
+        * svg/SVGViewSpec.cpp:
+        (WebCore::SVGViewSpec::setTransform):
+
 2012-03-13  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Enable animVal support for SVGLengthList
