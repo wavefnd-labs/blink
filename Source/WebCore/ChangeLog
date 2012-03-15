@@ -1,3 +1,32 @@
+2012-03-14  Chris Fleizach  <cfleizach@apple.com>
+
+        AX: embedded attachments do not report their parents correctly
+        https://bugs.webkit.org/show_bug.cgi?id=80132
+
+        When a WebHTMLView has embedded attachments in it, the AXParent of those attachments is wrong.
+        It usually points to the AXScrollView of the web area. That's because there has been no way for WebCore to
+        communicate that this attachment view should actually make believe that it's parent is within the WebCore AX tree.
+
+        We can fix that by overriding the AXParent in overriden attributes for items that are attachments.
+
+        Reviewed by Beth Dakin.
+
+        Not able to construct a layout test because the problem only manifests itself when an AX client connects to WebKit
+        through the IPC mechanism.
+
+        * accessibility/AccessibilityObject.cpp:
+        (WebCore::AccessibilityObject::detachFromParent):
+        * accessibility/AccessibilityObject.h:
+        (AccessibilityObject):
+        (WebCore::AccessibilityObject::overrideAttachmentParent):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::updateAttachmentViewParents):
+        (WebCore::AccessibilityRenderObject::addChildren):
+        * accessibility/AccessibilityRenderObject.h:
+        (AccessibilityRenderObject):
+        * accessibility/mac/AccessibilityObjectMac.mm:
+        (WebCore::AccessibilityObject::overrideAttachmentParent):
+
 2012-03-14  Ryosuke Niwa  <rniwa@webkit.org>
 
         Improve ContainerNode's collectNodes() performance
