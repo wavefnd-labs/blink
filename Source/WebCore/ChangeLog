@@ -1,3 +1,38 @@
+2012-03-16  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] The "progress" element should not be a form-associated element.
+        https://bugs.webkit.org/show_bug.cgi?id=80240
+
+        Reviewed by Kent Tamura.
+
+        This patch changes base class of HTMLProgressElement to LabelableElement from
+        HTMLFormControlElement for saving memory space and iteration time of
+        extra "progress" elements in HTMLFormElement::m_formAssociatedElements
+        and matching the HTML5 specification for ease of maintenance.
+
+        Changes of TextIterator is lead by usage of isFormControlElement. This
+        changes will be replaced with more meaningful predicate as part of
+        https://bugs.webkit.org/show_bug.cgi?id=80381
+
+        No new tests. Update existing tests to cover this change.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::canShareStyleWithElement): Moved the "progress" element support code from canShareStyleWithControl.
+        (WebCore::CSSStyleSelector::canShareStyleWithControl):
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOneSelector): Remove isFormControlElement check for PseudoIndeterminate.
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::advance): Check HTMLProgressElement in addition to isFormControlElement. This change is for text dump in LayoutTests implemented by document.innerText attribute.
+        * html/HTMLProgressElement.cpp: Remove unused include file.
+        (WebCore::HTMLProgressElement::HTMLProgressElement): Changed base class to LabelableElement.
+        (WebCore::HTMLProgressElement::create): Remove form paraprogress.
+        (WebCore::HTMLProgressElement::parseAttribute): Replace HTMLFormControlElement to LabelableElement.
+        (WebCore::HTMLProgressElement::attach): Replace HTMLFormControlElement to LabelableElement.
+        * html/HTMLProgressElement.h:
+        (HTMLProgressElement):
+        * html/HTMLProgressElement.idl: Remove the "form" attribute which isn't listed in the HTML5 specification.
+        * html/HTMLTagNames.in: Remove "constructorNeedsFormElement" for not passing "form" parameter in HTMLElementFactory.
+
 2012-03-16  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: Heap Snapshot: Unreviewed single line fix for isWindow getter.
