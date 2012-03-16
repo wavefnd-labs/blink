@@ -1,3 +1,127 @@
+2012-03-15  David Grogan  <dgrogan@chromium.org>
+
+        IndexedDB Tests: use self instead of window
+        https://bugs.webkit.org/show_bug.cgi?id=81043
+
+        'window' is meaningless in a worker; these tests will soon be run from
+        a worker context.
+
+        Reviewed by Tony Chang.
+
+        * storage/indexeddb/create-and-remove-object-store.html:
+        * storage/indexeddb/createObjectStore-name-argument-required.html:
+        * storage/indexeddb/createObjectStore-null-name.html:
+        * storage/indexeddb/cursor-continue.html:
+        * storage/indexeddb/cursor-delete.html:
+        * storage/indexeddb/cursor-inconsistency.html:
+        * storage/indexeddb/cursor-index-delete.html:
+        * storage/indexeddb/cursor-key-order.html:
+        * storage/indexeddb/cursor-primary-key-order.html:
+        * storage/indexeddb/cursor-skip-deleted.html:
+        * storage/indexeddb/cursor-update-value-argument-required.html:
+        * storage/indexeddb/cursor-update.html:
+        * storage/indexeddb/data-corruption.html:
+        * storage/indexeddb/database-basics.html:
+        * storage/indexeddb/database-quota.html:
+        * storage/indexeddb/delete-closed-database-object-expected.txt:
+        * storage/indexeddb/delete-closed-database-object.html:
+        * storage/indexeddb/deleteObjectStore-name-argument-required.html:
+        * storage/indexeddb/deleteObjectStore-null-name.html:
+        * storage/indexeddb/duplicates.html:
+        * storage/indexeddb/error-causes-abort-by-default.html:
+        * storage/indexeddb/exception-in-event-aborts.html:
+        * storage/indexeddb/factory-cmp-expected.txt:
+        * storage/indexeddb/factory-cmp.html:
+        * storage/indexeddb/factory-deletedatabase-interactions-expected.txt:
+        * storage/indexeddb/factory-deletedatabase-interactions.html:
+        * storage/indexeddb/factory-deletedatabase.html:
+        * storage/indexeddb/index-count.html:
+        * storage/indexeddb/index-cursor.html:
+        * storage/indexeddb/index-get-key-argument-required.html:
+        * storage/indexeddb/index-population.html:
+        * storage/indexeddb/index-unique.html:
+        * storage/indexeddb/invalid-keys-expected.txt:
+        * storage/indexeddb/invalid-keys.html:
+        * storage/indexeddb/key-generator.html:
+        * storage/indexeddb/key-sort-order-across-types.html:
+        * storage/indexeddb/key-sort-order-date.html:
+        * storage/indexeddb/key-type-array-expected.txt:
+        * storage/indexeddb/key-type-array.html:
+        * storage/indexeddb/key-type-infinity.html:
+        * storage/indexeddb/keypath-basics.html:
+        * storage/indexeddb/keypath-fetch-key.html:
+        * storage/indexeddb/mozilla/add-twice-failure.html:
+        * storage/indexeddb/mozilla/autoincrement-indexes.html:
+        * storage/indexeddb/mozilla/bad-keypath.html:
+        * storage/indexeddb/mozilla/clear.html:
+        * storage/indexeddb/mozilla/create-index-unique.html:
+        * storage/indexeddb/mozilla/create-index-with-integer-keys.html:
+        * storage/indexeddb/mozilla/create-objectstore-basics.html:
+        * storage/indexeddb/mozilla/create-objectstore-null-name.html:
+        * storage/indexeddb/mozilla/cursor-mutation-objectstore-only.html:
+        * storage/indexeddb/mozilla/cursor-update-updates-indexes.html:
+        * storage/indexeddb/mozilla/cursors.html:
+        * storage/indexeddb/mozilla/delete-result.html:
+        * storage/indexeddb/mozilla/event-source.html:
+        * storage/indexeddb/mozilla/global-data.html:
+        * storage/indexeddb/mozilla/indexes.html:
+        * storage/indexeddb/mozilla/key-requirements-delete-null-key.html:
+        * storage/indexeddb/mozilla/key-requirements-inline-and-passed.html:
+        * storage/indexeddb/mozilla/key-requirements-put-no-key.html:
+        * storage/indexeddb/mozilla/key-requirements-put-null-key.html:
+        * storage/indexeddb/mozilla/key-requirements.html:
+        * storage/indexeddb/mozilla/object-cursors.html:
+        * storage/indexeddb/mozilla/object-identity.html:
+        * storage/indexeddb/mozilla/object-store-inline-autoincrement-key-added-on-put.html:
+        * storage/indexeddb/mozilla/object-store-remove-values.html:
+        * storage/indexeddb/mozilla/objectstorenames.html:
+        * storage/indexeddb/mozilla/odd-result-order.html:
+        * storage/indexeddb/mozilla/put-get-values.html:
+        * storage/indexeddb/mozilla/readonly-transactions.html:
+        * storage/indexeddb/mozilla/readwrite-transactions.html:
+        * storage/indexeddb/mozilla/readyState.html:
+        * storage/indexeddb/mozilla/remove-index.html:
+        * storage/indexeddb/mozilla/remove-objectstore.html:
+        * storage/indexeddb/mozilla/versionchange-abort.html:
+        * storage/indexeddb/mozilla/versionchange.html:
+        * storage/indexeddb/mutating-cursor.html:
+        * storage/indexeddb/objectStore-required-arguments.html:
+        * storage/indexeddb/objectstore-autoincrement.html:
+        * storage/indexeddb/objectstore-clear.html:
+        * storage/indexeddb/objectstore-count.html:
+        * storage/indexeddb/objectstore-cursor.html:
+        * storage/indexeddb/objectstore-removeobjectstore.html:
+        * storage/indexeddb/open-close-version-expected.txt:
+        * storage/indexeddb/open-close-version.html:
+        * storage/indexeddb/open-cursor.html:
+        * storage/indexeddb/prefetch-bugfix-108071.html:
+        * storage/indexeddb/queued-commands.html:
+        * storage/indexeddb/request-event-propagation.html:
+        * storage/indexeddb/setVersion-null.html:
+        * storage/indexeddb/setVersion-undefined.html:
+        * storage/indexeddb/structured-clone-expected.txt:
+        * storage/indexeddb/structured-clone.html:
+        * storage/indexeddb/transaction-abort.html:
+        * storage/indexeddb/transaction-after-close.html:
+        * storage/indexeddb/transaction-and-objectstore-calls.html:
+        * storage/indexeddb/transaction-basics-expected.txt:
+        * storage/indexeddb/transaction-basics.html:
+        * storage/indexeddb/transaction-crash-on-abort-expected.txt:
+        * storage/indexeddb/transaction-crash-on-abort.html:
+        * storage/indexeddb/transaction-event-propagation.html:
+        * storage/indexeddb/transaction-read-only.html:
+        * storage/indexeddb/transaction-rollback.html:
+        * storage/indexeddb/transaction-storeNames-required.html:
+        * storage/indexeddb/two-version-changes-expected.txt:
+        * storage/indexeddb/two-version-changes.html:
+        * storage/indexeddb/value-undefined.html:
+        * storage/indexeddb/values-odd-types.html:
+        * storage/indexeddb/version-change-abort.html:
+        * storage/indexeddb/version-change-exclusive-expected.txt:
+        * storage/indexeddb/version-change-exclusive.html:
+        * storage/indexeddb/versionchangerequest-activedomobject-expected.txt:
+        * storage/indexeddb/versionchangerequest-activedomobject.html:
+
 2012-03-15  Tim Horton  <timothy_horton@apple.com>
 
         Unreviewed mac rebaseline for fast/clip/{011,012}.html after http://trac.webkit.org/changeset/110072
