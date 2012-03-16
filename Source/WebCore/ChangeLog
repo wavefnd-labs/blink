@@ -1,3 +1,78 @@
+2012-03-16  Adam Klein  <adamk@chromium.org>
+
+        Out-of-document radio buttons should be grouped when associated with a form
+        https://bugs.webkit.org/show_bug.cgi?id=81268
+
+        Reviewed by Kent Tamura.
+
+        Per the HTML spec, and the behavior of Firefox and IE 8/9, radio buttons
+        with a form owner should be grouped, even if that form is not in the document.
+
+        r104668 added many inDocument() tests to radio button grouping code.
+        While those are necessary to avoid unattached <input type=radio>
+        elements being grouped together, it also kept them from being grouped
+        when associated with a form outside the document.
+
+        This patch changes the HTMLInputElement::checkedRadioButtons() method
+        to return either a pointer to the proper CheckedRadioButtons instance
+        (either the document's or a form's), but will return null if the
+        element should not be associated with any radio button group.
+
+        The main fallout of this was that the callers of checkedRadioButtons()
+        now have to check for null, resulting in the creation of a few helper
+        methods in HTMLInputElement to wrap the null checks.
+
+        This refactoring has the pleasant side-effect of exposing a cleaner API between
+        HTMLInputElement and RadioInputType, and making a clearer contract
+        between HTMLInputElement and CheckedRadioButtons (e.g., all
+        CheckedRadioButtons methods that take an element can now assume that
+        it is a radio button, where previously some checked for that and
+        others asserted it).
+
+        Test: fast/forms/radio/radio-group-in-detached-form.html
+
+        * dom/CheckedRadioButtons.cpp:
+        (WebCore): Removed shouldMakeRadioGroup() helper function.
+        (WebCore::CheckedRadioButtons::addButton): Replace call to shouldMakeRadioGroup
+        with appropriate assert and name check.
+        (WebCore::CheckedRadioButtons::updateCheckedState): ditto.
+        (WebCore::CheckedRadioButtons::requiredAttributeChanged): ditto.
+        (WebCore::CheckedRadioButtons::isRequiredGroup): Renamed from isInRequiredGroup,
+        changed to take only a group name, not an element.
+        (WebCore::CheckedRadioButtons::removeButton): Replace call to shouldMakeRadioGroup.
+        with appropriate assert and name check.
+        * dom/CheckedRadioButtons.h:
+        (CheckedRadioButtons):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::~HTMLInputElement): Added isRadioButton check
+        now that it's asserted in CheckedRadioButtons.
+        (WebCore::HTMLInputElement::updateType): Call helper method instead of
+        calling directly into CheckedRadioButtons.
+        (WebCore::HTMLInputElement::parseAttribute): ditto.
+        (WebCore::HTMLInputElement::setChecked): ditto.
+        (WebCore::HTMLInputElement::willChangeForm): ditto.
+        (WebCore::HTMLInputElement::didChangeForm): ditto.
+        (WebCore::HTMLInputElement::insertedIntoDocument): ditto.
+        (WebCore::HTMLInputElement::removedFromDocument): ditto.
+        (WebCore::HTMLInputElement::didMoveToNewDocument): Added isRadioButton check.
+        (WebCore::HTMLInputElement::requiredAttributeChanged): Check for membership in a group
+        before calling into CheckedRadioButtons.
+        (WebCore::HTMLInputElement::isInRequiredRadioButtonGroup): Added helper method for use by RadioInputType.
+        (WebCore):
+        (WebCore::HTMLInputElement::checkedRadioButtonForGroup): ditto.
+        (WebCore::HTMLInputElement::checkedRadioButtons): Changed to return a
+        pointer, only return non-null if actually a member of a group.
+        (WebCore::HTMLInputElement::addToRadioButtonGroup): Helper method for
+        use in HTMLInputElement.
+        (WebCore::HTMLInputElement::removeFromRadioButtonGroup): ditto.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Added/removed methods, removed outdated comment about visibility.
+        * html/RadioInputType.cpp:
+        (WebCore::RadioInputType::valueMissing): Call new HTMLInputElement methods instead
+        of interacting directly with CheckedRadioButtons.
+        (WebCore::RadioInputType::isKeyboardFocusable): ditto.
+        (WebCore::RadioInputType::willDispatchClick): ditto.
+
 2012-03-16  David Hyatt  <hyatt@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=81366
