@@ -1,3 +1,31 @@
+2012-03-16  Levi Weintraub  <leviw@chromium.org>
+
+        Prepare RenderObject for FractionalLayoutUnits
+        https://bugs.webkit.org/show_bug.cgi?id=81178
+
+        Reviewed by Eric Seidel.
+
+        This readies RenderObject to deal with FractionalLayoutUnits as a backend for the
+        LayoutUnit abstraction.
+
+        No new tests. No change in behavior.
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::pixelSnappedAbsoluteClippedOverflowRect): Convenience method to be
+        used instead of absouluteClippedOverflowRect in platform code. Platform updates will come
+        in a separate patch.
+        (WebCore):
+        (WebCore::RenderObject::repaintAfterLayoutIfNeeded): Borders remain ints when we move to
+        sub-pixel layout. This adjusts border variables for this, and adds compiler fixes when
+        using std::max and std::min with mixed int/LayoutUnits.
+        (WebCore::RenderObject::adjustRectForOutlineAndShadow): Outlines, like borders, remain
+        ints in the new sub-pixel world. Using variables that reflect that.
+        * rendering/RenderObject.h:
+        (RenderObject):
+        (WebCore::adjustForAbsoluteZoom): Handles FractionalLayoutUnit values. Flooring is what
+        JavaScript requires since this is used with values that must return ints.
+        (WebCore): Adding FractionalLayoutUnit.h to support the new adjusteForAbsoluteZoom method.
+
 2012-03-16  Brady Eidson  <beidson@apple.com>
 
         <rdar://problem/11027997> and https://bugs.webkit.org/show_bug.cgi?id=81412
