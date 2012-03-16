@@ -1,3 +1,52 @@
+2012-03-16  Xiaomei Ji  <xji@chromium.org>
+
+        Using ICU break iterator to simplify visual word movement implementation.
+        https://bugs.webkit.org/show_bug.cgi?id=78856
+
+        Reviewed by Ryosuke Niwa.
+
+        This patch relies on ICU word break iterator and cursor visual movement by character to get the word break
+        position in visual order. It reduces the complexity of old implementation.
+
+        Test: editing/selection/move-by-word-visually-wrong-left-right.html
+
+        * editing/FrameSelection.cpp: Exclude WinCE from visual word movement since isWordTextBreak is not implemented.
+        (WebCore::FrameSelection::modifyMovingRight):
+        (WebCore::FrameSelection::modifyMovingLeft):
+        * editing/visible_units.cpp:
+        (WebCore):
+        (WebCore::previousLeafWithSameEditability): Just moving to the top without functionality change.
+        (WebCore::enclosingNodeWithNonInlineRenderer): ditto.
+        (WebCore::nextLeafWithSameEditability): ditto.
+        (WebCore::previousRootInlineBox): return previous RootInlineBox which is in different renderer.
+        (WebCore::nextRootInlineBox): return next RootInlineBox which is in different renderer.
+        (WebCore::boxIndexInVector):
+        (WebCore::previousBoxInLine): returns logically previous box in one line.
+        (WebCore::logicallyPreviousBox): returns logically previous box.
+        (WebCore::nextBoxInLine): returns logically next box in one line.
+        (WebCore::logicallyNextBox): returns logically next box.
+        (WebCore::wordBreakIteratorForMinOffsetBoundary): create word break iterator for position that is a box's min offset.
+        (WebCore::wordBreakIteratorForMaxOffsetBoundary): create word break iterator for position that is a box's max offset.
+        (WebCore::isLogicalStartOfWord): return whether a position is logically start of word.
+        (WebCore::islogicalEndOfWord): return whether a position is logically end of word.
+        (WebCore::visualWordPosition): returns the visual left or right word position.
+        (WebCore::leftWordPosition):
+        (WebCore::rightWordPosition):
+        * platform/text/TextBreakIterator.h: Add isWordTextBreak().
+        (WebCore):
+        * platform/text/TextBreakIteratorICU.cpp:
+        (WebCore::isWordTextBreak):
+        (WebCore):
+        * platform/text/gtk/TextBreakIteratorGtk.cpp:
+        (WebCore::isWordTextBreak):
+        (WebCore):
+        * platform/text/qt/TextBreakIteratorQt.cpp:
+        (WebCore::isWordTextBreak):
+        (WebCore):
+        * platform/text/wince/TextBreakIteratorWinCE.cpp:
+        (WebCore::isWordTextBreak):
+        (WebCore):
+
 2012-03-16  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Don't create a quad for video layers without a frame (avoid use of uninitialized m_format)
