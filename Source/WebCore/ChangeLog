@@ -1,3 +1,67 @@
+2012-03-15  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] The "meter" element should not be a form-associated element.
+        https://bugs.webkit.org/show_bug.cgi?id=80380
+
+        Reviewed by Kent Tamura.
+
+        This patch changes base class of HTMLMeterElement to LabelableElement from
+        HTMLFormControlElement for saving memory space and iteration time of
+        extra "meter" elements in HTMLFormElement::m_formAssociatedElements
+        and matching the HTML5 specification for ease of maintenance.
+
+        This patch renames isLabelable method to supportLabels and makes isLabelable
+        as predicate of an instance of LabelableElement or not.
+
+        Changes of TextIterator is lead by usage of isFormControlElement. This
+        changes will be replaced with more meaningful predicate as part of
+        https://bugs.webkit.org/show_bug.cgi?id=80381
+
+        No new tests. Update existing tests to cover this change.
+
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::advance): Check HTMLMeterElement in addition to isFormControlElement. This change is for text dump in LayoutTests implemented by document.innerText attribute.
+        * html/HTMLButton.h:
+        (WebCore::HTMLButtonElement::supportLabels): Renamed from isLabelable
+        * html/HTMLElement.h:
+        (WebCore::HTMLElement::isLabelable): Added. A predicate for an instance of LabelableElement.
+        * html/HTMLInputElement.h:
+        (WebCore::HTMLInputElement::supportLabels): Renamed from isLabelable
+        * html/HTMLKeygenElement.h:
+        (WebCore::HTMLKeygenElement::supportLabels): Renamed from isLabelable
+         * html/HTMLLabelElement.cpp:
+        (WebCore::nodeAsLabelableElement): Changed to return LabelableElement instead of HTMLFormControlElement.
+        (WebCore::HTMLLabelElement::control): Changed to return LabelableElement instead of HTMLFormControlElement.
+        * html/HTMLLabelElement.h:
+        (HTMLLabelElement):
+        * html/HTMLMeterElement.cpp:
+        (WebCore::HTMLMeterElement::HTMLMeterElement): Changed base class to LabelableElement.
+        (WebCore::HTMLMeterElement::create): Remove form parameter.
+        (WebCore::HTMLMeterElement::formControlType): Remove implementation of virtual method declared in HTMLFormControlElement.
+        (WebCore::HTMLMeterElement::parseAttribute): Replace HTMLFormControlElement to LabelableElement
+        (WebCore::HTMLMeterElement::attach): Replace HTMLFormControlElement to LabelableElement
+        * html/HTMLMeterElement.idl: Remove the "form" attribute which isn't listed in the HTML5 specification.
+        * html/HTMLMeterElement.h:
+        (HTMLMeterElement):
+        (WebCore::HTMLMeterElement::supportLabels): Renamed from isLabelable
+        * html/HTMLOutputElement.h:
+        (WebCore::HTMLOutputElement::supportLabels): Renamed from isLabelable
+        * html/HTMLProgressElement.h:
+        (WebCore::HTMLProgressElement::supportLabels): Renamed from isLabelable
+         * html/HTMLSelectElement.h:
+        (WebCore::HTMLSelectElement::supportLabels): Renamed from isLabelable
+        * html/HTMLTextAreaElement.h:
+        (WebCore::HTMLTextAreaElement::supportLabels): Renamed from isLabelable
+        * html/HiddenInputType.h:
+        (WebCore::HiddenInputType::supportLabels): Renamed from isLabelable
+        * html/InputType.h:
+        (WebCore::InputType::supportLabels): Renamed from isLabelable
+        * html/HTMLTagNames.in: Remove "constructorNeedsFormElement" for not passing "form" parameter in HTMLElementFactory.
+        * html/LabelableElement.cpp:
+        (WebCore::LabelableElement::labels): Replace isLabelable to supportLabels
+        * html/LabelableElement.h:
+        (LabelableElement):
+
 2012-03-15  Adam Klein  <adamk@chromium.org>
 
         REGRESSION(r103452): 100% CPU usage and 5s pause after clicking on a link in Yahoo Mail
