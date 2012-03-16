@@ -1,3 +1,48 @@
+2012-03-15  Shinya Kawanaka  <shinyak@chromium.org>
+
+        [Crash] Adding <content> into a ShadowRoot causes crash.
+        https://bugs.webkit.org/show_bug.cgi?id=80020
+
+        Reviewed by Hajime Morita.
+
+        The problem is <content> tries to select host children though it is not prepared.
+        Since populating host children for insertion points is performed just before
+        attaching a shadow tree, we should recalculate whole shadow tree if <content> is
+        appended as a child.
+
+        However, element->appendChild() does not know the element is in a shadow tree or not.
+        We have to ensure reattaching whole shadow tree here.
+
+        So this patch adds some phases to HTMLContentSelector so that we can check node
+        distribution algorihm is begin processed or not. If not we cannot select anything,
+        but we have to enable a flag to reattach whole shadow tree.
+
+        Tests: fast/dom/shadow/shadow-content-crash-expected.html
+               fast/dom/shadow/shadow-content-crash.html
+
+        * dom/ShadowTree.cpp:
+        (WebCore::ShadowTree::attach):
+        (WebCore::ShadowTree::insertionPointFor):
+        * dom/ShadowTree.h:
+        (WebCore):
+        (ShadowTree):
+        (WebCore::ShadowTree::selector):
+        * html/shadow/HTMLContentSelector.cpp:
+        (WebCore::HTMLContentSelector::HTMLContentSelector):
+        (WebCore::HTMLContentSelector::select):
+        (WebCore::HTMLContentSelector::willSelect):
+        (WebCore):
+        (WebCore::HTMLContentSelector::didSelect):
+        (WebCore::HTMLContentSelector::populateIfNecessary):
+        * html/shadow/HTMLContentSelector.h:
+        (HTMLContentSelector):
+        (WebCore::HTMLContentSelector::isSelecting):
+        (WebCore):
+        (WebCore::HTMLContentSelector::hasPopulated):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::distributeHostChildren):
+        (WebCore::InsertionPoint::clearDistribution):
+
 2012-03-15  Mike Lawther  <mikelawther@chromium.org>
 
         CSS3 calc: mixed percent/absolute expressions for gradients
