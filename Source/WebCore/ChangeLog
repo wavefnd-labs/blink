@@ -1,3 +1,27 @@
+2012-03-16  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Add overdraw metrics for texture uploads
+        https://bugs.webkit.org/show_bug.cgi?id=81175
+
+        Reviewed by Adrienne Walker.
+
+        Record texture upload metrics during paint. To properly record
+        the amount of pixels culled, we must compute the amount of pixels we
+        would have uploaded for a tile. This requires knowing the dirty rect of
+        the tile, but the dirty rect can be changed by WebKit during a paint, so
+        we always store the dirtyRect in the tile's updateRect. We add an
+        m_updateCulled bool to the UpdatableTile structure, to identify tiles
+        that were not updated, and know a tile was updated if updateRect is not
+        empty and updateCulled is false.
+
+        Tested by all TiledLayerChromiumTests that use occlusion tracker.
+
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (UpdatableTile):
+        (WebCore::TiledLayerChromium::prepareToUpdateTiles):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::paintLayerContents):
+
 2012-03-16  Jer Noble  <jer.noble@apple.com>
 
         Allow AudioContext::create() to emit an ExceptionCode.
