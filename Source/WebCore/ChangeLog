@@ -1,3 +1,42 @@
+2012-03-16  David Barton  <dbarton@mathscribe.com>
+
+        MathML internals - factor code for almost anonymous blocks
+        https://bugs.webkit.org/show_bug.cgi?id=81387
+
+        Reviewed by Eric Seidel.
+
+        MathML uses "almost anonymous" blocks to layout parts of mathematical expressions. These
+        will be converted to true anonymous blocks in a later patch. Here we factor out the code
+        to create them into RenderMathMLBlock::createAlmostAnonymousBlock().
+
+        No new tests. Some tree dump output is modified for existing tests. <munder>, <mover>,
+        and <munderover> renderers already used true anonymous blocks, so we change them to call
+        RenderBlock::createAnonymousBlock(). In the other direction, <mroot>'s almost anonymous
+        blocks are now made RenderMathMLBlock not just RenderBlock, in agreement with other
+        current MathML renderers.
+
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::createAlmostAnonymousBlock):
+        * rendering/mathml/RenderMathMLBlock.h:
+        (RenderMathMLBlock):
+        (WebCore::RenderMathMLBlock::getBoxModelObjectWidth):
+        * rendering/mathml/RenderMathMLFenced.cpp:
+        (WebCore::RenderMathMLFenced::addChild):
+        * rendering/mathml/RenderMathMLFraction.cpp:
+        (WebCore::RenderMathMLFraction::updateFromElement):
+            - improve some variable names
+        (WebCore::RenderMathMLFraction::addChild):
+        (WebCore::RenderMathMLFraction::layout):
+        (WebCore::RenderMathMLFraction::paint):
+        (WebCore::RenderMathMLFraction::baselinePosition):
+        * rendering/mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::addChild):
+        * rendering/mathml/RenderMathMLSubSup.cpp:
+        (WebCore::RenderMathMLSubSup::addChild):
+        * rendering/mathml/RenderMathMLSubSup.h:
+        * rendering/mathml/RenderMathMLUnderOver.cpp:
+        (WebCore::RenderMathMLUnderOver::addChild):
+
 2012-03-16  Levi Weintraub  <leviw@chromium.org>
 
         Prepare RenderObject for FractionalLayoutUnits
