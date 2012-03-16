@@ -1,3 +1,103 @@
+2012-03-16  Kihong Kwon  <kihong.kwon@samsung.com>
+
+        Support for Battery Status API
+        https://bugs.webkit.org/show_bug.cgi?id=62698
+
+        Battery Status API is implemented under the Navigator class.
+        Battery Status API has four types of events, and all events are operated based on a callback mechanism.
+         : onchargingchange, onchargingtimechange, ondischargingtimechange, onlevelchange.
+        The battery status can be accessed using BatteryManager(navigator.webkitBattery), and battery status is controlled by BatteryController which manages instances of BatteryManager.
+        When battery status event is raised, BatteryController calls all registered BatteryManager's event dispatcher.
+        http://www.w3.org/TR/battery-status/
+
+        Reviewed by Adam Barth.
+
+        Tests: batterystatus/add-listener-from-callback.html
+               batterystatus/basic-all-types-of-events.html
+               batterystatus/basic-operation.html
+               batterystatus/event-after-navigation.html
+               batterystatus/multiple-frames.html
+               batterystatus/updates.html
+               batterystatus/window-property.html
+
+        * CMakeLists.txt:
+        * Modules/battery/BatteryClient.h: Added.
+        (WebCore):
+        (BatteryClient):
+        (WebCore::BatteryClient::~BatteryClient):
+        * Modules/battery/BatteryController.cpp: Added.
+        (WebCore):
+        (WebCore::BatteryController::BatteryController):
+        (WebCore::BatteryController::~BatteryController):
+        (WebCore::BatteryController::create):
+        (WebCore::BatteryController::addListener):
+        (WebCore::BatteryController::removeListener):
+        (WebCore::BatteryController::didChangeBatteryStatus):
+        (WebCore::BatteryController::supplementName):
+        (WebCore::BatteryController::isActive):
+        (WebCore::provideBatteryTo):
+        * Modules/battery/BatteryController.h: Added.
+        (WebCore):
+        (BatteryController):
+        (WebCore::BatteryController::client):
+        (WebCore::BatteryController::from):
+        * Modules/battery/BatteryManager.cpp: Added.
+        (WebCore):
+        (WebCore::BatteryManager::create):
+        (WebCore::BatteryManager::~BatteryManager):
+        (WebCore::BatteryManager::BatteryManager):
+        (WebCore::BatteryManager::charging):
+        (WebCore::BatteryManager::chargingTime):
+        (WebCore::BatteryManager::dischargingTime):
+        (WebCore::BatteryManager::level):
+        (WebCore::BatteryManager::didChangeBatteryStatus):
+        (WebCore::BatteryManager::suspend):
+        (WebCore::BatteryManager::resume):
+        (WebCore::BatteryManager::stop):
+        * Modules/battery/BatteryManager.h: Added.
+        (WebCore):
+        (BatteryManager):
+        (WebCore::BatteryManager::interfaceName):
+        (WebCore::BatteryManager::scriptExecutionContext):
+        (WebCore::BatteryManager::batteryControllerDestroyed):
+        (WebCore::BatteryManager::canSuspend):
+        (WebCore::BatteryManager::eventTargetData):
+        (WebCore::BatteryManager::ensureEventTargetData):
+        (WebCore::BatteryManager::refEventTarget):
+        (WebCore::BatteryManager::derefEventTarget):
+        * Modules/battery/BatteryManager.idl: Added.
+        * Modules/battery/BatteryStatus.cpp: Added.
+        (WebCore):
+        (WebCore::BatteryStatus::create):
+        (WebCore::BatteryStatus::BatteryStatus):
+        * Modules/battery/BatteryStatus.h: Added.
+        (WebCore):
+        (BatteryStatus):
+        (WebCore::BatteryStatus::charging):
+        (WebCore::BatteryStatus::chargingTime):
+        (WebCore::BatteryStatus::dischargingTime):
+        (WebCore::BatteryStatus::level):
+        * Modules/battery/NavigatorBattery.cpp: Added.
+        (WebCore):
+        (WebCore::NavigatorBattery::NavigatorBattery):
+        (WebCore::NavigatorBattery::~NavigatorBattery):
+        (WebCore::NavigatorBattery::webkitBattery):
+        (WebCore::NavigatorBattery::from):
+        (WebCore::NavigatorBattery::batteryManager):
+        * Modules/battery/NavigatorBattery.h: Added.
+        (WebCore):
+        (NavigatorBattery):
+        * Modules/battery/NavigatorBattery.idl: Added.
+        * dom/EventNames.h:
+        (WebCore):
+        * dom/EventTargetFactory.in:
+        * testing/Internals.cpp:
+        (WebCore::Internals::setBatteryStatus):
+        (WebCore):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-03-16  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: HeapSnapshot: speedup buildReverseIndex.
