@@ -1,3 +1,47 @@
+2012-03-16  Joshua Bell  <jsbell@chromium.org>
+
+        [Chromium] IndexedDB: Assertion failure when storing File objects
+        https://bugs.webkit.org/show_bug.cgi?id=76746
+
+        The blob data in Blob/File/FileList objects is serialized "by reference" (the
+        internal URL) rather than "by value" (the actual data); this is sufficient for
+        postMessage() but not for IndexedDB since the referenced data is not retained
+        Expose a mechanism to enumerate the URLs so that SSVs can be rejected by IDB
+        until blob data serialization can is implemented (outside the SSV mechanism, and
+        potentially asynchronously).
+
+        Also, correct issue in V8DOMWrapper::instantiateV8Object where context is assumed
+        to be a Worker context if it's not a Window, which is incorrect for the
+        Chromium utility process; this is hit if Blobs are not blocked.
+
+        Reviewed by Tony Chang.
+
+        Test: storage/indexeddb/noblobs.html
+
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::update): Reject SSVs that contain blob references.
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore::IDBObjectStore::add): Reject SSVs that contain blob references.
+        (WebCore::IDBObjectStore::put): Reject SSVs that contain blob references.
+        * bindings/js/SerializedScriptValue.cpp:
+        (WebCore::CloneSerializer::serialize):
+        (WebCore::CloneSerializer::CloneSerializer):
+        (WebCore::CloneSerializer::dumpIfTerminal):
+        (WebCore::CloneSerializer::write):
+        (CloneSerializer):
+        (WebCore::SerializedScriptValue::SerializedScriptValue):
+        (WebCore::SerializedScriptValue::create):
+        (WebCore::SerializedScriptValue::undefinedValue):
+        (WebCore::SerializedScriptValue::booleanValue):
+        * bindings/js/SerializedScriptValue.h: New API to enable the clients to be picky.
+        * bindings/v8/SerializedScriptValue.cpp:
+        (WebCore::SerializedScriptValue::SerializedScriptValue):
+        * bindings/v8/SerializedScriptValue.h: New API to enable the clients to be picky.
+        (WebCore::SerializedScriptValue::blobURLs):
+        (SerializedScriptValue):
+        * bindings/v8/V8DOMWrapper.cpp:
+        (WebCore::V8DOMWrapper::instantiateV8Object):  Ensure context is a worker context before treating it as such.
+
 2012-03-16  Erik Arvidsson  <arv@chromium.org>
 
         [V8] Ensure that invalid syntax in inline event handlers does not cause a crash
