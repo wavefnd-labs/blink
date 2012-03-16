@@ -1,3 +1,50 @@
+2012-03-15  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Move overdraw metrics into a templated class for both paint and draw metrics.
+        https://bugs.webkit.org/show_bug.cgi?id=81156
+
+        Reviewed by Adrienne Walker.
+
+        Creates CCOverdrawMetrics which can be called to inform it about
+        draws/paints. At the end of the frame, the CCOverdrawMetrics
+        recordMetrics() method will put its data into histograms, a
+        TRACE_COUNTER for culling information, and a TRACE_EVENT for details
+        about the number of opaque/translucent pixels.
+
+        Covered by existing tests.
+
+        * WebCore.gypi:
+        * platform/chromium/TraceEvent.h:
+        (TraceEvent):
+        (WebCore::TraceEvent::addTraceEvent):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        * platform/graphics/chromium/cc/CCOverdrawMetrics.cpp: Added.
+        (WebCore):
+        (WebCore::CCOverdrawMetrics::CCOverdrawMetrics):
+        (WebCore::wedgeProduct):
+        (WebCore::quadArea):
+        (WebCore::CCOverdrawMetrics::didDraw):
+        (WebCore::CCOverdrawMetrics::recordMetrics):
+        (WebCore::CCOverdrawMetrics::recordMetricsInternal):
+        * platform/graphics/chromium/cc/CCOverdrawMetrics.h: Added.
+        (WebCore):
+        (CCOverdrawMetrics):
+        (WebCore::CCOverdrawMetrics::pixelsDrawnOpaque):
+        (WebCore::CCOverdrawMetrics::pixelsDrawnTranslucent):
+        (WebCore::CCOverdrawMetrics::pixelsCulled):
+        * platform/graphics/chromium/cc/CCQuadCuller.cpp:
+        (WebCore::CCQuadCuller::CCQuadCuller):
+        (WebCore::CCQuadCuller::append):
+        * platform/graphics/chromium/cc/CCQuadCuller.h:
+        (WebCore):
+        (CCQuadCuller):
+        * platform/graphics/chromium/cc/CCRenderPass.cpp:
+        (WebCore::CCRenderPass::appendQuadsForLayer):
+        * platform/graphics/chromium/cc/CCRenderPass.h:
+        (WebCore):
+        (CCRenderPass):
+
 2012-03-15  James Robinson  <jamesr@chromium.org>
 
         [chromium] RateLimiter should hold a reference to its context
