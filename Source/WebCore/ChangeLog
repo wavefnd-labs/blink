@@ -1,3 +1,67 @@
+2012-03-16  Levi Weintraub  <leviw@chromium.org>
+
+        Update usage of LayoutUnits in RenderBlock*
+        https://bugs.webkit.org/show_bug.cgi?id=80437
+
+        Reviewed by Julien Chaffraix.
+
+        Updating LayoutUnit usage in RenderBlock and RenderBlockLineLayout. This better readies trunk for
+        the transition to subpixel layout.
+
+        See https://trac.webkit.org/wiki/LayoutUnit for more details.
+
+        No new tests. No changed behavior.
+
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::paint): Adding the paint offset rounding previously in RenderBlock::paint.
+        * rendering/LayoutTypes.h:
+        (WebCore::floorToInt): Will floor a LayoutUnit to an integer once we switch to
+        FractionalLayoutUnits.
+        (WebCore::boundedMultiply): Method that will return the multiplied result of two LayoutUnits
+        or the max/min LayoutUnit if the result overflows. Only does a regular multiply while
+        LayoutUnits are integers instead of FractionalLayoutUnits.
+        (WebCore):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::paintContents): Rounding the paintOffset here didn't work for all
+        inline blocks. This rounding is actually only needed for InlineTextBoxes, so the logic has
+        been moved there.
+        (WebCore::RenderBlock::newLine): Use a LayoutUnit for the y position.
+        (WebCore::RenderBlock::isPointInOverflowControl): Points for hit testing need to be rounded.
+        (WebCore::RenderBlock::layoutColumns): Using boundedMultiply for a calculation prone to overflow.
+        (WebCore::updatePreferredWidth): Reverting back to using ceilf. ceiledLayoutUnit was to be ultimately
+        converted to just a straight LayoutUnit constructor to preserve precision. This precision doesn't work
+        for us here as we still paint Boxes/Blocks on pixel boundaries, so we need to expand to a pixel size
+        that encloses the contained text.
+        (WebCore::RenderBlock::setPageLogicalOffset): LogicalOffset should be a LayoutUnit.
+        (WebCore::RenderBlock::marginValuesForChild): Margins should have subpixel resolution.
+        (WebCore::RenderBlock::FloatingObjects::intervalForFloatingObject): Intervals for floating objects
+        need to use pixel snapped values to give the proper results.
+        * rendering/RenderBlock.h:
+        (WebCore::RenderBlock::pixelSnappedLogicalLeftOffsetForLine): Only moved.
+        (WebCore::RenderBlock::pixelSnappedLogicalRightOffsetForLine): While we can round the left offset,
+        columns add an extra offset at paint that can't currently be planned for at line-layout time. To
+        avoid laying out lines that run off the end of columns, we floor the right offset. The resulting
+        lines will be up to 1 pixel shorter than they potentially could be.
+        (RenderBlock):
+        (WebCore::RenderBlock::FloatingObject::pixelSnappedX): Using corresponding pixelSnappedX value from
+        LayoutRects.
+        (WebCore::RenderBlock::FloatingObject::pixelSnappedMaxX): Ditto.
+        (WebCore::RenderBlock::FloatingObject::pixelSnappedY): Ditto.
+        (WebCore::RenderBlock::FloatingObject::pixelSnappedMaxY): Ditto.
+        (WebCore::RenderBlock::FloatingObject::pixelSnappedWidth): Ditto.
+        (WebCore::RenderBlock::FloatingObject::pixelSnappedHeight): Ditto.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::LineWidth::shrinkAvailableWidthForNewFloatIfNeeded): LogicalHeight is a LayoutUnit. Also
+        flooring textIndentOffset to an integer to match old behavior.
+        (WebCore::LineWidth::fitBelowFloats): Using LayoutUnits for float logical top and bottoms.
+        (WebCore::LineLayoutState::endLineLogicalTop): Changing to a LayoutUnit.
+        (WebCore::LineLayoutState::setEndLineLogicalTop): Ditto.
+        (LineLayoutState): Ditto.
+        (WebCore::RenderBlock::linkToEndLineIfNeeded): Calculating overflow with LayoutUnits.
+        (WebCore::RenderBlock::layoutInlineChildren): LowestAllowedPosition should be subpixel.
+        (WebCore::RenderBlock::checkLinesForTextOverflow): Reverting ellipsis width calculation to integers
+        as this value can be seen as representing pixels on screen.
+
 2012-03-15  Kenneth Rohde Christiansen  <kenneth@webkit.org>
 
         Follow up to: window.innerWidth/Height should not include page scale
