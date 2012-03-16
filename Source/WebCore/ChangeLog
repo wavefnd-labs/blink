@@ -1,3 +1,61 @@
+2012-03-08  Jer Noble  <jer.noble@apple.com>
+
+        Support W3C Full Screen API proposal
+        https://bugs.webkit.org/show_bug.cgi?id=80660
+
+        Reviewed by Alexey Proskuryakov.
+
+        Tests: fullscreen/full-screen-element-stack.html
+               fullscreen/full-screen-enabled.html
+               fullscreen/full-screen-restrictions.html
+
+        The W3C proposal for taking arbitrary elements into full-screen mode is significantly
+        different than the Mozilla proposal. For example, the W3C has proposed a lower-case "s"
+        in "Fullscreen", which means the W3C and Mozilla "requestFullscreen" APIs differ only by
+        in that lower-case "s". Annoying as this is, it does allow us to retain the semantics for
+        the Mozilla case (har!).
+
+        A significant difficulty is obeying the new W3C spec rules is that we would like to apply the
+        fullscreen CSS rules while exiting fullscreen mode, though the W3C spec insists that the
+        webkitFullscreenElement returns the new value immediately.  As such, we retain the m_fullScreenElement
+        variable (distinct from the top of the m_fullScreenElements stack) which is controlled by the
+        webkit{Will,Did}{Enter,Exit}FullScreen functions.
+
+        New APIs for the W3C Fullscreen spec:
+        * dom/Document.h:
+        (WebCore::Document::webkitFullscreenElement):
+        (WebCore::Document::webkitFullscreenEnabled):
+        * dom/Document.idl:
+        * dom/Element.cpp:
+        (WebCore::Element::webkitRequestFullscreen):
+        * dom/Element.h:
+        * dom/Element.idl:
+
+        * dom/Document.cpp:
+        (WebCore::Document::removedLastRef): Clear m_fullScreenElementStack.
+        (WebCore::Document::requestFullScreenForElement): Implement the W3C requirements.
+        (WebCore::Document::webkitExitFullscreen): Ditto.
+        (WebCore::Document::webkitCancelFullScreen): Implement in terms of webkitCancelFullscreen.
+        (WebCore::Document::webkitDidEnterFullScreenForElement): 
+        (WebCore::Document::webkitWillExitFullScreenForElement):
+        (WebCore::Document::webkitDidExitFullScreenForElement):
+        (WebCore::Document::fullScreenChangeDelayTimerFired): Protect against items being
+            added to the event and error queue by swapping out empty queues before starting.
+        (WebCore::Document::clearFullscreenElementStack): Simple accessor.
+        (WebCore::Document::popFullscreenElementStack): Ditto.
+        (WebCore::Document::pushFullscreenElementStack): Ditto.
+        * dom/Element.cpp:
+        (WebCore::Element::webkitRequestFullScreen):
+
+        Add new RuntimeEnabledFeatures functions for the added Document and Element functions.
+        * bindings/generic/RuntimeEnabledFeatures.h:
+        (RuntimeEnabledFeatures):
+        (WebCore::RuntimeEnabledFeatures::webkitFullscreenEnabledEnabled):
+        (WebCore::RuntimeEnabledFeatures::webkitFullscreenElementEnabled):
+        (WebCore::RuntimeEnabledFeatures::webkitExitFullscreenEnabled):
+        (WebCore::RuntimeEnabledFeatures::webkitRequestFullscreenEnabled):
+
+
 2012-03-16  Adam Klein  <adamk@chromium.org>
 
         Make HTMLInputElement::isRadioButton non-virtual and remove unused HTMLFormControlElement::isRadioButton method
