@@ -1,3 +1,110 @@
+2012-03-15  Daniel Cheng  <dcheng@chromium.org>
+
+        [chromium] Refactor ClipboardChromium and DataTransferItemList/DataTransferItem to support HTML spec
+        https://bugs.webkit.org/show_bug.cgi?id=76598
+
+        Reviewed by Tony Chang.
+
+        We no longer store drag/clipboard data in named fields. We used to maintain the data store
+        list separately, which resulted in a lot of complicated code to try to make sure that
+        ChromiumDataObject and this list stayed in sync. We now just store what is essentially a
+        list MIME type/data pairs directly in ChromiumDataObject. This has the benefit of letting us
+        easily add write support during dragstart/copy operations using DataTransferItemList.
+
+        Tests: fast/events/clipboard-dataTransferItemList.html
+               fast/events/drag-dataTransferItemList.html
+
+        * platform/chromium/ChromiumDataObject.cpp:
+        (WebCore::findItem):
+        (WebCore::ChromiumDataObject::createFromPasteboard):
+        (WebCore::ChromiumDataObject::create):
+        (WebCore::ChromiumDataObject::copy):
+        (WebCore::ChromiumDataObject::items):
+        (WebCore::ChromiumDataObject::clearData):
+        (WebCore::ChromiumDataObject::clearAll):
+        (WebCore::ChromiumDataObject::clearAllExceptFiles):
+        (WebCore::ChromiumDataObject::types):
+        (WebCore::ChromiumDataObject::getData):
+        (WebCore::ChromiumDataObject::setData):
+        (WebCore::ChromiumDataObject::urlAndTitle):
+        (WebCore::ChromiumDataObject::setURLAndTitle):
+        (WebCore::ChromiumDataObject::htmlAndBaseURL):
+        (WebCore::ChromiumDataObject::setHTMLAndBaseURL):
+        (WebCore::ChromiumDataObject::containsFilenames):
+        (WebCore):
+        (WebCore::ChromiumDataObject::filenames):
+        (WebCore::ChromiumDataObject::addFilename):
+        (WebCore::ChromiumDataObject::addSharedBuffer):
+        (WebCore::ChromiumDataObject::ChromiumDataObject):
+        * platform/chromium/ChromiumDataObject.h:
+        (WebCore):
+        (ChromiumDataObject):
+        * platform/chromium/ClipboardChromium.cpp:
+        (WebCore::normalizeType):
+        (WebCore::ClipboardChromium::ClipboardChromium):
+        (WebCore::ClipboardChromium::clearData):
+        (WebCore::ClipboardChromium::clearAllData):
+        (WebCore::ClipboardChromium::getData):
+        (WebCore::ClipboardChromium::setData):
+        (WebCore::ClipboardChromium::types):
+        (WebCore::ClipboardChromium::files):
+        (WebCore::writeImageToDataObject):
+        (WebCore::ClipboardChromium::declareAndWriteDragImage):
+        (WebCore::ClipboardChromium::writeURL):
+        (WebCore::ClipboardChromium::writeRange):
+        (WebCore::ClipboardChromium::writePlainText):
+        (WebCore::ClipboardChromium::hasData):
+        (WebCore::ClipboardChromium::items):
+        * platform/chromium/ClipboardChromium.h:
+        (WebCore):
+        (ClipboardChromium):
+        (WebCore::ClipboardChromium::frame):
+        * platform/chromium/ClipboardUtilitiesChromium.cpp:
+        (WebCore::convertURIListToURL):
+        (WebCore):
+        * platform/chromium/ClipboardUtilitiesChromium.h:
+        (WebCore):
+        * platform/chromium/DataTransferItemChromium.cpp:
+        (WebCore::DataTransferItemChromium::createFromString):
+        (WebCore::DataTransferItemChromium::createFromFile):
+        (WebCore::DataTransferItemChromium::createFromURL):
+        (WebCore::DataTransferItemChromium::createFromHTML):
+        (WebCore):
+        (WebCore::DataTransferItemChromium::createFromSharedBuffer):
+        (WebCore::DataTransferItemChromium::createFromPasteboard):
+        (WebCore::DataTransferItemChromium::DataTransferItemChromium):
+        (WebCore::DataTransferItemChromium::getAsString):
+        (WebCore::DataTransferItemChromium::getAsFile):
+        (WebCore::DataTransferItemChromium::internalGetAsString):
+        (WebCore::DataTransferItemChromium::isFilename):
+        * platform/chromium/DataTransferItemChromium.h:
+        (WebCore):
+        (DataTransferItemChromium):
+        (WebCore::DataTransferItemChromium::kind):
+        (WebCore::DataTransferItemChromium::type):
+        (WebCore::DataTransferItemChromium::sharedBuffer):
+        (WebCore::DataTransferItemChromium::title):
+        (WebCore::DataTransferItemChromium::baseURL):
+        * platform/chromium/DataTransferItemListChromium.cpp:
+        (WebCore::DataTransferItemListChromium::create):
+        (WebCore::DataTransferItemListChromium::createFromPasteboard):
+        (WebCore):
+        (WebCore::DataTransferItemListChromium::DataTransferItemListChromium):
+        (WebCore::DataTransferItemListChromium::length):
+        (WebCore::DataTransferItemListChromium::item):
+        (WebCore::DataTransferItemListChromium::deleteItem):
+        (WebCore::DataTransferItemListChromium::clear):
+        (WebCore::DataTransferItemListChromium::add):
+        (WebCore::DataTransferItemListChromium::internalAddStringItem):
+        (WebCore::DataTransferItemListChromium::internalAddFileItem):
+        * platform/chromium/DataTransferItemListChromium.h:
+        (WebCore):
+        (DataTransferItemListChromium):
+        * platform/chromium/DragDataChromium.cpp:
+        (WebCore::DragData::asURL):
+        (WebCore::DragData::asPlainText):
+        (WebCore::DragData::asFragment):
+
 2012-03-16  Matt Lilek  <mrl@apple.com>
 
         Don't install libWebCoreTestSupport on OS X production builds
