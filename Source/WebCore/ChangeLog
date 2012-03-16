@@ -1,3 +1,54 @@
+2012-03-16  David Hyatt  <hyatt@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=81366
+        
+        Add RenderMultiColumnBlock subclass of RenderBlock. This new class will hold all of the multi-column
+        logic (as well as painting/hit testing). That way the column code can be kept out of the base class
+        and be more cleanly factored.
+
+        Patch Node::diff so that we detach and re-attach the renderer if column counts or widths change
+        from auto to non-auto (and vice versa) to ensure the right renderer gets made.
+        
+        Patch RenderObject::createObject to make a RenderMultiColumnBlock if either the column count or
+        column width is non-auto.
+        
+        Patch RenderBlock::calcColumnWidth to "turn off" the old implementation of columns if the pref to use
+        the new column implementation is set. This single chokepoint should be sufficient for disabling the old
+        columns in favor of the new.
+
+        Reviewed by Dan Bernstein.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/Document.cpp:
+        (WebCore::Document::regionBasedColumnsEnabled):
+        (WebCore):
+        (WebCore::Document::recalcStyle):
+        * dom/Document.h:
+        (Document):
+        * dom/Element.cpp:
+        (WebCore::Element::recalcStyle):
+        * dom/Node.cpp:
+        (WebCore::Node::diff):
+        * dom/Node.h:
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::calcColumnWidth):
+        (WebCore::RenderBlock::updateFirstLetterStyle):
+        * rendering/RenderMultiColumnBlock.cpp: Added.
+        (WebCore):
+        (WebCore::RenderMultiColumnBlock::RenderMultiColumnBlock):
+        (WebCore::RenderMultiColumnBlock::renderName):
+        * rendering/RenderMultiColumnBlock.h: Added.
+        (WebCore):
+        (RenderMultiColumnBlock):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::createObject):
+        * rendering/RenderObjectChildList.cpp:
+        (WebCore::RenderObjectChildList::updateBeforeAfterContent):
+
 2012-03-16  Stephen White  <senorblanco@chromium.org>
 
         [chromium] Improve CSS3 filter blur performance.
