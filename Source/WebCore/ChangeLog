@@ -1,3 +1,47 @@
+2012-03-16  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Changes to overdraw metrics to allow upload tracking
+        https://bugs.webkit.org/show_bug.cgi?id=81222
+
+        Reviewed by Adrienne Walker.
+
+        Stick CCOverdrawMetrics into CCOcclusionTracker, so that it is available
+        everywhere that culling/drawing/painting is going on. Then we can stop
+        plumbing a metrics object through CCQuadCuller.
+
+        Rename the CCOverdrawMetrics "painting" stuff to "uploading" as this will
+        measure texture uploads rather than pixels painted in main memory.
+
+        Covered by existing tests.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.cpp:
+        (WebCore::::CCOcclusionTrackerBase):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.h:
+        (CCOcclusionTrackerBase):
+        (WebCore::CCOcclusionTrackerBase::overdrawMetrics):
+        * platform/graphics/chromium/cc/CCOverdrawMetrics.cpp:
+        (WebCore::CCOverdrawMetrics::didCull):
+        (WebCore):
+        (WebCore::CCOverdrawMetrics::didDraw):
+        (WebCore::CCOverdrawMetrics::recordMetrics):
+        (WebCore::CCOverdrawMetrics::recordMetricsInternal):
+        * platform/graphics/chromium/cc/CCOverdrawMetrics.h:
+        (WebCore):
+        (WebCore::CCOverdrawMetrics::create):
+        (CCOverdrawMetrics):
+        * platform/graphics/chromium/cc/CCQuadCuller.cpp:
+        (WebCore::CCQuadCuller::CCQuadCuller):
+        (WebCore::CCQuadCuller::append):
+        * platform/graphics/chromium/cc/CCQuadCuller.h:
+        (CCQuadCuller):
+        * platform/graphics/chromium/cc/CCRenderPass.cpp:
+        (WebCore::CCRenderPass::appendQuadsForLayer):
+        * platform/graphics/chromium/cc/CCRenderPass.h:
+        (WebCore):
+        (CCRenderPass):
+
 2012-03-16  Greg Billock  <gbillock@google.com>
 
         Add TransferList IDL modifier, with support in V8 code gen.
