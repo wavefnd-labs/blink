@@ -1,3 +1,146 @@
+2012-03-17  Joe Thomas  <joethomas@motorola.com>
+
+        move calc*Value functions out from Length (and platform)
+        https://bugs.webkit.org/show_bug.cgi?id=80897
+
+        Moving the Length calc*Value functions out from Length structure and also from /WebCore/platform/ folder.
+        This helps to avoid the layering violation while length calculation. Otherwise layer violation can be avoided only by adding a virtual interface(bug 27160).
+
+        Reviewed by Antti Koivisto.
+
+        * GNUmakefile.list.am: Build system changes for adding new files.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * accessibility/gtk/WebKitAccessibleInterfaceText.cpp:
+        (getAttributeSetForAccessibilityObject):
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/LengthFunctions.h: Added. Moved calc*Value functions of Length.
+        (WebCore):
+        (WebCore::calculateMinimumValue):
+        (WebCore::calculateValue):
+        (WebCore::calculateFloatValue):
+        * dom/Document.cpp:
+        (WebCore::Document::pageSizeAndMarginsInPixels):
+        * html/HTMLAreaElement.cpp:
+        (WebCore::HTMLAreaElement::getRegion):
+        * platform/CalculationValue.h:
+        (WebCore::CalcExpressionLength::evaluate):
+        * platform/Length.h: Removed the calc*Value functions from Length structure.
+        (Length):
+        (WebCore::Length::getFloatValue):
+        (WebCore::Length::getIntValue):
+        * platform/graphics/ca/mac/PlatformCAAnimationMac.mm:
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm:
+        (PlatformCALayer::setFilters):
+        * platform/graphics/chromium/cc/CCRenderSurfaceFilters.cpp:
+        (WebCore::CCRenderSurfaceFilters::apply):
+        * platform/graphics/filters/FilterOperations.cpp:
+        (WebCore::FilterOperations::getOutsets):
+        * platform/graphics/transforms/PerspectiveTransformOperation.cpp:
+        (WebCore::PerspectiveTransformOperation::blend):
+        * platform/graphics/transforms/PerspectiveTransformOperation.h:
+        (WebCore::PerspectiveTransformOperation::isIdentity):
+        (WebCore::PerspectiveTransformOperation::apply):
+        * platform/graphics/transforms/TranslateTransformOperation.h:
+        (WebCore::TranslateTransformOperation::x):
+        (WebCore::TranslateTransformOperation::y):
+        (WebCore::TranslateTransformOperation::z):
+        (WebCore::TranslateTransformOperation::isIdentity):
+        * platform/win/PopupMenuWin.cpp:
+        (WebCore::PopupMenuWin::paint):
+        * rendering/AutoTableLayout.cpp:
+        (WebCore::AutoTableLayout::layout):
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::build):
+        * rendering/FixedTableLayout.cpp:
+        (WebCore::FixedTableLayout::layout):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::textIndentOffset):
+        (WebCore::RenderBlock::computeInlinePreferredLogicalWidths):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::reflectionOffset):
+        (WebCore::RenderBox::clipRect):
+        (WebCore::RenderBox::computeLogicalWidthInRegion):
+        (WebCore::RenderBox::computeLogicalWidthInRegionUsing):
+        (WebCore::RenderBox::computeInlineDirectionMargins):
+        (WebCore::RenderBox::computePercentageLogicalHeight):
+        (WebCore::RenderBox::computeReplacedLogicalWidthUsing):
+        (WebCore::RenderBox::computeReplacedLogicalHeightUsing):
+        (WebCore::RenderBox::availableLogicalHeightUsing):
+        (WebCore::RenderBox::computeBlockDirectionMargins):
+        (WebCore::RenderBox::computePositionedLogicalWidthUsing):
+        (WebCore::RenderBox::computePositionedLogicalHeightUsing):
+        (WebCore::RenderBox::computePositionedLogicalWidthReplaced):
+        (WebCore::RenderBox::computePositionedLogicalHeightReplaced):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::relativePositionOffsetX):
+        (WebCore::RenderBoxModelObject::relativePositionOffsetY):
+        (WebCore::RenderBoxModelObject::paddingTop):
+        (WebCore::RenderBoxModelObject::paddingBottom):
+        (WebCore::RenderBoxModelObject::paddingLeft):
+        (WebCore::RenderBoxModelObject::paddingRight):
+        (WebCore::RenderBoxModelObject::paddingBefore):
+        (WebCore::RenderBoxModelObject::paddingAfter):
+        (WebCore::RenderBoxModelObject::paddingStart):
+        (WebCore::RenderBoxModelObject::paddingEnd):
+        (WebCore::RenderBoxModelObject::calculateFillTileSize):
+        (WebCore::RenderBoxModelObject::calculateBackgroundImageGeometry):
+        (WebCore::computeBorderImageSide):
+        (WebCore::RenderBoxModelObject::paintNinePieceImage):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::preferredMainAxisContentExtentForChild):
+        (WebCore::RenderFlexibleBox::computeMainAxisPreferredSizes):
+        (WebCore::RenderFlexibleBox::runFreeSpaceAllocationAlgorithm):
+        * rendering/RenderFrameSet.cpp:
+        (WebCore::RenderFrameSet::layOutAxis):
+        * rendering/RenderInline.cpp:
+        (WebCore::computeMargin):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::perspectiveTransform):
+        (WebCore::RenderLayer::perspectiveOrigin):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::computeTransformOrigin):
+        (WebCore::RenderLayerBacking::computePerspectiveOrigin):
+        * rendering/RenderMarquee.cpp:
+        (WebCore::RenderMarquee::timerFired):
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::updateOptionsWidth):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::repaintAfterLayoutIfNeeded):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::computeReplacedLogicalWidth):
+        * rendering/RenderScrollbarPart.cpp:
+        (WebCore::calcScrollbarThicknessUsing):
+        (WebCore::RenderScrollbarPart::computeScrollbarWidth):
+        (WebCore::RenderScrollbarPart::computeScrollbarHeight):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::computeLogicalWidth):
+        (WebCore::RenderTable::convertStyleLogicalWidthToComputedWidth):
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::logicalHeightForRowSizing):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight):
+        * rendering/RenderText.h:
+        (WebCore::RenderText::marginLeft):
+        (WebCore::RenderText::marginRight):
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::verticalPositionForBox):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::applyTransform):
+        (WebCore::calcRadiiFor):
+        * rendering/style/RenderStyle.h:
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::computeIntrinsicRatioInformation):
+        (WebCore::resolveLengthAttributeForSVG):
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::currentViewBoxRect):
+        (WebCore::SVGSVGElement::currentViewportSize):
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::computeIntrinsicDimensions):
+
 2012-03-17  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Enable animVal support for SVGNumberOptionalNumber
