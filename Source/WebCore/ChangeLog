@@ -1,3 +1,97 @@
+2012-03-17  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Enable animVal support for SVGNumberOptionalNumber
+        https://bugs.webkit.org/show_bug.cgi?id=81448
+
+        Reviewed by Antti Koivisto.
+
+        Enable animVal support for SVGNumberOptionalNumber. Its a special case as two SVG DOM properties
+        eg. stdDeviationX/stdDeviationY are mapped to a single XML attribute: SVGNames::stdDeviationAttr.
+
+        When animating properties like this, both animVal wrappers need to reflect changes.
+        Generalize the current animVal code to support more than one SVGAnimatedProperty that gets
+        animated for a single attributeName. This allows us to remove SVGAnimatedType::variantValue/setVariantValue
+        which paves the way for removing SVGGenericAnimatedType from even more places.
+
+        Covered by existing tests.
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::SVGAnimateElement):
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        (WebCore::SVGAnimateElement::resetToBaseValue):
+        (WebCore::SVGAnimateElement::targetElementWillChange):
+        * svg/SVGAnimateElement.h:
+        (SVGAnimateElement):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::constructFromBaseValue):
+        (WebCore):
+        (WebCore::SVGAnimatedLengthAnimator::resetAnimatedTypeToBaseValue):
+        * svg/SVGAnimatedLength.h:
+        (SVGAnimatedLengthAnimator):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::constructFromBaseValue):
+        (WebCore):
+        (WebCore::SVGAnimatedLengthListAnimator::resetAnimatedTypeToBaseValue):
+        * svg/SVGAnimatedLengthList.h:
+        (SVGAnimatedLengthListAnimator):
+        * svg/SVGAnimatedNumber.cpp:
+        (WebCore::SVGAnimatedNumberAnimator::constructFromBaseValue):
+        (WebCore):
+        (WebCore::SVGAnimatedNumberAnimator::resetAnimatedTypeToBaseValue):
+        * svg/SVGAnimatedNumber.h:
+        (SVGAnimatedNumberAnimator):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::constructFromBaseValue):
+        (WebCore):
+        (WebCore::SVGAnimatedNumberListAnimator::resetAnimatedTypeToBaseValue):
+        * svg/SVGAnimatedNumberList.h:
+        (SVGAnimatedNumberListAnimator):
+        * svg/SVGAnimatedNumberOptionalNumber.cpp:
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::constructFromBaseValue):
+        (WebCore):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::resetAnimatedTypeToBaseValue):
+        * svg/SVGAnimatedNumberOptionalNumber.h:
+        (WebCore):
+        (SVGAnimatedNumberOptionalNumberAnimator):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::constructFromBaseValue):
+        (WebCore::SVGAnimatedTransformListAnimator::resetAnimatedTypeToBaseValue):
+        (WebCore):
+        * svg/SVGAnimatedTransformList.h:
+        (SVGAnimatedTransformListAnimator):
+        * svg/SVGAnimatedType.cpp:
+        (WebCore::SVGAnimatedType::supportsAnimVal):
+        * svg/SVGAnimatedType.h:
+        (SVGAnimatedType):
+        * svg/SVGAnimatedTypeAnimator.h:
+        (SVGAnimatedTypeAnimator):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::resetAnimatedTypeToBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::currentBaseValueVariant):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromOneBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::resetAnimatedTypeFromOneBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromTwoBaseValues):
+        (WebCore::SVGAnimatedTypeAnimator::resetAnimatedTypeFromTwoBaseValues):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::findMatchingAnimatedProperties):
+        (WebCore::SVGAnimationElement::applyAnimatedValue):
+        (WebCore::notifyAnimatedPropertyAboutAnimationBeginEnd):
+        (WebCore::SVGAnimationElement::animationStarted):
+        (WebCore::SVGAnimationElement::animationEnded):
+        (WebCore::SVGAnimationElement::animatedPropertiesForType):
+        * svg/SVGAnimationElement.h:
+        * svg/properties/SVGAnimatedListPropertyTearOff.h:
+        (WebCore::SVGAnimatedListPropertyTearOff::currentBaseValueVariant):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationStarted):
+        * svg/properties/SVGAnimatedProperty.h:
+        (SVGAnimatedProperty):
+        * svg/properties/SVGAnimatedPropertyTearOff.h:
+        (WebCore::SVGAnimatedPropertyTearOff::currentBaseValueVariant):
+        (WebCore::SVGAnimatedPropertyTearOff::animationStarted):
+        * svg/properties/SVGAnimatedStaticPropertyTearOff.h:
+        (WebCore::SVGAnimatedStaticPropertyTearOff::currentBaseValueVariant):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animationStarted):
+
 2012-03-12  Philippe Normand  <pnormand@igalia.com>
 
         [GStreamer] run AudioFileReader in a nested loop
