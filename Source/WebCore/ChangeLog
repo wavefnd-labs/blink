@@ -1,3 +1,52 @@
+2012-03-16  Kentaro Hara  <haraken@chromium.org>
+
+        [Chromium][Performance] Optimize innerText and outerText in Chromium/Mac
+        https://bugs.webkit.org/show_bug.cgi?id=81192
+
+        Reviewed by Dimitri Glazkov.
+
+        This patch makes innerText and outerText 4 times faster on Chromium/Mac.
+        A similar performance improvement will be also observed in APIs that are using
+        TextIterator::plainText() (e.g. Editting, SpellChecker, Clipboard, Pasteboard etc).
+
+        Performance test: https://bugs.webkit.org/attachment.cgi?id=131989
+
+        - AppleWebKit/JavaScriptCore/Mac:
+        div.innerText : 2978.4ms
+        div.outerText : 2944.4ms
+
+        - Chromium/V8/Mac without the patch:
+        div.innerText : 10050.8ms
+        div.outerText : 10072.2ms
+
+        - Chromium/V8/Mac with the patch:
+        div.innerText: 2536.4ms
+        div.outerText: 2714ms
+
+        This patch just changes the initial buffer size of a plain text buffer on Chromium/Mac.
+        As shown below, in my local Chromium/Mac environment the performance changes
+        dramatically between 1<<15 and 1<<16, and in my local Chromium/Linux environment
+        the performance changes between 1<<17 and 1<<18. I am not yet sure what determines
+        these figures, but it seems there exists a performance gap at some point
+        depending on a malloc mechanism.
+
+        - div.innerText results on Chromium/V8/Mac:
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 14 ==> 2465.6 ms
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 15 ==> 2447.2 ms   <--- after this patch
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 16 ==> 10250.8 ms  <--- before this patch
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 17 ==> 10278.2 ms
+
+        - div.innerText results on Chromium/V8/Linux:
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 14 ==> 1569.8 ms
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 15 ==> 1531.8 ms
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 16 ==> 1543.2 ms  <--- before/after this patch
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 17 ==> 1541.6 ms
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 18 ==> 12540.8 ms
+        WTF_TEXT_ITERATOR_BUFFER_INITIAL_CAPACITY = 1 << 19 ==> 12340.8 ms
+
+        * editing/TextIterator.cpp:
+        (WebCore::plainTextToMallocAllocatedBuffer):
+
 2012-03-16  Dmitry Titov  <dimich@chromium.org>
 
         HTMLFrameElementBase::m_remainsAliveOnRemovalFromTree can be cleared without unloading the frame.
