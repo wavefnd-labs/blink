@@ -1,3 +1,90 @@
+2012-03-16  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Unify the drawing logic for different layer types that output textures to the compositor
+        https://bugs.webkit.org/show_bug.cgi?id=81286
+
+        Reviewed by Adrienne Walker.
+
+        Currently canvas 2d, webgl, and plugin layers all export a texture to the compositor that then needs to be
+        drawn.  There are a small set of operations that can be applied to the texture at draw time - do a Y flip,
+        stretch a subrect to the layer bounds, set the blend mode etc but they are fundamentally the same thing. This
+        collapses the nearly-redundant code into a single impl-side layer type for a texture-backed layer that can
+        handle the union of the bits needed for each layer type.
+
+        Canvas 2d, WebGL and plugin composited rendering are all covered by layout tests.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/Canvas2DLayerChromium.cpp:
+        (WebCore::Canvas2DLayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/CanvasLayerChromium.cpp:
+        (WebCore::CanvasLayerChromium::createCCLayerImpl):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::drawQuad):
+        (WebCore::TexStretchTextureProgramBinding::set):
+        (WebCore::TexTransformTextureProgramBinding::set):
+        (WebCore::LayerRendererChromium::drawTextureQuad):
+        (WebCore::LayerRendererChromium::textureLayerProgramFlip):
+        (WebCore::LayerRendererChromium::textureLayerProgramStretch):
+        (WebCore::LayerRendererChromium::textureLayerProgramStretchFlip):
+        (WebCore::LayerRendererChromium::textureLayerTexRectProgram):
+        (WebCore::LayerRendererChromium::textureLayerTexRectProgramFlip):
+        (WebCore::LayerRendererChromium::cleanupSharedObjects):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (WebCore):
+        (LayerRendererChromium):
+        * platform/graphics/chromium/PluginLayerChromium.cpp:
+        (WebCore::PluginLayerChromium::PluginLayerChromium):
+        (WebCore::PluginLayerChromium::createCCLayerImpl):
+        (WebCore::PluginLayerChromium::setIOSurfaceProperties):
+        (WebCore::PluginLayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/PluginLayerChromium.h:
+        (PluginLayerChromium):
+        * platform/graphics/chromium/WebGLLayerChromium.cpp:
+        (WebCore::WebGLLayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/cc/CCCanvasDrawQuad.cpp: Removed.
+        * platform/graphics/chromium/cc/CCCanvasDrawQuad.h: Removed.
+        * platform/graphics/chromium/cc/CCCanvasLayerImpl.cpp: Removed.
+        * platform/graphics/chromium/cc/CCCanvasLayerImpl.h: Removed.
+        * platform/graphics/chromium/cc/CCDrawQuad.cpp:
+        (WebCore::CCDrawQuad::toTextureDrawQuad):
+        * platform/graphics/chromium/cc/CCDrawQuad.h:
+        (WebCore):
+        (CCDrawQuad):
+        * platform/graphics/chromium/cc/CCTextureDrawQuad.cpp: Renamed from Source/WebCore/platform/graphics/chromium/cc/CCPluginDrawQuad.cpp.
+        (WebCore):
+        (WebCore::CCTextureDrawQuad::create):
+        (WebCore::CCTextureDrawQuad::CCTextureDrawQuad):
+        * platform/graphics/chromium/cc/CCTextureDrawQuad.h: Renamed from Source/WebCore/platform/graphics/chromium/cc/CCPluginDrawQuad.h.
+        (WebCore):
+        (CCTextureDrawQuad):
+        (WebCore::CCTextureDrawQuad::textureId):
+        (WebCore::CCTextureDrawQuad::hasAlpha):
+        (WebCore::CCTextureDrawQuad::premultipliedAlpha):
+        (WebCore::CCTextureDrawQuad::uvRect):
+        (WebCore::CCTextureDrawQuad::flipped):
+        (WebCore::CCTextureDrawQuad::ioSurfaceSize):
+        (WebCore::CCTextureDrawQuad::ioSurfaceTextureId):
+        * platform/graphics/chromium/cc/CCTextureLayerImpl.cpp: Renamed from Source/WebCore/platform/graphics/chromium/cc/CCPluginLayerImpl.cpp.
+        (WebCore):
+        (WebCore::CCTextureLayerImpl::CCTextureLayerImpl):
+        (WebCore::CCTextureLayerImpl::~CCTextureLayerImpl):
+        (WebCore::CCTextureLayerImpl::willDraw):
+        (WebCore::CCTextureLayerImpl::appendQuads):
+        (WebCore::CCTextureLayerImpl::dumpLayerProperties):
+        (WebCore::CCTextureLayerImpl::didLoseContext):
+        (WebCore::CCTextureLayerImpl::setIOSurfaceProperties):
+        * platform/graphics/chromium/cc/CCTextureLayerImpl.h: Renamed from Source/WebCore/platform/graphics/chromium/cc/CCPluginLayerImpl.h.
+        (WebCore):
+        (CCTextureLayerImpl):
+        (WebCore::CCTextureLayerImpl::create):
+        (WebCore::CCTextureLayerImpl::textureId):
+        (WebCore::CCTextureLayerImpl::setTextureId):
+        (WebCore::CCTextureLayerImpl::setHasAlpha):
+        (WebCore::CCTextureLayerImpl::setPremultipliedAlpha):
+        (WebCore::CCTextureLayerImpl::setFlipped):
+        (WebCore::CCTextureLayerImpl::setUVRect):
+        (WebCore::CCTextureLayerImpl::layerTypeAsString):
+
 2012-03-16  Martin Robinson  <mrobinson@igalia.com>
 
         [Cairo] Text extent of shadowed text is calculated incorrectly
