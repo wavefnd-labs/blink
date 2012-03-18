@@ -1,3 +1,33 @@
+2012-03-18  Kentaro Hara  <haraken@chromium.org>
+
+        Change the initial buffer size of a plain text
+        https://bugs.webkit.org/show_bug.cgi?id=81192
+
+        Reviewed by Dimitri Glazkov.
+
+        r111109 changed the initial buffer size of a plain text
+        from 1<<16 to 1<<15 in Chromium/Mac only, for the following reasons:
+
+        - As far as I experimented locally, while 1<<15 is better than 1<<16 in Chromium/Mac,
+        1<<15 and 1<<16 are the same in AppleWebKit/Mac and Chromium/Linux (their performance
+        "gap" exists at between 1<<17 and 1<<18).
+        - The reason why I changed 1<<16 to 1<<15 in Chromium/Mac only is that
+        the value highly depends on the underlying malloc system and I was a bit afraid
+        that changing to 1<<15 _might_ cause unintentional performance regression in some
+        platform.
+
+        That being said, it seems that 1<<15 would not be worse than 1<<16 in all platforms,
+        and we should just keep the value consistent. In the first place, according to anttik
+        (who wrote 1<<16 a long time ago), there was no strong reason for 1<<16.
+
+        Based on these observations (See https://bugs.webkit.org/show_bug.cgi?id=81192
+        for more details), this patch unifies the value to 1<<15 in all platforms.
+
+        No tests. No change in behavior.
+
+        * editing/TextIterator.cpp:
+        (WebCore::plainTextToMallocAllocatedBuffer):
+
 2012-02-13  Robert Hogan  <robert@webkit.org>
 
         CSS 2.1 failure: eof-003.htm fails
