@@ -1,3 +1,57 @@
+2012-03-18  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Transform animation state should be inherited from parents
+        https://bugs.webkit.org/show_bug.cgi?id=81363
+
+        Reviewed by Adrienne Walker.
+
+        Adds a drawTransformIsAnimating() and screenSpaceTransformIsAnimating()
+        to the layer classes, and similar to the surface classes. These inherit
+        the values from their parents in the same way that the transforms
+        themselves do, and reflect if the layer's transform is being affected
+        by some active animation.
+
+        These can be used in main-thread culling when determining if the layer's
+        position is static in the given coordinate space or being animated.
+
+        Unit test: CCLayerTreeHostCommonTest.verifyAnimationsForRenderSurfaceHierarchy
+
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+        (WebCore::LayerChromium::drawTransformIsAnimating):
+        (WebCore::LayerChromium::setDrawTransformIsAnimating):
+        (WebCore::LayerChromium::screenSpaceTransformIsAnimating):
+        (WebCore::LayerChromium::setScreenSpaceTransformIsAnimating):
+        * platform/graphics/chromium/RenderSurfaceChromium.cpp:
+        (WebCore::RenderSurfaceChromium::RenderSurfaceChromium):
+        * platform/graphics/chromium/RenderSurfaceChromium.h:
+        (WebCore::RenderSurfaceChromium::targetSurfaceTransformsAreAnimating):
+        (WebCore::RenderSurfaceChromium::setTargetSurfaceTransformsAreAnimating):
+        (WebCore::RenderSurfaceChromium::screenSpaceTransformsAreAnimating):
+        (WebCore::RenderSurfaceChromium::setScreenSpaceTransformsAreAnimating):
+        (RenderSurfaceChromium):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::CCLayerImpl):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+        (WebCore::CCLayerImpl::drawTransformIsAnimating):
+        (WebCore::CCLayerImpl::setDrawTransformIsAnimating):
+        (WebCore::CCLayerImpl::screenSpaceTransformIsAnimating):
+        (WebCore::CCLayerImpl::setScreenSpaceTransformIsAnimating):
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.cpp:
+        (WebCore::subtreeShouldBeSkipped):
+        (WebCore::calculateDrawTransformsAndVisibilityInternal):
+        * platform/graphics/chromium/cc/CCRenderSurface.cpp:
+        (WebCore::CCRenderSurface::CCRenderSurface):
+        * platform/graphics/chromium/cc/CCRenderSurface.h:
+        (WebCore::CCRenderSurface::targetSurfaceTransformsAreAnimating):
+        (WebCore::CCRenderSurface::setTargetSurfaceTransformsAreAnimating):
+        (WebCore::CCRenderSurface::screenSpaceTransformsAreAnimating):
+        (WebCore::CCRenderSurface::setScreenSpaceTransformsAreAnimating):
+        (CCRenderSurface):
+
 2012-03-18  Pratik Solanki  <psolanki@apple.com>
 
         Fix compile when FULLSCREEN_API is not enabled on Mac
