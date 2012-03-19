@@ -1,5 +1,38 @@
 2012-03-18  Dana Jansens  <danakj@chromium.org>
 
+        [chromium] Don't occlude on main-thread behind layers/surfaces with impl-thread animations
+        https://bugs.webkit.org/show_bug.cgi?id=81354
+
+        Reviewed by Adrienne Walker.
+
+        Layers and surfaces can have an animating opacity or translation on the
+        impl thread. In this case, the main thread does not know their actual
+        values, and treats these values as "unknowns". This means we can't use
+        them for marking areas of the screen as occluded, and we can't consider
+        a part of a layer occluded in a space that we can not reliably transform
+        to.
+
+        Unit test: CCOcclusionTrackerTestAnimationOpacity0OnMainThread
+                   CCOcclusionTrackerTestAnimationOpacity1OnMainThread
+                   CCOcclusionTrackerTestAnimationTranslateOnMainThread
+
+        * platform/graphics/chromium/cc/CCOcclusionTracker.cpp:
+        (WebCore::layerOpacityKnown):
+        (WebCore::layerTransformsToTargetKnown):
+        (WebCore::layerTransformsToScreenKnown):
+        (WebCore):
+        (WebCore::surfaceOpacityUnknown):
+        (WebCore::surfaceTransformsToTargetUnknown):
+        (WebCore::surfaceTransformsToScreenUnknown):
+        (WebCore::::finishedTargetRenderSurface):
+        (WebCore::contentToScreenSpaceTransform):
+        (WebCore::contentToTargetSurfaceTransform):
+        (WebCore::::markOccludedBehindLayer):
+        (WebCore::::occluded):
+        (WebCore::::unoccludedContentRect):
+
+2012-03-18  Dana Jansens  <danakj@chromium.org>
+
         [chromium] Animating opacity is not opaque and should create a render surface on main thread
         https://bugs.webkit.org/show_bug.cgi?id=81401
 
