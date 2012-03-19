@@ -1,3 +1,62 @@
+2012-03-19  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
+        Select best target for tap gesture.
+        https://bugs.webkit.org/show_bug.cgi?id=78801
+
+        Reviewed by Kenneth Rohde Christiansen.
+        IntRect changes reviewed by Dave Hyatt.
+
+        The new API is available through EventHandler::bestClickableNodeForTouchPoint, but
+        implementation details have been placed in page/TouchAdjustment.
+
+        The default hit detection is performed by measuring the distance to the center
+        lines of the absolute rects of the hit nodes. Absolute rects are used instead
+        of bounding rects to make hit-detecting against links over line breaks. Distance
+        to center line is used to make it easier to hit small links next to large links.
+        For line-rects the distance to the center-line is a better expression of the distance
+        to a rectangles center than the distance to the center-point.
+
+        Tests: touchadjustment/event-triggered-widgets.html
+               touchadjustment/html-label.html
+               touchadjustment/nested-touch.html
+               touchadjustment/touch-inlines.html
+
+        * Target.pri:
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleGestureTap):
+        (WebCore::EventHandler::bestClickableNodeForTouchPoint):
+        * page/EventHandler.h:
+        * page/TouchAdjustment.cpp: Added.
+        (WebCore::TouchAdjustment::QuadForHitTest::QuadForHitTest):
+        (WebCore::TouchAdjustment::QuadForHitTest::node):
+        (WebCore::TouchAdjustment::QuadForHitTest::quad):
+        (WebCore::TouchAdjustment::QuadForHitTest::boundingBox):
+        (WebCore::TouchAdjustment::nodeRespondsToTapGesture):
+        (WebCore::TouchAdjustment::appendAbsoluteQuadsForNodeToHitTestList):
+        (WebCore::TouchAdjustment::compileQuadsForHitTesting):
+        (WebCore::TouchAdjustment::distanceSquaredToQuadCenterLine):
+        (WebCore::TouchAdjustment::findNodeWithLowestMetric):
+        (WebCore::findBestClickableCandidate):
+        * page/TouchAdjustment.h: Added.
+        * platform/graphics/FloatQuad.h:
+        (WebCore::FloatQuad::center):
+        * platform/graphics/IntPoint.h:
+        (WebCore::IntPoint::distanceSquaredToPoint):
+        * platform/graphics/IntRect.cpp:
+        (WebCore::distanceToInterval):
+        (WebCore::IntRect::differenceToPoint):
+        (WebCore::IntRect::differenceFromCenterLineToPoint):
+        * platform/graphics/IntRect.h:
+        (WebCore::IntRect::distanceSquaredToPoint):
+        (WebCore::IntRect::distanceSquaredFromCenterLineToPoint):
+        * platform/graphics/IntSize.h:
+        (WebCore::IntSize::diagonalLengthSquared):
+        * testing/Internals.cpp:
+        (WebCore::Internals::touchPositionAdjustedToBestClickableNode):
+        (WebCore::Internals::touchNodeAdjustedToBestClickableNode):
+        * testing/Internals.h:
+        * testing/Internals.idl:
+
 2012-03-19  Mark Pilgrim  <pilgrim@chromium.org>
 
         Add ENABLED(FILE_SYSTEM) to DOMFilePath.h
