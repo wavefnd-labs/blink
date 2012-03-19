@@ -1,3 +1,29 @@
+2012-03-19  David Hyatt  <hyatt@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=81534
+
+        [New Multicolumn] Make the multi-column block re-layout its children when the column width/count change.
+        Cache the count/width on the multi-column block for easy access.
+
+        Reviewed by Antti Koivisto.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::recomputeLogicalWidth):
+        (WebCore::RenderBlock::layoutBlock):
+        * rendering/RenderBlock.h:
+        Virtualize the code that recomputes the logical width for a block and sets relayoutChildren to true,
+        so that column code can subclass the method to also check for changes in the column width/count.
+
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::RenderMultiColumnBlock::computeColumnCountAndWidth):
+        The column count/width determination algorithm in one method on the RenderMultiColumnBlock. It's a copy
+        of the code from RenderBlock (which will be going away eventually).
+
+        (WebCore::RenderMultiColumnBlock::recomputeLogicalWidth):
+        * rendering/RenderMultiColumnBlock.h:
+        (RenderMultiColumnBlock):
+        Subclassed method to also check for changes in the column width to set relayoutChildren to true.
+
 2012-03-19  Michal Mocny  <mmocny@google.com>
 
         [chromium] Updating WebGraphicsContext3D MemoryAllocation callback to accept a struct with have backbuffer suggestion.
