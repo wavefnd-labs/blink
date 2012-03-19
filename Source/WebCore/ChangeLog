@@ -1,3 +1,24 @@
+2012-03-18  Luke Macpherson   <macpherson@chromium.org>
+
+        Remove remnants of code that assume Lengths are 28 bit integers.
+        https://bugs.webkit.org/show_bug.cgi?id=67976
+
+        Reviewed by Eric Seidel.
+
+        Test: LayoutTests/fast/table/max-width-integer-overflow-expected.html
+
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::computeLength):
+        Bound by INT_MAX and INT_MIN instead of 28 bit bounds.
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::ApplyPropertyBorderRadius::applyValue):
+        Use PrimitiveValue::computeLength function directly.
+        * platform/Length.h:
+        Remove 28 bit integer limit constants.
+        * rendering/AutoTableLayout.cpp:
+        (WebCore::AutoTableLayout::computePreferredLogicalWidths):
+        Use std::numeric_limits.
+
 2012-03-16  Shinya Kawanaka  <shinyak@chromium.org>
 
         Should remove RuntimeEnabledFeatures::multipleShadowSubtreesEnabled
