@@ -1,3 +1,44 @@
+2012-03-19  Raymond Toy  <rtoy@google.com>
+
+        Add playback state for AudioBufferSourceNode and add number of active nodes
+        https://bugs.webkit.org/show_bug.cgi?id=79701
+
+        Add a playback state to AudioBufferSourceNode so that the user can
+        tell if the node is scheduled, playing, or finished.
+
+        For an AudioContext, add a count of the number of
+        AudioBufferSourceNode's that are active (playing audio).
+
+        Deleted m_isPlaying and m_hasFinished. For the record, m_isPlaying
+        is the same as a playbackState of SCHEDULED_STATE or PLAYING_STATE.
+        m_hasFinished is equivalent to a playbackState of FINISHED_STATE.
+        
+        Reviewed by Chris Rogers.
+
+        Test: webaudio/audiobuffersource-playbackState.html
+
+        * webaudio/AudioBufferSourceNode.cpp:
+        (WebCore):
+        (WebCore::AudioBufferSourceNode::AudioBufferSourceNode):
+        initialize playbackState, remove m_isPlaying, m_hasFinished.
+        (WebCore::AudioBufferSourceNode::process): Update playbackState
+        (WebCore::AudioBufferSourceNode::finish): Update playbackState
+        (WebCore::AudioBufferSourceNode::noteOn): Update playbackState
+        (WebCore::AudioBufferSourceNode::noteGrainOn): Update playbackState
+        (WebCore::AudioBufferSourceNode::noteOff): Use playbackState 
+        * webaudio/AudioBufferSourceNode.h:
+        (AudioBufferSourceNode): Define states, remove m_isPlaying, m_hasFinished.
+        (WebCore::AudioBufferSourceNode::playbackState): Added.
+        * webaudio/AudioBufferSourceNode.idl: Define constants for the
+        playback state, add attribute playbackState.
+        * webaudio/AudioContext.cpp:
+        (WebCore::AudioContext::activeSourceCount): Added.
+        (WebCore::AudioContext::incrementActiveSourceCount): Added.
+        (WebCore::AudioContext::decrementActiveSourceCount): Added.
+        * webaudio/AudioContext.h:
+        (AudioContext):
+        * webaudio/AudioContext.idl: Add attribute activeSourceCount.
+
 2012-03-19  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r109014.
