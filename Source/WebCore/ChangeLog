@@ -1,3 +1,49 @@
+2012-03-19  Max Vujovic  <mvujovic@adobe.com>
+
+        inspector highlight of SVG root element with viewbox does not match dimensions of element
+        https://bugs.webkit.org/show_bug.cgi?id=78037
+
+        Reviewed by Nikolas Zimmermann.
+
+        Functions such as RenderBox::absoluteQuads and DOMNodeHighlighter::getOrDrawNodeHighlight
+        eventually call RenderSVGRoot::mapLocalToContainer, passing along local CSS box coordinates.
+
+        However, before this patch, RenderSVGRoot::mapLocalToContainer expected local SVG viewport
+        coordinates. This caused the inspector highlight to be incorrectly sized and positioned.
+
+        Now, RenderSVGRoot::mapLocalToContainer expects local CSS box coordinates, like other HTML
+        renderers.
+
+        Test: inspector/elements/highlight-svg-root.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::getBoundingClientRect):
+            Now, the SVG root element can use the code path for elements with CSS boxes to calculate
+            its bounding client rect.
+
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::mapLocalToContainer):
+            RenderSVGRoot::mapLocalToContainer no longer needs to apply the
+            localToBorderBoxTransform to convert from local SVG viewport coordinates to local CSS
+            box coordinates. Now, it receives local CSS box coordinates.
+
+        * rendering/svg/RenderSVGRoot.h:
+        (WebCore::RenderSVGRoot::localToBorderBoxTransform):
+            RenderSVGRoot::localToBorderBoxTransform has been exposed for child elements in the SVG
+            namespace to use when mapping from local SVG viewport coordinates to local CSS box
+            coordinates.
+
+        (RenderSVGRoot):
+        * rendering/svg/SVGRenderSupport.cpp:
+        (WebCore::SVGRenderSupport::mapLocalToContainer):
+            Elements in the SVG namespace should now apply the localToBorderBoxTransform at the
+            SVG/HTML boundary (aka RenderSVGRoot) when mapping their coordinates up the render tree.
+
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::localCoordinateSpaceTransform):
+            Same as above. This method is eventually used in the SVGLocatable::getScreenCTM
+            calculation.
+
 2012-03-19  Hironori Bono  <hbono@chromium.org>
 
         Add a copy constructor to CollapsedBorderValue
