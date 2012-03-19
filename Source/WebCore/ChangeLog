@@ -1,3 +1,42 @@
+2012-03-19  Emil A Eklund  <eae@chromium.org>
+
+        Correct usage of LayoutUnits in page code in preparation for turning on subpixel layout
+        https://bugs.webkit.org/show_bug.cgi?id=81538
+
+        Reviewed by Eric Seidel.
+
+        Fix usage of LayoutUnits and conversions between types in page code.
+
+        No new tests.
+
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::innerHeight):
+        (WebCore::DOMWindow::innerWidth):
+        Explicitly cast long to int. InspectorInstrumentation requires a long and
+        FractionalLayoutUnit has no constructor that takes long.
+        
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::sendContextMenuEventForKey):
+        Pixel snap overflow rect as selection rects are integer based.
+        
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scrollContentsFastPath):
+        Pixel snap repaint rects when computing update rect as all scrolling is
+        done on integer bounds.
+        
+        * page/GestureTapHighlighter.cpp:
+        Change rects vector to IntRect as addFocusRingRects operates on IntRects.
+        
+        * page/Page.cpp:
+        (WebCore::Page::addRelevantRepaintedObject):
+        (WebCore::Page::addRelevantUnpaintedObject):
+        Change paint methods to take a LayoutRect paint rect.
+        
+        * page/SpatialNavigation.cpp:
+        (WebCore::distanceDataForNode):
+        Change distance calculation to use floats instead of converting to float
+        at the end.
+
 2012-03-19  David Hyatt  <hyatt@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=81553
