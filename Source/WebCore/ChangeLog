@@ -1,3 +1,31 @@
+2012-03-19  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Move the extra logical height distribution into RenderTable as a new step in our layout algorithm
+        https://bugs.webkit.org/show_bug.cgi?id=81548
+
+        Reviewed by Tony Chang.
+
+        Refactoring, no expected change in behavior.
+
+        Moving the distribution step into RenderTable is needed to implement a better distribution algorithm that would
+        span several RenderTableSection (which is what IE and FF are doing right now).
+
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::distributeExtraLogicalHeight):
+        (WebCore::RenderTable::layout):
+        Moved the distribution step into distributeExtraLogicalHeight. While at it, changed the code to make use of the helper
+        methods to iterate over the sections and explicitly floor the LayoutUnit before calling distributeExtraLogicalHeight.
+
+        * rendering/RenderTable.h:
+        Added distributeExtraLogicalHeight.
+
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::layoutRows):
+        Changed the method signature as it doesn't handle the distribution step anymore.
+
+        * rendering/RenderTableSection.h:
+        Updated layoutRows signature and exposed distributeExtraLogicalHeightToRows for RenderTable use.
+
 2012-03-19  Anders Carlsson  <andersca@apple.com>
 
         Another attempt at fixing the Windows build.
