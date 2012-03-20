@@ -1,3 +1,29 @@
+2012-03-20  Jason Liu  <jason.liu@torchmobile.com.cn>
+
+        [BlackBerry]Cookies shouldn't be set into each of webcore's request and platform's request. And this makes a regression.
+        https://bugs.webkit.org/show_bug.cgi?id=80800
+
+        FrameLoaderClientBlackBerry::dispatchWillSendRequest sets cookies to resourceRequest's header
+        list to show cookies in inspector. And NetworkManager::startJob will set cookies to platformRequest's
+        m_cookieData again. So cookies are set two times. This causes performance issue.
+
+        Moreover, platformRequest will copy cookies from the resourceRequest. And then platformRequest has
+        the same cookies in its header list and m_cookieData. Network will use header list's cookies which
+        are output as latin1 only. This causes the regression of https://bugs.webkit.org/show_bug.cgi?id=80307.
+
+        Now, set cookies in initializePlatformRequest to ensure setting cookies only once.
+
+        Reviewed by George Staikos.
+
+        Test: http/tests/cookies/resources/setUtf8Cookies.php
+
+        * platform/network/blackberry/NetworkManager.cpp:
+        (WebCore::NetworkManager::startJob):
+        * platform/network/blackberry/ResourceRequest.h:
+        (ResourceRequest):
+        * platform/network/blackberry/ResourceRequestBlackBerry.cpp:
+        (WebCore::ResourceRequest::initializePlatformRequest):
+
 2012-03-19  Benjamin Poulain  <bpoulain@apple.com>
 
         Build fix for Debug build after r111358
