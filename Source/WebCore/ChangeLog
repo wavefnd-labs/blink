@@ -1,3 +1,25 @@
+2012-03-20  Robert Hogan  <robert@webkit.org>
+
+        Use-after-free of continuation in RenderBlock::paintContinuationOutlines()
+        https://bugs.webkit.org/show_bug.cgi?id=81276
+
+        Reviewed by David Hyatt.
+
+        Test: fast/css/relative-positioned-block-crash.html
+
+        https://trac.webkit.org/changeset/108185/ allowed anonymous blocks to get their own layer (when they're
+        relatively positioned). This broke the dependency in addContinuationWithOutline() on the owner of the continuation
+        table and the renderer getting added to it always being in the same layer. When they're not in the same layer
+        there's no guarantee that the owner of the continuation table will get painted again and so avoid any stale pointers
+        in its continuation table should any of the renderers in there get destroyed.
+
+        Fix this for now by only adding renderers to the containing block's continuation table if we don't have our own layer.
+        This fix causes fast/inline/continuation-outlines-with-layers.html to regress as it uses blocks inside relatively positioned
+        inlines, so skip it on all platforms pending a medium-term fix.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::paintObject):
+
 2012-03-20  Adele Peterson  <adele@apple.com>
 
         "Attempt to insert nil value " exception when calling attributed string APIs on content with a custom font
