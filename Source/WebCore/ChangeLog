@@ -1,3 +1,28 @@
+2012-03-19  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Push culled tiles that are prepainted
+        https://bugs.webkit.org/show_bug.cgi?id=81552
+
+        Reviewed by Adrienne Walker.
+
+        If a tile was culled during paint, but then prepainted in the following
+        idle paint pass, it was still marked as culled (and thus dirty) and not
+        pushed to the impl side.
+
+        Renames tile->m_updateCulled to tile->m_updated. This value is true if
+        the tile is updated any time during a commit, and remains false if it
+        is culled every time the layer is painted.
+
+        Unit test: TiledLayerChromiumTest.pushIdlePaintedOccludedTiles
+
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::UpdatableTile::isDirtyForCurrentFrame):
+        (UpdatableTile):
+        (WebCore::UpdatableTile::UpdatableTile):
+        (WebCore::TiledLayerChromium::updateCompositorResources):
+        (WebCore::TiledLayerChromium::prepareToUpdateTiles):
+        (WebCore::TiledLayerChromium::resetUpdateState):
+
 2012-03-19  Anders Carlsson  <andersca@apple.com>
 
         Fix Snow Leopard build.
