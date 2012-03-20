@@ -1,3 +1,24 @@
+2012-03-20  Adam Klein  <adamk@chromium.org>
+
+        Refactor ContainerNode::replaceChild to match other mutation methods and share code
+        https://bugs.webkit.org/show_bug.cgi?id=81579
+
+        Reviewed by Ojan Vafai.
+
+        Originally landed as r111310, this fixes a bug in replaceChild
+        introduced when switching to the insert-before logic.
+
+        A future change will make use of the consistency among insertBefore/appendChild/replaceChild
+        to handle insertion of DocumentFragments more cleanly.
+
+        No new tests, no change in behavior.
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::replaceChild): Use collectTargetNodes rather than walking through DocumentFragment children.
+        Insert before rather than inserting after. Dispatch to other methods to update parent/sibling pointers.
+        (WebCore::ContainerNode::appendChild): Call appendChildToContainer to update parent/sibling pointers.
+        (WebCore::ContainerNode::parserAddChild): Use type inference in call to appendChildToContainer.
+
 2012-03-20  Jon Lee  <jonlee@apple.com>
 
         Restrict access to notifications for unique origins and file URLs with no local file access
