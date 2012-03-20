@@ -1,3 +1,40 @@
+2012-03-20  Andreas Kling  <kling@webkit.org>
+
+        Let CSSImageValue inherit directly from CSSValue.
+        <http://webkit.org/b/81635>
+
+        Reviewed by Antti Koivisto.
+
+        This removes the last of the CSSPrimitiveValue subclasses, which will
+        open up the class to heavier refactoring.
+
+        Those CSSImageValues that used to represent the 'none' value are now
+        simply created as CSSPrimitiveValue identifiers by the parser.
+
+        Test: fast/css/image-value-type.html
+
+        * css/CSSCursorImageValue.cpp:
+        (WebCore::CSSCursorImageValue::~CSSCursorImageValue):
+        (WebCore::CSSCursorImageValue::updateIfSVGCursorIsUsed):
+        (WebCore::CSSCursorImageValue::cachedImage):
+        * css/CSSImageValue.cpp:
+        (WebCore::CSSImageValue::CSSImageValue):
+        (WebCore::CSSImageValue::cachedOrPendingImage):
+        (WebCore::CSSImageValue::cachedImage):
+        (WebCore::CSSImageValue::customCssText):
+        * css/CSSImageValue.h:
+        (WebCore::CSSImageValue::url):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseFillImage):
+        (WebCore::CSSParser::parseBorderImage):
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::ApplyPropertyCursor::applyValue):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSValue.h:
+        (WebCore::CSSValue::isPrimitiveValue):
+
 2012-03-20  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: call .length as the last check when detecting arrays.
