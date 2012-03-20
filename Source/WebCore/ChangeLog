@@ -1,3 +1,28 @@
+2012-03-20  Alexis Menard  <alexis.menard@openbossa.org>
+
+        Implement a fast path when setting CSS properties with keywords from JS.
+        https://bugs.webkit.org/show_bug.cgi?id=80874
+
+        Reviewed by Antti Koivisto.
+
+        The idea is to avoid the creation of the CSSParser instance and to run the parser on
+        a string we know it should be a keyword. When JS calls parseValue we try to check if we can
+        use the fast path and if the keyword is accepted then we just add it to the declaration directly.
+        For the sake of maintenance the parseValue function used by CSSGrammar.y is sharing some code with
+        the fast path (keyword matching mostly).
+
+        This patch improves this use case by 20%. Setting keyword properties from JS is used a lot in
+        Google Maps for example (when zooming or panning).
+
+        No new tests : it's a performance improvement, there shouldn't be any behavior change.
+
+        * css/CSSParser.cpp:
+        (WebCore):
+        (WebCore::isValidKeywordPropertyAndValue):
+        (WebCore::isKeywordPropertyID):
+        (WebCore::parseKeywordValue):
+        (WebCore::CSSParser::parseValue):
+
 2012-03-20  Ian Vollick  <vollick@chromium.org>
 
         [chromium] Infrastructure to allow animating layers to be only partially updated
