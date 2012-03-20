@@ -1,3 +1,39 @@
+2012-03-19  Florin Malita  <fmalita@google.com>
+
+        Relative-height block SVG root not layed out on container height change
+        https://bugs.webkit.org/show_bug.cgi?id=81513
+
+        Reviewed by Dirk Schulze.
+
+        Tests: svg/custom/svg-percent-scale-block-expected.html
+               svg/custom/svg-percent-scale-block.html
+
+        A couple of places still have style()->logical{Min,Max,}Height percent checks,
+        which do not work for SVG elements. This patch adds a virtual hasRelativeLogicalHeight()
+        RenderBox method to replace the explicit style checks.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlockChildren):
+        Use virtual hasRelativeLogicalHeight() instead of logical height style checks.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::hasRelativeLogicalHeight):
+        (WebCore):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        Add virtual hasRelativeLogicalHeight().
+
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::layout):
+        Use virtual hasRelativeLogicalHeight() instead of logical height style checks, if possible.
+
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::hasRelativeLogicalHeight):
+        (WebCore):
+        * rendering/svg/RenderSVGRoot.h:
+        (RenderSVGRoot):
+        Add hasRelativeLogicalHeight() override.
+
 2012-03-19  Jer Noble  <jer.noble@apple.com>
 
         Assertion failure in RenderBlock::addChildIgnoringAnonymousColumnBlocks when running fullscreen/full-screen-twice-crash.html 
