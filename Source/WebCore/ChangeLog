@@ -1,3 +1,117 @@
+2012-03-20  Ian Vollick  <vollick@chromium.org>
+
+        [chromium] Infrastructure to allow animating layers to be only partially updated
+        https://bugs.webkit.org/show_bug.cgi?id=81106
+
+        Reviewed by James Robinson
+
+        Merged the controller tests in CCLayerAnimationControllerTest
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        (GraphicsLayerChromium):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        (WebCore::LayerChromium::pushPropertiesTo):
+        (WebCore::LayerChromium::setOpacityFromAnimation):
+        (WebCore):
+        (WebCore::LayerChromium::setTransformFromAnimation):
+        (WebCore::LayerChromium::addAnimation):
+        (WebCore::LayerChromium::pauseAnimation):
+        (WebCore::LayerChromium::removeAnimation):
+        (WebCore::LayerChromium::suspendAnimations):
+        (WebCore::LayerChromium::resumeAnimations):
+        (WebCore::LayerChromium::setLayerAnimationController):
+        (WebCore::LayerChromium::hasActiveAnimation):
+        (WebCore::LayerChromium::setAnimationEvent):
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore):
+        (LayerChromium):
+        (WebCore::LayerChromium::id):
+        (WebCore::LayerChromium::opacity):
+        (WebCore::LayerChromium::transform):
+        (WebCore::LayerChromium::bounds):
+        * platform/graphics/chromium/cc/CCActiveAnimation.h:
+        (CCActiveAnimation):
+        * platform/graphics/chromium/cc/CCAnimationEvents.cpp:
+        (WebCore::CCAnimationEvent::CCAnimationEvent):
+        (WebCore::CCAnimationEvent::toFloatAnimationFinishedEvent):
+        (WebCore::CCAnimationEvent::toTransformAnimationFinishedEvent):
+        (WebCore::CCAnimationStartedEvent::create):
+        (WebCore):
+        (WebCore::CCAnimationStartedEvent::CCAnimationStartedEvent):
+        (WebCore::CCFloatAnimationFinishedEvent::create):
+        (WebCore::CCFloatAnimationFinishedEvent::CCFloatAnimationFinishedEvent):
+        (WebCore::CCFloatAnimationFinishedEvent::~CCFloatAnimationFinishedEvent):
+        (WebCore::CCFloatAnimationFinishedEvent::type):
+        (WebCore::CCTransformAnimationFinishedEvent::create):
+        (WebCore::CCTransformAnimationFinishedEvent::CCTransformAnimationFinishedEvent):
+        (WebCore::CCTransformAnimationFinishedEvent::~CCTransformAnimationFinishedEvent):
+        (WebCore::CCTransformAnimationFinishedEvent::type):
+        * platform/graphics/chromium/cc/CCAnimationEvents.h:
+        (WebCore):
+        (WebCore::CCAnimationEvent::targetProperty):
+        (CCAnimationEvent):
+        (CCAnimationStartedEvent):
+        (CCFloatAnimationFinishedEvent):
+        (WebCore::CCFloatAnimationFinishedEvent::finalValue):
+        (CCTransformAnimationFinishedEvent):
+        (WebCore::CCTransformAnimationFinishedEvent::finalValue):
+        * platform/graphics/chromium/cc/CCLayerAnimationController.cpp:
+        (WebCore::CCLayerAnimationController::CCLayerAnimationController):
+        (WebCore::CCLayerAnimationController::create):
+        (WebCore::CCLayerAnimationController::pushAnimationUpdatesTo):
+        (WebCore::CCLayerAnimationController::animate):
+        (WebCore):
+        (WebCore::CCLayerAnimationController::add):
+        (WebCore::CCLayerAnimationController::getActiveAnimation):
+        (WebCore::CCLayerAnimationController::hasActiveAnimation):
+        (WebCore::CCLayerAnimationController::isAnimatingProperty):
+        (WebCore::CCLayerAnimationController::pushNewAnimationsToImplThread):
+        (WebCore::CCLayerAnimationController::removeAnimationsCompletedOnMainThread):
+        (WebCore::CCLayerAnimationController::startAnimationsWaitingForNextTick):
+        (WebCore::CCLayerAnimationController::startAnimationsWaitingForStartTime):
+        (WebCore::CCLayerAnimationController::startAnimationsWaitingForTargetAvailability):
+        (WebCore::CCLayerAnimationController::resolveConflicts):
+        (WebCore::CCLayerAnimationController::purgeFinishedAnimations):
+        (WebCore::CCLayerAnimationController::tickAnimations):
+        * platform/graphics/chromium/cc/CCLayerAnimationController.h:
+        (WebCore):
+        (CCLayerAnimationControllerClient):
+        (WebCore::CCLayerAnimationControllerClient::~CCLayerAnimationControllerClient):
+        (CCLayerAnimationController):
+        * platform/graphics/chromium/cc/CCLayerAnimationControllerImpl.cpp: Removed.
+        * platform/graphics/chromium/cc/CCLayerAnimationControllerImpl.h: Removed.
+        * platform/graphics/chromium/cc/CCLayerAnimationDelegate.h:
+        (CCLayerAnimationDelegate):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::CCLayerImpl):
+        (WebCore::CCLayerImpl::setOpacityFromAnimation):
+        (WebCore):
+        (WebCore::CCLayerImpl::setTransformFromAnimation):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+        (WebCore::CCLayerImpl::id):
+        (WebCore::CCLayerImpl::layerAnimationController):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::CCLayerTreeHost):
+        (WebCore::CCLayerTreeHost::updateAnimations):
+        (WebCore::CCLayerTreeHost::finishCommitOnImplThread):
+        (WebCore::CCLayerTreeHost::didBecomeInvisibleOnImplThread):
+        (WebCore::CCLayerTreeHost::animateLayers):
+        (WebCore):
+        (WebCore::CCLayerTreeHost::animateLayersRecursive):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.cpp:
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::animateLayersRecursive):
+        (WebCore::CCLayerTreeHostImpl::animateLayers):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (WebCore::CCThreadProxy::BeginFrameAndCommitState::BeginFrameAndCommitState):
+
 2012-03-20  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: REGRESSION Detached DOM Nodes are not highlighted
