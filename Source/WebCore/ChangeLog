@@ -1,3 +1,154 @@
+2012-03-20  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Make animVal support type-safe
+        https://bugs.webkit.org/show_bug.cgi?id=81640
+
+        Reviewed by Antti Koivisto.
+
+        Test: svg/animations/force-use-shadow-tree-recreation-while-animating.html
+
+        Redesign animVal support in a type-safe fashion, avoiding the SVGGenericAnimatedType
+        and associated reinterpret_casts, which require all call-sites to assure that the
+        types are safe to cast, before actually calling the method.
+
+        Remove pure virtual animationStarted/Ended/ValueWillChange/ValueDidChange & currentBaseValueVariant methods from SVGAnimatedProperty,
+        and de-virtualize them in classes that inherit from SVGAnimatedProperty, like SVGAnimatedPropertyTearOff, etc.
+
+        Add startAnimValAnimation/stopAnimValAnimation/resetAnimValToBaseVal/animValWillChange/animVallDidChange methods to all
+        SVGAnimatedXXXAnimator classes that currently support animVal (SVGAnimatedLength/LengthList/Number(OptionalNumber)/NumberList/TransformList).
+        Those SVGAnimatedLengthAnimator can cast the generic SVGAnimatedProperty* associated with a certain SVG DOM property, to the real type
+        eg. SVGAnimatedLength (which is a SVGAnimatedPropertyTearOff<SVGLength>). This way we can call those methods, without relying on virtual
+        function calls. Also it makes the "SVGGenericAnimatedType* currentBaseValueVariant()" accessor needless, as we can just call the method
+        right on eg. the SVGAnimatedLength, which gives us the "const SVGLength&" object, instead of a generic pointer type, that we have to
+        reinterpret_cast to some hopefully-matching expected type. The new approach is truly type-safey, but needs a bit more boilerplate code.
+
+        To reduce the amount of copy&paste across the SVGAnimatedXXXAnimator classes, all code is placed in template functions in
+        SVGAnimatedTypeAnimator.h, which can be shared across all SVGAnimatedXXXAnimator classes, that inherit from SVGAnimatedTypeAnimator.
+
+        Test: svg/animations/force-use-shadow-tree-recreation-while-animating.html
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        (WebCore::SVGAnimateElement::resetToBaseValue):
+        (WebCore::SVGAnimateElement::applyResultsToTarget):
+        (WebCore):
+        (WebCore::SVGAnimateElement::targetElementWillChange):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedLengthAnimator::stopAnimValAnimation):
+        (WebCore):
+        (WebCore::SVGAnimatedLengthAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedLengthAnimator::animValWillChange):
+        (WebCore::SVGAnimatedLengthAnimator::animValDidChange):
+        * svg/SVGAnimatedLength.h:
+        (WebCore):
+        (SVGAnimatedLengthAnimator):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedLengthListAnimator::stopAnimValAnimation):
+        (WebCore):
+        (WebCore::SVGAnimatedLengthListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedLengthListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedLengthListAnimator::animValDidChange):
+        * svg/SVGAnimatedLengthList.h:
+        (WebCore):
+        (SVGAnimatedLengthListAnimator):
+        * svg/SVGAnimatedNumber.cpp:
+        (WebCore::SVGAnimatedNumberAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberAnimator::stopAnimValAnimation):
+        (WebCore):
+        (WebCore::SVGAnimatedNumberAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedNumberAnimator::animValWillChange):
+        (WebCore::SVGAnimatedNumberAnimator::animValDidChange):
+        * svg/SVGAnimatedNumber.h:
+        (WebCore):
+        (SVGAnimatedNumberAnimator):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberListAnimator::stopAnimValAnimation):
+        (WebCore):
+        (WebCore::SVGAnimatedNumberListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedNumberListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedNumberListAnimator::animValDidChange):
+        * svg/SVGAnimatedNumberList.h:
+        (WebCore):
+        (SVGAnimatedNumberListAnimator):
+        * svg/SVGAnimatedNumberOptionalNumber.cpp:
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::stopAnimValAnimation):
+        (WebCore):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::animValWillChange):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::animValDidChange):
+        * svg/SVGAnimatedNumberOptionalNumber.h:
+        (WebCore):
+        (SVGAnimatedNumberOptionalNumberAnimator):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::startAnimValAnimation):
+        (WebCore):
+        (WebCore::SVGAnimatedTransformListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedTransformListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedTransformListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedTransformListAnimator::animValDidChange):
+        * svg/SVGAnimatedTransformList.h:
+        (WebCore):
+        (SVGAnimatedTransformListAnimator):
+        * svg/SVGAnimatedType.h:
+        (WebCore):
+        * svg/SVGAnimatedTypeAnimator.h:
+        (WebCore):
+        (SVGAnimatedTypeAnimator):
+        (WebCore::SVGAnimatedTypeAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedTypeAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedTypeAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedTypeAnimator::animValWillChange):
+        (WebCore::SVGAnimatedTypeAnimator::animValDidChange):
+        (WebCore::SVGAnimatedTypeAnimator::findAnimatedPropertiesForAttributeName):
+        (WebCore::SVGAnimatedTypeAnimator::startAnimation):
+        (WebCore::SVGAnimatedTypeAnimator::stopAnimValAnimationForType):
+        (WebCore::SVGAnimatedTypeAnimator::animValDidChangeForType):
+        (WebCore::SVGAnimatedTypeAnimator::animValWillChangeForType):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromOneBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::resetFromOneBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromTwoBaseValues):
+        (WebCore::SVGAnimatedTypeAnimator::resetFromTwoBaseValues):
+        (WebCore::SVGAnimatedTypeAnimator::castAnimatedPropertyToActualType):
+        (WebCore::SVGAnimatedTypeAnimator::collectAnimatedPropertiesFromInstances):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::applyAnimatedValue):
+        (WebCore::SVGAnimationElement::setTargetAttributeAnimatedValue):
+        * svg/SVGAnimationElement.h:
+        (SVGAnimationElement):
+        * svg/SVGElementInstance.cpp:
+        (WebCore::SVGElementInstance::invalidateAllInstancesOfElement):
+        (WebCore::SVGElementInstance::InstanceUpdateBlocker::InstanceUpdateBlocker):
+        (WebCore):
+        (WebCore::SVGElementInstance::InstanceUpdateBlocker::~InstanceUpdateBlocker):
+        * svg/SVGElementInstance.h:
+        (WebCore):
+        (InstanceUpdateBlocker):
+        (SVGElementInstance):
+        * svg/properties/SVGAnimatedListPropertyTearOff.h:
+        (WebCore::SVGAnimatedListPropertyTearOff::currentBaseValue):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedListPropertyTearOff::animValWillChange):
+        (WebCore::SVGAnimatedListPropertyTearOff::animValDidChange):
+        * svg/properties/SVGAnimatedProperty.h:
+        (WebCore):
+        * svg/properties/SVGAnimatedPropertyTearOff.h:
+        (WebCore::SVGAnimatedPropertyTearOff::currentBaseValue):
+        (WebCore::SVGAnimatedPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedPropertyTearOff::animValWillChange):
+        (WebCore::SVGAnimatedPropertyTearOff::animValDidChange):
+        * svg/properties/SVGAnimatedStaticPropertyTearOff.h:
+        (WebCore::SVGAnimatedStaticPropertyTearOff::currentBaseValue):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animValWillChange):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animValDidChange):
+
 2012-03-20  Mihnea Ovidenie  <mihnea@adobe.com>
 
         [CSSRegions]Implement NamedFlow::getRegionsByContentNode
