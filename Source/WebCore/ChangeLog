@@ -1,3 +1,56 @@
+2012-03-21  Levi Weintraub  <leviw@chromium.org>
+
+        Update LayoutUnit usage in descendants of RenderReplaced
+        https://bugs.webkit.org/show_bug.cgi?id=80918
+
+        Reviewed by Eric Seidel.
+
+        Replaced elements have to flow in the new sub-pixel Render Tree, but since the rendering of these
+        often takes place outside of WebCore (or in cases such as foreign objects, in WebCore after
+        passing through platform code), care must be taken to determine the final rendered size and
+        location before render time. This patch brings these classes up to the latest and greatest in the
+        subpixellayout branch.
+
+        See https://trac.webkit.org/wiki/LayoutUnit for more information.
+
+        No new tests. No change in behavior.
+
+        * rendering/RenderFrameBase.cpp:
+        (WebCore::RenderFrameBase::layoutWithFlattening): Build Fix.
+        * rendering/RenderFullScreen.cpp:
+        (RenderFullScreen::createPlaceholder): Ditto.
+        * rendering/RenderFullScreen.h:
+        (RenderFullScreen): Ditto.
+        * rendering/RenderHTMLCanvas.cpp:
+        (WebCore::RenderHTMLCanvas::canvasSizeChanged): Ditto.
+        * rendering/RenderIFrame.cpp:
+        (WebCore::RenderIFrame::computeLogicalHeight): Ditto.
+        (WebCore::RenderIFrame::computeLogicalWidth): Ditto.
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::updateIntrinsicSizeIfNeeded): Intrinsic sizes are always integers, since they
+        originate outside of WebCore.
+        (WebCore::RenderImage::paintIntoRect): Use pixel snapping to paint into an arbitrary rect.
+        (WebCore::RenderImage::computeReplacedLogicalWidth): Intrinsic size is always integral -- rounding
+        values to integers.
+        * rendering/RenderImage.h:
+        (RenderImage):
+        * rendering/RenderVideo.cpp:
+        (WebCore::RenderVideo::videoBox):
+        (WebCore::RenderVideo::paintReplaced): Painting at integer boundaries.
+        * rendering/RenderWidget.cpp:
+        (WebCore):
+        (WebCore::roundedIntRect): Widgets are rendered outside of WebCore, so we always align them to
+        integer boundaries. This means we can actually round the size of our ultimate content box. This
+        function is implemented here specifically to prevent its misuse if we put it elsewhere.
+        (WebCore::RenderWidget::setWidgetGeometry): We simplify layout by taking a LayoutRect and rounding
+        it to its final location within this function.
+        (WebCore::RenderWidget::updateWidgetGeometry): We keep things in LayoutUnits until handing off to
+        setWidgetGeometry.
+        (WebCore::RenderWidget::paint): Rounding the paint location before handing painting off to the
+        widget itself.
+        * rendering/RenderWidget.h:
+        (RenderWidget):
+
 2012-03-21  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: HeapProfiler: support distance column in Summary View.
