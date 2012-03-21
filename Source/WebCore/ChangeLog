@@ -1,3 +1,57 @@
+2012-03-21  Ian Vollick  <vollick@chromium.org>
+
+        [chromium] Animation events should only be used for synchronizing animation start times
+        https://bugs.webkit.org/show_bug.cgi?id=81484
+
+        Reviewed by Adrienne Walker.
+
+        Tested in CCLayerTreeHostTestSynchronizeAnimationStartTimes
+
+        Eliminated animation finished events. Animations will finish naturally on the
+        main thread and the final values will be set.
+
+        Animation started events are now also used to synchronize the main thread
+        animations' start times with their impl thread equivalents, preventing skew.
+        Until main thread animations receive their synchronized start times, they will
+        apply their initial values (i.e., they will be paused at time zero). This
+        guarantees that we will not jump to the animation's final value on the main
+        thread while we wait for the synchronized start time.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::notifyAnimationStarted):
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore):
+        (LayerChromium):
+        * platform/graphics/chromium/cc/CCActiveAnimation.cpp:
+        (WebCore::CCActiveAnimation::CCActiveAnimation):
+        * platform/graphics/chromium/cc/CCActiveAnimation.h:
+        (CCActiveAnimation):
+        (WebCore::CCActiveAnimation::needsSynchronizedStartTime):
+        (WebCore::CCActiveAnimation::setNeedsSynchronizedStartTime):
+        * platform/graphics/chromium/cc/CCAnimationEvents.cpp: Removed.
+        * platform/graphics/chromium/cc/CCAnimationEvents.h:
+        (WebCore::CCAnimationStartedEvent::CCAnimationStartedEvent):
+        (CCAnimationStartedEvent):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerAnimationController.cpp:
+        (WebCore::CCLayerAnimationController::animate):
+        (WebCore::CCLayerAnimationController::notifyAnimationStarted):
+        (WebCore):
+        (WebCore::CCLayerAnimationController::pushNewAnimationsToImplThread):
+        (WebCore::CCLayerAnimationController::startAnimationsWaitingForNextTick):
+        (WebCore::CCLayerAnimationController::startAnimationsWaitingForStartTime):
+        (WebCore::CCLayerAnimationController::startAnimationsWaitingForTargetAvailability):
+        (WebCore::CCLayerAnimationController::purgeFinishedAnimations):
+        (WebCore::CCLayerAnimationController::tickAnimations):
+        * platform/graphics/chromium/cc/CCLayerAnimationController.h:
+        (CCLayerAnimationController):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::updateAnimations):
+        (WebCore::CCLayerTreeHost::setAnimationEventsRecursive):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+
 2012-03-21  Zeno Albisser  <zeno@webkit.org>
 
         [Qt][WK2][Mac] MiniBrowser asserts at HashTable.h:480
