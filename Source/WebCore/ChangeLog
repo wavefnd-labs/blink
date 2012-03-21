@@ -1,3 +1,40 @@
+2012-03-19  Shinya Kawanaka  <shinyak@chromium.org>
+
+        [Crash] RenderMenuList::addChild() in Shadow DOM.
+        https://bugs.webkit.org/show_bug.cgi?id=81201
+
+        Reviewed by Dimitri Glazkov.
+
+        <audio>, <video>, <meter>, <progress>, and <select> are implemented using
+        Shadow DOM having HTMLContentElement. Their renderer children basically should not
+        create a renderer unless they are on the upper shadow encapsulation boundary,
+        which means they are the direct children of the shadow root.
+
+        However, current implementation allows their renderer children to create a renderer
+        even if they are on a lower shadow encapsulation boundary, which means
+        they are distributed elements of HTMLContentElement.
+
+        This patch makes there renderer children not to create a renderer if they are on a lower shadow
+        encapsulation boudary.
+
+        Tests: fast/dom/shadow/content-element-in-media-element.html
+               fast/dom/shadow/content-element-in-meter-element.html
+               fast/dom/shadow/content-element-in-progress-element.html
+               fast/dom/shadow/content-element-in-select-element.html
+
+        * dom/NodeRenderingContext.h:
+        (NodeRenderingContext):
+        (WebCore::NodeRenderingContext::isOnUpperEncapsulationBoundary):
+        (WebCore):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::childShouldCreateRenderer):
+        * html/HTMLMeterElement.cpp:
+        (WebCore::HTMLMeterElement::childShouldCreateRenderer):
+        * html/HTMLProgressElement.cpp:
+        (WebCore::HTMLProgressElement::childShouldCreateRenderer):
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::childShouldCreateRenderer):
+
 2012-03-20  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Store origin/screen space transforms for surface and replica in the surface
