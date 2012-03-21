@@ -1,3 +1,45 @@
+2012-03-21  Tim Horton  <timothy_horton@apple.com>
+
+        Make use of CG rounded-rect primitives
+        https://bugs.webkit.org/show_bug.cgi?id=79932
+        <rdar://problem/9274953>
+
+        Reviewed by Simon Fraser.
+
+        Portions of patch by Nikolas Zimmermann and Mustafizur Rahaman.
+
+        Dispatch to potentially platform-specific rounded rectangle path
+        construction from addPathForRoundedRect. Make use of this to call
+        wkCGPathAddRoundedRect on Lion and above, as long as the rounded
+        corners are all equivalent.
+
+        The origin of the stroke dash differs between the bezier approach
+        and the path added by wkCGPathAddRoundedRect, so Path::addRoundedRect()
+        takes a new parameter allowing code which is sensitive to stroke dash
+        origin (i.e. SVG) to fall back to the old behavior if need be.
+
+        Make use of the new Path::addRoundedRect() parameter to fall back to
+        the old (bezier) rounded-rect behavior when constructing a dashed SVG path,
+        in order to continue complying with the spec.
+
+        No new tests, as this is covered by many that use rounded corners,
+        and is only a performance improvement.
+
+        * WebCore.exp.in:
+        * platform/graphics/Path.cpp:
+        (WebCore::Path::addRoundedRect):
+        (WebCore):
+        (WebCore::Path::addPathForRoundedRect):
+        * platform/graphics/Path.h:
+        (Path):
+        * platform/graphics/cg/PathCG.cpp:
+        (WebCore::Path::platformAddPathForRoundedRect):
+        (WebCore):
+        * platform/mac/WebCoreSystemInterface.h:
+        * platform/mac/WebCoreSystemInterface.mm:
+        * rendering/svg/SVGPathData.cpp:
+        (WebCore::updatePathFromRectElement):
+
 2012-03-21  David Reveman  <reveman@chromium.org>
 
         [Chromium] GL_EXT_occlusion_query_boolean and GL_CHROMIUM_command_buffer_query support.
