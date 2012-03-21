@@ -1,3 +1,50 @@
+2012-03-18  Tim Horton  <timothy_horton@apple.com>
+
+        Infinite repaint loop with SVGImageCache and deferred repaint timers
+        https://bugs.webkit.org/show_bug.cgi?id=78315
+        <rdar://problem/10651634>
+
+        Reviewed by Nikolas Zimmermann.
+
+        Only defer image redraw on a timer if we're in layout. This breaks
+        the repaint loop while still preventing us from drawing inside layout.
+
+        Completely disable repaint during relayout inside SVGImage::drawSVGToImageBuffer,
+        preventing deferred repaint timers from being started during that process.
+
+        No new tests, as the problem only occurs in a nonstandard configuration.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::FrameView):
+        (WebCore::FrameView::reset):
+        (WebCore::FrameView::repaintContentRectangle):
+        (WebCore::FrameView::endDeferredRepaints):
+        (WebCore::FrameView::startDeferredRepaintTimer):
+        (WebCore):
+        (WebCore::FrameView::doDeferredRepaints):
+        (WebCore::FrameView::deferredRepaintTimerFired):
+        (WebCore::FrameView::beginDisableRepaints):
+        (WebCore::FrameView::endDisableRepaints):
+        * page/FrameView.h:
+        (FrameView):
+        (WebCore::FrameView::repaintsDisabled):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::shouldRepaint):
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::drawSVGToImageBuffer):
+        (WebCore::SVGImage::draw):
+        (WebCore::SVGImage::frameView):
+        (WebCore):
+        * svg/graphics/SVGImage.h:
+        (WebCore):
+        * svg/graphics/SVGImageCache.cpp:
+        (WebCore::SVGImageCache::imageContentChanged):
+        (WebCore::SVGImageCache::redraw):
+        (WebCore::SVGImageCache::redrawTimerFired):
+        (WebCore):
+        * svg/graphics/SVGImageCache.h:
+        (SVGImageCache):
+
 2012-03-20  Adam Klein  <adamk@chromium.org>
 
         Include fix for dom/xhtml test promised in r111449.
