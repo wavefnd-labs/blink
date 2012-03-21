@@ -1,3 +1,35 @@
+2012-03-21  Sami Kyostila  <skyostil@chromium.org>
+
+        [chromium] Use floating point scroll deltas for layers
+        https://bugs.webkit.org/show_bug.cgi?id=81546
+
+        Reviewed by James Robinson.
+
+        Use floating point scroll deltas for layers instead of integral scroll
+        deltas. This is because due to page scaling it may be necessary to
+        scroll layers in sub-CSS-pixel steps to avoid visible jumps. When the
+        floating point scroll offset is committed to the main thread, it is
+        truncated to integer, but the fractional part is kept on the CC side to
+        make sure fractional scroll offsets are accumulated correctly over
+        multiple commits.
+
+        Test: CCLayerTreeHostTestFractionalScroll
+
+        * platform/graphics/FloatPoint.h:
+        (WebCore::toSize):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::scrollBy):
+        (WebCore::CCLayerImpl::setScrollDelta):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (WebCore::CCLayerImpl::scrollDelta):
+        (CCLayerImpl):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::startPageScaleAnimation):
+        (WebCore::CCLayerTreeHostImpl::adjustScrollsForPageScaleChange):
+        (WebCore::CCLayerTreeHostImpl::processScrollDeltas):
+        (WebCore::CCLayerTreeHostImpl::animatePageScale):
+
 2012-03-21  Li Yin  <li.yin@intel.com>
 
         [WebSocket]The Sec-WebSocket-Accept MUST NOT appear more than once in an HTTP response
