@@ -1,3 +1,28 @@
+2012-03-21  Eric Carlson  <eric.carlson@apple.com>
+
+        Removing HTMLTrackElement does not delete TextTrack
+        https://bugs.webkit.org/show_bug.cgi?id=80873
+
+        Reviewed by Antti Koivisto.
+
+        No new tests, but media/track/track-language-preference.html has been updated
+        to test this fix.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::didAddTrack): Renamed from trackWasAdded.
+        (WebCore::HTMLMediaElement::willRemoveTrack): Renamed from trackWasRemoved because it is
+        called before the track is removed, to allow the TextTrack to be removed.
+        * html/HTMLMediaElement.h:
+
+        * html/HTMLTrackElement.cpp:
+        (WebCore::HTMLTrackElement::insertedIntoTree): Renamed from insertedIntoDocument
+        (WebCore::HTMLTrackElement::willRemove): Renamed from removedFromDocument.
+        * html/HTMLTrackElement.h:
+
+        * html/track/LoadableTextTrack.cpp:
+        (WebCore::LoadableTextTrack::trackElementIndex): Don't include tracks that are not in the
+        document in the calcualtion.
+
 2012-03-21  Zeno Albisser  <zeno@webkit.org>
 
         [Qt][Mac] ranlib segfaults when creating symbol tables for libWebCore.a.
