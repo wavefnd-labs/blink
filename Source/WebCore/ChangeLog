@@ -1,3 +1,51 @@
+2012-03-20  Jon Lee  <jonlee@apple.com>
+
+        Restrict access to notifications for unique origins and file URLs with no local file access
+        https://bugs.webkit.org/show_bug.cgi?id=79704
+        <rdar://problem/10912430>
+
+        Reviewed by Adam Barth.
+
+        Before checking or requesting permissions, we look at whether we can show notifications based on
+        the security context. If not, we short circuit and do not forward the request to the client.
+
+        * notifications/Notification.cpp:
+        (WebCore::Notification::Notification): Fix a bug where creating a notification goes through slightly
+        different logic for checking permissions than when checking permissions through the
+        notification center.
+        * notifications/NotificationCenter.cpp:
+        (WebCore::NotificationCenter::checkPermission): Check to see if the origin can show notifications.
+        (WebCore::NotificationCenter::requestPermission): If we know whether an origin can show notifications,
+        we asynchronously call the callback with that decision. Otherwise we ask the client.
+
+        Add new variable in the notification center to keep track of pending callbacks when we short-circuit
+        requestPermission().
+        * notifications/NotificationCenter.h:
+        (NotificationRequestCallback): Add new private class encapsulating the callback.
+        * notifications/NotificationCenter.cpp:
+        (WebCore::NotificationCenter::requestTimedOut): Remove the request from the set of pending callbacks.
+        (WebCore::NotificationCenter::NotificationRequest::createAndStartTimer): Because this is used when we already
+        know the decision, and are not asking the client to decide, we can immediately trigger a one-shot timer
+        to invoke the callback.
+        (WebCore::NotificationCenter::NotificationRequest::NotificationRequest):
+        (WebCore::NotificationCenter::NotificationRequest::startTimer):
+        (WebCore::NotificationCenter::NotificationRequest::timerFired): Invoke the callback and tell the notification
+        center.
+        * page/SecurityOrigin.h: Add new toRawString() method to return the string representation of the origin,
+        regardless of any restrictions that might otherwise cause toString() to return "null".
+        * page/SecurityOrigin.cpp:
+        (WebCore::SecurityOrigin::canShowNotifications): Added to return a tri-state regarding whether we know
+        the origin can show notifications. If the origin is unique, we never let it show. If the origin has
+        universal access, we always let it show. Otherwise the client should be asked.
+        (WebCore::SecurityOrigin::toString): Refactor to use toRawString().
+        (WebCore::SecurityOrigin::toRawString):
+
+        Added FIXME's regarding the naming of enforceFilePathSeparation().
+        * dom/Document.cpp:
+        (WebCore::Document::initSecurityContext): Also, tab reformatting.
+
+        * WebCore.exp.in: Export toRawString().
+
 2012-03-20  Mark Pilgrim  <pilgrim@chromium.org>
 
         Move webaudio to Modules/webaudio/
