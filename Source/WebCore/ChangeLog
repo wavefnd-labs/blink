@@ -1,3 +1,36 @@
+2012-03-21  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Shaders] Make CSS Shaders compile on Chromium
+        https://bugs.webkit.org/show_bug.cgi?id=81435
+
+        Reviewed by Stephen White.
+
+        This patch enables the CSS Shaders compile time flag, but keeps the runtime flag disabled.
+        The only way to test the functionality now is to use the overridePreference from dump render tree.
+
+        Also part of this patch I fix a layering violation: I removed the "Document" reference from the FECustomFilter.cpp and passed the
+        HostWindow directly. There should be no problem when the HostWindow changes, because the RenderLayer and the FECustomFilter
+        get recreated anyway.
+
+        No new tests. I've updated the existing custom filter tests to run under Chromium and added the expected results.
+        I've just added window.layoutTestController.overridePreference("WebKitCSSCustomFilterEnabled", "1") to force 
+        enable the feature at runtime. 
+
+        * loader/cache/CachedResource.cpp: Made CachedResource::ShaderResource report as ResourceRequest::TargetIsSubresource for Chromium.
+        (WebCore::cachedResourceTypeToTargetType):
+
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::FECustomFilter): Removed Document and just used the HostWindow directly.
+        (WebCore::FECustomFilter::create):
+        (WebCore::FECustomFilter::initializeContext):
+        (WebCore::FECustomFilter::bindVertexAttribute): There was a typo and instead of using the "size" parameter it always used 4 component attribute.
+        Other drivers didn't complain about it, but it was clearly a bug.
+        (WebCore::FECustomFilter::bindProgramAndBuffers): Reading the image back from GPU will flip vertically the framebuffer in Chromium. I've flipped the
+        projection matrix only on Chromium, so that we get the correct result.
+
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::build): Passing the HostWindow instead of the Document.
+
 2012-03-21  Mark Pilgrim  <pilgrim@chromium.org>
 
         Realphabetize about webaudio move
