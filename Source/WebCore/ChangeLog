@@ -1,5 +1,40 @@
 2012-03-22  Pavel Feldman  <pfeldman@chromium.org>
 
+        Web Inspector: dispatch styleSheetChanged event synchronously.
+        https://bugs.webkit.org/show_bug.cgi?id=81892
+
+        Reviewed by Vsevolod Vlasov.
+
+        Today, backend generates stylesheet change event synchronously from within set* command.
+        But CSSStyleModel defers its dispatching until the stylesheet content is available. This
+        prevents us from ignoring update events from within commands that initiated those updates.
+
+        This change makes stylesheet change event dispatch synchronously and delegates stylesheet
+        content fetching to the event client.
+
+        * inspector/front-end/CSSStyleModel.js:
+        (WebInspector.CSSStyleModel.prototype._fireStyleSheetChanged):
+        (WebInspector.CSSStyleDeclaration.prototype.insertPropertyAt):
+        (WebInspector.CSSStyleModelResourceBinding.prototype.setContent):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._innerSetContent.callbackWrapper):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._innerSetContent):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._styleSheetChanged.callback):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._styleSheetChanged):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._innerStyleSheetChanged):
+
+2012-03-21  Ian Vollick  <vollick@chromium.org>
+
+        [chromium] timing functions are getting incorrectly applied for accelerated css transitions
+        https://bugs.webkit.org/show_bug.cgi?id=81692
+
+        Reviewed by Adrienne Walker.
+
+        Tested in CCLayerTreeHostTestAddAnimationWithTimingFunction
+
+        * platform/graphics/chromium/cc/CCLayerAnimationController.cpp:
+
+2012-03-22  Pavel Feldman  <pfeldman@chromium.org>
+
         Web Inspector: allow on-hover popover while in edit mode.
         https://bugs.webkit.org/show_bug.cgi?id=81898
 
