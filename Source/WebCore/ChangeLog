@@ -1,3 +1,50 @@
+2012-03-22  Kent Tamura  <tkent@chromium.org>
+
+        Expand RenderTextControlSingleLine::controlClipRect() to contain contentRect().
+        https://bugs.webkit.org/show_bug.cgi?id=81866
+
+        Reviewed by Hajime Morita.
+
+        We need to expand the controlClipRect because the existing shadow
+        tree of a text field can be wrapped by another shadow tree. e.g.
+
+        A current situation:
+
+        <input>
+          ┗ ShadowRoot
+             ┗ container element
+        ┌────────────┐<input>'s border box
+        │┌──────────┐│
+        ││container box       ││
+        │└──────────┘│
+        └────────────┘
+
+        Wrapped by another ShadowRoot:
+
+        <input>
+          ┗ New ShadowRoot
+             ┣ <shadow> represents the existing shadow tree
+             ┃  ┗ container element
+             ┗ D: an additional decoration element
+        ┌────────────┐<input>'s border box
+        │┌───────┬──┐│
+        ││container box │ D  ││
+        │└───────┴──┘│
+        └────────────┘
+        In this case, if we clip child renderers by container box, D is not
+        drawn. We should clip by the content box of the <input>.
+
+        A search field has an exceptional behavior. It can have the container
+        box of which height is taller than the content box height. The
+        controlClipRect should contain both of the container box and the content
+        box in this case. In other cases, the container box is equivalent to the
+        content box. So the code always unites them.
+
+        No new tests. This won't make any behavior change for now.
+
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::controlClipRect):
+
 2012-03-22  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] The option element should not be form associated element.
