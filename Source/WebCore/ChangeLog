@@ -1,3 +1,29 @@
+2012-03-21  Tony Chang  <tony@chromium.org>
+
+        refactor flexbox in preparation for flex-line-pack
+        https://bugs.webkit.org/show_bug.cgi?id=81843
+
+        Reviewed by Ojan Vafai.
+
+        Replace WrapReverseContext with a vector of LineContexts that contain
+        the same information, plus values needed for flex-align.
+
+        alignChildren has been moved to after all the lines have been
+        positioned. We want to align children after flex-line-pack has changed
+        the size of each line to avoid unnecessary layouts.
+
+        No new tests, just refactoring.
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::LineContext::LineContext): New struct,
+        holds information needed for wrap-reverse and aligning children.
+        (RenderFlexibleBox::LineContext):
+        (WebCore::RenderFlexibleBox::layoutFlexItems): alignChildren after layout out all the lines rather than after each line.
+        (WebCore::RenderFlexibleBox::layoutAndPlaceChildren): don't alignChildren
+        (WebCore::RenderFlexibleBox::alignChildren): align all flex items, not just a line at a time.
+        (WebCore::RenderFlexibleBox::flipForWrapReverse): Update to use LineContext
+        * rendering/RenderFlexibleBox.h:
+
 2012-03-21  Ryosuke Niwa  <rniwa@webkit.org>
 
         BDI element should have dir=auto by default
