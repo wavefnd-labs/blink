@@ -1,3 +1,32 @@
+2012-03-22  Joe Thomas  <joethomas@motorola.com>
+
+        Make Length Calculation functions non-inline
+        https://bugs.webkit.org/show_bug.cgi?id=81733
+
+        Currently length calculation functions in LengthFunctions.h are inline. These functions are pretty big to be inline.
+        And these functions are expected to grow again when new length units will be introduced in bug 27160.
+
+        A decent rule of thumb is to not inline a function if it is more than 10 lines long. Also it's typically not cost effective to inline
+        functions with loops or switch statements. (Reference: http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Inline_Functions).
+
+        Ran PerformanceTests/Parser/html5-full-render.html on Mac Snow-Leopard with and without the patch and did not see much performance difference.
+
+        Reviewed by Antti Koivisto.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/LengthFunctions.cpp: Added.
+        (WebCore):
+        (WebCore::miminumValueForLength):
+        (WebCore::valueForLength):
+        (WebCore::floatValueForLength):
+        * css/LengthFunctions.h:
+        (WebCore):
+
 2012-03-22  Alexis Menard  <alexis.menard@openbossa.org>
 
         Increase code sharing between CSSParser and CSSPropertyLonghand.
