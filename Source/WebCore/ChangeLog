@@ -1,3 +1,32 @@
+2012-03-22  Anders Carlsson  <andersca@apple.com>
+
+        ASSERT(!needsLayout) in RenderView.cpp when visiting http://www.panic.com/blog/
+        https://bugs.webkit.org/show_bug.cgi?id=81953
+        <rdar://problem/11086998>
+
+        Reviewed by Sam Weinig.
+
+        If a page ends up creating CATiledLayers, CA transactions can be committed outside of the normal
+        CA run loop observer, so we can't call setNeedsDisplay on tile cache layers directly because then
+        we'll end up calling into painting code before all the layers have been flushed.
+
+        Fix this by adding a list of dirty rects to platformCALayerDidCreateTiles and change GraphicsLayerCA to
+        mark them as dirty. This ensures that any CA transaction commits won't cause newly added layers to be painted.
+
+        * platform/graphics/avfoundation/cf/MediaPlayerPrivateAVFoundationCF.cpp:
+        (WebCore::LayerClient::platformCALayerDidCreateTiles):
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::platformCALayerDidCreateTiles):
+        * platform/graphics/ca/GraphicsLayerCA.h:
+        (GraphicsLayerCA):
+        * platform/graphics/ca/PlatformCALayerClient.h:
+        (PlatformCALayerClient):
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::setScale):
+        (WebCore::TileCache::revalidateTiles):
+        * platform/graphics/win/MediaPlayerPrivateQuickTimeVisualContext.cpp:
+        (WebCore::MediaPlayerPrivateQuickTimeVisualContext::LayerClient::platformCALayerDidCreateTiles):
+
 2012-03-19  Robert Hogan  <robert@webkit.org>
 
         Text should overflow when list item height set to 0
