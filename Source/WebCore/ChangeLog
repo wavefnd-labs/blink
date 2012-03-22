@@ -1,3 +1,33 @@
+2012-03-22  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
+        Event dispatching in XMLHttpRequestProgressEventThrottle should go through XMLHttpRequestProgressEventThrottle::dispatchEvent
+        https://bugs.webkit.org/show_bug.cgi?id=46743
+
+        Reviewed by Julien Chaffraix
+        Based on original patch by Anton D'Auria
+
+        In preparation for platform-specific queuing of XMLHttpRequest events,
+        this patch changes all calls to m_target->dispatchEvent to
+        XMLHttpRequestProgressEventThrottle::dispatchEvent.
+        Currently, we queue only one progress event on suspend() if we have
+        throttled progress events. We should be able to queue all XHR events
+        that can be generated after suspend(), if the platform network layer
+        continues to receive data.
+        XMLHttpRequest uses XMLHttpRequestProgressEventThrottle to dispatch only
+        download events, so this doesn't change behavior of upload events, which
+        aren't throttled or queued.
+
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::callReadyStateChangeListener):
+        * xml/XMLHttpRequestProgressEventThrottle.cpp:
+        (WebCore::XMLHttpRequestProgressEventThrottle::dispatchReadyStateChangeEvent):
+        (WebCore::XMLHttpRequestProgressEventThrottle::dispatchEvent):
+        (WebCore::XMLHttpRequestProgressEventThrottle::flushProgressEvent):
+        (WebCore::XMLHttpRequestProgressEventThrottle::dispatchPausedEvent):
+        (WebCore::XMLHttpRequestProgressEventThrottle::fired):
+        * xml/XMLHttpRequestProgressEventThrottle.h:
+        (XMLHttpRequestProgressEventThrottle):
+
 2012-03-22  Sudarsana Nagineni  <sudarsana.nagineni@linux.intel.com>
 
         [EFL] Map BackSpace key code to Unicode value
