@@ -1,3 +1,44 @@
+2012-03-22  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] The option element should not be form associated element.
+        https://bugs.webkit.org/show_bug.cgi?id=79764
+
+        Reviewed by Kent Tamura.
+
+        This patch changes base class of HTMLOptionELement to HTMLElement
+        from HTMLFormControlElement for saving memory space and iteration
+        time of extra "option" elements in HTMLFormElement::m_formAssociatedElements
+        and matching the HTML5 specification for ease of maintenance.
+
+        This patch changes behavior of handling of CSS pseudo classes "invalid"
+        and "valid". The "option" elements no longer use these CSS pseudo classes
+        as HTML5 specification. This bug was filed in https://bugs.webkit.org/show_bug.cgi?id=80088
+
+        Changes of TextIterator is lead by usage of isFormControlElement. This
+        changes will be replaced with more meaningful predicate as part of
+        https://bugs.webkit.org/show_bug.cgi?id=80381
+
+        No new tests but updated select-live-pseudo-selectors.html test.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::canShareStyleWithElement): Added checking of the "option" element and returns false as HTMLFormControlElement.
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOneSelector): Removed isFormControlElement for PseudoDisabled and PseudoChecked.
+        * html/HTMLKeygenElement.cpp:
+        (WebCore::HTMLKeygenElement::HTMLKeygenElement): Removed form parameter of call site of HTMLOptionElement::create.
+        * html/HTMLOptionElement.cpp:
+        (WebCore::HTMLOptionElement::HTMLOptionElement): Removed form parameter which no longer needed. Changed base class in initialization list. Added m_disabled initialization.
+        (WebCore::HTMLOptionElement::create): Removed form parameter which no longer needed.
+        (WebCore::HTMLOptionElement::attach): Changeid base class.
+        (WebCore::HTMLOptionElement::detach): Changed base class.
+        (WebCore::HTMLOptionElement::parseAttribute): Changed base class. Added "disabled" attribute handling.
+        (WebCore::HTMLOptionElement::childrenChanged): Changed base class.
+        (WebCore::HTMLOptionElement::insertedIntoTree): Changed base class.
+        * html/HTMLOptionElement.h:
+        (HTMLOptionElement): Added new member variable m_disabled which was in HTMLFormControlElement.
+        (WebCore::HTMLOptionElement::ownElementDisabled): Changed for using m_disabled.
+        * html/HTMLTagNames.in: Removed constructorNeedsFormElement for the "option" element, which was used for passing form parameter to create function.
+
 2012-03-21  Pavel Podivilov  <podivilov@chromium.org>
 
         Web Inspector: rename ClosureCompilerSourceMapping to SourceMapParser and move it to CompilerScriptMapping.js.
