@@ -1,3 +1,31 @@
+2012-03-22  Levi Weintraub  <leviw@chromium.org>
+
+        Update LayoutUnit usage in FrameSelection
+        https://bugs.webkit.org/show_bug.cgi?id=81754
+
+        Reviewed by Eric Seidel.
+
+        FrameSelection stores its caret and repaint bounds in absolute coordinates. Absolute coordinates
+        we treat as pixel values, so this patch changes these values to integers. Sub-pixel precision
+        will still be used when these coordinates are passed down and used locally.
+
+        No new tests. No change in behavior.
+
+        * editing/FrameSelection.cpp:
+        (WebCore::absoluteCaretY): Uses absolute coordinates, which are ints.
+        (WebCore::FrameSelection::modify): Uses absolute coordinates to handle vertical selection
+        modification. Sub-pixel precision will be used when these values are converted to local ones.
+        (WebCore::CaretBase::absoluteBoundsForLocalRect): Absolute coordinates -> ints.
+        (WebCore::FrameSelection::absoluteCaretBounds): Ditto.
+        (WebCore::CaretBase::caretRepaintRect): The caret repaint rect is stored in absolute coordinates.
+        Reverting the values to ints.
+        (WebCore::FrameSelection::recomputeCaretRect): Ditto.
+        * editing/FrameSelection.h:
+        (FrameSelection):
+        * editing/mac/FrameSelectionMac.mm:
+        (WebCore::FrameSelection::notifyAccessibilityForSelectionChange): Switching to store absolute
+        coordinates as integers.
+
 2012-03-22  Alexei Filippov  <alexeif@chromium.org>
 
         Web Inspector: Speed up the build retainers phase.
