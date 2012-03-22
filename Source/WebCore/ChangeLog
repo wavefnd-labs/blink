@@ -1,3 +1,38 @@
+2012-03-22  Dave Michael  <dmichael@chromium.org>
+
+        HTMLPluginElement is not destroyed on reload or navigation if getNPObject is called
+        https://bugs.webkit.org/show_bug.cgi?id=80428
+
+        Reviewed by Eric Seidel.
+
+        Make HTMLPluginElement release its m_NPObject in detach() to break a
+        reference-counting cycle that happens on reload or navigation. With this
+        change, HTMLPlugInElement::removedFromDocument is unnecessary, so it
+        was removed. Note that Releasing m_NPObject does not result in a call to
+        the plugin; it simply releases a reference count on the wrapper object
+        for this HTMLPlugInElement. (The plugin's NPP_Deallocate is invoked
+        when the render tree is destroyed, when PluginView calls
+        PluginPackage::unload.) Thus, it is safe to release m_NPObject in
+        detach, because it can not result in layout or style changes.
+
+        Also added numberOfLiveNodes() and numberOfLiveDocuments() to
+        window.internals to enable testing.
+
+        Test: plugins/netscape-dom-access-and-reload.html
+
+        * WebCore.exp.in:
+        * html/HTMLPlugInElement.cpp:
+        (WebCore::HTMLPlugInElement::detach):
+        * html/HTMLPlugInElement.h:
+        (HTMLPlugInElement):
+        * testing/Internals.cpp:
+        (WebCore::Internals::numberOfLiveDocuments):
+        (WebCore::Internals::numberOfLiveNodes):
+        (WebCore):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-03-22  Shawn Singh  <shawnsingh@chromium.org>
 
         [chromium] Make CCDamageTracker robust to empty layer lists
