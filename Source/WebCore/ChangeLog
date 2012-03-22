@@ -1,3 +1,23 @@
+2012-03-22  Raphael Kubo da Costa  <rakuco@FreeBSD.org>
+
+        Crash in fast/dom/navigator-detached-nocrash.html
+        https://bugs.webkit.org/show_bug.cgi?id=81773
+
+        Reviewed by Adam Barth.
+
+        BatteryManager::create() blindly assumes the Navigator* it
+        receives has a valid Frame, which is not always the case, as made
+        evident by the crashing test.
+
+        Follow abarth's suggestion and just stop
+        NavigatorBattery::webkitBattery() before it reaches the call to
+        BatteryManager::create() if that's the case.
+
+        No new tests, covered by fast/dom/navigator-detached-nocrash.html.
+
+        * Modules/battery/NavigatorBattery.cpp:
+        (WebCore::NavigatorBattery::webkitBattery):
+
 2012-03-22  Emil A Eklund  <eae@chromium.org>
 
         Unreviewed, add missing include statement for CSSValueList.h.
