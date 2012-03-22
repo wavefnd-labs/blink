@@ -1,3 +1,48 @@
+2012-03-22  Levi Weintraub  <leviw@chromium.org>
+
+        Correct LayoutUnit usage in Accessibility code
+        https://bugs.webkit.org/show_bug.cgi?id=81789
+
+        Reviewed by Eric Seidel.
+
+        Reverting Accessibility hit testing code back to integers. Accessibility hit tests originate from
+        the embedder and don't accumulate offsets, so we get nothing from using LayoutUnits, and needlessly
+        expose them to the embedder.
+
+        No new tests. No change in behavior.
+
+        * accessibility/AccessibilityListBox.cpp:
+        (WebCore::AccessibilityListBox::elementAccessibilityHitTest): See above.
+        * accessibility/AccessibilityListBox.h:
+        (AccessibilityListBox):
+        * accessibility/AccessibilityObject.cpp:
+        (WebCore::AccessibilityObject::clickPoint): This value is only ever used to display a context menu,
+        which is always done with integer coordinates.
+        (WebCore::AccessibilityObject::boundingBoxForQuads): This is a bounding box built from floats. We
+        don't pixel snap floats, so we return an integer bounding box.
+        (WebCore::AccessibilityObject::elementAccessibilityHitTest): See above.
+        (WebCore::AccessibilityObject::scrollToMakeVisible): Pixel snapping the bounding box and simplifying
+        up the code to position it at (0,0).
+        * accessibility/AccessibilityObject.h:
+        (WebCore::AccessibilityObject::accessibilityHitTest): See above.
+        (AccessibilityObject):
+        (WebCore::AccessibilityObject::pixelSnappedBoundingBoxRect): Convenience method for embedder callers.
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::visiblePositionForPoint): The point passed in here is comes from
+        screen coordinates and originates in embedder code. Reverting it to take an integer.
+        (WebCore::AccessibilityRenderObject::accessibilityImageMapHitTest): See above.
+        (WebCore::AccessibilityRenderObject::accessibilityHitTest): See above.
+        * accessibility/AccessibilityRenderObject.h:
+        (AccessibilityRenderObject):
+        * accessibility/AccessibilityScrollView.cpp:
+        (WebCore::AccessibilityScrollView::accessibilityHitTest): See above.
+        * accessibility/AccessibilityScrollView.h:
+        (AccessibilityScrollView):
+        * accessibility/AccessibilitySlider.cpp:
+        (WebCore::AccessibilitySlider::elementAccessibilityHitTest): See above.
+        * accessibility/AccessibilitySlider.h:
+        (AccessibilitySlider):
+
 2012-03-21  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: HeapProfiler: Heap snapshot worker has to report the errors to the front-end
