@@ -1,3 +1,130 @@
+2012-03-21  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=80322
+        Implement image-set
+
+        Reviewed by Dean Jackson.
+
+        This initial implementation of -webkit-image-set. 
+        http://lists.w3.org/Archives/Public/www-style/2012Feb/1103.html
+        The idea behind the feature is to allow authors to provide multiple variants 
+        of the same image at differing resolutions, and to allow the User Agent to 
+        choose the resource that is most appropriate at the time. This patch will 
+        choose the most appropriate image based on device scale factor.
+
+        CSSImageSetValue inherits from CSSValueList and behaves a lot like 
+        CSSImageValue.
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/CSSImageSetValue.h: Added.
+        (WebCore):
+        (CSSImageSetValue):
+        (WebCore::CSSImageSetValue::create):
+        (WebCore::CSSImageSetValue::isPending):
+        (ImageWithScale):
+        (WebCore::CSSImageSetValue::compareByScaleFactor):
+        * css/CSSImageSetValue.cpp: Added.
+        (WebCore):
+        (WebCore::CSSImageSetValue::CSSImageSetValue):
+        (WebCore::CSSImageSetValue::~CSSImageSetValue):
+        (WebCore::CSSImageSetValue::cachedOrPendingImageSet):
+        (WebCore::CSSImageSetValue::customCssText):
+
+        fillImageSet() iterates through the value list and turns the information into 
+        a sorted Vector of ImageWithScales (which is a struct containing image URLs 
+        and scale factors).
+        (WebCore::CSSImageSetValue::fillImageSet):
+
+        cachedImageSet() finds which image is most appropriate based on the device 
+        scale factor, and it loads only that image. In the future, additional scale 
+        factors will be taken into account.
+        (WebCore::CSSImageSetValue::bestImageForScaleFactor):
+        (WebCore::CSSImageSetValue::cachedImageSet):
+
+        parseImageSet() is called everywhere in the CSSParser that a regular image or 
+        generated image can be found.
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseContent):
+        (WebCore::CSSParser::parseFillImage):
+        (WebCore::CSSParser::parseBorderImage):
+        (WebCore):
+        (WebCore::CSSParser::parseImageSet):
+        * css/CSSParser.h:
+
+        Since CSSImageSetValue is implemented as a value list, 
+        ApplyPropertyFillLayer::applyValue() needs to be more specific when it's 
+        looking for a list of multiple URLs.
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::ApplyPropertyFillLayer::applyValue):
+
+        Handle image-set as a valid image value.
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        * css/CSSValue.cpp:
+        (WebCore::CSSValue::cssText):
+        (WebCore::CSSValue::destroy):
+        * css/CSSValue.h:
+        (CSSValue):
+        (WebCore::CSSValue::isImageSetValue):
+
+        computeIntrinsicDimensions() now takes an optional scaleFactor parameter that represents the author-enforced "intrinsic" scale factor of the image.
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::computeIntrinsicDimensions):
+        * loader/cache/CachedImage.h:
+        (CachedImage):
+        * platform/graphics/GeneratedImage.h:
+        (GeneratedImage):
+        * platform/graphics/GeneratorGeneratedImage.cpp:
+        (WebCore::GeneratedImage::computeIntrinsicDimensions):
+        * platform/graphics/Image.cpp:
+        (WebCore::Image::computeIntrinsicDimensions):
+        * platform/graphics/Image.h:
+        (Image):
+        * platform/graphics/cg/PDFDocumentImage.cpp:
+        (WebCore::PDFDocumentImage::computeIntrinsicDimensions):
+        * platform/graphics/cg/PDFDocumentImage.h:
+        (PDFDocumentImage):
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::computeIntrinsicDimensions):
+        * svg/graphics/SVGImage.h:
+        (SVGImage):
+
+        Inherits from StyleImage and returns a scaled size for imageSize() and 
+        computeIntrinsicDimensions().
+        * rendering/style/StyleCachedImageSet.cpp: Added.
+        (WebCore):
+        (WebCore::StyleCachedImageSet::StyleCachedImageSet):
+        (WebCore::StyleCachedImageSet::cssValue):
+        (WebCore::StyleCachedImageSet::canRender):
+        (WebCore::StyleCachedImageSet::isLoaded):
+        (WebCore::StyleCachedImageSet::errorOccurred):
+        (WebCore::StyleCachedImageSet::imageSize):
+        (WebCore::StyleCachedImageSet::imageHasRelativeWidth):
+        (WebCore::StyleCachedImageSet::imageHasRelativeHeight):
+        (WebCore::StyleCachedImageSet::computeIntrinsicDimensions):
+        (WebCore::StyleCachedImageSet::usesImageContainerSize):
+        (WebCore::StyleCachedImageSet::setContainerSizeForRenderer):
+        (WebCore::StyleCachedImageSet::addClient):
+        (WebCore::StyleCachedImageSet::removeClient):
+        (WebCore::StyleCachedImageSet::image):
+        * rendering/style/StyleCachedImageSet.h: Added.
+        (WebCore):
+        (StyleCachedImageSet):
+        (WebCore::StyleCachedImageSet::create):
+        (WebCore::StyleCachedImageSet::data):
+        (WebCore::StyleCachedImageSet::cachedImage):
+
+        Handle image-set.
+        * rendering/style/StyleImage.h:
+        (WebCore::StyleImage::isCachedImageSet):
+        (WebCore::StyleImage::StyleImage):
+        (StyleImage):
+        * rendering/style/StylePendingImage.h:
+        (StylePendingImage):
+        (WebCore::StylePendingImage::cssImageSetValue):
+
 2012-03-21  David Barton  <dbarton@mathscribe.com>
 
         MathML internals - improve naming in RenderMathMLSquareRoot.cpp and RenderMathMLRoot.cpp
