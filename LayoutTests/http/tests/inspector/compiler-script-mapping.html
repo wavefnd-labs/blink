@@ -23,7 +23,7 @@ function test()
     }
 
     InspectorTest.runTestSuite([
-        function testSimpleMapping(next)
+        function testSimpleMap(next)
         {
             /*
                 example.js:
@@ -45,7 +45,7 @@ function test()
                 "mappings":"AAASA,QAAAA,IAAG,CAACC,CAAD,CAAaC,CAAb,CACZ,CACI,MAAOD,EAAP,CAAoBC,CADxB,CAIA,IAAIC,OAAS;",
                 "sources":["example.js"]
             };
-            var mapping = new WebInspector.ClosureCompilerSourceMapping();
+            var mapping = new WebInspector.SourceMapParser();
             mapping._parseMappingPayload(mappingPayload);
 
             checkMapping(0, 9, "example.js", 0, 9, mapping);
@@ -71,7 +71,7 @@ function test()
                 "mappings":"AAAA,C,CAAE;",
                 "sources":["example.js"]
             };
-            var mapping = new WebInspector.ClosureCompilerSourceMapping();
+            var mapping = new WebInspector.SourceMapParser();
             mapping._parseMappingPayload(mappingPayload);
             checkMapping(0, 0, "example.js", 0, 0, mapping);
             checkMapping(0, 2, "example.js", 0, 2, mapping);
@@ -84,7 +84,7 @@ function test()
                 "mappings":"AAAA;;;CACA",
                 "sources":["example.js"]
             };
-            var mapping = new WebInspector.ClosureCompilerSourceMapping();
+            var mapping = new WebInspector.SourceMapParser();
             mapping._parseMappingPayload(mappingPayload);
             checkMapping(0, 0, "example.js", 0, 0, mapping);
             checkReverseMapping(3, 1, "example.js", 1, mapping);
@@ -108,7 +108,7 @@ function test()
                     }
                 }
             ]};
-            var mapping = new WebInspector.ClosureCompilerSourceMapping();
+            var mapping = new WebInspector.SourceMapParser();
             mapping._parseMappingPayload(mappingPayload);
             InspectorTest.assertEquals(2, mapping.sources().length);
             checkMapping(0, 0, "source1.js", 0, 0, mapping);
@@ -118,9 +118,9 @@ function test()
             next();
         },
 
-        function testResolveSourceMappingURL(next)
+        function testResolveSourceMapURL(next)
         {
-            var func = WebInspector.ClosureCompilerSourceMapping.prototype._canonicalizeURL;
+            var func = WebInspector.SourceMapParser.prototype._canonicalizeURL;
             InspectorTest.assertEquals("http://example.com/map.json", func("http://example.com/map.json", "http://example.com/script.js"));
             InspectorTest.assertEquals("http://example.com/map.json", func("/map.json", "http://example.com/script.js"));
             InspectorTest.assertEquals("http://example.com/scripts/../maps/map.json", func("../maps/map.json", "http://example.com/scripts/script.js"));
@@ -193,7 +193,7 @@ function test()
             }
         },
 
-        function testCompilerSourceMappingCouldNotBeLoaded(next)
+        function testSourceMapCouldNotBeLoaded(next)
         {
             WebInspector.debuggerModel._scripts = [];
             var mainScriptMapping = new WebInspector.MainScriptMapping();
@@ -218,6 +218,6 @@ function test()
 </head>
 
 <body onload="runTest()">
-<p>Tests ClosureCompilerSourceMapping.</p>
+<p>Tests SourceMapParser and CompilerScriptMapping.</p>
 </body>
 </html>
