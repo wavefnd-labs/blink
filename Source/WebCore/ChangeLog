@@ -1,3 +1,32 @@
+2012-03-22  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Enable style sharing for elements with a style attribute
+        https://bugs.webkit.org/show_bug.cgi?id=81523
+
+        Reviewed by Antti Koivisto.
+
+        Memory improvement change only.
+
+        Overall, this is a performance wash (some benchmarks may regress a bit due to the increase in time taken
+        by CSSStyleSelector::locateSharedStyle as we try more nodes, others increase their performance due to style sharing).
+
+        Instrumenting our style sharing, this should give us some nice memory shavings on some benchmarks:
+        - HTML5 isn't impacted as it doesn't use much inline style
+        - page cyclers' intl1 showed a 6% increase in style sharing.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::canShareStyleWithElement):
+        This method now handles inline style like presentation attributes on the element.
+
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        (WebCore::CSSStyleSelector::locateSharedStyle):
+        Don't bail out for an element with an inline style declaration.
+
+        (WebCore::CSSStyleSelector::stylesEqual):
+        Generalized attributeStylesEqual to share the logic between attribute and
+        inline style property set. This means that attribute checks are actually
+        doing a little extra more work but that didn't impact our benchmarks.
+
 2012-03-22  Kevin Ollivier  <kevino@theolliviers.com>
 
         [wx] Unreviewed. WebDOM build fix after array type changes.
