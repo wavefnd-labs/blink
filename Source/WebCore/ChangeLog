@@ -1,3 +1,39 @@
+2012-03-22  Kentaro Hara  <haraken@chromium.org>
+
+        run-bindings-tests output a lot of errors in TestSerializedScriptValueInterface.idl
+        https://bugs.webkit.org/show_bug.cgi?id=81852
+
+        Reviewed by Adam Barth.
+
+        run-bindings-tests output a lot of errors in TestSerializedScriptValueInterface.idl:
+
+        Use of uninitialized value in string eq at WebCore/bindings/scripts/CodeGeneratorJS.pm line 2743.
+        Use of uninitialized value $name in substitution (s///) at WebCore/bindings/scripts/CodeGenerator.pm line 119.
+        Use of uninitialized value $type in string eq at WebCore/bindings/scripts/CodeGeneratorJS.pm line 2969.
+        Use of uninitialized value $type in string eq at WebCore/bindings/scripts/CodeGeneratorJS.pm line 2972.
+        Use of uninitialized value $type in hash element at WebCore/bindings/scripts/CodeGenerator.pm line 367.
+        Use of uninitialized value $type in hash element at WebCore/bindings/scripts/CodeGenerator.pm line 368.
+        ...
+
+        This is because [Constructor(...)] does not yet support [Optional] arguments.
+        It just supports [Optional=DefaultIsUndefined] and [Optional=DefaultIsNullString] arguments:
+        https://trac.webkit.org/wiki/WebKitIDL#Constructor
+
+        This patch replaces [Optional] with [Optional=DefaultIsUndefined]
+        in TestSerializedScriptValueInterface.idl.
+
+        Test: bindings/scripts/test/TestSerializedScriptValueInterface.idl
+
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateConstructorDefinition):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateConstructorCallback):
+        * bindings/scripts/test/JS/JSTestSerializedScriptValueInterface.cpp:
+        (WebCore::JSTestSerializedScriptValueInterfaceConstructor::constructJSTestSerializedScriptValueInterface):
+        * bindings/scripts/test/TestSerializedScriptValueInterface.idl:
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::V8TestSerializedScriptValueInterface::constructorCallback):
+
 2012-03-22  Michal Mocny  <mmocny@google.com>
 
         [chromium] LayerRendererChromium should use GpuMemoryAllocationChanged callback to explicitly manage framebuffer.
