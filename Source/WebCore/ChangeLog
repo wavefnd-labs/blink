@@ -1,3 +1,29 @@
+2012-03-23  Simon Fraser  <simon.fraser@apple.com>
+
+        Move code that calls setAcceleratesDrawing() on GraphicsLayers into RenderLayerBacking
+        https://bugs.webkit.org/show_bug.cgi?id=82092
+
+        Reviewed by Dean Jackson.
+
+        A RenderLayerBacking manages several GraphicsLayers, but RenderLayerCompositor
+        was only calling setAcceleratesDrawing() on the one it knows about. Fix by moving
+        this setting code down into RenderLayerBacking.
+        
+        RenderLayerCompositor now caches the setAcceleratesDrawing setting, as it does
+        for other compositing-related settings, so that RenderLayerBacking doesn't have
+        to grovel for Settings every time.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::createGraphicsLayer):
+        (WebCore::RenderLayerBacking::createPrimaryGraphicsLayer):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::RenderLayerCompositor):
+        (WebCore::RenderLayerCompositor::cacheAcceleratedCompositingFlags):
+        (WebCore::RenderLayerCompositor::updateBacking):
+        * rendering/RenderLayerCompositor.h:
+        (WebCore::RenderLayerCompositor::acceleratedDrawingEnabled):
+        (RenderLayerCompositor):
+
 2012-03-23  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=82083
