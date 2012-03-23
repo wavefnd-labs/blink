@@ -10,12 +10,12 @@ def web_socket_do_extra_handshake(request):
 
 def web_socket_transfer_data(request):
     # pywebsocket does not mask message by default. We need to build a frame manually to mask it.
-    request.connection.write(stream.create_text_frame('First message', mask=True))
+    request.connection.write(stream.create_text_frame('First message', mask=False))
 
-    request.connection.write(stream.create_text_frame('Fragmented ', opcode=common.OPCODE_TEXT, fin=0, mask=True))
-    request.connection.write(stream.create_text_frame('message', opcode=common.OPCODE_CONTINUATION, fin=1, mask=True))
+    request.connection.write(stream.create_text_frame('Fragmented ', opcode=common.OPCODE_TEXT, fin=0, mask=False))
+    request.connection.write(stream.create_text_frame('message', opcode=common.OPCODE_CONTINUATION, fin=1, mask=False))
 
-    request.connection.write(stream.create_text_frame('', mask=True))
+    request.connection.write(stream.create_text_frame('', mask=False))
 
     msgutil.send_message(request, 'END')
 
@@ -30,6 +30,6 @@ def web_socket_transfer_data(request):
 
     # Send a masked close frame. Clients should be able to handle this frame and
     # the WebSocket object should be closed cleanly.
-    request.connection.write(stream.create_close_frame('', mask=True))
+    request.connection.write(stream.create_close_frame('', mask=False))
 
     raise handshake.AbortedByUserException('Abort the connection') # Prevents pywebsocket from starting its own closing handshake.

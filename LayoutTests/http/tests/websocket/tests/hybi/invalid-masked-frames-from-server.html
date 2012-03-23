@@ -7,42 +7,31 @@
 <div id="description"></div>
 <div id="console"></div>
 <script>
-description("Receive masked WebSocket frames.");
+description("Test whether WebSocket aborts the connection when it receives an masked frames from server.");
 
 window.jsTestIsAsync = true;
 if (window.layoutTestController)
     layoutTestController.overridePreference("WebKitHixie76WebSocketProtocolEnabled", 0);
 
-var url = "ws://localhost:8880/websocket/tests/hybi/masked-frames";
+var url = "ws://localhost:8880/websocket/tests/hybi/invalid-masked-frames-from-server";
 var ws = new WebSocket(url);
 var closeEvent;
-var expectedMessages = ["First message", "Fragmented message", ""];
-var actualMessages = [];
 
 ws.onopen = function()
 {
     debug("onopen() was called.");
-    ws.close();
 };
 
 ws.onmessage = function(event)
 {
     var message = event.data;
-    debug("onmessage() was called. (message = \"" + message + "\")");
-    if (message === "END") {
-        ws.close();
-        return;
-    }
-    actualMessages.push(message);
+    testFailed("onmessage() was called. (message = \"" + message + "\")");
 };
 
 ws.onclose = function(event)
 {
     closeEvent = event;
-    shouldBeTrue("actualMessages.length === expectedMessages.length");
-    for (var i = 0; i < expectedMessages.length; ++i)
-        shouldBeEqualToString("actualMessages[" + i + "]", expectedMessages[i]);
-    shouldBeTrue("closeEvent.wasClean");
+    shouldBeFalse("closeEvent.wasClean");
     finishJSTest();
 };
 
