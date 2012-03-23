@@ -1,3 +1,39 @@
+2012-03-23  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Improved composited debug borders
+        https://bugs.webkit.org/show_bug.cgi?id=82071
+
+        Reviewed by Adrienne Walker.
+
+        Fix the problem with missing debug borders. Since we append quads
+        to the list front to back now, we draw the quads in the list from
+        back to front of the list. Which means if the debug quad is added
+        after the layer it is drawing around, the layer can draw over top
+        of its debug quad. Reverse the ordering when appending to fix it.
+
+        Make the border red around tiles that are checkerboarded. Missing
+        tiles in non-root layers are drawn clear, so this makes them more
+        visible.
+
+        Put a blue border around each render surface, and a purple border
+        on their replicas.
+
+        No new tests.
+
+        * platform/graphics/chromium/cc/CCRenderPass.cpp:
+        (WebCore):
+        (WebCore::CCRenderPass::appendQuadsForLayer):
+        (WebCore::CCRenderPass::appendQuadsForRenderSurfaceLayer):
+        * platform/graphics/chromium/cc/CCRenderSurface.cpp:
+        (WebCore::CCRenderSurface::hasReplica):
+        (WebCore):
+        (WebCore::CCRenderSurface::createReplicaSharedQuadState):
+        * platform/graphics/chromium/cc/CCRenderSurface.h:
+        (CCRenderSurface):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.cpp:
+        (WebCore):
+        (WebCore::CCTiledLayerImpl::appendQuads):
+
 2012-03-23  Simon Fraser  <simon.fraser@apple.com>
 
         Move code that calls setAcceleratesDrawing() on GraphicsLayers into RenderLayerBacking
