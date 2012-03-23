@@ -1,3 +1,38 @@
+2012-03-23  Adam Klein  <adamk@chromium.org>
+
+        Match DOM4 spec with respect to DocumentFragment insertion
+        https://bugs.webkit.org/show_bug.cgi?id=82089
+
+        Reviewed by Ryosuke Niwa.
+
+        DOM4 specifies the behavior of appendChild, insertBefore, and replaceChild
+        in terms of "mutation algorithms":
+
+        http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#mutation-algorithms
+
+        This change updates WebKit to match, in particular with regard to DocumentFragments.
+        Previously, ContainerNode would remove nodes one at a time, then add them to the new parent.
+        When combined with MutationObservers, this results in overly-verbose mutation records.
+        Now we create as few records as possible, matching the spec as well as Gecko's implementation
+        of MutationObservers.
+
+        Note that we still need to check validity each time through the loop,
+        since inserting a node may dispatch events. In a future change, I hope
+        to move these events so that they fire only after all nodes are inserted,
+        but that's too much to tackle all in one.
+
+        Tests: fast/mutation/document-fragment-insertion.html
+
+        * dom/ContainerNode.cpp:
+        (WebCore::collectChildrenAndRemoveFromOldParent): New helper method
+        combining collectTargetNodes() with the removal of the collected nodes from
+        their old parent, if any.
+        (WebCore::ContainerNode::insertBefore): Use new helper method instead
+        of removing nodes one at a time from the fragment.
+        (WebCore::ContainerNode::replaceChild): ditto. Also removed some redundant asserts
+        and moved the "do nothing" check out of the loop.
+        (WebCore::ContainerNode::appendChild): Use new helper method.
+
 2012-03-23  Stephen White  <senorblanco@chromium.org>
 
         [skia] Switch to Skia's implementation of the feMorphology filter.
