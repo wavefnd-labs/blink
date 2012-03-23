@@ -1,3 +1,33 @@
+2012-03-23  Adam Barth  <abarth@webkit.org>
+
+        Move Notifications APIs from DOMWindow.idl to DOMWindowNotifications.idl (Part 3)
+        https://bugs.webkit.org/show_bug.cgi?id=82027
+
+        Reviewed by Kentaro Hara.
+
+        Rather than watching for willDetachPage, NotificationCenter can just
+        override ActiveDOMObject::stop directly to be notified when it needs to
+        stop.
+
+        Switching NotificationCenter over to using ActiveDOMObject callbacks
+        frees DOMWindowNotification to implement reconnectFrame.  However, this
+        is only really a victory in princple because NotificationCenter always
+        returns false for canSuspend(), which means we'll never actually use
+        the reconnectFrame functionality.  However, this patch does move us
+        closer to the time when NotificationCenter can implement
+        ActiveDOMObject::suspend/resume to play nice with the PageCache.
+
+        * notifications/DOMWindowNotifications.cpp:
+        (WebCore::DOMWindowNotifications::disconnectFrame):
+        (WebCore::DOMWindowNotifications::reconnectFrame):
+        * notifications/DOMWindowNotifications.h:
+        (DOMWindowNotifications):
+        * notifications/NotificationCenter.cpp:
+        (WebCore::NotificationCenter::NotificationCenter):
+        (WebCore::NotificationCenter::stop):
+        * notifications/NotificationCenter.h:
+        (NotificationCenter):
+
 2012-03-23  Daniel Cheng  <dcheng@chromium.org>
 
         [chromium] Support file drag out using DataTransferItemList::add(File)
