@@ -1,3 +1,53 @@
+2012-03-23  Kent Tamura  <tkent@chromium.org>
+
+        Add TextFieldDecorator and TextFieldDecorationElement
+        https://bugs.webkit.org/show_bug.cgi?id=80580
+
+        Reviewed by Dimitri Glazkov.
+
+        These classes will be used to add a decoration icon to a text field
+        <input> from outside of WebCore. We have a plan to use them in Chromium
+        port. So this patch doesn't add TextFieldDecorationElement.{cpp,h} to
+        non-Chromium build files.
+
+        How it works:
+        When a shadow subtree for a text field is created, we ask ChromeClient
+        to decorate it. ChromeClient appends a TextFieldDecorationElement to the
+        existing shadow subtree or another shadow tree. A TextFieldDecorator is
+        associated to a TextFieldDecorationElement, and it provides decoration
+        icon images and a click handler.
+
+        No new tests. This patch won't make any behavior change for now.
+
+        * WebCore.gypi: Add TextFieldDecorationElement.cpp and TextFieldDecorationElement.h
+        * dom/Element.h:
+        (WebCore::Element::isTextFieldDecoration):
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::createShadowSubtree):
+        Calls ChromeClient::willAddTextFieldDecorationsTo() and addTextFieldDecorationsTo().
+        * html/shadow/TextFieldDecorationElement.cpp: Added.
+        (WebCore::TextFieldDecorator::~TextFieldDecorator):
+        (WebCore::TextFieldDecorationElement::TextFieldDecorationElement):
+        (WebCore::TextFieldDecorationElement::create):
+        (WebCore::TextFieldDecorationElement::isTextFieldDecoration):
+        (WebCore::TextFieldDecorationElement::updateImage):
+        (WebCore::TextFieldDecorationElement::customStyleForRenderer):
+        Sets the size to a square of the font-size.
+        (WebCore::TextFieldDecorationElement::createRenderer):
+        Always creates a RenderImage.
+        (WebCore::TextFieldDecorationElement::attach):
+        Sets an image for appropriate state.
+        (WebCore::TextFieldDecorationElement::isMouseFocusable):
+        (WebCore::TextFieldDecorationElement::defaultEventHandler):
+        Delegate a click event to the corresponding function of TextFieldDecorator.
+        * html/shadow/TextFieldDecorationElement.h: Added.
+        (TextFieldDecorator): Added.
+        (TextFieldDecorationElement): Added.
+        (WebCore::toTextFieldDecorationElement): Added.
+        * page/ChromeClient.h:
+        (WebCore::ChromeClient::willAddTextFieldDecorationsTo): Add an empty implementation.
+        (WebCore::ChromeClient::addTextFieldDecorationsTo): ditto.
+
 2012-03-23  Adam Klein  <adamk@chromium.org>
 
         Match DOM4 spec with respect to DocumentFragment insertion
