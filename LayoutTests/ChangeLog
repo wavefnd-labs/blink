@@ -1,3 +1,32 @@
+2012-03-23  Sami Kyostila  <skyostil@chromium.org>
+
+        Reuse buffer allocation if canvas size does not change
+        https://bugs.webkit.org/show_bug.cgi?id=80871
+
+        Reviewed by Stephen White.
+
+        Add layout test to check canvas resizing without changing its layout size.
+
+        We also update the expected image one canvas clearing test. The test
+        is setting the size of a canvas and expecting it to be cleared in the process.
+        With the optimization to retain the underlying ImageBuffer, we no longer call
+        RenderReplaced::repaint() as a part of this process. This function used to
+        repaint both the canvas itself (100x50) as well as its local selection
+        rectangle (100x54).
+
+        In this case the local selection rectangle is larger than the canvas because
+        the canvas is contained within an anonymous RenderBlock that also has two empty
+        text nodes. The extra 4 pixels are needed for drawing the selection rectangle
+        around any descenders in the the text of those nodes.
+
+        Since clearing the canvas has no effect on the selection rectangle, we only
+        need to repaint the area of the canvas itself.
+
+        * fast/canvas/canvas-resize-after-paint-without-layout.html: Added.
+        * fast/canvas/canvas-resize-after-paint-without-layout-expected.txt: Added.
+        * platform/chromium-linux/fast/canvas/canvas-resize-after-paint-without-layout-expected.png: Added.
+        * platform/chromium-linux/fast/canvas/setWidthResetAfterForcedRender-expected.png: Updated.
+
 2012-03-23  Dan Bernstein  <mitz@apple.com>
 
         Added all tests that failed more than once on the Lion WebKit2 Release bot between r111814
