@@ -1,3 +1,39 @@
+2012-03-23  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=82083
+        Too many ScrollAnimators are allocated on pages with frames
+
+        Reviewed by Geoffrey Garen.
+
+        This patch adds a new getter to ScrollableArea called 
+        getExistingScrollAnimator() unlike scrollAnimator() this new function will 
+        just return null if there is not already a ScrollAnimator. Callers should use 
+        this new function when they have business with ScrollAnimator that does not 
+        need to do anything when there are no scrollbars.
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::transitionToCommitted):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleGestureTapDown):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::setAnimatorsAreActive):
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::updateScrollbars):
+        * platform/ScrollableArea.cpp:
+        (WebCore::ScrollableArea::willStartLiveResize):
+        (WebCore::ScrollableArea::willEndLiveResize):
+        (WebCore::ScrollableArea::contentAreaWillPaint):
+        (WebCore::ScrollableArea::mouseEnteredContentArea):
+        (WebCore::ScrollableArea::mouseExitedContentArea):
+        (WebCore::ScrollableArea::mouseMovedInContentArea):
+        (WebCore::ScrollableArea::contentAreaDidShow):
+        (WebCore::ScrollableArea::contentAreaDidHide):
+        (WebCore::ScrollableArea::willRemoveHorizontalScrollbar):
+        (WebCore::ScrollableArea::contentsResized):
+        (WebCore::ScrollableArea::serviceScrollAnimations):
+        * platform/ScrollableArea.h:
+        (ScrollableArea):
+        (WebCore::ScrollableArea::getExistingScrollAnimator):
+
 2012-03-23  Eric Carlson  <eric.carlson@apple.com>
 
         Deal with DOM modifications when evaluating source elements.
