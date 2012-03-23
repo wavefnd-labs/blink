@@ -1,3 +1,38 @@
+2012-03-23  Adam Barth  <abarth@webkit.org>
+
+        Move Notifications APIs from DOMWindow.idl to DOMWindowNotifications.idl (Part 2)
+        https://bugs.webkit.org/show_bug.cgi?id=82026
+
+        Reviewed by Kentaro Hara.
+
+        This patch removes DOMWindow::resetNotifications, which was unneeded
+        special-case logic for clearing the notifications center.  The previous
+        patch that tried to accomplish the same thing did not override
+        willDetachPage, which is why it caused crashes.
+
+        There's actually a cleaner way to handle these cases, which will let us
+        implement reconnectFrame, but that will need to wait for the next
+        patch.
+
+        * notifications/DOMWindowNotifications.cpp:
+        (WebCore::DOMWindowNotifications::DOMWindowNotifications):
+        (WebCore::DOMWindowNotifications::from):
+        (WebCore::DOMWindowNotifications::webkitNotifications):
+        (WebCore):
+        (WebCore::DOMWindowNotifications::disconnectFrame):
+        (WebCore::DOMWindowNotifications::willDetachPage):
+        (WebCore::DOMWindowNotifications::reset):
+        * notifications/DOMWindowNotifications.h:
+        (DOMWindowNotifications):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::willDetachPage):
+        (WebCore::DOMWindow::disconnectDOMWindowProperties):
+        (WebCore::DOMWindow::clearDOMWindowProperties):
+        * page/DOMWindow.h:
+        (DOMWindow):
+        * page/Frame.cpp:
+        (WebCore::Frame::willDetachPage):
+
 2012-03-22  Adam Barth  <abarth@webkit.org>
 
         Move Notifications APIs from DOMWindow.idl to DOMWindowNotifications.idl (Part 1)
