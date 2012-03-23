@@ -1,3 +1,35 @@
+2012-03-23  Ryosuke Niwa  <rniwa@webkit.org>
+
+        CSSParser doesn't set border-*-width/style/color to initial by border shorthand property
+        https://bugs.webkit.org/show_bug.cgi?id=82040
+
+        Reviewed by Antti Koivisto.
+
+        The border shorthand property sets values for border-width, border-style, and border-color shorthand properties.
+        While CSSParser::parseValue can process these shorthand properties properly and set the longhand properties
+        such as border-top-width, border-right-width, ... border-left-color, CSSParser::addProperty can't and the
+        initialization in parseShorthand fails for the border property.
+
+        Fixed the bug by explicitly initializing longhand properties.
+
+        Changing the behavior here is unlikely to break the Web since our behavior already differs from that of Firefox
+        and Internet Explorer. Both of those browsers return the actual initial values such as "medium" and "currentColor".
+        This discrepancy is tracked by https://bugs.webkit.org/show_bug.cgi?id=82078.
+
+        Test: fast/css/border-shorthand-initialize-longhands.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue): Uses borderAbridgedLonghand.
+        (WebCore::CSSParser::parseShorthand): Uses longhand properties for initialization if one is available.
+        This allows us to initialize multiple properties (e.g. border-*-color) for a single property missing in the set.
+        * css/CSSPropertyLonghand.cpp:
+        (WebCore::borderAbridgedLonghand): Added. The longhand here (border-width, border-style, border-color) is
+        "abridged" in the sense that they're still shorthands.
+        * css/CSSPropertyLonghand.h:
+        (WebCore::CSSPropertyLonghand::CSSPropertyLonghand):
+        (CSSPropertyLonghand): Added the version that takes longhand instances for initialization purposes.
+        (WebCore::CSSPropertyLonghand::longhandsForInitialization):
+
 2012-03-23  Tony Chang  <tony@chromium.org>
 
         [chromium] rename newwtf target back to wtf
