@@ -1,3 +1,23 @@
+2012-03-23  Shawn Singh  <shawnsingh@chromium.org>
+
+        [chromium] Fix race bug that clobbers CCLayerImpl updateRect
+        https://bugs.webkit.org/show_bug.cgi?id=82109
+
+        Reviewed by Dirk Pranke.
+
+        If the main thread commits twice before the impl thread actually
+        draws, then the updateRect of the first frame gets lost forever,
+        and not propagated to the damage tracker.
+
+        The solution is to accumulate the updateRect. The CCLayerImpl
+        updateRect is already being correctly cleared at the appropriate
+        time after drawing.
+
+        Unit test added to LayerChromiumTest.cpp.
+
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::pushPropertiesTo):
+
 2012-03-23  Rafael Weinstein  <rafaelw@chromium.org>
 
         [MutationObservers] attributeFilter should be case sensitive at all times
