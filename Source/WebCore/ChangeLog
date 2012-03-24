@@ -1,3 +1,32 @@
+2012-03-23  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] When prepainting fails, tiles dirty rects may be cleared
+        https://bugs.webkit.org/show_bug.cgi?id=82107
+
+        Reviewed by Adrienne Walker.
+
+        When prepainting, if a tile is unable to be reserved due to memory
+        limits, we bail out of prepareToUpdateTiles. But we would have
+        cleared the dirty rect of any previous tiles. This leaves them
+        in a bad state where their textures are reserved, but their textureIds
+        are set to 0, and they are not marked dirty. This means that they will
+        not be updated and displayed if they become visible, since it is
+        assumed that valid textures with zero textureId must have a dirty
+        region.
+
+        We fix this by not clearing the dirty rects until we know we are
+        going to update the layer.
+
+        Unit test: TiledLayerChromiumTest.pushTilesAfterIdlePaintFailed
+
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::TiledLayerChromium::prepareToUpdateTiles):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.cpp:
+        (WebCore::CCTiledLayerImpl::hasTextureIdForTileAt):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.h:
+        (CCTiledLayerImpl):
+
 2012-03-23  Stephanie Lewis  <slewis@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=81963 WebProcess can get stuck in GC during many low memory signals.
