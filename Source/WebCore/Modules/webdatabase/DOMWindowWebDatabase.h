@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef DOMWindowSQLDatabase_h
-#define DOMWindowSQLDatabase_h
+#ifndef DOMWindowWebDatabase_h
+#define DOMWindowWebDatabase_h
 
 #if ENABLE(SQL_DATABASE)
 #include "ExceptionCode.h"
@@ -41,17 +41,17 @@ class Database;
 class DatabaseCallback;
 class Frame;
 
-class DOMWindowSQLDatabase {
+class DOMWindowWebDatabase {
 public:
     static PassRefPtr<Database> openDatabase(DOMWindow*, const String& name, const String& version, const String& displayName, unsigned long estimatedSize, PassRefPtr<DatabaseCallback> creationCallback, ExceptionCode&);
 
 private:
-    DOMWindowSQLDatabase() { };
-    ~DOMWindowSQLDatabase() { };
+    DOMWindowWebDatabase() { };
+    ~DOMWindowWebDatabase() { };
 };
 
 } // namespace WebCore
 
 #endif // ENABLE(SQL_DATABASE)
 
-#endif // DOMWindowSQLDatabase_h
+#endif // DOMWindowWebDatabase_h

@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef WorkerContextSQLDatabase_h
-#define WorkerContextSQLDatabase_h
+#ifndef WorkerContextWebDatabase_h
+#define WorkerContextWebDatabase_h
 
 #if ENABLE(SQL_DATABASE)
 
@@ -42,18 +42,18 @@ class DatabaseCallback;
 class DatabaseSync;
 class WorkerContext;
 
-class WorkerContextSQLDatabase {
+class WorkerContextWebDatabase {
 public:
     static PassRefPtr<Database> openDatabase(WorkerContext*, const String& name, const String& version, const String& displayName, unsigned long estimatedSize, PassRefPtr<DatabaseCallback> creationCallback, ExceptionCode&);
     static PassRefPtr<DatabaseSync> openDatabaseSync(WorkerContext*, const String& name, const String& version, const String& displayName, unsigned long estimatedSize, PassRefPtr<DatabaseCallback> creationCallback, ExceptionCode&);
 
 private:
-    WorkerContextSQLDatabase() { };
-    ~WorkerContextSQLDatabase() { };
+    WorkerContextWebDatabase() { };
+    ~WorkerContextWebDatabase() { };
 };
 
 } // namespace WebCore
 
 #endif // ENABLE(SQL_DATABASE)
 
-#endif // WorkerContextSQLDatabase_h
+#endif // WorkerContextWebDatabase_h
