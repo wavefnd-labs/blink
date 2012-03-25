@@ -1,3 +1,125 @@
+2012-03-25  Antti Koivisto  <antti@apple.com>
+
+        Don't use CSSRuleList for child rule ownership
+        https://bugs.webkit.org/show_bug.cgi?id=82127
+
+        Reviewed by Andreas Kling.
+
+        CSSMediaRule, WebKitCSSKeyframesRule and WebKitRegionRule use CSSRuleList for storing children. 
+        They should use a simple rule vector instead. CSSRuleList is a CSSOM type that should be 
+        instantiated on-demand for API purposes only.
+        
+        - Use Vector<RefPtr<CSSRule>> for storing the rule children of CSSMediaRule, WebKitCSSKeyframesRule 
+          and WebKitRegionRule.
+        - Add direct accessors, use internally instead of CSSRuleList.
+        - Make CSSRuleList an abstract base. Add concrete subclasses for dealing with the underlying storage.
+        - Instantiate CSSRuleLists on-demand.
+        - Make CSSStyleSheet.cssRules always return the same object instance. This matches Firefox and the rest
+          of our CSSOM implementation. Tested by fast/dom/gc-9.html.
+          
+        The patch decouples internals from the external API. It simplifies the child rule ownership and reduces 
+        indirection. Memory use of css rules with children is reduced (by a ptr, refcount and heap allocation overhead).
+
+        * css/CSSGrammar.y:
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::CSSMediaRule):
+        (WebCore::CSSMediaRule::~CSSMediaRule):
+        (WebCore::CSSMediaRule::append):
+        (WebCore::CSSMediaRule::insertRule):
+        (WebCore::CSSMediaRule::deleteRule):
+        (WebCore::CSSMediaRule::cssText):
+        (WebCore::CSSMediaRule::cssRules):
+        * css/CSSMediaRule.h:
+        (WebCore::CSSMediaRule::create):
+        (CSSMediaRule):
+        (WebCore::CSSMediaRule::ruleCount):
+        (WebCore::CSSMediaRule::ruleAt):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::createMediaRule):
+        (WebCore::CSSParser::createRuleList):
+        (WebCore::CSSParser::createRegionRule):
+        * css/CSSParser.h:
+        (WebCore):
+        * css/CSSRuleList.cpp:
+        (WebCore):
+        (WebCore::StaticCSSRuleList::StaticCSSRuleList):
+        (WebCore::StaticCSSRuleList::~StaticCSSRuleList):
+        (WebCore::StaticCSSRuleList::deref):
+        (WebCore::StaticCSSRuleList::item):        
+        * css/CSSRuleList.h:
+        (CSSRuleList):
+
+            Turn CSSRuleList into abstract interface.
+                    
+        (StaticCSSRuleList):
+        (WebCore::StaticCSSRuleList::create):
+        (WebCore::StaticCSSRuleList::ref):
+        (WebCore::StaticCSSRuleList::rules):
+        (WebCore::StaticCSSRuleList::styleSheet):
+        (WebCore::StaticCSSRuleList::length):
+        
+            Concrete implementation for fixed list of rules.
+    
+        (WebCore):
+        (LiveCSSRuleList):
+        (WebCore::LiveCSSRuleList::LiveCSSRuleList):
+        (WebCore::LiveCSSRuleList::ref):
+        (WebCore::LiveCSSRuleList::deref):
+        (WebCore::LiveCSSRuleList::length):
+        (WebCore::LiveCSSRuleList::item):
+        (WebCore::LiveCSSRuleList::styleSheet):
+        
+            Concrete implemenation for live list backed by the underlying container rule.
+            LiveCSSRuleList is owned by the underlying rule. Refcount is forwarded. 
+        
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::sortAndTransferMatchedRules):
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        * css/CSSStyleSheet.cpp:
+        
+            The same scheme for CSSStyleSheet.cssRule as with container rules.
+        
+        (StyleSheetCSSRuleList):
+        (WebCore::StyleSheetCSSRuleList::StyleSheetCSSRuleList):
+        (WebCore::StyleSheetCSSRuleList::ref):
+        (WebCore::StyleSheetCSSRuleList::deref):
+        (WebCore::StyleSheetCSSRuleList::length):
+        (WebCore::StyleSheetCSSRuleList::item):
+        (WebCore::StyleSheetCSSRuleList::styleSheet):
+        (WebCore):
+        (WebCore::CSSStyleSheet::rules):
+        (WebCore::CSSStyleSheet::cssRules):
+        * css/CSSStyleSheet.h:
+        (CSSStyleSheet):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::WebKitCSSKeyframesRule::WebKitCSSKeyframesRule):
+        (WebCore::WebKitCSSKeyframesRule::~WebKitCSSKeyframesRule):
+        (WebCore):
+        (WebCore::WebKitCSSKeyframesRule::append):
+        (WebCore::WebKitCSSKeyframesRule::deleteRule):
+        (WebCore::WebKitCSSKeyframesRule::findRule):
+        (WebCore::WebKitCSSKeyframesRule::findRuleIndex):
+        (WebCore::WebKitCSSKeyframesRule::cssText):
+        (WebCore::WebKitCSSKeyframesRule::cssRules):
+        * css/WebKitCSSKeyframesRule.h:
+        (WebKitCSSKeyframesRule):
+        (WebCore::WebKitCSSKeyframesRule::ruleCount):
+        (WebCore::WebKitCSSKeyframesRule::ruleAt):
+        (WebCore::WebKitCSSKeyframesRule::length):
+        (WebCore::WebKitCSSKeyframesRule::item):
+        * css/WebKitCSSRegionRule.cpp:
+        (WebCore::WebKitCSSRegionRule::WebKitCSSRegionRule):
+        (WebCore::WebKitCSSRegionRule::~WebKitCSSRegionRule):
+        (WebCore::WebKitCSSRegionRule::cssText):
+        (WebCore::WebKitCSSRegionRule::cssRules):
+        * css/WebKitCSSRegionRule.h:
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::asCSSRuleList):
+        (WebCore::InspectorStyleSheet::addRule):
+        (WebCore::InspectorStyleSheet::buildObjectForStyleSheet):
+
 2012-03-25  Kentaro Hara  <haraken@chromium.org>
 
         Remove duplicated GenerateConditionalString() from code generators
