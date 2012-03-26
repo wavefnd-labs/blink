@@ -1,3 +1,91 @@
+2012-03-25  Hayato Ito  <hayato@chromium.org>
+
+        [Shadow DOM] Add Reified DOM Tree traversal internal APIs.
+        https://bugs.webkit.org/show_bug.cgi?id=79197
+
+        Reviewed by Dimitri Glazkov.
+
+        Add internal APIs which can be used to traverse Reified DOM tree, which is
+        a result of node distribution algorithm explained in Shadow DOM spec.
+        https://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html
+
+        Every public functions defined in ReifiedTreeTraversal are static
+        functions and are named in a similar way to ones defined in WebCore::Node class.
+        The only difference is that ReifiedTreeTraversal APIs consider shadow
+        hosts and also traverse nodes is Shadow DOM subtrees, crossing shadow's upper and lower boundary
+        transparently.
+
+        There is no actual client which uses these APIs. Follow-up patches for FocusNavigation
+        and EventDispatcher will use the APIs so that they can traverse node in reified tree order.
+
+        Test: fast/dom/shadow/reified-tree-traversal.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/ReifiedTreeTraversal.cpp: Added.
+        (WebCore):
+        (WebCore::isShadowHost):
+        (WebCore::shadowTreeFor):
+        (WebCore::shadowTreeOfParent):
+        (WebCore::ReifiedTreeTraversal::firstChild):
+        (WebCore::ReifiedTreeTraversal::lastChild):
+        (WebCore::ReifiedTreeTraversal::lastChildWithoutCrossingUpperBoundary):
+        (WebCore::ReifiedTreeTraversal::traverseChild):
+        (WebCore::ReifiedTreeTraversal::traverseLightChildren):
+        (WebCore::ReifiedTreeTraversal::traverseNode):
+        (WebCore::ReifiedTreeTraversal::nextSibling):
+        (WebCore::ReifiedTreeTraversal::previousSibling):
+        (WebCore::ReifiedTreeTraversal::traverseSiblingOrBackToInsertionPoint):
+        (WebCore::ReifiedTreeTraversal::traverseSiblingInCurrentTree):
+        (WebCore::ReifiedTreeTraversal::traverseSiblingOrBackToYoungerShadowRoot):
+        (WebCore::ReifiedTreeTraversal::escapeFallbackContentElement):
+        (WebCore::ReifiedTreeTraversal::traverseNodeEscapingFallbackContents):
+        (WebCore::ReifiedTreeTraversal::parentNode):
+        (WebCore::ReifiedTreeTraversal::parentNodeWithoutCrossingUpperBoundary):
+        (WebCore::ReifiedTreeTraversal::parentNodeOrBackToInsertionPoint):
+        (WebCore::ReifiedTreeTraversal::parentNodeInCurrentTree):
+        (WebCore::ReifiedTreeTraversal::parentNodeBackToYoungerShadowRootOrHost):
+        (WebCore::ReifiedTreeTraversal::adjustedParentNode):
+        (WebCore::ReifiedTreeTraversal::traverseNextNode):
+        (WebCore::ReifiedTreeTraversal::traverseNextNodeWithoutCrossingUpperBoundary):
+        (WebCore::ReifiedTreeTraversal::traversePreviousNode):
+        (WebCore::ReifiedTreeTraversal::traversePreviousNodeWithoutCrossingUpperBoundary):
+        * dom/ReifiedTreeTraversal.h: Added.
+        (WebCore):
+        (ReifiedTreeTraversal):
+        * dom/ShadowTree.cpp:
+        (WebCore::ShadowTree::insertionPointFor):
+        (WebCore::ShadowTree::selectionFor):
+        (WebCore):
+        * dom/ShadowTree.h:
+        (WebCore):
+        (ShadowTree):
+        * html/shadow/HTMLContentSelector.cpp:
+        (WebCore::HTMLContentSelector::findFor):
+        * html/shadow/HTMLContentSelector.h:
+        (HTMLContentSelectionSet):
+        (WebCore::HTMLContentSelectionSet::find):
+        (HTMLContentSelector):
+        * html/shadow/InsertionPoint.h:
+        (WebCore::isInsertionPoint):
+        (WebCore::toInsertionPoint):
+        (WebCore):
+        * testing/Internals.cpp:
+        (WebCore::Internals::nextSiblingInReifiedTree):
+        (WebCore):
+        (WebCore::Internals::firstChildInReifiedTree):
+        (WebCore::Internals::lastChildInReifiedTree):
+        (WebCore::Internals::traverseNextNodeInReifiedTree):
+        (WebCore::Internals::traversePreviousNodeInReifiedTree):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-03-25  Nikita Vasilyev  <me@elv1s.ru>
 
         Web Inspector: Indenting fully selected line should not indent the line next to it
