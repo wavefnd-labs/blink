@@ -1,3 +1,25 @@
+2012-03-26  Levi Weintraub  <leviw@chromium.org>
+
+        Correct LayoutUnit usage in RenderFieldSet and RenderMenuItem
+        https://bugs.webkit.org/show_bug.cgi?id=82179
+
+        Reviewed by Julien Chaffraix.
+
+        Correcting small misuses of ints vs LayoutUnits in RenderFieldSet and RenderMenuItem. Also
+        adding zeroLayoutUnit where necessary to fix the sub-pixel build. See below for details.
+
+        No new tests. No change in behavior.
+
+        * rendering/RenderFieldset.cpp:
+        (WebCore::RenderFieldset::paintBoxDecorations): Clip rects need to be pixel snapped to mirror
+        the actual coordinates we paint.
+        (WebCore::RenderFieldset::paintMask): Using zeroLayoutUnit for ternary operation to fix the
+        sub-pixel build.
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::showPopup): Correctly using an IntRect for absoluteBoundingBoxRect.
+        (WebCore::RenderMenuList::clientPaddingLeft): Correcting mismatched return type with header.
+        (WebCore::RenderMenuList::clientPaddingRight): Ditto.
+
 2012-03-26  Dan Bernstein  <mitz@apple.com>
 
         Tried to fix an unused parameter warning after r112154.
