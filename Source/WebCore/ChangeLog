@@ -1,3 +1,22 @@
+2012-03-26  Jason Liu  <jason.liu@torchmobile.com.cn>
+
+        [BlackBerry] Cookies mismatch when login to gmail.
+        https://bugs.webkit.org/show_bug.cgi?id=82165
+
+        Redirection's response can add or update cookies. The cookies of ResourceRequest is dirty
+        in this case. We shouldn't copy the dirty cookie header from ResourceRequest to PlatformRequest
+        for redirection loading.
+
+        This issue didn't happen before because we used m_cookieData not the cookie header.
+        Now we use the cookie header to avoid storing double cookie's data, and m_cookieData is removed.
+
+        Reviewed by George Staikos.
+
+        No new tests. It is a refactoring issue.
+
+        * platform/network/blackberry/ResourceRequestBlackBerry.cpp:
+        (WebCore::ResourceRequest::initializePlatformRequest):
+
 2012-03-26  Alexis Menard  <alexis.menard@openbossa.org>
 
         Increase code sharing between StylePropertySet and CSSPropertyLonghand.
