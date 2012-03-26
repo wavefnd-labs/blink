@@ -1,3 +1,41 @@
+2012-03-26  Levi Weintraub  <leviw@chromium.org>
+
+        Update localSelectionRect to return a LayoutRect
+        https://bugs.webkit.org/show_bug.cgi?id=82183
+
+        Reviewed by Eric Seidel.
+
+        localSelectionRect returns a rectangle in the coordinate space of its renderer,
+        and therefor should remain LayoutUnits until being promoted to absolute
+        coordinates or painted. Also fixing an incorrect conversion of startPos and
+        endPos in selectionRectForRepaint.
+
+        No new tests. No change in behavior.
+
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::localSelectionRect): Continuing to use enclosingIntRect
+        for the value being returned from the font engine since these floating point
+        values should not be pixel snapped.
+        * rendering/InlineTextBox.h:
+        (InlineTextBox):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::localSelectionRect):
+        * rendering/RenderReplaced.h:
+        (RenderReplaced):
+        * rendering/RenderText.cpp:
+        (WebCore::localQuadForTextBox):
+        (WebCore::RenderText::absoluteRectsForRange):
+        (WebCore::RenderText::absoluteQuadsForRange):
+        (WebCore::RenderText::selectionRectForRepaint): Fixing an incorrect conversion of
+        start/endPos to LayoutUnits. These values represent a range of selected characters,
+        not layout values!
+        * rendering/svg/RenderSVGInlineText.cpp:
+        (WebCore::RenderSVGInlineText::localCaretRect):
+        * rendering/svg/SVGInlineTextBox.cpp:
+        (WebCore::SVGInlineTextBox::localSelectionRect):
+        * rendering/svg/SVGInlineTextBox.h:
+        (SVGInlineTextBox):
+
 2012-03-26  Justin Novosad  <junov@chromium.org>
 
         [Chromium] Crash in Canvas2DLayerChromium::pushPropertiesTo
