@@ -1,3 +1,31 @@
+2012-03-26  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: breakpoints should be disabled while live editing JavaScript.
+        https://bugs.webkit.org/show_bug.cgi?id=81947
+
+        Reviewed by Yury Semikhatsky.
+
+        This change disables (removes from the backend) the breakpoints while editing script.
+        Undoing or committing the change restores the breakpoints. Main logic is implemented within
+        JavaScriptSourceFrame, but it required minor tweaking of the text editor: more correct
+        undo/redo wrapper and better detection of the noop opterations.
+
+        * inspector/front-end/JavaScriptSourceFrame.js:
+        (WebInspector.JavaScriptSourceFrame):
+        (WebInspector.JavaScriptSourceFrame.prototype.afterTextChanged):
+        (WebInspector.JavaScriptSourceFrame.prototype.beforeTextChanged):
+        (WebInspector.JavaScriptSourceFrame.prototype.didEditContent):
+        (WebInspector.JavaScriptSourceFrame.prototype.addBreakpoint):
+        (WebInspector.JavaScriptSourceFrame.prototype.removeBreakpoint):
+        (WebInspector.JavaScriptSourceFrame.prototype._onMouseDown):
+        * inspector/front-end/TextEditorModel.js:
+        (WebInspector.TextEditorModel.endsWithBracketRegex.):
+        * inspector/front-end/TextViewer.js:
+        (WebInspector.TextEditorMainPanel.prototype.handleUndoRedo.before):
+        (WebInspector.TextEditorMainPanel.prototype.handleUndoRedo.after):
+        (WebInspector.TextEditorMainPanel.prototype.handleUndoRedo):
+        (WebInspector.TextEditorMainPanel.prototype._applyDomUpdates):
+
 2012-03-25  Nat Duca  <nduca@chromium.org>
 
         [chromium] Route willBeginFrame from compositor to WebWidget
