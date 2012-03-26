@@ -1,3 +1,23 @@
+2012-03-26  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        REGRESSION(r110072): fast/forms/textfield-overflow.html is failing
+        https://bugs.webkit.org/show_bug.cgi?id=80531
+
+        Reviewed by Ojan Vafai.
+
+        Tested by fast/forms/textfield-overflow.html (re-enabled after this change).
+
+        The existing code would happily query layout information before calling layout (FTW!).
+        The solution is to properly layout our object, then modify some dimensions as needed while
+        marking ourself as needing layout and then layouting again.
+
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::layout):
+        Implemented a proper 2 pass layout algorithm. Removed the |relayoutChildren| logic as:
+        - layoutBlock handles automatically logical height changes.
+        - we were not modifying the logical width between layouts so we don't need to force a
+        child relayout in this case.
+
 2012-03-26  Robin Cao  <robin.cao@torchmobile.com.cn>
 
         [BlackBerry] Upstream LayerCompositingThread.{h, cpp}
