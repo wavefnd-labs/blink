@@ -1,3 +1,139 @@
+2012-03-26  Antti Koivisto  <antti@apple.com>
+
+        Split MediaList into internal and CSSOM types
+        https://bugs.webkit.org/show_bug.cgi?id=82149
+
+        Reviewed by Andread Kling.
+
+        MediaList is a CSSOM type and should not be used internally.
+        
+        - Use new type MediaQuerySet internally to represent a collection of media queries.
+        - Create MediaList wrapper on-demand for CSSOM purposes only.
+        
+        This moves us forward in separating CSSOM from the internal stylesheet implementation.
+        
+        MediaQuerySet really belongs to a file of its own but that is not part of this patch.
+        
+        * css/CSSGrammar.y:
+        * css/CSSImportRule.cpp:
+        (WebCore::CSSImportRule::create):
+        (WebCore):
+        (WebCore::CSSImportRule::CSSImportRule):
+        (WebCore::CSSImportRule::~CSSImportRule):
+        (WebCore::CSSImportRule::media):
+        (WebCore::CSSImportRule::cssText):
+        * css/CSSImportRule.h:
+        (WebCore):
+        (CSSImportRule):
+        (WebCore::CSSImportRule::mediaQueries):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::CSSMediaRule):
+        (WebCore::CSSMediaRule::~CSSMediaRule):
+        (WebCore::CSSMediaRule::cssText):
+        * css/CSSMediaRule.h:
+        (WebCore::CSSMediaRule::create):
+        (WebCore::CSSMediaRule::media):
+        (WebCore::CSSMediaRule::mediaQueries):
+        (CSSMediaRule):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseMediaQuery):
+        (WebCore::CSSParser::createMediaQuerySet):
+        (WebCore::CSSParser::createImportRule):
+        (WebCore::CSSParser::createMediaRule):
+        (WebCore::CSSParser::updateLastMediaLine):
+        * css/CSSParser.h:
+        (WebCore):
+        (CSSParser):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSheet.cpp:
+        (WebCore):
+        (WebCore::CSSStyleSheet::media):
+        (WebCore::CSSStyleSheet::setMediaQueries):
+        * css/CSSStyleSheet.h:
+        (WebCore):
+        (CSSStyleSheet):
+        (WebCore::CSSStyleSheet::mediaQueries):
+        * css/MediaList.cpp:
+        (WebCore):
+        (WebCore::MediaQuerySet::MediaQuerySet):
+        (WebCore::MediaQuerySet::~MediaQuerySet):
+        (WebCore::parseMediaDescriptor):
+        (WebCore::MediaQuerySet::parse):
+        (WebCore::MediaQuerySet::add):
+        (WebCore::MediaQuerySet::remove):
+        (WebCore::MediaQuerySet::addMediaQuery):
+        (WebCore::MediaQuerySet::mediaText):
+        (WebCore::MediaQuerySet::ensureMediaList):
+        
+            - Use OwnPtr<> for MediaQuery ownership.
+            - Move the appropriate functions to MediaQuerySet.
+            - Clean up a bit to make this more readable and better aligned to WebKit style.
+        
+        (WebCore::MediaList::MediaList):
+        (WebCore::MediaList::~MediaList):
+        (WebCore::MediaList::setMediaText):
+        (WebCore::MediaList::item):
+        (WebCore::MediaList::deleteMedium):
+        (WebCore::MediaList::appendMedium):
+        * css/MediaList.h:
+        (WebCore):
+        (WebCore::MediaQuerySet::create):
+        (WebCore::MediaQuerySet::createAllowingDescriptionSyntax):
+        (MediaQuerySet):
+        (WebCore::MediaQuerySet::queryVector):
+        (WebCore::MediaQuerySet::lastLine):
+        (WebCore::MediaQuerySet::setLastLine):
+        (MediaList):
+        (WebCore::MediaList::ref):
+        (WebCore::MediaList::deref):
+        (WebCore::MediaList::length):
+        (WebCore::MediaList::mediaText):
+        (WebCore::MediaList::queries):
+        * css/MediaQueryEvaluator.cpp:
+        (WebCore::MediaQueryEvaluator::eval):
+        * css/MediaQueryEvaluator.h:
+        (WebCore):
+        (MediaQueryEvaluator):
+        * css/MediaQueryList.cpp:
+        (WebCore::MediaQueryList::create):
+        (WebCore::MediaQueryList::MediaQueryList):
+        * css/MediaQueryList.h:
+        (WebCore):
+        (MediaQueryList):
+        * css/MediaQueryMatcher.cpp:
+        (WebCore::MediaQueryMatcher::evaluate):
+        (WebCore::MediaQueryMatcher::matchMedia):
+        * css/MediaQueryMatcher.h:
+        (WebCore):
+        (MediaQueryMatcher):
+        * css/StyleMedia.cpp:
+        (WebCore::StyleMedia::matchMedium):
+        * css/StyleSheet.cpp:
+        (WebCore::StyleSheet::~StyleSheet):
+        
+            Move the media query ownership to CSSStyleSheet where it belongs.
+        
+        (WebCore):
+        * css/StyleSheet.h:
+        (WebCore::StyleSheet::media):
+        (StyleSheet):
+        * dom/DOMImplementation.cpp:
+        (WebCore::DOMImplementation::createCSSStyleSheet):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::setCSSStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::process):
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::selectNextSourceChild):
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::HTMLNames::PreloadTask::linkMediaAttributeIsScreen):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::buildMediaObject):
+
 2012-03-26  Zeno Albisser  <zeno@webkit.org>
 
         [Qt]WK2] TextureMapperShaderManager should query the program map before creating new shader program instances.
