@@ -1,3 +1,32 @@
+2012-03-26  Nate Chapin  <japhet@chromium.org>
+
+        Simplify setting loading state in DocumentLoader
+        https://bugs.webkit.org/show_bug.cgi?id=82099
+
+        Reviewed by Adam Barth.
+
+        The logic for deciding what to return for DocumentLoader::isLoading()
+        is crazy. It's indirectly based on the ResourceLoaders that have
+        registered themselves with the DocumentLoader, but we can make that
+        relationship more direct.
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::checkLoadComplete): Renamed from updateLoading, since it's not actually
+            updating anything anymore. It now calls DOMWindow::finishedLoading() if loading is in fact done.
+        (WebCore::DocumentLoader::startLoadingMainResource): The only reason this had a return value was to call
+            updateLoading() if loading failed. Just call checkLoadComplete() directly (this allows it to
+            be private, whereas updateLoading() was public).
+        (WebCore::DocumentLoader::subresourceLoaderFinishedLoadingOnePart):
+        * loader/DocumentLoader.h:
+        (WebCore::DocumentLoader::isLoading): Rather than holding a separate bool, return based on the presence
+            of non-multipart ResourceLoaders directly.
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::isLoading): Depend on DocumentLoader::isLoading() for the activeDocumentLoader(),
+            rather than indirectly the other way around.
+        (WebCore::FrameLoader::checkLoadCompleteForThisFrame): Remove several assertions that should now be
+            absolutely identical to the remaining !pdl->isLoading().
+        (WebCore::FrameLoader::continueLoadAfterWillSubmitForm):
+
 2012-03-26  James Robinson  <jamesr@chromium.org>
 
         Scrollable plugins not registered properly in ScrollingCoordinator
