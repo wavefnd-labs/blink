@@ -1,3 +1,45 @@
+2012-03-26  Philip Rogers  <pdr@google.com>
+
+        Add invalid bounding box concept to SVG containers
+        https://bugs.webkit.org/show_bug.cgi?id=81104
+
+        Reviewed by Nikolas Zimmermann.
+
+        An empty <g> element needs to use an invalid bounding box because
+        an empty bounding box isn't the default state. This change
+        introduces the concept of an invalid object bounding box for
+        both RenderSVGContainer and RenderSVGRoot. Code that
+        does not explicitly check that the bounding box is valid
+        should be unaffected by this change. We use this new invalid
+        flag in computeContainerBoundingBoxes so that we do not
+        include invalid bounding boxes.
+
+        This change also contains a small fix in
+        RenderSVGContainer::toRenderSVGContainer which depended on
+        RenderSVGViewportContainer not inheriting from RenderSVGContainer,
+        which it now does.
+
+        Test: svg/custom/getBBox-empty-container.html
+
+        * rendering/svg/RenderSVGContainer.cpp:
+        (WebCore::RenderSVGContainer::RenderSVGContainer):
+        (WebCore::RenderSVGContainer::updateCachedBoundaries):
+        * rendering/svg/RenderSVGContainer.h:
+        (WebCore::RenderSVGContainer::isObjectBoundingBoxValid):
+        (RenderSVGContainer):
+        (WebCore::toRenderSVGContainer):
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::RenderSVGRoot):
+        (WebCore::RenderSVGRoot::updateCachedBoundaries):
+        * rendering/svg/RenderSVGRoot.h:
+        (RenderSVGRoot):
+        * rendering/svg/SVGRenderSupport.cpp:
+        (WebCore):
+        (WebCore::updateObjectBoundingBox):
+        (WebCore::SVGRenderSupport::computeContainerBoundingBoxes):
+        * rendering/svg/SVGRenderSupport.h:
+        (SVGRenderSupport):
+
 2012-03-26  Alexei Filippov  <alexeif@chromium.org>
 
         Web Inspector: Speed up the retainers build phase.
