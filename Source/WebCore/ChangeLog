@@ -1,3 +1,27 @@
+2012-03-26  Adam Klein  <adamk@chromium.org>
+
+        V8RecursionScope should not hold a raw pointer to ScriptExecutionContext
+        https://bugs.webkit.org/show_bug.cgi?id=82222
+
+        Reviewed by Eric Seidel.
+
+        Instead of holding onto ScriptExecutionContext, cache the boolean value we
+        care about (context->isDocument()). This avoids problems if the
+        context goes away as a result of the script we just ran.
+
+        Test: fast/frames/subframe-load-js-url-crash.html
+
+        * bindings/v8/V8RecursionScope.cpp:
+        (WebCore::V8RecursionScope::didLeaveScriptContext): Check the cached
+        bool instead of calling into the context.
+        * bindings/v8/V8RecursionScope.h:
+        (WebCore::V8RecursionScope::V8RecursionScope): Call isDocument from
+        the constructor and cache the result.
+        (WebCore::V8RecursionScope::~V8RecursionScope): No longer need to pass
+        anything to didLeaveScriptContext since it's now a member.
+        (V8RecursionScope): Make didLeaveScriptContext a member function and
+        remove its argument. Add member bool to hold the value of isDocument.
+
 2012-03-26  Dana Jansens  <danakj@chromium.org>
 
         [chromium] assertion being hit in CCLayerTreeHost::updateCompositorResources
