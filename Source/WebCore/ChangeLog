@@ -1,5 +1,24 @@
 2012-03-26  Julien Chaffraix  <jchaffraix@webkit.org>
 
+        REGRESSION (r110065-r110080): fast/forms/placeholder-set-attribute.html is failing intermittently because WebKit fails to repaint after setting the placeholder attribute
+        https://bugs.webkit.org/show_bug.cgi?id=81802
+
+        Reviewed by Dan Bernstein.
+
+        Covered by fast/forms/placeholder-set-attribute.html which should be less flaky.
+
+        Unfortunately no new test case as this bug requires a very specific set of conditions that I couldn't reproduce deterministically.
+
+        This is a regression from r110072: RenderTextControlSingleLine would rely on the placeholder's RenderLayer to properly repaint during
+        the first layout as the placeholder has overflow: hidden set. r110072 removed the layer in this case and thus we miss a repaint.
+
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::layout):
+        For our first layout, we need to make sure our placeholder is painted. layoutBlockChild has a very similar logic to force repaint
+        on a first layout. We don't hit this logic as the placeholder is explicitly skipped in RenderTextControl::layoutSpecialExcludedChild.
+
+2012-03-26  Julien Chaffraix  <jchaffraix@webkit.org>
+
         REGRESSION(r110072): fast/forms/textfield-overflow.html is failing
         https://bugs.webkit.org/show_bug.cgi?id=80531
 
