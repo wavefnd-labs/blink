@@ -1,3 +1,24 @@
+2012-03-23  Ryosuke Niwa  <rniwa@webkit.org>
+
+        cssText should use shorthand notations
+        https://bugs.webkit.org/show_bug.cgi?id=81737
+
+        Reviewed by Enrica Casucci.
+
+        Use shorthand properties to serialize style properties for cssText.
+
+        The overall algorithm is to look for any property that has a shorthand, and then check if
+        the shorthand value could be obtained (the condition is quite complicated for border properties).
+        If it could, then append that value to the string builder, and set the corresponding entries in
+        shorthandPropertyAppeared and shorthandPropertyUsed. If not, only turn on the bit in
+        shorthandPropertyAppeared on to avoid calling getPropertyValue again for longhand properties
+        that use the same shorthand property when we cannot use the shorthand.
+
+        Test: fast/css/cssText-shorthand.html
+
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::asText):
+
 2012-03-26  Bolin Hsu  <bhsu@google.com>
 
         [Chromium] Add Android keycodes
