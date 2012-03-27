@@ -1,3 +1,22 @@
+2012-03-27  Ryosuke Niwa  <rniwa@webkit.org>
+
+        cssText should not generate literal 'initial' in shorthand properties
+        https://bugs.webkit.org/show_bug.cgi?id=82364
+
+        Reviewed by Antti Koivisto.
+
+        Fixed the bug by treating initial value as if the value is not set.
+        While this is incorrect for properties that inherits by default,
+        it's strictly better than generating unparsable value as we do today.
+
+        The proper fix is for CSSInitialValue::cssText to fetch the respective
+        default value from what's currently in CSSStyleSelector code but that requires
+        a considerable amount of refactoring and work.
+
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::getShorthandValue):
+        (WebCore::StylePropertySet::getCommonValue):
+
 2012-03-26  Adam Klein  <adamk@chromium.org>
 
         Always set V8 wrappers via V8DOMWrapper::setJSWrapperFor* instead of WeakReferenceMap::set()
