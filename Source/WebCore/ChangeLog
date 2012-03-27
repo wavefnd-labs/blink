@@ -1,3 +1,25 @@
+2012-03-27  Nate Chapin  <japhet@chromium.org>
+
+        Don't manually set an identifier for main resource
+        loads in FrameLoader. ResourceLoader::willSendRequest()
+        will set an identifier for the request if one isn't found,
+        so this code appears to be unnecessary duplication.
+        https://bugs.webkit.org/show_bug.cgi?id=82248
+
+        Reviewed by Adam Barth.
+
+        No new tests, no functionality change intended.
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::startLoadingMainResource): Mark navigation start
+            here, since it's conceptually part of starting the main resource load.
+        * loader/DocumentLoader.h:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::continueLoadAfterWillSubmitForm): Remove duplicate identifier
+            logic, and move navigation timing call to startLoadingMainResource, since
+            it fits better logically there.
+        * loader/ResourceLoader.h: No callers of setIdentifier() remain, so delete it.
+
 2012-03-27  Dirk Pranke  <dpranke@chromium.org>
 
         Unreviewed, rolling out r112277.
