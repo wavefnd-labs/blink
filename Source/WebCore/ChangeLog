@@ -1,3 +1,37 @@
+2012-03-27  Carlos Garcia Campos  <cgarcia@igalia.com>
+
+        [SOUP] Implement missing methods in CookieJarSoup
+        https://bugs.webkit.org/show_bug.cgi?id=82082
+
+        Reviewed by Martin Robinson.
+
+        * platform/network/soup/CookieJarSoup.cpp:
+        (WebCore::defaultCookieJar): Return a global GRefPtr to store the
+        default cookie jar.
+        (WebCore::soupCookieJar): Return the current cookie jar or create
+        a new one.
+        (WebCore::setSoupCookieJar): Set the current cookie jar.
+        (WebCore::setCookies): Fix coding style.
+        (WebCore::cookiesForDocument): Helper function to get the list of
+        cookies as a string.
+        (WebCore::cookies): Use cookiesForDocument().
+        (WebCore::cookieRequestHeaderFieldValue): Ditto.
+        (WebCore::getRawCookies): Get the list of cookies for the given
+        document and url.
+        (WebCore::deleteCookie): Delete the given cookie.
+        (WebCore::getHostnamesWithCookies): Use GOwnPtr.
+        (WebCore::deleteCookiesForHostname): Use GOwnPtr and
+        soup_cookie_domain_matches() instead of comparing the domain
+        directly with the given hostname.
+        (WebCore::deleteAllCookies): Use GOwnPtr.
+        * platform/network/soup/CookieJarSoup.h:
+        * platform/network/soup/GOwnPtrSoup.cpp:
+        (WTF::SoupCookie): Add GOwnPtr template for SoupCookie.
+        * platform/network/soup/GOwnPtrSoup.h:
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::ensureSessionIsInitialized): Use soupCookieJar() instead
+        of defaultCookieJar().
+
 2012-03-27  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Enable animVal support for SVGAnimatedBoolean
