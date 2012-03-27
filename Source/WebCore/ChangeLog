@@ -1,3 +1,81 @@
+2012-03-26  Dirk Schulze  <krit@webkit.org>
+
+        Use enumeration for CSS parser mode
+        https://bugs.webkit.org/show_bug.cgi?id=82056
+
+        Reviewed by Antti Koivisto.
+
+        Introduce a new CSSParserMode enum to differ between strict / quirks and SVG presentation
+        attribute parsing modes.
+        The followup patch will make use of the enum in all other classes.
+        After that it will be easier possible to reuse the CSS parser in SVG as much as possible and
+        introduce SVG specific functionality.
+
+        No new tests. No change on functionality yet. This is just a refactoring to use the enumeration.
+
+        * GNUmakefile.list.am: Added new file CSSParserMode.h with the new enum, which can be used by any caller of CSSParser, CSSStyleSheet and others.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * css/CSSGrammar.y: Make use of the new enumeration.
+        * css/CSSParser.cpp: Replaced boolean by enumeration. No change of functionality at this point of time.
+        (WebCore::CSSParser::inStrictMode): Helper function.
+        (WebCore):
+        (WebCore::CSSParser::inQuirksMode): Helper function.
+        (WebCore::CSSParser::CSSParser):
+        (WebCore::CSSParser::validUnit):
+        (WebCore::CSSParser::checkForOrphanedUnits):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseSizeParameter):
+        (WebCore::CSSParser::parseBackgroundColor):
+        (WebCore::CSSParser::parseFillPositionX):
+        (WebCore::CSSParser::parseFillPositionY):
+        (WebCore::CSSParser::parseFillPositionComponent):
+        (WebCore::CSSParser::parseFillSize):
+        (WebCore::CSSParser::parseAnimationDelay):
+        (WebCore::CSSParser::parseAnimationDuration):
+        (WebCore::CSSParser::parseAnimationIterationCount):
+        (WebCore::CSSParser::parseTransformOriginShorthand):
+        (WebCore::CSSParser::parseCubicBezierTimingFunctionValue):
+        (WebCore::CSSParser::parseAnimationTimingFunction):
+        (WebCore::CSSParser::parseGridTrackList):
+        (WebCore::CSSParser::parseDashboardRegions):
+        (WebCore::CSSParser::parseShape):
+        (WebCore::CSSParser::parseWrapShapeRect):
+        (WebCore::CSSParser::parseWrapShapeCircle):
+        (WebCore::CSSParser::parseWrapShapeEllipse):
+        (WebCore::CSSParser::parseWrapShapePolygon):
+        (WebCore::CSSParser::parseFont):
+        (WebCore::CSSParser::parseFontWeight):
+        (WebCore::CSSParser::parseColorParameters):
+        (WebCore::CSSParser::parseHSLParameters):
+        (WebCore::CSSParser::parseColorFromValue):
+        (WebCore::CSSParser::parseShadow):
+        (WebCore::CSSParser::parseReflect):
+        (WebCore::CSSParser::parseFlex):
+        (WebCore::CSSParser::parseBorderImageSlice):
+        (WebCore::CSSParser::parseBorderImageQuad):
+        (WebCore::CSSParser::parseBorderRadius):
+        (WebCore::CSSParser::parseAspectRatio):
+        (WebCore::CSSParser::parseLinearGradient):
+        (WebCore::CSSParser::parseRadialGradient):
+        (WebCore::CSSParser::parseGradientColorStops):
+        (WebCore::CSSParser::parseTransform):
+        (WebCore::CSSParser::parseCustomFilter):
+        (WebCore::CSSParser::parseBuiltinFilterArguments):
+        (WebCore::CSSParser::parseTransformOrigin):
+        (WebCore::CSSParser::createStyleRule):
+        (WebCore::CSSParser::createFontFaceRule):
+        (WebCore::CSSParser::createPageRule):
+        (WebCore::CSSParser::createKeyframeRule):
+        * css/CSSParser.h:
+        (CSSParser):
+        * css/CSSParserMode.h: Added. New enumeration CSSParserMode.
+        * css/SVGCSSParser.cpp: Use new SVGAttributeMode CSS parsing mode.
+        (WebCore::CSSParser::parseSVGValue):
+        (WebCore::CSSParser::parseSVGStrokeDasharray):
+
 2012-03-27  Nate Chapin  <japhet@chromium.org>
 
         Don't manually set an identifier for main resource
