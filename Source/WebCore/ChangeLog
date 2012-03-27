@@ -1,3 +1,78 @@
+2012-03-27  Kentaro Hara  <haraken@chromium.org>
+
+        [V8][Performance] Optimize createTextNode(), createElement(), cloneNode(), etc
+        https://bugs.webkit.org/show_bug.cgi?id=82201
+
+        Reviewed by Adam Barth.
+
+        This patch improves performance of createTextNode() by 13%, createElement() by 14%,
+        and cloneNode() by 16%. Similar performance improvement will be observed in
+        DOM methods that create a new object every time.
+
+        Performance test: https://bugs.webkit.org/attachment.cgi?id=133799
+
+        The performance test results are as follows. Since the performance of V8's GC is
+        really unstable, the average of measured times makes no sense in Chromium.
+        Instead, let us focus on the median. I believe that this performance
+        improvement has impact on Dromaeo, but we cannot observe the improvement
+        due to the unsteadiness of V8's GC, as shown below.
+
+        Chromium/V8/Linux (without the patch):
+        createTextNode : median=277ms (mean=460.88ms, min=270ms, max=3381ms)
+        createElement : median=379ms (mean=637.52ms, min=372ms, max=3022ms)
+        cloneNode : median=369ms (mean=581.72ms, min=363ms, max=3050ms)
+        Dromaeo/dom-modify/createElement: 439.17runs/s +-31.60% (<--- pretty noisy)
+        Dromaeo/dom-modify/createTextNode: 287.71runs/s +-28.39% (<--- pretty noisy)
+        Dromaeo/dom-modify/cloneNode: 174.62runs/s +-25.68% (<--- pretty noisy)
+
+        Chromium/V8/Linux (with the patch):
+        createTextNode : median=240ms (mean=411.12ms, min=237ms, max=2965ms)
+        createElement : median=325ms (mean=585.30ms, min=317ms, max=2984ms)
+        cloneNode : median=310ms (mean=522.48ms, min=302ms, max=2988ms)
+        Dromaeo/dom-modify/createElement: 507.15runs/s +-36.00% (<--- pretty noisy)
+        Dromaeo/dom-modify/createTextNode: 251.01runs/s +-6.57%
+        Dromaeo/dom-modify/cloneNode: 177.85runs/s +-28.74% (<--- pretty noisy)
+
+        Chromium/V8/Mac (without the patch):
+        createTextNode : median=317ms (mean=439.08ms, min=303ms, max=3126ms)
+        createElement : median=403ms (mean=695.70ms, min=398ms, max=5615ms)
+        cloneNode : median=384ms (mean=577.96ms, min=372ms, max=5313ms)
+        Dromaeo/dom-modify/createElement: 493.89runs/s +-28.32% (<--- pretty noisy)
+        Dromaeo/dom-modify/createTextNode: 279.66runs/s +-1.91%
+        Dromaeo/dom-modify/cloneNode: 173.06runs/s +-24.41% (<--- pretty noisy)
+
+        Chromium/V8/Mac (with the patch):
+        createTextNode : median=277ms (mean=460.88ms, min=270ms, max=3381ms)
+        createElement : median=379ms (mean=637.52ms, min=372ms, max=3022ms)
+        cloneNode : median=369ms (mean=581.72ms, min=363ms, max=3050ms)
+        Dromaeo/dom-modify/createElement: 510.47runs/s +-28.13% (<--- pretty noisy)
+        Dromaeo/dom-modify/createTextNode: 215.80runs/s +-20.99% (<--- pretty noisy)
+        Dromaeo/dom-modify/cloneNode: 174.41runs/s +-24.85% (<--- pretty noisy)
+
+        Safari/JavaScriptCore/Mac:
+        createTextNode : median=142ms (mean=141.04ms, min=110ms, max=168ms)
+        createElement : median=234ms (mean=245.74ms, min=219ms, max=305ms)
+        cloneNode : median=210ms (mean=213.36ms, min=204ms, max=284ms)
+        Dromaeo/dom-modify/createElement: 822.49runs/s +-1.69%
+        Dromaeo/dom-modify/createTextNode: 735.57runs/s +-0.91%
+        Dromaeo/dom-modify/cloneNode: 135.20runs/s +-4.13%
+
+        This patch makes the following two optimizations:
+
+        [1] If the currently running context is equal to the context that we are about to enter,
+        we do not call context->Enter().
+        [2] We do not create a Local handle of the context until we really need to enter the context.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateToV8Converters):
+        * bindings/v8/V8Proxy.cpp:
+        (WebCore::V8Proxy::persistentContext):
+        (WebCore):
+        * bindings/v8/V8Proxy.h:
+        (V8Proxy):
+
+        * WebCore/bindings/scripts/test/V8/V8TestActiveDOMObject.cpp: Updated run-bindings-tests results.
+
 2012-03-27  Bill Budge  <bbudge@chromium.org>
 
         cross-origin XMLHttpRequest doesn't work with redirect
