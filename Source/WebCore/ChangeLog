@@ -1,3 +1,33 @@
+2012-03-26  Adam Barth  <abarth@webkit.org>
+
+        When <img crossorigin> fails the CORS check, we should fire the error event
+        https://bugs.webkit.org/show_bug.cgi?id=81998
+
+        Reviewed by Nate Chapin.
+
+        The spec says we're supposed to fire the error event when the CORS
+        check fails, but we haven't been.  This patch is larger than it might
+        otherwise be because we're firing the event asynchronously, but that
+        seems like the right thing to do.
+
+        Tests: http/tests/security/img-with-failed-cors-check-fails-to-load.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::implicitClose):
+        * loader/ImageLoader.cpp:
+        (WebCore::errorEventSender):
+        (WebCore):
+        (WebCore::ImageLoader::ImageLoader):
+        (WebCore::ImageLoader::~ImageLoader):
+        (WebCore::ImageLoader::setImage):
+        (WebCore::ImageLoader::updateFromElement):
+        (WebCore::ImageLoader::notifyFinished):
+        (WebCore::ImageLoader::dispatchPendingEvent):
+        (WebCore::ImageLoader::dispatchPendingErrorEvent):
+        (WebCore::ImageLoader::dispatchPendingErrorEvents):
+        * loader/ImageLoader.h:
+        (ImageLoader):
+
 2012-03-26  Stephen White  <senorblanco@chromium.org>
 
         Make filters and the threaded compositor play well together.
