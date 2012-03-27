@@ -1,3 +1,28 @@
+2012-03-27  Joe Mason  <jmason@rim.com>
+
+        [BlackBerry] fix confusing destruction sequence in LayerCompositingThread
+        https://bugs.webkit.org/show_bug.cgi?id=81706
+
+        Reviewed by Rob Buis.
+
+        LayerCompositingThread has a destructor that does a synchronous
+        dispatch to the compositing thread and then does the actual cleanup
+        from a helper function. This is confusing.It should be the
+        opposite: the helper function dispatches to the compositing thread,
+        which calls delete.
+
+        No new tests since the existing animation tests will exercise this
+        code.
+
+        * platform/graphics/blackberry/LayerCompositingThread.cpp:
+        (WebCore::LayerCompositingThread::destroyOnCompositingThread):
+        (WebCore):
+        (WebCore::LayerCompositingThread::~LayerCompositingThread):
+        * platform/graphics/blackberry/LayerCompositingThread.h:
+        (LayerCompositingThread):
+        (WTF):
+        (WTF::::deref):
+
 2012-03-27  Alexey Proskuryakov  <ap@apple.com>
 
         [Mac] Stop using NSMapTable in FormDataStreamMac.mm
