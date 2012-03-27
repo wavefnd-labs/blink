@@ -1,3 +1,31 @@
+2012-03-27  Levi Weintraub  <leviw@chromium.org>
+
+        Revert linesBoundingBox to integers
+        https://bugs.webkit.org/show_bug.cgi?id=82182
+
+        Reviewed by Eric Seidel.
+
+        LayoutRects are intended to be pixel snapped to determine the ultimate screen
+        coordinates, but the Inline Box tree is laid out using floats, and pixel snapping
+        the resulting box from linesBoundingBox would produce a potentially incorrect
+        rectangle. Keeping this using enclosingIntRect retains the previous accuracy and
+        prevents misuse.
+
+        No new tests. No change in behavior.
+
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::linesBoundingBox):
+        * rendering/RenderInline.h:
+        (RenderInline):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPosition):
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::linesBoundingBox):
+        * rendering/svg/RenderSVGInlineText.cpp:
+        (WebCore::RenderSVGInlineText::linesBoundingBox):
+        * rendering/svg/RenderSVGInlineText.h:
+        (RenderSVGInlineText):
+
 2012-03-26  Pavel Podivilov  <podivilov@chromium.org>
 
         Web Inspector: store UIBreakpoints on UISourceCode.
