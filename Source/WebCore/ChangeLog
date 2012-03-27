@@ -1,3 +1,31 @@
+2012-03-27  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Unknown transforms should be treated as non-axis aligned on main thread
+        https://bugs.webkit.org/show_bug.cgi?id=82370
+
+        Reviewed by Adrienne Walker.
+
+        On main thread, animating transforms have "unknown" values as they are changing
+        out of sync on the impl thread. So treat them as non-axis-aligned since they
+        may be, when deciding to create a render surface.
+
+        In addition, since surfaces are cheap on main thread, create one for all layers
+        with animating transforms and a drawing descendant, as this allows paint culling
+        within the layer's subtree (the animated transform won't affect drawTransforms
+        inside the subtree).
+
+        Also renamed the layerIsInAnimatingSubtreeFor* to animatingTransformTo*.
+        The old name made me pause and think what it meant and I'm the one who
+        created it. Hopefully this is more clear.
+
+        Unit test: CCLayerTreeHostCommonTest.verifyAnimationsForRenderSurfaceHierarchy
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.cpp:
+        (WebCore::transformToParentIsKnown):
+        (WebCore):
+        (WebCore::subtreeShouldRenderToSeparateSurface):
+        (WebCore::calculateDrawTransformsAndVisibilityInternal):
+
 2012-03-27  Dirk Pranke  <dpranke@chromium.org>
 
         Re-land r112277; reverting it doesn't seem to have fixed anything.
