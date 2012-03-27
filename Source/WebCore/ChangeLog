@@ -1,3 +1,56 @@
+2012-03-26  Vangelis Kokkevis  <vangelis@chromium.org>
+
+        [chromium] Simplify and fix CCLayerSorter
+        https://bugs.webkit.org/show_bug.cgi?id=82114
+
+        A significant cleanup, simplification and improvement of the CCLayerSorter code.
+        Simplified the LayerShape structure to use WebCore's FloatQuad for all overlap tests.
+        By treating every layer as two triangles, the old overlap code did a lot of redundant work
+        including testing two of the vertices of the layer and its diagonal twice. The new overlap
+        tests check:
+        1. The four corners of each of the two layers against the other layer.
+        2. The four edges of each layer against the edges of the other layer.
+        Unlike the old code, the new code has no early-outs in the overlap tests as those where causing
+        us to miss legitimate overlaps.
+        A new technique for breaking dependency cycles introduced by intersecting layers is implemented.
+        Instead of arbitrarily breaking cycles by choosing the node in the graph with the smallest number of
+        incoming edges (i.e. layers that need to be drawn before it) we chose the one with the smallest sum
+        of graph edge weights (defined as the max depth difference between two layers). Layers that intersect
+        have their respective graph edge weight set to zero, making them more likely to be picked for breaking
+        the cycles (it's not a perfect solution but it seems to perform much better than the previous one).
+
+        In addition to being overly complex and doing reduntant work, the old code was missing a
+        perspective divide when computing the coordinates of the layer's corners in the projected plane
+        which was the source of a lot of mis-sorted results.
+
+        In all, these improvements, fix a lot of outstanding issues with layer sorting, on pages such as:
+        http://www.keithclark.co.uk/labs/3dcss/demo/
+        http://2012.beercamp.com
+        https://developer.mozilla.org/fr/demos/detail/the-box/launch
+
+        Tests: CCLayerSorter unit tests.
+
+        Reviewed by Kenneth Russell.
+
+        * platform/graphics/chromium/cc/CCLayerSorter.cpp:
+        (WebCore):
+        (WebCore::perpProduct):
+        (WebCore::edgeEdgeTest):
+        (WebCore::CCLayerSorter::checkOverlap):
+        (WebCore::CCLayerSorter::LayerShape::LayerShape):
+        (WebCore::CCLayerSorter::LayerShape::layerZFromProjectedPoint):
+        (WebCore::CCLayerSorter::createGraphNodes):
+        (WebCore::CCLayerSorter::createGraphEdges):
+        (WebCore::CCLayerSorter::sort):
+        * platform/graphics/chromium/cc/CCLayerSorter.h:
+        (WebCore::CCLayerSorter::CCLayerSorter):
+        (CCLayerSorter):
+        (LayerShape):
+        (WebCore::CCLayerSorter::GraphNode::GraphNode):
+        (GraphNode):
+        (WebCore::CCLayerSorter::GraphEdge::GraphEdge):
+        (GraphEdge):
+
 2012-03-26  Fady Samuel  <fsamuel@chromium.org>
 
         [Chromium] Using WebViewPlugins with --force-compositing-mode causes an ASSERT to fail
