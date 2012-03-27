@@ -1,3 +1,33 @@
+2012-03-27  Stephen Chenney  <schenney@chromium.org>
+
+        <svg:use> elements in the parser can create elements not marked as created by the parser
+        https://bugs.webkit.org/show_bug.cgi?id=81985
+
+        Reviewed by Adam Barth.
+
+        The SVGUseElement was creating its shadow tree immediately upon
+        demand. This resulted in nodes being created that were not marked as
+        "createdByParser", even during parsing. As it happens, there is
+        already code in there to track "createdByParser" in the SVGUseElement,
+        it was just being ignored all the time. This may even have been
+        inefficient. Now we delay creating the shadow dom tree until children
+        are finished, which is the standard time to handle the createdByParser
+        flag.
+
+        I also verified that other SVG classes that derived from core DOM
+        classes that use the createdByParser flag do correctly pass this flag
+        on.
+
+        No new tests as this is covered by existing tests and does not have new behavior.
+
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::insertedIntoDocument):
+        (WebCore::SVGUseElement::svgAttributeChanged):
+        (WebCore::SVGUseElement::willRecalcStyle):
+        (WebCore::SVGUseElement::finishParsingChildren):
+        * xml/XMLErrors.cpp:
+        (WebCore::XMLErrors::insertErrorMessageBlock):
+
 2012-03-27  Ming Xie  <mxie@rim.com>
 
         [BlackBerry] Disable DisallowCType.h usage
