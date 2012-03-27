@@ -1,3 +1,47 @@
+2012-03-26  Fady Samuel  <fsamuel@chromium.org>
+
+        [Chromium] Using WebViewPlugins with --force-compositing-mode causes an ASSERT to fail
+        https://bugs.webkit.org/show_bug.cgi?id=81954
+
+        Reviewed by James Robinson.
+
+        A static variable s_inPaintContents is set when painting, and it ensures
+        that we don't delete GraphicsLayers or create GraphicsLayers while painting.
+
+        However, because this variable is static, it does not permit the existence
+        of multiple WebViews in different stages (one laying out and one painting).
+
+        This manifests itself if one attempts to use the --force-compositing-mode
+        in Chromium and attempts to navigate to a page with a missing or old plugin
+        or a browser plugin (which uses a WebViewPlugin as a placeholder until it's
+        done loading).
+
+        The solution to simplify debugging is to make this flag per-Page.
+        We can access Page from RenderLayerBacking which is a GraphicsLayerClient.
+        We add a new method GraphicsLayerClient::verifyNotPainting with a default
+        (do nothing) implementation and override it in RenderLayerBacking to
+        test the flag set in Page.
+
+        * page/Page.cpp:
+        (WebCore::Page::Page):
+        * page/Page.h:
+        (Page):
+        (WebCore::Page::setIsPainting):
+        (WebCore::Page::isPainting):
+        * platform/graphics/GraphicsLayer.cpp:
+        (WebCore::GraphicsLayer::GraphicsLayer):
+        (WebCore::GraphicsLayer::~GraphicsLayer):
+        (WebCore::GraphicsLayer::paintGraphicsLayerContents):
+        * platform/graphics/GraphicsLayerClient.h:
+        (GraphicsLayerClient):
+        (WebCore::GraphicsLayerClient::verifyNotPainting):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::paintContents):
+        (WebCore):
+        (WebCore::RenderLayerBacking::verifyNotPainting):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+
 2012-03-23  Ryosuke Niwa  <rniwa@webkit.org>
 
         cssText should use shorthand notations
