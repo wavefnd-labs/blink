@@ -1,3 +1,57 @@
+2012-03-27  Antti Koivisto  <antti@apple.com>
+
+        Remove Document::mappedElementSheet() 
+        https://bugs.webkit.org/show_bug.cgi?id=82242
+
+        Reviewed by Anreas Kling and Nikolas Zimmermann.
+
+        The only thing this is used for anymore is SVGFontFaceElement. That can be handled without
+        the confusing extra stylesheet.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::CSSStyleSelector):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        
+            - Add font face rules from registered SVGFontFaceElements.
+            - Simplify the constructor signature. Stylesheets are part of the document.
+            
+        * dom/Document.cpp:
+        (WebCore::Document::~Document):
+        (WebCore::Document::createStyleSelector):
+        (WebCore):
+        (WebCore::Document::updateBaseURL):
+        * dom/Document.h:
+        (WebCore):
+        (WebCore::Document::documentUserSheets):
+        (Document):
+
+            - Remove mappedElementSheet        
+            - Adapt to the CSSStyleSelector constructor signature changes.
+
+        * svg/SVGDocumentExtensions.cpp:
+        (WebCore::SVGDocumentExtensions::svgFontFaceElements):
+        (WebCore):
+        (WebCore::SVGDocumentExtensions::registerSVGFontFaceElement):
+        (WebCore::SVGDocumentExtensions::unregisterSVGFontFaceElement):
+        * svg/SVGDocumentExtensions.h:
+        (WebCore):
+        (SVGDocumentExtensions):
+        
+            - Add map for SVGFontFaceElements
+
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::insertedIntoDocument):
+        (WebCore::SVGFontFaceElement::removedFromDocument):
+        (WebCore):
+        * svg/SVGFontFaceElement.h:
+        (SVGFontFaceElement):
+        (WebCore::SVGFontFaceElement::fontFaceRule):
+        
+            - Switch to updating svgFontFaceElements map.
+            - Use elementSheet as the parent sheet (nothing is ever added to the elementSheet, it is used for
+              resolving relative URLs only).
+
 2012-03-27  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: startEditing should remove tabIndex attribute from the element if it was not set before.
