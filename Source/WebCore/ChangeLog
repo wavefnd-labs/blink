@@ -1,3 +1,44 @@
+2012-03-27  Adam Barth  <abarth@webkit.org>
+
+        ImageLoader::m_firedLoadEvent is a confusing name
+        https://bugs.webkit.org/show_bug.cgi?id=82283
+
+        Reviewed by Kentaro Hara.
+
+        This patch renames m_firedLoadEvent (and friends) to
+        m_hasPendingLoadEvent (and negates the value).  That name more
+        accurately reflects the semantics of this piece of state.  For example,
+        we now initialize m_hasPendingLoadEvent to false, which makes sense as
+        there is no pending load event, whereas before we initialized
+        m_firedLoadEvent to true, which made less sense since we hadn't yet
+        actually fired the load event.
+
+        * bindings/v8/V8GCController.cpp:
+        (WebCore::calculateGroupId):
+        * html/HTMLImageElement.cpp:
+        (WebCore::HTMLImageElement::attach):
+        * html/HTMLImageElement.h:
+        (HTMLImageElement):
+        (WebCore::HTMLImageElement::hasPendingLoadEvent):
+        (WebCore::HTMLImageElement::hasPendingActivity):
+        * html/ImageInputType.cpp:
+        (WebCore::ImageInputType::attach):
+        * loader/ImageLoader.cpp:
+        (WebCore::ImageLoader::ImageLoader):
+        (WebCore::ImageLoader::~ImageLoader):
+        (WebCore::ImageLoader::setImage):
+        (WebCore::ImageLoader::updateFromElement):
+        (WebCore::ImageLoader::notifyFinished):
+        (WebCore::ImageLoader::dispatchPendingBeforeLoadEvent):
+        (WebCore::ImageLoader::dispatchPendingLoadEvent):
+        (WebCore::ImageLoader::dispatchPendingErrorEvent):
+        * loader/ImageLoader.h:
+        (WebCore::ImageLoader::hasPendingBeforeLoadEvent):
+        (WebCore::ImageLoader::hasPendingLoadEvent):
+        (ImageLoader):
+        * svg/SVGImageElement.cpp:
+        (WebCore::SVGImageElement::haveLoadedRequiredResources):
+
 2012-03-27  Dan Bernstein  <mitz@apple.com>
 
         Tried to fix 32-bit builds.
