@@ -1,3 +1,23 @@
+2012-03-27  Zalan Bujtas  <zbujtas@gmail.com>
+
+        Frame flattening: childframe in FrameView::layout() needs protector.
+        https://bugs.webkit.org/show_bug.cgi?id=82345
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        RefPtr<FrameView> protector(this) is supposed to protect the current frameview in
+        FrameView::layout() from being destroyed by recalcStyle().
+        However, when frame flattening is on and a child frame is re-starting layout from
+        the topmost parent, the protection is missing and parent's recalcStyle()
+        can destroy the child frame.
+        Moving the protector before the layout re-starting is initiated makes the child frame
+        safe.
+
+        No new tests. Unable to create a test case, where this scenario is reproducible.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::layout):
+
 2012-03-27  Antti Koivisto  <antti@apple.com>
 
         Construct CSSCharsetRule on CSSOM API access only 
