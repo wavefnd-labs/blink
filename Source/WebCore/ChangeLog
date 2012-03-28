@@ -1,3 +1,52 @@
+2012-03-28  Adrienne Walker  <enne@google.com>
+
+        [chromium] Fix tiled layer assert for huge layers
+        https://bugs.webkit.org/show_bug.cgi?id=82486
+
+        Reviewed by James Robinson.
+
+        Test: TiledLayerChromiumTest.hugeLayerUpdateCrash
+
+        TilingData::numTiles() is calculated as the product of two ints and so
+        can potentially overflow, causing numTiles() to be incorrect. To avoid
+        calling code accidentally falling into this trap, remove this function
+        and all code that uses tile index from TilingData.  This requires
+        fixing up a bunch of callers of TilingData and CCLayerTilingData.
+
+        Additionally, TilingData::numTiles() has long been a confusing
+        function name in some contexts, so rename to bool hasEmptyBounds().
+
+        Also, remove TilingData::intersectDrawQuad because there are no
+        clients of that function.
+
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::TiledLayerChromium::drawsContent):
+        (WebCore::TiledLayerChromium::reserveTextures):
+        (WebCore::TiledLayerChromium::prepareToUpdate):
+        (WebCore::TiledLayerChromium::prepareToUpdateIdle):
+        (WebCore::TiledLayerChromium::needsIdlePaint):
+        (WebCore::TiledLayerChromium::idlePaintRect):
+        * platform/graphics/chromium/cc/CCLayerTilingData.cpp:
+        (WebCore::CCLayerTilingData::tileRect):
+        * platform/graphics/chromium/cc/CCLayerTilingData.h:
+        (WebCore::CCLayerTilingData::hasEmptyBounds):
+        (WebCore::CCLayerTilingData::tileBounds):
+        (WebCore::CCLayerTilingData::isEmpty):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.cpp:
+        (WebCore::CCTiledLayerImpl::bindContentsTexture):
+        (WebCore::CCTiledLayerImpl::appendQuads):
+        * platform/graphics/gpu/Texture.cpp:
+        (WebCore::Texture::create):
+        (WebCore::Texture::updateSubRect):
+        * platform/graphics/gpu/TilingData.cpp:
+        (WebCore::TilingData::tileBounds):
+        (WebCore::TilingData::tileBoundsWithBorder):
+        (WebCore::TilingData::tileBoundsNormalized):
+        * platform/graphics/gpu/TilingData.h:
+        (WebCore::TilingData::hasEmptyBounds):
+        (TilingData):
+        (WebCore::TilingData::assertTile):
+
 2012-03-28  Peter Rybin  <peter.rybin@gmail.com>
 
         Web Inspector: CodeGeneratorInspector.py: switch Runtime, Network and DOM domains to typed API
