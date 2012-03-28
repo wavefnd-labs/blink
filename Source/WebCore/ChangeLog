@@ -1,3 +1,22 @@
+2012-03-27  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [Chromium] Uninitialized access in SimpleFontDataSkia::platformInit
+        https://bugs.webkit.org/show_bug.cgi?id=82411
+
+        Reviewed by Kent Tamura.
+
+        SimpleFontDataSkia::platformInit() could call widthForGlyph(), which
+        accesses m_zeroWidthSpaceGlyph. This causes a valgrind memcheck error
+        because m_zeroWidthSpaceGlyph isn't initialized at this point.
+        Initialize m_zeroWidthSpaceGlyph with zero so that widthForGlyph() can
+        return appropriate value(The value zero here means "unknown glyph").
+
+        No new tests. I manually confirmed this change fixes the valgrind
+        memcheck error.
+
+        * platform/graphics/skia/SimpleFontDataSkia.cpp:
+        (WebCore::SimpleFontData::platformInit):
+
 2012-03-27  YoungTaeck Song  <youngtaeck.song@samsung.com>
 
         [EFL][WK2] Add RunLoopEfl and WorkQueueEfl
