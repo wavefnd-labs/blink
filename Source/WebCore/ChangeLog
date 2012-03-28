@@ -1,3 +1,83 @@
+2012-03-28  Peter Rybin  <peter.rybin@gmail.com>
+
+        Web Inspector: CodeGeneratorInspector.py: switch Runtime, Network and DOM domains to typed API
+        https://bugs.webkit.org/show_bug.cgi?id=81558
+
+        Reviewed by Pavel Feldman.
+
+        Client code is switched to typed API (all InspectorObject and InspectorArray types are
+        replaced with generated types from TypeBuilder according to Inspector.json).
+
+        Missing array of int specialization is added. Code generator now has a check against
+        misspelled (non-existing) domain names.
+
+        * inspector/CodeGeneratorInspector.py:
+        (Generator.go): check against misspelled domain names added.
+        * inspector/InjectedScript.cpp:
+        (WebCore::InjectedScript::evaluate):
+        (WebCore::InjectedScript::callFunctionOn):
+        (WebCore::InjectedScript::evaluateOnCallFrame):
+        (WebCore::InjectedScript::getProperties):
+        (WebCore::InjectedScript::wrapObject):
+        (WebCore::InjectedScript::wrapNode):
+        (WebCore::InjectedScript::wrapSerializedObject):
+        (WebCore::InjectedScript::makeEvalCall):
+        * inspector/InjectedScript.h:
+        (InjectedScript):
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::getDocument):
+        (WebCore::InspectorDOMAgent::pushChildNodesToFrontend):
+        (WebCore::InspectorDOMAgent::querySelectorAll):
+        (WebCore::InspectorDOMAgent::pushNodePathToFrontend):
+        (WebCore::InspectorDOMAgent::getEventListenersForNode):
+        (WebCore::InspectorDOMAgent::getSearchResults):
+        (WebCore::InspectorDOMAgent::resolveNode):
+        (WebCore::InspectorDOMAgent::getAttributes):
+        (WebCore::InspectorDOMAgent::buildObjectForNode):
+        (WebCore::InspectorDOMAgent::buildArrayForElementAttributes):
+        (WebCore::InspectorDOMAgent::buildArrayForContainerChildren):
+        (WebCore::InspectorDOMAgent::loadEventFired):
+        (WebCore::InspectorDOMAgent::didInsertDOMNode):
+        (WebCore::InspectorDOMAgent::styleAttributeInvalidated):
+        (WebCore::InspectorDOMAgent::pushNodeByPathToFrontend):
+        * inspector/InspectorDOMAgent.h:
+        (InspectorDOMAgent):
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::InspectorPageAgent::resourceTypeJson):
+        (WebCore::InspectorPageAgent::cachedResourceTypeJson):
+        (WebCore::InspectorPageAgent::buildObjectForFrameTree):
+        * inspector/InspectorPageAgent.h:
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::buildObjectForResourceRequest):
+        (WebCore::buildObjectForResourceResponse):
+        (WebCore::buildObjectForCachedResource):
+        (WebCore::InspectorResourceAgent::willSendRequest):
+        (WebCore::InspectorResourceAgent::didReceiveResponse):
+        (WebCore::InspectorResourceAgent::didLoadResourceFromMemoryCache):
+        (WebCore::InspectorResourceAgent::buildInitiatorObject):
+        (WebCore::InspectorResourceAgent::willSendWebSocketHandshakeRequest):
+        (WebCore::InspectorResourceAgent::didReceiveWebSocketHandshakeResponse):
+        * inspector/InspectorResourceAgent.h:
+        (InspectorResourceAgent):
+        * inspector/InspectorRuntimeAgent.cpp:
+        (WebCore::InspectorRuntimeAgent::evaluate):
+        (WebCore::InspectorRuntimeAgent::callFunctionOn):
+        (WebCore::InspectorRuntimeAgent::getProperties):
+        * inspector/InspectorRuntimeAgent.h:
+        (InspectorRuntimeAgent):
+        * inspector/InspectorValues.h:
+        (InspectorArray):
+        (WebCore::InspectorArray::pushInt):
+        (WebCore):
+        * inspector/ScriptCallFrame.cpp:
+        (WebCore::ScriptCallFrame::buildInspectorObject):
+        * inspector/ScriptCallFrame.h:
+        (ScriptCallFrame):
+        * inspector/ScriptCallStack.cpp:
+        (WebCore::ScriptCallStack::buildInspectorArray):
+        * inspector/ScriptCallStack.h:
+        (ScriptCallStack):
+
 2012-03-28  Eric Seidel  <eric@webkit.org>
 
         setNeedsLayout(true, false) is super confusing to read and should use an enum instead
