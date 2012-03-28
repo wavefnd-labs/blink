@@ -1,3 +1,48 @@
+2012-03-28  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Plumb through GraphicsLayer::contentsOpaque() to LayerTiler
+        https://bugs.webkit.org/show_bug.cgi?id=82457
+
+        Reviewed by Rob Buis.
+
+        The LayerTiler already knows not to turn on GL_BLEND for opaque layers.
+        However, it only ever sets the opaque flag for image layers and color
+        layers, never for content layers.
+
+        This was no big deal, because contentsOpaque() is currently false for
+        all layers except the root layer, which we always drew using the
+        BlackBerry::WebKit::BackingStore anyway.
+
+        When we start using RenderLayerBacking::m_usingTiledCacheLayer=true on
+        the root layer in situations where the BackingStore is unavailable, we
+        can speed up rendering of the root layer by honouring the opaque flag.
+
+        Fixed by plumbing through the GraphicsLayer::contentsOpaque() flag all
+        the way to LayerTiler and on to Texture.
+
+        * platform/graphics/blackberry/LayerData.h:
+        (WebCore::LayerData::LayerData):
+        (WebCore::LayerData::isOpaque):
+        (LayerData):
+        * platform/graphics/blackberry/LayerTile.cpp:
+        (WebCore::LayerTile::updateContents):
+        * platform/graphics/blackberry/LayerTile.h:
+        (LayerTile):
+        * platform/graphics/blackberry/LayerTiler.cpp:
+        (WebCore::LayerTiler::updateTextureContentsIfNeeded):
+        (WebCore::LayerTiler::performTileJob):
+        * platform/graphics/blackberry/LayerTiler.h:
+        (WebCore::LayerTiler::TextureJob::TextureJob):
+        (WebCore::LayerTiler::TextureJob::updateContents):
+        * platform/graphics/blackberry/LayerWebKitThread.h:
+        (WebCore::LayerWebKitThread::setOpaque):
+        * platform/graphics/blackberry/Texture.h:
+        (Texture):
+        * platform/graphics/blackberry/TextureCacheCompositingThread.cpp:
+        (WebCore::TextureCacheCompositingThread::updateContents):
+        * platform/graphics/blackberry/TextureCacheCompositingThread.h:
+        (TextureCacheCompositingThread):
+
 2012-03-28  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: nuke HeapGraph.setSize(), do it automagically on update
