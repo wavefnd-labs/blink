@@ -1,3 +1,107 @@
+2012-03-23  David Hyatt  <hyatt@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=81685
+        
+        [New Multicolumn] Add RenderMultiColumnFlowThread to hold the flow thread contents of a multi-column block.
+        It derives from RenderFlowThread.
+        
+        Refactor RenderFlowThread to split out the stuff related to explicit naming into a subclass, RenderNamedFlowThread.
+        This allows RenderFlowThread to be a simple base class that involves maintaining the regions themselves.
+    
+        Reviewed by Julien Chaffraix.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/Document.cpp:
+        * dom/NodeRenderingContext.cpp:
+        * dom/NodeRenderingContext.h:
+        (WebCore):
+        (WebCore::NodeRenderingContext::parentFlowRenderer):
+        * dom/WebKitNamedFlow.cpp:
+        (WebCore::WebKitNamedFlow::WebKitNamedFlow):
+        * dom/WebKitNamedFlow.h:
+        (WebCore):
+        (WebCore::WebKitNamedFlow::create):
+        (WebKitNamedFlow):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::collapseAnonymousBoxChild):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        (WebCore):
+        (WebCore::RenderFlowThread::addRegionToThread):
+        (WebCore::RenderFlowThread::removeRegionFromThread):
+        (WebCore::RenderFlowThread::removeRenderBoxRegionInfo):
+        * rendering/RenderFlowThread.h:
+        (WebCore):
+        * rendering/RenderMultiColumnFlowThread.cpp: Added.
+        (WebCore):
+        (WebCore::RenderMultiColumnFlowThread::RenderMultiColumnFlowThread):
+        (WebCore::RenderMultiColumnFlowThread::renderName):
+        * rendering/RenderMultiColumnFlowThread.h: Added.
+        (WebCore):
+        (RenderMultiColumnFlowThread):
+        * rendering/RenderNamedFlowThread.cpp: Added.
+        (WebCore):
+        (WebCore::RenderNamedFlowThread::RenderNamedFlowThread):
+        (WebCore::RenderNamedFlowThread::renderName):
+        (WebCore::RenderNamedFlowThread::nextRendererForNode):
+        (WebCore::RenderNamedFlowThread::previousRendererForNode):
+        (WebCore::RenderNamedFlowThread::addFlowChild):
+        (WebCore::RenderNamedFlowThread::removeFlowChild):
+        (WebCore::RenderNamedFlowThread::dependsOn):
+        (WebCore::compareRenderRegions):
+        (WebCore::RenderNamedFlowThread::addRegionToThread):
+        (WebCore::RenderNamedFlowThread::removeRegionFromThread):
+        (WebCore::RenderNamedFlowThread::checkInvalidRegions):
+        (WebCore::RenderNamedFlowThread::addDependencyOnFlowThread):
+        (WebCore::RenderNamedFlowThread::removeDependencyOnFlowThread):
+        (WebCore::RenderNamedFlowThread::pushDependencies):
+        (WebCore::RenderNamedFlowThread::ensureNamedFlow):
+        * rendering/RenderNamedFlowThread.h: Added.
+        (WebCore):
+        (RenderNamedFlowThread):
+        (WebCore::RenderNamedFlowThread::name):
+        (WebCore::RenderNamedFlowThread::hasChildren):
+        (WebCore::RenderNamedFlowThread::hasChild):
+        (WebCore::RenderNamedFlowThread::isRenderNamedFlowThread):
+        (WebCore::toRenderNamedFlowThread):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::willBeDestroyed):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isRenderNamedFlowThread):
+        * rendering/RenderObjectChildList.cpp:
+        (WebCore::renderNamedFlowThreadContainer):
+        (WebCore::RenderObjectChildList::removeChildNode):
+        (WebCore::RenderObjectChildList::appendChildNode):
+        (WebCore::RenderObjectChildList::insertChildNode):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::RenderRegion):
+        (WebCore::RenderRegion::attachRegion):
+        * rendering/RenderRegion.h:
+        (WebCore):
+        (WebCore::RenderRegion::parentNamedFlowThread):
+        (RenderRegion):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::writeRenderNamedFlowThreads):
+        (WebCore::writeLayers):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::RenderView):
+        (WebCore::RenderView::layout):
+        (WebCore::RenderView::styleDidChange):
+        (WebCore::RenderView::ensureRenderFlowThreadWithName):
+        (WebCore::RenderView::layoutRenderNamedFlowThreads):
+        * rendering/RenderView.h:
+        (WebCore):
+        (RenderView):
+        (WebCore::RenderView::hasRenderNamedFlowThreads):
+        (WebCore::RenderView::isRenderNamedFlowThreadOrderDirty):
+        (WebCore::RenderView::setIsRenderNamedFlowThreadOrderDirty):
+        (WebCore::RenderView::renderNamedFlowThreadList):
+
 2012-03-28  Emil A Eklund  <eae@chromium.org>
 
         Remove unnecessary rounding in RenderLayerBacking
