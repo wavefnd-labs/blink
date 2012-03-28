@@ -1,3 +1,79 @@
+2012-03-28  Eric Seidel  <eric@webkit.org>
+
+        setNeedsLayout(true, false) is super confusing to read and should use an enum instead
+        https://bugs.webkit.org/show_bug.cgi?id=82369
+
+        Reviewed by Julien Chaffraix.
+
+        I replaced all uses of the markParents bool with a MarkingBehavior
+        enum (which has two values: MarkContainingBlockChain and MarkOnlyThis).
+        I'm not sure the naming is perfect (as it's not clear to me if markParents is
+        used to mean the same thing in these 3 functions), but hopefully this code is more
+        clear.  I welcome further suggested adjustment from layout experts.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scheduleRelayout):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::adjustPositionedBlock):
+        (WebCore::RenderBlock::layoutBlockChildren):
+        (WebCore::RenderBlock::layoutBlockChild):
+        (WebCore::RenderBlock::layoutPositionedObjects):
+        (WebCore::RenderBlock::markForPaginationRelayoutIfNeeded):
+        (WebCore::RenderBlock::removePositionedObjects):
+        (WebCore::RenderBlock::insertFloatingObject):
+        (WebCore::RenderBlock::positionNewFloats):
+        (WebCore::RenderBlock::markAllDescendantsWithFloatsForLayout):
+        (WebCore::RenderBlock::adjustBlockChildForPagination):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutRunsAndFloats):
+        (WebCore::RenderBlock::layoutInlineChildren):
+        (WebCore::RenderBlock::positionNewFloatOnLine):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::positionLineBox):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutBlock):
+        (WebCore::gatherFlexChildrenInfo):
+        (WebCore::RenderDeprecatedFlexibleBox::layoutHorizontalBox):
+        (WebCore::RenderDeprecatedFlexibleBox::layoutVerticalBox):
+        (WebCore::RenderDeprecatedFlexibleBox::applyLineClamp):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::prepareChildForPositionedLayout):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateScrollInfoAfterLayout):
+        * rendering/RenderMedia.cpp:
+        (WebCore::RenderMedia::layout):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::setPreferredLogicalWidthsDirty):
+        * rendering/RenderObject.h:
+        (RenderObject):
+        (WebCore::RenderObject::setNeedsLayout):
+        (WebCore::RenderObject::setChildNeedsLayout):
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::layoutSpecialExcludedChild):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::layout):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::layout):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight):
+        (WebCore::RenderTableSection::layoutRows):
+        * rendering/RenderTextControl.cpp:
+        (WebCore::RenderTextControl::layoutSpecialExcludedChild):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::layout):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::RenderView):
+        (WebCore::RenderView::layout):
+        * rendering/mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::layout):
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::layout):
+        * rendering/mathml/RenderMathMLSubSup.cpp:
+        (WebCore::RenderMathMLSubSup::layout):
+        * rendering/svg/SVGRenderSupport.cpp:
+        (WebCore::SVGRenderSupport::layoutChildren):
+
 2012-03-28  Joseph Pecoraro  <pecoraro@apple.com>
 
         <http://webkit.org/b/82419> Web Inspector: Create -[DOMNode inspect] from IDL
