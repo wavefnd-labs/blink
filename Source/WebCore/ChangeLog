@@ -1,3 +1,35 @@
+2012-03-26  Eric Uhrhane  <ericu@chromium.org>
+
+        FileWriter has two race conditions
+        https://bugs.webkit.org/show_bug.cgi?id=81861
+
+        Reviewed by David Levin.
+
+        Should make current tests less flaky.
+
+        * Modules/filesystem/FileWriter.h:
+        * Modules/filesystem/FileWriter.cpp:
+        Track the in-flight operation, whether it be an abort/write/truncate.
+        Whether an abort comes back as didWrite, didTruncate, or didFail, handle
+        it appropriately.  Before this fix, the Chromium implementation would
+        assert in two cases:
+
+        If the user calls abort, then write, then abort before the backend
+        catches up, we'd send both aborts to the backend, even though it hadn't
+        received the write yet.  Chromium's backend asserts if there's an abort
+        with no write in progress.  We now record that we've sent an abort and
+        are waiting for the response.
+
+        If the user calls abort while a write/truncate is just finishing, on the
+        Chromium worker implementation, the completion message could be
+        thread-hopping back to WebCore at the
+        WorkerAsyncFileWriterCallbacksBridge while the abort is thread-hopping
+        in the other direction.  Again, this leads to an abort call to the
+        backend with no write in progress, and an assert.  We're now robust to
+        completions coming back when we're expecting an abort, and
+        https://chromiumcodereview.appspot.com/9764018/ will make the backend
+        robust to extra abort calls.
+
 2012-03-27  Ryosuke Niwa  <rniwa@webkit.org>
 
         Deleting a paragraph of text should not add elements for typing style
