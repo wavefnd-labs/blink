@@ -1,3 +1,35 @@
+2012-03-27  Antti Koivisto  <antti@apple.com>
+
+        Separate @import rules from other rules in CSSStyleSheet
+        https://bugs.webkit.org/show_bug.cgi?id=82384 
+
+        Reviewed by Andreas Kling.
+
+        Import rules always come before all other rules (except @charset). They currently live 
+        in the generic child rule vector. They can be moved to a vector of their own for stronger
+        typing and more focused traversal. This will also make future refactoring easier.
+        
+        - @import rules go to m_importRules
+        - the rest go to m_childRules
+        
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::parserAppendRule):
+        (WebCore::CSSStyleSheet::length):
+        (WebCore::CSSStyleSheet::item):
+        (WebCore::CSSStyleSheet::clearRules):
+        (WebCore::CSSStyleSheet::rules):
+        (WebCore::CSSStyleSheet::insertRule):
+        (WebCore::CSSStyleSheet::deleteRule):
+        (WebCore::CSSStyleSheet::isLoading):
+        (WebCore::CSSStyleSheet::addSubresourceStyleURLs):
+        * css/CSSStyleSheet.h:
+        (WebCore):
+        (CSSStyleSheet):
+        (WebCore::CSSStyleSheet::childRules):
+        (WebCore::CSSStyleSheet::importRules):
+
 2012-03-28  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: REGRESSION: Stack overflow on the page with > 100kloc
