@@ -1,3 +1,31 @@
+2012-03-26  Shawn Singh  <shawnsingh@chromium.org>
+
+        [chromium] layer->clipRect() is not initialized for layers that create a renderSurface.
+        https://bugs.webkit.org/show_bug.cgi?id=74147
+
+        Reviewed by Adrienne Walker.
+
+        Added 3 additional unit tests; Modified existing unit tests and layout tests.
+
+        The layer's clipRect and usesLayerClipping information was not
+        being initialized for layers that created a renderSurface. (It
+        was, however, being initialized for the renderSurface itself.)
+        This patch adds a unit test that reproduces that this is an error,
+        other unit tests to tightly test the value of clipRect being
+        initialized, and adds the logic to properly initialize the
+        clipRect.
+
+        Before this patch, this bug was causing flashing on tab-switch on
+        the apple iphone page. Even worse, with partial swap enabled, the
+        layers would simply disappear, because the first frame the
+        clipRect is uninitialized and the layer is not drawn, and the
+        second frame onwards, the damage tracker correctly things nothing
+        is damaged, so it doesn't draw that layer again until other damage
+        causes it to be redrawn.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.cpp:
+        (WebCore::calculateDrawTransformsAndVisibilityInternal):
+
 2012-03-28  Anders Carlsson  <andersca@apple.com>
 
         "Sticky" or slow scrolling on some sites
