@@ -1,3 +1,21 @@
+2012-03-28  Stephen Chenney  <schenney@chromium.org>
+
+        Null dereference in SVGTextElement::animatedLocalTransform()
+        https://bugs.webkit.org/show_bug.cgi?id=82375
+
+        Reviewed by Nikolas Zimmermann.
+
+        A poorly structured SVG file with a text element inside an
+        animatedTransform element leaves the text element placed outside of
+        the SVG root and it has no renderer(). Later attempts to use the
+        renderer in animatedLocalTransform fail.
+
+        Test: svg/custom/get-text-element-transform-crash.html
+
+        * svg/SVGTextElement.cpp:
+        (WebCore::SVGTextElement::animatedLocalTransform): Added a check for null renderer, and do not check
+        for style transform if there is no renderer.
+
 2012-03-27  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Enable animVal support for SVGAnimatedPreserveAspectRatio
