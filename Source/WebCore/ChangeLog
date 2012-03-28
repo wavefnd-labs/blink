@@ -1,3 +1,47 @@
+2012-03-28  Leandro Gracia Gil  <leandrogracia@chromium.org>
+
+        Selectively retrieve text content around a given position.
+        https://bugs.webkit.org/show_bug.cgi?id=78361
+
+        Reviewed by Ryosuke Niwa.
+
+        Tests: a new layout test will be introduced once the required WebKit API code is ready.
+
+        Introduce the DOMTextContentWalker class to selectively retrieve content
+        around a given VisiblePosition into a string in such a way that a text
+        Range can be extracted later from a pair of the string's positions.
+
+        A new boolean called m_shouldStop is also introduced in the TextIterator to force
+        it advancing under certain conditions. Although this is usually done by setting
+        m_positionNode to zero, it can't be applied in this case since by doing so the
+        iterator's range is lost.
+
+        * WebCore.gypi:
+        * editing/SurroundingText.cpp: Added.
+        (WebCore):
+        (WebCore::SurroundingText::SurroundingText):
+        (WebCore::SurroundingText::rangeFromContentOffsets):
+        (WebCore::SurroundingText::content):
+        (WebCore::SurroundingText::positionOffsetInContent):
+        * editing/SurroundingText.h: Added.
+        (WebCore):
+        (SurroundingText):
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::TextIterator):
+        (WebCore::TextIterator::advance):
+        (WebCore::SimplifiedBackwardsTextIterator::SimplifiedBackwardsTextIterator):
+        (WebCore::SimplifiedBackwardsTextIterator::advance):
+        * editing/TextIterator.h:
+        (WebCore::TextIterator::atEnd):
+        (TextIterator):
+        (WebCore::SimplifiedBackwardsTextIterator::atEnd):
+        (SimplifiedBackwardsTextIterator):
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::enclosingFormControlElement):
+        (WebCore):
+        * html/HTMLFormControlElement.h:
+        (HTMLFormControlElement):
+
 2012-03-28  Alexis Menard  <alexis.menard@openbossa.org>
 
         Speed up updates of existing CSS properties from JS.
