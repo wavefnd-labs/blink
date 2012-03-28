@@ -1,3 +1,24 @@
+2012-03-28  Joe Thomas  <joethomas@motorola.com>
+
+        SL bot is hitting SHOULD NEVER BE REACHED in WebCore::valueForLength() on many tests
+        https://bugs.webkit.org/show_bug.cgi?id=82390
+
+        Reviewed by Simon Fraser.
+
+        This is an attempt to fix the MAC SL/Lion Bot issue as this issue is not reproducible locally.
+        The assertion happened when length type is Undefined in valueForLength() function but the assertion for Undefined length type
+        in RenderBox::computeLogicalWidthInRegionUsing which calls the above said function did not get hit.
+
+        This patch passes Length structure as const reference to Length calculation functions which avoids the call to the copy-constructor.
+        And it ensures that the Length structure is not getting modified during copy-construction. 
+
+        * css/LengthFunctions.cpp:
+        (WebCore::minimumValueForLength):
+        (WebCore::valueForLength):
+        (WebCore::floatValueForLength):
+        * css/LengthFunctions.h:
+        (WebCore):
+
 2012-03-28  Gavin Barraclough  <barraclough@apple.com>
 
         Yarr: if we're not using the output array, don't populate it!
