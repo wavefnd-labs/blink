@@ -1,3 +1,97 @@
+2012-03-28  Antti Koivisto  <antti@apple.com>
+
+        Split WebKitCSSKeyframeRule into internal and CSSOM types 
+        https://bugs.webkit.org/show_bug.cgi?id=82490 
+
+        Reviewed by Andreas Kling.
+
+        WebKitCSSKeyframeRule is a CSSOM type and should not be used internally.
+        
+        - Add StyleKeyframe as the internal data structure for keyframes.
+        - WebKitCSSKeyframeRule becomes a wrapper for StyleKeyframe.
+        - Use StyleKeyframe internally so WebKitCSSKeyframeRules are created on CSSOM access only.
+
+        * css/CSSGrammar.y:
+        
+            Use StyleKeyframes instead of WebKitCSSKeyframeRules.
+        
+        * css/CSSMediaRule.h:
+        (CSSMediaRule):
+        (WebCore::CSSMediaRule::length):
+        (WebCore::CSSMediaRule::item):
+        
+            Adapt to LiveCSSRuleList changes.
+        
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseKeyframeRule):
+        (WebCore::CSSParser::createKeyframe):
+        * css/CSSParser.h:        
+        (WebCore):
+        (CSSParser):
+        
+            Construct StyleKeyframes.
+        
+        * css/CSSRuleList.h:
+        (WebCore::LiveCSSRuleList::length):
+        (WebCore::LiveCSSRuleList::item):
+
+            Make LiveCSSRuleList call rule item()/length() to avoid accessor duplication.
+    
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        * css/WebKitCSSKeyframeRule.cpp:
+        
+            Use StyleKeyframe.
+            Make 0% and 100% keyframes static.
+        
+        (WebCore):
+        (WebCore::StyleKeyframe::setProperties):
+        (WebCore::StyleKeyframe::parseKeyString):
+        (WebCore::StyleKeyframe::cssText):
+        (WebCore::WebKitCSSKeyframeRule::WebKitCSSKeyframeRule):
+        (WebCore::WebKitCSSKeyframeRule::~WebKitCSSKeyframeRule):
+        (WebCore::WebKitCSSKeyframeRule::style):
+        * css/WebKitCSSKeyframeRule.h:
+        (WebCore):
+        (WebCore::StyleKeyframe::create):
+        (WebCore::StyleKeyframe::keyText):
+        (WebCore::StyleKeyframe::setKeyText):
+        (StyleKeyframe):
+        (WebCore::StyleKeyframe::properties):
+        (WebCore::StyleKeyframe::StyleKeyframe):
+        (WebKitCSSKeyframeRule):
+        (WebCore::WebKitCSSKeyframeRule::keyText):
+        (WebCore::WebKitCSSKeyframeRule::setKeyText):
+        (WebCore::WebKitCSSKeyframeRule::cssText):
+        
+            Split to internal and CSSOM wrapper type. The wrapper refs StyleKeyframe. 
+        
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::WebKitCSSKeyframesRule::~WebKitCSSKeyframesRule):
+        (WebCore::WebKitCSSKeyframesRule::parserAppendKeyframe):
+        (WebCore::WebKitCSSKeyframesRule::insertRule):
+        (WebCore::WebKitCSSKeyframesRule::deleteRule):
+        (WebCore::WebKitCSSKeyframesRule::findRule):
+        (WebCore::WebKitCSSKeyframesRule::findKeyframeIndex):
+        (WebCore::WebKitCSSKeyframesRule::cssText):
+        (WebCore):
+        (WebCore::WebKitCSSKeyframesRule::item):
+        * css/WebKitCSSKeyframesRule.h:
+        (WebCore):
+        (WebCore::WebKitCSSKeyframesRule::keyframes):
+        (WebKitCSSKeyframesRule):
+        (WebCore::WebKitCSSKeyframesRule::length):
+        
+            Keep StyleKeyframes and the wrappers (WebKitCSSKeyframeRules) in separate vectors.
+            Construct the wrapper vector and wrappers themselves on demand.
+            Keep the vectors in sync during mutations.
+        
+        * css/WebKitCSSRegionRule.h:
+        
+            Adapt to LiveCSSRuleList changes.
+
 2012-03-29  Zeno Albisser  <zeno@webkit.org>
 
         Fieldset disabled attribute does not work.
