@@ -1,3 +1,69 @@
+2012-03-29  hayato@chromium.org  <hayato@chromium.org>
+
+        Let focus navigation be compliant with Shadow DOM spec.
+        https://bugs.webkit.org/show_bug.cgi?id=78588
+
+        Reviewed by Dimitri Glazkov.
+
+        Re-landing r112500. Fixed an assertion failure on ReifiedTreeTraversal.
+
+        Sequential focus navigation now behaves exactly as specified in the Shadow DOM spec.
+
+        According to the Shadow DOM spec:
+        The shadow DOM navigation order sequence is inserted into the document navigation order:
+        1. immediately after the shadow host, if the shadow host is focusable; or
+        2. in place of the shadow host as if the shadow host were assigned the value of auto for determining its position.
+
+        Prior to this patch, sequential focus navigation goes into Shadow DOM, but it is incomplete
+        since insertion points, such as <content> elements or <shadow> elements, are not resolved at all.
+        Now focus navigation can traverse shadow DOM subtrees in 'reified tree order', resolving lower boundaries transparently.
+
+        Implementation notes:
+        Prior to this patch, sequential focus navigation does not go into Shadow DOM if a shadow host is non-focusable.
+        Now focus navigation must go into Shadow DOM subtrees even if a show host is not focusable as described in 2).
+        To support this behavior, this patch introduced adjustedTabIndex() locally in FocusController so that
+        it does not skip a non-focusable shadow host in current focus scope.
+        After finding a *pseudo* focusable element in current focus scope, it tries to resolve a focused element recursively,
+        considering a nested focus scope inside of a shadow host or iframe.
+        To traverse Shadow DOM subtrees, a FocusController makes use of ReifiedTreeTraversal APIs, which was introduced in r112055.
+
+        This change does not affect an existing behavior if a shadow dom is not involved.
+
+        Test: fast/dom/shadow/focus-navigation.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::focus):
+        * dom/ReifiedTreeTraversal.cpp:
+        (WebCore::ReifiedTreeTraversal::parentNodeWithoutCrossingUpperBoundary):
+        * page/FocusController.cpp:
+        (WebCore::isShadowHost):
+        (WebCore):
+        (WebCore::FocusScope::FocusScope):
+        (WebCore::FocusScope::rootNode):
+        (WebCore::FocusScope::owner):
+        (WebCore::FocusScope::focusScopeOf):
+        (WebCore::FocusScope::focusScopeOwnedByShadowHost):
+        (WebCore::FocusScope::focusScopeOwnedByIFrame):
+        (WebCore::hasCustomFocusLogic):
+        (WebCore::isNonFocusableShadowHost):
+        (WebCore::isFocusableShadowHost):
+        (WebCore::adjustedTabIndex):
+        (WebCore::shouldVisit):
+        (WebCore::FocusController::findFocusableNodeDecendingDownIntoFrameDocument):
+        (WebCore::FocusController::advanceFocusInDocumentOrder):
+        (WebCore::FocusController::findFocusableNodeAcrossFocusScope):
+        (WebCore::FocusController::findFocusableNodeRecursively):
+        (WebCore::FocusController::findFocusableNode):
+        (WebCore::FocusController::findNodeWithExactTabIndex):
+        (WebCore::nextNodeWithGreaterTabIndex):
+        (WebCore::previousNodeWithLowerTabIndex):
+        (WebCore::FocusController::nextFocusableNode):
+        (WebCore::FocusController::previousFocusableNode):
+        * page/FocusController.h:
+        (WebCore):
+        (FocusScope):
+        (FocusController):
+
 2012-03-28  Kinuko Yasuda  <kinuko@chromium.org>
 
         [chromium] Add isolated filesystem type and WebDragData::filesystem_id for drag-and-drop using File/DirectoryEntry.
