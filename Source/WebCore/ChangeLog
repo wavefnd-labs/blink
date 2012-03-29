@@ -1,3 +1,105 @@
+2012-03-28  Dirk Schulze  <krit@webkit.org>
+
+        Introduce CSSParserMode in all classes
+        https://bugs.webkit.org/show_bug.cgi?id=82335
+
+        Reviewed by Ryosuke Niwa.
+
+        Introduce the new CSSParserMode enum to more classes. SVG classes make use of SVGAttributeMode for CSS parsing already.
+        But SVGAttributeMode does not differ from CSSQuirksMode at the moment. This will change with a followup patch on bug 46112.
+
+        No new tests. No change of functionality. Everything gets covered by existing tests.
+
+        * css/CSSImportRule.cpp:
+        (WebCore::CSSImportRule::setCSSStyleSheet):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::insertRule):
+        * css/CSSParser.cpp: Move private functions away from strict boolean and make use of CSSParserMode instead.
+        (WebCore):
+        (WebCore::parseColorValue):
+        (WebCore::parseSimpleLengthValue):
+        (WebCore::CSSParser::parseFontFaceValue):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseColor):
+        (WebCore::CSSParser::createStyleRule):
+        (WebCore::CSSParser::createFontFaceRule):
+        (WebCore::CSSParser::createPageRule):
+        (WebCore::CSSParser::createKeyframeRule):
+        * css/CSSParser.h: Removed constructor with boolean argument. We just use the CSSParserMode enum now.
+        (CSSParser):
+        * css/CSSParserMode.h:
+        (strictToCSSParserMode): New helper function to convert boolean to CSSParserMode.
+        (isStrictParserMode): Helper function that returns true if argument is CSSStrictMode.
+        * css/CSSRule.h:
+        (WebCore::CSSRule::cssParserMode): Renamed useStrictParsing to cssParserMode since it returns CSSParserMode instead of a boolean now.
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::CSSStyleSheet):
+        (WebCore::CSSStyleSheet::insertRule):
+        (WebCore::CSSStyleSheet::parseString):
+        (WebCore::CSSStyleSheet::parseStringAtLine):
+        * css/CSSStyleSheet.h:
+        (CSSStyleSheet):
+        (WebCore::CSSStyleSheet::setCSSParserMode): Renamed setStrictParsing to setCSSParserMode since we set an enum now.
+        (WebCore::CSSStyleSheet::cssParserMode): Renamed useStrictParsing to cssParserMode since it returns CSSParserMode instead of a boolean now.
+        * css/MediaList.cpp:
+        (WebCore::MediaQuerySet::parse):
+        (WebCore::MediaQuerySet::add):
+        (WebCore::MediaQuerySet::remove):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::StylePropertySet):
+        (WebCore::StylePropertySet::setProperty):
+        (WebCore::StylePropertySet::parseDeclaration):
+        * css/StylePropertySet.h: Use unsigned member variables to store the parser mode.  
+        (WebCore::StylePropertySet::create):
+        (WebCore::StylePropertySet::setCSSParserMode): Renamed setStrictParsing to setCSSParserMode since we get an enum now. This gets converted to unsigned internally.
+        (WebCore::StylePropertySet::cssParserMode): Renamed useStrictParsing to cssParserMode since it returns CSSParserMode instead of a boolean now.
+        (StylePropertySet):
+        * css/StyleSheet.h:
+        (StyleSheet):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::WebKitCSSKeyframesRule::insertRule):
+        * css/WebKitCSSMatrix.cpp:
+        (WebCore::WebKitCSSMatrix::setMatrixValue):
+        * dom/Document.cpp:
+        (WebCore::Document::webkitGetFlowByName):
+        (WebCore::Document::pageUserSheet):
+        (WebCore::Document::pageGroupUserSheets):
+        * dom/Element.cpp:
+        (WebCore::Element::webkitMatchesSelector):
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::ensureInlineStyle):
+        (WebCore::ElementAttributeData::ensureMutableInlineStyle):
+        (WebCore::ElementAttributeData::updateInlineStyleAvoidingMutation):
+        * dom/Node.cpp:
+        (WebCore::Node::querySelector):
+        (WebCore::Node::querySelectorAll):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::parseStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * html/HTMLElement.cpp:
+        (WebCore::StyledElement::copyNonAttributeProperties):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::setFont):
+        * html/shadow/ContentSelectorQuery.cpp:
+        (WebCore::ContentSelectorQuery::ContentSelectorQuery):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::reparseStyleSheet):
+        * svg/SVGElementRareData.h:
+        (WebCore::SVGElementRareData::ensureAnimatedSMILStyleProperties):
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::SVGFontFaceElement):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::getPresentationAttribute):
+        * xml/XSLStyleSheet.h:
+        (XSLStyleSheet):
+        * xml/XSLStyleSheetLibxslt.cpp:
+        (WebCore::XSLStyleSheet::parseString):
+        * xml/XSLStyleSheetQt.cpp:
+        (WebCore::XSLStyleSheet::parseString):
+
 2012-03-29  Sanghyun Park  <sh919.park@samsung.com>
 
         Fix the error type in JSAudioBufferSourceNodeCustom to pass layout test.
