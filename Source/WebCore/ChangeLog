@@ -1,3 +1,42 @@
+2012-03-29  Vineet Chaudhary  <rgf748@motorola.com>
+
+        Remove custom bindings form Internals.idl of attribute type Array.
+        https://bugs.webkit.org/show_bug.cgi?id=82319
+
+        Reviewed by Kentaro Hara.
+
+        Remove custom bindings for Array type and replace Array type with sequence<String>.
+
+        No new tests. LayoutTests/fast/harness/user-preferred-language.html should pass
+        even after these changes.
+
+        * Target.pri: Remove JSInternalsCustom.cpp and V8InternalsCustom.cpp.
+        * UseJSC.cmake: Remove JSInternalsCustom.cpp.
+        * UseV8.cmake: Remove V8InternalsCustom.cpp.
+        * WebCore.gypi: Remove JSInternalsCustom.cpp and V8InternalsCustom.cpp.
+        * WebCore.vcproj/WebCoreTestSupport.vcproj: Remove JSInternalsCustom.cpp and V8InternalsCustom.cpp.
+        * WebCore.xcodeproj/project.pbxproj: Remove JSInternalsCustom.cpp and V8InternalsCustom.cpp.
+        * bindings/js/JSDOMBinding.h:
+        (WebCore):
+        (WebCore::jsArray): Added new specialize function template for Strings.
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (JSValueToNative): Add jsArray<String>() to deduce return type.
+        (NativeToJSValue): Added check for type String.
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (JSValueToNative): Add v8Array<String>() to deduce return type.
+        (NativeToJSValue): Added check for type String.
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore::setJSTestObjSequenceAttr): Modified results from run-binding-tests.
+        * bindings/scripts/test/V8/V8TestObj.cpp: Modified results from run-binding-tests.
+        (WebCore::TestObjInternal::sequenceAttrAttrSetter):
+        * bindings/v8/V8Binding.h: Added new specialize function template for Strings.
+        (WebCore):
+        (WebCore::v8Array):
+        (WebCore::toNativeArray):
+        * testing/Internals.idl: Replace Array type with sequence<String>
+        * testing/js/JSInternalsCustom.cpp: Removed.
+        * testing/v8/V8InternalsCustom.cpp: Removed.
+
 2012-03-29  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r112500.
