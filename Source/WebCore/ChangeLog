@@ -1,3 +1,133 @@
+2012-03-29  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Pack bitfields in InlineBox for Windows
+        https://bugs.webkit.org/show_bug.cgi?id=82578
+
+        Reviewed by Kent Tamura.
+
+        Unlike gcc and clang, MSVC pads each consecutive member variables of the same type in bitfields. e.g. if you have:
+        sturct AB {
+        unsigned m_1 : 31;
+        bool m_2 : 1;
+        }
+        then MSVC pads m_1 and allocates sizeof(unsigned) * 2 for AB whereas gcc and clang only allocate
+        sizeof(unsigned) * 1 for AB.
+
+        Fixed the bug by packing all bitfields in InlineBox into InlineBoxBitfields and always using either unsigned or int.
+
+        * rendering/EllipsisBox.cpp:
+        (WebCore::EllipsisBox::paint):
+        (WebCore::EllipsisBox::selectionRect):
+        (WebCore::EllipsisBox::nodeAtPoint):
+        * rendering/InlineBox.cpp:
+        (WebCore):
+        (SameSizeAsInlineBox):
+        (WebCore::InlineBox::logicalHeight):
+        (WebCore::InlineBox::baselinePosition): Moved from the header file since it's a virtual function.
+        (WebCore::InlineBox::lineHeight): Ditto.
+        (WebCore::InlineBox::deleteLine):
+        (WebCore::InlineBox::extractLine):
+        (WebCore::InlineBox::attachLine):
+        (WebCore::InlineBox::nextOnLineExists):
+        (WebCore::InlineBox::clearKnownToHaveNoOverflow):
+        * rendering/InlineBox.h:
+        (WebCore::InlineBox::InlineBox):
+        (WebCore::InlineBox::isText):
+        (WebCore::InlineBox::setIsText):
+        (WebCore::InlineBox::hasVirtualLogicalHeight):
+        (WebCore::InlineBox::setHasVirtualLogicalHeight):
+        (WebCore::InlineBox::isHorizontal):
+        (WebCore::InlineBox::setIsHorizontal):
+        (WebCore::InlineBox::isConstructed):
+        (WebCore::InlineBox::setConstructed):
+        (WebCore::InlineBox::setExtracted):
+        (WebCore::InlineBox::setFirstLineStyleBit):
+        (WebCore::InlineBox::isFirstLineStyle):
+        (InlineBox):
+        (WebCore::InlineBox::bidiLevel):
+        (WebCore::InlineBox::setBidiLevel):
+        (WebCore::InlineBox::direction):
+        (WebCore::InlineBox::isDirty):
+        (WebCore::InlineBox::markDirty):
+        (WebCore::InlineBox::expansion):
+        (WebCore::InlineBox::verticalAlign):
+        (WebCore::InlineBox::knownToHaveNoOverflow):
+        (WebCore::InlineBox::dirOverride):
+        (WebCore::InlineBox::setDirOverride):
+        (InlineBoxBitfields):
+        (WebCore::InlineBox::InlineBoxBitfields::InlineBoxBitfields):
+        (WebCore::InlineBox::InlineBoxBitfields::bidiEmbeddingLevel):
+        (WebCore::InlineBox::InlineBoxBitfields::setBidiEmbeddingLevel):
+        (WebCore::InlineBox::InlineBoxBitfields::determinedIfNextOnLineExists):
+        (WebCore::InlineBox::InlineBoxBitfields::setDeterminedIfNextOnLineExists):
+        (WebCore::InlineBox::InlineBoxBitfields::nextOnLineExists):
+        (WebCore::InlineBox::InlineBoxBitfields::setNextOnLineExists):
+        (WebCore::InlineBox::InlineBoxBitfields::expansion):
+        (WebCore::InlineBox::InlineBoxBitfields::setExpansion):
+        (WebCore::InlineBox::endsWithBreak):
+        (WebCore::InlineBox::setEndsWithBreak):
+        (WebCore::InlineBox::hasEllipsisBox):
+        (WebCore::InlineBox::hasSelectedChildren):
+        (WebCore::InlineBox::setHasSelectedChildren):
+        (WebCore::InlineBox::setHasEllipsisBox):
+        (WebCore::InlineBox::hasHyphen):
+        (WebCore::InlineBox::setHasHyphen):
+        (WebCore::InlineBox::canHaveLeadingExpansion):
+        (WebCore::InlineBox::setCanHaveLeadingExpansion):
+        (WebCore::InlineBox::setExpansion):
+        (WebCore::InlineBox::extracted):
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::addToLine):
+        (WebCore::InlineFlowBox::removeChild):
+        (WebCore::InlineFlowBox::extractLine):
+        (WebCore::InlineFlowBox::attachLine):
+        (WebCore::InlineFlowBox::placeBoxesInInlineDirection):
+        (WebCore::InlineFlowBox::requiresIdeographicBaseline):
+        (WebCore::InlineFlowBox::placeBoxesInBlockDirection):
+        (WebCore::InlineFlowBox::addBoxShadowVisualOverflow):
+        (WebCore::InlineFlowBox::addBorderOutsetVisualOverflow):
+        (WebCore::InlineFlowBox::addTextBoxVisualOverflow):
+        (WebCore::InlineFlowBox::paintBoxDecorations):
+        (WebCore::InlineFlowBox::computeOverAnnotationAdjustment):
+        (WebCore::InlineFlowBox::computeUnderAnnotationAdjustment):
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::destroy):
+        (WebCore::InlineTextBox::logicalOverflowRect):
+        (WebCore::InlineTextBox::setLogicalOverflowRect):
+        (WebCore::InlineTextBox::baselinePosition):
+        (WebCore::InlineTextBox::lineHeight):
+        (WebCore::InlineTextBox::localSelectionRect):
+        (WebCore::InlineTextBox::extractLine):
+        (WebCore::InlineTextBox::attachLine):
+        (WebCore::InlineTextBox::placeEllipsisBox):
+        (WebCore::InlineTextBox::paint):
+        (WebCore::InlineTextBox::paintDecoration):
+        (WebCore::InlineTextBox::paintSpellingOrGrammarMarker):
+        (WebCore::InlineTextBox::paintCompositionUnderline):
+        (WebCore::InlineTextBox::offsetForPosition):
+        (WebCore::InlineTextBox::positionForOffset):
+        (WebCore::InlineTextBox::constructTextRun):
+        * rendering/InlineTextBox.h:
+        (InlineTextBox):
+        (WebCore::InlineTextBox::setExpansion):
+        (WebCore::InlineTextBox::expansionBehavior):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::constructLine):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::writeTextRun):
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::baselinePosition): Moved from the header file since it's a virtual function.
+        (WebCore::RootInlineBox::lineHeight): Ditto.
+        (WebCore::RootInlineBox::paint):
+        (WebCore::RootInlineBox::ascentAndDescentForBox):
+        (WebCore::RootInlineBox::verticalPositionForBox):
+        * rendering/RootInlineBox.h:
+        (RootInlineBox):
+        * rendering/svg/SVGInlineTextBox.cpp:
+        (WebCore::SVGInlineTextBox::constructTextRun):
+        * rendering/svg/SVGRenderTreeAsText.cpp:
+        (WebCore::writeSVGInlineTextBox):
+
 2012-03-29  hayato@chromium.org  <hayato@chromium.org>
 
         Let focus navigation be compliant with Shadow DOM spec.
