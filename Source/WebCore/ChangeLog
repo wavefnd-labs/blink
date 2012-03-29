@@ -1,3 +1,22 @@
+2012-03-28  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Filters] Avoid rebuilding FEFilters when RenderLayer is destroyed
+        https://bugs.webkit.org/show_bug.cgi?id=82524
+
+        Reviewed by Dean Jackson.
+
+        RenderLayer::~RenderLayer is calling clearBacking which updated the m_filter with new filters,
+        even though they were to be deleted a couple of lines below. This change avoids updating the filters,
+        if we are in the "destroyed" state.
+
+        No new tests. This change has no visible results to HTML or JavaScript, so it cannot be tested without a debugger.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::~RenderLayer):
+        (WebCore::RenderLayer::clearBacking):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+
 2012-03-28  Gyuyoung Kim  <gyuyoung.kim@samsung.com>
 
         Remove ScriptExecutionContext from NavigatorBattery.idl
