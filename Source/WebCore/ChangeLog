@@ -1,3 +1,183 @@
+2012-03-29  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        HashMap<>::add should return a more descriptive object
+        https://bugs.webkit.org/show_bug.cgi?id=71063
+
+        Reviewed by Ryosuke Niwa.
+
+        Update code to use AddResult instead of a pair. No new tests, just a refactoring.
+
+        * Modules/webdatabase/SQLTransactionCoordinator.cpp:
+        (WebCore::SQLTransactionCoordinator::acquireLock):
+        * Modules/webdatabase/chromium/QuotaTracker.cpp:
+        (WebCore::QuotaTracker::updateDatabaseSize):
+        * bindings/js/DOMObjectHashTableMap.h:
+        (WebCore::DOMObjectHashTableMap::get):
+        * bindings/js/JSDOMBinding.cpp:
+        (WebCore::cacheDOMStructure):
+        * bindings/js/JSDOMBinding.h:
+        (WebCore::cacheWrapper):
+        * bindings/js/JSDOMGlobalObject.h:
+        (WebCore::getDOMConstructor):
+        * bindings/js/PageScriptDebugServer.cpp:
+        (WebCore::PageScriptDebugServer::addListener):
+        * bindings/js/ScriptDebugServer.cpp:
+        (WebCore::ScriptDebugServer::setBreakpoint):
+        * bindings/js/SerializedScriptValue.cpp:
+        (WebCore::CloneSerializer::startObjectInternal):
+        (WebCore::CloneSerializer::write):
+        * bindings/v8/NPV8Object.cpp:
+        (WebCore::npCreateV8ScriptObject):
+        * bridge/IdentifierRep.cpp:
+        (WebCore::IdentifierRep::get):
+        * bridge/NP_jsobject.cpp:
+        (ObjectMap::add):
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::logUnimplementedPropertyID):
+        * css/CSSFontFaceSource.cpp:
+        (WebCore::CSSFontFaceSource::getFontData):
+        * css/CSSFontSelector.cpp:
+        (WebCore::CSSFontSelector::addFontFaceRule):
+        (WebCore::CSSFontSelector::getFontData):
+        * css/CSSSegmentedFontFace.cpp:
+        (WebCore::CSSSegmentedFontFace::getFontData):
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::ApplyPropertyCounter::applyInheritValue):
+        (WebCore::ApplyPropertyCounter::applyValue):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::appendAuthorStylesheets):
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSValuePool.cpp:
+        (WebCore::CSSValuePool::createIdentifierValue):
+        (WebCore::CSSValuePool::createColorValue):
+        (WebCore::CSSValuePool::createValue):
+        (WebCore::CSSValuePool::createFontFamilyValue):
+        (WebCore::CSSValuePool::createFontFaceValue):
+        * dom/CheckedRadioButtons.cpp:
+        (WebCore::RadioButtonGroup::add):
+        (WebCore::CheckedRadioButtons::addButton):
+        * dom/ChildListMutationScope.cpp:
+        (WebCore::ChildListMutationScope::MutationAccumulationRouter::incrementScopingLevel):
+        * dom/Document.cpp:
+        (WebCore::Document::windowNamedItems):
+        (WebCore::Document::documentNamedItems):
+        (WebCore::Document::getCSSCanvasElement):
+        (WebCore::Document::getItems):
+        * dom/DocumentEventQueue.cpp:
+        (WebCore::DocumentEventQueue::enqueueEvent):
+        (WebCore::DocumentEventQueue::enqueueOrDispatchScrollEvent):
+        (WebCore::DocumentEventQueue::pendingEventTimerFired):
+        * dom/DocumentOrderedMap.cpp:
+        (WebCore::DocumentOrderedMap::add):
+        * dom/EventListenerMap.cpp:
+        (WebCore::EventListenerMap::add):
+        * dom/Node.cpp:
+        (WebCore::Node::dumpStatistics):
+        (WebCore::Node::getElementsByTagName):
+        (WebCore::Node::getElementsByTagNameNS):
+        (WebCore::Node::getElementsByName):
+        (WebCore::Node::getElementsByClassName):
+        (WebCore::Node::collectMatchingObserversForMutation):
+        * dom/QualifiedName.cpp:
+        (WebCore::QualifiedName::init):
+        * dom/SpaceSplitString.cpp:
+        (WebCore::SpaceSplitStringData::create):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::updateAttributeStyle):
+        * html/HTMLCollection.cpp:
+        (WebCore::HTMLCollection::append):
+        * inspector/DOMPatchSupport.cpp:
+        (WebCore::DOMPatchSupport::diff):
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::SelectorProfile::commitSelector):
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::performSearch):
+        * inspector/InspectorDebuggerAgent.cpp:
+        (WebCore::InspectorDebuggerAgent::resolveBreakpoint):
+        * inspector/InspectorValues.h:
+        (WebCore::InspectorObject::setValue):
+        (WebCore::InspectorObject::setObject):
+        (WebCore::InspectorObject::setArray):
+        * loader/appcache/ApplicationCacheGroup.cpp:
+        (WebCore::ApplicationCacheGroup::addEntry):
+        * loader/appcache/ApplicationCacheStorage.cpp:
+        (WebCore::ApplicationCacheStorage::findOrCreateCacheGroup):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleTouchEvent):
+        * page/PageGroup.cpp:
+        (WebCore::PageGroup::pageGroup):
+        (WebCore::PageGroup::addVisitedLink):
+        (WebCore::PageGroup::addUserScriptToWorld):
+        (WebCore::PageGroup::addUserStyleSheetToWorld):
+        * page/SecurityPolicy.cpp:
+        (WebCore::SecurityPolicy::addOriginAccessWhitelistEntry):
+        * page/TouchAdjustment.cpp:
+        (WebCore::TouchAdjustment::compileSubtargetList):
+        * platform/cf/BinaryPropertyList.cpp:
+        (WebCore::BinaryPropertyListPlan::writeInteger):
+        (WebCore::BinaryPropertyListPlan::writeString):
+        (WebCore::BinaryPropertyListPlan::writeIntegerArray):
+        * platform/graphics/blackberry/LayerTiler.cpp:
+        (WebCore::LayerTiler::addTileJob):
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::findOrMakeClone):
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::revalidateTiles):
+        * platform/graphics/ca/win/LayerChangesFlusher.cpp:
+        (WebCore::LayerChangesFlusher::flushPendingLayerChangesSoon):
+        * platform/graphics/chromium/FontUtilsChromiumWin.cpp:
+        (WebCore::getDerivedFontData):
+        * platform/graphics/chromium/cc/CCLayerAnimationController.cpp:
+        (WebCore::CCLayerAnimationController::startAnimationsWaitingForTargetAvailability):
+        * platform/graphics/mac/ComplexTextControllerATSUI.cpp:
+        (WebCore::initializeATSUStyle):
+        * platform/graphics/mac/SimpleFontDataCoreText.cpp:
+        (WebCore::SimpleFontData::getCFStringAttributes):
+        * platform/graphics/mac/SimpleFontDataMac.mm:
+        (WebCore::SimpleFontData::canRenderCombiningCharacterSequence):
+        * platform/graphics/wince/FontPlatformData.cpp:
+        (WebCore::FixedSizeFontData::create):
+        * platform/gtk/RenderThemeGtk3.cpp:
+        (WebCore::getStyleContext):
+        * platform/mac/ThreadCheck.mm:
+        (WebCoreReportThreadViolation):
+        * platform/network/HTTPHeaderMap.cpp:
+        (WebCore::HTTPHeaderMap::add):
+        * platform/network/HTTPHeaderMap.h:
+        (HTTPHeaderMap):
+        * platform/network/ResourceRequestBase.cpp:
+        (WebCore::ResourceRequestBase::addHTTPHeaderField):
+        * plugins/PluginDatabase.cpp:
+        (WebCore::PluginDatabase::add):
+        (WebCore::PluginDatabase::loadPersistentMetadataCache):
+        * plugins/win/PluginDatabaseWin.cpp:
+        (WebCore::PluginDatabase::getPluginPathsInDirectories):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::addPercentHeightDescendant):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::setLogicalWidthForTextRun):
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::addDependencyOnFlowThread):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::setRenderBoxRegionInfo):
+        * rendering/svg/RenderSVGResourceGradient.cpp:
+        (WebCore::RenderSVGResourceGradient::applyResource):
+        * rendering/svg/RenderSVGResourcePattern.cpp:
+        (WebCore::RenderSVGResourcePattern::applyResource):
+        * storage/StorageMap.cpp:
+        (WebCore::StorageMap::setItem):
+        (WebCore::StorageMap::importItem):
+        * svg/SVGDocumentExtensions.cpp:
+        (WebCore::SVGDocumentExtensions::addPendingResource):
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::setRequestHeaderInternal):
+        * xml/XPathFunctions.cpp:
+        (WebCore::XPath::FunId::evaluate):
+        * xml/XPathPath.cpp:
+        (WebCore::XPath::LocationPath::evaluate):
+        * xml/XPathPredicate.cpp:
+        (WebCore::XPath::Union::evaluate):
+
 2012-03-29  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: improve window selection accuracy in vertical overview of timeline panel
