@@ -1,3 +1,28 @@
+2012-03-29  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        REGRESSION (r110065-r110080): Content drawing outside overflow: hidden at ynet.co.il
+        https://bugs.webkit.org/show_bug.cgi?id=82129
+
+        Reviewed by Ojan Vafai.
+
+        Tests: fast/overflow/before-after-overflow-hidden-horizontal-writing-mode-tb-expected.html
+               fast/overflow/before-after-overflow-hidden-horizontal-writing-mode-tb.html
+               fast/overflow/before-after-overflow-hidden-vertical-writing-mode-rl-expected.html
+               fast/overflow/before-after-overflow-hidden-vertical-writing-mode-rl.html
+               fast/overflow/start-end-overflow-hidden-horizontal-writing-mode-tb-expected.html
+               fast/overflow/start-end-overflow-hidden-horizontal-writing-mode-tb.html
+               fast/overflow/start-end-overflow-hidden-vertical-writing-mode-rl-expected.html
+               fast/overflow/start-end-overflow-hidden-vertical-writing-mode-rl.html
+
+        This is a regression from r110072. I wrongly thought we should call ensureLayer if we create our RenderOverflow.
+        However the current overflow code removes the before and start overflows (like in horizontal writing mode with ltr direction,
+        we never have a top or a left overflow). Because of that we would not get a RenderLayer as expected and the overflow clip rects
+        would be wrong on our RenderLayer children.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::addLayoutOverflow):
+        Moved the ensureLayer() call after the check that we do have some overflow but before we remove the overflow in some directions.
+
 2012-03-29  Adam Barth  <abarth@webkit.org>
 
         [Chromium] Move ResourceHandle to WebCore/platform/network/chromium
