@@ -1,3 +1,33 @@
+2012-03-28  Alexey Proskuryakov  <ap@apple.com>
+
+        [Win] Some Blob tests crash in CFNetwork in advanceCurrentStream(FormStreamFields*)
+        https://bugs.webkit.org/show_bug.cgi?id=82386
+        <rdar://problem/11121501>
+
+        Reviewed by Brady Eidson.
+
+        Covered by existing tests.
+
+        * platform/network/cf/FormDataStreamCFNet.cpp:
+        * platform/network/cf/FormDataStreamCFNet.h:
+        Moved low level implementation from FormDataStreamMac, and exposed an additional function
+        to implement Foundation-based API on top of this.
+
+        * platform/network/mac/FormDataStreamMac.h:
+        * platform/network/mac/FormDataStreamMac.mm:
+        Rely on toll-free bridging and implementation details to make this work without duplicating
+        code.
+        Note that httpBodyFromStream is confusing - I don't see how it can work when sending serialized
+        requests across process boundary. We probably only get away with this because we don't attempt
+        to send requests to UI process once they already have streams associated with them.
+
+        * WebCore.vcproj/WebCore.vcproj: Added missing platform/cf files.
+
+        * platform/cf/FileSystemCF.cpp: Fixed include style.
+
+        * platform/win/FileSystemWin.cpp: (WebCore::fileSystemRepresentation): Ifdef out a broken
+        implementation.
+
 2012-03-28  Adrienne Walker  <enne@google.com>
 
         [chromium] Fix tiled layer assert for huge layers
