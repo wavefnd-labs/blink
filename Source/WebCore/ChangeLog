@@ -1,3 +1,44 @@
+2012-03-28  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: switch heap profiler front-end to separate storage of nodes and edges
+        https://bugs.webkit.org/show_bug.cgi?id=82453
+
+        When heap snapshot is completely loaded move nodes and containment edges
+        into two separate arrays. This way we don't need _nodeIndex and _nodePosition
+        maps to go from node offset inside the raw snapshot to its index and back, instead
+        we may just divide node offset by the number of node fields to get node index. After
+        the nodes and containment edges are separated original array (_nodes) is dropped.
+        All front-end code was switched to the new representation.
+
+        Reviewed by Pavel Feldman.
+
+        * inspector/front-end/HeapSnapshot.js:
+        (WebInspector.HeapSnapshotRetainerEdge):
+        (WebInspector.HeapSnapshotRetainerEdge.prototype.clone):
+        (WebInspector.HeapSnapshotRetainerEdge.prototype.set edgeIndex):
+        (WebInspector.HeapSnapshotRetainerEdge.prototype.get _edge):
+        (WebInspector.HeapSnapshotRetainerEdgeIterator.prototype.hasNext):
+        (WebInspector.HeapSnapshotNode.prototype.get edgesCount):
+        (WebInspector.HeapSnapshotNode.prototype.get rawEdges):
+        (WebInspector.HeapSnapshotNode.prototype.get retainers):
+        (WebInspector.HeapSnapshotNode.prototype.get _nodes):
+        (WebInspector.HeapSnapshotNode.prototype._firstEdgeIndex):
+        (WebInspector.HeapSnapshotNode.prototype._afterLastEdgeIndex):
+        (WebInspector.HeapSnapshotNode.prototype.get _nextNodeIndex):
+        (WebInspector.HeapSnapshot.prototype._init):
+        (WebInspector.HeapSnapshot.prototype._splitNodesAndContainmentEdges):
+        (WebInspector.HeapSnapshot.prototype._createOnlyNodesArray):
+        (WebInspector.HeapSnapshot.prototype._createContainmentEdgesArray):
+        (WebInspector.HeapSnapshot.prototype._buildRetainers):
+        (WebInspector.HeapSnapshot.prototype.dispose):
+        (WebInspector.HeapSnapshot.prototype.get maxNodeId):
+        (WebInspector.HeapSnapshot.prototype._calculateObjectToWindowDistance):
+        (WebInspector.HeapSnapshot.prototype._bfs):
+        (WebInspector.HeapSnapshot.prototype._buildDominatedNodes):
+        (WebInspector.HeapSnapshot.prototype._getDominatedIndex):
+        (WebInspector.HeapSnapshot.prototype._markInvisibleEdges):
+        (WebInspector.HeapSnapshot.prototype._markQueriableHeapObjects):
+
 2012-03-29  Leo Yang  <leo.yang@torchmobile.com.cn>
 
         [BlackBerry] Add m_targetType to WorkerScriptLoader
