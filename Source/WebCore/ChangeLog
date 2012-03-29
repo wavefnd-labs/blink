@@ -1,3 +1,27 @@
+2012-03-29  Adam Klein  <adamk@chromium.org>
+
+        Factor out common post-insertion logic in ContainerNode
+        https://bugs.webkit.org/show_bug.cgi?id=82544
+
+        Reviewed by Ryosuke Niwa.
+
+        appendChild, insertBefore, and replaceChild all share a great deal of logic.
+        This patch factors out the "post-insertion" logic that deals with
+        notifying parents that their children changed and notifying children
+        that they've been added to the tree.
+
+        Besides reducing code duplication, this is in preparation for moving
+        this post-insertion notification later in the insertion process.
+
+        No new tests, no change in behavior.
+
+        * dom/ContainerNode.cpp:
+        (WebCore):
+        (WebCore::ContainerNode::insertBefore): Factor out shared logic, remove unnecessary "prev" variable.
+        (WebCore::ContainerNode::replaceChild): ditto.
+        (WebCore::ContainerNode::appendChild): ditto.
+        (WebCore::updateTreeAfterInsertion): New helper method encapsulating shared logic.
+
 2012-03-29  Tony Chang  <tony@chromium.org>
 
         Need to implement flex-line-pack
