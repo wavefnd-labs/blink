@@ -1,3 +1,17 @@
+2012-03-29  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: check more likely condition first in HeapSnapshot._buildAggregates
+        https://bugs.webkit.org/show_bug.cgi?id=82621
+
+        Reviewed by Pavel Feldman.
+
+        * inspector/front-end/HeapSnapshot.js: selfSize === 0 is quite rare, moving this condition
+        to the first place saves 1 of 6 secs on the heap profiler perf test.
+        (WebInspector.HeapSnapshot.prototype._buildAggregates):
+        (WebInspector.HeapSnapshot.prototype._buildDominatedNodes): root node is always the first
+        one and is the only one that doesn't have dominator, so we may start iterating nodes from
+        the second node and avoid additional check in the loop.
+
 2012-03-29  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: "go to the previous panel" shortcut is painful to maintain
