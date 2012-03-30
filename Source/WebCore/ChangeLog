@@ -1,3 +1,21 @@
+2012-03-30  Zalan Bujtas  <zbujtas@gmail.com>
+
+        Fix defective size_t overflow in GestureTapHighlighter.
+        https://bugs.webkit.org/show_bug.cgi?id=82605
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        In pathForRenderer, the for loop has 'i < rects().size() - 1' as test expression,
+        where rects().size() returns with size_t.
+        In case of empty rect, it leads to unsigned int overflow. Overflow value makes
+        the associated for loop run with invalid values.
+        Fix it by making loop variable int and stop using size_t type in the test expression.
+        Also, return early, if no focus ring found.
+
+        Manual test added. Tap gesture highlighter is getting triggered by UI process.
+
+        * page/GestureTapHighlighter.cpp:
+
 2012-03-30  Mark Pilgrim  <pilgrim@chromium.org>
 
         GEOLOCATION should be implemented as Page Supplement
