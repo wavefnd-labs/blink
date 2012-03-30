@@ -1,3 +1,48 @@
+2012-03-30  Vineet Chaudhary  <rgf748@motorola.com>
+
+        IDLParser.pm should be able to parse sequence<T> as method argument.
+        https://bugs.webkit.org/show_bug.cgi?id=82599
+
+        Reviewed by Kentaro Hara.
+
+        With this patch IDL parser should support sequence<T> as method argument.
+        Current behaviour is argument name is not parsed hence shows empty spaces instead.
+
+        Tests: bindings/scripts/test/TestObj.idl
+
+        * bindings/scripts/CodeGeneratorCPP.pm:
+        (SkipFunction): Skip functions for specific type.
+        (SkipAttribute): Skip functions for specific type.
+        (AddIncludesForType): Skip header for sequence<T> type.
+        (GenerateHeader): Skip header and declaration for sequence<T> type.
+        (GenerateImplementation): Skip header and implementation for sequence<T> type.
+        * bindings/scripts/CodeGeneratorGObject.pm:
+        (SkipFunction): Skip functions for sequence<T> type.
+        * bindings/scripts/CodeGeneratorObjC.pm:
+        (SkipFunction): Skip functions for specific type.
+        (SkipAttribute): Skip functions for specific type.
+        (AddForwardDeclarationsForType): Skip header for sequence<T> type.
+        (AddIncludesForType): Skip header for sequence<T> type.
+        (GenerateHeader):Skip header and declaration for sequence<T> type.
+        (GenerateImplementation): Skip header and implementation for sequence<T> type.
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (CreateCustomSignature): Add appropriate headers.
+        * bindings/scripts/IDLStructure.pm: Add support to parse sequence<T>.
+        * bindings/scripts/test/CPP/WebDOMTestObj.cpp: Modified results from run-binding-tests.
+        (WebDOMTestObj::objMethodWithArgs):
+        * bindings/scripts/test/CPP/WebDOMTestObj.h: Ditto.
+        * bindings/scripts/test/GObject/WebKitDOMTestObj.cpp: Ditto.
+        (webkit_dom_test_obj_obj_method_with_args):
+        * bindings/scripts/test/GObject/WebKitDOMTestObj.h: Ditto.
+        * bindings/scripts/test/JS/JSTestObj.cpp: Ditto.
+        (WebCore::jsTestObjPrototypeFunctionMethodWithSequenceArg):
+        * bindings/scripts/test/ObjC/DOMTestObj.h: Ditto.
+        * bindings/scripts/test/ObjC/DOMTestObj.mm: Ditto.
+        (-[DOMTestObj objMethodWithArgs:strArg:objArg:]):
+        * bindings/scripts/test/V8/V8TestObj.cpp: Ditto.
+        (WebCore::TestObjInternal::methodWithSequenceArgCallback):
+        (WebCore::ConfigureV8TestObjTemplate):
+
 2012-03-30  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: editing resets line-ending of the whole file
