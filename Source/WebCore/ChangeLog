@@ -1,3 +1,79 @@
+2012-03-30  Philip Rogers  <pdr@google.com>
+
+        Add new renderer for circles and ellipses
+        https://bugs.webkit.org/show_bug.cgi?id=80423
+
+        Reviewed by Eric Seidel.
+
+        This patch introduces a special renderer for SVGCircleElements
+        and SVGEllipseElements to avoid having to use the slower path
+        rendering code. This patch includes optimized circle code for
+        the CG platform, and hooks (GC::fillEllipse, GC::strokeEllipse)
+        are available for other platforms as well.
+
+        Tests: svg/hittest/svg-ellipse-non-scale-stroke.xhtml
+               svg/hittest/svg-ellipse.xhtml
+
+        Added a test to exercise hit testing on an ellipse, and on
+        an ellipse's stroke, to make sure the formulae in this patch
+        are correct.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::fillEllipse):
+        (WebCore):
+        (WebCore::GraphicsContext::strokeEllipse):
+        (WebCore::GraphicsContext::fillEllipseAsPath):
+        (WebCore::GraphicsContext::strokeEllipseAsPath):
+        (WebCore::GraphicsContext::platformFillEllipse):
+        (WebCore::GraphicsContext::platformStrokeEllipse):
+        * platform/graphics/GraphicsContext.h:
+        (GraphicsContext):
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore::GraphicsContext::platformFillEllipse):
+        (WebCore):
+        (WebCore::GraphicsContext::platformStrokeEllipse):
+        * platform/graphics/skia/GraphicsContextSkia.cpp:
+        (WebCore::GraphicsContext::platformFillEllipse):
+        (WebCore):
+        (WebCore::GraphicsContext::platformStrokeEllipse):
+        * rendering/svg/RenderSVGAllInOne.cpp:
+        * rendering/svg/RenderSVGEllipse.cpp: Added.
+        (WebCore):
+        (WebCore::RenderSVGEllipse::RenderSVGEllipse):
+        (WebCore::RenderSVGEllipse::~RenderSVGEllipse):
+        (WebCore::RenderSVGEllipse::createShape):
+        (WebCore::RenderSVGEllipse::calculateRadiiAndCenter):
+        (WebCore::RenderSVGEllipse::objectBoundingBox):
+        (WebCore::RenderSVGEllipse::strokeBoundingBox):
+        (WebCore::RenderSVGEllipse::fillShape):
+        (WebCore::RenderSVGEllipse::strokeShape):
+        (WebCore::RenderSVGEllipse::shapeDependentStrokeContains):
+        (WebCore::RenderSVGEllipse::shapeDependentFillContains):
+        * rendering/svg/RenderSVGEllipse.h: Added.
+        (WebCore):
+        (RenderSVGEllipse):
+        (WebCore::RenderSVGEllipse::isSVGEllipse):
+        (WebCore::RenderSVGEllipse::renderName):
+        (WebCore::RenderSVGEllipse::isEmpty):
+        * svg/SVGCircleElement.cpp:
+        (WebCore::SVGCircleElement::svgAttributeChanged):
+        (WebCore):
+        (WebCore::SVGCircleElement::createRenderer):
+        * svg/SVGCircleElement.h:
+        (SVGCircleElement):
+        * svg/SVGEllipseElement.cpp:
+        (WebCore::SVGEllipseElement::svgAttributeChanged):
+        (WebCore::SVGEllipseElement::createRenderer):
+        (WebCore):
+        * svg/SVGEllipseElement.h:
+        (SVGEllipseElement):
+
 2012-03-30  Jesus Sanchez-Palencia  <jesus.palencia@openbossa.org>
 
         Add a "preview" state to Page Visibility API implementation
