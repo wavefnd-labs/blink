@@ -1,3 +1,37 @@
+2012-03-30  Anders Carlsson  <andersca@apple.com>
+
+        Show a scrolling indicator light when compositing borders are turned on
+        https://bugs.webkit.org/show_bug.cgi?id=82758
+        <rdar://problem/11143892>
+
+        Reviewed by Andreas Kling.
+
+        With this change, turning on compositing borders also turn on a tiny indicator in the top left corner.
+        This indicator uses color coding to show where wheel events are handled and where the scroll layer position is updated:
+
+          - Green means that both wheel events and scroll layer position updates are handled on the scrolling thread.
+          - Yellow means that wheel events need to be dispatched to the main thread (due to wheel event handlers), but that scroll layer position
+            updates still happen on the scrolling thread.
+          - Red means that scroll layer position updates happen on the main thread (due to background-attachment: fixed or fixed position objects).
+
+        * WebCore.exp.in:
+        * WebCore.xcodeproj/project.pbxproj:
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::commitNewTreeState):
+        Call updateDebugRootLayer().
+
+        * page/scrolling/ScrollingTreeNode.h:
+        (WebCore::ScrollingTreeNode::shouldUpdateScrollLayerPositionOnMainThread):
+        Make this public.
+
+        (ScrollingTreeNode):
+        * page/scrolling/mac/ScrollingTreeMac.mm: Added.
+        (WebCore::ScrollingTree::setDebugRootLayer):
+        Set up a new debug info sublayer.
+
+        (WebCore::ScrollingTree::updateDebugRootLayer):
+        Update the debug root layer background color based on the scrolling tree state.
+
 2012-03-30  Peter Rybin  <peter.rybin@gmail.com>
 
         Web Inspector: CodeGeneratorInspector.py: add missing runtime assert method for InspectorObject
