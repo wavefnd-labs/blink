@@ -1,3 +1,32 @@
+2012-03-29  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Filters] Trigger a repaint on elements with changed filter
+        https://bugs.webkit.org/show_bug.cgi?id=82521
+
+        Reviewed by Dean Jackson.
+
+        I've added ContextSensitivePropertyFilter and changed RenderStyle::diff to use it when
+        the filter property is changed. In RenderObject::adjustStyleDifference the appropriate StyleDifferenceRepaintLayer
+        or StyleDifferenceRecompositeLayer is used depending on whether the layer is painting filters in software or in hardware
+        (composited).
+
+        Tests: css3/filters/filter-change-repaint-composited.html
+               css3/filters/filter-change-repaint.html
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::createFilterOperations): None was treated as an invalid value.
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm: Shadows were remaining behind. Fixed that.
+        (PlatformCALayer::setFilters):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::styleWillChange): Repaint the layer when there is a layout change and a filter change.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::styleChanged): Making sure that the backing store is repainted when filters fallback to hardware.
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::adjustStyleDifference):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::diff):
+        * rendering/style/RenderStyleConstants.h:
+
 2012-03-29  Koji Ishii  <kojiishi@gmail.com>
 
 
