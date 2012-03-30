@@ -1,3 +1,20 @@
+2012-03-30  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Race condition causes version change transaction to commit after onblocked
+        https://bugs.webkit.org/show_bug.cgi?id=82678
+
+        For a version change event, the blocked and success events could both be queued
+        before either is dispatched. The transaction would erroneously be allowed to commit
+        after the blocked event was dispatched; it should not be, as the request was not
+        finished.
+
+        Reviewed by Tony Chang.
+
+        Test: storage/indexeddb/dont-commit-on-blocked.html
+
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::dispatchEvent):
+
 2012-03-30  Ryosuke Niwa  <rniwa@webkit.org>
 
         Add a compile assert for the size of FontDescription
