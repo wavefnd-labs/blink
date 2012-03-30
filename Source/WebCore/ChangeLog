@@ -1,3 +1,102 @@
+2012-03-30  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Filters] Drop Shadow is not repainting correctly when repaint area is smaller than the filtered element
+        https://bugs.webkit.org/show_bug.cgi?id=80323
+
+        Reviewed by Dean Jackson.
+        
+        The problem is that shadow and blur (and custom filters - although not treated in this patch) need the full source image of
+        the surface that needs to be filtered. Until now the filter was computed only using the area defined by the dirty repaint rectangle.
+        Those filters need full image source because they displace pixel positions, meaning that pixels in the current dirty rectangle
+        have a dependency on pixels from the RenderLayer outside the dirty rect. See the bug pictures for an example of how that could go wrong.
+        
+        The fix is to always keep a copy of the RenderLayer representation in memory. When repaint is needed we still invalidate
+        only the parts that changed, but the filter is computed using the full source image and not only the dirty rectangle.
+        
+        In order to make that work, we needed the full repaint rectangle of the current RenderLayer and not just the clipped version that
+        we get through the ::paint methods. Also, because filters sometime need to repaint more than just the dirty area (because of the 
+        outsets of the filters - ie blur, drop-shadow), it makes it easier to just capture all the repaints in the RenderLayer itself in a
+        similar way WebKit does now for composited layers. As a result the repaint container can also be a filtered layer (not just composited ones), so 
+        that we can catch all the filter repaints in one place in the RenderLayer. Also with this change I removed the need to add visual overflow to 
+        the RenderBox and also there's no need to patch the repaintUsingContainer. By the way, repaintUsingContainer did not always work because of the 
+        LayoutState optimizations, so repaints during layout would fail (I know that that could be fixed by disabling the LayoutState for filtered areas).
+        
+        Also part of this patch I extracted a function from RenderLayerCompositor::calculateCompositedBounds, so that we can also use it from RenderLayer.
+        I called it RenderLayer::calculateLayerBounds and there should be no change in functionality. It now also includes the outsets of the filter. I've
+        added a different bug to avoid adding the outsets when the filter is computed in hardware. That's because some platforms do not support that yet:
+        https://bugs.webkit.org/show_bug.cgi?id=81239 
+        
+        Also the visual overflow doesn't include the child RenderLayers, meaning that the outsets would have been applied to the border and not to the bounding box
+        of the RenderLayer. The end result was that some child RenderLayers could be clipped out of the filtered area.
+        
+        Tests: css3/filters/filter-repaint-blur.html
+               css3/filters/filter-repaint-child-layers.html
+               css3/filters/filter-repaint-composited-fallback-crash.html
+               css3/filters/filter-repaint-composited-fallback.html
+               css3/filters/filter-repaint-sepia.html
+               css3/filters/filter-repaint-shadow-clipped.html
+               css3/filters/filter-repaint-shadow-rotated.html
+               css3/filters/filter-repaint-shadow.html
+
+        * platform/graphics/filters/FilterOperations.cpp:
+        (WebCore::FilterOperations::getOutsets): Drop shadow should only enlarge the outsets and never make them smaller.
+        
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::build): Caching the operations.hasFilterThatMovesPixels() in the FilterEffectRenderer.
+        (WebCore::FilterEffectRenderer::updateBackingStore): It now returns true when the backing store was recreated, so that we can repaint it all.
+        (WebCore):
+        (WebCore::FilterEffectRendererHelper::prepareFilterEffect): Separated beginFilterEffect into two methods. One that computed the rects 
+        and one that prepares the draw context.
+        (WebCore::FilterEffectRendererHelper::beginFilterEffect):
+        (WebCore::FilterEffectRendererHelper::applyFilterEffect):
+        
+        * rendering/FilterEffectRenderer.h:
+        (FilterEffectRendererHelper):
+        (FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::hasFilterThatMovesPixels):
+        
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeRectForRepaint): No need to include the outsets in the repaint rect here, we will do it later in RenderLayer.
+        (WebCore::RenderBox::addVisualEffectOverflow): Removed outsets from the overflow.
+        
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::computeRectForRepaint): Removed the outsets from this method. We now compute that in
+        RenderLayer::setFilterBackendNeedsRepaintingInRect.
+        
+        * rendering/RenderLayer.cpp:
+        (WebCore):
+        In this change I introduce a new dirty rectangle used by filters. It accumulates all the repaint requests inside the filtered layer,
+        so that we can invalidate the areas that are outside the clipping rectangle. Such cases include "overflow:scroll" and "overflow:hidden", when
+        we still want to blur or drop shadow based on content that is not actually displayed on screen (but the shadow for that content is visible). That rectangle
+        is called m_filterRepaintRect and resets back to zero when the next repaint is finished. All the filtered layers that apply blur and drop-shadow
+        will have an extra backing surface and only the invalidated areas are repainted in that surface. This is very similar to how composited layers work.
+        
+        (WebCore::RenderLayer::requiresFullLayerImageForFilters): Returns true in CPU mode and only if the layer needs the full source image of 
+        the layer to compute the filter. Otherwise GPU layers already have access to the full bakcing image.
+        (WebCore::RenderLayer::enclosingFilterLayer): Returns the enclosing layer that returns true on requiresFullLayerImageForFilters.
+        (WebCore::RenderLayer::enclosingFilterRepaintLayer): Returns the enclosing layer that can be used to repaint the current layer. Usually that 
+        is the RenderView layer or the parent RenderLayer that is composited.
+        (WebCore::RenderLayer::setFilterBackendNeedsRepaintingInRect): Intercepts all the repaint queries for the filtered layers and uses
+        enclosingFilterRepaintLayer to enforce the repaint using the parent container.
+        
+        (WebCore::RenderLayer::paintLayerContents): Consolidated the filters code in one single place. Also, it is now sending the bounding box and the 
+        dirty rect to the FilterEffectRendererHelper::prepareFilterEffect to make sure the backing store is repainted accordingly. In some cases it might 
+        rewrite the dirty rectangle used to paint the current layer, so that all the dirty areas in the backing store are covered.
+        (WebCore::RenderLayer::calculateLayerBounds): Extracted from RenderLayerCompositor::calculateCompositedBounds.
+        (WebCore::RenderLayer::updateOrRemoveFilterEffect): We should not create the filter builder when there's no filter specified.
+        
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::calculateCompositedBounds): Now using the code from RenderLayer::calculateLayerBounds
+        
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::containerForRepaint): Using RenderLayer::enclosingFilterLayer to also find the parent filtered area.
+        (WebCore::RenderObject::repaintUsingContainer): Removed the need to add filter outsets in this method. We now compute that in
+        RenderLayer::setFilterBackendNeedsRepaintingInRect.
+
 2012-03-30  Ryosuke Niwa  <rniwa@webkit.org>
 
         Add a compile assert for the size of BidiContext
