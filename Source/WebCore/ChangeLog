@@ -1,3 +1,76 @@
+2012-03-29  Koji Ishii  <kojiishi@gmail.com>
+
+
+        Vertical flow support for OpenType fonts with the least platform dependencies
+        https://bugs.webkit.org/show_bug.cgi?id=81326
+
+        Reviewed by Dan Bernstein.
+
+        This patch introduces a new class OpenTypeVerticalData to read
+        vertical font metrics from OpenType fonts.
+
+        Currently, WebKit relies on platform APIs to do the work. However,
+        some platforms such as Windows lack support for all the capabilities
+        WebKit requires for vertical flow and the text-orientation property
+        to work correctly. Reading OpenType tables directly also gives
+        benefits in consistent behavior among the WebKit platforms.
+
+        This patch is for any platforms that want to parse OpenType tables
+        directly, but it's currently included only in CGWin and isn't on any
+        code path even on CGWin yet. Caller's side change for CGWin and
+        support for other platforms will be in separate bugs.
+
+        No new tests are required. No behavior changes.
+
+        * WebCore.vcproj/WebCore.vcproj: Added OpenTypeTypes.h and OpenTypeVerticalData.h/cpp.
+        * platform/SharedBuffer.cpp: Add create(size_t)
+        (WebCore::SharedBuffer::SharedBuffer):
+        (WebCore):
+        * platform/SharedBuffer.h: Add create(size_t)
+        (WebCore::SharedBuffer::create):
+        (SharedBuffer):
+        * platform/graphics/FontPlatformData.h: Added openTypeTable().
+        (WebCore):
+        (FontPlatformData):
+        * platform/graphics/SimpleFontData.h: Added sizePerUnit().
+        (WebCore::SimpleFontData::sizePerUnit): size() / unitsPerEm() for less multiplication.
+        * platform/graphics/opentype/OpenTypeTypes.h: Added OpenType basic type definitions.
+        (OpenType):
+        (WebCore::OpenType::BigEndianShort::operator short):
+        (WebCore::OpenType::BigEndianShort::BigEndianShort):
+        (BigEndianShort):
+        (WebCore::OpenType::BigEndianUShort::operator unsigned short):
+        (WebCore::OpenType::BigEndianUShort::BigEndianUShort):
+        (BigEndianUShort):
+        (WebCore::OpenType::BigEndianLong::operator int):
+        (WebCore::OpenType::BigEndianLong::BigEndianLong):
+        (BigEndianLong):
+        (WebCore::OpenType::BigEndianULong::operator unsigned):
+        (WebCore::OpenType::BigEndianULong::BigEndianULong):
+        (BigEndianULong):
+        * platform/graphics/opentype/OpenTypeVerticalData.cpp: Added.
+        (OpenType):
+        (HheaTable):
+        (VheaTable):
+        (Entry):
+        (VORGTable):
+        (VertOriginYMetrics):
+        (WebCore::OpenType::VORGTable::requiredSize):
+        (WebCore):
+        (WebCore::validatedPtr):
+        (WebCore::OpenTypeVerticalData::OpenTypeVerticalData):
+        (WebCore::OpenTypeVerticalData::advanceHeight): Advance height for a glyph.
+        (WebCore::OpenTypeVerticalData::getVerticalTranslationsForGlyphs): Vertical origin.
+        * platform/graphics/opentype/OpenTypeVerticalData.h: Added.
+        (WebCore):
+        (OpenTypeVerticalData): A new class to handle vertical flow data in OpenType.
+        (WebCore::OpenTypeVerticalData::isOpenType):
+        (WebCore::OpenTypeVerticalData::hasVerticalMetrics):
+        (WebCore::OpenTypeVerticalData::hasVORG):
+        * platform/graphics/win/FontPlatformDataWin.cpp:
+        (WebCore):
+        (WebCore::FontPlatformData::openTypeTable): Implemented openTypeTable() for Win32.
+
 2012-03-29  Leo Yang  <leo.yang@torchmobile.com.cn>
 
         [BlackBerry] Sync up PlatformMouseEvent
