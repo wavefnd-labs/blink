@@ -1,3 +1,89 @@
+2012-03-30  Tony Tseung  <tseung@apple.com>
+
+        Composite Font References is a new established standard (ISO/IEC 14496-28:2012) for specifying
+        composite fonts from existing physical fonts.
+        <rdar://problem/10717370>
+        https://bugs.webkit.org/show_bug.cgi?id=82810
+        
+        CoreText have already the features enabled, here we added this to WebKit text layout and rendering.
+        A member function getCompositeFontReferenceFontData is added to the SimpleFontData class for the component font
+        correspond to the platformData, in this case, a NSFont. This is used when CoreText layout had resulted
+        a component of the Composite Font Reference and its corresponding SimpleFontData object is then cached
+        in the SimpleFontData object of the posting font (Composite Font Reference).
+        
+        When glyphs are encoded to form the GlyphPage for rendering, the Composite Font Reference is handled throught
+        the CoreText layout path (using CTLine), here the resulting glyph is associated with a font which could
+        be not the original font request. In this case, these are the component fonts of the Composite Font
+        Reference. This is then identified and then added to the GlyphPage appropriately.
+        
+        To support this feature, a member function isCompositeFontReference is added to FontPlatformData to
+        indicate a font is a Composite Font Reference. Also in order to pass the component font correctly a boolean
+        isPrinterFont is added to one the FontPlatformData constructors to describe the NSFont.
+
+        Reviewed by Dan Bernstein.
+
+        Added test LayoutTests/fast/text/international/text-spliced-font.html
+
+        * WebCore.exp.in:
+        Replaced obsolete FontPlatformData constructor entry.
+
+        * platform/graphics/FontPlatformData.cpp:
+        (WebCore::FontPlatformData::FontPlatformData):
+        Copy of the additional m_isCompositeFontReference and m_isPrinterFont data members.
+        
+        (WebCore::FontPlatformData::operator=):
+        Assignment of the additional m_isCompositeFontReference and m_isPrinterFont data members.
+        
+        * platform/graphics/FontPlatformData.h:
+        (WebCore::FontPlatformData::FontPlatformData):
+        (FontPlatformData):
+        Default value of m_isCompositeFontReference and m_isPrinterFont data members are set to false in various constructors.
+        
+        (WebCore::FontPlatformData::isCompositeFontReference):
+        Newly added for Composite Font Reference type font.
+
+        (WebCore::FontPlatformData::isPrinterFont):
+        Newly added for describing the NSFont parameter if is applicable.
+
+        (WebCore::FontPlatformData::operator==):
+        Comparison of the additional m_isCompositeFontReference and m_isPrinterFont data members.
+
+        * platform/graphics/SimpleFontData.cpp:
+        (WebCore::SimpleFontData::DerivedFontData::~DerivedFontData):
+        Clean up the cache for component fonts of the Composite Font References.
+
+        * platform/graphics/SimpleFontData.h:
+        (SimpleFontData):
+        Added member function const SimpleFontData* getCompositeFontReferenceFontData(NSFont *key) const.
+        
+        (DerivedFontData):
+        Added CFDictionary for caching the component font of Composite Font Reference.
+
+        * platform/graphics/cocoa/FontPlatformDataCocoa.mm:
+        (WebCore::FontPlatformData::FontPlatformData):
+        Data members m_isCompositeFontReference and m_isPrinterFont are initialised and their values are determined in the body of the contructor.
+
+        (WebCore::FontPlatformData::setFont):
+        Data members m_isCompositeFontReference and m_isPrinterFont are determined and set.
+        
+        * platform/graphics/mac/FontCacheMac.mm:
+        (WebCore::FontCache::createFontPlatformData):
+        Boolean value isUsingPrinterFont is passed in the new FontPlatformData constructor.
+        
+        * platform/graphics/mac/GlyphPageTreeNodeMac.cpp:
+        (WebCore::shouldUseCoreText):
+        Added the condition for Composite Font Reference type font.
+        
+        (WebCore::GlyphPage::fill):
+        In the case of Composite Font Reference, when iterate the runs, component font of Composite Font
+        Reference is used to fill the glyph index in the GlyphPage.
+        
+        * platform/graphics/mac/SimpleFontDataMac.mm:
+        (WebCore::SimpleFontData::getCompositeFontReferenceFontData):
+        Newly added method for the component fonts correspond to the platformData, in this case, a NSFont. 
+        This SimpleFontData is created and cached in this object and will only be deleted when the destructor
+        if this is called.
+        
 2012-03-30  Charles Wei  <charles.wei@torchmobile.com.cn>
 
         [BlackBerry] Use KURL::protocolIsInHTTPFamily() instead KURL::protocolInHTTPFamily()
