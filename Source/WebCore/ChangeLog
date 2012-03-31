@@ -1,3 +1,44 @@
+2012-03-30  Emil A Eklund  <eae@chromium.org>
+
+        Fix usage of LayoutUnits in table code.
+        https://bugs.webkit.org/show_bug.cgi?id=82765
+
+        Reviewed by Eric Seidel.
+
+        Clean up usage of ints and LayoutUnits in table code in preparation for
+        turning on subpixel layout.
+
+        No new tests, no change in functionality.
+
+        * rendering/AutoTableLayout.cpp:
+        (WebCore::AutoTableLayout::computePreferredLogicalWidths):
+        Cast maxWidth to int as all table layout is done on int bounds.
+        
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::convertStyleLogicalWidthToComputedWidth):
+        Change borders to LayoutUnit as paddings can have subpixel precision.
+        
+        * rendering/RenderTable.h:
+        (WebCore::RenderTable::getColumnPos):
+        (WebCore::RenderTable::columnPositions):
+        Change getColumnPos and columnPositions to ints as the values are always
+        on pixel bounds.
+        
+        (WebCore::RenderTable::bordersPaddingAndSpacingInRowDirection):
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::styleOrColLogicalWidth):
+        Remove unnecessary cast.
+        
+        (WebCore::RenderTableCell::clippedOverflowRectForRepaint):
+        Use LayoutPoint instead of left/top.
+        
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight):
+        (WebCore::RenderTableSection::layoutRows):
+        * rendering/RenderTableSection.h:
+        Change baseline and baselineDescent to int to avoid unnecessary type
+        conversion.
+
 2012-03-30  Joe Thomas  <joethomas@motorola.com>
 
         Spec renamed Viewport-relative lengths to Viewport-percentage lengths
