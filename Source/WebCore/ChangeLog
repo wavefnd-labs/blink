@@ -1,3 +1,42 @@
+2012-03-30  Eric Seidel  <eric@webkit.org>
+        styleForElement() should use enums instead of bools so we can all understand what it's doing
+        https://bugs.webkit.org/show_bug.cgi?id=82807
+
+        Reviewed by Adam Barth.
+
+        No change in behavior, thus no tests.
+
+        Mostly this is just replacing true/false with the correct new enum value
+        or removing true/false from the callsites when they would have been default anyway.
+        I think this makes the code *way* more clear.
+
+        The old code was extra confusing because the defaults were "true, false". :)
+        The new defaults are AllowStyleSharing, MatchAllRules.
+        It's very uncommon for callers to want to override either of these behaviors.
+        I think most callers which specify DisallowStyleSharing likely don't actually need to
+        (our style-sharing code should be smart enough to only share when safe anyway).
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::CSSStyleSelector):
+         - Use enums and remove bogus comment (m_rootDefaultStyle is a RefPtr!)
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        * css/MediaQueryMatcher.cpp:
+        (WebCore::MediaQueryMatcher::prepareEvaluator):
+        * css/StyleMedia.cpp:
+        (WebCore::StyleMedia::matchMedium):
+        * dom/Element.cpp:
+        (WebCore::Element::styleForRenderer):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::getUncachedPseudoStyle):
+         - Updated to use enums
+         - Also fixed this to use toElement and modern early-return styles.
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::computeStyleInRegion):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::customStyleForRenderer):
+
 2012-03-30  Jason Liu  <jason.liu@torchmobile.com.cn>
 
         [BlackBerry] Headers with no content shouldn't be dropped by platform's request.
