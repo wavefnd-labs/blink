@@ -1,3 +1,32 @@
+2012-03-30  Dirk Schulze  <krit@webkit.org>
+
+        Colors seem to be parsed using HTML quirks in SVG attributes
+        https://bugs.webkit.org/show_bug.cgi?id=46112
+
+        Reviewed by Eric Seidel.
+        
+        Finally move to SVGAttributeMode on parsing SVG presentation attributes. SVG attributes are
+        mainly parsed in the strict mode, which affects strict parsing of colors and no spaces between
+        values and units. Unit less values are still allowed.
+
+        Tests: svg/css/svg-attribute-length-parsing.html
+               svg/css/svg-attribute-parser-mode.html
+
+        * css/CSSGrammar.y: No quirks mode for SVG.
+        * css/CSSParser.h:
+        (WebCore::CSSParser::inStrictMode): SVGAttributeMode also implies strict parsing.
+        (WebCore::CSSParser::inQuirksMode): Remove SVGAttributeMode from quirks mode.
+        * css/CSSParserMode.h:
+        (isStrictParserMode): Ditto.
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::updateAttributeStyle):
+        * svg/SVGElementRareData.h:
+        (WebCore::SVGElementRareData::ensureAnimatedSMILStyleProperties):
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::SVGFontFaceElement):
+        * svg/SVGStyledElement.cpp: Switch to SVGAttributeMode if we parse a SVG presentation attribute.
+        (WebCore::SVGStyledElement::getPresentationAttribute):
+
 2012-03-30  Tony Tseung  <tseung@apple.com>
 
         Composite Font References is a new established standard (ISO/IEC 14496-28:2012) for specifying
