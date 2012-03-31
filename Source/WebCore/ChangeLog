@@ -1,3 +1,33 @@
+2012-03-30  Emil A Eklund  <eae@chromium.org>
+
+        Fix return type for virtual borderBoundingBox method
+        https://bugs.webkit.org/show_bug.cgi?id=82561
+
+        Reviewed by Eric Seidel.
+
+        No new tests, no change in functionality.
+
+        * editing/DeleteButtonController.cpp:
+        (WebCore::isDeletableElement):
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::borderBoxRect):
+        Rename pixelSnappedBorderBoxRect to borderBoxRect and remove LayoutRect
+        version of same as we always want to use the pixel snapped version to
+        ensure proper rounding and alignment to device pixels.
+        (The way this rect is pixel snapped, using the m_frameRect location,
+        makes it hard for calling code to take the subpixel rect and correctly
+        snap it).
+
+        (WebCore::RenderBox::borderBoundingBox):
+        * rendering/RenderBoxModelObject.h:
+        Change pure virtual definition of borderBoundingBox to return an IntRect
+        to match implementation in RenderBox.
+        
+        (RenderBoxModelObject):
+        * rendering/RenderInline.h:
+        (WebCore::RenderInline::borderBoundingBox):
+        Change overloaded method to IntRect to match RenderBox implementation.
+
 2012-03-30  Bear Travis  <betravis@adobe.com>
 
         shape-inside and shape-outside are not in the list of computed style properties
