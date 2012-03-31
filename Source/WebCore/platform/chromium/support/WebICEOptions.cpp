@@ -32,54 +32,39 @@
 
 #if ENABLE(MEDIA_STREAM)
 
-#include "platform/WebMediaStreamSourcesRequest.h"
+#include <public/WebICEOptions.h>
 
-#include "MediaStreamCenter.h"
-#include "MediaStreamSource.h"
-#include "platform/WebMediaStreamSource.h"
-#include "platform/WebVector.h"
-#include <wtf/Vector.h>
+#include "IceOptions.h"
 
 using namespace WebCore;
 
 namespace WebKit {
 
-WebMediaStreamSourcesRequest::WebMediaStreamSourcesRequest(const PassRefPtr<WebCore::MediaStreamSourcesQueryClient>& queryClient)
-    : m_private(queryClient)
+WebICEOptions::WebICEOptions(const PassRefPtr<IceOptions>& mediaHints)
+    : m_private(mediaHints)
 {
 }
 
-void WebMediaStreamSourcesRequest::reset()
+void WebICEOptions::assign(const WebICEOptions& other)
+{
+    m_private = other.m_private;
+}
+
+void WebICEOptions::initialize(CandidateType candidateType)
+{
+    ASSERT(isNull());
+    m_private = IceOptions::create(static_cast<IceOptions::UseCandidatesOption>(candidateType));
+}
+
+void WebICEOptions::reset()
 {
     m_private.reset();
 }
 
-bool WebMediaStreamSourcesRequest::audio() const
+WebICEOptions::CandidateType WebICEOptions::candidateTypeToUse() const
 {
     ASSERT(!isNull());
-    return m_private->audio();
-}
-
-bool WebMediaStreamSourcesRequest::video() const
-{
-    ASSERT(!isNull());
-    return m_private->video();
-}
-
-void WebMediaStreamSourcesRequest::didCompleteQuery(const WebVector<WebMediaStreamSource>& audioSources, const WebVector<WebMediaStreamSource>& videoSources) const
-{
-    ASSERT(!isNull());
-    MediaStreamSourceVector audio;
-    for (size_t i = 0; i < audioSources.size(); ++i) {
-        MediaStreamSource* curr = audioSources[i];
-        audio.append(curr);
-    }
-    MediaStreamSourceVector video;
-    for (size_t i = 0; i < videoSources.size(); ++i) {
-        MediaStreamSource* curr = videoSources[i];
-        video.append(curr);
-    }
-    m_private->didCompleteQuery(audio, video);
+    return static_cast<CandidateType>(m_private->useCandidates());
 }
 
 } // namespace WebKit

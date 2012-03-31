@@ -35,12 +35,10 @@
 #include "DeprecatedPeerConnectionHandlerInternal.h"
 
 #include "DeprecatedPeerConnectionHandlerClient.h"
-#include "SecurityOrigin.h"
-#include "WebKit.h"
-#include "platform/WebKitPlatformSupport.h"
-#include "platform/WebMediaStreamDescriptor.h"
-#include "platform/WebPeerConnectionHandler.h"
-#include "platform/WebPeerConnectionHandlerClient.h"
+#include <public/Platform.h>
+#include <public/WebMediaStreamDescriptor.h>
+#include <public/WebPeerConnectionHandler.h>
+#include <public/WebPeerConnectionHandlerClient.h>
 #include <wtf/PassOwnPtr.h>
 
 namespace WebCore {
@@ -49,17 +47,12 @@ DeprecatedPeerConnectionHandlerInternal::DeprecatedPeerConnectionHandlerInternal
     : m_client(client)
 {
     ASSERT(m_client);
-    m_webHandler = adoptPtr(WebKit::webKitPlatformSupport()->createPeerConnectionHandler(this));
+    m_webHandler = adoptPtr(WebKit::Platform::current()->createPeerConnectionHandler(this));
     // FIXME: When there is some error reporting avaliable in the PeerConnection object report
     // if we didn't get a WebPeerConnectionHandler instance.
 
-    if (m_webHandler) {
-        // Dual calls due to API change
+    if (m_webHandler)
         m_webHandler->initialize(serverConfiguration, username);
-
-        // DEPRECATED
-        m_webHandler->initialize(serverConfiguration, SecurityOrigin::createFromString(username));
-    }
 }
 
 DeprecatedPeerConnectionHandlerInternal::~DeprecatedPeerConnectionHandlerInternal()

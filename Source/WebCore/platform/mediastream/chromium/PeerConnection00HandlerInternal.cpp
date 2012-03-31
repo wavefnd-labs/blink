@@ -40,15 +40,14 @@
 #include "PeerConnection00.h"
 #include "PeerConnection00HandlerClient.h"
 #include "SessionDescriptionDescriptor.h"
-#include "WebKit.h"
-#include "platform/WebICECandidateDescriptor.h"
-#include "platform/WebICEOptions.h"
-#include "platform/WebKitPlatformSupport.h"
-#include "platform/WebMediaHints.h"
-#include "platform/WebMediaStreamDescriptor.h"
-#include "platform/WebPeerConnection00Handler.h"
-#include "platform/WebPeerConnection00HandlerClient.h"
-#include "platform/WebSessionDescriptionDescriptor.h"
+#include <public/Platform.h>
+#include <public/WebICECandidateDescriptor.h>
+#include <public/WebICEOptions.h>
+#include <public/WebMediaHints.h>
+#include <public/WebMediaStreamDescriptor.h>
+#include <public/WebPeerConnection00Handler.h>
+#include <public/WebPeerConnection00HandlerClient.h>
+#include <public/WebSessionDescriptionDescriptor.h>
 #include <wtf/PassOwnPtr.h>
 
 namespace WebCore {
@@ -57,7 +56,7 @@ PeerConnection00HandlerInternal::PeerConnection00HandlerInternal(PeerConnection0
     : m_client(client)
 {
     ASSERT(m_client);
-    m_webHandler = adoptPtr(WebKit::webKitPlatformSupport()->createPeerConnection00Handler(this));
+    m_webHandler = adoptPtr(WebKit::Platform::current()->createPeerConnection00Handler(this));
     // FIXME: When there is some error reporting avaliable in the PeerConnection object report
     // if we didn't get a WebPeerConnection00Handler instance.
 

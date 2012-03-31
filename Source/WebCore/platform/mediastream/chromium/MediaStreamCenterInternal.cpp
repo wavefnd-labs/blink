@@ -39,20 +39,19 @@
 #include "MediaStreamComponent.h"
 #include "MediaStreamSource.h"
 #include "SessionDescriptionDescriptor.h"
-#include "WebKit.h"
-#include "platform/WebICECandidateDescriptor.h"
-#include "platform/WebKitPlatformSupport.h"
-#include "platform/WebMediaStreamCenter.h"
-#include "platform/WebMediaStreamComponent.h"
-#include "platform/WebMediaStreamDescriptor.h"
-#include "platform/WebMediaStreamSourcesRequest.h"
-#include "platform/WebSessionDescriptionDescriptor.h"
+#include <public/Platform.h>
+#include <public/WebICECandidateDescriptor.h>
+#include <public/WebMediaStreamCenter.h>
+#include <public/WebMediaStreamComponent.h>
+#include <public/WebMediaStreamDescriptor.h>
+#include <public/WebMediaStreamSourcesRequest.h>
+#include <public/WebSessionDescriptionDescriptor.h>
 #include <wtf/PassOwnPtr.h>
 
 namespace WebCore {
 
 MediaStreamCenterInternal::MediaStreamCenterInternal(MediaStreamCenter* owner)
-    : m_private(adoptPtr(WebKit::webKitPlatformSupport()->createMediaStreamCenter(this)))
+    : m_private(adoptPtr(WebKit::Platform::current()->createMediaStreamCenter(this)))
     , m_owner(owner)
 {
 }

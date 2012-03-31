@@ -28,46 +28,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#ifndef MediaStreamCenterInternal_h
+#define MediaStreamCenterInternal_h
 
 #if ENABLE(MEDIA_STREAM)
 
-#include "platform/WebICEOptions.h"
-
-#include "IceOptions.h"
-
-using namespace WebCore;
+#include <public/WebMediaStreamCenterClient.h>
+#include <wtf/OwnPtr.h>
+#include <wtf/PassRefPtr.h>
+#include <wtf/text/WTFString.h>
 
 namespace WebKit {
-
-WebICEOptions::WebICEOptions(const PassRefPtr<IceOptions>& mediaHints)
-    : m_private(mediaHints)
-{
+class WebMediaStreamCenter;
 }
 
-void WebICEOptions::assign(const WebICEOptions& other)
-{
-    m_private = other.m_private;
-}
+namespace WebCore {
 
-void WebICEOptions::initialize(CandidateType candidateType)
-{
-    ASSERT(isNull());
-    m_private = IceOptions::create(static_cast<IceOptions::UseCandidatesOption>(candidateType));
-}
+class IceCandidateDescriptor;
+class MediaStreamCenter;
+class MediaStreamComponent;
+class MediaStreamDescriptor;
+class MediaStreamSourcesQueryClient;
+class SessionDescriptionDescriptor;
 
-void WebICEOptions::reset()
-{
-    m_private.reset();
-}
+class MediaStreamCenterInternal : public WebKit::WebMediaStreamCenterClient {
+public:
+    explicit MediaStreamCenterInternal(MediaStreamCenter*);
+    ~MediaStreamCenterInternal();
 
-WebICEOptions::CandidateType WebICEOptions::candidateTypeToUse() const
-{
-    ASSERT(!isNull());
-    return static_cast<CandidateType>(m_private->useCandidates());
-}
+    void queryMediaStreamSources(PassRefPtr<MediaStreamSourcesQueryClient>);
+    void didSetMediaStreamTrackEnabled(MediaStreamDescriptor*, MediaStreamComponent*);
+    void didStopLocalMediaStream(MediaStreamDescriptor*);
+    void didConstructMediaStream(MediaStreamDescriptor*);
+    String constructSDP(IceCandidateDescriptor*);
+    String constructSDP(SessionDescriptionDescriptor*);
 
-} // namespace WebKit
+    // From WebKit::WebMediaStreamCenterClient.
+    virtual void stopLocalMediaStream(const WebKit::WebMediaStreamDescriptor&);
+
+private:
+    OwnPtr<WebKit::WebMediaStreamCenter> m_private;
+    MediaStreamCenter* m_owner;
+};
+
+} // namespace WebCore
 
 #endif // ENABLE(MEDIA_STREAM)
 
+#endif // MediaStreamCenterInternal_h

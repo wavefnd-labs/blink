@@ -32,14 +32,14 @@
 
 #if ENABLE(MEDIA_STREAM)
 
-#include "platform/WebMediaStreamDescriptor.h"
+#include <public/WebMediaStreamDescriptor.h>
 
 #include "MediaStreamComponent.h"
 #include "MediaStreamDescriptor.h"
 #include "MediaStreamSource.h"
-#include "platform/WebMediaStreamComponent.h"
-#include "platform/WebMediaStreamSource.h"
-#include "platform/WebString.h"
+#include <public/WebMediaStreamComponent.h>
+#include <public/WebMediaStreamSource.h>
+#include <public/WebString.h>
 #include <wtf/Vector.h>
 
 using namespace WebCore;

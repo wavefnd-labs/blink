@@ -32,10 +32,10 @@
 
 #if ENABLE(MEDIA_STREAM)
 
-#include "platform/WebICECandidateDescriptor.h"
+#include <public/WebICECandidateDescriptor.h>
 
 #include "IceCandidateDescriptor.h"
-#include "platform/WebString.h"
+#include <public/WebString.h>
 
 using namespace WebCore;
 

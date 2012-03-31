@@ -28,51 +28,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MediaStreamCenterInternal_h
-#define MediaStreamCenterInternal_h
+#ifndef WebMediaStreamCenter_h
+#define WebMediaStreamCenter_h
 
-#if ENABLE(MEDIA_STREAM)
-
-#include "platform/WebMediaStreamCenterClient.h"
-#include <wtf/OwnPtr.h>
-#include <wtf/PassRefPtr.h>
-#include <wtf/text/WTFString.h>
+#include "WebString.h"
 
 namespace WebKit {
-class WebMediaStreamCenter;
-}
+class WebICECandidateDescriptor;
+class WebMediaStreamComponent;
+class WebMediaStreamDescriptor;
+class WebMediaStreamSourcesRequest;
+class WebSessionDescriptionDescriptor;
 
-namespace WebCore {
-
-class IceCandidateDescriptor;
-class MediaStreamCenter;
-class MediaStreamComponent;
-class MediaStreamDescriptor;
-class MediaStreamSourcesQueryClient;
-class SessionDescriptionDescriptor;
-
-class MediaStreamCenterInternal : public WebKit::WebMediaStreamCenterClient {
+class WebMediaStreamCenter {
 public:
-    explicit MediaStreamCenterInternal(MediaStreamCenter*);
-    ~MediaStreamCenterInternal();
+    virtual ~WebMediaStreamCenter() { }
 
-    void queryMediaStreamSources(PassRefPtr<MediaStreamSourcesQueryClient>);
-    void didSetMediaStreamTrackEnabled(MediaStreamDescriptor*, MediaStreamComponent*);
-    void didStopLocalMediaStream(MediaStreamDescriptor*);
-    void didConstructMediaStream(MediaStreamDescriptor*);
-    String constructSDP(IceCandidateDescriptor*);
-    String constructSDP(SessionDescriptionDescriptor*);
+    virtual void queryMediaStreamSources(const WebMediaStreamSourcesRequest&) = 0;
+    virtual void didEnableMediaStreamTrack(const WebMediaStreamDescriptor&, const WebMediaStreamComponent&) = 0;
+    virtual void didDisableMediaStreamTrack(const WebMediaStreamDescriptor&, const WebMediaStreamComponent&) = 0;
+    virtual void didStopLocalMediaStream(const WebMediaStreamDescriptor&) = 0;
+    virtual void didConstructMediaStream(const WebMediaStreamDescriptor&) = 0;
 
-    // From WebKit::WebMediaStreamCenterClient.
-    virtual void stopLocalMediaStream(const WebKit::WebMediaStreamDescriptor&);
-
-private:
-    OwnPtr<WebKit::WebMediaStreamCenter> m_private;
-    MediaStreamCenter* m_owner;
+    // FIXME: Make pure virtual after implementation.
+    virtual WebString constructSDP(const WebICECandidateDescriptor&) { return WebString(); }
+    virtual WebString constructSDP(const WebSessionDescriptionDescriptor&) { return WebString(); }
 };
 
-} // namespace WebCore
+} // namespace WebKit
 
-#endif // ENABLE(MEDIA_STREAM)
+#endif // WebMediaStreamCenter_h
 
-#endif // MediaStreamCenterInternal_h

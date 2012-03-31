@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Google Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,60 +28,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#ifndef WebMediaStreamSource_h
+#define WebMediaStreamSource_h
 
-#if ENABLE(MEDIA_STREAM)
+#include "WebCommon.h"
+#include "WebNonCopyable.h"
+#include "WebPrivatePtr.h"
 
-#include "platform/WebMediaStreamComponent.h"
-
-#include "MediaStreamComponent.h"
-#include "platform/WebMediaStreamSource.h"
-#include "platform/WebString.h"
-#include <wtf/Vector.h>
-
-using namespace WebCore;
+namespace WebCore {
+class MediaStreamSource;
+}
 
 namespace WebKit {
 
-WebMediaStreamComponent::WebMediaStreamComponent(WebCore::MediaStreamComponent* mediaStreamComponent)
-    : m_private(mediaStreamComponent)
-{
-}
+class WebString;
 
-WebMediaStreamComponent& WebMediaStreamComponent::operator=(WebCore::MediaStreamComponent* mediaStreamComponent)
-{
-    m_private = mediaStreamComponent;
-    return *this;
-}
+class WebMediaStreamSource {
+public:
+    enum Type {
+        TypeAudio,
+        TypeVideo
+    };
 
-void WebMediaStreamComponent::reset()
-{
-    m_private.reset();
-}
+    WebMediaStreamSource() { }
+    WebMediaStreamSource(const WebMediaStreamSource& other) { assign(other); }
+    ~WebMediaStreamSource() { reset(); }
 
-WebMediaStreamComponent::operator PassRefPtr<MediaStreamComponent>() const
-{
-    return m_private.get();
-}
+    WebMediaStreamSource& operator=(const WebMediaStreamSource& other)
+    {
+        assign(other);
+        return *this;
+    }
 
-WebMediaStreamComponent::operator MediaStreamComponent*() const
-{
-    return m_private.get();
-}
+    WEBKIT_EXPORT void assign(const WebMediaStreamSource&);
 
-bool WebMediaStreamComponent::isEnabled() const
-{
-    ASSERT(!m_private.isNull());
-    return m_private.get()->enabled();
-}
+    WEBKIT_EXPORT void initialize(const WebString& id, Type, const WebString& name);
+    WEBKIT_EXPORT void reset();
+    bool isNull() const { return m_private.isNull(); }
 
-WebMediaStreamSource WebMediaStreamComponent::source() const
-{
-    ASSERT(!m_private.isNull());
-    return WebMediaStreamSource(m_private.get()->source());
-}
+    WEBKIT_EXPORT WebString id() const;
+    WEBKIT_EXPORT Type type() const;
+    WEBKIT_EXPORT WebString name() const;
+
+#if WEBKIT_IMPLEMENTATION
+    WebMediaStreamSource(const WTF::PassRefPtr<WebCore::MediaStreamSource>&);
+    WebMediaStreamSource& operator=(WebCore::MediaStreamSource*);
+    operator WTF::PassRefPtr<WebCore::MediaStreamSource>() const;
+    operator WebCore::MediaStreamSource*() const;
+#endif
+
+private:
+    WebPrivatePtr<WebCore::MediaStreamSource> m_private;
+};
 
 } // namespace WebKit
 
-#endif // ENABLE(MEDIA_STREAM)
-
+#endif // WebMediaStreamSource_h

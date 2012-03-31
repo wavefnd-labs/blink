@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Google Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,63 +28,53 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PeerConnection00HandlerInternal_h
-#define PeerConnection00HandlerInternal_h
+#ifndef DeprecatedPeerConnectionHandlerInternal_h
+#define DeprecatedPeerConnectionHandlerInternal_h
 
 #if ENABLE(MEDIA_STREAM)
 
 #include "MediaStreamDescriptor.h"
-#include "platform/WebPeerConnection00HandlerClient.h"
+#include <public/WebPeerConnectionHandlerClient.h>
 #include <wtf/OwnPtr.h>
 #include <wtf/PassRefPtr.h>
 #include <wtf/text/WTFString.h>
 
 namespace WebKit {
-class WebICECandidateDescriptor;
-class WebPeerConnection00Handler;
-class WebMediaStreamDescriptor;
+class WebPeerConnectionHandler;
 class WebString;
+class WebMediaStreamDescriptor;
 }
 
 namespace WebCore {
 
-class IceCandidateDescriptor;
-class IceOptions;
-class MediaHints;
-class PeerConnection00HandlerClient;
-class SessionDescriptionDescriptor;
+class DeprecatedPeerConnectionHandlerClient;
 
-class PeerConnection00HandlerInternal : public WebKit::WebPeerConnection00HandlerClient {
+class DeprecatedPeerConnectionHandlerInternal : public WebKit::WebPeerConnectionHandlerClient {
 public:
-    PeerConnection00HandlerInternal(PeerConnection00HandlerClient*, const String& serverConfiguration, const String& username);
-    ~PeerConnection00HandlerInternal();
+    DeprecatedPeerConnectionHandlerInternal(DeprecatedPeerConnectionHandlerClient*, const String& serverConfiguration, const String& username);
+    ~DeprecatedPeerConnectionHandlerInternal();
 
-    PassRefPtr<SessionDescriptionDescriptor> createOffer(PassRefPtr<MediaHints>);
-    PassRefPtr<SessionDescriptionDescriptor> createAnswer(const String& offer, PassRefPtr<MediaHints>);
-    bool setLocalDescription(int action, PassRefPtr<SessionDescriptionDescriptor>);
-    bool setRemoteDescription(int action, PassRefPtr<SessionDescriptionDescriptor>);
-    PassRefPtr<SessionDescriptionDescriptor> localDescription();
-    PassRefPtr<SessionDescriptionDescriptor> remoteDescription();
-    bool startIce(PassRefPtr<IceOptions>);
-    bool processIceMessage(PassRefPtr<IceCandidateDescriptor>);
-    void addStream(PassRefPtr<MediaStreamDescriptor>);
-    void removeStream(PassRefPtr<MediaStreamDescriptor>);
-    void stop();
+    virtual void produceInitialOffer(const MediaStreamDescriptorVector& pendingAddStreams);
+    virtual void handleInitialOffer(const String& sdp);
+    virtual void processSDP(const String& sdp);
+    virtual void processPendingStreams(const MediaStreamDescriptorVector& pendingAddStreams, const MediaStreamDescriptorVector& pendingRemoveStreams);
+    virtual void sendDataStreamMessage(const char* data, size_t length);
+    virtual void stop();
 
-    // WebKit::WebJSEPPeerConnectionHandlerClient implementation.
-    virtual void didGenerateICECandidate(const WebKit::WebICECandidateDescriptor&, bool moreToFollow);
-    virtual void didChangeReadyState(ReadyState);
-    virtual void didChangeICEState(ICEState);
+    // WebKit::WebPeerConnectionHandlerClient implementation.
+    virtual void didCompleteICEProcessing();
+    virtual void didGenerateSDP(const WebKit::WebString& sdp);
+    virtual void didReceiveDataStreamMessage(const char* data, size_t length);
     virtual void didAddRemoteStream(const WebKit::WebMediaStreamDescriptor&);
     virtual void didRemoveRemoteStream(const WebKit::WebMediaStreamDescriptor&);
 
 private:
-    OwnPtr<WebKit::WebPeerConnection00Handler> m_webHandler;
-    PeerConnection00HandlerClient* m_client;
+    OwnPtr<WebKit::WebPeerConnectionHandler> m_webHandler;
+    DeprecatedPeerConnectionHandlerClient* m_client;
 };
 
 } // namespace WebCore
 
 #endif // ENABLE(MEDIA_STREAM)
 
-#endif // PeerConnection00HandlerInternal_h
+#endif // DeprecatedPeerConnectionHandlerInternal_h
