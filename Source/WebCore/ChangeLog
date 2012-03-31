@@ -1,3 +1,77 @@
+2012-03-31  Antti Koivisto  <antti@apple.com>
+
+        CSSStyleRules should own their CSSStyleDeclarations 
+        https://bugs.webkit.org/show_bug.cgi?id=82832
+
+        Reviewed by Andreas Kling.
+
+        Move the rule properties CSSOM wrapper ownership from the StylePropertySet to the rule itself.
+        This is preparation for bug 82728 (Split remaining CSSRules into internal and CSSOM types). This
+        temporarily grows the size of CSSStyleRule by a pointer (82728 will give the memory back and more)
+
+        * css/CSSFontFaceRule.cpp:
+        (WebCore::CSSFontFaceRule::~CSSFontFaceRule):
+        (WebCore):
+        (WebCore::CSSFontFaceRule::style):
+        * css/CSSFontFaceRule.h:
+        (WebCore):
+        (CSSFontFaceRule):
+        * css/CSSPageRule.cpp:
+        (WebCore::CSSPageRule::~CSSPageRule):
+        (WebCore):
+        (WebCore::CSSPageRule::style):
+        * css/CSSPageRule.h:
+        (WebCore):
+        (CSSPageRule):
+        * css/CSSStyleRule.cpp:
+        (WebCore::CSSStyleRule::~CSSStyleRule):
+        (WebCore::CSSStyleRule::style):
+        * css/CSSStyleRule.h:
+        (WebCore):
+        (CSSStyleRule):
+        
+            Make the rules own the property CSSOM wrapper.
+        
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::StyleRuleCSSStyleDeclaration::ref):
+        (WebCore):
+        (WebCore::StyleRuleCSSStyleDeclaration::deref):
+        (WebCore::StyleRuleCSSStyleDeclaration::setNeedsStyleRecalc):
+        (WebCore::StyleRuleCSSStyleDeclaration::contextStyleSheet):
+        (WebCore::InlineCSSStyleDeclaration::ref):
+        (WebCore::InlineCSSStyleDeclaration::deref):
+        * css/PropertySetCSSStyleDeclaration.h:
+        (WebCore::PropertySetCSSStyleDeclaration::parentElement):
+        (PropertySetCSSStyleDeclaration):
+        (WebCore::StyleRuleCSSStyleDeclaration::create):
+        (StyleRuleCSSStyleDeclaration):
+        (WebCore::StyleRuleCSSStyleDeclaration::clearParentRule):
+        (WebCore::StyleRuleCSSStyleDeclaration::StyleRuleCSSStyleDeclaration):
+        (WebCore::StyleRuleCSSStyleDeclaration::parentRule):
+        
+            - Rename RuleCSSStyleDeclaration -> StyleRuleCSSStyleDeclaration
+            - Make StyleRuleCSSStyleDeclaration use regular refcounting since
+              it is no longer owned by the wrapped object.
+            - Rename hasCSSOMWrapper() -> isMutable(), m_hasCSSOMWrapper -> m_ownsCSSOMWrapper
+              to match the purpose.
+        
+        (InlineCSSStyleDeclaration):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::StylePropertySet):
+        (WebCore::StylePropertySet::~StylePropertySet):
+        (WebCore::StylePropertySet::ensureCSSStyleDeclaration):
+        (WebCore):
+        (WebCore::StylePropertySet::ensureInlineCSSStyleDeclaration):
+        (WebCore::StylePropertySet::clearParentElement):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        (WebCore::StylePropertySet::isMutable):
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::ensureMutableInlineStyle):
+        (WebCore::ElementAttributeData::updateInlineStyleAvoidingMutation):
+
 2012-03-31  Jonathan Dong  <jonathan.dong@torchmobile.com.cn>
 
         [BlackBerry] http authenticate dialog popup only once no matter authentication pass or fail
