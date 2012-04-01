@@ -1,3 +1,209 @@
+2012-04-01  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Enable animVal support for SVGAnimatedEnumeration
+        https://bugs.webkit.org/show_bug.cgi?id=82459
+
+        Reviewed by Dirk Schulze.
+
+        Enable animVal support for the last missing SVG DOM primitive: SVGAnimatedEnumeration.
+        It's a bit more involved than the others as we have to differentiate between the various
+        enumerations to use the correct SVGPropertyTraits<MyEnum>::fromString() code-path.
+
+        One SVGAnimatedEnumeration property in the SVG DOM is special: SVGAnimatedEnumeration orientType
+        from SVGMarkerElement. SVGMarkerElement exposes both the orientType and SVGAnimatedAngle orientAngle
+        SVG DOM properties and both get mapped to the same SVGNames::orientAttr ("orient" XML attribute).
+        That means that any animation of the orientAttr has to update both orientType & orientAngle.
+
+        This is a not a new requirement, we already support attributes like 'stdDeviation' from
+        SVGFEGaussianBlurElement, which get mapped to multiple SVG DOM objects: SVGAnimatedInteger stdDeviationX/Y.
+        The difference is that <integer-optional-integer> or <number-optional-number> animations use the
+        same type in the pair<xxx, xxx> (eg. both int, or both float). The 'orient' attribute needs to be
+        mapped to pair<xxx, yyy> types. Generalize the templates in SVGAnimatedTypeAnimator to support that.
+
+        Example:
+        <marker id="someMarkerElement" orient="45deg"/>
+        <animate fill="remove" begin="1s" dur="2s" from="90deg" to="auto" attributeName="orient" xlink:href="#someMarkerElement"/>
+
+        at 0s: someMarkerElement.orientType.animVal = SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE
+               someMarkerElement.orientAngle.animVal.value = 45
+
+               someMarkerElement.orientType.baseVal = SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE
+               someMarkerElement.orientAngle.baseVal.value = 45
+
+        at 1s: someMarkerElement.orientType.animVal = SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE
+               someMarkerElement.orientAngle.animVal.value = 90
+
+               someMarkerElement.orientType.baseVal = SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE
+               someMarkerElement.orientAngle.baseVal.value = 45
+
+        at 2s: someMarkerElement.orientType.animVal = SVGMarkerElement.SVG_MARKER_ORIENT_AUTO
+               someMarkerElement.orientAngle.animVal.value = 0
+
+               someMarkerElement.orientType.baseVal = SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE
+               someMarkerElement.orientAngle.baseVal.value = 45
+
+         > 3s: someMarkerElement.orientType.animVal = SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE
+               someMarkerElement.orientAngle.animVal.value = 45
+
+               someMarkerElement.orientType.baseVal = SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE
+               someMarkerElement.orientAngle.baseVal.value = 45
+
+        We need to map the 'orient' attribute to a pair<SVGAngle, unsigned short> type, in order
+        to track both orientAngle & orientType at the same type. Fortunately SVGAnimatedAngle
+        is only used in the SVG DOM for SVGMarkerElements orientAngle property. We can directly
+        switch SVGAnimatedAngleAnimator to the new pair<SVGAngle, unsigned short> type instead
+        of having to introduce a special SVGAnimatedAngleAndEnumerationAnimator.
+
+        Added tests for all SVGAnimatedEnumeration properties in the SVG DOM, including an extensive set of tests
+        for the synchronization of the orientType / orientAngle properties, when they get animated.
+
+        Tests: svg/animations/animate-marker-orient-from-angle-to-angle.html
+               svg/animations/animate-marker-orient-from-angle-to-auto.html
+               svg/animations/animate-marker-orient-to-angle.html
+               svg/animations/svgenum-animation-1.html
+               svg/animations/svgenum-animation-10.html
+               svg/animations/svgenum-animation-11.html
+               svg/animations/svgenum-animation-12.html
+               svg/animations/svgenum-animation-13.html
+               svg/animations/svgenum-animation-2.html
+               svg/animations/svgenum-animation-3.html
+               svg/animations/svgenum-animation-4.html
+               svg/animations/svgenum-animation-5.html
+               svg/animations/svgenum-animation-6.html
+               svg/animations/svgenum-animation-7.html
+               svg/animations/svgenum-animation-8.html
+               svg/animations/svgenum-animation-9.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * svg/SVGAllInOne.cpp:
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::determineAnimatedPropertyType):
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        (WebCore::propertyTypesAreConsistent):
+        (WebCore::SVGAnimateElement::applyResultsToTarget):
+        * svg/SVGAnimatedAngle.cpp:
+        (WebCore::SVGAnimatedAngleAnimator::constructFromString):
+        (WebCore::SVGAnimatedAngleAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedAngleAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedAngleAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedAngleAnimator::animValWillChange):
+        (WebCore::SVGAnimatedAngleAnimator::animValDidChange):
+        (WebCore::SVGAnimatedAngleAnimator::calculateFromAndByValues):
+        (WebCore::SVGAnimatedAngleAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedAngle.h:
+        (WebCore):
+        * svg/SVGAnimatedBoolean.cpp:
+        (WebCore::SVGAnimatedBooleanAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedBooleanAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedBooleanAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedEnumeration.cpp: Added.
+        (WebCore):
+        (WebCore::enumerationValueForTargetAttribute):
+        (WebCore::SVGAnimatedEnumerationAnimator::SVGAnimatedEnumerationAnimator):
+        (WebCore::SVGAnimatedEnumerationAnimator::constructFromString):
+        (WebCore::SVGAnimatedEnumerationAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedEnumerationAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedEnumerationAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedEnumerationAnimator::animValWillChange):
+        (WebCore::SVGAnimatedEnumerationAnimator::animValDidChange):
+        (WebCore::SVGAnimatedEnumerationAnimator::calculateFromAndToValues):
+        (WebCore::SVGAnimatedEnumerationAnimator::calculateFromAndByValues):
+        (WebCore::SVGAnimatedEnumerationAnimator::calculateAnimatedValue):
+        (WebCore::SVGAnimatedEnumerationAnimator::calculateDistance):
+        * svg/SVGAnimatedEnumeration.h:
+        (SVGAnimatedEnumerationAnimator):
+        (WebCore::SVGAnimatedEnumerationAnimator::~SVGAnimatedEnumerationAnimator):
+        (WebCore):
+        * svg/SVGAnimatedInteger.cpp:
+        (WebCore::SVGAnimatedIntegerAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedIntegerOptionalInteger.cpp:
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::animValWillChange):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::animValDidChange):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedLengthAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedLengthAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedLengthListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedLengthListAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedNumber.cpp:
+        (WebCore::SVGAnimatedNumberAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedNumberAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedNumberListAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedNumberOptionalNumber.cpp:
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::animValWillChange):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::animValDidChange):
+        * svg/SVGAnimatedPreserveAspectRatio.cpp:
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedRect.cpp:
+        (WebCore::SVGAnimatedRectAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedRectAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedRectAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedString.cpp:
+        (WebCore::SVGAnimatedStringAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedStringAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedStringAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedTransformListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedTransformListAnimator::resetAnimValToBaseVal):
+        * svg/SVGAnimatedType.cpp:
+        (WebCore::SVGAnimatedType::~SVGAnimatedType):
+        (WebCore::SVGAnimatedType::createAngleAndEnumeration):
+        (WebCore::SVGAnimatedType::createEnumeration):
+        (WebCore):
+        (WebCore::SVGAnimatedType::angleAndEnumeration):
+        (WebCore::SVGAnimatedType::enumeration):
+        (WebCore::SVGAnimatedType::valueAsString):
+        (WebCore::SVGAnimatedType::setValueAsString):
+        (WebCore::SVGAnimatedType::supportsAnimVal):
+        * svg/SVGAnimatedType.h:
+        (SVGAnimatedType):
+        * svg/SVGAnimatedTypeAnimator.h:
+        (WebCore::SVGAnimatedTypeAnimator::findAnimatedPropertiesForAttributeName):
+        (SVGAnimatedTypeAnimator):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::resetFromBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::stopAnimValAnimationForType):
+        (WebCore::SVGAnimatedTypeAnimator::animValDidChangeForType):
+        (WebCore::SVGAnimatedTypeAnimator::animValWillChangeForType):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromBaseValues):
+        (WebCore::SVGAnimatedTypeAnimator::resetFromBaseValues):
+        (WebCore::SVGAnimatedTypeAnimator::stopAnimValAnimationForTypes):
+        (WebCore::SVGAnimatedTypeAnimator::animValDidChangeForTypes):
+        (WebCore::SVGAnimatedTypeAnimator::animValWillChangeForTypes):
+        (WebCore::SVGAnimatedTypeAnimator::castAnimatedPropertyToActualType):
+        (WebCore::SVGAnimatedTypeAnimator::executeAction):
+        * svg/SVGAnimatorFactory.h:
+        (WebCore::SVGAnimatorFactory::create):
+        * svg/SVGMarkerElement.cpp:
+        (WebCore):
+        * svg/properties/SVGAnimatedListPropertyTearOff.h:
+        (SVGAnimatedListPropertyTearOff):
+        * svg/properties/SVGAnimatedPropertyTearOff.h:
+        (SVGAnimatedPropertyTearOff):
+        * svg/properties/SVGAnimatedStaticPropertyTearOff.h:
+        (SVGAnimatedStaticPropertyTearOff):
+
 2012-04-01  Hao Zheng  <zhenghao@chromium.org>
 
         [chromium] Do not generate custom signature for static methods.
