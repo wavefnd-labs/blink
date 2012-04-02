@@ -1,10 +1,10 @@
 /*
  * Copyright (C) 2010 Google Inc. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above
@@ -14,7 +14,7 @@
  *     * Neither the name of Google Inc. nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -28,48 +28,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "platform/WebThreadSafeData.h"
+#ifndef WebThreadSafeData_h
+#define WebThreadSafeData_h
 
-#include "BlobData.h"
+#include "WebCommon.h"
+#include "WebPrivatePtr.h"
 
-using namespace WebCore;
+#if !WEBKIT_IMPLEMENTATION
+#include <string>
+#endif
+
+namespace WebCore { class RawData; }
 
 namespace WebKit {
 
-void WebThreadSafeData::reset()
-{
-    m_private.reset();
-}
+// A container for raw bytes. It is inexpensive to copy a WebThreadSafeData object.
+// It is safe to pass a WebThreadSafeData across threads!!!
+class WebThreadSafeData {
+public:
+    WebThreadSafeData() { }
+    ~WebThreadSafeData() { reset(); }
 
-void WebThreadSafeData::assign(const WebThreadSafeData& other)
-{
-    m_private = other.m_private;
-}
+    WEBKIT_EXPORT void assign(const WebThreadSafeData&);
+    WEBKIT_EXPORT void reset();
 
-size_t WebThreadSafeData::size() const
-{
-    if (m_private.isNull())
-        return 0;
-    return m_private->length();
-}
+    WEBKIT_EXPORT size_t size() const;
+    WEBKIT_EXPORT const char* data() const;
 
-const char* WebThreadSafeData::data() const
-{
-    if (m_private.isNull())
-        return 0;
-    return m_private->data();
-}
+    bool isEmpty() const { return !size(); }
 
-WebThreadSafeData::WebThreadSafeData(const PassRefPtr<RawData>& data)
-    : m_private(data.leakRef())
-{
-}
+#if WEBKIT_IMPLEMENTATION
+    WebThreadSafeData(const WTF::PassRefPtr<WebCore::RawData>&);
+    WebThreadSafeData& operator=(const WTF::PassRefPtr<WebCore::RawData>&);
+#else
+    operator std::string() const
+    {
+        size_t len = size();
+        return len ? std::string(data(), len) : std::string();
+    }
+#endif
 
-WebThreadSafeData& WebThreadSafeData::operator=(const PassRefPtr<RawData>& data)
-{
-    m_private = data;
-    return *this;
-}
+private:
+    WebPrivatePtr<WebCore::RawData> m_private;
+};
 
 } // namespace WebKit
+
+#endif
