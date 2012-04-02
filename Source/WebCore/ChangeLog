@@ -1,3 +1,282 @@
+2012-04-02  Antti Koivisto  <antti@apple.com>
+
+        Split remaining CSSRules into internal and CSSOM types
+        https://bugs.webkit.org/show_bug.cgi?id=82728
+
+        Reviewed by Andreas Kling.
+
+        This will complete the move to internal types for CSS rules. The only remaining unsplit type is
+        the CSSStyleSheet itself.
+        
+        By separating internal types from the CSSOM we save memory immediately and enable future performance
+        optimizations as we are no longer tied to the structure of the API.
+        
+        CSSOM type              Internal type
+        
+        CSSStyleRule            StyleRule -> StyleRuleBase
+        CSSPageRule             StyleRulePage -> StyleRuleBase
+        CSSFontFaceRule         StyleRuleFontFace -> StyleRuleBase
+        CSSMediaRule            StyleRuleMedia -> StyleRuleBlock -> StyleRuleBase
+        CSSImportRule           StyleRuleImport -> StyleRuleBase
+        CSSCharsetRule          String (owned by CSSStyleSheet)
+        CSSUnknownRule          Never instantiated
+        WebKitCSSRegionRule     StyleRuleRegion -> StyleRuleBlock -> StyleRuleBase
+        WebKitKeyframesRule     StyleRuleKeyframes -> StyleRuleBase
+        WebKitKeyframeRule      StyleKeyframe (owned by StyleRuleKeyframes)
+        
+        StyleRuleBase is refcounted. 
+        
+        The CSSOM objects contain the public API functions and their implementations (almost) nothing else. Unlike the 
+        CSSOM types they don't have parent pointers, saving memory.  
+        
+        The CSSOM tree is constructed on demand only. The CSSOM wrapper instances are constructed and owned by 
+        the parent wrapper in the tree. Wrappers ref the corresponding internal type. The trees are kept in sync
+        when mutating.
+        
+        All rules shrink by a pointer (from the parent pointer removal). The immediate memory savings from this patch are
+        larger as some earlier patches temporarily increased the memory use to allow incremental refactoring. 
+
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/JSDOMBinding.h:
+        (WebCore):
+        * css/CSSFontFaceRule.cpp:
+        (WebCore::CSSFontFaceRule::CSSFontFaceRule):
+        (WebCore::CSSFontFaceRule::style):
+        (WebCore::CSSFontFaceRule::cssText):
+        (WebCore):
+        * css/CSSFontFaceRule.h:
+        (WebCore):
+        (WebCore::CSSFontFaceRule::create):
+        (CSSFontFaceRule):
+        * css/CSSFontSelector.cpp:
+        (WebCore::CSSFontSelector::addFontFaceRule):
+        * css/CSSFontSelector.h:
+        (WebCore):
+        * css/CSSGrammar.y:
+        * css/CSSImportRule.cpp:
+        (WebCore::StyleRuleImport::create):
+        (WebCore::StyleRuleImport::StyleRuleImport):
+        (WebCore::StyleRuleImport::~StyleRuleImport):
+        (WebCore::StyleRuleImport::setCSSStyleSheet):
+        (WebCore::StyleRuleImport::isLoading):
+        (WebCore::StyleRuleImport::requestStyleSheet):
+        (WebCore::CSSImportRule::CSSImportRule):
+        (WebCore):
+        (WebCore::CSSImportRule::media):
+        (WebCore::CSSImportRule::cssText):
+        * css/CSSImportRule.h:
+        (StyleRuleImport):
+        (WebCore::StyleRuleImport::parentStyleSheet):
+        (WebCore::StyleRuleImport::clearParentStyleSheet):
+        (WebCore::StyleRuleImport::href):
+        (WebCore::StyleRuleImport::ImportedStyleSheetClient::ImportedStyleSheetClient):
+        (ImportedStyleSheetClient):
+        (CSSImportRule):
+        (WebCore::CSSImportRule::create):
+        (WebCore::CSSImportRule::href):
+        (WebCore::CSSImportRule::styleSheet):
+        (WebCore):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::CSSMediaRule):
+        (WebCore::CSSMediaRule::~CSSMediaRule):
+        (WebCore::CSSMediaRule::insertRule):
+        (WebCore::CSSMediaRule::deleteRule):
+        (WebCore::CSSMediaRule::cssText):
+        (WebCore::CSSMediaRule::media):
+        (WebCore):
+        (WebCore::CSSMediaRule::length):
+        (WebCore::CSSMediaRule::item):
+        (WebCore::CSSMediaRule::cssRules):
+        * css/CSSMediaRule.h:
+        (WebCore):
+        (WebCore::CSSMediaRule::create):
+        (CSSMediaRule):
+        * css/CSSPageRule.cpp:
+        (WebCore::CSSPageRule::CSSPageRule):
+        (WebCore::CSSPageRule::style):
+        (WebCore::CSSPageRule::selectorText):
+        (WebCore::CSSPageRule::setSelectorText):
+        (WebCore::CSSPageRule::cssText):
+        * css/CSSPageRule.h:
+        (WebCore):
+        (WebCore::CSSPageRule::create):
+        (CSSPageRule):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseRule):
+        (WebCore::CSSParser::createImportRule):
+        (WebCore::CSSParser::createMediaRule):
+        (WebCore::CSSParser::createKeyframesRule):
+        (WebCore::CSSParser::createStyleRule):
+        (WebCore::CSSParser::createFontFaceRule):
+        (WebCore::CSSParser::createPageRule):
+        (WebCore::CSSParser::createRegionRule):
+        (WebCore::CSSParser::createMarginAtRule):
+        * css/CSSParser.h:
+        (WebCore):
+        (CSSParser):
+        * css/CSSPropertySourceData.h:
+        (WebCore):
+        * css/CSSStyleRule.cpp:
+        (WebCore):
+        (WebCore::selectorTextCache):
+        (WebCore::CSSStyleRule::CSSStyleRule):
+        (WebCore::CSSStyleRule::~CSSStyleRule):
+        (WebCore::CSSStyleRule::setSelectorText):
+        * css/CSSStyleRule.h:
+        (WebCore):
+        (WebCore::CSSStyleRule::create):
+        (CSSStyleRule):
+        * css/CSSStyleSelector.cpp:
+        (RuleSet):
+        (WebCore::RuleSet::pageRules):
+        (WebCore::CSSStyleSelector::addKeyframeStyle):
+        (WebCore::CSSStyleSelector::sortAndTransferMatchedRules):
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::CSSStyleSheet):
+        (WebCore::CSSStyleSheet::parserAppendRule):
+        (WebCore::CSSStyleSheet::createChildRuleCSSOMWrapper):
+        (WebCore::CSSStyleSheet::item):
+        (WebCore::CSSStyleSheet::clearCharsetRule):
+        (WebCore::CSSStyleSheet::clearRules):
+        (WebCore::CSSStyleSheet::rules):
+        (WebCore::CSSStyleSheet::insertRule):
+        (WebCore::CSSStyleSheet::deleteRule):
+        (WebCore::CSSStyleSheet::addSubresourceStyleURLs):
+        (WebCore::CSSStyleSheet::ensureCSSOMWrapper):
+        (WebCore):
+        (WebCore::CSSStyleSheet::ownerRule):
+        (WebCore::CSSStyleSheet::parentStyleSheet):
+        * css/CSSStyleSheet.h:
+        (WebCore):
+        (WebCore::CSSStyleSheet::create):
+        (CSSStyleSheet):
+        (WebCore::CSSStyleSheet::childRules):
+        (WebCore::CSSStyleSheet::importRules):
+        (WebCore::CSSStyleSheet::clearOwnerRule):
+        (WebCore::CSSStyleSheet::hasCharsetRule):
+        * css/StyleRule.cpp:
+        (WebCore::StyleRuleBase::createCSSOMWrapper):
+        (WebCore):
+        (WebCore::StyleRuleBase::destroy):
+        (WebCore::StyleRule::StyleRule):
+        (WebCore::StyleRule::setProperties):
+        (WebCore::StyleRulePage::StyleRulePage):
+        (WebCore::StyleRulePage::~StyleRulePage):
+        (WebCore::StyleRulePage::setProperties):
+        (WebCore::StyleRuleFontFace::StyleRuleFontFace):
+        (WebCore::StyleRuleFontFace::~StyleRuleFontFace):
+        (WebCore::StyleRuleFontFace::setProperties):
+        (WebCore::StyleRuleBlock::StyleRuleBlock):
+        (WebCore::StyleRuleBlock::wrapperInsertRule):
+        (WebCore::StyleRuleBlock::wrapperRemoveRule):
+        (WebCore::StyleRuleMedia::StyleRuleMedia):
+        (WebCore::StyleRuleRegion::StyleRuleRegion):
+        * css/StyleRule.h:
+        (WebCore):
+        (WebCore::StyleRuleBase::type):
+        (StyleRuleBase):
+        (WebCore::StyleRuleBase::isCharsetRule):
+        (WebCore::StyleRuleBase::isFontFaceRule):
+        (WebCore::StyleRuleBase::isKeyframesRule):
+        (WebCore::StyleRuleBase::isMediaRule):
+        (WebCore::StyleRuleBase::isPageRule):
+        (WebCore::StyleRuleBase::isStyleRule):
+        (WebCore::StyleRuleBase::isRegionRule):
+        (WebCore::StyleRuleBase::isImportRule):
+        (WebCore::StyleRuleBase::sourceLine):
+        (WebCore::StyleRuleBase::deref):
+        (WebCore::StyleRuleBase::StyleRuleBase):
+        (WebCore::StyleRuleBase::~StyleRuleBase):
+        (StyleRule):
+        (WebCore::StyleRule::create):
+        (WebCore::StyleRule::parserAdoptSelectorVector):
+        (WebCore::StyleRule::wrapperAdoptSelectorList):
+        (StyleRuleFontFace):
+        (WebCore::StyleRuleFontFace::create):
+        (WebCore::StyleRuleFontFace::properties):
+        (StyleRulePage):
+        (WebCore::StyleRulePage::create):
+        (WebCore::StyleRulePage::selector):
+        (WebCore::StyleRulePage::properties):
+        (WebCore::StyleRulePage::parserAdoptSelectorVector):
+        (WebCore::StyleRulePage::wrapperAdoptSelectorList):
+        (StyleRuleBlock):
+        (WebCore::StyleRuleBlock::childRules):
+        (StyleRuleMedia):
+        (WebCore::StyleRuleMedia::create):
+        (WebCore::StyleRuleMedia::mediaQueries):
+        (StyleRuleRegion):
+        (WebCore::StyleRuleRegion::create):
+        (WebCore::StyleRuleRegion::selectorList):
+        * css/StyleSheet.cpp:
+        (WebCore::StyleSheet::StyleSheet):
+        (WebCore):
+        * css/StyleSheet.h:
+        (WebCore):
+        (WebCore::StyleSheet::ownerRule):
+        (WebCore::StyleSheet::parentStyleSheet):
+        (StyleSheet):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::StyleRuleKeyframes::StyleRuleKeyframes):
+        (WebCore):
+        (WebCore::StyleRuleKeyframes::~StyleRuleKeyframes):
+        (WebCore::StyleRuleKeyframes::parserAppendKeyframe):
+        (WebCore::StyleRuleKeyframes::wrapperAppendKeyframe):
+        (WebCore::StyleRuleKeyframes::wrapperRemoveKeyframe):
+        (WebCore::StyleRuleKeyframes::findKeyframeIndex):
+        (WebCore::WebKitCSSKeyframesRule::WebKitCSSKeyframesRule):
+        (WebCore::WebKitCSSKeyframesRule::~WebKitCSSKeyframesRule):
+        (WebCore::WebKitCSSKeyframesRule::setName):
+        (WebCore::WebKitCSSKeyframesRule::insertRule):
+        (WebCore::WebKitCSSKeyframesRule::deleteRule):
+        (WebCore::WebKitCSSKeyframesRule::findRule):
+        (WebCore::WebKitCSSKeyframesRule::cssText):
+        (WebCore::WebKitCSSKeyframesRule::length):
+        (WebCore::WebKitCSSKeyframesRule::item):
+        * css/WebKitCSSKeyframesRule.h:
+        (WebCore):
+        (StyleRuleKeyframes):
+        (WebCore::StyleRuleKeyframes::create):
+        (WebCore::StyleRuleKeyframes::keyframes):
+        (WebCore::StyleRuleKeyframes::name):
+        (WebCore::StyleRuleKeyframes::setName):
+        (WebCore::WebKitCSSKeyframesRule::create):
+        (WebCore::WebKitCSSKeyframesRule::name):
+        (WebKitCSSKeyframesRule):
+        * css/WebKitCSSRegionRule.cpp:
+        (WebCore::WebKitCSSRegionRule::WebKitCSSRegionRule):
+        (WebCore::WebKitCSSRegionRule::~WebKitCSSRegionRule):
+        (WebCore::WebKitCSSRegionRule::cssText):
+        (WebCore::WebKitCSSRegionRule::length):
+        (WebCore):
+        (WebCore::WebKitCSSRegionRule::item):
+        (WebCore::WebKitCSSRegionRule::cssRules):
+        * css/WebKitCSSRegionRule.h:
+        (WebCore):
+        (WebCore::WebKitCSSRegionRule::create):
+        (WebKitCSSRegionRule):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore::InspectorInstrumentation::willMatchRuleImpl):
+        (WebCore::InspectorInstrumentation::willProcessRuleImpl):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::ensureSourceData):
+        * inspector/InspectorStyleSheet.h:
+        (WebCore):
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::SVGFontFaceElement):
+        (WebCore::SVGFontFaceElement::parseAttribute):
+        (WebCore::SVGFontFaceElement::fontFamily):
+        (WebCore::SVGFontFaceElement::rebuildFontFace):
+        (WebCore::SVGFontFaceElement::insertedIntoDocument):
+        (WebCore::SVGFontFaceElement::removedFromDocument):
+        * svg/SVGFontFaceElement.h:
+        (WebCore):
+        (WebCore::SVGFontFaceElement::fontFaceRule):
+        (SVGFontFaceElement):
+
 2012-04-02  Rakesh KN  <rakesh.kn@motorola.com>
 
         Scroll position is lost after hide/show element
