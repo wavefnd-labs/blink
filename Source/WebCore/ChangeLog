@@ -1,3 +1,45 @@
+2012-04-02  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: [refactoring] factor our frame aggregation logic to TimelineFrameController
+        https://bugs.webkit.org/show_bug.cgi?id=82735
+
+        Reviewed by Pavel Feldman.
+
+        - factor out frame aggregation logic from TimelineVerticalOverview into TimelineFrameController;
+        - if we don't have frames, pretend each top-level event is a frame (this preserves behavior of vertical overview);
+        - factor out time-by-category stats aggregation into class methods of TimelineModel for reuse accross timeline modules;
+        - do not filter top-level events by type in vertical overview mode;
+
+        * WebCore.gypi: Added TimelineFrameController.js
+        * WebCore.vcproj/WebCore.vcproj: ditto.
+        * inspector/compile-front-end.py: ditto.
+        * inspector/front-end/TimelineFrameController.js: Added.
+        (WebInspector.TimelineFrameController):
+        (WebInspector.TimelineFrameController.prototype._onRecordAdded):
+        (WebInspector.TimelineFrameController.prototype._onRecordsCleared):
+        (WebInspector.TimelineFrameController.prototype._addRecord):
+        (WebInspector.TimelineFrameController.prototype._flushFrame):
+        (WebInspector.TimelineFrameController.prototype._createSyntheticFrame): create a "frame" based on a single top-level record.
+        (WebInspector.TimelineFrameController.prototype.dispose): Remove listeners that we added in constructor.
+        (WebInspector.TimelineFrame):
+        * inspector/front-end/TimelineModel.js: Added utilities for aggregating times by categories.
+        (WebInspector.TimelineModel.aggregateTimeByCategories):
+        (WebInspector.TimelineModel.aggregateTimeForRecord):
+        * inspector/front-end/TimelineOverviewPane.js: Use frame information supplied by TimelineFrameController.
+        (WebInspector.TimelineOverviewPane.prototype._showTimelines):
+        (WebInspector.TimelineOverviewPane.prototype._setVerticalOverview):
+        (WebInspector.TimelineOverviewPane.prototype.addFrame):
+        (WebInspector.TimelineVerticalOverview.prototype.reset): Clear stored frames upon reset()
+        (WebInspector.TimelineVerticalOverview.prototype.update):
+        (WebInspector.TimelineVerticalOverview.prototype.addFrame):
+        (WebInspector.TimelineVerticalOverview.prototype._aggregateFrames):
+        (WebInspector.TimelineVerticalOverview.prototype.getWindowTimes):
+        * inspector/front-end/TimelinePanel.js: Create/dispose TimelineFrameController when switching to/from vertical overview mode.
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel.Record.prototype.calculateAggregatedStats): Factored out statistics aggregation to utilities method in the model.
+        * inspector/front-end/WebKit.qrc: Added TimelineFrameController.js
+        * inspector/front-end/inspector.html: ditto.
+
 2012-03-31  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Implement backend for device metrics emulation
