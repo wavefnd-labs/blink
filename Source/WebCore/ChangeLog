@@ -1,3 +1,39 @@
+2012-04-02  Rakesh KN  <rakesh.kn@motorola.com>
+
+        Scroll position is lost after hide/show element
+        https://bugs.webkit.org/show_bug.cgi?id=72852
+
+        Maintain the scroll position of an overflowing element in the ElementRareData when the scrollable 
+        RenderLayer is destroyed, which can be used to restore the scroll position if the same element gets
+        back a RenderLayer.
+
+        WebKit behaviour will be the same as Firefox and IE. It differs from Opera as it does not reset the
+        scroll position when an element is moved to another location in the same document. However Opera resets
+        the scroll position for elements moved to another document, which matches other browsers.
+
+        Reviewed by Julien Chaffraix.
+
+        Test: fast/overflow/scroll-div-hide-show.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::removedFromDocument):
+        Reset the saved scroll offset if the node is moved to another location in the same document or another one.
+
+        (WebCore::Element::savedLayerScrollOffset):
+        (WebCore::Element::setSavedLayerScrollOffset):
+        * dom/Element.h:
+        Add helper functions to access the layer scroll offset from the element's rare data.
+
+        * dom/ElementRareData.h:
+        (ElementRareData):
+        Add the scroll offset book-keeping.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::RenderLayer):
+        Restore the scroll offset.
+        (WebCore::RenderLayer::~RenderLayer):
+        Store the scroll offset if document is not being destroyed.
+
 2012-04-02  Alexis Menard  <alexis.menard@openbossa.org>
 
         Rename CSSPropertyLonghand files to StylePropertyShorthand.
