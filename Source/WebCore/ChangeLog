@@ -1,3 +1,25 @@
+2012-04-02  Michael Saboff  <msaboff@apple.com>
+
+        WebKit should throttle memory pressure notifications in proportion to handler time
+        https://bugs.webkit.org/show_bug.cgi?id=82674
+
+        Reviewed by Geoffrey Garen.
+
+        Changed the MemoryPressureHandler hold off timer to start timing after 
+        respondToMemoryPressure runs.  The delay time is now 20 times longer than the
+        time it took for respondToMemoryPressure to run with a minimum of 5 seconds.
+        This throttles the response to low memory events in the extreme case where
+        we are spending most of our time paging / swapping.
+        This is a Mac only change.
+
+        No additional tests. This passes existing test and was verified using
+        manual tests on a small memory system with many websites open.
+
+        * platform/mac/MemoryPressureHandlerMac.mm:
+        (WebCore):
+        (WebCore::MemoryPressureHandler::holdOff):
+        (WebCore::MemoryPressureHandler::respondToMemoryPressure):
+
 2012-04-02  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r112163.
