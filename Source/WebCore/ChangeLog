@@ -1,3 +1,30 @@
+2012-04-02  Mario Sanchez Prada  <msanchez@igalia.com>
+
+        in page anchor and keyboard navigation
+        https://bugs.webkit.org/show_bug.cgi?id=17450
+
+        Reviewed by Chris Fleizach.
+
+        Ensure that the position of the caret and the focused element
+        get updated when following an anchor link.
+
+        The implementation is moved from platform specific files out to
+        AXObjectCache.cpp since it should be a cross-platform valid
+        solution. However, the new code is currently activated for the Mac
+        and GTK ports only, since the windows and chromium ports provide
+        their own specific code, and removing it now might break things.
+
+        Test: accessibility/anchor-link-selection-and-focus.html
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore):
+        (WebCore::AXObjectCache::handleScrolledToAnchor): Cross-platform
+        implementation of the fix, only activated for Mac and GTK for now.
+        * accessibility/gtk/AXObjectCacheAtk.cpp: Removed the GTK-specific
+        implementation of WebCore::AXObjectCache::handleScrolledToAnchor.
+        * accessibility/mac/AXObjectCacheMac.mm: Removed the Mac-specific
+        implementation of WebCore::AXObjectCache::handleScrolledToAnchor.
+
 2012-04-02  Hayato Ito  <hayato@chromium.org>
 
         [Shadow DOM] Introduce ComposedShadowTreeWalker as a successor of ReifiedTreeTraversal APIs
