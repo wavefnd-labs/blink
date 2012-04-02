@@ -1,3 +1,82 @@
+2012-04-02  Hayato Ito  <hayato@chromium.org>
+
+        [Shadow DOM] Introduce ComposedShadowTreeWalker as a successor of ReifiedTreeTraversal APIs
+        https://bugs.webkit.org/show_bug.cgi?id=82009
+
+        Reviewed by Dimitri Glazkov.
+
+        ComposedShadowTreeWalker is intended to be a successor of current ReifiedTreeTraversal APIs.
+        ComposedShadowTreeWalker uses a cursor pattern and takes a starting node in its constructor.
+
+        A typical usage is:
+
+          for (ComposedShadowTreeWalker walker(node); walker.get(); walker.next()) {
+                ...
+          }
+
+        Follow-up patches will update clients which use current ReifiedTreeTraversal APIs so that they use the Walker.
+        More tests will come along with these actual use cases in follow-up patches.
+        After that, I'll get rid of ReifiedTreeTraversal APIs in favor of the Walker.
+
+        Note that 'ComposedShadowTree' and 'ReifiedTree' has the same meaning.
+        Because ReifiedTree is not intuitive name, we are starting to use 'ComposedShadowTree' from now.
+
+        Test: fast/dom/shadow/composed-shadow-tree-walker.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/ComposedShadowTreeWalker.cpp: Added.
+        (WebCore):
+        (WebCore::isShadowHost):
+        (WebCore::shadowTreeFor):
+        (WebCore::shadowTreeOfParent):
+        (WebCore::ComposedShadowTreeWalker::ComposedShadowTreeWalker):
+        (WebCore::ComposedShadowTreeWalker::fromFirstChild):
+        (WebCore::ComposedShadowTreeWalker::firstChild):
+        (WebCore::ComposedShadowTreeWalker::traverseFirstChild):
+        (WebCore::ComposedShadowTreeWalker::lastChild):
+        (WebCore::ComposedShadowTreeWalker::traverseLastChild):
+        (WebCore::ComposedShadowTreeWalker::traverseChild):
+        (WebCore::ComposedShadowTreeWalker::traverseLightChildren):
+        (WebCore::ComposedShadowTreeWalker::traverseNode):
+        (WebCore::ComposedShadowTreeWalker::nextSibling):
+        (WebCore::ComposedShadowTreeWalker::previousSibling):
+        (WebCore::ComposedShadowTreeWalker::traverseSiblingOrBackToInsertionPoint):
+        (WebCore::ComposedShadowTreeWalker::traverseSiblingInCurrentTree):
+        (WebCore::ComposedShadowTreeWalker::traverseSiblingOrBackToYoungerShadowRoot):
+        (WebCore::ComposedShadowTreeWalker::escapeFallbackContentElement):
+        (WebCore::ComposedShadowTreeWalker::traverseNodeEscapingFallbackContents):
+        (WebCore::ComposedShadowTreeWalker::parent):
+        (WebCore::ComposedShadowTreeWalker::traverseParent):
+        (WebCore::ComposedShadowTreeWalker::traverseParentInCurrentTree):
+        (WebCore::ComposedShadowTreeWalker::traverseParentBackToYoungerShadowRootOrHost):
+        (WebCore::ComposedShadowTreeWalker::traverseNextSibling):
+        (WebCore::ComposedShadowTreeWalker::traversePreviousSibling):
+        (WebCore::ComposedShadowTreeWalker::next):
+        (WebCore::ComposedShadowTreeWalker::previous):
+        * dom/ComposedShadowTreeWalker.h: Added.
+        (WebCore):
+        (ComposedShadowTreeWalker):
+        (WebCore::ComposedShadowTreeWalker::get):
+        (WebCore::ComposedShadowTreeWalker::canCrossUpperBoundary):
+        (WebCore::ComposedShadowTreeWalker::assertPrecondition):
+        (WebCore::ComposedShadowTreeWalker::assertPostcondition):
+        * testing/Internals.cpp:
+        (WebCore::Internals::nextSiblingByWalker):
+        (WebCore):
+        (WebCore::Internals::firstChildByWalker):
+        (WebCore::Internals::lastChildByWalker):
+        (WebCore::Internals::nextNodeByWalker):
+        (WebCore::Internals::previousNodeByWalker):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-04-02  Pavel Podivilov  <podivilov@chromium.org>
 
         Web Inspector: breakpoints are not shown in sidebar pane after switching pretty-print mode.
