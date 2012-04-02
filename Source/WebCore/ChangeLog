@@ -1,3 +1,77 @@
+2012-04-02  Chris Rogers  <crogers@google.com>
+
+        Add Oscillator/WaveTable implementation and tests
+        https://bugs.webkit.org/show_bug.cgi?id=82414
+        
+        Oscillator represents an audio source generating a periodic waveform.  It can be set to
+        a few commonly used waveforms.  Additionally, it can be set to an arbitrary periodic
+        waveform through the use of a WaveTable object.
+
+        Reviewed by Kenneth Russell.
+
+        Tests: webaudio/oscillator-custom.html
+               webaudio/oscillator-sawtooth.html
+               webaudio/oscillator-sine.html
+               webaudio/oscillator-square.html
+               webaudio/oscillator-triangle.html
+
+        * DerivedSources.make:
+        * GNUmakefile.list.am:
+        Add Oscillator and WaveTable to build files.
+        * Modules/webaudio/AudioContext.cpp:
+        (WebCore::AudioContext::createOscillator):
+        (WebCore):
+        (WebCore::AudioContext::createWaveTable):
+        * Modules/webaudio/AudioContext.h:
+        Add create methods for Oscillator and WaveTable.
+        (WebCore):
+        (AudioContext):
+        * Modules/webaudio/AudioContext.idl:
+        * Modules/webaudio/AudioNode.h:
+        * Modules/webaudio/Oscillator.cpp: Added.
+        (WebCore):
+        (WebCore::Oscillator::create):
+        (WebCore::Oscillator::Oscillator):
+        (WebCore::Oscillator::~Oscillator):
+        (WebCore::Oscillator::setType):
+        (WebCore::Oscillator::calculateSampleAccuratePhaseIncrements):
+        (WebCore::Oscillator::process):
+        (WebCore::Oscillator::reset):
+        (WebCore::Oscillator::setWaveTable):
+        * Modules/webaudio/Oscillator.h: Added.
+        (WebCore):
+        (Oscillator):
+        (WebCore::Oscillator::type):
+        (WebCore::Oscillator::frequency):
+        (WebCore::Oscillator::detune):
+        Implement Oscillator as AudioSourceNode.
+        * Modules/webaudio/Oscillator.idl: Added.
+        * Modules/webaudio/WaveTable.cpp: Added.
+        (WebCore):
+        (WebCore::WaveTable::create):
+        (WebCore::WaveTable::createSine):
+        (WebCore::WaveTable::createSquare):
+        (WebCore::WaveTable::createSawtooth):
+        (WebCore::WaveTable::createTriangle):
+        (WebCore::WaveTable::WaveTable):
+        (WebCore::WaveTable::waveDataForFundamentalFrequency):
+        (WebCore::WaveTable::maxNumberOfPartials):
+        (WebCore::WaveTable::numberOfPartialsForRange):
+        (WebCore::WaveTable::createBandLimitedTables):
+        (WebCore::WaveTable::generateBasicWaveform):
+        * Modules/webaudio/WaveTable.h: Added.
+        (WebCore):
+        (WaveTable):
+        (WebCore::WaveTable::rateScale):
+        (WebCore::WaveTable::waveTableSize):
+        (WebCore::WaveTable::sampleRate):
+        (WebCore::WaveTable::numberOfRanges):
+        Implement WaveTable which is constructed given a set of Fourier coefficients.
+        * Modules/webaudio/WaveTable.idl: Added.
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        Add Oscillator and WaveTable files to build files.
+
 2012-04-02  Levi Weintraub  <leviw@chromium.org>
 
         Correct remaining LayoutUnit misuse in RenderReplaced and RenderFlexibleBox
