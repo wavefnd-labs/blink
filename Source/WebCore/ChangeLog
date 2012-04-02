@@ -1,3 +1,31 @@
+2012-03-29  Kent Tamura  <tkent@chromium.org>
+
+        Fix some problems of text field decoration
+        https://bugs.webkit.org/show_bug.cgi?id=82693
+
+        Reviewed by Dimitri Glazkov.
+
+        - Fix a problem that decorations are not removed when the input type is
+        changed.
+        - Add a comment to the 'willDetach' callback.
+
+        No new tests because the behavior changes are not visible yet.
+
+        * GNUMakefile.list.am: Add HTMLShadowElement.*.
+        * html/InputType.cpp:
+        (WebCore::InputType::destroyShadowSubtree):
+        Remove all of ShadowRoot contents, and add a <shadow> element to each of
+        them. We don't remove ShadowRoots from the tree because it's not
+        supported well.
+        * html/shadow/TextFieldDecorationElement.cpp:
+        (getDecorationRootAndDecoratedRoot): A helper function for decorate().
+        If the input element has a ShadowRoot with single <shadow> child, we
+        don't create new ShadowRoot and reuse it.
+        (WebCore::TextFieldDecorationElement::decorate):
+        Use getDecorationRootAndDecoratedRoot().
+        * html/shadow/TextFieldDecorationElement.h:
+        (TextFieldDecorator): Add a comment to willDetach().
+
 2012-04-01  Li Yin  <li.yin@intel.com>
 
         [WebSocket]Reserved bits test case should cover both extension and no-extension scenarios
