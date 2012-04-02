@@ -1,3 +1,50 @@
+2012-04-02  Kent Tamura  <tkent@chromium.org>
+
+        Add a calendar picker indicator to date-type input fields
+        https://bugs.webkit.org/show_bug.cgi?id=80478
+
+        Reviewed by Hajime Morita.
+
+        Add an indicator to date-type controls. The bahevior change is enclosed
+        with ENABLE_CALENDAR_PICKER.
+
+        - Remove spin buttons from date-type controls.
+        It's not so helpful if we have a calendar picker. We introduce
+        TextFieldInputType::shouldHaveSpinButton().
+
+        - Add CalendarPickerElement.
+        This is added into a shadow tree of a date-type control. It uses
+        RenderDetailsMarker.
+
+        We're going to add click handler and so on to CalendarPickerElement.
+
+        Test: fast/forms/date/date-appearance.html
+
+        * WebCore.gypi: Add CalendarPickerElement.{cpp,h}
+        * css/html.css:
+        (input::-webkit-calendar-picker-indicator):
+        * html/DateInputType.cpp:
+        (WebCore::DateInputType::createShadowSubtree): Insert CalendarPickerElement.
+        (WebCore::DateInputType::needsContainer):
+        Alwyas return true because we have an extra decoration element.
+        (WebCore::DateInputType::shouldHaveSpinButton):
+        Always return false to disable spin button.
+        * html/DateInputType.h:
+        (DateInputType): Add declarations.
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::shouldHaveSpinButton):
+        (WebCore::TextFieldInputType::createShadowSubtree): Move some code to shouldHaveSpinButton().
+        * html/TextFieldInputType.h:
+        (TextFieldInputType): Add a declartion.
+        * html/shadow/CalendarPickerElement.cpp:
+        (WebCore::CalendarPickerElement::CalendarPickerElement):
+        (WebCore::CalendarPickerElement::create):
+        (WebCore::CalendarPickerElement::createRenderer): Creates RenderDetailsMarker.
+        * html/shadow/CalendarPickerElement.h: Added.
+        * rendering/RenderDetailsMarker.cpp:
+        (WebCore::RenderDetailsMarker::isOpen): Always show a down arrow if this is in <input>.
+        * rendering/RenderDetailsMarker.h:
+
 2012-04-02  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: make timeline overview a view
