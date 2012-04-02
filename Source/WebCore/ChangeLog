@@ -1,3 +1,39 @@
+2012-04-02  Nate Chapin  <japhet@chromium.org>
+
+        Simplify main resource load start/end in FrameLoader
+        and DocumentLoader.
+        https://bugs.webkit.org/show_bug.cgi?id=82935
+
+        1. Have FrameLoader call prepareForLoadStart() on itself directly, rather
+            than through DocumentLoader.
+        2. Remove DocumentLoader::m_primaryLoadComplete, since this is basically equivalent
+            to m_mainResourceLoader.
+        3. Rename setPrimaryLoadComplete() to clearMainResourceLoader(), and only call it at
+            the end of the main resource load.
+        4. Move clearing DocumentLoader::m_mainResourceError into startLoadingMainResource(),
+            which leaves DocumentLoader::prepareForLoadStart() empty.
+
+        Reviewed by Adam Barth.
+
+        No new tests, refactor only.
+
+        * WebCore.exp.in:
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::DocumentLoader):
+        (WebCore):
+        (WebCore::DocumentLoader::mainReceivedError):
+        (WebCore::DocumentLoader::finishedLoading):
+        (WebCore::DocumentLoader::clearMainResourceLoader):
+        (WebCore::DocumentLoader::isLoadingInAPISense):
+        (WebCore::DocumentLoader::startLoadingMainResource):
+        * loader/DocumentLoader.h:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::commitProvisionalLoad):
+        (WebCore::FrameLoader::continueLoadAfterWillSubmitForm):
+        (WebCore::FrameLoader::loadProvisionalItemFromCachedPage):
+        * loader/FrameLoader.h: prepareForLoadStart() is now called directly,
+            so make it private.
+
 2012-04-02  Tim Horton  <timothy_horton@apple.com>
 
         ASSERTION FAILED: m_purgePreventCount in FontCache::getCachedFontData running svg/custom/animate-disallowed-use-element.svg
