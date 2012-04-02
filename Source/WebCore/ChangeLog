@@ -1,3 +1,56 @@
+2012-04-02  Alexis Menard  <alexis.menard@openbossa.org>
+
+        We should use CSSPropertyID rather than integers when manipulating CSS property ids.
+        https://bugs.webkit.org/show_bug.cgi?id=82941
+
+        Reviewed by Andreas Kling.
+
+        CSSPropertyID enum holds all the CSS property ids but many parts of WebKit treat the ids
+        as integers. While it's not incorrect it is nicer to use the enum as a parameter of
+        functions manipulating property ids, as we ensure that the value passed will be an
+        existing value. It will also feel more correct after this patch that CSSProperty::id()
+        return a value of the enum rather than an integer. As this modification is quite big this
+        is the first part only so it will be easier to review.
+
+        No new tests : There should be no behavior change in this patch.
+
+        * css/CSSParser.cpp:
+        (WebCore::cssPropertyID):
+        * css/CSSParser.h:
+        (WebCore):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::cssText):
+        * css/CSSProperty.h:
+        (WebCore::CSSProperty::id):
+        (WebCore::CSSProperty::shorthandID):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::item):
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyCSSValue):
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyValue):
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyPriority):
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyShorthand):
+        (WebCore::PropertySetCSSStyleDeclaration::isPropertyImplicit):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::getPropertyValue):
+        (WebCore::StylePropertySet::appendFontLonghandValueIfExplicit):
+        (WebCore::StylePropertySet::propertyIsImportant):
+        (WebCore::StylePropertySet::getPropertyShorthand):
+        (WebCore::StylePropertySet::isPropertyImplicit):
+        (WebCore::StylePropertySet::asText):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        * editing/EditingStyle.cpp:
+        (WebCore::EditingStyle::conflictsWithInlineStyleOfElement):
+        (WebCore::removePropertiesInStyle):
+        (WebCore::setTextDecorationProperty):
+        (WebCore::diffTextDecorations):
+        * editing/Editor.cpp:
+        (WebCore::Editor::selectionStartCSSPropertyValue):
+        * editing/Editor.h:
+        (Editor):
+        * editing/EditorCommand.cpp:
+        (WebCore::valueStyle):
+
 2012-04-02  Nate Chapin  <japhet@chromium.org>
 
         Simplify main resource load start/end in FrameLoader
