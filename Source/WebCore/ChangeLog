@@ -1,3 +1,40 @@
+2012-04-01  Antti Koivisto  <antti@apple.com>
+
+        Add mechanism for mapping from StyleRules back to fully constructed CSSStyleRules 
+        https://bugs.webkit.org/show_bug.cgi?id=82847
+
+        Reviewed by Andreas Kling.
+
+        Inspector is using CSSStyleSelector to calculate the CSS rules matched by a given element and
+        expects to be able to walk the parent chain. After 82728 the stylesheet object tree won't have
+        parent pointers and we are going to need another mechanism to support this.
+        
+        The new code does not actually run without 82728.
+        
+        * css/CSSStyleSelector.cpp:
+        (WebCore):
+        (WebCore::CSSStyleSelector::appendAuthorStylesheets):
+        (WebCore::loadFullDefaultStyle):
+        (WebCore::ensureDefaultStyleSheetsForElement):
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+    
+        Add ensureFullCSSOMWrapperForStyleRule() method which traverses through all style
+        sheets that apply to the document and constucts wrappers for the rules. These wrappers
+        are cached to a map. The map can then be used for StyleRule -> CSSStyleRule lookups.
+        
+        This uses quite a bit of memory so should not be used for any normal engine functions.
+    
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::getMatchedStylesForNode):
+        (WebCore::InspectorCSSAgent::buildArrayForRuleList):
+    
+        Use the new mechanism to get fully functional wrappers for rule objects without parent pointer.
+    
+        * inspector/InspectorCSSAgent.h:
+        (InspectorCSSAgent):
+
 2012-04-02  Carlos Garcia Campos  <cgarcia@igalia.com>
 
         Unreviewed. Fix make distcheck issues.
