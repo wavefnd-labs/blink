@@ -1,3 +1,32 @@
+2012-03-15  Anders Carlsson  <andersca@apple.com>
+
+        Search result page scrolls up before the correct page opens from google search
+        https://bugs.webkit.org/show_bug.cgi?id=81280
+        <rdar://problem/10973263>
+
+        Reviewed by Sam Weinig.
+
+        Make the requested scroll position part of the ScrollingTreeState so any changes being made
+        are in sync with other important changes such as the scroll layer or contents size.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::frameViewRootLayerDidChange):
+        Use coordinatesScrollingForFrameView instead of checking if the frame is the main frame.
+
+        (WebCore::ScrollingCoordinator::requestScrollPositionUpdate):
+        Call ScrollingTreeState::setRequestedScrollPosition.
+
+        (WebCore::ScrollingCoordinator::setScrollLayer):
+        Reset the requested scroll position.
+
+        * page/scrolling/ScrollingTreeState.cpp:
+        (WebCore::ScrollingTreeState::setRequestedScrollPosition):
+        Keep track of the scroll position.
+
+        * page/scrolling/mac/ScrollingTreeNodeMac.mm:
+        (WebCore::ScrollingTreeNodeMac::update):
+        Update the scroll position if it's changed.
+
 2012-04-03  W. James MacLean  <wjmaclean@chromium.org>
 
         [chromium] Switch touchpad fling curve physics to absolute (not scaled) curve.
