@@ -1,3 +1,89 @@
+2012-03-29  Joseph Pecoraro  <joepeck@webkit.org> and Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
+
+        Add Generic HTTP Request Class. Generalized HTTP Parsing.
+        https://bugs.webkit.org/show_bug.cgi?id=73092
+
+        Reviewed by Simon Hausmann.
+
+        A WebSocket server will need to read HTTP Requests before upgrading
+        to WebSocket framing. This patch creates a cross-platform HTTPRequest
+        class. Since some of this was already done in WebSocket code:
+
+          - the header parsing code was extracted and put into HTTPParsers.cpp
+          - WebSocketHandshakeRequest subclasses HTTPRequest
+          - WebSocket code was refactored for these changes
+
+        Refactoring is covered by existing http/tests/websocket tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+
+        * Modules/websockets/WebSocketChannel.cpp:
+        (WebCore::WebSocketChannel::didOpenSocketStream):
+
+          Extract the HTTP Header parsing out of WebSocketHandshake and
+          put it into HTTP Parsers. Now make use of the generic parsing.
+
+        * Modules/websockets/WebSocketHandshake.cpp:
+        (WebCore):
+        (WebCore::trimInputSample):
+        (WebCore::WebSocketHandshake::clientHandshakeRequest): switch to RefCounted HandshakeRequest.
+        (WebCore::WebSocketHandshake::readStatusLine):
+        (WebCore::WebSocketHandshake::readHTTPHeaders): use generic HTTPParsers parsing.
+        * Modules/websockets/WebSocketHandshake.h: switch to RefCounted HandshakeRequest.
+
+          WebSocketHandshakeRequest is a specialization of an HTTPRequest.
+          Much of its original code was abstracted into HTTPRequest, and
+          this is now a subclass with WebSocket key information.
+
+        * Modules/websockets/WebSocketHandshakeRequest.cpp:
+        (WebCore::WebSocketHandshakeRequest::WebSocketHandshakeRequest): initialize now calls super.
+        * Modules/websockets/WebSocketHandshakeRequest.h:
+        (WebCore::WebSocketHandshakeRequest::create): switch to being ref counted like HTTPRequest.
+        (WebSocketHandshakeRequest):
+
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+
+          Add generic HTTP Request parsing functions to HTTPParsers.cpp.
+          Use out parameters to get values after parsing.
+
+        * platform/network/HTTPParsers.cpp:
+        (WebCore):
+        (WebCore::trimInputSample): taken from WebSocket parsing.
+        (WebCore::parseHTTPRequestLine): new code, parse a request line.
+        (WebCore::parseHTTPHeaders): taken from previous WebSocket parsing. Algorithm unchanged.
+        (WebCore::parseHTTPRequestBody): new code, just copy the date into the provided buffer.
+        * platform/network/HTTPParsers.h:
+        (WebCore):
+
+          This adds a general HTTPRequest class. Accessors for the
+          request method, url, httpVersion, headers, and data. You can
+          create an HTTPRequest using the constructor, or parse one
+          from a data buffer, such as one read from a socket.
+
+        * platform/network/HTTPRequest.cpp: Added.
+        (WebCore):
+        (WebCore::HTTPRequest::parseHTTPRequestFromBuffer): create an HTTPRequest by parsing data in a buffer.
+        (WebCore::HTTPRequest::parseRequestLine): helper to initialize members while parsing.
+        (WebCore::HTTPRequest::parseHeaders): helper to initialize members while parsing.
+        (WebCore::HTTPRequest::parseRequestBody): helper to initialize members while parsing.
+        (WebCore::HTTPRequest::HTTPRequest):
+        (WebCore::HTTPRequest::~HTTPRequest):
+        * platform/network/HTTPRequest.h: Added.
+        (WebCore):
+        (HTTPRequest):
+        (WebCore::HTTPRequest::create): create an empty request, or specify details.
+        (WebCore::HTTPRequest::requestMethod):
+        (WebCore::HTTPRequest::setRequestMethod):
+        (WebCore::HTTPRequest::url):
+        (WebCore::HTTPRequest::setURL):
+        (WebCore::HTTPRequest::body):
+        (WebCore::HTTPRequest::headerFields):
+        (WebCore::HTTPRequest::addHeaderField):
+
 2012-04-03  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
 
         [Qt] Add a missing inspector front-end image to resources.
