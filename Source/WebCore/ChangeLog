@@ -1,3 +1,80 @@
+2012-04-03  Levi Weintraub  <leviw@chromium.org>
+
+        Revert RenderTheme paint and layout functions to ints
+        https://bugs.webkit.org/show_bug.cgi?id=82196
+
+        Reviewed by Julien Chaffraix.
+
+        When dealing with object that are rendered outside of WebCore, we do all necessary pixel snapping
+        before passing coordinates to the external code. RenderTheme encompasses a set of objects whose
+        rendering is influenced by the platform. This change reverts the interface between this platform
+        code and WebCore to be integers.
+
+        Some platforms, such as Mac, use sub-pixel units for layout and rendering, but it's still not
+        desirable to pass sub-pixel values to these API's, because ultimately we'll render these objects
+        at whole-pixel values to avoid anti-aliasing.
+
+        Marking touched overridden virtual functions as OVERRIDE. There are many more to update.
+
+        No new tests. No change in behavior.
+
+        * platform/graphics/FractionalLayoutRect.h:
+        (WebCore::FractionalLayoutRect::pixelSnappedLocation): Convenience function.
+        (WebCore::FractionalLayoutRect::pixelSnappedSize): Ditto.
+        (FractionalLayoutRect):
+        * platform/graphics/IntRect.h:
+        (WebCore::IntRect::pixelSnappedLocation): Temporary mirrors to the functions of the same name on
+        FractionalLayoutRect.
+        (WebCore::IntRect::pixelSnappedSize): Ditto.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::paintBoxDecorations): Adding a local pixel snapped paint rect to avoid
+        repeated pixel snapping.
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::absoluteContentBox): Reverting to integers since this represents on-screen
+        coordinates
+        (WebCore::RenderBox::pixelSnappedSize): Convenience method.
+        * rendering/RenderMediaControls.cpp:
+        (WebCore::RenderMediaControls::volumeSliderOffsetFromMuteButton): This static function is only called
+        from RenderTheme platform code. Changing it to operate on pixel snapped values since we don't want
+        to pipe LayoutUnits through that code.
+        * rendering/RenderMeter.cpp:
+        (WebCore::RenderMeter::computeLogicalWidth): Changing to feed pixel snapped values into the platform
+        code to properly determine the resulting meter size.
+        (WebCore::RenderMeter::computeLogicalHeight): Ditto.
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::paint):
+        (WebCore::RenderTheme::volumeSliderOffsetFromMuteButton):
+        (WebCore::RenderTheme::adjustRepaintRect):
+        (WebCore::RenderTheme::meterSizeForBounds):
+        * rendering/RenderTheme.h:
+        (RenderTheme):
+        (WebCore::RenderTheme::paintCapsLockIndicator):
+        * rendering/RenderThemeChromiumMac.h:
+        (RenderThemeChromiumMac):
+        * rendering/RenderThemeChromiumSkia.cpp:
+        (WebCore::RenderThemeChromiumSkia::convertToPaintingRect):
+        (WebCore::RenderThemeChromiumSkia::paintSearchFieldCancelButton):
+        (WebCore::RenderThemeChromiumSkia::paintSearchFieldResultsDecoration):
+        (WebCore::RenderThemeChromiumSkia::paintSearchFieldResultsButton):
+        * rendering/RenderThemeChromiumSkia.h:
+        * rendering/RenderThemeMac.h:
+        (RenderThemeMac):
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::adjustRepaintRect):
+        (WebCore::RenderThemeMac::inflateRect):
+        (WebCore::RenderThemeMac::convertToPaintingRect):
+        (WebCore::RenderThemeMac::setControlSize):
+        (WebCore::RenderThemeMac::paintCapsLockIndicator):
+        (WebCore::RenderThemeMac::paintMenuList):
+        (WebCore::RenderThemeMac::meterSizeForBounds):
+        (WebCore::RenderThemeMac::setPopupButtonCellState):
+        (WebCore::RenderThemeMac::paintSearchFieldCancelButton):
+        (WebCore::RenderThemeMac::volumeSliderOffsetFromMuteButton):
+        * rendering/RenderThemeWin.cpp:
+        (WebCore::RenderThemeWin::volumeSliderOffsetFromMuteButton):
+        * rendering/RenderThemeWin.h:
+        (RenderThemeWin):
+
 2012-03-29  Joseph Pecoraro  <joepeck@webkit.org> and Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
 
         Add a Generic WebSocket Server.
