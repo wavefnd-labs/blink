@@ -1,3 +1,42 @@
+2012-04-01  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
+
+        Expose reusable WebSocket code for WebSocketServer.
+        https://bugs.webkit.org/show_bug.cgi?id=73852
+
+        Reviewed by Kent Tamura.
+
+        Keep the majority the web socket handshake HTTP request and response logic
+        inside WebSocketHandshake and expose it through WebSocketFrame to make it
+        available for the web socket server implementation.
+
+        This also re-add the masking code that was removed in r111829 since it is
+        needed for the server implementation.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/websockets/WebSocketChannel.cpp:
+        (WebCore):
+        (WebCore::WebSocketChannel::processFrame): now using WebSocketChannel::parseFrame. Extracted the !frame.masked check.
+        (WebCore::WebSocketChannel::sendFrame):
+        * Modules/websockets/WebSocketChannel.h:
+        (WebSocketChannel):
+        * Modules/websockets/WebSocketFrame.cpp: Added.
+        (WebCore):
+        (WebCore::WebSocketFrame::needsExtendedLengthField):
+        (WebCore::WebSocketFrame::parseFrame): moved from WebSocketChannel::parseFrame.
+        (WebCore::appendMaskedFramePayload):
+        (WebCore::WebSocketFrame::makeFrameData): moved from makeFrameData in WebSocketChannel.cpp.
+        (WebCore::WebSocketFrame::WebSocketFrame): moved from the header.
+        * Modules/websockets/WebSocketFrame.h:
+        (WebSocketFrame):
+        * Modules/websockets/WebSocketHandshake.cpp:
+        (WebCore::WebSocketHandshake::getExpectedWebSocketAccept): expose this object-static function.
+        * Modules/websockets/WebSocketHandshake.h:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+
 2012-03-29  Joseph Pecoraro  <joepeck@webkit.org> and Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
 
         Add Generic HTTP Request Class. Generalized HTTP Parsing.
