@@ -1,3 +1,151 @@
+2012-04-03  Alexis Menard  <alexis.menard@openbossa.org>
+
+        [Part 2] We should use CSSPropertyID rather than integers when manipulating CSS property ids.
+        https://bugs.webkit.org/show_bug.cgi?id=82977
+
+        Reviewed by Andreas Kling.
+
+        CSSPropertyID enum holds all the CSS property ids but many parts of WebKit treat the ids
+        as integers. While it's not incorrect it is nicer to use the enum as a parameter of
+        functions manipulating property ids, as we ensure that the value passed will be an
+        existing value. Almost everything has been changed with the exception of the Animation related
+        classes which can be done in a following patch.
+
+        No new tests : There should be no behavior change in this patch.
+
+        * WebCore.exp.in:
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::cssText):
+        (WebCore::CSSComputedStyleDeclaration::valueForShadow):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        (WebCore::logUnimplementedPropertyID):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyValue):
+        (WebCore::CSSComputedStyleDeclaration::item):
+        * css/CSSComputedStyleDeclaration.h:
+        (CSSComputedStyleDeclaration):
+        * css/CSSGrammar.y:
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::CSSParser):
+        (WebCore::isColorPropertyID):
+        (WebCore::parseColorValue):
+        (WebCore::isSimpleLengthPropertyID):
+        (WebCore::parseSimpleLengthValue):
+        (WebCore::isValidKeywordPropertyAndValue):
+        (WebCore::isKeywordPropertyID):
+        (WebCore::parseKeywordValue):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::addProperty):
+        (WebCore::CSSParser::parseFillShorthand):
+        (WebCore::CSSParser::parseShorthand):
+        (WebCore::CSSParser::parse4Values):
+        (WebCore::CSSParser::parsePage):
+        (WebCore::CSSParser::parseSize):
+        (WebCore::CSSParser::parseQuotes):
+        (WebCore::CSSParser::parseContent):
+        (WebCore::CSSParser::parseFillSize):
+        (WebCore::CSSParser::parseFillProperty):
+        (WebCore::CSSParser::parseAnimationProperty):
+        (WebCore::CSSParser::parseGridTrackList):
+        (WebCore::CSSParser::parseDashboardRegions):
+        (WebCore::CSSParser::parseClipShape):
+        (WebCore::CSSParser::parseShadow):
+        (WebCore::CSSParser::parseReflect):
+        (WebCore::BorderImageParseContext::commitBorderImageProperty):
+        (WebCore::CSSParser::parseBorderImage):
+        (WebCore::CSSParser::parseBorderImageSlice):
+        (WebCore::CSSParser::parseBorderRadius):
+        (WebCore::CSSParser::parseCounter):
+        (WebCore::CSSParser::parseFlowThread):
+        (WebCore::CSSParser::parseRegionThread):
+        (WebCore::CSSParser::parseTransformOrigin):
+        (WebCore::CSSParser::parsePerspectiveOrigin):
+        * css/CSSParser.h:
+        (CSSParser):
+        (WebCore::ShorthandScope::ShorthandScope):
+        * css/CSSProperty.cpp:
+        (WebCore::resolveToPhysicalProperty):
+        (WebCore::CSSProperty::resolveDirectionAwareProperty):
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/CSSProperty.h:
+        (WebCore::CSSProperty::CSSProperty):
+        (CSSProperty):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::setProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::removeProperty):
+        * css/SVGCSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getSVGPropertyCSSValue):
+        * css/SVGCSSParser.cpp:
+        (WebCore::CSSParser::parseSVGValue):
+        * css/SVGCSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::applySVGProperty):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::getPropertyCSSValue):
+        (WebCore::StylePropertySet::removeShorthandProperty):
+        (WebCore::StylePropertySet::removeProperty):
+        (WebCore::StylePropertySet::setProperty):
+        (WebCore::StylePropertySet::asText):
+        (WebCore::StylePropertySet::findPropertyWithId):
+        (WebCore::StylePropertySet::removeEquivalentProperties):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        * css/StylePropertyShorthand.cpp:
+        (WebCore::shorthandForProperty):
+        * css/StylePropertyShorthand.h:
+        (WebCore):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::setInlineStyleProperty):
+        (WebCore::StyledElement::removeInlineStyleProperty):
+        (WebCore::StyledElement::addPropertyToAttributeStyle):
+        * dom/StyledElement.h:
+        (StyledElement):
+        (WebCore::StyledElement::addPropertyToAttributeStyle):
+        * editing/EditingStyle.cpp:
+        (HTMLElementEquivalent):
+        (WebCore::EditingStyle::EditingStyle):
+        (WebCore::EditingStyle::setProperty):
+        * editing/EditingStyle.h:
+        (WebCore::EditingStyle::create):
+        (EditingStyle):
+        * editing/Editor.cpp:
+        (WebCore::Editor::selectionStartHasStyle):
+        (WebCore::Editor::selectionHasStyle):
+        * editing/Editor.h:
+        (Editor):
+        * editing/EditorCommand.cpp:
+        (WebCore::executeApplyStyle):
+        (WebCore::executeToggleStyleInList):
+        (WebCore::executeToggleStyle):
+        (WebCore::executeApplyParagraphStyle):
+        (WebCore::stateStyle):
+        * editing/markup.cpp:
+        (WebCore):
+        (WebCore::propertyMissingOrEqualToNone):
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::addHTMLLengthToStyle):
+        (WebCore::HTMLElement::addHTMLColorToStyle):
+        * html/HTMLElement.h:
+        (HTMLElement):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyle::styleWithProperties):
+        * page/animation/AnimationBase.cpp:
+        (WebCore::addShorthandProperties):
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::cssPropertyIdForSVGAttributeName):
+        (WebCore::SVGFontFaceElement::parseAttribute):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::mapAttributeToCSSProperty):
+        (WebCore::SVGStyledElement::cssPropertyIdForSVGAttributeName):
+        (WebCore::SVGStyledElement::collectStyleForAttribute):
+        (WebCore::SVGStyledElement::svgAttributeChanged):
+        (WebCore::SVGStyledElement::getPresentationAttribute):
+        * svg/SVGStyledElement.h:
+        (WebCore):
+        (SVGStyledElement):
+
 2012-04-03  Levi Weintraub  <leviw@chromium.org>
 
         Revert RenderTheme paint and layout functions to ints
