@@ -1,3 +1,49 @@
+2012-04-02  Emil A Eklund  <eae@chromium.org>
+
+        Fix usage of LayoutUnits and pixel snapping in RenderLayer
+        https://bugs.webkit.org/show_bug.cgi?id=82498
+
+        Reviewed by Julien Chaffraix.
+
+        Fix usage of subpixel types and snapping/rounding in RenderLayer in
+        preparation for turning on subpixel layout.
+
+        No new tests, no change in functionality.
+
+        * rendering/LayoutTypes.h:
+        (WebCore::pixelSnappedIntSize):
+        Add no-op implementation of pixelSnappedIntSize, will be replaced with a
+        real implementation once we make the switch.
+        
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPosition):
+        Snap RenderBox size when updating the size of the layer.
+        
+        (WebCore::RenderLayer::resize):
+        Round position when setting the inline style during resize operation.
+
+        (WebCore::RenderLayer::scrollCornerRect):
+        Remove unnecessary pixelSnappedIntRect call.
+        
+        (WebCore::RenderLayer::positionOverflowControls):
+        Remove unnecessary pixelSnappedIntRect call.
+        
+        (WebCore::RenderLayer::scrollWidth):
+        (WebCore::RenderLayer::scrollHeight):
+        Fix implementation of scrollWidth and Height to pixel snap the values.
+         
+        (WebCore::RenderLayer::computeScrollDimensions):
+        (WebCore::RenderLayer::paintResizer):
+        (WebCore::RenderLayer::hitTestOverflowControls):
+        Remove unnecessary pixelSnappedIntRect calls.
+        
+        (WebCore::RenderLayer::paintLayerContents):
+        Pixel snap values just before painting (instead of earlier on).
+
+        (WebCore::RenderLayer::hitTest):
+        (WebCore::RenderLayer::hitTestContents):
+        Change to use subpixel types.
+
 2012-04-02  Abhishek Arya  <inferno@chromium.org>
 
         <select> shouldn't intrude as a run-in.
