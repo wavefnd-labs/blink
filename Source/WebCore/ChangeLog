@@ -1,3 +1,27 @@
+2012-04-02  Shinya Kawanaka  <shinyak@chromium.org>
+
+        Remove TreeScope::isShadowRoot.
+        https://bugs.webkit.org/show_bug.cgi?id=82879
+
+        Reviewed by Dimitri Glazkov.
+
+        This patch removes TreeScope::isShadowRoot(). To make code fast, TreeScope::isShadowRoot
+        is implemented in ShadowRoot.h. So when using TreeScope::isShadowRoot(), ShadowRoot.h is
+        always required. In some case,  this might bring unnecessary dependency.
+
+        Since TreeScope::rootNode() is inlined, the overall performance won't change.
+
+        No new tests, simple refactoring.
+
+        * dom/ShadowRoot.h:
+        * dom/TreeScope.h:
+        * html/shadow/HTMLShadowElement.cpp:
+        (WebCore::HTMLShadowElement::doesSelectFromHostChildren):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::attach):
+        (WebCore::InsertionPoint::assignedFrom):
+        (WebCore::InsertionPoint::isShadowBoundary):
+
 2012-04-02  Emil A Eklund  <eae@chromium.org>
 
         Fix usage of LayoutUnits and pixel snapping in RenderLayer
