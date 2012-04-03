@@ -1,3 +1,33 @@
+2012-04-01  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Animate animatedPoints instead of points for SVGPoly*Elements
+        https://bugs.webkit.org/show_bug.cgi?id=82844
+
+        Reviewed by Dirk Schulze.
+
+        When the points attribute of a SVGPoly*Element is animated, we should animate
+        the 'animatedPoints' SVG DOM property, not the 'points' property, which corresponds
+        to the "baseVal". Fix that, now only the 'd' attribute for SVGPathElement is incorrect,
+        everything else is moved to the new animVal concept!
+
+        * svg/SVGAnimatedPointList.cpp:
+        (WebCore::SVGAnimatedPointListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedPointListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedPointListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedPointListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedPointListAnimator::animValDidChange):
+        * svg/SVGAnimatedPointList.h:
+        (SVGAnimatedPointListAnimator):
+        * svg/SVGAnimatedType.cpp:
+        (WebCore::SVGAnimatedType::valueAsString):
+        (WebCore::SVGAnimatedType::setValueAsString):
+        (WebCore::SVGAnimatedType::supportsAnimVal):
+        * svg/SVGPolyElement.cpp:
+        (WebCore::SVGPolyElement::parseAttribute):
+        (WebCore::SVGPolyElement::lookupOrCreatePointsWrapper):
+        (WebCore::SVGPolyElement::points):
+        (WebCore::SVGPolyElement::animatedPoints):
+
 2012-04-03  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Not reviewed. Next chromium build fix, this time for real :-)
