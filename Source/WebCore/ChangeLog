@@ -1,3 +1,107 @@
+2012-04-03  Jia Pu  <jpu@apple.com>
+
+        Rename SpellingCorrectionController to AlternativeTextController.
+        https://bugs.webkit.org/show_bug.cgi?id=82942
+
+        Reviewed by Enrica Casucci.
+
+        No new tests, since there's no change of funcationalities.
+
+        This patch renames SpellingCorrectionController to AlternativeTextController, CorrectionPanelInfo to
+        AlternativeTextInfo, CorrectionPanelInfo::CorretionPanelType to AlternativeTextType, and ReasonForDismissingCorrectionPanel
+        to ReasonForDismissingAlternativeText. All these renaming reflects the fact that this class controls change
+        of text caused by both spell checking and alternative dictation results. It also renames a couple of functions
+        in the original SpellingCorrectionController class for the same reason.
+
+        SpellingCorrectionPanel::replacementString has been replaced by AlternativeTextInfo::details which is an object
+        that can be instantiated with different subclasses.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * editing/AlternativeTextController.cpp: Copied from Source/WebCore/editing/SpellingCorrectionController.cpp.
+        (AutocorrectionAlternativeDetails):
+        (WebCore::AutocorrectionAlternativeDetails::create):
+        (WebCore::AutocorrectionAlternativeDetails::replacementString):
+        (WebCore::AutocorrectionAlternativeDetails::AutocorrectionAlternativeDetails):
+        (WebCore):
+        (WebCore::AlternativeTextController::AlternativeTextController):
+        (WebCore::AlternativeTextController::~AlternativeTextController):
+        (WebCore::AlternativeTextController::startAlternativeTextUITimer):
+        (WebCore::AlternativeTextController::stopAlternativeTextUITimer):
+        (WebCore::AlternativeTextController::stopPendingCorrection):
+        (WebCore::AlternativeTextController::applyPendingCorrection):
+        (WebCore::AlternativeTextController::hasPendingCorrection):
+        (WebCore::AlternativeTextController::isSpellingMarkerAllowed):
+        (WebCore::AlternativeTextController::show):
+        (WebCore::AlternativeTextController::handleCancelOperation):
+        (WebCore::AlternativeTextController::dismiss):
+        (WebCore::AlternativeTextController::dismissSoon):
+        (WebCore::AlternativeTextController::applyAlternativeText):
+        (WebCore::AlternativeTextController::applyAutocorrectionBeforeTypingIfAppropriate):
+        (WebCore::AlternativeTextController::respondToUnappliedSpellCorrection):
+        (WebCore::AlternativeTextController::timerFired):
+        (WebCore::AlternativeTextController::handleAlternativeTextUIResult):
+        (WebCore::AlternativeTextController::isAutomaticSpellingCorrectionEnabled):
+        (WebCore::AlternativeTextController::rootViewRectForRange):
+        (WebCore::AlternativeTextController::respondToChangedSelection):
+        (WebCore::AlternativeTextController::respondToAppliedEditing):
+        (WebCore::AlternativeTextController::respondToUnappliedEditing):
+        (WebCore::AlternativeTextController::client):
+        (WebCore::AlternativeTextController::textChecker):
+        (WebCore::AlternativeTextController::recordAutocorrectionResponseReversed):
+        (WebCore::AlternativeTextController::markReversed):
+        (WebCore::AlternativeTextController::markCorrection):
+        (WebCore::AlternativeTextController::recordSpellcheckerResponseForModifiedCorrection):
+        (WebCore::AlternativeTextController::deletedAutocorrectionAtPosition):
+        (WebCore::AlternativeTextController::markPrecedingWhitespaceForDeletedAutocorrectionAfterCommand):
+        (WebCore::AlternativeTextController::processMarkersOnTextToBeReplacedByResult):
+        * editing/AlternativeTextController.h: Copied from Source/WebCore/editing/SpellingCorrectionController.h.
+        (AlternativeTextDetails):
+        (WebCore::AlternativeTextDetails::AlternativeTextDetails):
+        (WebCore::AlternativeTextDetails::~AlternativeTextDetails):
+        (WebCore):
+        (AlternativeTextInfo):
+        (AlternativeTextController):
+        (WebCore::AlternativeTextController::shouldRemoveMarkersUponEditing):
+        * editing/EditingAllInOne.cpp:
+        * editing/Editor.cpp:
+        (WebCore::Editor::respondToChangedSelection):
+        (WebCore::Editor::appliedEditing):
+        (WebCore::Editor::unappliedEditing):
+        (WebCore::Editor::Editor):
+        (WebCore::Editor::insertTextWithoutSendingTextEvent):
+        (WebCore::Editor::insertLineBreak):
+        (WebCore::Editor::insertParagraphSeparator):
+        (WebCore::Editor::isAutomaticSpellingCorrectionEnabled):
+        (WebCore::Editor::markMisspellingsAfterTypingToWord):
+        (WebCore::Editor::markAllMisspellingsAndBadGrammarInRanges):
+        (WebCore::Editor::markAndReplaceFor):
+        (WebCore::Editor::changeBackToReplacedString):
+        (WebCore::Editor::unappliedSpellCorrection):
+        (WebCore::Editor::updateMarkersForWordsAffectedByEditing):
+        (WebCore::Editor::deletedAutocorrectionAtPosition):
+        (WebCore::Editor::startAlternativeTextUITimer):
+        (WebCore::Editor::handleAlternativeTextUIResult):
+        (WebCore::Editor::dismissCorrectionPanelAsIgnored):
+        * editing/Editor.h:
+        (WebCore):
+        (Editor):
+        * editing/SpellingCorrectionCommand.cpp:
+        * editing/SpellingCorrectionController.cpp: Removed.
+        * editing/SpellingCorrectionController.h: Removed.
+        * editing/TypingCommand.cpp:
+        (WebCore::TypingCommand::markMisspellingsAfterTyping):
+        * loader/EmptyClients.h:
+        (WebCore::EmptyEditorClient::showCorrectionPanel):
+        (WebCore::EmptyEditorClient::dismissCorrectionPanel):
+        (WebCore::EmptyEditorClient::dismissCorrectionPanelSoon):
+        * page/EditorClient.h:
+
 2012-04-03  Adam Barth  <abarth@webkit.org>
 
         Unreviewed. This patch adds an ugly, ugly hack to bandaid over the
