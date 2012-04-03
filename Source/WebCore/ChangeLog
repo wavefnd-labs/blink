@@ -1,3 +1,21 @@
+2012-04-03  Daniel Cheng  <dcheng@chromium.org>
+
+        Having a drop handler prevents navigation on drop even if event is not cancelled
+        https://bugs.webkit.org/show_bug.cgi?id=79172
+
+        Reviewed by Ryosuke Niwa.
+
+        Only early return if the drop handler prevents the default action.
+        http://trac.webkit.org/changeset/105396 introduced this issue when fixing some other aspects
+        of DnD handling.
+
+        Test: fast/events/drop-handler-should-not-stop-navigate.html
+
+        * page/DragController.cpp:
+        (WebCore::DragController::performDrag):
+        (WebCore::DragController::concludeEditDrag): Remove the assert. By definition, we want to
+            allow default actions to run now if they weren't explicitly canceled.
+
 2012-04-03  Erik Arvidsson  <arv@chromium.org>
 
         [v8] Fix memory leak in V8LazyEventListener
