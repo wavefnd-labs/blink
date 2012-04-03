@@ -1,3 +1,65 @@
+2012-04-02  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Remove SkCanvas::LayerIter use from OpaqueRegionSkia
+        https://bugs.webkit.org/show_bug.cgi?id=82564
+
+        Reviewed by Stephen White.
+
+        Per-tile-painting uses an SkPictureRecord in place of an SkCanvas
+        as the painting target for the GraphicsContext. This class only does
+        a simple recording and does not create layers in the canvas during
+        record, only playback. This is preventing us from correctly tracking
+        opaque regions under per-tile-painting.
+
+        We currently use the SkCanvas LayerIter to look at the layers in the
+        canvas backing the GraphicsContext, and check the SkPaints, clips,
+        and transforms to see how they impact the current draw once it reaches
+        the final device.
+
+        The clips and transforms can be retreived without using the LayerIter
+        through the "getTotal*" methods. A cumulative SkPaint is not available
+        so we store this ourselves.
+
+        PlatformContextSkia becomes aware of when saveLayer() is being called
+        on the underlying canvas, and passes this information to the
+        OpaqueRegionSkia class. Since we no longer watch layers in the canvas,
+        we must explicitly handle image clipping for the opaque tracker, as
+        it is implemented in the PlatformContextSkia, not via constructs in
+        the SkCanvas/SkPaint. We save the opaque area of the image mask for
+        the canvas layer in the stack along with the SkPaint for the layer.
+
+        Unit test: PlatformContextSkiaTest.PreserveOpaqueOnlyMattersForFirstLayer
+
+        * platform/graphics/filters/skia/FEGaussianBlurSkia.cpp:
+        (WebCore::FEGaussianBlur::platformApplySkia):
+        * platform/graphics/filters/skia/FEMorphologySkia.cpp:
+        (WebCore::FEMorphology::platformApplySkia):
+        * platform/graphics/skia/GraphicsContextSkia.cpp:
+        (WebCore::GraphicsContext::beginPlatformTransparencyLayer):
+        (WebCore::GraphicsContext::endPlatformTransparencyLayer):
+        * platform/graphics/skia/OpaqueRegionSkia.cpp:
+        (WebCore::OpaqueRegionSkia::pushCanvasLayer):
+        (WebCore):
+        (WebCore::OpaqueRegionSkia::popCanvasLayer):
+        (WebCore::OpaqueRegionSkia::setImageMask):
+        (WebCore::OpaqueRegionSkia::didDrawRect):
+        (WebCore::OpaqueRegionSkia::didDrawPath):
+        (WebCore::OpaqueRegionSkia::didDrawPoints):
+        (WebCore::OpaqueRegionSkia::didDrawBounded):
+        (WebCore::OpaqueRegionSkia::didDraw):
+        (WebCore::OpaqueRegionSkia::didDrawUnbounded):
+        * platform/graphics/skia/OpaqueRegionSkia.h:
+        (OpaqueRegionSkia):
+        (WebCore::OpaqueRegionSkia::CanvasLayerState::CanvasLayerState):
+        (CanvasLayerState):
+        * platform/graphics/skia/PlatformContextSkia.cpp:
+        (WebCore::PlatformContextSkia::saveLayer):
+        (WebCore):
+        (WebCore::PlatformContextSkia::restoreLayer):
+        (WebCore::PlatformContextSkia::beginLayerClippedToImage):
+        * platform/graphics/skia/PlatformContextSkia.h:
+        (PlatformContextSkia):
+
 2012-04-02  Shinya Kawanaka  <shinyak@chromium.org>
 
         Remove TreeScope::isShadowRoot.
