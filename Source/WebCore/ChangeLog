@@ -1,3 +1,39 @@
+2012-04-03  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        presentationAttributeCacheMaximumSize is set too low
+        https://bugs.webkit.org/show_bug.cgi?id=82816
+
+        Reviewed by Antti Koivisto.
+
+        Performance change, no side effects anticipated.
+
+        Prior to r106740, the presentation attribute style cache used to grow unbounded. As part of r110316,
+        a different version of the cache was introduced with a maximum size of 128. This size gave a 75% hit rate.
+
+        However this is bad as the previous cache had a 85% hit rate** and each miss propagate down to the matched
+        properties cache as we use pointer comparisons.
+
+        This change bumps the size to 4096. This size was chosen to bring us back to the previous hit rate while
+        being a power of 2 (it is the HashMap maximum size). The steep increase is due to the combinational compexity
+        of the new cache model: we need to match all our attributes' name, value and tag name to get a hit vs
+        one attribute name, value and a category in the previous cache. To avoid blowing up the memory, we introduced
+        a timer to clear the cache if the hit rate is too low.
+
+        The measured hit rate is actually better now - in the 90% range on most page cyclers. This ups the matched
+        properties hit rate by 1 percent point on presentation attributes.
+
+        ** This is not a true apple-to-apple comparison as the cache model was changed.
+
+        * dom/StyledElement.cpp:
+        (PresentationAttributeCacheCleaner):
+        (WebCore::PresentationAttributeCacheCleaner::PresentationAttributeCacheCleaner):
+        (WebCore::PresentationAttributeCacheCleaner::didHitPresentationAttributeCache):
+        (WebCore::PresentationAttributeCacheCleaner::cleanCache):
+        (WebCore):
+        (WebCore::presentationAttributeCacheCleaner):
+        (WebCore::StyledElement::updateAttributeStyle):
+        Added the logic to clean the presentation attribute cache if we drop below 100 hits per minutes.
+
 2012-04-03  Tony Chang  <tony@chromium.org>
 
         Implement new flex property and deprecate flex function
