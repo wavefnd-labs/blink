@@ -1,3 +1,32 @@
+2012-04-04  Dmitry Lomov  <dslomov@google.com>
+
+        [JSC] ArrayBufferView and its ArrayBuffer are appended to object pool in wrong order
+        https://bugs.webkit.org/show_bug.cgi?id=82090
+        The implementation of structured cloning algorithm (http://www.w3.org/TR/html5/common-dom-interfaces.html#internal-structured-cloning-algorithm)
+        in SerializedScriptValue.cpp assigns numerical identifiers to encontered objects as it traverses
+        the cloned object during serialization.
+        When the cloning encounters an already seen object, it transfers the assigned numerical id
+        instead of cloning the object again. Deserialization process then repeats the process in 
+        the mirror fashion, i.e. on deserializing the object it assigns deserialized object a numeric id and if it
+        deserializes the id it substitutes the perviously deserialized objects. It is critical that serialization and deserialization
+        assigns numeric ids in the same order.
+
+        The bug (discovered by Yong Li) is that when serializing ArrayBufferView, the ids were assigned first to 
+        the ArrayBufferView and then to underlying ArrayBuffer; however on deserialization the ids were assigned another way round.
+
+        This patch fixes that by assigning the id first to ArrayBuffer and then to ArrayBufferView, and adds corresponding test cases.
+
+        Reviewed by Kenneth Russell.
+
+        New test cases added to fast/canvas/web-gl/array-message-passing.html.
+
+        * bindings/js/SerializedScriptValue.cpp:
+        (WebCore::CloneSerializer::checkForDuplicate):
+        (CloneSerializer):
+        (WebCore::CloneSerializer::recordObject):
+        (WebCore::CloneSerializer::startObjectInternal):
+        (WebCore::CloneSerializer::dumpIfTerminal):
+
 2012-04-04  Ian Vollick  <vollick@chromium.org>
 
         [chromium] When setting animation started events, should check the root layer
