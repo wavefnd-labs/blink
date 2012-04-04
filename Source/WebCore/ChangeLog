@@ -1,3 +1,112 @@
+2012-04-03  Adam Barth  <abarth@webkit.org>
+
+        Implement <iframe srcdoc>
+        https://bugs.webkit.org/show_bug.cgi?id=82991
+
+        Reviewed by Sam Weinig.
+
+        This patch implements the <iframe srcdoc> feature. This feature allows
+        authors to easily supply the contents of an iframe without needing to
+        round-trip to the server. Using srcdoc is more convenient than using
+        data URLs because we set a bunch of properties of the child document
+        sensibly. For example, the child inherits the base URL of the parent
+        and the child uses standards mode by default.
+
+        This feature is specified in
+        <http://www.whatwg.org/specs/web-apps/current-work/#attr-iframe-srcdoc>.
+        Although the feature has been in the spec for a while, I'm not aware of
+        any other implementations in major browsers. The srcdoc feature works
+        especially well with the sandbox and seamless attributes. We already
+        implement sandbox and will likely implement seamless soon.
+
+        The srcdoc feature was announced on the webkit-dev mailing list on March 30:
+        https://lists.webkit.org/pipermail/webkit-dev/2012-March/020161.html
+
+        This patch approaches the implementation using SubstituteData, which is
+        a mechanism previously used for error messages and the like. Using
+        SubstituteData has the advantage of not needing to modify the loading
+        or history pipelines at all, making the integration of srcdoc with the
+        rest of WebCore quite smooth.
+
+        This patch encodes the contents of the srcdoc attribute to and from
+        UTF-8 when round-tripping the contents through the loader. In a future
+        patch, I plan to experiment with whether using UTF-16 (or perhaps
+        another encoding) can improve performance. There might also be a way to
+        avoid the memcpy entirely, but these optimizations are best left to
+        followup patches as this patch focuses on the observable behavior of
+        the feature.
+
+        Tests: fast/frames/srcdoc/reloading-a-srcdoc-document-loads-it-again.html
+               fast/frames/srcdoc/setting-src-does-nothing.html
+               fast/frames/srcdoc/setting-srcdoc-reloads-document.html
+               fast/frames/srcdoc/srcdoc-beats-src-dom.html
+               fast/frames/srcdoc/srcdoc-beats-src.html
+               fast/frames/srcdoc/srcdoc-can-be-in-qurks-mode.html
+               fast/frames/srcdoc/srcdoc-can-navigate.html
+               fast/frames/srcdoc/srcdoc-defaults-to-standards-mode.html
+               fast/frames/srcdoc/srcdoc-loads-content.html
+               fast/frames/srcdoc/srcdoc-urls.html
+               http/tests/security/srcdoc-can-access-parent.html
+               http/tests/security/srcdoc-in-sandbox-cannot-access-parent.html
+               http/tests/security/srcdoc-inherits-referrer-for-forms.html
+               http/tests/security/srcdoc-inherits-referrer.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::initSecurityContext):
+            - srcdoc documents need to inherit their security contexts from
+              their parents. We pick this initialization point to inherit the
+              base URL and to set the "srcdoc Document" bit so that everything
+              gets initialized atomically and from precisely the same owner
+              frame.
+        * dom/Document.h:
+        (Document):
+        (WebCore::Document::isSrcdocDocument):
+            - This bit of state is present in the HTML5 spec and is referred to
+              by a number of different requirements in the spec.
+        * html/HTMLAttributeNames.in:
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::parseAttribute):
+        (WebCore::HTMLFrameElementBase::location):
+            - These functions implement the requirement that the srcdoc
+              attribute takes precedence over the src attribute and triggers a
+              load of a document with the URL about:srcdoc.
+        * html/HTMLIFrameElement.idl:
+            - Expose the srcdoc property as a reflection of the DOM attribute.
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::defaultForInitial):
+            - This tweak allows srcdoc documents to use standards mode by
+              default, saving authors from having to include a doctype in each
+              srcdoc document.
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::defaultSubstituteDataForURL):
+            - This function transfers the contents of the srcdoc attribute into
+              the loading pipeline. If the client supplies other
+              SubstituteData, that takes precendence over our "default"
+              SubstituteData.
+        (WebCore::FrameLoader::outgoingReferrer):
+            - This function implements the requirement from the HTML5 spec that
+              srcdoc documents inherit their referrer from their parent
+              document. A recursive implementation might have been more
+              aesthetic but the iterative implementation seemed like a better
+              choice.
+        (WebCore::FrameLoader::shouldTreatURLAsSrcdocDocument):
+            - An about:srcdoc URL only has special meaning when loaded in an
+              iframe with a srcdoc attribute. Otherwise, it's just a normal
+              "about" URL, meaning a blank page.
+        (WebCore::FrameLoader::urlSelected):
+        (WebCore::FrameLoader::submitForm):
+        (WebCore::FrameLoader::loadFrameRequest):
+        (WebCore::FrameLoader::load):
+        (WebCore::FrameLoader::loadWithNavigationAction):
+        (WebCore::FrameLoader::reloadWithOverrideEncoding):
+        (WebCore::FrameLoader::reload):
+        (WebCore::FrameLoader::loadResourceSynchronously):
+            - Update these call sites to call defaultSubstituteDataForURL and
+              outgoingReferrer consistently.
+        * loader/FrameLoader.h:
+        (FrameLoader):
+
 2012-03-29  Geoffrey Garen  <ggaren@apple.com>
 
         First step toward incremental Weak<T> finalization
