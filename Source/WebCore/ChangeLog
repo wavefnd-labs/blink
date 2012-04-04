@@ -1,3 +1,77 @@
+2012-04-04  Erik Arvidsson  <arv@chromium.org>
+
+        [V8] Add a per context data store and use that for caching boiler plates as well as constructor functions
+        https://bugs.webkit.org/show_bug.cgi?id=83093
+
+        Reviewed by Adam Barth.
+
+        This introduces a V8BindingPerContextData class. After creating a new v8::Context we also create a new
+        per context data instance. This instance maintains the boiler plate and constructor caches. V8DOMWrapper
+        now delegates the caching to this new class. Previously the caching was only done in V8DOMWindowShell which
+        made workers and isolated worlds behave slightly different.
+
+        Tests: fast/dom/constructor-proto.html
+               fast/workers/constructor-proto.html
+
+        * WebCore.gypi:
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateConstructorGetter): Renamed getConstructor to constructorForType.
+        * bindings/v8/V8BindingPerContextData.cpp: Added.
+        (WebCore):
+        (WebCore::V8BindingPerContextData::dispose): This clears the persistent handles stored in the maps.
+        (WebCore::V8BindingPerContextData::init): This installs the hidden prototype which is used as the
+        [[Prototype]] for the constructor functions (for HotMail compat).
+        (WebCore::V8BindingPerContextData::createWrapperFromCacheSlowCase): Instantiates a new object and
+        stores it in the boilerplate map, and returns a clone.
+        (WebCore::V8BindingPerContextData::constructorForTypeSlowCase): Creates the function for the constructor
+        and stores it in the constructor map.
+        * bindings/v8/V8BindingPerContextData.h: Added.
+        (WebCore):
+        (V8BindingPerContextData):
+        (WebCore::V8BindingPerContextData::create):
+        (WebCore::V8BindingPerContextData::~V8BindingPerContextData):
+        (WebCore::V8BindingPerContextData::createWrapperFromCache): Checks the cache and clones the wrapper in
+        the cache. If no boiler plate exists one is created and cached.
+        (WebCore::V8BindingPerContextData::constructorForType): If the constructor already exists the cached
+        constructor function is returned, otherwise a new constructor function is created and cached.
+        (WebCore::V8BindingPerContextData::V8BindingPerContextData):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::disposeContextHandles): Clear the per context data when disposing the handles.
+        (WebCore::V8DOMWindowShell::initContextIfNeeded): Create and initialize the per context data.
+        (WebCore::V8DOMWindowShell::installDOMWindow):
+        * bindings/v8/V8DOMWindowShell.h:
+        (V8DOMWindowShell):
+        (WebCore::V8DOMWindowShell::perContextData):
+        * bindings/v8/V8DOMWrapper.cpp:
+        (WebCore::V8DOMWrapper::constructorForType): Static method to get the constructor. The per context data
+        is determined based on the type of the parameters.
+        (WebCore):
+        (WebCore::V8DOMWrapper::perContextData):
+        (WebCore::V8DOMWrapper::instantiateV8Object): Use the per context data to unify the code paths.
+        * bindings/v8/V8DOMWrapper.h:
+        (WebCore):
+        (V8DOMWrapper):
+        * bindings/v8/V8IsolatedContext.cpp:
+        (WebCore::V8IsolatedContext::V8IsolatedContext): Create and initialize the per context data.
+        (WebCore::V8IsolatedContext::destroy): Clear the per context data.
+        * bindings/v8/V8IsolatedContext.h:
+        (WebCore):
+        (WebCore::V8IsolatedContext::perContextData):
+        (V8IsolatedContext):
+        * bindings/v8/V8Proxy.cpp:
+        (WebCore::V8Proxy::retrievePerContextData):
+        (WebCore):
+        * bindings/v8/V8Proxy.h:
+        (WebCore):
+        (V8Proxy):
+        * bindings/v8/WorkerContextExecutionProxy.cpp:
+        (WebCore::WorkerContextExecutionProxy::dispose): Clear the per context data
+        (WebCore::WorkerContextExecutionProxy::initContextIfNeeded): Create and initialize the per context data.
+        * bindings/v8/WorkerContextExecutionProxy.h:
+        (WebCore):
+        (WebCore::WorkerContextExecutionProxy::perContextData):
+        (WorkerContextExecutionProxy):
+
 2012-04-04  Shawn Singh  <shawnsingh@chromium.org>
 
         [chromium] Move recursive renderSurface clearing to CCLayerTreeHostImpl
