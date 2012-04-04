@@ -1,3 +1,39 @@
+2012-04-04  Adam Klein  <adamk@chromium.org>
+
+        Web Inspector: break on DOM node insertion only once per operation, not once per inserted node
+        https://bugs.webkit.org/show_bug.cgi?id=82967
+
+        Reviewed by Ojan Vafai.
+
+        This change affects the case where a DocumentFragment is inserted,
+        rather than a single node. This is most common when using innerHTML:
+        the effect of the change is that inserting, e.g., '<input><input>',
+        the SubtreeModified breakpoint will be hit once, rather than twice
+        (once for each input element). Given that the particular node being
+        inserted wasn't exposed as part of the breakpoint, this seems strictly
+        better.
+
+        Now that the call to willInsertDOMNode is outside the loop, there's
+        not an obvious node to pass in as the new child. Luckily, InspectorDOMDebuggerAgent
+        already ignored that argument, so it's simply been removed from the signature.
+
+        This changes paves the way to do only tree-modification work, and no
+        external notifications, inside the loops in appendChild/insertBefore/replaceChild.
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::insertBefore): Hoisted call to willInsertDOMNode out of loop.
+        (WebCore::ContainerNode::replaceChild): ditto.
+        (WebCore::ContainerNode::appendChild): ditto.
+        * inspector/InspectorDOMDebuggerAgent.cpp:
+        (WebCore::InspectorDOMDebuggerAgent::willInsertDOMNode): Removed first argument (now takes only the parent).
+        * inspector/InspectorDOMDebuggerAgent.h:
+        (InspectorDOMDebuggerAgent):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore::InspectorInstrumentation::willInsertDOMNodeImpl): Removed second argument.
+        * inspector/InspectorInstrumentation.h:
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::willInsertDOMNode): Removed second argument.
+
 2012-04-04  Jeffrey Pfau  <jpfau@apple.com>
 
         Move pending sheet removal from ~HTMLLinkElement to removal from document.
