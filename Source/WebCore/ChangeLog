@@ -1,3 +1,92 @@
+2012-04-04  Alexis Menard  <alexis.menard@openbossa.org>
+
+        Animation related classes should use CSSPropertyID rather than integers when manipulating CSS property ids.
+        https://bugs.webkit.org/show_bug.cgi?id=83050
+
+        Reviewed by Simon Fraser.
+
+        Split the concept of animate none and animate all into a separate function rather than using the property member
+        with some magic value set on it. Make also sure that we use CSSPropertyID all over the place rather than integers.
+        We still have some place where convert from int to CSSPropertyID (mostly due to the fact that we need to make Hash*
+        related classes to handle CSSPropertyID). While refactoring I also removed some dead code.
+
+        No new tests : not behaviour changes intented.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSStyleApplyProperty.cpp:
+        (WebCore::ApplyPropertyAnimation::applyInheritValue):
+        (WebCore::CSSStyleApplyProperty::CSSStyleApplyProperty):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * page/animation/AnimationBase.cpp:
+        (WebCore):
+        (WebCore::PropertyWrapperBase::PropertyWrapperBase):
+        (WebCore::PropertyWrapperBase::property):
+        (PropertyWrapperBase):
+        (WebCore::PropertyWrapperGetter::PropertyWrapperGetter):
+        (WebCore::PropertyWrapper::PropertyWrapper):
+        (WebCore::RefCountedPropertyWrapper::RefCountedPropertyWrapper):
+        (WebCore::StyleImagePropertyWrapper::StyleImagePropertyWrapper):
+        (WebCore::PropertyWrapperColor::PropertyWrapperColor):
+        (WebCore::PropertyWrapperShadow::PropertyWrapperShadow):
+        (WebCore::PropertyWrapperMaybeInvalidColor::PropertyWrapperMaybeInvalidColor):
+        (WebCore::PropertyWrapperVisitedAffectedColor::PropertyWrapperVisitedAffectedColor):
+        (WebCore::FillLayersPropertyWrapper::FillLayersPropertyWrapper):
+        (WebCore::ShorthandPropertyWrapper::ShorthandPropertyWrapper):
+        (WebCore::PropertyWrapperSVGPaint::PropertyWrapperSVGPaint):
+        (WebCore::wrapperForProperty):
+        (WebCore::AnimationBase::propertiesEqual):
+        The code removed here could never be reached. propertiesEqual is used only in CompositeAnimation::updateTransitions and through
+        ImplicitAnimation::isTargetPropertyEqual which is also called in CompositeAnimation. Both calls are protected by an ASSERT in
+        CompositeAnimation:116 where we make sure the property id we're dealing with is a valid property id, therefore prop can't be equal to
+        the old value cAnimateAll or even the new mode concept introduced in that patch can't be AnimateAll.
+        (WebCore::AnimationBase::getPropertyAtIndex):
+        (WebCore::AnimationBase::blendProperties):
+        (WebCore::AnimationBase::animationOfPropertyIsAccelerated):
+        (WebCore::gatherEnclosingShorthandProperties):
+        (WebCore::AnimationBase::animatableShorthandsAffectingProperty):
+        * page/animation/AnimationBase.h:
+        (AnimationBase):
+        * page/animation/CompositeAnimation.cpp:
+        (WebCore::CompositeAnimation::updateTransitions):
+        (WebCore::CompositeAnimation::pauseTransitionAtTime):
+        * page/animation/CompositeAnimation.h:
+        (CompositeAnimation):
+        * page/animation/ImplicitAnimation.cpp:
+        (WebCore::ImplicitAnimation::ImplicitAnimation):
+        (WebCore::ImplicitAnimation::sendTransitionEvent):
+        The check removed is useless as ImplicitAnimation constructor ensure via an ASSERT that the animatingProperty value is a correct and valid
+        property id. Even the old code was ensuring the value of animatingProperty was different from cAnimateAll at construction time. As stated also
+        in CompositeAnimation::updateTransitions and cover by the same ASSERT explained earlier, ImplicitAnimation are constructed for valid property ids.
+        (WebCore::ImplicitAnimation::isTargetPropertyEqual):
+        (WebCore::ImplicitAnimation::blendPropertyValueInStyle):
+        * page/animation/ImplicitAnimation.h:
+        (WebCore::ImplicitAnimation::create):
+        (ImplicitAnimation):
+        * page/animation/KeyframeAnimation.cpp:
+        (WebCore::KeyframeAnimation::animate):
+        (WebCore::KeyframeAnimation::getAnimatedStyle):
+        (WebCore::KeyframeAnimation::timeToNextService):
+        * platform/animation/Animation.cpp:
+        (WebCore::Animation::Animation):
+        (WebCore::Animation::operator=):
+        (WebCore::Animation::animationsMatch):
+        * platform/animation/Animation.h:
+        (WebCore::Animation::property):
+        (WebCore::Animation::animationMode):
+        (WebCore::Animation::setProperty):
+        (WebCore::Animation::setAnimationMode):
+        (Animation):
+        (WebCore::Animation::initialAnimationProperty):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::startTransition):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::transitionForProperty):
+        * rendering/style/RenderStyle.h:
+
 2012-04-04  Emil A Eklund  <eae@chromium.org>
 
         Fix usage of LayoutUnits and snapping for scrolling in RenderBox
