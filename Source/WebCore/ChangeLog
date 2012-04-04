@@ -1,3 +1,87 @@
+2012-04-03  Rafael Weinstein  <rafaelw@chromium.org>
+
+        Use V8 completion callback API to assert that V8RecursionScope is on the stack whenever invoking script
+        https://bugs.webkit.org/show_bug.cgi?id=79131
+
+        Reviewed by Adam Barth.
+
+        End-of-microtask work (cancelling outstanding IDB transactions,
+        delivering DOM mutations) depend on V8RecursionScope being on the
+        stack whenever a call is made into script. V8 provides a completion
+        callback API that could be used to hook these "end-of-microtask"
+        events, but it turns out that WebKit calls into script for various
+        reasons besides running script from the page. For example, constructing
+        wrapper objects from function templates counts as "running script",
+        yet it's not appropriate to run this callback every time a JS wrapper
+        is constructed.
+
+        Instead, this patch makes use of the V8 completion callback mechanism
+        only in debug mode, to assert that either a V8RecursionScope (when
+        calling author script) or a V8RecursionScope::MicrotaskSuppression
+        (when calling non-author script) is on the stack when V8 thinks it's
+        finished executing script. This requires dropping MicrotaskSuppression
+        objects in a bunch of places, most notably the Inspector.
+        Note that in release mode, this class does nothing and thus should be
+        optimized away.
+
+        No new tests. Existing tests have appropriate coverage.
+
+        * Target.pri:
+        * WebCore.gypi:
+        * bindings/v8/DateExtension.cpp:
+        (WebCore::DateExtension::setAllowSleep):
+        * bindings/v8/PageScriptDebugServer.cpp:
+        (WebCore::PageScriptDebugServer::addListener):
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::callFunctionEvenIfScriptDisabled):
+        (WebCore):
+        (WebCore::ScriptController::collectGarbage):
+        * bindings/v8/ScriptController.h:
+        (ScriptController):
+        * bindings/v8/ScriptDebugServer.cpp:
+        (WebCore::ScriptDebugServer::callDebuggerMethod):
+        (WebCore):
+        (WebCore::ScriptDebugServer::pauseOnExceptionsState):
+        (WebCore::ScriptDebugServer::setPauseOnExceptionsState):
+        (WebCore::ScriptDebugServer::stepIntoStatement):
+        (WebCore::ScriptDebugServer::stepOverStatement):
+        (WebCore::ScriptDebugServer::stepOutOfFunction):
+        (WebCore::ScriptDebugServer::setScriptSource):
+        (WebCore::ScriptDebugServer::currentCallFrame):
+        (WebCore::ScriptDebugServer::handleV8DebugEvent):
+        (WebCore::ScriptDebugServer::ensureDebuggerScriptCompiled):
+        * bindings/v8/ScriptDebugServer.h:
+        (ScriptDebugServer):
+        * bindings/v8/ScriptFunctionCall.cpp:
+        (WebCore::ScriptFunctionCall::call):
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::V8BindingPerIsolateData::V8BindingPerIsolateData):
+        * bindings/v8/V8Binding.h:
+        (V8BindingPerIsolateData):
+        (WebCore::V8BindingPerIsolateData::internalScriptRecursionLevel):
+        (WebCore::V8BindingPerIsolateData::incrementInternalScriptRecursionLevel):
+        (WebCore::V8BindingPerIsolateData::decrementInternalScriptRecursionLevel):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        * bindings/v8/V8DOMWrapper.cpp:
+        * bindings/v8/V8LazyEventListener.cpp:
+        (WebCore::V8LazyEventListener::prepareListenerObject):
+        * bindings/v8/V8NPObject.cpp:
+        * bindings/v8/V8RecursionScope.h:
+        (WebCore):
+        (WebCore::V8RecursionScope::recursionLevel):
+        (V8RecursionScope):
+        (WebCore::V8RecursionScope::properlyUsed):
+        (MicrotaskSuppression):
+        (WebCore::V8RecursionScope::MicrotaskSuppression::MicrotaskSuppression):
+        (WebCore::V8RecursionScope::MicrotaskSuppression::~MicrotaskSuppression):
+        * bindings/v8/WorkerContextExecutionProxy.cpp:
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::V8HTMLDocument::WrapInShadowObject):
+        * bindings/v8/custom/V8InjectedScriptManager.cpp:
+        (WebCore::InjectedScriptManager::createInjectedScript):
+        * bindings/v8/custom/V8ScriptProfileCustom.cpp:
+        * bindings/v8/custom/V8ScriptProfileNodeCustom.cpp:
+
 2012-04-03  Anna Cavender  <annacc@chromium.org>
 
         Makes sure m_showingByDefault is set to false when TextTrack.mode is set from JS.
