@@ -1,3 +1,105 @@
+2012-04-04  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Implement animatedPathSegList support for SVGPathElement
+        https://bugs.webkit.org/show_bug.cgi?id=83140
+
+        Reviewed by Zoltan Herczeg.
+
+        Add the last missing piece of animVal support: animations of the SVGPathElement's 'd' attribute
+        should be reflected in the 'animatedPathSegList' not the 'pathSegList'.
+
+        The SVGAnimatedPathAnimator is special as it doesn't operate on the SVGPathSegList types
+        directly, but on the SVGPathByteStreams for performance reasons. The SVGPathSegLists
+        are refcounted and exposed to JS, thus require lots of memory, compared to a simple
+        byte stream, which SVGPathByteStream is. Only build an 'animatedPathSegList' while
+        animating if its actually observed by the bindings, as this operation is heavy.
+
+        This marks the finish of the animVal patch series: no more string round trips during
+        animation. Previously paths were animated as byte streams, then converted to a String
+        passed to pathElement->setAttribute("d", "newString"), parsed again to a byte stream, etc.
+
+        A follow-up patch will remove the last crufts of direct setAttribute() animation.
+
+        Extend all existing animated SVGPathElement tests to cover animatedPathSegList.
+
+        * svg/SVGAnimatedColor.h:
+        (WebCore::SVGAnimatedColorAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedColorAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedColorAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedColorAnimator::animValWillChange):
+        (WebCore::SVGAnimatedColorAnimator::animValDidChange):
+        (SVGAnimatedColorAnimator):
+        * svg/SVGAnimatedPath.cpp:
+        (WebCore::SVGAnimatedPathAnimator::constructFromString):
+        (WebCore::SVGAnimatedPathAnimator::startAnimValAnimation):
+        (WebCore):
+        (WebCore::SVGAnimatedPathAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedPathAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedPathAnimator::animValWillChange):
+        (WebCore::SVGAnimatedPathAnimator::animValDidChange):
+        (WebCore::SVGAnimatedPathAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedPath.h:
+        (SVGAnimatedPathAnimator):
+        * svg/SVGAnimatedType.cpp:
+        (WebCore::SVGAnimatedType::valueAsString):
+        (WebCore::SVGAnimatedType::setValueAsString):
+        (WebCore::SVGAnimatedType::supportsAnimVal):
+        * svg/SVGAnimatedTypeAnimator.h:
+        (SVGAnimatedTypeAnimator):
+        (WebCore::SVGAnimatedTypeAnimator::findAnimatedPropertiesForAttributeName):
+        * svg/SVGPathElement.cpp:
+        (WebCore::SVGPathElement::SVGPathElement):
+        (WebCore::SVGPathElement::getTotalLength):
+        (WebCore::SVGPathElement::getPointAtLength):
+        (WebCore::SVGPathElement::getPathSegAtLength):
+        (WebCore::SVGPathElement::parseAttribute):
+        (WebCore::SVGPathElement::svgAttributeChanged):
+        (WebCore::SVGPathElement::pathByteStream):
+        (WebCore):
+        (WebCore::SVGPathElement::lookupOrCreateDWrapper):
+        (WebCore::SVGPathElement::pathSegList):
+        (WebCore::SVGPathElement::animatedPathSegList):
+        (WebCore::SVGPathElement::pathSegListChanged):
+        * svg/SVGPathElement.h:
+        (WebCore):
+        (SVGPathElement):
+        (WebCore::SVGPathElement::isAnimValObserved):
+        * svg/SVGPathParserFactory.cpp:
+        (WebCore::SVGPathParserFactory::buildSVGPathByteStreamFromSVGPathSegList):
+        (WebCore::SVGPathParserFactory::buildSVGPathByteStreamFromString):
+        (WebCore::SVGPathParserFactory::buildAnimatedSVGPathByteStream):
+        * svg/SVGPathParserFactory.h:
+        (SVGPathParserFactory):
+        * svg/SVGPathSegWithContext.h:
+        * svg/properties/SVGAnimatedListPropertyTearOff.h:
+        (SVGAnimatedListPropertyTearOff):
+        (WebCore::SVGAnimatedListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedListPropertyTearOff::animVal):
+        (WebCore::SVGAnimatedListPropertyTearOff::removeItemFromList):
+        (WebCore::SVGAnimatedListPropertyTearOff::detachListWrappers):
+        (WebCore::SVGAnimatedListPropertyTearOff::currentAnimatedValue):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedListPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedListPropertyTearOff::synchronizeWrappersIfNeeded):
+        * svg/properties/SVGAnimatedPathSegListPropertyTearOff.h:
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::animVal):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::removeItemFromList):
+        (SVGAnimatedPathSegListPropertyTearOff):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::animationStarted):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::animValDidChange):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::animatedPathByteStream):
+        (WebCore::SVGAnimatedPathSegListPropertyTearOff::SVGAnimatedPathSegListPropertyTearOff):
+        * svg/properties/SVGAnimatedTransformListPropertyTearOff.h:
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::baseVal):
+        (WebCore::SVGAnimatedTransformListPropertyTearOff::animVal):
+        * svg/properties/SVGListProperty.h:
+        (WebCore::SVGListProperty::setValuesAndWrappers):
+        (WebCore::SVGListProperty::SVGListProperty):
+        (WebCore::SVGListProperty::~SVGListProperty):
+        (SVGListProperty):
+
 2012-04-04  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
 
         Best zoomable area does not balance intersection with target area.
