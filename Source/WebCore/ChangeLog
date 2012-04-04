@@ -1,3 +1,32 @@
+2012-03-29  Geoffrey Garen  <ggaren@apple.com>
+
+        First step toward incremental Weak<T> finalization
+        https://bugs.webkit.org/show_bug.cgi?id=82670
+
+        Reviewed by Filip Pizlo.
+
+        Updated WebCore for Weak<T> API changes.
+
+        * bindings/js/DOMWrapperWorld.cpp:
+        (WebCore::JSStringOwner::finalize): We're not allowed to get() a dead Weak<T>
+        anymore, so use the debug-only was() helper function instead.
+
+        * bindings/js/JSDOMBinding.h:
+        (WebCore::uncacheWrapper): Ditto.
+
+        * bindings/js/JSNodeCustom.h:
+        (WebCore::setInlineCachedWrapper):
+        (WebCore::clearInlineCachedWrapper): We're not allowed to get() a dead
+        Weak<T>, so I had to push down these ASSERTs into ScriptWrappable.
+
+        * bindings/js/JSNodeFilterCondition.cpp:
+        (WebCore::JSNodeFilterCondition::acceptNode): Updated for non-Handle-ness
+        of Weak<T>.
+
+        * bindings/js/ScriptWrappable.h:
+        (WebCore::ScriptWrappable::setWrapper):
+        (WebCore::ScriptWrappable::clearWrapper): Use was(), as above.
+
 2012-04-03  Luke Macpherson  <macpherson@chromium.org>
 
         Don't parse "show" and "hide" as valid values for display property.
