@@ -1,3 +1,24 @@
+2012-04-04  Tom Sepez  <tsepez@chromium.org>
+
+        XSSAuditor bypass through HTTP Parameter Pollution.
+        https://bugs.webkit.org/show_bug.cgi?id=81283
+
+        Reviewed by Adam Barth.
+
+        Deal with concatenation of multiple parameters via comma-splicing that 
+        is common to some webservers. We can no longer trust that all of the 
+        attributes of a reflected script tag, nor the reflected script itself,
+        came from the same single URL parameter. The fix is to take commas into
+        account when trucating the snippet used for matching.
+        
+        Test: http/tests/security/xssAuditor/script-tag-with-comma.html
+
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::filterScriptToken):
+        (WebCore):
+        (WebCore::XSSAuditor::decodedSnippetForName):
+        (WebCore::XSSAuditor::decodedSnippetForJavaScript):
+
 2012-04-04  Dan Bernstein  <mitz@apple.com>
 
         Paginated webviews render nothing in their gutters
