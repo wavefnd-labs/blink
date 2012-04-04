@@ -1,3 +1,25 @@
+2012-04-03  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [Chromium] Out-of-process font loading garbles text
+        https://bugs.webkit.org/show_bug.cgi?id=83002
+
+        Reviewed by Kent Tamura.
+
+        Initialize m_CTFont by using m_cgFont in FontPlatformData when we use
+        out-of-process font loading.
+
+        No new tests. This problem only occurs when the user uses a third party
+        font management software like Font Explorer so it is difficult to add
+        tests.
+
+        * platform/graphics/chromium/CrossProcessFontLoading.mm:
+        (WebCore):
+        (WebCore::FontPlatformData::loadFont): If font loading fails, set null to outNSFont so that the FontPlatformData won't be used.
+        * platform/graphics/cocoa/FontPlatformDataCocoa.mm:
+        (WebCore::FontPlatformData::ctFont): Modified to return the appropriate NSFont object when the font from the browser process.
+        * platform/graphics/mac/FontCacheMac.mm:
+        (WebCore::FontCache::createFontPlatformData): Returns null when the generated FontPlatformData object doesn't have NSFont object.
+
 2012-04-03  Hironori Bono  <hbono@chromium.org>
 
         Prevent spellchecking text pasted to an element having spellchecking disabled
