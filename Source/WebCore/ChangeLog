@@ -1,5 +1,56 @@
 2012-04-04  Emil A Eklund  <eae@chromium.org>
 
+        Fix types for location, size and rect calculations for render objects
+        https://bugs.webkit.org/show_bug.cgi?id=83089
+
+        Reviewed by Eric Seidel.
+
+        Fix usage of LayoutUnits and rounding for a couple of different render
+        object classes.
+
+        No new tests, no change in functionality.
+
+        * rendering/RenderDetailsMarker.cpp:
+        (WebCore::RenderDetailsMarker::getPath):
+        Change getPath to take a LayoutPoint as the transform has subpixel
+        precision already.
+        
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::computeLogicalHeight):
+        Change logicalHeight to LayoutUnit as it is computed from subpixel
+        values.
+        
+        * rendering/RenderInputSpeech.cpp:
+        (WebCore::RenderInputSpeech::paintInputFieldSpeechButton):
+        Change button rect computation to LayoutRect and pixel snap just before
+        painting to preserve precision.
+        
+        * rendering/RenderLineBoxList.cpp:
+        (WebCore::RenderLineBoxList::rangeIntersectsRect):
+        (WebCore::RenderLineBoxList::lineIntersectsDirtyRect):
+        (WebCore::RenderLineBoxList::paint):
+        Change range calculations to LayoutUnits to preserve precision.
+        
+        * rendering/RenderMarquee.cpp:
+        (WebCore::RenderMarquee::computePosition):
+        Change width calculations to LayoutUnits to preserve precision.
+        
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::layoutCaption):
+        Change table captions to LayoutUnits as the values are computed from
+        subpixel componenets.
+        
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::getRoundedBorderFor):
+        Snap border rect as RoundedRects use ints for crisp rendering.
+        
+        * rendering/style/ShadowData.cpp:
+        (WebCore::ShadowData::adjustRectForShadow):
+        Change adjustRectForShadow to take a LayoutRect as it already uses
+        LayoutUnits.
+        
+2012-04-04  Emil A Eklund  <eae@chromium.org>
+
         Convert RootInlineBox to LayoutUnits in preparation for turning on subpixel layout
         https://bugs.webkit.org/show_bug.cgi?id=83054
 
