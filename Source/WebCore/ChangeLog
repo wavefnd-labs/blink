@@ -1,5 +1,46 @@
 2012-04-04  Emil A Eklund  <eae@chromium.org>
 
+        Fix usage of LayoutUnits and snapping for scrolling in RenderBox
+        https://bugs.webkit.org/show_bug.cgi?id=83073
+
+        Reviewed by Eric Seidel.
+
+        Fix usage of LayoutUnits and snapping/rounding logic in RenderBox.
+
+        No new tests, no change in functionality.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::scrollWidth):
+        Change scrollWidth to properly pixel snap values.
+        
+        (WebCore::RenderBox::scrollHeight):
+        Change scrollHeight to properly pixel snap values.
+        
+        (WebCore::RenderBox::scrolledContentOffset):
+        Change to return IntSize to match function definition.
+        
+        (WebCore::RenderBox::cachedSizeForOverflowClip):
+        Changed cachedSizeForOverflowClip to LayoutSize as the overflow and clip
+        rects all have subpixel precision.
+
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::pixelSnappedWidth):
+        (WebCore::RenderBox::pixelSnappedHeight):
+        Removed FIXME comment as the implementation 
+        
+        (WebCore::RenderBox::minYLayoutOverflow):
+        (WebCore::RenderBox::maxYLayoutOverflow):
+        (WebCore::RenderBox::minXLayoutOverflow):
+        (WebCore::RenderBox::maxXLayoutOverflow):
+        Added static_cast for border values.
+        
+        (WebCore::RenderBox::hasVisualOverflow):
+        Changed to compare two pixel snapped values as we don't want to indicate
+        overflow in cases where the the size is rounded down resulting in no
+        visual overflow.
+
+2012-04-04  Emil A Eklund  <eae@chromium.org>
+
         Fix types for location, size and rect calculations for render objects
         https://bugs.webkit.org/show_bug.cgi?id=83089
 
