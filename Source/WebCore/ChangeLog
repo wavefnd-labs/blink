@@ -1,3 +1,24 @@
+2012-04-04  Adam Barth  <abarth@webkit.org>
+
+        XSSAuditor doesn't catch injected srcdoc attributes
+        https://bugs.webkit.org/show_bug.cgi?id=83238
+
+        Reviewed by Daniel Bates.
+
+        <iframe srcdoc> is an XSS injection vector because the srcdoc inherits
+        the security origin of the parent page.  This patch updates the XSS
+        auditor to check whether the attribute is injected using the same
+        hueristics we use for inline event handlers.
+
+        Test: http/tests/security/xssAuditor/iframe-srcdoc.html
+
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::filterIframeToken):
+        (WebCore::XSSAuditor::eraseDangerousAttributesIfInjected):
+        (WebCore::XSSAuditor::eraseAttributeIfInjected):
+        (WebCore::XSSAuditor::decodedSnippetForAttribute):
+        * html/parser/XSSAuditor.h:
+
 2012-04-04  Leo Yang  <leo.yang@torchmobile.com.cn>
 
         [BlackBerry] Add local: protocol support in KURL for blackberry
