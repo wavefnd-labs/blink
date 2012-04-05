@@ -1,3 +1,47 @@
+2012-03-14  Antonio Gomes  <agomes@rim.com>
+
+        Extend HitTestResult to support not "discarding" shadow content in favor of its DOM ancestor
+        https://bugs.webkit.org/show_bug.cgi?id=80847
+
+        Reviewed by David Hyatt.
+
+        In order to improve touch precision on shadow tree content, patch
+        extends the rect-hittest'ing system to allow shadow content
+        to be stored as the rect-hittest result node list.
+
+        Primary use cases are for this extension is making it easier to
+        improve the clickability of default controls of <video> and <audio>
+        elements.
+
+        For the callee site, the use is simple: if shadow content in the rect-hittest
+        result is desired, just add an extra 'AllowShadowContent' parameter at the creation
+        of the HitTestResult object.
+
+        Test: fast/dom/nodesFromRect-shadowContent.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::nodesFromRect):
+        * dom/Document.h:
+        (Document):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::hitTestResultAtPoint):
+        * rendering/HitTestResult.cpp:
+        (WebCore::HitTestResult::HitTestResult):
+        (WebCore::HitTestResult::addNodeToRectBasedTestResult):
+        * rendering/HitTestResult.h:
+        (HitTestResult):
+        (WebCore::HitTestResult::shadowContentFilterPolicy):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::nodeAtPoint):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::hitTestLayer):
+        (WebCore::RenderLayer::hitTestList):
+        * testing/Internals.cpp:
+        (WebCore::Internals::nodesFromRect):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-04-05  Hans Muller  <hmuller@adobe.com>
 
         Rename CSS Exclusions "rect" value to "rectangle"
