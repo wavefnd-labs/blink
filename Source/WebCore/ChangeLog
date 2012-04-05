@@ -1,3 +1,27 @@
+2012-04-05  Stephen Chenney  <schenney@chromium.org>
+
+        REGRESSION(99539): Infinite repaint loop with SVGImage and deferred repaint timers
+        https://bugs.webkit.org/show_bug.cgi?id=78315
+
+        Reviewed by Dimitri Glazkov.
+
+        The existing fix for this issue was failing to check if the frameView object
+        was currently _in_ layout, in addition to whether it needs layout. Calling the
+        redraw method while in layout leads to a debug assertion and potential infinite
+        layout loops. Now we check whether we need layout or are in layout. We also add
+        a check when the repaint timer fires to ensure we do not call redraw during layout
+        at that point.
+
+        This patch was tested with tens of thousands of runs on layout test cases that
+        previously crashed at a rate of about 1 in 25. Now we see no crashes and no test
+        failures.
+
+        No new tests, as this exists to fix flaky existing tests.
+
+        * svg/graphics/SVGImageCache.cpp:
+        (WebCore::SVGImageCache::imageContentChanged):
+        (WebCore::SVGImageCache::redrawTimerFired):
+
 2012-04-05  Keishi Hattori  <keishi@webkit.org>
 
         Hide datalist element
