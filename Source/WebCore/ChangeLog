@@ -1,3 +1,24 @@
+2012-04-05  Brady Eidson  <beidson@apple.com>
+
+        <rdar://problem/9359029> and https://bugs.webkit.org/show_bug.cgi?id=83311
+        Crashes in WebProcess at WebCore::HistoryController::recursiveSetProvisionalItem when restoring previous session
+
+        Reviewed by Sam Weinig.
+
+        It's possible to hit a race condition between the UIProcess and the WebProcess where the UIProcess records for a 
+        page have been cleared out but the WebProcess is still trying to perform a history navigation within that page.
+        
+        In this situation HistoryController code that expects there to always be a current history item in the back/forward
+        controller is wrong.
+
+        No new tests. (The race conditions involved have proven making a test impractical)
+
+        * loader/HistoryController.cpp:
+        (WebCore::HistoryController::recursiveSetProvisionalItem): Don't ASSERT the fromItem. We now know there might not be one.
+        (WebCore::HistoryController::recursiveGoToItem): Ditto
+        (WebCore::HistoryController::itemsAreClones): Always return false if either item is null, as a null item and a non-null
+          item cannot possible be clones of each other.
+
 2012-04-05  Adam Klein  <adamk@chromium.org>
 
         Crash in MutationObservers due to an invalid HashSet iterator
