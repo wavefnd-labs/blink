@@ -1,3 +1,59 @@
+2012-04-04  Adam Klein  <adamk@chromium.org>
+
+        Delay post-insertion notifications until new DOM tree is complete
+        https://bugs.webkit.org/show_bug.cgi?id=82631
+
+        Reviewed by Ojan Vafai.
+
+        When inserting a DocumentFragment, WebKit previously would update both
+        internal WebCore state and mutation event listeners after each node
+        was inserted. This is inconsistent not only with DOM4, but also
+        with (at least) Firefox and IE. Given the many bugs over the years in
+        WebKit due to this behavior, it seems better to delay notification
+        until the fragment is completely inserted.
+
+        The changes to the three core mutation methods below are similar:
+        the only logic remaining in the loop is checking that insertion is
+        possible and taking care of that insertion. The entire loop is then
+        wrapped in forbidEventDispatch/allowEventDispatch, effectively
+        asserting that none of the code inside will have side effects.
+
+        The one bit of logic added to the loop is resizing the targets
+        vector down to the set of nodes actually inserted as part of the
+        loop. This makes it possible to simply pass the vector on to
+        notifyChildrenInserted without having to also pass along a count of
+        actually-inserted nodes.
+
+        As for the code that used to live inside the loop that could have
+        side-effects, or depended on those side-effects, it has been moved
+        out, either above (the check that the refChild is still valid in
+        insertBefore) or after (the calls to notifyChildrenInserted).
+
+        Finally, it was necessary to retrofit ChildListMutationScope to take a
+        vector of added nodes instead of a single node at a time, due to the
+        assertions in isAddedNodeInOrder (now renamed to be plural). Note that
+        there is now a single call to ChildListMutationScope::childrenAdded,
+        inside notifyChildrenInserted.
+
+        Test: fast/events/domnodeinserted-entire-fragment.html
+
+        * dom/ChildListMutationScope.cpp:
+        (ChildListMutationScope::MutationAccumulator): Renamed method to be plural.
+        (WebCore::ChildListMutationScope::MutationAccumulator::areAddedNodesInOrder): Handle a NodeVector instead of a Node.
+        (WebCore::ChildListMutationScope::MutationAccumulator::childrenAdded): Handle adding a NodeVector instead of a Node.
+        (WebCore::ChildListMutationScope::MutationAccumulationRouter::childrenAdded): Renamed to be plural, pass NodeVector through.
+        * dom/ChildListMutationScope.h:
+        (WebCore::ChildListMutationScope::childrenAdded): ditto.
+        (MutationAccumulationRouter):
+        * dom/ContainerNode.cpp:
+        (WebCore): Renamed updateTreeAfterInsertion to notifyChildrenInserted.
+        (WebCore::ContainerNode::insertBefore): See main ChangeLog explanation.
+        (WebCore::ContainerNode::replaceChild): ditto.
+        (WebCore::ContainerNode::appendChild): ditto.
+        (WebCore::dispatchChildInsertionEvents): Remove MutationObserver handling.
+        (WebCore::notifyChildrenInserted): Handle a NodeVector of all inserted children,
+        and take on responsiblity for MutationObserver handling as well as dispatchSubtreeModifiedEvent.
+
 2012-04-04  Chris Rogers  <crogers@google.com>
 
         RealtimeAnalyserNode should support smaller analysis sizes
