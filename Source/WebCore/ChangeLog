@@ -1,3 +1,28 @@
+2012-04-05  Levi Weintraub  <leviw@chromium.org>
+
+        DOM measurement APIs should operate on pixel snapped values.
+        https://bugs.webkit.org/show_bug.cgi?id=83138
+
+        Reviewed by Julien Chaffraix.
+
+        DOM measurement APIs return unscaled integers. In an effort to return the best possible values (and
+        most consistent with current behavior) when we use sub-pixel values for Layout, we want to adjust
+        the actual on-screen position and size values for scaling, not the sub-pixel values.
+
+        No new tests. No change in behavior.
+
+        * dom/Element.cpp:
+        (WebCore::adjustForLocalZoom): Needs to return an integer, since this is what the DOM API calls for.
+        (WebCore::Element::offsetWidth): Using pixel snapped values for all the following functions.
+        (WebCore::Element::offsetHeight):
+        (WebCore::Element::clientLeft):
+        (WebCore::Element::clientTop):
+        (WebCore::Element::clientWidth):
+        (WebCore::Element::clientHeight):
+        * html/HTMLImageElement.cpp:
+        (WebCore::HTMLImageElement::width):
+        (WebCore::HTMLImageElement::height):
+
 2012-04-05  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: add ability to copy resource URL from web inspector's resources page.
