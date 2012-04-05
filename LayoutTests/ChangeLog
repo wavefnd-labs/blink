@@ -1,3 +1,22 @@
+2012-04-05  ChangSeok Oh  <shivamidow@gmail.com>
+
+        [GTK][DRT] Fail fast/filesystem/flags-passing.html on JSC
+        https://bugs.webkit.org/show_bug.cgi?id=83137
+
+        Reviewed by Kentaro Hara.
+
+        fast/filesystem/flags-passing.html is failed on webkitgtk+ applied FileSystem API patch
+        for bug58443. 'testsList' is a global array object, but it's accessed in runNextTest
+        function object like this, "this[testsList[testCounter++]]();". I'm not familiar
+        with JavaScript and V8, but in my understanding, it looks a bit strange.
+        'this' in the statement means runNextTest function object which doesn't have
+        testList array object. (It's a global scope variable.) This test might be able to
+        pass on V8 JS engine, but not on JSC at least my try.
+        'testsList' is changed from a function name array to a function array.
+
+        * fast/filesystem/script-tests/flags-passing.js:
+        (runNextTest):
+
 2012-04-05  Philippe Normand  <pnormand@igalia.com>
 
         Unreviewed, GTK test_expectations update after r113292.
