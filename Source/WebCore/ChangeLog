@@ -1,3 +1,30 @@
+2012-04-05  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Disable paintingGoesToWindow() for the root layer when forced compositing mode is active
+        https://bugs.webkit.org/show_bug.cgi?id=83127
+
+        Reviewed by Rob Buis.
+
+        RIM PR: 136381
+        The BlackBerry port will use accelerated compositing code path to
+        render the root layer in some situations.
+
+        The plan is to do this by activating the "force compositing mode"
+        setting, but that in itself doesn't get us all the way, since painting
+        will still go to window for the root layer.
+
+        Fixed by adding a special clause in
+        RenderLayerBacking::paintingGoesToWindow() for PLATFORM(BLACKBERRY).
+
+        No new tests, this is currently not testable with the BlackBerry WebKit
+        testing infrastructure.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::paintingGoesToWindow):
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+        (WebCore::RenderLayerCompositor::inForcedCompositingMode): Added.
+
 2012-04-05  Stephen Chenney  <schenney@chromium.org>
 
         REGRESSION(99539): Infinite repaint loop with SVGImage and deferred repaint timers
