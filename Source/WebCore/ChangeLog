@@ -1,3 +1,51 @@
+2012-04-05  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Record the number of tiles paint-culled instead of the incorrect number of pixels
+        https://bugs.webkit.org/show_bug.cgi?id=82423
+
+        Reviewed by Adrienne Walker.
+
+        We currently attempt to record the number of pixels we save from uploading,
+        however the number is wrong in two ways.
+        1) An early-out if everything is culled results in nothing being reported.
+        2) With threaded-compositor, the number of pixels uploaded in one tile can be
+        changed by culling in another tile, making the number far too difficult to
+        compute to be worthwhile. If a tile was going to be partial-updated, but is
+        culled, now a new tile gets to be partial-updated instead, which affects the
+        numbers.
+
+        This patch breaks up CCOverdrawMetrics to make the methods/variables less
+        overloaded and more clear. This way they don't have to mirror each other
+        so closely on paint/draw sides.
+
+        Then we record the number of tiles for which we prevented upload via paint
+        culling. This will still over-report (a dirty culled tile stays dirty and
+        will be culled again each commit), but it seems more reasonable as it
+        clearly does not try to mimic a performance metric in the way that a pixel
+        count does, but still gives a rough estimation of the amount of paint
+        culling going on in a page.
+
+        Covered by existing tests, modified where needed.
+
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::TiledLayerChromium::prepareToUpdateTiles):
+        * platform/graphics/chromium/cc/CCOverdrawMetrics.cpp:
+        (WebCore::CCOverdrawMetrics::CCOverdrawMetrics):
+        (WebCore::CCOverdrawMetrics::didCullTileForUpload):
+        (WebCore):
+        (WebCore::CCOverdrawMetrics::didUpload):
+        (WebCore::CCOverdrawMetrics::didCullForDrawing):
+        (WebCore::CCOverdrawMetrics::recordMetrics):
+        (WebCore::CCOverdrawMetrics::recordMetricsInternal):
+        * platform/graphics/chromium/cc/CCOverdrawMetrics.h:
+        (CCOverdrawMetrics):
+        (WebCore::CCOverdrawMetrics::pixelsCulledForDrawing):
+        (WebCore::CCOverdrawMetrics::pixelsUploadedOpaque):
+        (WebCore::CCOverdrawMetrics::pixelsUploadedTranslucent):
+        (WebCore::CCOverdrawMetrics::tilesCulledForUpload):
+        * platform/graphics/chromium/cc/CCQuadCuller.cpp:
+        (WebCore::CCQuadCuller::append):
+
 2012-04-05  Enrica Casucci  <enrica@apple.com>
 
         Provide a separate editing command to cleanup of redundant markup.
