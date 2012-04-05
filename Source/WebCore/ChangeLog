@@ -1,3 +1,43 @@
+2012-04-05  Zan Dobersek  <zandobersek@gmail.com>
+
+        media/track/track-webvtt-tc004-magic-header.html flakily times out
+        https://bugs.webkit.org/show_bug.cgi?id=72279
+
+        Reviewed by Eric Carlson.
+
+        Move all the checking for the WebVTT file identifier from TextTrackLoader
+        to WebVTTParser, notifying the parser clients of parsing failures through
+        a new method. Remove the WebVTTParser::fileIdentifierMaximumLength method
+        and make WebVTTParser::hasRequiredFileIdentifier private. The latter now
+        operates on a vector holding the identifier data to which data is added
+        until there's enough of it to possibly hold the optional BOM character
+        and the required WEBVTT character sequence.
+
+        No new tests. Fixes an existing test.
+
+        * html/track/WebVTTParser.cpp: Fix a typo throughout the file:
+        fileIdentiferLength -> fileIdentifierLength
+        (WebCore):
+        (WebCore::WebVTTParser::parseBytes): Only continue with searcing for
+        the WEBVTT identifier if there's enough data to possibly contain the
+        identifier. Report that the file failed to parse if the identifier
+        was then not found.
+        (WebCore::WebVTTParser::hasRequiredFileIdentifier): Refactor to operate
+        on the vector containing identifier data and merge with the
+        hasLongWebVTTIdentifier function.
+        * html/track/WebVTTParser.h:
+        (WebVTTParserClient): Add a new method.
+        (WebVTTParser):
+        * loader/TextTrackLoader.cpp:
+        (WebCore::TextTrackLoader::processNewCueData): Parser is now created
+        immediately regardless of the mime type the response holds.
+        (WebCore::TextTrackLoader::fileFailedToParse): Log the error, set the
+        state to failed, start the cue load timer and cancel the load if the file
+        was not parsed successfully.
+        (WebCore):
+        * loader/TextTrackLoader.h:
+        (TextTrackLoader):
+
 2012-04-05  Shawn Singh  <shawnsingh@chromium.org>
 
         [chromium] Need to clip to homogeneous w=0 plane when applying transforms.
