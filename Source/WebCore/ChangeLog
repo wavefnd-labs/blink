@@ -1,3 +1,52 @@
+2012-04-04  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        RenderLayer scrollbars' updates should be split between layout induced and style change induced
+        https://bugs.webkit.org/show_bug.cgi?id=83213
+
+        Reviewed by Simon Fraser.
+
+        Refactoring only, no change in behavior.
+
+        This patches splits up the 2 reasons for modifying the scrollbars:
+        - style updates, handled in updateScrollbarsAfterStyleChange.
+        - layout time, handled in updateScrollbarsAfterLayout.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::contentsSize):
+        Removed now unneeded const-casts.
+
+        (WebCore::RenderLayer::setHasHorizontalScrollbar):
+        (WebCore::RenderLayer::setHasVerticalScrollbar):
+        Updated to use hasHorizontalScrollbar / hasVerticalScrollbar.
+
+        (WebCore::RenderLayer::scrollWidth):
+        (WebCore::RenderLayer::scrollHeight):
+        Made those functions |const|.
+
+        (WebCore::RenderLayer::computeScrollDimensions):
+        Removed the unneeded booleans and move the do-we-have-overflow-logic
+        into hasHorizontalOverflow and hasVerticalOverflow.
+
+        (WebCore::RenderLayer::hasHorizontalOverflow):
+        (WebCore::RenderLayer::hasVerticalOverflow):
+        Added those new helper functions.
+
+        (WebCore::RenderLayer::updateScrollbarsAfterLayout):
+        (WebCore::RenderLayer::updateScrollInfoAfterLayout):
+        Updated the latter to call the former.
+
+        (WebCore::RenderLayer::updateScrollbarsAfterStyleChange):
+        (WebCore::RenderLayer::styleChanged):
+        Ditto.
+
+        (WebCore::overflowCanHaveAScrollbar):
+        Add this helper function for updateScrollbarsAfterStyleChange.
+
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::hasHorizontalScrollbar):
+        (WebCore::RenderLayer::hasVerticalScrollbar):
+        Added those 2 new helper functions.
+
 2012-04-04  Andrei Burago  <aburago@chromium.org>
 
         Auto-size may not work on first load
