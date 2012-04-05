@@ -1,3 +1,55 @@
+2012-04-05  Jia Pu  <jpu@apple.com>
+
+        Move correction panel related functions from EditorClient into separated AlternativeTextClient class.
+        https://bugs.webkit.org/show_bug.cgi?id=82970
+
+        Reviewed by Enrica Casucci.
+
+        No new tests, since there's no change of functionality.
+
+        The existing correction panel related functions in EditorClient are currently used only by OS X.
+        We'd like to move them into separate AlternativeTextClient class to avoid using #ifdef's. This
+        new client class will also hold dictation alternative related interface that we will add soon for
+        bug 82503.
+
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * editing/AlternativeTextController.cpp: Changes in this file are all for calling functions in
+          AlternativeTextClient instead of those in EditoClient.
+        (WebCore::AlternativeTextController::show):
+        (WebCore::AlternativeTextController::dismiss):
+        (WebCore::AlternativeTextController::dismissSoon):
+        (WebCore::AlternativeTextController::respondToUnappliedSpellCorrection):
+        (WebCore::AlternativeTextController::timerFired):
+        (WebCore::AlternativeTextController::isAutomaticSpellingCorrectionEnabled):
+        (WebCore::AlternativeTextController::alternativeTextClient):
+        (WebCore):
+        (WebCore::AlternativeTextController::editorClient):
+        (WebCore::AlternativeTextController::textChecker):
+        (WebCore::AlternativeTextController::recordAutocorrectionResponseReversed):
+        (WebCore::AlternativeTextController::recordSpellcheckerResponseForModifiedCorrection):
+        * editing/AlternativeTextController.h:
+        (WebCore):
+        (AlternativeTextController):
+        * editing/TextCheckingHelper.h:
+        (WebCore):
+        * loader/EmptyClients.h:
+        (EmptyEditorClient):
+        * page/AlternativeTextClient.h: Added.
+        (WebCore):
+        (AlternativeTextClient):
+        (WebCore::AlternativeTextClient::~AlternativeTextClient):
+        * page/EditorClient.h:
+        (EditorClient):
+        * page/Page.cpp:
+        (WebCore::Page::Page):
+        (WebCore::Page::PageClients::PageClients):
+        * page/Page.h:
+        (WebCore):
+        (PageClients):
+        (Page):
+        (WebCore::Page::alternativeTextClient):
+
 2012-04-05  Min Qin  <qinmin@google.com>
 
         Fix fullscreen video button for android
