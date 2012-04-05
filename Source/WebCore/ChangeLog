@@ -1,3 +1,51 @@
+2012-04-04  Alexis Menard  <alexis.menard@openbossa.org>
+
+        [Part 4] We should use CSSPropertyID rather than integers when manipulating CSS property ids.
+        https://bugs.webkit.org/show_bug.cgi?id=83224
+
+        Reviewed by Tony Chang.
+
+        CSSPropertyID enum holds all the CSS property ids but many parts of WebKit treat the ids
+        as integers. While it's not incorrect it is nicer to use the enum as a parameter of
+        functions manipulating property ids, as we ensure that the value passed will be an
+        existing value. This patch clean up some remaining part of code.
+
+        No new tests : There should be no behavior change in this patch.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * page/animation/AnimationBase.h:
+        (WebCore::AnimationBase::affectsProperty):
+        (WebCore::AnimationBase::isAnimatingProperty):
+        * page/animation/CompositeAnimation.cpp:
+        (WebCore::CompositeAnimation::getAnimationForProperty):
+        (WebCore::CompositeAnimation::overrideImplicitAnimations):
+        (WebCore::CompositeAnimation::resumeOverriddenImplicitAnimations):
+        (WebCore::CompositeAnimation::isAnimatingProperty):
+        * page/animation/CompositeAnimation.h:
+        (CompositeAnimation):
+        * page/animation/ImplicitAnimation.cpp:
+        (WebCore::ImplicitAnimation::affectsProperty):
+        * page/animation/ImplicitAnimation.h:
+        (WebCore::ImplicitAnimation::transitionProperty):
+        (WebCore::ImplicitAnimation::animatingProperty):
+        (ImplicitAnimation):
+        * page/animation/KeyframeAnimation.cpp:
+        (WebCore::KeyframeAnimation::fetchIntervalEndpointsForProperty):
+        (WebCore::KeyframeAnimation::hasAnimationForProperty):
+        (WebCore::KeyframeAnimation::overrideAnimations):
+        (WebCore::KeyframeAnimation::resumeOverriddenAnimations):
+        (WebCore::KeyframeAnimation::affectsProperty):
+        * page/animation/KeyframeAnimation.h:
+        (KeyframeAnimation):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::transitionPaused):
+        (WebCore::RenderLayerBacking::transitionFinished):
+        (WebCore::RenderLayerBacking::graphicsLayerToCSSProperty):
+        (WebCore::RenderLayerBacking::cssToGraphicsLayerProperty):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+
 2012-04-04  Rafael Weinstein  <rafaelw@chromium.org>
 
         [MutationObservers] implement takeRecords()
