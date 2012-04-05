@@ -1,3 +1,39 @@
+2012-04-05  Dean Jackson  <dino@apple.com>
+
+        [mac] requestAnimationFrame sometimes stuck when page loads in a background tab
+        https://bugs.webkit.org/show_bug.cgi?id=76105
+
+        Reviewed by Simon Fraser.
+
+        Fix three issues with requestAnimationFrame:
+        - It's possible for the call to rAF to come to the document before there
+          is a page associated. Added a guard for this.
+        - A page may try to suspend the scripted animations before the
+          ScriptedAnimationController exists, in which case we need to
+          suspend it immediately after it is created. Do this by keeping
+          track of the state in Page. Otherwise rAF would be busy looping
+          on hidden pages until they are brought to the front and hidden again.
+        - A page created in the background (from WebKit1) does not get
+          informed it is not visible. This can mean that resume() is called
+          more times than suspend() and we get into a state where the number
+          of suspensions becomes -1, and thus fails truthiness tests. Clamp it
+          to values >= 0.
+
+        No new tests, since this is not automatically testable. The most reliable test
+        is to open a page with rAF in a background tab within Safari.
+
+        * dom/Document.cpp:
+        (WebCore::Document::webkitRequestAnimationFrame):
+        * dom/ScriptedAnimationController.cpp:
+        (WebCore::ScriptedAnimationController::resume):
+        * page/Page.cpp:
+        (WebCore::Page::Page):
+        (WebCore::Page::suspendScriptedAnimations):
+        (WebCore::Page::resumeScriptedAnimations):
+        * page/Page.h:
+        (WebCore::Page::scriptedAnimationsSuspended):
+        (Page):
+
 2012-04-05  Brady Eidson  <beidson@apple.com>
 
         <rdar://problem/9359029> and https://bugs.webkit.org/show_bug.cgi?id=83311
