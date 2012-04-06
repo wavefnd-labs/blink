@@ -1,3 +1,72 @@
+2012-04-06  Tommy Widenflycht  <tommyw@google.com>
+
+        MediaStream API: Deleting the chromium bridge class MediaStreamCenterInternal
+        https://bugs.webkit.org/show_bug.cgi?id=83167
+
+        Reviewed by Adam Barth.
+
+        The situation before this patch is that we had a MediaStreamCenter.h with #ifdefs for the chromium specific
+        private class MediaStreamCenterInternal. This bridge class only shuffled calls between MediaStreamCenter and
+        WebMediaStreamCenter and was needed before the introduction of Platform.
+        To get rid of this now unnecessary class I had two alternatives:
+        1) Sprinkle platform/MediaStreamCenter.h with more #ifdefs, including around the class declaration.
+        2) Create an abstract base class that the chromium and gstreamer implementations overrides.
+        My personal preference is 2) since I strongly dislike #ifdefs. The drawback is that MediaStreamCenter now
+        has a vtable. However since all methods in this class are extremely low-usage it doesn't affect anything
+        in practice.
+
+        No code behaviour changes.
+
+        * GNUmakefile.am:
+        * GNUmakefile.list.am:
+        * Modules/mediastream/MediaStreamTrack.cpp:
+        (WebCore::MediaStreamTrack::setEnabled):
+        * Modules/mediastream/UserMediaRequest.cpp:
+        * Modules/mediastream/UserMediaRequest.h:
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        * platform/chromium/support/WebMediaStreamSourcesRequest.cpp:
+        * platform/mediastream/MediaStreamCenter.cpp:
+        (WebCore::MediaStreamCenter::MediaStreamCenter):
+        (WebCore):
+        (WebCore::MediaStreamCenter::~MediaStreamCenter):
+        * platform/mediastream/MediaStreamCenter.h:
+        (WebCore):
+        (MediaStreamCenter):
+        * platform/mediastream/MediaStreamSourcesQueryClient.h: Copied from Source/WebCore/platform/mediastream/MediaStreamCenter.h.
+        (WebCore):
+        (MediaStreamSourcesQueryClient):
+        (WebCore::MediaStreamSourcesQueryClient::~MediaStreamSourcesQueryClient):
+        * platform/mediastream/chromium/MediaStreamCenterChromium.cpp:
+        (WebCore::MediaStreamCenter::instance):
+        (WebCore::MediaStreamCenterChromium::MediaStreamCenterChromium):
+        (WebCore::MediaStreamCenterChromium::~MediaStreamCenterChromium):
+        (WebCore::MediaStreamCenterChromium::queryMediaStreamSources):
+        (WebCore::MediaStreamCenterChromium::didSetMediaStreamTrackEnabled):
+        (WebCore::MediaStreamCenterChromium::didStopLocalMediaStream):
+        (WebCore::MediaStreamCenterChromium::didConstructMediaStream):
+        (WebCore::MediaStreamCenterChromium::constructSDP):
+        (WebCore):
+        (WebCore::MediaStreamCenterChromium::stopLocalMediaStream):
+        * platform/mediastream/chromium/MediaStreamCenterChromium.h: Renamed from Source/WebCore/platform/mediastream/chromium/MediaStreamCenterInternal.h.
+        (WebKit):
+        (WebCore):
+        (MediaStreamCenterChromium):
+        * platform/mediastream/chromium/MediaStreamCenterInternal.cpp: Removed.
+        * platform/mediastream/gstreamer/MediaStreamCenterGStreamer.cpp: Copied from Source/WebCore/platform/mediastream/MediaStreamCenter.cpp.
+        (WebCore):
+        (WebCore::MediaStreamCenter::instance):
+        (WebCore::MediaStreamCenterGStreamer::MediaStreamCenterGStreamer):
+        (WebCore::MediaStreamCenterGStreamer::~MediaStreamCenterGStreamer):
+        (WebCore::MediaStreamCenterGStreamer::queryMediaStreamSources):
+        (WebCore::MediaStreamCenterGStreamer::didSetMediaStreamTrackEnabled):
+        (WebCore::MediaStreamCenterGStreamer::didStopLocalMediaStream):
+        (WebCore::MediaStreamCenterGStreamer::didConstructMediaStream):
+        (WebCore::MediaStreamCenterGStreamer::constructSDP):
+        * platform/mediastream/gstreamer/MediaStreamCenterGStreamer.h: Copied from Source/WebCore/platform/mediastream/MediaStreamCenter.h.
+        (WebCore):
+        (MediaStreamCenterGStreamer):
+
 2012-04-05  Simon Fraser  <simon.fraser@apple.com>
 
         Should disable preserves3D() for things that enforce flattening, like overflow and filters
