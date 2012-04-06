@@ -1,3 +1,104 @@
+2012-04-06  James Robinson  <jamesr@chromium.org>
+
+        WebGL content swapped at wrong time in threaded compositing mode
+        https://bugs.webkit.org/show_bug.cgi?id=82275
+
+        Reviewed by Kenneth Russell.
+
+        When using threaded compositing, we need to defer touching the texture ID being used by the compositor until the
+        appropriate point in the synchronization routine and not before. Specifically, there is no time at which it is
+        safe to manipulate the texture the compositor may be using from the main thread. This breaks up the presentation
+        path into a few pieces (depending on the context attributes) in order to maintain these invariants.
+
+        Depending on the context attributes and if we're in threaded mode, there are a few different possible back/front
+        buffer combinations:
+
+        - When the context is antialiased, we have a multisampled renderbuffer and associated framebuffer.
+        - In all cases, we have a color texture back buffer.
+        - When preserveDrawingBuffer is set or threaded compositing is enabled, we have a separate color texture as a
+        front buffer.
+
+        The resource update is in two phases. First, on the main thread, we prepare the back buffer. This resolves from
+        the multisampled FBO into the back color buffer if multisampled and swaps the front / back color buffer textures
+        if preserveDrawingBuffer is false and we're using separate front / back color buffers. Second, on the compositor
+        thread, we do a texture copy from the back to the front color buffer if preserveDrawingBuffer is true. After
+        these steps are complete the main thread is free to manipulate the back buffer color texture without affecting
+        any resources the compositor is using.
+
+        One incidental cleanup this patch also does is remove all state queries from DrawingBuffer::clearFramebuffer().
+
+        Tests: fast/canvas/webgl/webgl-composite-modes-repaint.html
+               fast/canvas/webgl/webgl-composite-modes.html
+
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore):
+        (WebCore::WebGLRenderingContext::WebGLRenderingContext):
+        (WebCore::WebGLRenderingContext::clearIfComposited):
+        (WebCore::WebGLRenderingContext::restoreStateAfterClear):
+        (WebCore::WebGLRenderingContext::reshape):
+        (WebCore::WebGLRenderingContext::maybeRestoreContext):
+        * html/canvas/WebGLRenderingContext.h:
+        (WebGLRenderingContext):
+        * platform/graphics/blackberry/DrawingBufferBlackBerry.cpp:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore):
+        (WebCore::DrawingBuffer::prepareBackBuffer):
+        (WebCore::DrawingBuffer::requiresCopyFromBackToFrontBuffer):
+        (WebCore::DrawingBuffer::frontColorBuffer):
+        * platform/graphics/cairo/DrawingBufferCairo.cpp:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore):
+        (WebCore::DrawingBuffer::prepareBackBuffer):
+        (WebCore::DrawingBuffer::requiresCopyFromBackToFrontBuffer):
+        (WebCore::DrawingBuffer::frontColorBuffer):
+        * platform/graphics/chromium/DrawingBufferChromium.cpp:
+        (WebCore::generateColorTexture):
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore::DrawingBuffer::initialize):
+        (WebCore::DrawingBuffer::prepareBackBuffer):
+        (WebCore):
+        (WebCore::DrawingBuffer::requiresCopyFromBackToFrontBuffer):
+        (WebCore::DrawingBuffer::frontColorBuffer):
+        (WebCore::DrawingBuffer::platformLayer):
+        * platform/graphics/chromium/WebGLLayerChromium.cpp:
+        (WebCore::WebGLLayerChromium::WebGLLayerChromium):
+        (WebCore::WebGLLayerChromium::paintContentsIfDirty):
+        (WebCore::WebGLLayerChromium::updateCompositorResources):
+        (WebCore::WebGLLayerChromium::paintRenderedResultsToCanvas):
+        (WebCore::WebGLLayerChromium::setNeedsDisplayRect):
+        (WebCore::WebGLLayerChromium::setDrawingBuffer):
+        * platform/graphics/chromium/WebGLLayerChromium.h:
+        (WebGLLayerChromium):
+        * platform/graphics/clutter/DrawingBufferClutter.cpp:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore):
+        (WebCore::DrawingBuffer::prepareBackBuffer):
+        (WebCore::DrawingBuffer::requiresCopyFromBackToFrontBuffer):
+        (WebCore::DrawingBuffer::frontColorBuffer):
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::initializeContext):
+        * platform/graphics/gpu/DrawingBuffer.cpp:
+        (WebCore::DrawingBuffer::create):
+        (WebCore::DrawingBuffer::clear):
+        (WebCore::DrawingBuffer::clearFramebuffer):
+        (WebCore::DrawingBuffer::reset):
+        (WebCore::DrawingBuffer::discardResources):
+        * platform/graphics/gpu/DrawingBuffer.h:
+        (DrawingBuffer):
+        * platform/graphics/gpu/mac/DrawingBufferMac.mm:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore):
+        (WebCore::DrawingBuffer::prepareBackBuffer):
+        (WebCore::DrawingBuffer::requiresCopyFromBackToFrontBuffer):
+        (WebCore::DrawingBuffer::frontColorBuffer):
+        * platform/graphics/gpu/qt/DrawingBufferQt.cpp:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore::DrawingBuffer::platformLayer):
+        (WebCore::DrawingBuffer::prepareBackBuffer):
+        (WebCore::DrawingBuffer::requiresCopyFromBackToFrontBuffer):
+        (WebCore):
+        (WebCore::DrawingBuffer::frontColorBuffer):
+
 2012-04-06  Julien Chaffraix  <jchaffraix@webkit.org>
 
         Unreviewed build fix after r113486 and r113487.
