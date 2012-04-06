@@ -1,3 +1,26 @@
+2012-04-06  Michael Saboff  <msaboff@apple.com>
+
+        Call Heap::discardAllCompiledCode() in low memory situations
+        https://bugs.webkit.org/show_bug.cgi?id=83335
+
+        Reviewed by Geoffrey Garen.
+
+        Added call to discardAllCompiledCode() when under memory pressure.
+        We can re-JIT as needed.  This is similar to what we used to do when we did
+        a full GC which also cleaned up JIT code.  Doing a full GC typically didn't
+        help our memory situation, in fact it made things worse in the really low
+        memory situation as it caused more paging.
+
+        Added pass through discardAllCompiledCode() method to GCController.
+
+        * bindings/js/GCController.cpp:
+        (WebCore::GCController::discardAllCompiledCode):
+        (WebCore):
+        * bindings/js/GCController.h:
+        (GCController):
+        * platform/mac/MemoryPressureHandlerMac.mm:
+        (WebCore::MemoryPressureHandler::releaseMemory):
+
 2012-04-06  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: on a single click in Timeline overview, make a minimal selection centered around cursor
