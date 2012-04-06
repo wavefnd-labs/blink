@@ -1,3 +1,60 @@
+2012-04-06  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: ObjectStore/Index shouldn't hold reference to backing store
+        https://bugs.webkit.org/show_bug.cgi?id=83074
+
+        We should be able to collect and close the leveldb backing store as soon as the database
+        connection is closed, but the IDBObjectStoreBackendImpl and IDBIndexBackendImpl were
+        holding RefPtrs, and those objects are kept alive by script references.
+
+        Replaced RefPtrs to the IDBBackingStore with pointers to the IDBDatabase. On the back end,
+        IDBDatabaseBackendImpl maintains a RefPtr to the IDBObjectStoreBackendImpl object, so 
+        a raw pointer back is safe. On the front end, the IDBObjectStore maintains a RefPtr to
+        the IDBDatabase so script can navigate upwards. Ditto on both ends for the ObjectStore/Index
+        relationship. The frontend objects maintain RefPtrs to the backend objects, so the backend
+        objects and their owners are maintained as long as there's a script reference.
+
+        Also made IDBDatabaseBackendImpl handle a null IDBFactoryBackendImpl pointer, for testing.
+
+        Reviewed by Tony Chang.
+
+        Tests: webkit_unit_tests --gtest_filter="IDBDatabaseBackendTest.*"
+
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::~IDBDatabaseBackendImpl):
+        (WebCore::IDBDatabaseBackendImpl::createObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::loadObjectStores):
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp:
+        (WebCore::IDBIndexBackendImpl::IDBIndexBackendImpl):
+        (WebCore::IDBIndexBackendImpl::openCursorInternal):
+        (WebCore::IDBIndexBackendImpl::countInternal):
+        (WebCore::IDBIndexBackendImpl::getInternal):
+        (WebCore::IDBIndexBackendImpl::addingKeyAllowed):
+        * Modules/indexeddb/IDBIndexBackendImpl.h:
+        (WebCore::IDBIndexBackendImpl::create):
+        (IDBIndexBackendImpl):
+        (WebCore::IDBIndexBackendImpl::backingStore):
+        (WebCore::IDBIndexBackendImpl::databaseId):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::IDBObjectStoreBackendImpl):
+        (WebCore::IDBObjectStoreBackendImpl::getInternal):
+        (WebCore::IDBObjectStoreBackendImpl::putInternal):
+        (WebCore::IDBObjectStoreBackendImpl::deleteInternal):
+        (WebCore::IDBObjectStoreBackendImpl::clearInternal):
+        (WebCore):
+        (WebCore::IDBObjectStoreBackendImpl::createIndex):
+        (WebCore::IDBObjectStoreBackendImpl::createIndexInternal):
+        (WebCore::IDBObjectStoreBackendImpl::deleteIndexInternal):
+        (WebCore::IDBObjectStoreBackendImpl::openCursorInternal):
+        (WebCore::IDBObjectStoreBackendImpl::countInternal):
+        (WebCore::IDBObjectStoreBackendImpl::loadIndexes):
+        (WebCore::IDBObjectStoreBackendImpl::genAutoIncrementKey):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.h:
+        (WebCore::IDBObjectStoreBackendImpl::create):
+        (IDBObjectStoreBackendImpl):
+        (WebCore::IDBObjectStoreBackendImpl::backingStore):
+        (WebCore::IDBObjectStoreBackendImpl::databaseId):
+
 2012-04-06  Jon Lee  <jonlee@apple.com>
 
         Fix build warning on const long long to int implicit conversion.
