@@ -1,3 +1,22 @@
+2012-04-05  Yuta Kitamura  <yutak@chromium.org>
+
+        Leak in WebSocketChannel with workers/worker-reload.html
+        https://bugs.webkit.org/show_bug.cgi?id=83345
+
+        Reviewed by David Levin.
+
+        A speculative fix of memory leaks caused by worker-reload.html.
+
+        No new tests, as this change imposes no functional change.
+
+        * Modules/websockets/WorkerThreadableWebSocketChannel.cpp:
+        (WebCore::WorkerThreadableWebSocketChannel::mainThreadDestroy):
+        Receive the peer as PassOwnPtr<> so the destructor of the task object can
+        delete the peer even if the task didn't run before main thread's cleanup period.
+        (WebCore::WorkerThreadableWebSocketChannel::Bridge::disconnect):
+        * Modules/websockets/WorkerThreadableWebSocketChannel.h:
+        (WorkerThreadableWebSocketChannel):
+
 2012-04-05  Lu Guanqun  <guanqun.lu@intel.com>
 
         combine two arrays (coreExceptionNames and coreExceptionDescriptions) into one array
