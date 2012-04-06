@@ -1,3 +1,61 @@
+2012-04-06  Kent Tamura  <tkent@chromium.org>
+
+        Calendar Picker: Add code to open/close the calendar picker
+        https://bugs.webkit.org/show_bug.cgi?id=83258
+
+        Reviewed by Hajime Morita.
+
+        No new tests. This code is not used because of no ENABLE_INPUT_TYPE_DATE.
+
+        * WebCore.gypi: Add existing header files.
+
+        * html/DateInputType.cpp:
+        (WebCore::DateInputType::DateInputType):
+        Moved from DateInputType.h because the constructor depends on
+        CalendarPickerElement.
+        (WebCore::DateInputType::createShadowSubtree):
+        Store a CalendarPickerElement object.
+        (WebCore::DateInputType::destroyShadowSubtree):
+        Release the CalendarPickerElement object.
+        (WebCore::DateInputType::handleBlurEvent):
+        Close the calendar picker when the input loses focus.
+        * html/DateInputType.h:
+        (DateInputType):
+        - Move the constructor definition to DateInputType.cpp
+        - Add function declarations
+        - Add m_pickerElement data member.
+
+        * html/shadow/CalendarPickerElement.cpp:
+        (WebCore::CalendarPickerElement::hostInput): A helper to get the host <input>.
+        (WebCore::CalendarPickerElement::defaultEventHandler):
+        If the element is clicked, open a calendar picker.
+        (WebCore::CalendarPickerElement::openPopup):
+        Opens a calendar picker by ChromeClient::openPagePopup().
+        (WebCore::CalendarPickerElement::closePopup):
+        Closes a calendar picker by ChromeClient::closePagePopup().
+        (WebCore::CalendarPickerElement::detach):
+        Closes a calendar picker when the element loses a renderer.
+
+        (WebCore::CalendarPickerElement::contentSize):
+        Provides the initial size of a popup.
+        (WebCore::addString): A helper for writeDocument().
+        (WebCore::addJavaScriptString): ditto.
+        (WebCore::addProperty): ditto.
+        (WebCore::CalendarPickerElement::writeDocument):
+        Provides the source of a popup. The function creates a complete HTML with:
+        - WebCore/Resources/calendarPicker.css
+        - WebCore/Resources/calendarPicker.js
+        - An object to pass localization strings and <input> state
+        (WebCore::CalendarPickerElement::setValueAndClosePopup):
+        Sets the value from a calendar picker to the <input>.
+        (WebCore::CalendarPickerElement::didClosePopup):
+        Clear the popup object.
+        * html/shadow/CalendarPickerElement.h:
+        (CalendarPickerElement): Add declarations.
+
+        * platform/text/LocalizedCalendarICU.cpp:
+        (WebCore::getFirstDayOfWeek): Make sure this is 0-base. UCAL_SUNDAY is 1.
+
 2012-04-05  Adele Peterson  <adele@apple.com>
 
         <rdar://problem/11133179> and https://bugs.webkit.org/show_bug.cgi?id=74129
