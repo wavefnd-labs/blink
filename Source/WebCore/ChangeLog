@@ -1,3 +1,29 @@
+2012-04-06  Darin Adler  <darin@apple.com>
+
+        Streamline strtod and fix some related problems
+        https://bugs.webkit.org/show_bug.cgi?id=82857
+
+        Reviewed by Geoffrey Garen.
+
+        Refactoring of code covered by existing tests.
+
+        * dom/ViewportArguments.cpp:
+        (WebCore::numericPrefix): Removed a confusing comment that just said
+        "we tolerate extra characters" in a roundabout way. Made the "ok"
+        argument optional. Changed to call the new version of charactersToFloat
+        that returns the number of characters parsed rather than using the
+        charactersToFloatIgnoringJunk/didReadNumber solution from before.
+        (WebCore::findSizeValue): Since numericPrefix is guaranteed to return 0
+        when it can't parse, removed the "ok" code. Also changed the unusual
+        syntax "float(1.0)" to just "1", which works just as well.
+        (WebCore::findScaleValue): Ditto.
+        (WebCore::findUserScalableValue): Ditto.
+
+        * html/parser/HTMLParserIdioms.cpp:
+        (WebCore::parseToDoubleForNumberType): Removed an unneeded code path
+        and replaced it with an assertion; toDouble no longer will return infinity
+        or not-a-number values.
+
 2012-04-06  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Surface replica should have a separate quad in the render pass
