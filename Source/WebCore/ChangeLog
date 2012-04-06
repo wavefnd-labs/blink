@@ -1,3 +1,27 @@
+2012-04-05  Alexander Pavlov  <apavlov@chromium.org>
+
+        [REGRESSION] Refreshed autofill popup renders garbage
+        https://bugs.webkit.org/show_bug.cgi?id=83255
+        http://code.google.com/p/chromium/issues/detail?id=118374
+
+        The code used to update only the PopupContainer coordinates as if they were the coordinates relative
+        to the root view. Instead, a WebWidget positioned relative to the screen origin holds the PopupContainer,
+        so it is the WebWidget that should be positioned in PopupContainer::refresh(), and the PopupContainer's
+        location should be (0, 0) (and their sizes should always be equal).
+
+        Reviewed by Kent Tamura.
+
+        No new tests, as the popup appearance is not testable in WebKit.
+
+        * platform/chromium/PopupContainer.cpp:
+        (WebCore::PopupContainer::layoutAndCalculateWidgetRect): Variable renamed.
+        (WebCore::PopupContainer::showPopup): Use m_originalFrameRect rather than frameRect()
+        for passing into chromeClient.
+        (WebCore::PopupContainer::showInRect): Set up the correct frameRect() for the container.
+        (WebCore::PopupContainer::refresh): Resize the container and position the WebWidget correctly.
+        * platform/chromium/PopupContainer.h:
+        (PopupContainer):
+
 2012-04-06  Kent Tamura  <tkent@chromium.org>
 
         Calendar Picker: Add code to open/close the calendar picker
