@@ -1,3 +1,32 @@
+2012-04-06  Levi Weintraub  <leviw@chromium.org>
+
+        Update LayoutUnit usage in RenderView
+        https://bugs.webkit.org/show_bug.cgi?id=83147
+
+        Reviewed by Julien Chaffraix.
+
+        Updating the usage of LayoutUnits in RenderView in preparation for sub-pixel layout. This mostly
+        affects paint and repaint functions, which take LayoutRects up to the RenderView level. This is
+        necessary as we continue to accumulate sub-pixel offsets up to this level.
+
+        No new tests. No change in behavior.
+
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::paint): Adding an assert that we're being called to paint on pixel
+        boundaries. We don't currently ever position RenderViews at sub-pixel offsets.
+        (WebCore::RenderView::shouldRepaint):
+        (WebCore::RenderView::repaintViewRectangle): Switching to a LayoutRect and cleaning up a fixme
+        that used decomposed offsets. Pixel snapping is applied before handing the rect up to the
+        FrameView.
+        (WebCore::RenderView::repaintRectangleInViewAndCompositedLayers): Pixel snapping before handing
+        the rect up to the Compositor.
+        (WebCore::RenderView::computeRectForRepaint):
+        (WebCore::RenderView::selectionBounds):
+        (WebCore::RenderView::viewRect):
+        (WebCore::RenderView::unscaledDocumentRect):
+        * rendering/RenderView.h:
+        (RenderView):
+
 2012-04-06  Tim Horton  <timothy_horton@apple.com>
 
         Add autodetection of image orientation from EXIF information
