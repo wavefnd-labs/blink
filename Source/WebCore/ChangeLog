@@ -1,5 +1,100 @@
 2012-04-06  Peter Rybin  <peter.rybin@gmail.com>
 
+        Web Inspector: CodeGeneratorInspector.py: completely switch all domains to 'strict' mode
+        https://bugs.webkit.org/show_bug.cgi?id=83332
+
+        Reviewed by Pavel Feldman.
+
+        Hardcoded list of domains is removed from generator. Partial domain sorting is dropped as unneeded.
+        Types with open propery list are introduced: validator allows undocumented properties for them.
+
+        Timeline domain code is patched to do runtimeCast in the last moment because true switching to
+        type-safe interfaces should take significant time and should be done separately.
+
+        * inspector/CodeGeneratorInspector.py:
+        (Generator.go):
+        (Generator.process_event):
+        (Generator.process_command):
+        * inspector/InspectorTimelineAgent.cpp:
+        (WebCore::InspectorTimelineAgent::willSendResourceRequest):
+        (WebCore::InspectorTimelineAgent::innerAddRecordToTimeline):
+
+2012-04-06  Peter Rybin  <peter.rybin@gmail.com>
+
+        Web Inspector: CodeGeneratorInspector.py: stop accepting raw InspectorObject in generated setters
+        https://bugs.webkit.org/show_bug.cgi?id=83327
+
+        Reviewed by Pavel Feldman.
+
+        Generator fixed to have strict types in generated setter methods.
+
+        Client code is switched from InspectorObject's and String's to generated types where
+        needed.
+
+        * inspector/CodeGeneratorInspector.py:
+        (AdHocTypeContext):
+        (format_setter_value_expression):
+        * inspector/ConsoleMessage.cpp:
+        (WebCore::messageSourceValue):
+        (WebCore::messageTypeValue):
+        (WebCore::messageLevelValue):
+        (WebCore::ConsoleMessage::addToFrontend):
+        * inspector/InspectorApplicationCacheAgent.cpp:
+        (WebCore::InspectorApplicationCacheAgent::buildArrayForApplicationCacheResources):
+        (WebCore::InspectorApplicationCacheAgent::buildObjectForApplicationCacheResource):
+        * inspector/InspectorApplicationCacheAgent.h:
+        (InspectorApplicationCacheAgent):
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::asInspectorStyleSheet):
+        (WebCore::InspectorCSSAgent::viaInspectorStyleSheet):
+        (WebCore::InspectorCSSAgent::detectOrigin):
+        * inspector/InspectorCSSAgent.h:
+        (InspectorCSSAgent):
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::buildObjectForNode):
+        * inspector/InspectorIndexedDBAgent.cpp:
+        (WebCore):
+        * inspector/InspectorMemoryAgent.cpp:
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::InspectorPageAgent::buildObjectForFrameTree):
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::buildObjectForTiming):
+        (WebCore::buildObjectForCachedResource):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyle::buildObjectForStyle):
+        (WebCore::InspectorStyleSheet::create):
+        (WebCore::InspectorStyleSheet::InspectorStyleSheet):
+        (WebCore::InspectorStyleSheet::buildObjectForRule):
+        (WebCore::InspectorStyleSheet::resourceStyleSheetText):
+        (WebCore::InspectorStyleSheet::buildArrayForRuleList):
+        (WebCore::InspectorStyleSheetForInlineStyle::create):
+        (WebCore::InspectorStyleSheetForInlineStyle::InspectorStyleSheetForInlineStyle):
+        * inspector/InspectorStyleSheet.h:
+        (InspectorCSSId):
+        (WebCore::InspectorCSSId::asProtocolValue): method is made template as now it returns 2 formally different types.
+        (InspectorStyleSheet):
+        (WebCore::InspectorStyleSheet::canBind):
+        (InspectorStyleSheetForInlineStyle):
+
+2012-04-06  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: highlight diff in the gutter, not in the line content.
+        https://bugs.webkit.org/show_bug.cgi?id=83371
+
+        Reviewed by Yury Semikhatsky.
+
+        Now that the editing mode is enabled by default, diff highlighting gets annoying.
+        I am moving it to the gutter (same decoration as before, but now coloring gutter only).
+
+        * inspector/front-end/TextViewer.js:
+        (WebInspector.TextEditorGutterPanel.prototype.textChanged):
+        * inspector/front-end/textViewer.css:
+        (.diff-container .webkit-added-line.webkit-line-number):
+        (.diff-container .webkit-removed-line.webkit-line-number):
+        (.diff-container .webkit-changed-line.webkit-line-number):
+
+2012-04-06  Peter Rybin  <peter.rybin@gmail.com>
+
         Web Inspector: CodeGeneratorInspector.py: stop accepting raw InspectorObject in generated setters
         https://bugs.webkit.org/show_bug.cgi?id=83327
 
