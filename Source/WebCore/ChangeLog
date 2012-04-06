@@ -1,3 +1,41 @@
+2012-04-05  David Barton  <dbarton@mathscribe.com>
+
+        Remove intrinsic padding from contentBoxRect(), etc.
+        https://bugs.webkit.org/show_bug.cgi?id=83092
+
+        Reviewed by Julien Chaffraix.
+
+        "Intrinsic padding" does not count as CSS padding, but is treated as padding by basic
+        layout and rendering code, e.g. RenderBlock::layout(). A lot of code relies on the
+        equation border-box = content-box + padding + border (+ scrollbars). To keep this valid,
+        change 5 functions in RenderBox.h to not include intrinsic padding in the content box,
+        thus reverting to their behavior before the patch for bug 33593. Instead, have
+        sizingBox(renderer) in CSSComputedStyleDeclaration.cpp explicitly put the intrinsic
+        padding in computed CSS content-box values [for javascript getComputedStyle()], so the
+        above equation still also holds for CSS computed values. This seems more consistent with
+        how the padding...() functions behave since the patch for bug 23487, and will work
+        better for MathML. For instance, a block's contentLogicalWidth() will be the
+        availableLogicalWidth() for use by child elements.
+
+        No new tests. The only real observable changes are illustrated in the bug 83092 attached
+        test case and discussion. These are minor and hard to automate.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::sizingBox):
+        * editing/DeleteSelectionCommand.cpp:
+        (WebCore::DeleteSelectionCommand::removeNode):
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::contentBoxRect):
+        (WebCore::RenderBox::contentWidth):
+        (WebCore::RenderBox::contentHeight):
+        (WebCore::RenderBox::contentLogicalWidth):
+        (WebCore::RenderBox::contentLogicalHeight):
+            - Change these 5 functions to omit intrinsic padding from the content box.
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::cellBaselinePosition):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::firstLineBoxBaseline):
+
 2012-04-05  Hironori Bono  <hbono@chromium.org>
 
         [Chromium] moving a cursor on a misspelled word should not remove a misspelled underline
