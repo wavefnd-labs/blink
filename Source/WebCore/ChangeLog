@@ -1,3 +1,32 @@
+2012-04-06  Levi Weintraub  <leviw@chromium.org>
+
+        Update LayoutUnit usage in Editor and Frame
+        https://bugs.webkit.org/show_bug.cgi?id=83278
+
+        Reviewed by Eric Seidel.
+
+        Frame and Editor both take input from the embedder, which passes along coordinates in screen
+        coordinates, which aren't fractional. Updating a few remaining functions to show this, and correcting
+        some inconsistencies in LayoutUnit usage.
+
+        No new tests. No change in behavior.
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::rangeForPoint): windowToContents returns an IntPoint.
+        (WebCore::Editor::countMatchesForText): Using enclosingIntRect since we're (fake) repainting the entire
+        view rect.
+        * editing/Editor.h:
+        (Editor): Correcting mismatched function signature.
+        * page/Frame.cpp:
+        (WebCore::Frame::visiblePositionForPoint): Frame takes points in screen coordinates, usually from the
+        embedder. Changing these functions to be in IntPoints.
+        (WebCore::Frame::documentAtPoint): Ditto.
+        (WebCore::Frame::rangeForPoint): Ditto.
+        * page/Frame.h:
+        (Frame):
+        * platform/graphics/IntRect.h:
+        (enclosingIntRect): Adding an inline no-op copy of the FractionalLayoutRect method enclosingIntRect.
+
 2012-04-06  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Deleting the chromium bridge class MediaStreamCenterInternal
