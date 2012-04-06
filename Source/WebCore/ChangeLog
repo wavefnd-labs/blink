@@ -1,3 +1,45 @@
+2012-04-06  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=81939
+        -webkit-image-set should update dynamically when the device scale factor 
+        changes
+        -and corresponding-
+        <rdar://problem/11101108> 
+
+        Reviewed by Darin Adler.
+
+        New member variable to keep track of the scale factor.
+        * css/CSSImageSetValue.cpp:
+        (WebCore::CSSImageSetValue::CSSImageSetValue):
+        (WebCore::CSSImageSetValue::bestImageForScaleFactor):
+
+         Merge the two cachedImageSet functions. There was no need for two functions here.
+        (WebCore::CSSImageSetValue::cachedImageSet):
+
+        cachedOrPendingImageSet() now takes a Document as a parameter so that it can 
+        access the deviceScaleFactor. If there is a cached image already and the 
+        Document's deviceScaleFactor doesn't match m_scaleFactor, then m_imageSet is set 
+        to a pending image so that the best fit image will be reassessed and then 
+        loaded.
+        (WebCore::CSSImageSetValue::cachedOrPendingImageSet):
+        * css/CSSImageSetValue.h:
+        (WebCore):
+        (CSSImageSetValue):
+
+        cachedOrPendingImageSet() now takes a Document.
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+
+        StyleCachedImageSet should inherit from CachedImageClient just like 
+        StyleCachedImage. It should add and remove itself as a client upon creation 
+        and destruction, respectively.
+        * rendering/style/StyleCachedImageSet.cpp:
+        (WebCore::StyleCachedImageSet::StyleCachedImageSet):
+        (WebCore):
+        (WebCore::StyleCachedImageSet::~StyleCachedImageSet):
+        * rendering/style/StyleCachedImageSet.h:
+        (StyleCachedImageSet):
+
 2012-04-06  Levi Weintraub  <leviw@chromium.org>
 
         Update LayoutUnit usage in RenderView
