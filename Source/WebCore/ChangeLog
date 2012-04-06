@@ -1,3 +1,30 @@
+2012-04-06  Benjamin Poulain  <bpoulain@apple.com>
+
+        Get rid of the useless flag PREEMPT_GEOLOCATION_PERMISSION
+        https://bugs.webkit.org/show_bug.cgi?id=83325
+
+        Reviewed by Ryosuke Niwa.
+
+        The flag WTF_USE_PREEMPT_GEOLOCATION_PERMISSION was added in r63742 but
+        was never disabled by anyone. Supporting this feature added complexity by
+        introducing two authorization scheme.
+
+        This patch removes WTF_USE_PREEMPT_GEOLOCATION_PERMISSION and the code supporting
+        granting the authorization after startUpdating().
+
+        * Modules/geolocation/Geolocation.cpp:
+        (WebCore::Geolocation::GeoNotifier::runSuccessCallback): With the simplified
+        authorization code, we ensure stronger constraint on GeoNotifier::runSuccessCallback().
+        (WebCore::Geolocation::stop):
+        (WebCore::Geolocation::startRequest):
+        (WebCore::Geolocation::clearWatch):
+        (WebCore::Geolocation::setIsAllowed):
+        (WebCore::Geolocation::positionChanged): The case (!isAllowed()) was there
+        to support granting the authorization for WTF_USE_PREEMPT_GEOLOCATION_PERMISSION.
+        (WebCore::Geolocation::handlePendingPermissionNotifiers):
+        * Modules/geolocation/Geolocation.h:
+        (Geolocation):
+
 2012-04-06  Tom Sepez  <tsepez@chromium.org>
 
         Block cross-origin iframe scroll to fragment.
