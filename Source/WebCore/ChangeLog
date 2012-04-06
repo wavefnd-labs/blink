@@ -1,3 +1,72 @@
+2012-04-06  Dan Bernstein  <mitz@apple.com>
+
+        <rdar://problem/10912476> Pixel access canvas APIs do not work transparently with high-DPI backing store
+        https://bugs.webkit.org/show_bug.cgi?id=83072
+
+        Reviewed by Simon Fraser.
+
+        Made getImageData, putImageData, and toDataURL downsample/upsample when pixels in the canvas
+        backing store are not in a 1:1 ratio to CSS pixels. This makes clients of these APIs
+        indifferent to the backing store resolution, up to sampling artifacts.
+
+        In order for this to work, ImageBuffer has to know and respect the resolutionScale
+        parameter. This change makes the Core Graphics-based implementation of ImageBuffer do this,
+        but on other platforms, resolutionScale values other than 1 will not work. Such platforms
+        should not enable the HIGH_DPI_CANVAS feature.
+
+        * html/HTMLCanvasElement.cpp:
+        (WebCore::HTMLCanvasElement::HTMLCanvasElement): Updated a comment.
+        (WebCore::HTMLCanvasElement::createImageBuffer): Changed to create an ImageBuffer with
+        the desired resolution instead of 1.
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::drawImage): Removed code that scaled the source rect,
+        since this is now handled at the ImageBuffer level.
+        (WebCore::CanvasRenderingContext2D::createImageData): Now returns ImageData of the requested
+        size regardless of the backing store resolution.
+        (WebCore::CanvasRenderingContext2D::getImageData): Ditto.
+        * platform/graphics/ImageBuffer.h:
+        (WebCore::ImageBuffer::create): Removed some code that tried to apply the resolution scale
+        to the buffer after creating it, and changed to pass the resolution scale down to the
+        (platform-specific) constructor, which can apply it correctly.
+        * platform/graphics/cairo/ImageBufferCairo.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        * platform/graphics/cg/ImageBufferCG.cpp:
+        (WebCore::ImageBuffer::ImageBuffer): Added a resolutionScale parameter, which is used to
+        compute the backing buffer size, and to apply a device scale factor to the context.
+        (WebCore::ImageBuffer::copyImage): Changed to return an image scaled down to the logical
+        size of the buffer.
+        (WebCore::ImageBuffer::getUnmultipliedImageData): Changed to pass the resolution scale to
+        ImageData::getData().
+        (WebCore::ImageBuffer::getPremultipliedImageData): Ditto.
+        (WebCore::ImageBuffer::putByteArray): Changed to pass the resolution scale to
+        ImageData::putData(). When drawing the byte array as an image, changed to preserve the base
+        CTM in the destination context (thus mapping from image data pixels to backing store pixels).
+        (WebCore::ImageBuffer::toDataURL): Fixed a CGColorSpace leak. Made the returned image have
+        the buffer’s logical size instead of the backing buffer’s size.
+        (WebCore::ImageDataToDataURL): Fixed a CGColorSpace leak.
+        * platform/graphics/cg/ImageBufferDataCG.cpp:
+        (WebCore::ImageBufferData::getData): Added a resolutionScale parameter. The source
+        coordinates are scaled by the value of that parameter, and a reverse scaling transform
+        is applied when copying from the backing store into the destination (either explicitly
+        using Accelerate or implicitly by drawing as an image). Since after scaling,
+        unpremultiplication and component permutation are done in-place, made the
+        non-Accelerate code that does these things safe in this case.
+        (WebCore::ImageBufferData::putData): Added a resolutionScale parameter. The destination
+        coordinates are scaled by the value of that parameter, and a scaling transform is applied
+        when copying from the source into the backing store (either explicitly using Accelerate or
+        implicitly by drawing as an image). Since after scaling, premultiplication and component
+        permutation are done in-place, made the non-Accelerate code that does these things safe in
+        this case.
+        * platform/graphics/cg/ImageBufferDataCG.h:
+        * platform/graphics/qt/ImageBufferQt.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        * platform/graphics/skia/ImageBufferSkia.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        * platform/graphics/wince/ImageBufferWinCE.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+        * platform/graphics/wx/ImageBufferWx.cpp:
+        (WebCore::ImageBuffer::ImageBuffer):
+
 2012-04-06  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Draw debug borders for tiles on layers with skipsDraw
