@@ -1,3 +1,21 @@
+2012-04-06  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Avoid deleting impl tree when becoming invisible
+        https://bugs.webkit.org/show_bug.cgi?id=83396
+
+        Reviewed by Adrienne Walker.
+
+        This bit of code in CCLayerTreeHost::didBecomeInvisible..() was an attempt to drop resources when becoming
+        invisible. However, it's fairly confused - we drop textures via TextureManagers when going invisible and
+        CCLayerImpl destructors can't delete non-managed resources since they do not have access to a context - so this
+        code was never actually freeing up GPU resources. Having a sometimes-null CCLayerImpl tree when we still have a
+        valid LayerChromium tree has lead to various tricky bugs.
+
+        No new tests since this code wasn't doing anything useful in the first place.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::didBecomeInvisibleOnImplThread):
+
 2012-04-06  Leo Yang  <leo.yang@torchmobile.com.cn>
 
         LocalFileSystem::initializeLocalFileSystem should be static
