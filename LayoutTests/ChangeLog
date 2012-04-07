@@ -1,3 +1,27 @@
+2012-04-06  Alexandre Elias  <aelias@google.com>
+
+        Fix bug in ContainerNode::getRect with scale transforms
+        https://bugs.webkit.org/show_bug.cgi?id=83385
+
+        Reviewed by Simon Fraser.
+
+        The bottom-right corner calculation for non-inline and replaced
+        elements in ContainerNode::getRect was incorrect in the presence of
+        scaling, because the untransformed element size was added after the
+        transformation is applied.  The rest of the calculations are careful
+        to always apply the transformation as the last step, but this had been
+        forgotten in this codepath.  The fix is just to make sure the size is
+        included in the localToAbsolute call.
+
+        One bug caused by this was that a scaled element would be cut off
+        when scrollIntoView(false) is called to scroll its parent container
+        to make it bottom-visible.
+
+        New layout test case in fast/transforms/scrollIntoView-transformed.html
+
+        * fast/transforms/scrollIntoView-transformed-expected.txt:
+        * fast/transforms/scrollIntoView-transformed.html:
+
 2012-04-06  James Robinson  <jamesr@chromium.org>
 
         [chromium] Clear values in combinedClear path not respected in WebGLRenderingContext::clearIfComposited()
