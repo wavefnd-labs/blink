@@ -1,3 +1,48 @@
+2012-04-07  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Work around an entity parsing bug in libxml2 2.7.3 (supplied with Lion) and unskip tests
+        https://bugs.webkit.org/show_bug.cgi?id=82577
+
+        Reviewed by Filip Pizlo.
+
+        Work-around entity expansion bug that affects several SVG tests on Lion.
+
+        Sample test document which is currently broken:
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Basic//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-basic.dtd" [
+        <!ENTITY Smile "<rect x='.5' y='.5' width='29' height='39' fill='black' stroke='red'/>">
+        ]>
+
+        <svg xmlns="http://www.w3.org/2000/svg">&Smile;</svg>
+
+        The expanded rect carries no namespace, thus an Element will be created for it, instead of a SVGRectElement.
+        libxml2 2.7.4 fixed this bug (https://bugzilla.gnome.org/show_bug.cgi?id=502960) in 2009 already, but Lion
+        still ships with 2.7.3, so we need to find a work-around for the problem. It works like this:
+        - When an entity is requested (getEntityHandler) determine whether the entity is being declared (while the <!ENTITY.. parses)
+          or wheter its references (when the &Smile; is parsed). If its referenced, record the current depth of the libxml2 parser.
+        - When startElementNs is called while we're expanding entities, be sure to transfer the namespace of the parent node
+          to the new node, but only do this if the current depth() is greater than the depth() at the time where entity expansion started.
+          This way we only apply our workaround for elements inside entities, that get expanded at the insertion point.
+        - When endElementNs is called, and our current depth() is less than our equal to the depth() where entity expansion started,
+          clear the recorded detph(), and stop executing the workaround.
+
+        It requires storing an extra integer & boolean in XMLDocumentParser, which is only used for this work-around.
+
+        * xml/parser/XMLDocumentParser.h:
+        (XMLDocumentParser):
+        (WebCore::XMLDocumentParser::isParsingEntityDeclaration):
+        (WebCore::XMLDocumentParser::setIsParsingEntityDeclaration):
+        (WebCore::XMLDocumentParser::depthTriggeringEntityExpansion):
+        (WebCore::XMLDocumentParser::setDepthTriggeringEntityExpansion):
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+        (WebCore::hackAroundLibXMLEntityParsingBug):
+        (WebCore::XMLDocumentParser::startElementNs):
+        (WebCore::XMLDocumentParser::endElementNs):
+        (WebCore::entityDeclarationHandler):
+        (WebCore::getEntityHandler):
+        (WebCore::XMLDocumentParser::initializeParserContext):
+
 2012-04-06  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r113526.
