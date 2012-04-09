@@ -1,3 +1,20 @@
+2012-03-30  Robert Hogan  <robert@webkit.org>
+
+        REGRESSION (r94492): Incorrect initial layout of absolutely positioned <input> inside centering div
+        https://bugs.webkit.org/show_bug.cgi?id=77754
+
+        Reviewed by David Hyatt.
+
+        The correct static position of an center-aligned, inline, absolutely positioned object with a block child can't be known
+        until the width of the child has been computed. This means that setStaticPositions() in RenderBlockLineLayout is setting
+        the position too early, before the width of the child has been finalised. To fix, adjust the static position of the inline
+        positioned object once its child's width has been calculated.
+
+        Test: fast/css/align-positioned-object-on-resize.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutPositionedObjects):
+
 2012-04-09  Eric Carlson  <eric.carlson@apple.com>
 
         WebVTT parser unnecessarily limits the value of a timestamp
