@@ -1,3 +1,32 @@
+2012-04-08  Takashi Sakamoto  <tasak@google.com>
+
+        <content> in <meter> is not rendered correctly.
+        https://bugs.webkit.org/show_bug.cgi?id=81311
+
+        This code changes a code location where MeterValueElement's value
+        attribute is initialized. In the old code, HTMLMeterElement's attach
+        did. It is better to initialize the attribute just after creating
+        meter's shadow subtree.
+
+        Reviewed by Hajime Morita.
+
+        No new tests, because an existing test,
+        content-element-in-meter-element.html covers.
+        However test_expectations.txt is changed. Now the test passes.
+
+        * html/HTMLMeterElement.cpp:
+        * html/HTMLMeterElement.h:
+        (HTMLMeterElement):
+        (HTMLMeterElement::attach):
+        Removed attach method, because attach method is just calling
+        LabelableElement::attach after removing didElementStateChange.
+        (HTMLMeterElement::createShadowSubTree):
+        Added setWidthPercentage to initialize MeterValueElement's value
+        attribute.
+        * LayoutTests/platform/chromium/test_expectations.txt:
+        Removed BUGWK81311 fast/dom/shadow/content-element-in-meter.html,
+        because now contentElementInMeterElement passes.
+
 2012-04-08  Patrick Gansterer  <paroga@webkit.org>
 
         Build fix for !ENABLE(CSS_FILTERS) && ASSERT_DISABLED after r109953.
