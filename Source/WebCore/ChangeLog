@@ -1,3 +1,43 @@
+2012-04-09  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Flip transition painting delayed with threaded animations
+        https://bugs.webkit.org/show_bug.cgi?id=82571
+
+        Reviewed by Adrienne Walker.
+
+        This allows for prepainting to see and paint layers that are not facing
+        the camera but have animating transforms. This is needed to prepaint
+        animations that "flip" layers around to make the front visible.
+
+        The changes are to add a backFaceIsVisible() helper function in
+        CCLTHCommon. This is used like before to cull non-double sided
+        layers, but culling is prevented on main thread when the screen
+        space transform is unknown due to animation. We add new
+        helper methods transformToScreenIsKnown() to identify this.
+
+        However the layer is not actually visible, so we set the
+        visibleLayerRect to be empty in this case.
+
+        The calculateVisibleLayerRect needs to use the backFaceIsVisible()
+        helper, so we move it into the .cpp file where it belongs, and make
+        it static to the file since it is not used outide of CCLTHCommon.cpp
+        at all.
+
+        Unit test: CCLayerTreeHostCommonTest.verifyBackFaceCulling
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.cpp:
+        (WebCore):
+        (WebCore::backFaceIsVisible):
+        (WebCore::calculateVisibleLayerRect):
+        (WebCore::layerOpacityIsOpaque):
+        (WebCore::transformToParentIsKnown):
+        (WebCore::transformToScreenIsKnown):
+        (WebCore::layerShouldBeSkipped):
+        (WebCore::calculateDrawTransformsAndVisibilityInternal):
+        (WebCore::walkLayersAndCalculateVisibleLayerRects):
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.h:
+        (WebCore):
+
 2012-04-09  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] Toggle buttons do not size appropriately in some themes
