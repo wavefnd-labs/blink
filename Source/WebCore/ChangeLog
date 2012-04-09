@@ -1,3 +1,36 @@
+2012-04-09  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Make culling work with clipped rects
+        https://bugs.webkit.org/show_bug.cgi?id=83494
+
+        Reviewed by Adrienne Walker.
+
+        Use new CCMathUtil transformation methods to deal with rects that clip
+        the camera plane. This fixes three things:
+
+        1. A layer completely behind the camera is not visible and should not
+        occlude.
+        2. A layer that is clipped by the camera is treated like a
+        non-axis-aligned transform, as the result of a mapClippedRect() is a
+        bounding box and may contain pixels not in the original rect. This guards
+        our use of mapRect() when transforming occluded regions.
+        3. A layer's occlusion must be clipped by its scissor rect. This scissor
+        rect exists in its target space, so occlusion in screen space is only
+        possible if its target also is axis aligned in the screen, such that
+        the layer's scissor rect remains a rect in screen space.
+
+        Unit tests: CCOcclusionTrackerTestLayerBehindCameraDoesNotOcclude
+                    CCOcclusionTrackerTestLargePixelsOccludeInsideClipRect
+
+        * platform/graphics/chromium/cc/CCMathUtil.cpp:
+        (WebCore::CCMathUtil::mapQuad):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.cpp:
+        (WebCore::transformSurfaceOpaqueRegion):
+        (WebCore::computeOcclusionBehindLayer):
+        (WebCore::::markOccludedBehindLayer):
+        (WebCore::testContentRectOccluded):
+        (WebCore::computeUnoccludedContentRect):
+
 2012-04-09  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r113613.
