@@ -1,3 +1,135 @@
+2012-04-09  Antti Koivisto  <antti@apple.com>
+
+        Don't expose internal CSSValues in API
+        https://bugs.webkit.org/show_bug.cgi?id=83426
+        
+        Reviewed by Andreas Kling.
+
+        The CSSValues returned from functions like CSSStyleDeclaration.getPropertyCSSValue() are currently
+        the same instances we use internally. This creates various problems. The values can't be shared between 
+        documents as the wrappers would be shared too. Having to maintain per-document CSSValuePools complicate 
+        the architecture and increase memory usage. This also blocks sharing style sheet data structures 
+        between documents.
+        
+        This patch adds a concept of CSSOM-safe CSSValue. Only the safe values can be wrapped for JS access. 
+        Values are unsafe by default. The CSSOM functions that return CSSValues create safe instances by
+        cloning the internal values.
+        
+        The use of APIs that return CSSValues is very rare (the currect CSSOM draft deprecates them) and
+        cloning is cheap in any case. Future patches will eliminate the per-document value pool in favor
+        of a global one for a memory win.
+        
+        In the future we want to replace internally used CSSValues with true internal types (StyleValues) and
+        use CSSValues exclusively as wrappers (similar to how CSSStyleRule wraps internal StyleRule).
+
+        * bindings/js/JSCSSValueCustom.cpp:
+        (WebCore::toJS):
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValueInternal):
+        * css/CSSImageSetValue.cpp:
+        (WebCore::CSSImageSetValue::CSSImageSetValue):
+        (WebCore):
+        (WebCore::CSSImageSetValue::cloneForCSSOM):
+        * css/CSSImageSetValue.h:
+        (CSSImageSetValue):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::cleanup):
+        
+            Opportunistically fix a string leak for CSS_COUNTER_NAME values.
+            Add all cases, remove default.
+        
+        (WebCore::CSSPrimitiveValue::cloneForCSSOM):
+        (WebCore):
+        * css/CSSPrimitiveValue.h:
+        (CSSPrimitiveValue):
+        (WebCore::CSSPrimitiveValue::setCSSOMSafe):
+        * css/CSSValue.cpp:
+        (WebCore):
+        (TextCloneCSSValue):
+        (WebCore::TextCloneCSSValue::create):
+        (WebCore::TextCloneCSSValue::cssText):
+        (WebCore::TextCloneCSSValue::TextCloneCSSValue):
+        
+            Most non-primitive value types are not exposed in CSSOM. For those we create a dummy value
+            that contains only the data that is accessible though the base CSSValue interface.
+        
+        (WebCore::CSSValue::addSubresourceStyleURLs):
+        (WebCore::CSSValue::cssText):
+        (WebCore::CSSValue::destroy):
+        (WebCore::CSSValue::cloneForCSSOM):
+        * css/CSSValue.h:
+        (WebCore):
+        (CSSValue):
+        (WebCore::CSSValue::isCSSOMSafe):
+        (WebCore::CSSValue::isSubtypeExposedToCSSOM):
+        (WebCore::CSSValue::CSSValue):
+        * css/CSSValueList.cpp:
+        (WebCore::CSSValueList::CSSValueList):
+        (WebCore):
+        (WebCore::CSSValueList::cloneForCSSOM):
+        * css/CSSValueList.h:
+        (CSSValueList):
+        * css/Counter.h:
+        (Counter):
+        (WebCore::Counter::cloneForCSSOM):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::setCssText):
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyCSSValue):
+        (WebCore::PropertySetCSSStyleDeclaration::setProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::removeProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyCSSValueInternal):
+        (WebCore::PropertySetCSSStyleDeclaration::setPropertyInternal):
+        (WebCore::PropertySetCSSStyleDeclaration::didMutate):
+        (WebCore):
+        (WebCore::PropertySetCSSStyleDeclaration::cloneAndCacheForCSSOM):
+        
+            Maintain a map of safe CSSValues so we can maintain object identity.
+        
+        * css/PropertySetCSSStyleDeclaration.h:
+        (WebCore::PropertySetCSSStyleDeclaration::setNeedsStyleRecalc):
+        (PropertySetCSSStyleDeclaration):
+        * css/RGBColor.cpp:
+        (WebCore::RGBColor::red):
+        (WebCore::RGBColor::green):
+        (WebCore::RGBColor::blue):
+        (WebCore::RGBColor::alpha):
+        * css/Rect.h:
+        (WebCore::RectBase::RectBase):
+        (RectBase):
+        (Rect):
+        (WebCore::Rect::cloneForCSSOM):
+        (WebCore::Rect::Rect):
+        (Quad):
+        (WebCore::Quad::cloneForCSSOM):
+        (WebCore::Quad::Quad):
+        * css/WebKitCSSFilterValue.cpp:
+        (WebCore::WebKitCSSFilterValue::WebKitCSSFilterValue):
+        (WebCore):
+        (WebCore::WebKitCSSFilterValue::cloneForCSSOM):
+        * css/WebKitCSSFilterValue.h:
+        (WebKitCSSFilterValue):
+        * css/WebKitCSSTransformValue.cpp:
+        (WebCore::WebKitCSSTransformValue::WebKitCSSTransformValue):
+        (WebCore):
+        (WebCore::WebKitCSSTransformValue::cloneForCSSOM):
+        * css/WebKitCSSTransformValue.h:
+        (WebKitCSSTransformValue):
+        * svg/SVGColor.cpp:
+        (WebCore::SVGColor::SVGColor):
+        (WebCore):
+        (WebCore::SVGColor::cloneForCSSOM):
+        * svg/SVGColor.h:
+        (SVGColor):
+        * svg/SVGPaint.cpp:
+        (WebCore::SVGPaint::SVGPaint):
+        (WebCore):
+        (WebCore::SVGPaint::cloneForCSSOM):
+        * svg/SVGPaint.h:
+        (SVGPaint):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::getPresentationAttribute):
+
 2012-04-09  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: get rid of WebInspector.Resource.category, use  WebInspector.Resource.type instead.
