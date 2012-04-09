@@ -1,3 +1,30 @@
+2012-04-09  James Robinson  <jamesr@chromium.org>
+
+        [chromium] CCLayerTreeHost / WebLayerTreeView should be single ownership, not RefCounted
+        https://bugs.webkit.org/show_bug.cgi?id=83413
+
+        Reviewed by Adrienne Walker.
+
+        CCLayerTreeHost always has a single logical owner, typically a WebLayerTreeView via either WebViewImpl or the
+        public API. It is currently refcounted for historical reasons but this isn't necessary and adds confusion.
+        CCLayerTreeHost instances and pointers are carefully managed currently to avoid leaks. In particular, while
+        LayerChromium instances hold RefPtr<CCLayerTreeHost>s, whenever we want to destroy a CCLayerTreeHost we
+        proactively clear out these references inside setRootLayer() to break the cycle.
+
+        Refactor covered by existing unit and layout tests.
+
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        (WebCore::LayerChromium::setMaskLayer):
+        (WebCore::LayerChromium::setReplicaLayer):
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore::LayerChromium::layerTreeHost):
+        (LayerChromium):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::create):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+
 2012-04-09  Joshua Bell  <jsbell@chromium.org>
 
         Unreviewed, rolling out r113473.
