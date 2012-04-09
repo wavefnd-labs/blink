@@ -1,3 +1,36 @@
+2012-04-09  James Robinson  <jamesr@chromium.org>
+
+        Remove partially implemented per-Element visibility checks from requestAnimationFrame logic
+        https://bugs.webkit.org/show_bug.cgi?id=74232
+
+        Reviewed by Dean Jackson.
+
+        The initial requestAnimationFrame implementation had an Element parameter as the second argument to the
+        function. This element was intended to convey the element associated with the animation so that when the element
+        was not visible the animation callback would not be run. The checked in implementation does a very limited check
+        - testing for display:none and being detached from the tree - but does it in a way that does not work correctly
+        if an element's visibility is manipulated by a callback running from a different document. It also adds
+        significant complexity to the code, making it less hackable and easy to introduce subtle security bugs or
+        infinite loops.
+
+        This patch removes the parameter. Since it has always been marked optional, there is no web compat risk.
+
+        If this functionality is added back in the future it needs to be implemented in a way that considers all
+        callbacks within a Page and not only those within a single Document.
+
+        * dom/Document.cpp:
+        (WebCore::Document::webkitRequestAnimationFrame):
+        * dom/Document.h:
+        * dom/RequestAnimationFrameCallback.h:
+        * dom/ScriptedAnimationController.cpp:
+        (WebCore::ScriptedAnimationController::registerCallback):
+        (WebCore::ScriptedAnimationController::serviceScriptedAnimations):
+        * dom/ScriptedAnimationController.h:
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::webkitRequestAnimationFrame):
+        * page/DOMWindow.h:
+        * page/DOMWindow.idl:
+
 2012-04-09  Chris Guan  <chris.guan@torchmobile.com.cn>
 
         [Blackberry] m_isRequestedByPlugin should be copied in ResourceRequest
