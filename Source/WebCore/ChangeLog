@@ -1,3 +1,32 @@
+2012-04-09  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Replica layers are not drawn, so should not be painted
+        https://bugs.webkit.org/show_bug.cgi?id=83504
+
+        Reviewed by James Robinson.
+
+        We attempt to paint replica layers when we are painting the mask layers
+        in CCLayerTreeHost.cpp.
+
+        This is useless code, replica layers have drawsContent() == false, and
+        have an empty visibleLayerRect, so the paint functions end up early-
+        outting. But it is a waste of time to try, and confusing to have
+        this attempted in the code at all, since the replica layers are never
+        drawn. They exist only for their transforms.
+
+        Also the dimensions used for the replica mask are different from the
+        surface mask, which is confusing and unnecessary as well. The mask is
+        applied to the same surface contents as the surface mask would be, so
+        only the surface's contentBounds need to be painted in the replica
+        mask.
+
+        Covered by existing tests.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::paintMasksForRenderSurface):
+        (WebCore::CCLayerTreeHost::paintLayerContents):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+
 2012-04-09  Shinya Kawanaka  <shinyak@chromium.org>
 
         ShadowRoot should have selection attribute.
