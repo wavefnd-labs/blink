@@ -1,3 +1,19 @@
+2012-04-09  Alexey Proskuryakov  <ap@apple.com>
+
+        [Mac] WebProcess dies due to m_process->checkURLReceivedFromWebProcess(url) dropping a file URL
+        https://bugs.webkit.org/show_bug.cgi?id=83506
+        <rdar://problem/11171264>
+
+        Reviewed by Darin Adler.
+
+        Cannot test, because dragging within a single window never initiates a navigation, and dragging
+        across windows is too much for DRT and WTR.
+
+        * platform/mac/DragDataMac.mm: (WebCore::DragData::asURL): Add the same checks that we had
+        for NSURLPboardType to NSStringPboardType case, preventing dropping of non-HTTP URLs.
+        String types cannot be sanitized when they are modified by JavaScript, and are thus less trusted.
+        String checks should be at least as restrictive as URL ones.
+
 2012-04-09  Greg Billock  <gbillock@google.com>
 
         Add transfer map argument to Intent constructor
