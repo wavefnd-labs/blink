@@ -1,3 +1,168 @@
+2012-04-09  Andreas Kling  <kling@webkit.org>
+
+        Make CSSValuePool share values globally.
+        <http://webkit.org/b/77700>
+
+        Reviewed by Antti Koivisto.
+
+        Remove the per-Document CSSValuePool and have everyone use a global pool
+        accessed via "CSSValuePool& cssValuePool()".
+
+        This reduces memory usage by sharing cached CSSValues between all documents,
+        and relaxes heap churn since the common, persistenly cached values are held
+        by CSSValuePool forever.
+
+        No behavior change thanks to r113588 which introduced a mechanism that makes
+        sure we never expose internal CSSValue objects to bindings, but read-only
+        clones of those values.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::valueForNinePieceImageSlice):
+        (WebCore::valueForNinePieceImageQuad):
+        (WebCore::valueForNinePieceImageRepeat):
+        (WebCore::valueForNinePieceImage):
+        (WebCore::zoomAdjustedPixelValue):
+        (WebCore::zoomAdjustedNumberValue):
+        (WebCore::zoomAdjustedPixelValueForLength):
+        (WebCore::valueForReflection):
+        (WebCore::getPositionOffsetValue):
+        (WebCore::CSSComputedStyleDeclaration::currentColorOrValidColor):
+        (WebCore::getBorderRadiusCornerValues):
+        (WebCore::getBorderRadiusCornerValue):
+        (WebCore::getBorderRadiusShorthandValue):
+        (WebCore::computedTransform):
+        (WebCore::CSSComputedStyleDeclaration::valueForCustomFilterNumberParameter):
+        (WebCore::CSSComputedStyleDeclaration::valueForFilter):
+        (WebCore::valueForGridTrackBreadth):
+        (WebCore::valueForGridTrackList):
+        (WebCore::valueForGridPosition):
+        (WebCore::getDelayValue):
+        (WebCore::getDurationValue):
+        (WebCore::createLineBoxContainValue):
+        (WebCore::CSSComputedStyleDeclaration::getFontSizeCSSValuePreferringKeyword):
+        (WebCore::CSSComputedStyleDeclaration::valueForShadow):
+        (WebCore::valueForFamily):
+        (WebCore::renderUnicodeBidiFlagsToCSSValue):
+        (WebCore::renderTextDecorationFlagsToCSSValue):
+        (WebCore::fillRepeatToCSSValue):
+        (WebCore::fillSizeToCSSValue):
+        (WebCore::contentToCSSValue):
+        (WebCore::counterToCSSValue):
+        (WebCore::fontFamilyFromStyle):
+        (WebCore::lineHeightFromStyle):
+        (WebCore::fontSizeFromStyle):
+        (WebCore::fontStyleFromStyle):
+        (WebCore::fontVariantFromStyle):
+        (WebCore::fontWeightFromStyle):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSComputedStyleDeclaration.h:
+        (WebCore):
+        * css/CSSParser.cpp:
+        (WebCore::parseColorValue):
+        (WebCore::parseSimpleLengthValue):
+        (WebCore::parseKeywordValue):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseColor):
+        (WebCore::CSSParser::setStyleSheet):
+        (WebCore::CSSParser::createPrimitiveNumericValue):
+        (WebCore::CSSParser::createPrimitiveStringValue):
+        (WebCore::CSSParser::parseValidPrimitive):
+        (WebCore::parseBackgroundClip):
+        (WebCore::CSSParser::parseFillShorthand):
+        (WebCore::CSSParser::parseAnimationShorthand):
+        (WebCore::CSSParser::parseTransitionShorthand):
+        (WebCore::CSSParser::parseShorthand):
+        (WebCore::CSSParser::parsePage):
+        (WebCore::CSSParser::parseSizeParameter):
+        (WebCore::CSSParser::parseContent):
+        (WebCore::CSSParser::parseAttr):
+        (WebCore::CSSParser::parseBackgroundColor):
+        (WebCore::CSSParser::parseFillImage):
+        (WebCore::CSSParser::parseFillPositionX):
+        (WebCore::CSSParser::parseFillPositionY):
+        (WebCore::CSSParser::parseFillPositionComponent):
+        (WebCore::CSSParser::parseFillPosition):
+        (WebCore::CSSParser::parseFillRepeat):
+        (WebCore::CSSParser::parseFillSize):
+        (WebCore::CSSParser::parseFillProperty):
+        (WebCore::CSSParser::parseAnimationDirection):
+        (WebCore::CSSParser::parseAnimationFillMode):
+        (WebCore::CSSParser::parseAnimationIterationCount):
+        (WebCore::CSSParser::parseAnimationName):
+        (WebCore::CSSParser::parseAnimationPlayState):
+        (WebCore::CSSParser::parseAnimationProperty):
+        (WebCore::CSSParser::parseAnimationTimingFunction):
+        (WebCore::CSSParser::parseGridTrackList):
+        (WebCore::CSSParser::parseDashboardRegions):
+        (WebCore::CSSParser::parseCounterContent):
+        (WebCore::CSSParser::parseClipShape):
+        (WebCore::CSSParser::parseExclusionShape):
+        (WebCore::CSSParser::parseFont):
+        (WebCore::FontFamilyValueBuilder::FontFamilyValueBuilder):
+        (WebCore::FontFamilyValueBuilder::commit):
+        (FontFamilyValueBuilder):
+        (WebCore::CSSParser::parseFontFamily):
+        (WebCore::CSSParser::parseFontVariant):
+        (WebCore::CSSParser::parseFontWeight):
+        (WebCore::ShadowParseContext::commitStyle):
+        (WebCore::CSSParser::parseShadow):
+        (WebCore::CSSParser::parseReflect):
+        (WebCore::CSSParser::parseFlex):
+        (WebCore::BorderImageParseContext::commitBorderImageProperty):
+        (WebCore::CSSParser::parseBorderImage):
+        (WebCore::CSSParser::parseBorderImageRepeat):
+        (WebCore::BorderImageSliceParseContext::commitBorderImageSlice):
+        (WebCore::BorderImageQuadParseContext::commitNumber):
+        (WebCore::BorderImageQuadParseContext::commitBorderImageQuad):
+        (WebCore::CSSParser::parseBorderRadius):
+        (WebCore::CSSParser::parseAspectRatio):
+        (WebCore::CSSParser::parseCounter):
+        (WebCore::parseDeprecatedGradientPoint):
+        (WebCore::parseDeprecatedGradientColorStop):
+        (WebCore::CSSParser::parseDeprecatedGradient):
+        (WebCore::valueFromSideKeyword):
+        (WebCore::parseGradientColorOrKeyword):
+        (WebCore::CSSParser::parseLinearGradient):
+        (WebCore::CSSParser::parseRadialGradient):
+        (WebCore::CSSParser::parseCrossfade):
+        (WebCore::CSSParser::parseImageSet):
+        (WebCore::CSSParser::parseCustomFilter):
+        (WebCore::CSSParser::parseBuiltinFilterArguments):
+        (WebCore::CSSParser::parseFilter):
+        (WebCore::CSSParser::parseFlowThread):
+        (WebCore::CSSParser::parseRegionThread):
+        (WebCore::CSSParser::parseTextEmphasisStyle):
+        (WebCore::CSSParser::parseFontFeatureSettings):
+        (WebCore::CSSParser::parseFontVariantLigatures):
+        * css/CSSParser.h:
+        (WebCore):
+        (CSSParser):
+        * css/CSSValuePool.cpp:
+        (WebCore::cssValuePool):
+        (WebCore):
+        * css/CSSValuePool.h:
+        (CSSValuePool):
+        (WebCore):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::setProperty):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        * dom/Document.cpp:
+        * dom/Document.h:
+        (WebCore):
+        (Document):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::setInlineStyleProperty):
+        (WebCore::StyledElement::addPropertyToAttributeStyle):
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::addHTMLColorToStyle):
+        * html/HTMLFontElement.cpp:
+        (WebCore::HTMLFontElement::collectStyleForAttribute):
+        * html/HTMLHRElement.cpp:
+        (WebCore::HTMLHRElement::collectStyleForAttribute):
+        * html/HTMLTableElement.cpp:
+        (WebCore::HTMLTableElement::createSharedCellStyle):
+
 2012-04-09  Levi Weintraub  <leviw@chromium.org>
 
         Prepare html classes for sub-pixel LayoutUnits
