@@ -1,3 +1,69 @@
+2012-04-10  Chris Rogers  <crogers@google.com>
+
+        AudioParam must support connections from audio-rate signals
+        https://bugs.webkit.org/show_bug.cgi?id=83524
+
+        Reviewed by Eric Carlson.
+        
+        In the Web Audio API, it's possible to connect one AudioNode to another AudioNode.
+        Similary we should allow an AudioNode to connect to an AudioParam, thus controlling
+        a parameter with an audio-rate signal.  This is important in many audio processing
+        applications.
+
+        Test: webaudio/audioparam-connect-audioratesignal.html
+
+        Simple method name change of AudioParam::hasTimelineValues() to AudioParam::hasSampleAccurateValues().
+        * Modules/webaudio/AudioGainNode.cpp:
+        (WebCore::AudioGainNode::process):
+
+        * Modules/webaudio/AudioNode.cpp:
+        (WebCore::AudioNode::connect): Add connect() method from AudioNode -> AudioParam.
+        (WebCore):
+        (WebCore::AudioNode::disconnect):
+        (WebCore::AudioNode::finishDeref):
+        Use AudioNodeOutput::disconnectAll() instead of AudioNodeOutput::disconnectAllInputs().
+        * Modules/webaudio/AudioNode.h: Add connect() method from AudioNode -> AudioParam.
+        (WebCore):
+        (AudioNode):
+        * Modules/webaudio/AudioNode.idl: Add connect() method from AudioNode -> AudioParam.
+
+        Implement support for an AudioNodeOutput to fanout to multiple AudioParams.
+        * Modules/webaudio/AudioNodeOutput.cpp:
+        (WebCore::AudioNodeOutput::AudioNodeOutput):
+        (WebCore::AudioNodeOutput::updateRenderingState): Update rendering state related to AudioParams.
+        (WebCore::AudioNodeOutput::pull): pull() must now take into account fanout to AudioParams for in-place processing.
+        (WebCore::AudioNodeOutput::fanOutCount):
+        (WebCore):
+        (WebCore::AudioNodeOutput::paramFanOutCount): New method keeping track of number of connections to AudioParams.
+        (WebCore::AudioNodeOutput::renderingParamFanOutCount): New method keeping track of number of connections to AudioParams for rendering.
+        (WebCore::AudioNodeOutput::addParam): Add a connection to an AudioParam.
+        (WebCore::AudioNodeOutput::removeParam): Remove a connection to an AudioParam.
+        (WebCore::AudioNodeOutput::disconnectAllParams): Remove all connections to AudioParams.
+        (WebCore::AudioNodeOutput::disconnectAll): New method to disconnect all AudioNodeInputs and AudioParams.
+        * Modules/webaudio/AudioNodeOutput.h:
+        (AudioNodeOutput):
+
+        Allow an AudioParam to accept a connection from an AudioNodeOutput, thus being controlled
+        by an audio-rate signal.
+        * Modules/webaudio/AudioParam.cpp:
+        (WebCore::AudioParam::calculateSampleAccurateValues): Calculates sample-accurate values from timeline or an AudioNode.
+        (WebCore):
+        (WebCore::AudioParam::calculateAudioRateSignalValues): Calculates sample-accurate values from an AudioNode.
+        (WebCore::AudioParam::calculateTimelineValues): Calculates sample-accurate values scheduled on the timeline.
+        (WebCore::AudioParam::connect): Connect from an AudioNodeOutput for control from an audio-rate signal.
+        (WebCore::AudioParam::disconnect): Disconnect from an AudioNodeOutput.
+        * Modules/webaudio/AudioParam.h:
+        (WebCore):
+        (WebCore::AudioParam::AudioParam):
+        (WebCore::AudioParam::hasSampleAccurateValues): Change name from hasTimelineValues() and return true
+        either if we have timeline values or if we've been connected from an AudioNode.
+        (AudioParam):
+
+        Simple method name change of AudioParam::hasTimelineValues() to AudioParam::hasSampleAccurateValues().
+        * Modules/webaudio/Oscillator.cpp:
+        (WebCore::Oscillator::calculateSampleAccuratePhaseIncrements):
+        (WebCore::Oscillator::process):
+
 2012-04-10  Patrick Gansterer  <paroga@webkit.org>
 
         [CMake] Enable USE_FOLDERS property
