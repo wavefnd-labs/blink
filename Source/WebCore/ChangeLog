@@ -1,3 +1,46 @@
+2012-04-10  No'am Rosenthal  <noam.rosenthal@nokia.com>
+
+        [Qt][WK2] Manage graphics buffers in the web process
+        https://bugs.webkit.org/show_bug.cgi?id=78675
+
+        Added WebCore::GraphicsSurface, a wrapper class to a platform-dependant
+        surface that can be accessed efficiently by both the CPU and the GPU.
+        This will allow fast texture uploads for WebKit2, and in the future
+        fast copies for 2D canvas and WebGL.
+        The first implementation is for Mac using IOSurfaces.
+
+        TextureMapperGL had to be modified to use GL_UNSIGNED_INT_8_8_8_8_REV
+        for textures on Mac, since that's the native pixel format of BGRA
+        IOSurfaces.
+
+        Though this feature is not written in a Qt-specific way, it's currently
+        only enabled for Qt and is protected by USE(GRAPHICS_SURFACE).
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Covered by existing API tests.
+
+        * Target.pri:
+        * WebCore.pri:
+        * platform/graphics/surfaces/GraphicsSurface.cpp: Added.
+        * platform/graphics/surfaces/GraphicsSurface.h: Added.
+        * platform/graphics/surfaces/mac/GraphicsSurfaceMac.cpp: Added.
+        * platform/graphics/surfaces/qt/GraphicsSurfaceQt.cpp: Added.
+        (WebCore::GraphicsSurface::didReleaseImage):
+        (WebCore):
+        (WebCore::GraphicsSurface::platformBeginPaint):
+        (WebCore::GraphicsSurface::createReadOnlyImage):
+        * platform/graphics/texmap/TextureMapper.h:
+        (WebCore::BitmapTexture::isOpenGLBacked):
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::toBitmapTextureGL):
+        (WebCore):
+        (WebCore::BitmapTextureGL::didReset):
+        (WebCore::BitmapTextureGL::updateContents):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (WebCore::BitmapTextureGL::isOpenGLBacked):
+        (WebCore):
+
 2012-04-10  Alexei Filippov  <alexeif@chromium.org>
 
         Web Inspector: split nodes and edges array in heap profiler serialization.
