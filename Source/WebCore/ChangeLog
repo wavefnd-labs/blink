@@ -1,3 +1,25 @@
+2012-04-10  Andreas Kling  <kling@webkit.org>
+
+        REGRESSION(r113588): 15-30% perf. regression on CSS/CSSPropertySetterGetter.
+        <http://webkit.org/b/83540>
+
+        Reviewed by Antti Koivisto.
+
+        Changed the behavior of getPropertyCSSValueInternal() to actually return the internal
+        value rather than a cloned one. There is an assertion in the CSSValue bindings that
+        will catch anyone trying to expose these values to the web.
+
+        This avoids constructing "safe" CSSValue objects in the bindings layer, for the cases
+        where we only want to extract the cssText or numeric value. These cloned objects are
+        only needed when exposing fully-fledged CSSValues to the web, which must be tied to
+        a single document.
+
+        * css/CSSStyleDeclaration.h:
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValueInternal):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyCSSValueInternal):
+
 2012-04-10  No'am Rosenthal  <noam.rosenthal@nokia.com>
 
         [Qt][WK2] Manage graphics buffers in the web process
