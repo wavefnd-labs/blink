@@ -1,3 +1,49 @@
+2012-04-09  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Cull occluded surface quads
+        https://bugs.webkit.org/show_bug.cgi?id=81227
+
+        Reviewed by Adrienne Walker.
+
+        Cull render surface and replica quads during draw based on occlusion.
+
+        In order to compute occlusion for the surface or replica, it must not
+        consider occlusion found in the surface's own subtree. To do this, we
+        reorder the calls to the occlusion tracker, and add the surface and
+        replica quads before we "leaveToTargetRenderSurface" which merges
+        occlusion from the surface's subtree up into its parent.
+
+        Unit test: CCOcclusionTrackerTestReplicaOccluded
+                   CCOcclusionTrackerTestSurfaceWithReplicaUnoccluded
+                   CCOcclusionTrackerTestSurfaceAndReplicaOccludedDifferently
+                   CCOcclusionTrackerTestSurfaceChildOfSurface
+                   CCOcclusionTrackerTestSurfaceChildOfClippingSurface
+
+        And added some sanity checks to other CCOcclusionTracker tests that have
+        render surfaces.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.cpp:
+        (WebCore::::leaveToTargetRenderSurface):
+        (WebCore::::unoccludedContributingSurfaceContentRect):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.h:
+        (CCOcclusionTrackerBase):
+        * platform/graphics/chromium/cc/CCQuadCuller.cpp:
+        (WebCore::CCQuadCuller::CCQuadCuller):
+        (WebCore::appendQuadInternal):
+        (WebCore::CCQuadCuller::append):
+        (WebCore):
+        (WebCore::CCQuadCuller::appendSurface):
+        (WebCore::CCQuadCuller::appendReplica):
+        * platform/graphics/chromium/cc/CCQuadCuller.h:
+        (CCQuadCuller):
+        * platform/graphics/chromium/cc/CCRenderPass.cpp:
+        (WebCore::CCRenderPass::appendQuadsForRenderSurfaceLayer):
+        * platform/graphics/chromium/cc/CCRenderPass.h:
+        (CCRenderPass):
+
 2012-04-09  Andreas Kling  <kling@webkit.org>
 
         Make CSSValuePool share values globally.
