@@ -1,3 +1,31 @@
+2012-04-09  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Defer texture id allocation for copies until the actual copy executes
+        https://bugs.webkit.org/show_bug.cgi?id=83514
+
+        Reviewed by Adrienne Walker.
+
+        This allows for queuing a texture copy operation into a ManagedTexture whose texture ID has not yet been
+        allocated. The ManagedTexture* serves as a promise that an ID will be available when the copy is executed.
+
+        * platform/graphics/chromium/Canvas2DLayerChromium.cpp:
+        (WebCore::Canvas2DLayerChromium::updateCompositorResources):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::doCommit):
+        * platform/graphics/chromium/cc/CCTextureUpdater.cpp:
+        (WebCore::CCTextureUpdater::CCTextureUpdater):
+        (WebCore::CCTextureUpdater::appendManagedCopy):
+        (WebCore):
+        (WebCore::CCTextureUpdater::hasMoreUpdates):
+        (WebCore::CCTextureUpdater::update):
+        (WebCore::CCTextureUpdater::clear):
+        * platform/graphics/chromium/cc/CCTextureUpdater.h:
+        (CCTextureUpdater):
+        (ManagedCopyEntry):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::beginFrameCompleteOnImplThread):
+        (WebCore::CCThreadProxy::scheduledActionUpdateMoreResources):
+
 2012-04-10  David Hyatt  <hyatt@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=83595
