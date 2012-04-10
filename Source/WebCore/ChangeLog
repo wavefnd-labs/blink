@@ -1,3 +1,40 @@
+2012-04-10  Rob Buis  <rbuis@rim.com>
+
+        getElementsByTagName unable to find SVG camelCase elements imported into HTML
+        https://bugs.webkit.org/show_bug.cgi?id=46800
+
+        Reviewed by Nikolas Zimmermann.
+
+        Implement getElementsByTagName according to the algorithm in
+        http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#concept-getelementsbytagname.
+        If the owner document of the element is html, the new class HTMLTagNodeList deals with
+        finding the match(es) based on this algorithm. If the owner document is non HTML, the existing
+        TagNodeList is used.
+
+        Implement getElementsByTagNameNS according to the algorithm in
+        http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#concept-getelementsbytagnamens.
+        The existing TagNodeList implements this algorithm.
+
+        Cached results may have less hits after this change. Tag names that are equal when case
+        insensitive but different when case sensitive can't share the result due to above algorithms, i.e.
+        they would match differently in the non html part of the document.
+
+        Tests: fast/dom/getElementsByTagName-localName-matching.html
+               fast/dom/getElementsByTagName-localName-matching2.xhtml
+               svg/dom/getElementsByTagName-localName-matching.html
+
+        * dom/Node.cpp:
+        (WebCore::Node::getElementsByTagName): create TagNodeList depending on owner document type.
+        (WebCore::Node::getElementsByTagNameNS): do not lowercase localName for html.
+        * dom/TagNodeList.cpp:
+        (WebCore::HTMLTagNodeList::HTMLTagNodeList): add specialized TagNodeList for html matching rules.
+        (WebCore):
+        (WebCore::HTMLTagNodeList::nodeMatches):
+        * dom/TagNodeList.h:
+        (TagNodeList):
+        (HTMLTagNodeList):
+        (WebCore::HTMLTagNodeList::create):
+
 2012-04-09  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: [Device Metrics] Introduce the "Fit window" option
