@@ -1,3 +1,23 @@
+2012-04-10  Abhishek Arya  <inferno@chromium.org>
+
+        Crash due to captions list not updated after section recalc.
+        https://bugs.webkit.org/show_bug.cgi?id=83552
+
+        Reviewed by Julien Chaffraix.
+
+        Test: fast/table/table-caption-not-removed-crash.html
+
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::addChild): no need to set the need for
+        section recalc. It was needed in old code when we had more than
+        one caption and we need to call section recalc to destroy the other
+        captions.
+        (WebCore::RenderTable::recalcSections): need to rebuild captions list.
+        This is how the old code worked before r100177. Basically, children can
+        moved without calling RenderTable::removeChild, so we should depend on
+        recalcSections to update our captions list. Also, fix a style nit of aligning
+        case labels with the switch statement.
+
 2012-04-10  Anders Carlsson  <andersca@apple.com>
 
         Unreviewed, rolling out r113611.
