@@ -1,3 +1,52 @@
+2012-04-10  David Barton  <dbarton@mathscribe.com>
+
+        msqrt's implied mrow should do operator stretching
+        https://bugs.webkit.org/show_bug.cgi?id=82353
+
+        Reviewed by Julien Chaffraix.
+
+        An <msqrt> with more than one child is supposed to surround them with an implied <mrow>.
+        This patch does this, and thus includes vertical operator stretching. We also fix some
+        problems with the old RenderMathMLSquareRoot.cpp: possibly shared RenderStyles were
+        being modified, and layout() was using heights of children without checking whether they
+        needed layout themselves first.
+        
+        To leave room for the radical sign, we use intrinsic padding. This is simpler and more
+        efficient than using anonymous RenderStyles.
+
+        Added tests to mo-stretch.html and style.xhtml. Regression tests are in roots.xhtml.
+
+        * css/mathml.css:
+        (msqrt):
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::RenderMathMLBlock):
+        (WebCore::RenderMathMLBlock::paddingTop):
+        (WebCore::RenderMathMLBlock::paddingBottom):
+        (WebCore::RenderMathMLBlock::paddingLeft):
+        (WebCore::RenderMathMLBlock::paddingRight):
+        (WebCore::RenderMathMLBlock::paddingBefore):
+        (WebCore::RenderMathMLBlock::paddingAfter):
+        (WebCore::RenderMathMLBlock::paddingStart):
+        (WebCore::RenderMathMLBlock::paddingEnd):
+        * rendering/mathml/RenderMathMLBlock.h:
+        (RenderMathMLBlock):
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::RenderMathMLRow):
+        (WebCore::RenderMathMLRow::createAnonymousWithParentRenderer):
+        * rendering/mathml/RenderMathMLRow.h:
+        (RenderMathMLRow):
+        * rendering/mathml/RenderMathMLSquareRoot.cpp:
+        (WebCore):
+        (WebCore::RenderMathMLSquareRoot::addChild):
+        (WebCore::RenderMathMLSquareRoot::computePreferredLogicalWidths):
+        (WebCore::RenderMathMLSquareRoot::computeLogicalHeight):
+        (WebCore::RenderMathMLSquareRoot::layout):
+        (WebCore::RenderMathMLSquareRoot::paint):
+        * rendering/mathml/RenderMathMLSquareRoot.h:
+        (RenderMathMLSquareRoot):
+
 2012-04-10  Luke Macpherson  <macpherson@chromium.org>
 
         Don't allow fallthrough for CSSPropertyBaselineShift in CSSComputedStyleDeclaration::getSVGPropertyCSSValue().
