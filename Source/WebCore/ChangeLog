@@ -1,3 +1,28 @@
+2012-04-09  Levi Weintraub  <leviw@chromium.org>
+
+        Prepare html classes for sub-pixel LayoutUnits
+        https://bugs.webkit.org/show_bug.cgi?id=83491
+
+        Reviewed by Eric Seidel.
+
+        This patch brings the entire HTML folder up to the current state of the subpixellayout branch. Adding
+        an intValue flavor of Length that maps to the current value function was also necessary to get us
+        there. See https://trac.webkit.org/wiki/LayoutUnit and the descriptions below for details.
+
+        No new tests. No change in behavior.
+
+        * html/HTMLMarqueeElement.cpp:
+        (WebCore::HTMLMarqueeElement::scrollAmount): Fixes a compiler error when length returns a float, as
+        we intend it to do when switching to sub-pixel layout.
+        * html/ImageDocument.cpp:
+        (WebCore::ImageDocumentParser::finish): imageSize is always integral.
+        * platform/Length.h:
+        (WebCore::Length::Length): Added a constructor that takes a FractionalLayoutUnit.
+        (Length):
+        (WebCore::Length::intValue): Currently maps directly to Length::value, but the current logic of value
+        will be migrated here when value is changed to return a float.
+        (WebCore::Length::setValue): Added a variant that takes a FractionalLayoutUnit.
+
 2012-04-09  Andrew Lo  <anlo@rim.com>
 
         [BlackBerry] requestAnimationFrame performance choppy & inconsistent
