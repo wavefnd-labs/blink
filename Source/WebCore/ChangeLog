@@ -1,3 +1,67 @@
+2011-12-14  Jer Noble  <jer.noble@apple.com>
+
+        WebAudio: propagate a silence hint through the AudioNode graph.
+        https://bugs.webkit.org/show_bug.cgi?id=74553
+
+        Reviewed by Chris Rogers.
+
+        No new tests; optimization of existing code path, so covered by existing tests.
+
+        Introduce the concept of a "silent" channel:
+        * platform/audio/AudioChannel.h:
+        (WebCore::AudioChannel::AudioChannel):
+        (WebCore::AudioChannel::set): Clear silent bit.
+        (WebCore::AudioChannel::zero): Set silent bit.
+        (WebCore::AudioChannel::clearSilentFlag): Clear silent bit.
+        (WebCore::AudioChannel::isSilent): Accessor.
+
+        Optimize a few channel operations when the source or destination channels are silent.
+        * platform/audio/AudioChannel.cpp:
+        (WebCore::AudioChannel::scale): No-op on a silent channel.
+        (WebCore::AudioChannel::copyFrom): zero() when source is silent.
+        (WebCore::AudioChannel::copyFromRange): possibly zero() when source is silent.
+        (WebCore::AudioChannel::sumFrom): No-op when source is silent.
+        (WebCore::AudioChannel::maxAbsValue): 0 on a silent channel.
+
+        Optimize a few bus operations when the source or destination channels are silent.
+        * platform/audio/AudioBus.cpp:
+        (WebCore::AudioBus::processWithGainFromMonoStereo): No-op if source is silent and either
+            the destination bus is silent, or the output is not summed to the destination.
+        (WebCore::AudioBus::copyWithSampleAccurateGainValuesFrom): zero() if the source is silent
+            and the lengths of the gain values, source, and destination match.
+        (WebCore::AudioBus::createBySampleRateConverting): Return an empty bus if the source is silent.
+        (WebCore::AudioBus::createByMixingToMono): Ditto; clear the destination's silent bit otherwise.
+        (WebCore::AudioBus::isSilent): Return whether all channels are silent.
+        (WebCore::AudioBus::clearSilentFlag): Clear silent bit of constituent channels.
+        * platform/audio/AudioBus.h:
+
+        Make sure that classes which generate audio clear their busses' silent bit.
+        * webaudio/AudioBufferSourceNode.cpp:
+        (WebCore::AudioBufferSourceNode::process): Ditto.
+        (WebCore::AudioBufferSourceNode::renderFromBuffer): Ditto.
+        (WebCore::AudioBufferSourceNode::propagatesSilence): Propagate silence only when the source node
+            has nothing left to render.
+        * webaudio/AudioBufferSourceNode.h:
+        (WebCore::AudioBufferSourceNode::playbackState): Made const correct.
+        (WebCore::AudioBufferSourceNode::isPlaying): Added simple accessor.
+        (WebCore::AudioBufferSourceNode::hasFinished): Ditto.
+        * webaudio/AudioDestinationNode.h:
+        (WebCore::AudioDestinationNode::currentSampleFrame): Made const correct.
+        (WebCore::AudioDestinationNode::currentTime): Ditto.
+
+        Audio nodes should not process audio data when the input is silent and the nodes will propagate silences.
+        * webaudio/AudioNode.cpp:
+        (WebCore::AudioNode::processIfNecessary): 
+        (WebCore::AudioNode::inputsAreSilent): Convenience function which walk over the node's inputs.
+        (WebCore::AudioNode::silenceOutputs): Ditto.
+        (WebCore::AudioNode::unsilenceOutputs): Ditto.
+        * webaudio/AudioNode.h:
+        (WebCore::AudioNode::propagatesSilence):
+
+        These Nodes can generate audio when given silent input, so return false from propagatesSilence.
+        * Modules/webaudio/Oscillator.h:
+        (WebCore::Oscillator::propagatesSilence): Added.
+
 2012-04-10  Yi Shen  <yi.4.shen@nokia.com>
 
         Pressing enter on blank line after bullet deletes entire bulleted line.
