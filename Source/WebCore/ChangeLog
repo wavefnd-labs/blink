@@ -1,3 +1,94 @@
+2012-04-10  Peter Rybin  <peter.rybin@gmail.com>
+
+        Web Inspector: CodeGeneratorInspector.py: do not expose raw methods from generated types
+        https://bugs.webkit.org/show_bug.cgi?id=83390
+
+        Reviewed by Yury Semikhatsky.
+
+        Intermediate classes InspectorObjectBase and InspectorArrayBase are created. They have all raw methos
+        protected. InspectorObject and InspectorArray now inherit the corresponding base classes with exposing
+        all their protected methods.
+
+        "Open types" are left inheriting from InspectorObject, plus field name constants are generated for
+        an easy random access to all properties.
+
+        All the client code is fixed to use type-safe API rather than raw access methods in function parameter
+        and return types and bodies.
+
+        * inspector/CodeGeneratorInspector.py:
+        (RawTypes.Object):
+        (RawTypes.Object.get_setter_name):
+        (RawTypes.Array):
+        (RawTypes.Array.get_setter_name):
+        (TypeBindings.create_type_declaration_.ClassBinding.get_code_generator.CodeGenerator.generate_type_builder):
+        (Array):
+        (Generator):
+        (Generator.resolve_type_and_generate_ad_hoc.InterfaceGenerateContext):
+        (Generator.process_types.GenerateContext):
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::querySelectorAll):
+        (WebCore::InspectorDOMAgent::getEventListenersForNode):
+        (WebCore::InspectorDOMAgent::buildObjectForEventListener):
+        * inspector/InspectorDOMAgent.h:
+        (InspectorDOMAgent):
+        * inspector/InspectorDOMDebuggerAgent.cpp:
+        (WebCore::InspectorDOMDebuggerAgent::descriptionForDOMEvent):
+        * inspector/InspectorDebuggerAgent.cpp:
+        (WebCore::InspectorDebuggerAgent::setBreakpointByUrl):
+        (WebCore::InspectorDebuggerAgent::didPause):
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::buildObjectForSearchResult):
+        (WebCore::InspectorPageAgent::searchInResources):
+        (WebCore::InspectorPageAgent::buildObjectForFrameTree):
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::InspectorResourceAgent::didReceiveResponse):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::fillMediaListChain):
+        (WebCore::InspectorStyle::styleWithProperties):
+        * inspector/InspectorValues.cpp:
+        (WebCore::InspectorObjectBase::~InspectorObjectBase):
+        (WebCore::InspectorObjectBase::asObject):
+        (WebCore::InspectorObjectBase::openAccessors):
+        (WebCore):
+        (WebCore::InspectorObjectBase::getBoolean):
+        (WebCore::InspectorObjectBase::getString):
+        (WebCore::InspectorObjectBase::getObject):
+        (WebCore::InspectorObjectBase::getArray):
+        (WebCore::InspectorObjectBase::get):
+        (WebCore::InspectorObjectBase::remove):
+        (WebCore::InspectorObjectBase::writeJSON):
+        (WebCore::InspectorObjectBase::InspectorObjectBase):
+        (WebCore::InspectorArrayBase::~InspectorArrayBase):
+        (WebCore::InspectorArrayBase::asArray):
+        (WebCore::InspectorArrayBase::writeJSON):
+        (WebCore::InspectorArrayBase::InspectorArrayBase):
+        (WebCore::InspectorArrayBase::get):
+        * inspector/InspectorValues.h:
+        (InspectorObjectBase):
+        (InspectorObject):
+        (WebCore::InspectorObject::create):
+        (WebCore):
+        (InspectorArrayBase):
+        (WebCore::InspectorArrayBase::length):
+        (InspectorArray):
+        (WebCore::InspectorArray::create):
+        (WebCore::InspectorObjectBase::find):
+        (WebCore::InspectorObjectBase::setBoolean):
+        (WebCore::InspectorObjectBase::setNumber):
+        (WebCore::InspectorObjectBase::setString):
+        (WebCore::InspectorObjectBase::setValue):
+        (WebCore::InspectorObjectBase::setObject):
+        (WebCore::InspectorObjectBase::setArray):
+        (WebCore::InspectorArrayBase::pushBoolean):
+        (WebCore::InspectorArrayBase::pushInt):
+        (WebCore::InspectorArrayBase::pushNumber):
+        (WebCore::InspectorArrayBase::pushString):
+        (WebCore::InspectorArrayBase::pushValue):
+        (WebCore::InspectorArrayBase::pushObject):
+        (WebCore::InspectorArrayBase::pushArray):
+        * inspector/TimelineRecordFactory.cpp:
+        (WebCore::TimelineRecordFactory::createGenericRecord):
+
 2012-04-10  Philip Rogers  <pdr@google.com>
 
         Remove unnecessary calls to RenderSVGShape::createShape()
