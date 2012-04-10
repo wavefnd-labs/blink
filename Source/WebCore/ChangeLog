@@ -1,3 +1,44 @@
+2012-04-09  Shinya Kawanaka  <shinyak@chromium.org>
+
+        Assert triggers VisibleSelection::adjustSelectionToAvoidCrossingShadowBoundaries.
+        https://bugs.webkit.org/show_bug.cgi?id=83118
+
+        Reviewed by Hajime Morita.
+
+        VisibleSelection::adjustSelectionToAvoidCrossingShadowBoundaries did not work correctly.
+        There was a case that selection crosses shadow boundaries.
+
+        This patch introduces a class TreeScopeAdjuster, which enables us to adjust Node or Position
+        into a specified tree scope.
+
+        Test: fast/dom/shadow/selections-in-shadow.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.ext.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/DOMAllInOne.cpp:
+        * dom/TreeScope.h:
+        (TreeScope):
+        * dom/TreeScopeAdjuster.cpp: Added.
+        (WebCore):
+        (WebCore::TreeScopeAdjuster::TreeScopeAdjuster):
+        (WebCore::TreeScopeAdjuster::ancestorInThisScope):
+          Returns the node itself if it's in the same tree scope.
+          Otherwise, this method checks the shadow ancestor of the node recursively.
+          If no corresponding node is found, 0 will be returned.
+        (WebCore::TreeScopeAdjuster::adjustPositionBefore):
+        (WebCore::TreeScopeAdjuster::adjustPositionAfter):
+        * dom/TreeScopeAdjuster.h: Added.
+        (WebCore):
+        (TreeScopeAdjuster):
+        (WebCore::TreeScopeAdjuster::treeScope):
+        * editing/VisibleSelection.cpp:
+        (WebCore::VisibleSelection::adjustSelectionToAvoidCrossingShadowBoundaries):
+
 2012-04-09  Lu Guanqun  <guanqun.lu@intel.com>
 
         combine two arrays in SVGException.cpp into one
