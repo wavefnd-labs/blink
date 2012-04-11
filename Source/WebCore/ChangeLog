@@ -1,3 +1,229 @@
+2012-04-11  Antti Koivisto  <antti@apple.com>
+
+        Split CSSStyleSheet into internal and CSSOM type
+        https://bugs.webkit.org/show_bug.cgi?id=83612
+        
+        Reviewed by Andreas Kling.
+
+        This will complete the separation of our style sheet data structures from CSSOM.
+        
+        The internal parts of CSSStyleSheet move to StyleSheetInternal. CSS parser
+        and style selector will now operate on internal types. Unlike other CSSOM types
+        CSSStyleSheets are still always instantiated to hold the top level author stylesheets
+        (by Nodes).
+
+        * css/CSSFontFaceSrcValue.cpp:
+        (WebCore::CSSFontFaceSrcValue::addSubresourceStyleURLs):
+        * css/CSSFontFaceSrcValue.h:
+        (CSSFontFaceSrcValue):
+        * css/CSSImportRule.cpp:
+        (WebCore::StyleRuleImport::create):
+        (WebCore::StyleRuleImport::StyleRuleImport):
+        (WebCore::StyleRuleImport::setCSSStyleSheet):
+        (WebCore::StyleRuleImport::requestStyleSheet):
+        (WebCore::CSSImportRule::~CSSImportRule):
+        (WebCore):
+        (WebCore::CSSImportRule::styleSheet):
+        * css/CSSImportRule.h:
+        (WebCore):
+        (StyleRuleImport):
+        (WebCore::StyleRuleImport::parentStyleSheet):
+        (WebCore::StyleRuleImport::styleSheet):
+        (CSSImportRule):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::insertRule):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseSheet):
+        (WebCore::CSSParser::parseRule):
+        (WebCore::CSSParser::parseKeyframeRule):
+        (WebCore::CSSParser::parseFontFaceValue):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseSelector):
+        (WebCore::CSSParser::parseDeclaration):
+        (WebCore::CSSParser::setStyleSheet):
+        (WebCore::CSSParser::parseFlowThread):
+        * css/CSSParser.h:
+        (WebCore):
+        (CSSParser):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::addSubresourceStyleURLs):
+        * css/CSSPrimitiveValue.h:
+        (CSSPrimitiveValue):
+        * css/CSSReflectValue.cpp:
+        (WebCore::CSSReflectValue::addSubresourceStyleURLs):
+        * css/CSSReflectValue.h:
+        (CSSReflectValue):
+        * css/CSSRule.h:
+        (CSSRule):
+        * css/CSSStyleSelector.cpp:
+        (RuleSet):
+        (WebCore):
+        (WebCore::CSSStyleSelector::CSSStyleSelector):
+        (WebCore::CSSStyleSelector::addAuthorRulesAndCollectUserRulesFromSheets):
+        (WebCore::CSSStyleSelector::determineScope):
+        (WebCore::CSSStyleSelector::appendAuthorStylesheets):
+        (WebCore::parseUASheet):
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (CSSStyleSelector):
+        
+            Add a set for root CSSStyleSheet objects so that the wrappers created in ensureFullCSSOMWrapperForInspector
+            stay valid.
+        
+        * css/CSSStyleSheet.cpp:
+        (WebCore::StyleSheetInternal::StyleSheetInternal):
+        (WebCore::StyleSheetInternal::~StyleSheetInternal):
+        (WebCore::StyleSheetInternal::parserAppendRule):
+        (WebCore::StyleSheetInternal::createChildRuleCSSOMWrapper):
+        (WebCore::StyleSheetInternal::ruleCount):
+        (WebCore::StyleSheetInternal::clearCharsetRule):
+        (WebCore::StyleSheetInternal::clearRules):
+        (WebCore::StyleSheetInternal::parserSetEncodingFromCharsetRule):
+        (WebCore::StyleSheetInternal::wrapperInsertRule):
+        (WebCore::StyleSheetInternal::wrapperDeleteRule):
+        (WebCore::StyleSheetInternal::addNamespace):
+        (WebCore::StyleSheetInternal::determineNamespace):
+        (WebCore::StyleSheetInternal::parseString):
+        (WebCore::StyleSheetInternal::parseStringAtLine):
+        (WebCore::StyleSheetInternal::isLoading):
+        (WebCore::StyleSheetInternal::checkLoaded):
+        (WebCore::StyleSheetInternal::notifyLoadedSheet):
+        (WebCore::StyleSheetInternal::startLoadingDynamicSheet):
+        (WebCore::StyleSheetInternal::findStyleSheetOwnerNode):
+        (WebCore::StyleSheetInternal::findDocument):
+        (WebCore::StyleSheetInternal::setMediaQueries):
+        (WebCore::StyleSheetInternal::styleSheetChanged):
+        (WebCore):
+        (WebCore::StyleSheetInternal::baseURL):
+        (WebCore::StyleSheetInternal::completeURL):
+        (WebCore::StyleSheetInternal::addSubresourceStyleURLs):
+        (WebCore::StyleSheetInternal::parentStyleSheet):
+        (WebCore::CSSStyleSheet::CSSStyleSheet):
+        (WebCore::CSSStyleSheet::~CSSStyleSheet):
+        (WebCore::CSSStyleSheet::setDisabled):
+        (WebCore::CSSStyleSheet::length):
+        (WebCore::CSSStyleSheet::item):
+        (WebCore::CSSStyleSheet::rules):
+        (WebCore::CSSStyleSheet::insertRule):
+        (WebCore::CSSStyleSheet::addRule):
+        (WebCore::CSSStyleSheet::cssRules):
+        (WebCore::CSSStyleSheet::deleteRule):
+        (WebCore::CSSStyleSheet::media):
+        (WebCore::CSSStyleSheet::parentStyleSheet):
+        * css/CSSStyleSheet.h:
+        (WebCore):
+        (WebCore::StyleSheetInternal::create):
+        (WebCore::StyleSheetInternal::createInline):
+        (StyleSheetInternal):
+        (WebCore::StyleSheetInternal::ownerNode):
+        (WebCore::StyleSheetInternal::clearOwnerNode):
+        (WebCore::StyleSheetInternal::ownerRule):
+        (WebCore::StyleSheetInternal::originalURL):
+        (WebCore::StyleSheetInternal::title):
+        (WebCore::StyleSheetInternal::setTitle):
+        (WebCore::StyleSheetInternal::setFinalURL):
+        (WebCore::StyleSheetInternal::finalURL):
+        (CSSStyleSheet):
+        (WebCore::CSSStyleSheet::create):
+        (WebCore::CSSStyleSheet::removeRule):
+        (WebCore::CSSStyleSheet::clearOwnerRule):
+        (WebCore::CSSStyleSheet::styleSheetChanged):
+        (WebCore::CSSStyleSheet::findDocument):
+        (WebCore::CSSStyleSheet::internal):
+        (WebCore::CSSStyleSheet::isCSSStyleSheet):
+        (WebCore::CSSStyleSheet::type):
+        * css/CSSValue.cpp:
+        (WebCore::CSSValue::addSubresourceStyleURLs):
+        * css/CSSValue.h:
+        (WebCore):
+        (CSSValue):
+        * css/CSSValueList.cpp:
+        (WebCore::CSSValueList::addSubresourceStyleURLs):
+        * css/CSSValueList.h:
+        (CSSValueList):
+        * css/CSSValuePool.cpp:
+        (WebCore::CSSValuePool::createFontFaceValue):
+        * css/CSSValuePool.h:
+        (WebCore):
+        (CSSValuePool):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::setCssText):
+        (WebCore::PropertySetCSSStyleDeclaration::setProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::setPropertyInternal):
+        * css/PropertySetCSSStyleDeclaration.h:
+        (WebCore):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::setProperty):
+        (WebCore::StylePropertySet::parseDeclaration):
+        (WebCore::StylePropertySet::addSubresourceStyleURLs):
+        * css/StylePropertySet.h:
+        (WebCore):
+        (StylePropertySet):
+        * css/StyleSheet.cpp:
+        (WebCore):
+        * css/StyleSheet.h:
+        (StyleSheet):
+        (WebCore::StyleSheet::media):
+        (WebCore::StyleSheet::ownerRule):
+        (WebCore::StyleSheet::isXSLStyleSheet):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::WebKitCSSKeyframesRule::insertRule):
+        * dom/DOMImplementation.cpp:
+        (WebCore::DOMImplementation::createCSSStyleSheet):
+        * dom/Document.cpp:
+        (WebCore::Document::updateBaseURL):
+        (WebCore::Document::pageUserSheet):
+        (WebCore::Document::pageGroupUserSheets):
+        (WebCore::Document::addUserSheet):
+        (WebCore::Document::elementSheet):
+        (WebCore::Document::testAddedStylesheetRequiresStyleRecalc):
+        (WebCore::Document::analyzeStylesheetChange):
+        * dom/Document.h:
+        (WebCore):
+        (Document):
+        (WebCore::Document::documentUserSheets):
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::updateInlineStyleAvoidingMutation):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::setCSSStyleSheet):
+        (WebCore::ProcessingInstruction::parseStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::setInlineStyleProperty):
+        (WebCore::StyledElement::addSubresourceAttributeURLs):
+        (WebCore):
+        (WebCore::StyledElement::addPropertyToAttributeStyle):
+        * dom/StyledElement.h:
+        (WebCore):
+        * html/HTMLFontElement.cpp:
+        (WebCore::HTMLFontElement::collectStyleForAttribute):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::parseAttribute):
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        (WebCore::HTMLLinkElement::styleSheetIsLoading):
+        (WebCore::HTMLLinkElement::addSubresourceAttributeURLs):
+        * html/HTMLStyleElement.cpp:
+        (WebCore::HTMLStyleElement::parseAttribute):
+        (WebCore::HTMLStyleElement::addSubresourceAttributeURLs):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::fillMediaListChain):
+        (WebCore::InspectorStyle::setPropertyText):
+        (WebCore::InspectorStyleSheet::styleSheetURL):
+        (WebCore::InspectorStyleSheet::reparseStyleSheet):
+        (WebCore::InspectorStyleSheet::ensureSourceData):
+        (WebCore::InspectorStyleSheetForInlineStyle::getStyleAttributeRanges):
+        * page/PageSerializer.cpp:
+        (WebCore::PageSerializer::serializeCSSStyleSheet):
+        * svg/SVGStyleElement.cpp:
+        (WebCore::SVGStyleElement::parseAttribute):
+        * xml/XSLStyleSheet.h:
+        (XSLStyleSheet):
+        (WebCore::XSLStyleSheet::finalURL):
+        * xml/XSLStyleSheetLibxslt.cpp:
+        (WebCore::XSLStyleSheet::XSLStyleSheet):
+        (WebCore::XSLStyleSheet::isLoading):
+
 2012-04-11  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r113912.
