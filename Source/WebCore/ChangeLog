@@ -1,3 +1,81 @@
+2012-04-11  Adrienne Walker  <enne@google.com>
+
+        [chromium] Draw missing layer tile checkerboards as checkerboards
+        https://bugs.webkit.org/show_bug.cgi?id=83241
+
+        Reviewed by James Robinson.
+
+        For non-Android platforms, draw missing tile checkerboards as actual
+        checkerboards. Use a shader to do this so that no texture uploads are
+        needed. This only happens on the non-composited content host to avoid
+        having unexpected (or transformed and aliased) checkerboards on other
+        content layers.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        (WebCore::LayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore::LayerChromium::setDrawCheckerboardForMissingTiles):
+        (WebCore::LayerChromium::drawCheckerboardForMissingTiles):
+        (LayerChromium):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::drawQuad):
+        (WebCore::LayerRendererChromium::drawCheckerboardQuad):
+        (WebCore):
+        (WebCore::LayerRendererChromium::checkerboardProgram):
+        (WebCore::LayerRendererChromium::cleanupSharedObjects):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromium):
+        * platform/graphics/chromium/ShaderChromium.cpp:
+        (WebCore::FragmentShaderCheckerboard::FragmentShaderCheckerboard):
+        (WebCore):
+        (WebCore::FragmentShaderCheckerboard::init):
+        (WebCore::FragmentShaderCheckerboard::getShaderString):
+        * platform/graphics/chromium/ShaderChromium.h:
+        (FragmentShaderCheckerboard):
+        (WebCore::FragmentShaderCheckerboard::alphaLocation):
+        (WebCore::FragmentShaderCheckerboard::texTransformLocation):
+        (WebCore::FragmentShaderCheckerboard::frequencyLocation):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCCheckerboardDrawQuad.cpp: Copied from Source/WebCore/platform/graphics/chromium/cc/CCSolidColorLayerImpl.h.
+        (WebCore):
+        (WebCore::CCCheckerboardDrawQuad::create):
+        (WebCore::CCCheckerboardDrawQuad::CCCheckerboardDrawQuad):
+        * platform/graphics/chromium/cc/CCCheckerboardDrawQuad.h: Copied from Source/WebCore/platform/graphics/chromium/cc/CCSolidColorLayerImpl.h.
+        (WebCore):
+        (CCCheckerboardDrawQuad):
+        * platform/graphics/chromium/cc/CCDrawQuad.cpp:
+        (WebCore::CCDrawQuad::toCheckerboardDrawQuad):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCDrawQuad.h:
+        (WebCore):
+        (CCDrawQuad):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::CCLayerImpl):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+        (WebCore::CCLayerImpl::setDrawCheckerboardForMissingTiles):
+        (WebCore::CCLayerImpl::drawCheckerboardForMissingTiles):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        * platform/graphics/chromium/cc/CCRenderPass.cpp:
+        (WebCore::CCRenderPass::appendQuadsForLayer):
+        * platform/graphics/chromium/cc/CCRenderPass.h:
+        (CCRenderPass):
+        * platform/graphics/chromium/cc/CCScrollbarLayerImpl.h:
+        (CCScrollbarLayerImpl):
+        * platform/graphics/chromium/cc/CCSolidColorLayerImpl.h:
+        (CCSolidColorLayerImpl):
+        * platform/graphics/chromium/cc/CCTextureLayerImpl.h:
+        (CCTextureLayerImpl):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.cpp:
+        (WebCore::CCTiledLayerImpl::appendQuads):
+        * platform/graphics/chromium/cc/CCTiledLayerImpl.h:
+        (CCTiledLayerImpl):
+        * platform/graphics/chromium/cc/CCVideoLayerImpl.h:
+        (CCVideoLayerImpl):
+
 2012-04-11  Joe Mason  <jmason@rim.com>
 
         [BlackBerry] Update to the thread-safe GuardedPointer API
