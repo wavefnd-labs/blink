@@ -1,3 +1,36 @@
+2012-04-11  David Hyatt  <hyatt@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=83614
+        <rdar://problem/11177351>
+        
+        REGRESSION: Table on wikipedia overlaps float on right hand side.
+        
+        Revise how auto margins are resolved so that for objects that avoid floats, the available line
+        width is always used instead of the overall containing block width. computeLogicalWidth now
+        always properly computes inline margins (based off the object's current logicalTop() position)
+        and so the code in computeStartPositionDeltaForChildAvoidingFloats that recomputes inline
+        direction margins can now be removed.
+        
+        Reviewed by Dan Bernstein.
+
+        Added new test in fast/block/float.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computeStartPositionDeltaForChildAvoidingFloats):
+        (WebCore::RenderBlock::determineLogicalLeftPositionForChild):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::containingBlockAvailableLineWidthInRegion):
+        (WebCore):
+        (WebCore::RenderBox::computeLogicalWidthInRegion):
+        (WebCore::RenderBox::renderBoxRegionInfo):
+        (WebCore::RenderBox::shrinkToAvoidFloats):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::computeLogicalWidth):
+
 2012-04-11  Adrienne Walker  <enne@google.com>
 
         Fix regression where a clip style change did not update layer sizes
