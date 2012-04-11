@@ -1,3 +1,30 @@
+2012-04-10  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
+
+        [Qt] Fix issues when using the WebView as ShaderEffectSource
+        https://bugs.webkit.org/show_bug.cgi?id=83587
+
+        Reviewed by Noam Rosenthal.
+
+        - Make sure that the bound frame buffer is preserved instead of binding
+          to the default one
+        - Accept a "mirrored" flag in beginPainting that we're applying on the
+          projection matrix just as with internal FBOs
+
+        The "flip" logic in createProjectionMatrix has been reversed and renamed to
+        mirrored so that FBO rendering is considered the special case and not the
+        other way around just like within Qt.
+
+        * platform/graphics/texmap/TextureMapper.h:
+        (WebCore::TextureMapper::beginPainting):
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGLData::TextureMapperGLData):
+        (TextureMapperGLData):
+        (WebCore::TextureMapperGL::beginPainting):
+        (WebCore::createProjectionMatrix):
+        (WebCore::BitmapTextureGL::bind):
+        (WebCore::TextureMapperGL::bindSurface):
+        * platform/graphics/texmap/TextureMapperGL.h:
+
 2012-04-11  Stephen Chenney  <schenney@chromium.org>
 
         Shadow tree TreeScope data is not removed by ContainerNode::removeAllChildren
