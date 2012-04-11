@@ -1,3 +1,29 @@
+2012-04-10  Adam Klein  <adamk@chromium.org>
+
+        Break the association between form controls and their owner when the owner leaves the tree
+        https://bugs.webkit.org/show_bug.cgi?id=81420
+
+        Reviewed by Kent Tamura.
+
+        When parsing malformed markup, it's possible for a form and a
+        form-associated element to not be in an ancestor/descendant relationship.
+        When that form is later removed from the tree, the relationship needs to be updated.
+
+        Test: fast/forms/parser-associated-form-removal.html
+
+        * html/FormAssociatedElement.cpp:
+        (WebCore::FormAssociatedElement::FormAssociatedElement):
+        (WebCore::FormAssociatedElement::formRemovedFromTree): New method called when
+        by the form when it's being removed: handles either resetting the
+        owner or storing a bit to optimize away a second walk up the tree.
+        * html/FormAssociatedElement.h:
+        (FormAssociatedElement):
+        * html/HTMLFormElement.cpp:
+        (WebCore::findRoot): Simple helper method copied from FormAssociatedElement (this should probably live elsewhere).
+        (WebCore::HTMLFormElement::removedFromTree): Override removedFromTree to notify associated elements of the removal.
+        * html/HTMLFormElement.h:
+        (HTMLFormElement):
+
 2012-04-10  James Robinson  <jamesr@chromium.org>
 
         [chromium] Add OVERRIDE annotations for cc scheduler-related client interfaces
