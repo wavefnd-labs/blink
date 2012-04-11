@@ -1,3 +1,25 @@
+2012-04-11  Stephen Chenney  <schenney@chromium.org>
+
+        Shadow tree TreeScope data is not removed by ContainerNode::removeAllChildren
+        https://bugs.webkit.org/show_bug.cgi?id=83484
+
+        Reviewed by Hajime Morita.
+
+        The ContainerNode::removeAllChildren method does fast and dirty node removal.
+        As compared to ContainerNode::removeChildren, it does not include the
+        method to adopt the removed child node into the root document's TreeScope.
+        Rather, it leaves the existing TreeScope in place. However, the existing
+        TreeScope may be removed, causing a crash when something prevents the child
+        node from being deleted immediately. The fix is to modify the code in
+        ContainerNodeAlgorithms to do the TreeScope adoption.
+
+        Could not reproduce crash in layout test.
+
+        * dom/ContainerNodeAlgorithms.h:
+        (Private):
+        (WebCore::Private::NodeRemovalDispatcher::dispatch):
+        (WebCore::Private::addChildNodesToDeletionQueue):
+
 2012-04-11  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: showing summary view is very slow on a snapshot with thousands of constructors
