@@ -1,3 +1,329 @@
+2012-04-11  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: extracting NetworkRequest from Resource (step 1)
+        https://bugs.webkit.org/show_bug.cgi?id=83684
+
+        Reviewed by Yury Semikhatsky.
+
+        Meta bug: https://bugs.webkit.org/show_bug.cgi?id=61363.
+        In this step, NetworkRequest is introduced. It temporarily inherits from
+        the Resource, but all the call sites are now referring to it as to request.
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/ApplicationCacheItemsView.js:
+        (WebInspector.ApplicationCacheItemsView.prototype._updateCallback):
+        * inspector/front-end/AuditLauncherView.js:
+        (WebInspector.AuditLauncherView):
+        (WebInspector.AuditLauncherView.prototype._onRequestStarted):
+        (WebInspector.AuditLauncherView.prototype._onRequestFinished):
+        * inspector/front-end/AuditRules.js:
+        (WebInspector.AuditRules.getDomainToResourcesMap):
+        (WebInspector.AuditRules.GzipRule.prototype.doRun):
+        (WebInspector.AuditRules.GzipRule.prototype._isCompressed):
+        (WebInspector.AuditRules.GzipRule.prototype._shouldCompress):
+        (WebInspector.AuditRules.CombineExternalResourcesRule.prototype.doRun):
+        (WebInspector.AuditRules.MinimizeDnsLookupsRule.prototype.doRun):
+        (WebInspector.AuditRules.ParallelizeDownloadRule.prototype.doRun):
+        (WebInspector.AuditRules.UnusedCssRule.prototype.doRun.evalCallback.selectorsCallback):
+        (WebInspector.AuditRules.CacheControlRule.prototype.doRun):
+        (WebInspector.AuditRules.CacheControlRule.prototype.handleNonCacheableResources):
+        (WebInspector.AuditRules.CacheControlRule.prototype._cacheableAndNonCacheableResources):
+        (WebInspector.AuditRules.CacheControlRule.prototype.execCheck):
+        (WebInspector.AuditRules.CacheControlRule.prototype.freshnessLifetimeGreaterThan):
+        (WebInspector.AuditRules.CacheControlRule.prototype.responseHeader):
+        (WebInspector.AuditRules.CacheControlRule.prototype.hasResponseHeader):
+        (WebInspector.AuditRules.CacheControlRule.prototype.isCompressible):
+        (WebInspector.AuditRules.CacheControlRule.prototype.isPubliclyCacheable):
+        (WebInspector.AuditRules.CacheControlRule.prototype.responseHeaderMatch):
+        (WebInspector.AuditRules.CacheControlRule.prototype.hasExplicitExpiration):
+        (WebInspector.AuditRules.CacheControlRule.prototype._isExplicitlyNonCacheable):
+        (WebInspector.AuditRules.CacheControlRule.prototype.isCacheableResource):
+        (WebInspector.AuditRules.BrowserCacheControlRule.prototype.handleNonCacheableResources):
+        (WebInspector.AuditRules.BrowserCacheControlRule.prototype.runChecks):
+        (WebInspector.AuditRules.BrowserCacheControlRule.prototype._missingExpirationCheck):
+        (WebInspector.AuditRules.BrowserCacheControlRule.prototype._varyCheck):
+        (WebInspector.AuditRules.BrowserCacheControlRule.prototype._oneMonthExpirationCheck):
+        (WebInspector.AuditRules.BrowserCacheControlRule.prototype._oneYearExpirationCheck):
+        (WebInspector.AuditRules.ProxyCacheControlRule.prototype.runChecks):
+        (WebInspector.AuditRules.ProxyCacheControlRule.prototype._questionMarkCheck):
+        (WebInspector.AuditRules.ProxyCacheControlRule.prototype._publicCachingCheck):
+        (WebInspector.AuditRules.ProxyCacheControlRule.prototype._setCookieCacheableCheck):
+        (WebInspector.AuditRules.CookieRuleBase.prototype.doRun.resultCallback):
+        (WebInspector.AuditRules.CookieRuleBase.prototype.doRun):
+        (WebInspector.AuditRules.CookieRuleBase.prototype.mapResourceCookies):
+        (WebInspector.AuditRules.CookieRuleBase.prototype._callbackForResourceCookiePairs):
+        (WebInspector.AuditRules.CookieSizeRule.prototype.processCookies):
+        (WebInspector.AuditRules.StaticCookielessRule.prototype.processCookies):
+        (WebInspector.AuditRules.StaticCookielessRule.prototype._collectorCallback):
+        * inspector/front-end/AuditsPanel.js:
+        (WebInspector.AuditsPanel.prototype._executeAudit):
+        (WebInspector.AuditCategory.prototype.run):
+        (WebInspector.AuditRule.prototype.run):
+        (WebInspector.AuditRule.prototype.doRun):
+        * inspector/front-end/ConsoleMessage.js:
+        * inspector/front-end/ConsoleModel.js:
+        (WebInspector.ConsoleDispatcher.prototype.messageAdded):
+        * inspector/front-end/ContentProviders.js:
+        (WebInspector.ResourceContentProvider):
+        (WebInspector.ResourceContentProvider.prototype.requestContent):
+        (WebInspector.ResourceContentProvider.prototype.searchInContent):
+        * inspector/front-end/DebuggerPresentationModel.js:
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onGetHAR):
+        (WebInspector.ExtensionServer.prototype._notifyRequestFinished):
+        * inspector/front-end/HAREntry.js:
+        (WebInspector.HAREntry):
+        (WebInspector.HAREntry.prototype.build):
+        (WebInspector.HAREntry.prototype._buildRequest):
+        (WebInspector.HAREntry.prototype._buildResponse):
+        (WebInspector.HAREntry.prototype._buildContent):
+        (WebInspector.HAREntry.prototype._buildTimings):
+        (WebInspector.HAREntry.prototype._buildPostData):
+        (WebInspector.HAREntry.prototype._buildCookie):
+        (WebInspector.HAREntry.prototype._interval):
+        (WebInspector.HAREntry.prototype.get requestBodySize):
+        (WebInspector.HAREntry.prototype.get responseBodySize):
+        (WebInspector.HAREntry.prototype.get responseCompression):
+        (WebInspector.HARLog):
+        (WebInspector.HARLog.prototype.build):
+        (WebInspector.HARLog.prototype._buildPages):
+        (WebInspector.HARLog.prototype._convertResource):
+        * inspector/front-end/NetworkItemView.js:
+        (WebInspector.NetworkItemView):
+        * inspector/front-end/NetworkLog.js:
+        (WebInspector.NetworkLog):
+        (WebInspector.NetworkLog.prototype.get requests):
+        (WebInspector.NetworkLog.prototype.pageLoadForRequest):
+        (WebInspector.NetworkLog.prototype._onMainFrameNavigated):
+        (WebInspector.NetworkLog.prototype._onRequestStarted):
+        (WebInspector.NetworkLog.prototype._onLoad):
+        (WebInspector.PageLoad):
+        * inspector/front-end/NetworkManager.js:
+        (WebInspector.NetworkManager.get this):
+        (WebInspector.NetworkManager.get NetworkAgent):
+        (WebInspector.NetworkManager):
+        (WebInspector.NetworkManager.prototype.inflightRequestForURL):
+        (WebInspector.NetworkDispatcher):
+        (WebInspector.NetworkDispatcher.prototype._updateNetworkRequestWithRequest):
+        (WebInspector.NetworkDispatcher.prototype._updateNetworkRequestWithResponse):
+        (WebInspector.NetworkDispatcher.prototype._mimeTypeIsConsistentWithType):
+        (WebInspector.NetworkDispatcher.prototype._updateNetworkRequestWithCachedResource):
+        (WebInspector.NetworkDispatcher.prototype.requestWillBeSent):
+        (WebInspector.NetworkDispatcher.prototype.requestServedFromCache):
+        (WebInspector.NetworkDispatcher.prototype.responseReceived):
+        (WebInspector.NetworkDispatcher.prototype.dataReceived):
+        (WebInspector.NetworkDispatcher.prototype.loadingFinished):
+        (WebInspector.NetworkDispatcher.prototype.loadingFailed):
+        (WebInspector.NetworkDispatcher.prototype.requestServedFromMemoryCache):
+        (WebInspector.NetworkDispatcher.prototype.webSocketCreated):
+        (WebInspector.NetworkDispatcher.prototype.webSocketWillSendHandshakeRequest):
+        (WebInspector.NetworkDispatcher.prototype.webSocketHandshakeResponseReceived):
+        (WebInspector.NetworkDispatcher.prototype.webSocketClosed):
+        (WebInspector.NetworkDispatcher.prototype._appendRedirect):
+        (WebInspector.NetworkDispatcher.prototype._startNetworkRequest):
+        (WebInspector.NetworkDispatcher.prototype._updateNetworkRequest):
+        (WebInspector.NetworkDispatcher.prototype._finishNetworkRequest):
+        (WebInspector.NetworkDispatcher.prototype._dispatchEventToListeners):
+        (WebInspector.NetworkDispatcher.prototype._createNetworkRequest):
+        (get WebInspector):
+        * inspector/front-end/NetworkPanel.js:
+        (WebInspector.NetworkLogView.prototype._initializeView):
+        (WebInspector.NetworkLogView.prototype.get statusBarItems):
+        (WebInspector.NetworkLogView.prototype._createSortingFunctions):
+        (WebInspector.NetworkLogView.prototype._updateSummaryBar):
+        (WebInspector.NetworkLogView.prototype._updateDividersIfNeeded):
+        (WebInspector.NetworkLogView.prototype._invalidateAllItems):
+        (WebInspector.NetworkLogView.prototype._requestGridNode):
+        (WebInspector.NetworkLogView.prototype._createRequestGridNode):
+        (WebInspector.NetworkLogView.prototype._onLoadEventFired):
+        (WebInspector.NetworkLogView.prototype._domContentLoadedEventFired):
+        (WebInspector.NetworkLogView.prototype.refresh):
+        (WebInspector.NetworkLogView.prototype._reset):
+        (WebInspector.NetworkLogView.prototype.get requests):
+        (WebInspector.NetworkLogView.prototype.requestById):
+        (WebInspector.NetworkLogView.prototype._onRequestStarted):
+        (WebInspector.NetworkLogView.prototype._appendRequest):
+        (WebInspector.NetworkLogView.prototype._onRequestUpdated):
+        (WebInspector.NetworkLogView.prototype._refreshRequest):
+        (WebInspector.NetworkLogView.prototype._mainFrameNavigated):
+        (WebInspector.NetworkLogView.prototype.get _setLargerRequests):
+        (WebInspector.NetworkLogView.prototype._getPopoverAnchor):
+        (WebInspector.NetworkLogView.prototype._showPopover):
+        (WebInspector.NetworkLogView.prototype._contextMenu):
+        (WebInspector.NetworkLogView.prototype._copyAll):
+        (WebInspector.NetworkLogView.prototype._copyRequest):
+        (WebInspector.NetworkLogView.prototype._copyLocation):
+        (WebInspector.NetworkLogView.prototype._copyRequestHeaders):
+        (WebInspector.NetworkLogView.prototype._copyResponseHeaders):
+        (WebInspector.NetworkLogView.prototype._exportAll):
+        (WebInspector.NetworkLogView.prototype._exportRequest):
+        (WebInspector.NetworkLogView.prototype._matchRequest):
+        (WebInspector.NetworkLogView.prototype._clearSearchMatchedList):
+        (WebInspector.NetworkLogView.prototype._updateSearchMatchedListAfterRequestIdChanged):
+        (WebInspector.NetworkLogView.prototype._updateHighlightIfMatched):
+        (WebInspector.NetworkLogView.prototype._highlightNthMatchedRequest):
+        (WebInspector.NetworkLogView.prototype.performSearch):
+        (WebInspector.NetworkLogView.prototype.jumpToPreviousSearchResult):
+        (WebInspector.NetworkLogView.prototype.jumpToNextSearchResult):
+        (WebInspector.NetworkLogView.prototype.revealAndHighlightRequest):
+        (WebInspector.NetworkPanel.prototype.handleShortcut):
+        (WebInspector.NetworkPanel.prototype.get requests):
+        (WebInspector.NetworkPanel.prototype.requestById):
+        (WebInspector.NetworkPanel.prototype._requestByAnchor):
+        (WebInspector.NetworkPanel.prototype.canShowAnchorLocation):
+        (WebInspector.NetworkPanel.prototype.showAnchorLocation):
+        (WebInspector.NetworkPanel.prototype.revealAndHighlightRequest):
+        (WebInspector.NetworkPanel.prototype._onViewCleared):
+        (WebInspector.NetworkPanel.prototype._onRequestSelected):
+        (WebInspector.NetworkPanel.prototype._showRequest):
+        (WebInspector.NetworkPanel.prototype._closeVisibleRequest):
+        (WebInspector.NetworkPanel.prototype._toggleGridMode):
+        (WebInspector.NetworkPanel.prototype._toggleViewingRequestMode):
+        (WebInspector.NetworkTimeCalculator.prototype.computeBarGraphPercentages):
+        (WebInspector.NetworkTimeCalculator.prototype.computeBarGraphLabels):
+        (WebInspector.NetworkTimeCalculator.prototype.updateBoundaries):
+        (WebInspector.NetworkTimeCalculator.prototype._lowerBound):
+        (WebInspector.NetworkTimeCalculator.prototype._upperBound):
+        (WebInspector.NetworkTransferTimeCalculator.prototype._lowerBound):
+        (WebInspector.NetworkTransferTimeCalculator.prototype._upperBound):
+        (WebInspector.NetworkTransferDurationCalculator.prototype._upperBound):
+        (WebInspector.NetworkDataGridNode):
+        (WebInspector.NetworkDataGridNode.prototype.isFilteredOut):
+        (WebInspector.NetworkDataGridNode.prototype.select):
+        (WebInspector.NetworkDataGridNode.prototype._openInNewTab):
+        (WebInspector.NetworkDataGridNode.prototype.get selectable):
+        (WebInspector.NetworkDataGridNode.prototype._createTimelineCell):
+        (WebInspector.NetworkDataGridNode.prototype.refreshRequest):
+        (WebInspector.NetworkDataGridNode.prototype._refreshNameCell):
+        (WebInspector.NetworkDataGridNode.prototype._fileName):
+        (WebInspector.NetworkDataGridNode.prototype._refreshStatusCell):
+        (WebInspector.NetworkDataGridNode.prototype._refreshTypeCell):
+        (WebInspector.NetworkDataGridNode.prototype._refreshInitiatorCell):
+        (WebInspector.NetworkDataGridNode.prototype._refreshSizeCell):
+        (WebInspector.NetworkDataGridNode.prototype._refreshTimeCell):
+        (WebInspector.NetworkDataGridNode.prototype.refreshGraph):
+        (WebInspector.NetworkDataGridNode.NameComparator):
+        (WebInspector.NetworkDataGridNode.SizeComparator):
+        (WebInspector.NetworkDataGridNode.InitiatorComparator):
+        (WebInspector.NetworkDataGridNode.RequestPropertyComparator):
+        * inspector/front-end/NetworkRequest.js: Added.
+        (WebInspector.NetworkRequest):
+        * inspector/front-end/RawSourceCode.js:
+        (WebInspector.RawSourceCode):
+        (WebInspector.RawSourceCode.prototype._requestFinished):
+        (WebInspector.RawSourceCode.prototype._createContentProvider):
+        * inspector/front-end/Resource.js:
+        (WebInspector.Resource):
+        (WebInspector.Resource.displayName):
+        (WebInspector.Resource.prototype.get request):
+        (WebInspector.Resource.prototype.set finished):
+        (WebInspector.Resource.prototype.set timing):
+        (WebInspector.Resource.prototype.set requestHeaders):
+        (WebInspector.Resource.prototype.set requestHeadersText):
+        (WebInspector.Resource.prototype.set responseHeaders):
+        (WebInspector.Resource.prototype.set responseHeadersText):
+        (WebInspector.Resource.prototype.requestContent):
+        * inspector/front-end/ResourceCookiesView.js:
+        (WebInspector.ResourceCookiesView):
+        (WebInspector.ResourceCookiesView.prototype.get _gotCookies):
+        (WebInspector.ResourceCookiesView.prototype._buildCookiesTable):
+        * inspector/front-end/ResourceHeadersView.js:
+        (WebInspector.ResourceHeadersView):
+        (WebInspector.ResourceHeadersView.prototype._refreshURL):
+        (WebInspector.ResourceHeadersView.prototype._refreshQueryString):
+        (WebInspector.ResourceHeadersView.prototype._refreshUrlFragment):
+        (WebInspector.ResourceHeadersView.prototype._refreshFormData):
+        (WebInspector.ResourceHeadersView.prototype._refreshRequestHeaders):
+        (WebInspector.ResourceHeadersView.prototype._refreshResponseHeaders):
+        (WebInspector.ResourceHeadersView.prototype._refreshHTTPInformation):
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping.prototype.addScript):
+        * inspector/front-end/ResourceTimingView.js:
+        (WebInspector.ResourceTimingView):
+        (WebInspector.ResourceTimingView.prototype.wasShown):
+        (WebInspector.ResourceTimingView.prototype._refresh):
+        (WebInspector.ResourceTimingView.createTimingTable):
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.ResourceTreeModel):
+        (WebInspector.ResourceTreeModel.prototype._frontendReused):
+        (WebInspector.ResourceTreeModel.prototype._onRequestUpdated):
+        (WebInspector.ResourceTreeModel.prototype._onRequestUpdateDropped):
+        (WebInspector.ResourceTreeModel.prototype._createResource):
+        (WebInspector.ResourceTreeFrame):
+        (WebInspector.ResourceTreeFrame.prototype._addRequest):
+        * inspector/front-end/ResourceUtils.js:
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.FrameResourceTreeElement.prototype._appendOpenInNetworkPanelAction):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/externs.js:
+        (WebInspector.networkRequestById):
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/inspector.js:
+        (WebInspector.networkRequestById):
+        (WebInspector.openRequestInNetworkPanel):
+
+2012-04-11  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: fix category -> type refactoring implications.
+        https://bugs.webkit.org/show_bug.cgi?id=83680
+
+        Reviewed by Yury Semikhatsky.
+
+        We are now using type identifiers (singulars) as opposed to category identifier (plurals) in the style.
+
+        * inspector/front-end/NetworkPanel.js:
+        (WebInspector.NetworkLogView.prototype._createFilterStatusBarItems.createFilterElement):
+        (WebInspector.NetworkLogView.prototype._createFilterStatusBarItems):
+        (WebInspector.NetworkLogView.prototype._showCategory):
+        (WebInspector.NetworkLogView.prototype._hideCategory):
+        (WebInspector.NetworkLogView.prototype._filter):
+        (WebInspector.NetworkDataGridNode.prototype.refreshResource):
+        (WebInspector.NetworkDataGridNode.prototype.refreshGraph):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.FrameResourceTreeElement):
+        (WebInspector.ResourceRevisionTreeElement):
+        * inspector/front-end/networkLogView.css:
+        (.network-log-grid.data-grid .network-type-script .icon):
+        (.network-log-grid.data-grid.small .network-type-script .icon):
+        (.network-log-grid.data-grid .network-type-document .icon):
+        (.network-log-grid.data-grid.small .network-type-document .icon):
+        (.network-log-grid.data-grid .network-type-stylesheet .icon):
+        (.network-log-grid.data-grid.small .network-type-stylesheet .icon):
+        (.network-log-grid.data-grid .network-type-image .icon):
+        (.network-log-grid.data-grid.small .network-type-image .icon):
+        (.network-type-document .network-graph-bar):
+        (.network-type-document.resource-cached .network-graph-bar):
+        (.network-type-stylesheet .network-graph-bar):
+        (.network-type-stylesheet.resource-cached .network-graph-bar):
+        (.network-type-image .network-graph-bar):
+        (.network-type-image.resource-cached .network-graph-bar):
+        (.network-type-font .network-graph-bar):
+        (.network-type-font.resource-cached .network-graph-bar):
+        (.network-type-script .network-graph-bar):
+        (.network-type-script.resource-cached .network-graph-bar):
+        (.network-type-xhr .network-graph-bar):
+        (.network-type-xhr.resource-cached .network-graph-bar):
+        (.network-type-websocket .network-graph-bar):
+        (.network-type-websocket.resource-cached .network-graph-bar):
+        (.network-log-grid.data-grid.filter-other table.data tr.revealed.network-type-other):
+        * inspector/front-end/resourcesPanel.css:
+        (.resource-sidebar-tree-item.resources-type-image .icon):
+        (.resources-type-image .image-resource-icon-preview):
+        (.children.small .resource-sidebar-tree-item.resources-type-image .icon):
+        (.children.small .resources-type-image .image-resource-icon-preview):
+        (.resource-sidebar-tree-item.resources-type-document .icon):
+        (.children.small .resource-sidebar-tree-item.resources-type-document .icon):
+        (.resource-sidebar-tree-item.resources-type-stylesheet .icon):
+        (.children.small .resource-sidebar-tree-item.resources-type-stylesheet .icon):
+        (.resource-sidebar-tree-item.resources-type-font .icon):
+        (.children.small .resource-sidebar-tree-item.resources-type-font .icon):
+        (.resource-sidebar-tree-item.resources-type-script .icon):
+        (.children.small .resource-sidebar-tree-item.resources-type-script .icon):
+        (.resource-sidebar-tree-item.resources-type-xhr .icon):
+        (.children.small .resource-sidebar-tree-item.resources-type-xhr .icon):
+
 2012-04-11   Arko Saha  <arko@motorola.com>
 
         Microdata: Implement cache mechanism for HTMLPropertiesCollection.
