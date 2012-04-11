@@ -1,3 +1,25 @@
+2012-04-11  Philip Rogers  <pdr@google.com>
+
+        Fix bug where stroke's bounding box was clipped
+        https://bugs.webkit.org/show_bug.cgi?id=83651
+
+        Reviewed by Dirk Schulze.
+
+        This change contains two fixes for one bug:
+        1) FloatRect::contains contained a nasty mistake where
+           maxy() < y() was compared instead of maxy() < point.y().
+        2) RenderSVGShape::strokeContains was depending on its internal
+           m_strokeAndMarkerBoundingBox instead of calling the virtual
+           method strokeBoundingBox(). This change switches to using
+           strokeBoundingBox().
+
+        Test: svg/hittest/svg-ellipse-rect-stroke.xhtml
+
+        * platform/graphics/FloatRect.cpp:
+        (WebCore::FloatRect::contains):
+        * rendering/svg/RenderSVGShape.cpp:
+        (WebCore::RenderSVGShape::strokeContains):
+
 2012-04-11  Kentaro Hara  <haraken@chromium.org>
 
         Enable the [Supplemental] IDL on BlackBerry
