@@ -1,3 +1,33 @@
+2012-04-10  Adam Barth  <abarth@webkit.org>
+
+        Limit -apple- and -khtml- to ENABLE(DASHBOARD_SUPPORT)
+        https://bugs.webkit.org/show_bug.cgi?id=83256
+
+        Reviewed by Eric Seidel.
+
+        As recommended by David Hyatt in
+        <https://lists.webkit.org/pipermail/webkit-dev/2010-July/013536.html>,
+        we should phase out support for -khtml- and -apple- vendor prefixes in
+        CSS (in favor of -webkit-).
+
+        As noted in <https://bugs.webkit.org/show_bug.cgi?id=42093#c29>, Dave's
+        proposal is a bit too agressive.  These prefixes appear to be needed
+        for a number of dashboard widgets.  For that reason, this patch limits
+        the prefixes to ENABLE(LEGACY_CSS_VENDOR_PREFIXES).
+
+        This patch enables ENABLE(LEGACY_CSS_VENDOR_PREFIXES) on apple-mac and
+        apple-win, which will let us learn whether removing these prefixes
+        causes a compatibility problem on the broader web.
+
+        * Configurations/FeatureDefines.xcconfig:
+        * bindings/js/JSCSSStyleDeclarationCustom.cpp:
+        (WebCore::getCSSPropertyNamePrefix):
+        (WebCore::cssPropertyIDForJSCSSPropertyName):
+        * bindings/v8/custom/V8CSSStyleDeclarationCustom.cpp:
+        (WebCore::cssPropertyInfo):
+        * css/CSSParser.cpp:
+        (WebCore::cssPropertyID):
+
 2012-04-10  Levi Weintraub  <leviw@chromium.org>
 
         Clean up multiple RenderedPosition::absoluteRect definitions and correct LayoutUnit usage
