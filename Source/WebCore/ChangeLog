@@ -1,3 +1,26 @@
+2012-04-11  Andras Becsi  <andras.becsi@nokia.com>
+
+        Fix the build with gcc 4.7.0
+        https://bugs.webkit.org/show_bug.cgi?id=83584
+
+        Reviewed by Alexey Proskuryakov.
+
+        No new tests needed.
+
+        * Target.pri: Disable Werror on the ANGLE code since it has several recurring issues
+        because older versions of flex (<2.5.35) and bison (<2.5) generate code which
+        triggers warnings. This generated code is committed on each version update of ANGLE,
+        and it is very likely that the code is generated with older versions of the mentioned
+        tools.
+        * html/HTMLImageElement.cpp:
+        (WebCore::HTMLImageElement::createForJSConstructor): Fails because of -Werror=extra
+        * platform/graphics/TiledBackingStoreClient.h: Fails because -Werror=delete-non-virtual-dtor,
+        gcc requires classes which have virtual methods to have a virtual destructor, if their instances
+        or the instances of their subclasses are deleted.
+        (WebCore::TiledBackingStoreClient::~TiledBackingStoreClient):
+        * platform/graphics/texmap/TextureMapperPlatformLayer.h: Ditto.
+        (WebCore::TextureMapperPlatformLayer::~TextureMapperPlatformLayer):
+
 2012-04-11  Kent Tamura  <tkent@chromium.org>
 
         [V8] Calendar Picker: Add a helper function to expose PagePopupClient::setValueAndClosePopup() to JavaScript
