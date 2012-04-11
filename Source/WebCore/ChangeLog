@@ -1,3 +1,36 @@
+2012-04-11  Kent Tamura  <tkent@chromium.org>
+
+        [V8] Calendar Picker: Add a helper function to expose PagePopupClient::setValueAndClosePopup() to JavaScript
+        https://bugs.webkit.org/show_bug.cgi?id=83561
+
+        Reviewed by Adam Barth.
+
+        Add ScriptController::installFunctionsForPagePopup(), which add
+        window.setValueAndClosePopup() for JavaScript code in PagePopup
+        environment, and the function calls
+        WebCore::PagePopupClient::setValueAndClosePopup().
+
+        This patch introduces Supplement<DOMWindow> object to hold a
+        PagePopupClient object. It makes keeping a PagePopupClient easier.
+
+        * WebCore.gypi: Add DOMWindowPagePopup.{cpp,h}
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::setValueAndClosePopupCallback):
+        (WebCore::ScriptController::installFunctionsForPagePopup):
+        * bindings/v8/ScriptController.h:
+        (ScriptController): Add installFunctionsForPagePopup().
+        * page/DOMWindowPagePopup.cpp: Added.
+        (WebCore::DOMWindowPagePopup::DOMWindowPagePopup):
+        (WebCore::DOMWindowPagePopup::supplementName):
+        Returns "DOMWindowPagePopup" as a key of this Supplement<DOMWindow>.
+        (WebCore::DOMWindowPagePopup::setValueAndClosePopup):
+        Gets a DOMWindowPagePopup from the window, then calls PagePopupClient::setValueAndClosePopup().
+        (WebCore::DOMWindowPagePopup::install):
+        On-demand creation of DOMWindowPagePopup doesn't work because it
+        must have a PagePopupClient object. We need to install
+        DOMWindowPagePopup explicitly.
+        * page/DOMWindowPagePopup.h: Added.
+
 2012-04-11  Sadrul Habib Chowdhury  <sadrul@chromium.org>
 
         [chromium] Add Battery Status API support.
