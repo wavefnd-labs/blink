@@ -1,3 +1,21 @@
+2012-04-11  Andy Estes  <aestes@apple.com>
+
+        LayerFlushScheduler's run loop observer should have an autorelease pool.
+        https://bugs.webkit.org/show_bug.cgi?id=83729
+
+        Reviewed by Dan Bernstein.
+
+        LayerFlushScheduler's run loop observer needs an autorelease pool.
+        NSApplication creates one, but it is only drained after processing user
+        input. In the case where a WebView is displaying composited content but
+        not receiving user input, NSApplication's pool will accumulate a large
+        number of objects autoreleased by the run loop observer. Have
+        LayerFlushScheduler create an autorelease pool that is drained after
+        each run loop observer callback.
+
+        * platform/graphics/ca/mac/LayerFlushSchedulerMac.cpp:
+        (WebCore::LayerFlushScheduler::runLoopObserverCallback):
+
 2012-04-11  Antti Koivisto  <antti@apple.com>
 
         Split CSSStyleSheet into internal and CSSOM type
