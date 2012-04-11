@@ -1,3 +1,47 @@
+2012-04-10  David Grogan  <dgrogan@chromium.org>
+
+        Notify observers of WorkerRunLoop stopping before the V8 isolate dies.
+        https://bugs.webkit.org/show_bug.cgi?id=83104
+
+        PlatformSupport::didStopWorkerRunLoop ultimately causes
+        ~V8AbstractEventListener to call
+        v8::Local<v8::Object>::New(m_listener) after the V8 isolate has been
+        disposed, which manifests as a crash in V8.
+
+        The current code in trunk runs this at shutdown:
+        1) removeAllDOMObjects()
+        2) dispose of V8
+        3) didStopWorkerRunLoop()  <-- problem
+
+        This patch changes the order to be:
+        1) removeAllDOMObjects()
+        2) didStopWorkerRunLoop()
+        3) dispose of V8
+
+        We put didStopWorkerRunLoop after removeAllDOMObjects because we don't
+        want chromium code that runs on a webcore worker to run after it
+        receives the didStopWorkerRunLoop signal. The destructors of some IDB
+        objects are run by removeAllDOMObjects, so putting
+        didStopWorkerRunLoop before removeAllDOMObjects would violate that
+        constraint.
+
+        It's possible that there's a lower layer fix available in V8 or the
+        bindings.
+
+        Reviewed by David Levin.
+
+        Test: storage/indexeddb/pending-version-change-on-exit.html
+
+        * bindings/v8/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::~WorkerScriptController):
+        New location of didStopWorkerRunLoop. removeAllDOMObjects and V8
+        disposal are called here, to run something between them it also has
+        to go here.
+
+        * workers/WorkerThread.cpp:
+        (WebCore::WorkerThread::workerThread): Old location of
+        didStopWorkerRunLoop.
+
 2012-04-10  Adam Klein  <adamk@chromium.org>
 
         Break the association between form controls and their owner when the owner leaves the tree
