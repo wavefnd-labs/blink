@@ -1,3 +1,86 @@
+2012-04-10  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Don't expose the intrinsic padding concept to the code outside rendering
+        https://bugs.webkit.org/show_bug.cgi?id=83380
+
+        Reviewed by Eric Seidel.
+
+        No new tests, refactoring only.
+
+        The current code would expose the concept of intrinsic padding to every
+        object holding a renderer through an enum on the padding* functions.
+
+        This was very fragile as only the class using intrinsic padding should know about
+        its very existence, the rest of the code shouldn't have to special case for it.
+        There is one exception: the getComputedStyle logic needs the opposite value
+        rendering needs. To handle that, we make it more explicit what returns the
+        computed values vs the rendering values.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::sizingBox):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        Updated those functions to use the new computedCSS* functions below.
+
+        * rendering/RenderBox.h:
+        (RenderBox):
+        (WebCore::RenderBox::computedCSSContentBoxRect):
+        This is the computed content box. It includes the intrinsic padding.
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::computedCSSPaddingTop):
+        (WebCore::RenderBoxModelObject::computedCSSPaddingBottom):
+        (WebCore::RenderBoxModelObject::computedCSSPaddingLeft):
+        (WebCore::RenderBoxModelObject::computedCSSPaddingRight):
+        (WebCore::RenderBoxModelObject::computedCSSPaddingBefore):
+        (WebCore::RenderBoxModelObject::computedCSSPaddingAfter):
+        (WebCore::RenderBoxModelObject::computedCSSPaddingStart):
+        (WebCore::RenderBoxModelObject::computedCSSPaddingEnd):
+        Renamed from padding* as they returned the CSS computed values.
+
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        Killed the enum paddingOptions!
+
+        (WebCore::RenderBoxModelObject::paddingTop):
+        (WebCore::RenderBoxModelObject::paddingBottom):
+        (WebCore::RenderBoxModelObject::paddingLeft):
+        (WebCore::RenderBoxModelObject::paddingRight):
+        (WebCore::RenderBoxModelObject::paddingBefore):
+        (WebCore::RenderBoxModelObject::paddingAfter):
+        (WebCore::RenderBoxModelObject::paddingStart):
+        (WebCore::RenderBoxModelObject::paddingEnd):
+        All padding* functions call the computedCSSPadding* ones above.
+
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::paddingTop):
+        (WebCore::RenderTableCell::paddingBottom):
+        (WebCore::RenderTableCell::paddingLeft):
+        (WebCore::RenderTableCell::paddingRight):
+        (WebCore::RenderTableCell::paddingBefore):
+        (WebCore::RenderTableCell::paddingAfter):
+        Updated these functions after the renaming.
+
+        * rendering/RenderTableCell.h:
+        (RenderTableCell):
+        Updated the functions signature and decorated them with OVERRIDE.
+
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::paddingTop):
+        (WebCore::RenderMathMLBlock::paddingBottom):
+        (WebCore::RenderMathMLBlock::paddingLeft):
+        (WebCore::RenderMathMLBlock::paddingRight):
+        (WebCore::RenderMathMLBlock::paddingBefore):
+        (WebCore::RenderMathMLBlock::paddingAfter):
+        (WebCore::RenderMathMLBlock::paddingStart):
+        (WebCore::RenderMathMLBlock::paddingEnd):
+        * rendering/mathml/RenderMathMLBlock.h:
+        (RenderMathMLBlock):
+        Updated these functions after the renaming.
+
+        * rendering/mathml/RenderMathMLSquareRoot.cpp:
+        (WebCore::RenderMathMLSquareRoot::paint):
+        Updated this function to use computeCSSContentBoxRect.location().
+
 2012-04-10  Lauro Neto  <lauro.neto@openbossa.org>
 
         TextureMapperGL.cpp breaks build with OpenGL ES
