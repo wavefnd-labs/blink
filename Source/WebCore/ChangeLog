@@ -1,3 +1,90 @@
+2012-04-10  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Fold LayerChromium::updateCompositorResources into main update
+        https://bugs.webkit.org/show_bug.cgi?id=83530
+
+        Reviewed by Adrienne Walker.
+
+        We used to update layer contents in two phases. The first, called paintContentsIfDirty() /
+        idlePaintContentsIfDirty(), ran on the main WebKit thread and took care of any main-thread work - primarily
+        WebCore painting as the name implies. The second, called updateCompositorResources(), ran on the compositor
+        thread with the main thread blocked and took care of any actions that required direct access to the compositor's
+        context - such as texture uploads into compositor-managed textures. Now that all compositor texture operations
+        are queued on a CCTextureUpdater, the compositor can take care of these operations on the correct thread at the
+        right time without needing layer-specific logic.
+
+        This folds both functions into one function called LayerChromium::update() (and idleUpdate() for idle
+        prepainting) and adds a CCTextureUpdater reference for queuing up texture operations.
+
+        The CCProxy is responsible for the lifetime of the CCTextureUpdater. In the threaded proxy, the updater is
+        tied to the lifetime of the beginFrame operation. Specifically it's constructed on the impl thread when the
+        beginFrame message is generated, is accessed by reference on the main thread during the commit, and then
+        destroyed by the proxy when the commit is complete. CCTextureUpdater::update should only be called on the impl
+        thread by the proxy. In the future, it might be worth exposing a more limited interface to layers.
+
+        * platform/graphics/chromium/Canvas2DLayerChromium.cpp:
+        (WebCore::Canvas2DLayerChromium::update):
+        * platform/graphics/chromium/Canvas2DLayerChromium.h:
+        (Canvas2DLayerChromium):
+        * platform/graphics/chromium/ContentLayerChromium.cpp:
+        (WebCore::ContentLayerChromium::update):
+        (WebCore::ContentLayerChromium::idleUpdate):
+        * platform/graphics/chromium/ContentLayerChromium.h:
+        (ContentLayerChromium):
+        * platform/graphics/chromium/ImageLayerChromium.cpp:
+        (WebCore::ImageLayerTextureUpdater::updateLayerRect):
+        (WebCore::ImageLayerChromium::update):
+        * platform/graphics/chromium/ImageLayerChromium.h:
+        (ImageLayerChromium):
+        * platform/graphics/chromium/LayerChromium.h:
+        (WebCore::LayerChromium::update):
+        (WebCore::LayerChromium::idleUpdate):
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::UpdatableTile::isDirty):
+        (WebCore::UpdatableTile::copyAndClearDirty):
+        (WebCore::UpdatableTile::isDirtyForCurrentFrame):
+        (UpdatableTile):
+        (WebCore::UpdatableTile::UpdatableTile):
+        (WebCore::TiledLayerChromium::TiledLayerChromium):
+        (WebCore::TiledLayerChromium::createTile):
+        (WebCore::TiledLayerChromium::invalidateRect):
+        (WebCore::TiledLayerChromium::tileOnlyNeedsPartialUpdate):
+        (WebCore::TiledLayerChromium::updateTiles):
+        (WebCore::TiledLayerChromium::reserveTextures):
+        (WebCore::TiledLayerChromium::resetUpdateState):
+        (WebCore::TiledLayerChromium::updateLayerRect):
+        (WebCore::TiledLayerChromium::idleUpdateLayerRect):
+        (WebCore::TiledLayerChromium::needsIdlePaint):
+        * platform/graphics/chromium/TiledLayerChromium.h:
+        (TiledLayerChromium):
+        * platform/graphics/chromium/WebGLLayerChromium.cpp:
+        (WebCore::WebGLLayerChromium::update):
+        * platform/graphics/chromium/WebGLLayerChromium.h:
+        (WebGLLayerChromium):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::~CCLayerTreeHost):
+        (WebCore::CCLayerTreeHost::commitComplete):
+        (WebCore::CCLayerTreeHost::updateLayers):
+        (WebCore::CCLayerTreeHost::reserveTextures):
+        (WebCore::CCLayerTreeHost::update):
+        (WebCore::CCLayerTreeHost::paintMaskAndReplicaForRenderSurface):
+        (WebCore::CCLayerTreeHost::paintLayerContents):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::doCommit):
+        (WebCore::CCSingleThreadProxy::commitIfNeeded):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        (CCSingleThreadProxy):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::scheduledActionBeginFrame):
+        (WebCore::CCThreadProxy::beginFrame):
+        (WebCore::CCThreadProxy::beginFrameCompleteOnImplThread):
+        (WebCore::CCThreadProxy::scheduledActionCommit):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (WebCore::CCThreadProxy::BeginFrameAndCommitState::BeginFrameAndCommitState):
+        (BeginFrameAndCommitState):
+
 2012-04-10  Adam Klein  <adamk@chromium.org>
 
         Store V8 SVGElementInstance wrappers in the regular DOMObjectMap
