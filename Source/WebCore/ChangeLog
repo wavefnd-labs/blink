@@ -1,3 +1,35 @@
+2012-04-11  Alex Nicolaou  <anicolao@chromium.org>
+
+        [chromium] When rendering goes idle, do not count that time against frame rate
+        https://bugs.webkit.org/show_bug.cgi?id=73454
+
+        The FPS counter had a few issues with its reporting. The first
+        3 swapbuffers are non-blocking and create FPS rates that are
+        unrealistically high, throwing off the moving averages and
+        introducing false spikes into the FPS graph. There was also no
+        way to monitor the smoothness of the animation, or to focus in
+        on a particular animation or transition.
+
+        This patch updates the FPS counter code so that bad data points
+        are trimmed and not graphed; so that the graph itself is taller
+        and more legible; so that there is a clear boundary between 40FPS
+        and better; and to keep statistics on frame rate between
+        pauses in the activity in the UI so that you can trigger a
+        transition and read off the average and standard deviation for
+        that transition to judge it smooth enough or not.
+
+
+        Reviewed by James Robinson.
+
+        HUD is not testable in webkit.
+
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.cpp:
+        (WebCore::CCHeadsUpDisplay::CCHeadsUpDisplay):
+        (WebCore::CCHeadsUpDisplay::onFrameBegin):
+        (WebCore::CCHeadsUpDisplay::drawHudContents):
+        (WebCore::CCHeadsUpDisplay::drawFPSCounter):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.h:
+
 2012-04-10  Zhenyao Mo  <zmo@google.com>
 
         WebGLRenderingContext should defer caching program info
