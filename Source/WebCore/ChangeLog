@@ -1,3 +1,72 @@
+2012-04-11  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSS Regions]Add helper class for flow threads info in RenderView
+        https://bugs.webkit.org/show_bug.cgi?id=83464
+
+        Reviewed by David Hyatt.
+
+        This patch creates a new helper class FlowThreadController that will accommodate all the flow thread
+        related info from RenderView and moves all the data structures/methods from RenderView into this new class.
+        There is only one FlowThreadController object per RenderView and it can be retrieved using flowThreadController() method from RenderView.
+        The flow thread controller object is owned by the RenderView and it is created on demand only if there are flowing
+        threads in the page.
+
+        Since there is no change in functionality, there are no new tests added.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/Document.cpp:
+        (WebCore::Document::webkitGetFlowByName):
+        * dom/NodeRenderingContext.cpp:
+        (WebCore::NodeRenderingContext::moveToFlowThreadIfNeeded):
+        * rendering/FlowThreadController.cpp: Added.
+        (WebCore):
+        (WebCore::FlowThreadController::create):
+        (WebCore::FlowThreadController::FlowThreadController):
+        (WebCore::FlowThreadController::~FlowThreadController):
+        (WebCore::FlowThreadController::ensureRenderFlowThreadWithName):
+        (WebCore::FlowThreadController::layoutRenderNamedFlowThreads):
+        * rendering/FlowThreadController.h: Added.
+        (WebCore):
+        (FlowThreadController):
+        (WebCore::FlowThreadController::currentRenderFlowThread):
+        (WebCore::FlowThreadController::setCurrentRenderFlowThread):
+        (WebCore::FlowThreadController::isRenderNamedFlowThreadOrderDirty):
+        (WebCore::FlowThreadController::setIsRenderNamedFlowThreadOrderDirty):
+        (WebCore::FlowThreadController::renderNamedFlowThreadList):
+        (WebCore::FlowThreadController::hasRenderNamedFlowThreads):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::CurrentRenderFlowThreadMaintainer::CurrentRenderFlowThreadMaintainer):
+        (WebCore::CurrentRenderFlowThreadMaintainer::~CurrentRenderFlowThreadMaintainer):
+        (WebCore::CurrentRenderFlowThreadDisabler::CurrentRenderFlowThreadDisabler):
+        (WebCore::CurrentRenderFlowThreadDisabler::~CurrentRenderFlowThreadDisabler):
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::nextRendererForNode):
+        (WebCore::RenderNamedFlowThread::previousRendererForNode):
+        (WebCore::RenderNamedFlowThread::removeRegionFromThread):
+        (WebCore::RenderNamedFlowThread::addDependencyOnFlowThread):
+        (WebCore::RenderNamedFlowThread::removeDependencyOnFlowThread):
+        * rendering/RenderNamedFlowThread.h:
+        (RenderNamedFlowThread):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::createObject):
+        (WebCore::RenderObject::enclosingRenderFlowThread):
+        (WebCore::RenderObject::willBeDestroyed):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::writeRenderNamedFlowThreads):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::RenderView):
+        (WebCore::RenderView::layout):
+        (WebCore::RenderView::hasRenderNamedFlowThreads):
+        (WebCore::RenderView::flowThreadController):
+        * rendering/RenderView.h:
+        (WebCore):
+        (RenderView):
+
 2012-04-11  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: [Device Metrics] Implement dimension swapping
