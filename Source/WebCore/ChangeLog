@@ -1,3 +1,42 @@
+2012-04-11   Arko Saha  <arko@motorola.com>
+
+        Microdata: Implement cache mechanism for HTMLPropertiesCollection.
+        https://bugs.webkit.org/show_bug.cgi?id=80490
+
+        Reviewed by Ryosuke Niwa.
+
+        Implemented caching mechanism for HTMLPropertiesCollection.
+        propertyCache - contains microdata item properties.
+        itemRefElements - contains sorted microdata item and itemref elements.
+        propertyNames - contains microdata property names of the elements in the collection.
+        itemRefElementPosition - store the current position of itemRefElements.
+        hasItemRefElements - set to ture once we have sorted microdata item and itemref elements list i.e, itemRefElements.
+        Cache is invalidated only when dom tree modified. Whenever any query is made on HTMLPropertiesCollection,
+        result is returned from the cache. Earliar we used to calculate properties node list every time a query is made.
+
+        * html/HTMLPropertiesCollection.cpp:
+        (WebCore):
+        (WebCore::HTMLPropertiesCollection::HTMLPropertiesCollection):
+        (WebCore::HTMLPropertiesCollection::invalidateCacheIfNeeded):
+        (WebCore::HTMLPropertiesCollection::updateRefElements): Appends microdata item element and elements which
+        are added through itemref attribute in itemRefElements (in tree order).
+        (WebCore::nextNodeWithProperty):
+        (WebCore::HTMLPropertiesCollection::itemAfter): Takes parent base and previous item property as argument.
+        Finds the next item property in base.
+        (WebCore::HTMLPropertiesCollection::calcLength): Calculates the length of properties collection if length
+        is not available in the cache.
+        (WebCore::HTMLPropertiesCollection::length):
+        (WebCore::HTMLPropertiesCollection::firstProperty): Returns the first property in the collection.
+        (WebCore::HTMLPropertiesCollection::item):
+        (WebCore::HTMLPropertiesCollection::findProperties): Finds microdata item properties in the base element.
+        Appends the properties in propertyCache and property names in propertyNames.
+        (WebCore::HTMLPropertiesCollection::updateNameCache):  It updates the propertyCache and propertyNames if hasNameCache is false.
+        (WebCore::HTMLPropertiesCollection::names):
+        (WebCore::HTMLPropertiesCollection::namedItem):
+        (WebCore::HTMLPropertiesCollection::hasNamedItem):
+        * html/HTMLPropertiesCollection.h:
+        (HTMLPropertiesCollection):
+
 2012-04-10  Jocelyn Turcotte  <jocelyn.turcotte@nokia.com>
 
         [Qt] Fix issues when using the WebView as ShaderEffectSource
