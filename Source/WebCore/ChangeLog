@@ -1,3 +1,41 @@
+2012-04-12  Alec Flett  <alecflett@chromium.org>
+
+        IndexedDB: Attributes for a cursor "run past the end" should be undefined.
+        https://bugs.webkit.org/show_bug.cgi?id=83492
+
+        Reviewed by Ojan Vafai.
+
+        This brings us up to spec with respect to when it's ok to call
+        cursor.continue() and the various behaviors around it:
+
+        If you call it more than once, continue() throws an exception.
+
+        The values of key/primaryKey/value are consistent, whether or not
+        continue has been called, meaning that if continue() results in
+        data being loaded from the backing store, that data does not
+        affect the cursor until the success callback has completed.
+
+        Calls to update() and delete() can happen before continue(), but
+        not afterwards.
+
+        Test: storage/indexeddb/cursor-continue-validity.html
+
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::IDBCursor):
+        (WebCore::IDBCursor::key):
+        (WebCore::IDBCursor::primaryKey):
+        (WebCore::IDBCursor::value):
+        (WebCore::IDBCursor::update):
+        (WebCore::IDBCursor::continueFunction):
+        (WebCore::IDBCursor::deleteFunction):
+        (WebCore::IDBCursor::setGotValue):
+        (WebCore):
+        * Modules/indexeddb/IDBCursor.h:
+        (IDBCursor):
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::onSuccess):
+        (WebCore::IDBRequest::dispatchEvent):
+
 2012-04-12  Eric Carlson  <eric.carlson@apple.com>
 
         Media engine should not be told to prepare for playback if media loading is not allowed
