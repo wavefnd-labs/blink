@@ -1,3 +1,43 @@
+2012-04-12  Jon Lee  <jonlee@apple.com>
+
+        Implement Dictionary.h on mac (83472)
+        https://bugs.webkit.org/show_bug.cgi?id=83472
+        <rdar://problem/11209766>
+
+        Reviewed by Kentaro Hara.
+
+        A difference between Dictionary and JSDictionary makes it difficult to merge the two together and avoid
+        creating a confusing API. The boolean returned by Dictionary::get() represents whether the
+        property was found. The boolean returned by JSDictionary::tryGetProperty() represents whether an
+        exception was thrown.
+
+        * WebCore.xcodeproj/project.pbxproj: Add Dictionary.h and Dictionary.cpp.
+
+        * bindings/js/Dictionary.cpp: Added.
+        (WebCore::Dictionary::Dictionary):
+        (WebCore::Dictionary::get):
+        * bindings/js/Dictionary.h: Leverage JSDictionary's functionality to obtain the data.
+        (WebCore::Dictionary::isObject): Mark an unimplemented.
+        (WebCore::Dictionary::isUndefinedOrNull): Mark an unimplemented.
+        (WebCore::Dictionary::getWithUndefinedOrNullCheck): Mark an unimplemented.
+
+        * bindings/js/JSDictionary.cpp:
+        (WebCore::JSDictionary::tryGetProperty): Convert to a const function.
+        * bindings/js/JSDictionary.h:
+        (WebCore::JSDictionary::isValid):
+        (WebCore::JSDictionary::tryGetProperty): Convert to a const function.
+        (WebCore::JSDictionary::get): Similar to tryGetProperty(), but returns true if the
+        property was found, converting the value succeeded and the out parameter "result" was set.
+        (WebCore::JSDictionary::tryGetPropertyAndResult): Refactor tryGetProperty() to return the enum directly.
+
+        Change bindings scripts to use Dictionary constructor.
+        * bindings/js/IDBBindingUtilities.cpp: Remove createDictionaryFromValue().
+        * bindings/js/IDBBindingUtilities.h: Remove createDictionaryFromValue().
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (JSValueToNative): Update to remove IDBBindingUtilities.h dependency, and use Dictionary constructor.
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore::jsTestObjPrototypeFunctionOptionsObject): Update expected generated output.
+
 2012-04-12  Sami Kyostila  <skyostil@chromium.org>
 
         [chromium] Fix threaded compositor HUD crash
