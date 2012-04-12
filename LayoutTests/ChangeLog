@@ -1,3 +1,45 @@
+2012-04-12  Erik Arvidsson  <arv@chromium.org>
+
+        Add support for [ArrayClass] and use that on NodeList
+        https://bugs.webkit.org/show_bug.cgi?id=
+
+        Reviewed by Adam Barth.
+
+        Attempt to reland r113931. Now with more updated test expectations.
+
+        With this patch NodeLists now have Array.prototype on their prototype chain which allows
+        methods such as forEach and map to work on NodeLists.
+
+        http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-nodelist
+
+        For V8 we need to set a flag on the WrapperTypeInfo since V8 uses FunctionTemplates which
+        does not allow setting the prototype to a non FunctionTemplate so the prototype is therefore
+        set when the constructor is created.
+
+        For JSC we just pass the right prototype object when creating the NodeList prototype. JSC has
+        a bug (81588) that prevents toString to work as specced on Array.prototype.toString. This
+        causes test failures in the tests until that has been fixed.
+
+        * fast/dom/HTMLSelectElement/named-options-expected.txt:
+        * fast/dom/HTMLSelectElement/script-tests/named-options.js:
+        * fast/dom/NodeList/node-list-array-class-expected.txt: Added.
+        * fast/dom/NodeList/node-list-array-class.html: Added.
+        * fast/dom/NodeList/nodelist-item-call-as-function-expected.txt:
+        * fast/dom/everything-to-string-expected.txt:
+        * fast/dom/prototype-inheritance-2-expected.txt:
+        * fast/js/recursion-limit-equal-expected.txt:
+        * inspector/console/command-line-api-expected.txt:
+        * inspector/console/console-dir-expected.txt:
+        * inspector/console/console-format-collections-expected.txt:
+        * jquery/traversing-expected.txt:
+        * platform/chromium/fast/dom/HTMLSelectElement/named-options-expected.txt: Copied from LayoutTests/fast/dom/HTMLSelectElement/named-options-expected.txt.
+        * platform/chromium/fast/dom/everything-to-string-expected.txt: Copied from LayoutTests/fast/dom/everything-to-string-expected.txt.
+        * platform/chromium/inspector/console/command-line-api-expected.txt: Copied from LayoutTests/inspector/console/command-line-api-expected.txt.
+        * platform/chromium/inspector/console/console-dir-expected.txt:
+        * platform/chromium/inspector/console/console-format-collections-expected.txt:
+        * platform/chromium/jquery/traversing-expected.txt: Copied from LayoutTests/jquery/traversing-expected.txt.
+        * platform/mac/fast/dom/prototype-inheritance-2-expected.txt:
+
 2012-04-12  Stephen Chenney  <schenney@chromium.org>
 
         chromium windows + linux svg tests failing after r65665

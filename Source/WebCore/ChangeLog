@@ -1,3 +1,77 @@
+2012-04-12  Erik Arvidsson  <arv@chromium.org>
+
+        Add support for [ArrayClass] and use that on NodeList
+        https://bugs.webkit.org/show_bug.cgi?id=
+
+        Reviewed by Adam Barth.
+
+        Attempt to reland r113931. Now with more updated test expectations.
+
+        With this patch NodeLists now have Array.prototype on their prototype chain which allows
+        methods such as forEach and map to work on NodeLists.
+
+        http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-nodelist
+
+        For V8 we need to set a flag on the WrapperTypeInfo since V8 uses FunctionTemplates which
+        does not allow setting the prototype to a non FunctionTemplate so the prototype is therefore
+        set when the constructor is created.
+
+        For JSC we just pass the right prototype object when creating the NodeList prototype. JSC has
+        a bug (81588) that prevents toString to work as specced on Array.prototype.toString. This
+        causes test failures in the tests until that has been fixed.
+
+        Test: fast/dom/NodeList/node-list-array-class.html
+
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateHeader): Include ArrayPrototype.h if an ArrayClass.
+        (GenerateImplementation): If ArrayClass use arrayPrototype as prototype.
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNamedConstructorCallback):
+        (GenerateImplementation): Adds a flag to the WrapperTypeInfo.
+        * bindings/scripts/IDLAttributes.txt:: Adds new attribute: ArrayClass.
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore::JSTestObj::createPrototype):
+        * bindings/scripts/test/JS/JSTestObj.h:
+        * bindings/scripts/test/TestObj.idl:
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestNode.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore):
+        * bindings/v8/NPV8Object.cpp:
+        (WebCore::npObjectTypeInfo):
+        * bindings/v8/V8BindingPerContextData.cpp:
+        (WebCore::V8BindingPerContextData::init): Get the array prototype too.
+        (WebCore::V8BindingPerContextData::createWrapperFromCacheSlowCase):
+        (WebCore::V8BindingPerContextData::constructorForTypeSlowCase): If this is an ArrayClass we need to
+        set the `[[Prototype]]`.
+        * bindings/v8/V8BindingPerContextData.h:
+        (V8BindingPerContextData):
+        * bindings/v8/V8HiddenPropertyName.h:
+        (WebCore):
+        * bindings/v8/WrapperTypeInfo.h:
+        (WrapperTypeInfo):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.cpp:
+        (WebCore):
+        * dom/NodeList.idl:
+
 2012-04-12  Konrad Piascik  <kpiascik@rim.com>
 
         [BlackBerry] Web Inspector cookie expiry is showing the wrong date.
