@@ -1,3 +1,27 @@
+2012-04-12  Andy Estes  <aestes@apple.com>
+
+        REGRESSION (r102262): iAd Producer relies on CSSStyleDeclaration property setters respecting '!important'
+        https://bugs.webkit.org/show_bug.cgi?id=83832
+
+        Reviewed by Alexey Proskuryakov.
+
+        Shipping versions of iAd Producer rely on the pre-r102262 behavior of
+        respecting '!important' when specified in a CSSStyleDeclaration
+        property setter. Restore this quirky behavior for versions of the app
+        that expect it.
+
+        * WebCore.exp.in: Export
+        Settings::setShouldRespectPriorityInCSSAttributeSetters().
+        * bindings/js/JSCSSStyleDeclarationCustom.cpp:
+        (WebCore::JSCSSStyleDeclaration::putDelegate): If
+        setShouldRespectPriorityInCSSAttributeSetters() is true, restore the
+        pre-r102262 behavior wherein we attempt to parse '!important' out of
+        the property value.
+        * page/Settings.cpp:
+        (WebCore::Settings::setShouldRespectPriorityInCSSAttributeSetters):
+        (WebCore::Settings::shouldRespectPriorityInCSSAttributeSetters):
+        * page/Settings.h:
+
 2012-04-12  Alexandru Chiculita  <achicu@adobe.com>
 
         REGRESSION(112745) [CSS Filters] Memory use explosion for offscreen filtered elements
