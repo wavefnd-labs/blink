@@ -1,3 +1,28 @@
+2012-04-12  Alexandru Chiculita  <achicu@adobe.com>
+
+        REGRESSION(112745) [CSS Filters] Memory use explosion for offscreen filtered elements
+        https://bugs.webkit.org/show_bug.cgi?id=83815
+
+        Reviewed by Simon Fraser.
+
+        The filtered area used to be the dirty rect intersected by the bounding box of the
+        layer. During a previous change that behavior was lost, so adding it back now.
+
+        Also, removing the memory buffers used to compute filters after the filter is computed.
+        They are deleted next time the filter is applied anyway, so there's no need to keep the
+        memory for them.
+
+        Test: css3/filters/offscreen-filters-memory-usage.html
+
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::prepare):
+        (WebCore):
+        (WebCore::FilterEffectRenderer::clearIntermediateResults):
+        (WebCore::FilterEffectRendererHelper::prepareFilterEffect):
+        (WebCore::FilterEffectRendererHelper::applyFilterEffect):
+        * rendering/FilterEffectRenderer.h:
+        (FilterEffectRenderer):
+
 2012-04-12  Brent Fulgham  <bfulgham@webkit.org>
 
         [WinCairo] Build fix after addition of openTypeTable.
