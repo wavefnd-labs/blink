@@ -1,3 +1,23 @@
+2012-04-11  Levi Weintraub  <leviw@chromium.org>
+
+        Correct pixel snapping error in RenderBox::pixelSnappedClientWidth/Height
+        https://bugs.webkit.org/show_bug.cgi?id=83621
+
+        Reviewed by Eric Seidel.
+
+        Though the problem wouldn't yet manifest itself since we haven't flipped the switch on sub-pixel
+        layout, clientWidth and clientHeight, when pixel snapped, need to take the RenderBox's location
+        into account. Previously, ClientLeft/Top were used, but these are simply the width of the borders,
+        and don't include the box's sub-pixel location, which is needed to properly snap the width/height.
+
+        No new tests. Untestable until we switch to FractionalLayoutUnits. A test case that covers this
+        is in the subpixellayout branch and will land with the switch.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::pixelSnappedClientWidth):
+        (WebCore::RenderBox::pixelSnappedClientHeight):
+        (WebCore::RenderBox::scrollWidth): Replacing a raw zero with ZERO_LAYOUT_UNIT.
+
 2012-04-11  Erik Arvidsson  <arv@chromium.org>
 
         Add support for [ArrayClass] and use that on NodeList
