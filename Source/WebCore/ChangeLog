@@ -1,3 +1,45 @@
+2012-04-12  David Hyatt  <hyatt@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=83817
+        
+        This patch modifies RenderText so that it scans all of its characters up front to
+        determine whether or not the simple code path can be used for measurement/rendering
+        of the text for the whole run.
+        
+        TextRun now has an additional field that indicates that the character scan is not
+        required, since the entire RenderText is known to be simple. This boolean is set
+        when constructing the TextRun from the places that make TextRuns from RenderTexts.
+        
+        The character scan has been refactored into a static Font method so that it can be
+        called by RenderText. The scan of individual TextRuns is also done using the same method
+        so that the code is shared.
+
+        Reviewed by Dan Bernstein.
+
+        * platform/graphics/Font.cpp:
+        (WebCore::Font::codePath):
+        (WebCore::Font::characterRangeCodePath):
+        * platform/graphics/Font.h:
+        * platform/graphics/TextRun.h:
+        (WebCore::TextRun::TextRun):
+        (WebCore::TextRun::characterScanForCodePath):
+        (WebCore::TextRun::setCharacterScanForCodePath):
+        (TextRun):
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::constructTextRun):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::textWidth):
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::RenderText):
+        (WebCore::RenderText::widthFromCache):
+        (WebCore::RenderText::setTextInternal):
+        (WebCore::RenderText::width):
+        (WebCore::RenderText::computeCanUseSimpleFontCodePath):
+        (WebCore):
+        * rendering/RenderText.h:
+        (RenderText):
+        (WebCore::RenderText::canUseSimpleFontCodePath):
+
 2012-04-12  Levi Weintraub  <leviw@chromium.org>
 
         Make AccessibilityObject::size non-virtual and fix platform accessibility code's LayoutUnit usage
