@@ -33,7 +33,7 @@
  * @extends {WebInspector.View}
  * @param {WebInspector.NetworkRequest} request
  */
-WebInspector.ResourceHeadersView = function(request)
+WebInspector.RequestHeadersView = function(request)
 {
     WebInspector.View.call(this);
     this.registerRequiredCSS("resourceView.css");
@@ -111,7 +111,7 @@ WebInspector.ResourceHeadersView = function(request)
     this._refreshHTTPInformation();
 }
 
-WebInspector.ResourceHeadersView.prototype = {
+WebInspector.RequestHeadersView.prototype = {
     /**
      * @param {string} name
      * @param {string} value
@@ -410,4 +410,4 @@ WebInspector.ResourceHeadersView.prototype = {
     }
 }
 
-WebInspector.ResourceHeadersView.prototype.__proto__ = WebInspector.View.prototype;
+WebInspector.RequestHeadersView.prototype.__proto__ = WebInspector.View.prototype;

@@ -30,58 +30,42 @@
 
 /**
  * @constructor
- * @extends {WebInspector.View}
+ * @extends {WebInspector.RequestView}
  * @param {WebInspector.NetworkRequest} request
  */
-WebInspector.ResourceCookiesView = function(request)
+WebInspector.RequestHTMLView = function(request)
 {
-    WebInspector.View.call(this);
-    this.element.addStyleClass("resource-cookies-view");
-
-    this._request = request;
-
-    request.addEventListener(WebInspector.NetworkRequest.Events.RequestHeadersChanged, this._refreshCookies, this);
-    request.addEventListener(WebInspector.NetworkRequest.Events.ResponseHeadersChanged, this._refreshCookies, this);
+    WebInspector.RequestView.call(this, request);
+    this.element.addStyleClass("html");
 }
 
-WebInspector.ResourceCookiesView.prototype = {
+WebInspector.RequestHTMLView.prototype = {
+    hasContent: function()
+    {
+        return true;
+    },
+
     wasShown: function()
     {
-        if (!this._gotCookies) {
-            if (!this._emptyView) {
-                this._emptyView = new WebInspector.EmptyView(WebInspector.UIString("This request has no cookies."));
-                this._emptyView.show(this.element);
-            }
-            return;
-        }
-
-        if (!this._cookiesTable)
-            this._buildCookiesTable();
+        this._createIFrame();
     },
 
-    get _gotCookies()
+    willHide: function(parentElement)
     {
-        return !!(this._request.requestCookies || this._request.responseCookies);
+        this.element.removeChildren();
     },
 
-    _buildCookiesTable: function()
+    _createIFrame: function()
     {
-        this.detachChildViews();
+        // We need to create iframe again each time because contentDocument
+        // is deleted when iframe is removed from its parent.
+        this.element.removeChildren();
+        var iframe = document.createElement("iframe");
+        this.element.appendChild(iframe);
+        iframe.setAttribute("sandbox", ""); // Forbid to run JavaScript and set unique origin.
 
-        this._cookiesTable = new WebInspector.CookiesTable(null, true);
-        this._cookiesTable.addCookiesFolder(WebInspector.UIString("Request Cookies"), this._request.requestCookies);
-        this._cookiesTable.addCookiesFolder(WebInspector.UIString("Response Cookies"), this._request.responseCookies);
-        this._cookiesTable.show(this.element);
-    },
-
-    _refreshCookies: function()
-    {
-        delete this._cookiesTable;
-        if (!this._gotCookies || !this.isShowing())
-            return;
-        this._buildCookiesTable();
-        this._cookiesTable.updateWidths();
+        iframe.contentDocument.body.innerHTML = this.request.content;
     }
 }
 
-WebInspector.ResourceCookiesView.prototype.__proto__ = WebInspector.View.prototype;
+WebInspector.RequestHTMLView.prototype.__proto__ = WebInspector.RequestView.prototype;

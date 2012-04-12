@@ -33,7 +33,7 @@
  * @extends {WebInspector.View}
  * @param {WebInspector.NetworkRequest} request
  */
-WebInspector.ResourceTimingView = function(request)
+WebInspector.RequestTimingView = function(request)
 {
     WebInspector.View.call(this);
     this.element.addStyleClass("resource-timing-view");
@@ -43,7 +43,7 @@ WebInspector.ResourceTimingView = function(request)
     request.addEventListener(WebInspector.NetworkRequest.Events.TimingChanged, this._refresh, this);
 }
 
-WebInspector.ResourceTimingView.prototype = {
+WebInspector.RequestTimingView.prototype = {
     wasShown: function()
     {
         if (!this._request.timing) {
@@ -68,12 +68,12 @@ WebInspector.ResourceTimingView.prototype = {
         if (this._tableElement)
             this._tableElement.parentElement.removeChild(this._tableElement);
 
-        this._tableElement = WebInspector.ResourceTimingView.createTimingTable(this._request);
+        this._tableElement = WebInspector.RequestTimingView.createTimingTable(this._request);
         this.element.appendChild(this._tableElement);
     }
 }
 
-WebInspector.ResourceTimingView.createTimingTable = function(request)
+WebInspector.RequestTimingView.createTimingTable = function(request)
 {
     var tableElement = document.createElement("table");
     var rows = [];
@@ -158,4 +158,4 @@ WebInspector.ResourceTimingView.createTimingTable = function(request)
     return tableElement;
 }
 
-WebInspector.ResourceTimingView.prototype.__proto__ = WebInspector.View.prototype;
+WebInspector.RequestTimingView.prototype.__proto__ = WebInspector.View.prototype;
