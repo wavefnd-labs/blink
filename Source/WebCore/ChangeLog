@@ -1,3 +1,94 @@
+2012-03-05  Pierre Rossi  <pierre.rossi@gmail.com>
+
+        [Qt] Use QRawFont when building with Qt 5
+        https://bugs.webkit.org/show_bug.cgi?id=78001
+
+        Up until now, fonts in the Qt port have been handled via
+        the QFont API. QRawFont offers a lower-level API enabling
+        us to be more in line with what other WebKit ports do.
+        This patch proceeds to switching over to QRawFont, and
+        effectively use an earlier change by Andreas Kling
+        that remained guarded up until now.
+
+        Reviewed by Simon Hausmann.
+
+        No new tests since this is refactoring of existing
+        functionality.
+
+        * Target.pri:
+        * platform/graphics/Font.cpp:
+        (WebCore::Font::drawText):
+        * platform/graphics/Font.h:
+        (Font):
+        (WebCore):
+        (WebCore::Font::syntheticFont): Added.
+        * platform/graphics/SimpleFontData.h:
+        (SimpleFontData):
+        (WebCore::SimpleFontData::getQtRawFont):
+        (WebCore):
+        * platform/graphics/qt/FontCacheQt.cpp:
+        (WebCore::rawFontForCharacters):
+        (WebCore):
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::createFontPlatformData):
+        * platform/graphics/qt/FontCustomPlatformData.h:
+        (FontCustomPlatformData):
+        * platform/graphics/qt/FontCustomPlatformDataQt.cpp:
+        (WebCore::FontCustomPlatformData::~FontCustomPlatformData):
+        (WebCore::FontCustomPlatformData::fontPlatformData):
+        (WebCore::createFontCustomPlatformData):
+        * platform/graphics/qt/FontPlatformData.h:
+        (WebCore::FontPlatformDataPrivate::FontPlatformDataPrivate):
+        (FontPlatformDataPrivate):
+        (FontPlatformData):
+        * platform/graphics/qt/FontPlatformDataQt.cpp:
+        (WebCore::FontPlatformData::FontPlatformData):
+        (WebCore):
+        (WebCore::FontPlatformData::operator==):
+        * platform/graphics/qt/FontQt.cpp:
+        (WebCore::fillPenForContext):
+        (WebCore::pathForGlyphs):
+        (WebCore::drawQtGlyphRun):
+        (WebCore::Font::drawComplexText):
+        (WebCore::Font::floatWidthForComplexText):
+        (WebCore::Font::offsetForPositionForComplexText):
+        (WebCore::Font::selectionRectForComplexText):
+        (WebCore::Font::initFormatForTextLayout):
+        (WebCore):
+        (WebCore::Font::drawGlyphs):
+        (WebCore::Font::syntheticFont):
+        (WebCore::Font::rawFont):
+        * platform/graphics/qt/FontQt4.cpp: Copied from Source/WebCore/platform/graphics/qt/FontQt.cpp.
+        (WebCore):
+        (WebCore::fromRawDataWithoutRef):
+        (WebCore::setupLayout):
+        (WebCore::fillPenForContext):
+        (WebCore::strokePenForContext):
+        (WebCore::drawTextCommon):
+        (WebCore::Font::drawComplexText):
+        (WebCore::Font::floatWidthForComplexText):
+        (WebCore::Font::offsetForPositionForComplexText):
+        (WebCore::Font::selectionRectForComplexText):
+        (WebCore::Font::canReturnFallbackFontsForComplexText):
+        (WebCore::Font::drawEmphasisMarksForComplexText):
+        (WebCore::Font::drawSimpleText):
+        (WebCore::Font::offsetForPositionForSimpleText):
+        (WebCore::Font::floatWidthForSimpleText):
+        (WebCore::Font::selectionRectForSimpleText):
+        (WebCore::Font::canExpandAroundIdeographsInComplexText):
+        (WebCore::Font::primaryFontHasGlyphForCharacter):
+        (WebCore::Font::emphasisMarkAscent):
+        (WebCore::Font::emphasisMarkDescent):
+        (WebCore::Font::emphasisMarkHeight):
+        (WebCore::Font::drawEmphasisMarksForSimpleText):
+        (WebCore::Font::font):
+        * platform/graphics/qt/SimpleFontDataQt.cpp:
+        (WebCore::SimpleFontData::platformInit):
+        * platform/qt/RenderThemeQt.cpp:
+        (WebCore::RenderThemeQt::fileListNameForWidth):
+        * platform/qt/RenderThemeQtMobile.cpp:
+        (WebCore::RenderThemeQtMobile::computeSizeBasedOnStyle):
+
 2012-04-12  JungJik Lee  <jungjik.lee@samsung.com>
 
         Calculate the cover rect of tiled backing store with the trajectory vector.
