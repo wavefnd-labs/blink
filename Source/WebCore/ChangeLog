@@ -1,3 +1,51 @@
+2012-04-12  Levi Weintraub  <leviw@chromium.org>
+
+        Make AccessibilityObject::size non-virtual and fix platform accessibility code's LayoutUnit usage
+        https://bugs.webkit.org/show_bug.cgi?id=83803
+
+        Reviewed by Eric Seidel.
+
+        AccessibilityObject::size was virtual with a number of overloads, but all the implementations were
+        redundant. Avoiding the virtual thunk and code duplication by declaring it non-virtual and only
+        implementing it in AccessibilityObject.
+
+        Also adding a pixelSnappedSize method that returns an IntSize, and using it in platform
+        accessibility code.
+
+        No new tests. No change in behavior.
+
+        * accessibility/AccessibilityMenuListOption.h:
+        (WebCore::AccessibilityMenuListOption::canHaveChildren):
+        * accessibility/AccessibilityMenuListPopup.h:
+        (WebCore::AccessibilityMenuListPopup::elementRect):
+        * accessibility/AccessibilityObject.h:
+        (WebCore::AccessibilityObject::size):
+        (WebCore::AccessibilityObject::pixelSnappedSize):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore):
+        * accessibility/AccessibilityRenderObject.h:
+        (AccessibilityRenderObject):
+        * accessibility/AccessibilitySlider.cpp:
+        (WebCore):
+        * accessibility/AccessibilitySlider.h:
+        (AccessibilitySliderThumb):
+        * accessibility/AccessibilityTableColumn.cpp:
+        (WebCore):
+        * accessibility/AccessibilityTableColumn.h:
+        (AccessibilityTableColumn):
+        * accessibility/AccessibilityTableHeaderContainer.cpp:
+        (WebCore):
+        * accessibility/AccessibilityTableHeaderContainer.h:
+        (AccessibilityTableHeaderContainer):
+        * accessibility/gtk/WebKitAccessibleInterfaceComponent.cpp:
+        (webkitAccessibleComponentGetExtents):
+        * accessibility/gtk/WebKitAccessibleInterfaceImage.cpp:
+        (webkitAccessibleImageGetImagePosition):
+        (webkitAccessibleImageGetImageSize):
+        * accessibility/mac/WebAccessibilityObjectWrapper.mm:
+        (-[WebAccessibilityObjectWrapper position]):
+        (-[WebAccessibilityObjectWrapper accessibilityAttributeValue:]):
+
 2012-04-12  Anna Cavender  <annacc@chromium.org>
 
         Update HTMLMediaElement's index of cues when TextTrack.mode changes to
