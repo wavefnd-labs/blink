@@ -1,3 +1,74 @@
+2012-04-12  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Reduce the use of RenderLayer outside of the rendering code
+        https://bugs.webkit.org/show_bug.cgi?id=83728
+
+        Reviewed by Simon Fraser.
+
+        Test: fast/layers/scrollByLines-overflow-no-layer.html
+
+        This is mostly a layering violation change. This changes reduces the number of
+        RenderLayer use outside rendering/ by a third but there are still numerous uses.
+
+        While auditing the different uses of RenderLayer, I found a potential crasher
+        and fixed it which is why we have a test case.
+
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::visiblePositionForPoint):
+        * dom/Document.cpp:
+        (WebCore::Document::nodesFromRect):
+        (WebCore::Document::handleZeroPadding):
+        (WebCore::nodeFromPoint):
+        (WebCore::Document::prepareMouseEvent):
+        * editing/FrameSelection.cpp:
+        (WebCore::FrameSelection::contains):
+        * page/DragController.cpp:
+        (WebCore::elementUnderMouse):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleMouseDraggedEvent):
+        (WebCore::EventHandler::eventMayStartDrag):
+        (WebCore::EventHandler::updateSelectionForMouseDrag):
+        (WebCore::EventHandler::hitTestResultAtPoint):
+        (WebCore::EventHandler::handleWheelEvent):
+        (WebCore::EventHandler::hoverTimerFired):
+        (WebCore::EventHandler::handleDrag):
+        Updated these call sites to use RenderView::hitTest.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::contentsInCompositedLayer):
+        (WebCore::FrameView::scrollContentsFastPath):
+        Updated these call sites to use RenderObject::isComposited().
+
+        * dom/Element.cpp:
+        (WebCore::Element::scrollByUnits):
+        Call directly RenderBox::scroll instead of calling the layer.
+        This actually fixes a crasher that slipped through the cracks.
+
+        * editing/visible_units.cpp:
+        * html/shadow/TextControlInnerElements.cpp:
+        * page/ContextMenuController.cpp:
+        * page/FocusController.cpp:
+        * page/Frame.cpp:
+        * page/GestureTapHighlighter.cpp:
+        * page/PrintContext.cpp:
+        * plugins/mac/PluginViewMac.mm:
+        Removed unneeded #include.
+
+        * plugins/gtk/PluginViewGtk.cpp:
+        * plugins/qt/PluginViewQt.cpp:
+        Replaced RenderLayer.h #include with RenderObject.h as
+        we use RenderObject::absoluteToLocal.
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::isComposited):
+        * rendering/RenderObject.h:
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::hitTest):
+        * rendering/RenderView.h:
+        Added 2 new functions that pipe through the RenderLayer.
+
 2012-04-12  Pravinin D  <pravind.2k4@gmail.com>
 
         font-size:0 text runs has non zero width in case of Windows Safari.
