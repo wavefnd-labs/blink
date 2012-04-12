@@ -1,3 +1,34 @@
+2012-04-11  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: show wall time frame duration on the vertical overview
+        https://bugs.webkit.org/show_bug.cgi?id=83718
+
+        Reviewed by Pavel Feldman.
+
+        - show frame duration as a contour of the frame bar in vertical overview;
+        - when scaling, normalize bar to a max of 3 * median frame duration, so too long frames do not dwarf the majority;
+        - add Array.prototype.qselect() for the above;
+        - factor our partition algorithm onto Array.prototype for better reuse;
+
+        * inspector/front-end/PartialQuickSort.js: factor out partition()
+        (Object.defineProperty.):
+        (Object.defineProperty):
+        * inspector/front-end/TimelineFrameController.js:
+        (WebInspector.TimelineFrameController.prototype._flushFrame): add frame.duration.
+        (WebInspector.TimelineFrameController.prototype._createSyntheticFrame): ditto.
+        * inspector/front-end/TimelineOverviewPane.js:
+        (WebInspector.TimelineVerticalOverview):
+        (WebInspector.TimelineVerticalOverview.prototype.reset): this._longestFrameTime is gone.
+        (WebInspector.TimelineVerticalOverview.prototype.update): ditto.
+        (WebInspector.TimelineVerticalOverview.prototype._aggregateFrames): return frames to display, not just their timeByCatogory.
+        (WebInspector.TimelineVerticalOverview.prototype._renderBars): use entire frames, not timeByCategory.
+        (WebInspector.TimelineVerticalOverview.prototype._renderBar): ditto.
+        * inspector/front-end/externs.js: Added annotations for partition() and qselect()
+        (Array.prototype.partition):
+        (Array.prototype.qselect):
+        * inspector/front-end/utilities.js:
+        (.):
+
 2012-04-12  David Barr  <davidbarr@chromium.org>
 
         Optimize non-rounded double border rendering to avoid transparency layers
