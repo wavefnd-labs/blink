@@ -1,3 +1,31 @@
+2012-04-12  Nate Chapin  <japhet@chromium.org>
+
+        Move Archive processing to DocumentLoader, instead of FrameLoader.
+        https://bugs.webkit.org/show_bug.cgi?id=83055
+
+        Reviewed by Adam Barth.
+
+        No new tests, no functionality change intended.
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::finishedLoading):
+        (WebCore::DocumentLoader::setupForReplaceByMIMEType):
+        (WebCore::DocumentLoader::maybeCreateArchive): Renamed from
+            FrameLoader::finishedLoadingDocument(). Returns true if an archive
+            was created.
+        (WebCore::DocumentLoader::setArchive):
+        (WebCore::DocumentLoader::scheduleArchiveLoad):
+        (WebCore::DocumentLoader::documentURL): Add a check for whether an archive url
+            should be returned, so that we don't need special handling in Document and
+            FrameLoader for overriding the document url later.
+        * loader/DocumentLoader.h:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::receivedFirstData): Remove archive special cases, since
+            DocumentLoader::documentURL() will return the right thing for legacy archives
+            and maybeCreateArchive() will override the base url for mhtml.
+        (WebCore::FrameLoader::loadArchive):
+        * loader/FrameLoader.h:
+
 2012-04-12  Dmitry Lomov  <dslomov@google.com>
 
         REGRESSION (r113233): fast/canvas/webgl/array-message-passing.html crashing on Lion and Snow Leopard bots.
