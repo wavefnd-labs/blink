@@ -1,3 +1,34 @@
+2012-04-12  Zalan Bujtas  <zbujtas@gmail.com>
+
+        [Qt][WK2] Zoom gesture with double tap crashes on iframe when main frame has scroll offset.
+        https://bugs.webkit.org/show_bug.cgi?id=83428
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        When delegate scrolling is on, the frame view needs to ignore scrolling offset when converting
+        coordinates. It is already done at ScrollView base class and this patch copies the logic to the
+        FrameView subclass.
+        Also make sure that TouchAdjustment's findBest*() functions' return value are not ignored by the caller.
+
+        Test: touchadjustment/iframe-with-mainframe-scroll-offset.html
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::bestClickableNodeForTouchPoint):
+        (WebCore::EventHandler::bestZoomableAreaForTouchPoint):
+        * page/EventHandler.h:
+        (EventHandler):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::convertFromRenderer):
+        (WebCore::FrameView::convertToRenderer):
+        * page/GestureTapHighlighter.cpp:
+        * testing/Internals.cpp:
+        (WebCore::Internals::setDelegatesScrolling):
+        (WebCore::Internals::touchPositionAdjustedToBestClickableNode):
+        (WebCore::Internals::bestZoomableAreaForTouchPoint):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-04-12  Zoltan Horvath  <zoltan@webkit.org>
 
         [Qt] Two canvas tests fail with QT_IMAGE_DECODER=0 setup
