@@ -1,3 +1,34 @@
+2012-04-12  Rob Buis  <rbuis@rim.com>
+
+        XMLSerializer().serializeToString() doesn't generate the XML declaration markup like Opera and Firefox
+        https://bugs.webkit.org/show_bug.cgi?id=83432
+
+        Reviewed by Ryosuke Niwa.
+
+        Serialize the xml declaration exactly as parsed, if present in the document.
+
+        Test: fast/dom/dom-parse-serialize-xmldecl.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::setXMLStandalone): update xmlStandalone to either yes or no.
+        * dom/Document.h:
+        (WebCore::Document::xmlStandalone):
+        (WebCore::Document::xmlStandaloneStatus): xmlStandalone can be unspecified, yes or no.
+        (WebCore::Document::hasXMLDeclaration):  test if xml declaration is present.
+        (WebCore::Document::setHasXMLDeclaration):
+        (Document):
+        * editing/MarkupAccumulator.cpp:
+        (WebCore::MarkupAccumulator::appendXMLDeclaration): write xml declaration if present.
+        (WebCore):
+        (WebCore::MarkupAccumulator::appendStartMarkup):
+        * editing/MarkupAccumulator.h:
+        (MarkupAccumulator):
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::startDocument): call setHasXmlDeclaration and any declaration strings parsed.
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::XMLDocumentParser::startDocument): call setHasXmlDeclaration and any declaration strings parsed.
+
 2012-04-12  Adam Barth  <abarth@webkit.org>
 
         window.open should prepare for seamless navigation by using findFrameForNavigation
