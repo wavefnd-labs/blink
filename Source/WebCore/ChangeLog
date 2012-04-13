@@ -1,3 +1,29 @@
+2012-04-13  Shinya Kawanaka  <shinyak@chromium.org>
+
+        Background width (or height) is wrong if width (or height) * zoom < 1.
+        https://bugs.webkit.org/show_bug.cgi?id=83350
+
+        Reviewed by Nikolas Zimmermann.
+
+        calculateImageIntrinsicDimension will return wrong size if the calculated size is 0.
+        0 is used for expressing unspecfied, so the method returns the box width(height) instead.
+
+        Since CachedImage has already similar code, we moved it to IntSize and shared it.
+
+        Tests: fast/css/zoom-background-repeat-x-expected.html
+               fast/css/zoom-background-repeat-x.html
+               fast/css/zoom-background-repeat-y-expected.html
+               fast/css/zoom-background-repeat-y.html
+
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::imageSizeForRenderer):
+        * platform/graphics/IntSize.h:
+        (IntSize):
+        (WebCore::IntSize::scale):
+        (WebCore::IntSize::clampToMinimumSize):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::calculateImageIntrinsicDimensions):
+
 2012-04-13  Adam Barth  <abarth@webkit.org>
 
         Prepare submitForm for seamless navigation
