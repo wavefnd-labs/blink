@@ -1,3 +1,105 @@
+2012-04-11  Antonio Gomes  <agomes@rim.com>
+
+        Be more restrictive when adding ScrollableArea's to FrameView's ScrollableArea's map
+        https://bugs.webkit.org/show_bug.cgi?id=79611
+
+        Reviewed by James Robinson.
+
+        Source/WebCore:
+
+        As of today, any FrameView attached to the Widget-tree or any
+        RenderLayer whose corresponding RenderBox's style has a 'overflow'
+        property set to 'auto' is cached in its containing scrollable areas set.
+        We could be more restrictive about what we in fact want to
+        cache as scrollable areas, by checking if the element as an overflow
+        (i.e. more content than its viewport).
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::setFrameRect):
+
+        Whenever the viewport changes, check if we have an scrollable/overflowed
+        content, and update the cache accordingly.
+
+        (WebCore::FrameView::setContentsSize):
+
+        Whenever the contents size changes, check if we have a scrollable/overflowed
+        content, and update the cache accordingly.
+
+        (WebCore::FrameView::calculateScrollbarModesForLayout):
+
+        Introduces a way to query for the scrollbars by only
+        taking into account the "rules" set by the web author.
+        For that, a new enum was added called SrollbarModesCalculationStrategy,
+        which allows callers to discard for example client-side scrollbar policies
+        in order to verify if a given frameview is scrollable or not.
+
+        (WebCore::FrameView::updateScrollableAreaSet):
+
+        Take into account various factors before considering a FrameView as
+        scrollable. If in the end it is, it gets added to its parent FrameView
+        scrollable areas map, otherwise removed.
+
+        (WebCore):
+        (WebCore::FrameView::addScrollableArea):
+
+        Became unneeded, thus removed.
+
+        (WebCore::FrameView::removeScrollableArea):
+
+        Whenever a FrameView is removed from the Widget-tree,
+        remove it from the cache.
+
+        * page/FrameView.h:
+        (FrameView):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateScrollbarsAfterLayout):
+
+        Update scrollable area set after layout.
+
+        (WebCore::RenderLayer::updateScrollbarsAfterStyleChange):
+
+        Update scrollable area set after style changes.
+
+        (WebCore::RenderLayer::styleChanged):
+
+        Removed the scrollable areas logic detection from it.
+
+        (WebCore::RenderLayer::updateScrollableAreaSet):
+
+        Updates the containing FrameView scrollable areas cache
+        only when needed (i.e. an overflow exists).
+
+        (WebCore):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * testing/Internals.cpp:
+        (WebCore::Internals::numberOfScrollableAreas):
+        (WebCore):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
+        Tests: fast/scrolling/scrollable-area-frame-inherited-visibility-hidden.html
+               fast/scrolling/scrollable-area-frame-overflow-hidden.html
+               fast/scrolling/scrollable-area-frame-overried-inherited-visibility-hidden.html
+               fast/scrolling/scrollable-area-frame-scrolling-no-overried-inherited-visibility-hidden.html
+               fast/scrolling/scrollable-area-frame-scrolling-no-visibility-hidden-child.html
+               fast/scrolling/scrollable-area-frame-scrolling-no.html
+               fast/scrolling/scrollable-area-frame-scrolling-yes-display-none.html
+               fast/scrolling/scrollable-area-frame-scrolling-yes.html
+               fast/scrolling/scrollable-area-frame-visibility-hidden-child.html
+               fast/scrolling/scrollable-area-frame-zero-size-and-border.html
+               fast/scrolling/scrollable-area-frame.html
+               fast/scrolling/scrollable-area-overflow-auto-display-none-in-parent.html
+               fast/scrolling/scrollable-area-overflow-auto-display-none.html
+               fast/scrolling/scrollable-area-overflow-auto-visibility-hidden-in-parent.html
+               fast/scrolling/scrollable-area-overflow-auto-visibility-hidden.html
+               fast/scrolling/scrollable-area-overflow-auto-visibility-override.html
+               fast/scrolling/scrollable-area-overflow-auto-visibility-visible.html
+               fast/scrolling/scrollable-area-overflow-auto.html
+               fast/scrolling/scrollable-area-overflow-not-set.html
+               fast/scrolling/scrollable-area-overflow-visible.html
+
 2012-04-13  Antti Koivisto  <antti@apple.com>
 
         Track rem unit usage in StyleSheetInternal
