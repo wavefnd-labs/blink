@@ -1,3 +1,72 @@
+2012-04-13  Dan Bernstein  <mitz@apple.com>
+
+        <rdar://problem/10912680> Pixel access canvas APIs do not operate at backing store resolution
+        https://bugs.webkit.org/show_bug.cgi?id=83836
+
+        Reviewed by Darin Adler.
+
+        Test: fast/canvas/2d.imageDataHD.html
+
+        Added getImageDataHD and putImageDataHD functions to CanvasRenderingContext2D, as proposed in
+        <http://lists.whatwg.org/htdig.cgi/whatwg-whatwg.org/2012-March/035112.html>. The functions
+        are prefixed with “webkit” for now.
+
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::getImageData): Added this cover function that calls
+        through to getImageData with LogicalCoordinateSystem.
+        (WebCore::CanvasRenderingContext2D::webkitGetImageDataHD): Added. Calls through to
+        getImageData with BackingStoreCoordinateSystem.
+        (WebCore::CanvasRenderingContext2D::getImageData): Added a CoordinateSystem parameter to this
+        now-private function. It is passed through to ImageBuffer::getUnmultipliedImageData().
+        (WebCore::CanvasRenderingContext2D::putImageData): Added this cover function that calls
+        through to putImageData with LogicalCoordinateSystem.
+        (WebCore::CanvasRenderingContext2D::webkitPutImageDataHD): Added. Calls through to
+        putImageData with BackingStoreCoordinateSystem.
+        (WebCore::CanvasRenderingContext2D::putImageData): Added a CoordinateSystem parameter to this
+        function. It is passed through to ImageBuffer::putByteArray, and used to compute the rect to
+        invalidate after the drawing operation.
+        * html/canvas/CanvasRenderingContext2D.h:
+        * html/canvas/CanvasRenderingContext2D.idl: Added webkitPutImageDataHD() and
+        webkitGetImageDataHD().
+        * platform/graphics/ImageBuffer.h: Added a CoordinateSystem enum with the values
+        LogicalCoordinateSystem and BackingStoreCoordinateSystem. Added a CoordinateSystem parameter,
+        which defaults to LogicalCoordinateSystem, to getUnmultipliedImageData,
+        getPremultipliedImageData, and putByteArray.
+        * platform/graphics/cairo/ImageBufferCairo.cpp:
+        (WebCore::ImageBuffer::getUnmultipliedImageData):
+        (WebCore::ImageBuffer::getPremultipliedImageData):
+        (WebCore::ImageBuffer::putByteArray):
+        (WebCore::ImageBuffer::toDataURL):
+        * platform/graphics/cg/ImageBufferCG.cpp:
+        (WebCore::ImageBuffer::getUnmultipliedImageData): Now uses the CoordinateSystem parameter to
+        decide whether to ask ImageBufferDaya::getData() to apply the resolution scale or not.
+        (WebCore::ImageBuffer::getPremultipliedImageData): Ditto.
+        (WebCore::ImageBuffer::putByteArray): Now uses the CoordinateSystem parameter to decide
+        whether to maintain the resolution scale while drawing or not.
+        (WebCore::ImageBuffer::toDataURL):
+        * platform/graphics/gtk/ImageBufferGtk.cpp:
+        (WebCore::ImageBuffer::toDataURL):
+        * platform/graphics/qt/ImageBufferQt.cpp:
+        (WebCore::ImageBuffer::getUnmultipliedImageData):
+        (WebCore::ImageBuffer::getPremultipliedImageData):
+        (WebCore::ImageBuffer::putByteArray):
+        (WebCore::ImageBuffer::toDataURL):
+        * platform/graphics/skia/ImageBufferSkia.cpp:
+        (WebCore::ImageBuffer::getUnmultipliedImageData):
+        (WebCore::ImageBuffer::getPremultipliedImageData):
+        (WebCore::ImageBuffer::putByteArray):
+        (WebCore::ImageBuffer::toDataURL):
+        * platform/graphics/wince/ImageBufferWinCE.cpp:
+        (WebCore::ImageBuffer::getUnmultipliedImageData):
+        (WebCore::ImageBuffer::getPremultipliedImageData):
+        (WebCore::ImageBuffer::putByteArray):
+        (WebCore::ImageBuffer::toDataURL):
+        * platform/graphics/wx/ImageBufferWx.cpp:
+        (WebCore::ImageBuffer::getUnmultipliedImageData):
+        (WebCore::ImageBuffer::getPremultipliedImageData):
+        (WebCore::ImageBuffer::putByteArray):
+        (WebCore::ImageBuffer::toDataURL):
+
 2012-04-12  Shawn Singh  <shawnsingh@chromium.org>
 
         [chromium] Support CCHeadsUpDisplay in threaded compositing mode
