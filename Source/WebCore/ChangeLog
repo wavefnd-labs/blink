@@ -1,3 +1,68 @@
+2012-04-12  Shawn Singh  <shawnsingh@chromium.org>
+
+        [chromium] Support CCHeadsUpDisplay in threaded compositing mode
+        https://bugs.webkit.org/show_bug.cgi?id=67499
+
+        Reviewed by James Robinson.
+
+        No new tests because this code is debugging code itself.
+
+        The last item that was needed to make the CCHeadsUpDisplay work in
+        threaded compositing mode was to remove the font rendering code
+        used on the impl-side thread. To solve this, this patch adds a
+        CCFontAtlas that is initialized on the main thread (where the font
+        rendering takes place). Then, when the HUD draws text on the impl
+        thread, it uses the font atlas directly.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::create):
+        (WebCore::LayerRendererChromium::initialize):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (WebCore):
+        (LayerRendererChromium):
+        * platform/graphics/chromium/cc/CCFontAtlas.cpp: Added.
+        (WebCore):
+        (WebCore::CCFontAtlas::CCFontAtlas):
+        (WebCore::wrapPositionIfNeeded):
+        (WebCore::CCFontAtlas::generateAtlasForFont):
+        (WebCore::CCFontAtlas::initialize):
+        (WebCore::CCFontAtlas::drawText):
+        (WebCore::CCFontAtlas::drawOneLineOfTextInternal):
+        (WebCore::CCFontAtlas::drawDebugAtlas):
+        * platform/graphics/chromium/cc/CCFontAtlas.h: Added.
+        (WebCore):
+        (CCFontAtlas):
+        (WebCore::CCFontAtlas::create):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.cpp:
+        (WebCore::CCHeadsUpDisplay::CCHeadsUpDisplay):
+        (WebCore):
+        (WebCore::CCHeadsUpDisplay::showPlatformLayerTree):
+        (WebCore::CCHeadsUpDisplay::drawHudContents):
+        (WebCore::CCHeadsUpDisplay::drawFPSCounter):
+        (WebCore::CCHeadsUpDisplay::drawFPSCounterText):
+        (WebCore::CCHeadsUpDisplay::drawPlatformLayerTree):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.h:
+        (WebCore::CCHeadsUpDisplay::create):
+        (CCHeadsUpDisplay):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::initialize):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (WebCore):
+        (WebCore::CCLayerTreeHost::headsUpDisplayFontAtlas):
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::initializeLayerRenderer):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (WebCore):
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::initializeLayerRenderer):
+        (WebCore::CCSingleThreadProxy::recreateContext):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::initializeLayerRendererOnImplThread):
+        (WebCore::CCThreadProxy::recreateContextOnImplThread):
+
 2012-04-13  Rob Flack  <flackr@chromium.org>
 
         Chromium: Should enable -webkit-image-set
