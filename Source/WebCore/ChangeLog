@@ -1,5 +1,67 @@
 2012-04-13  Pavel Feldman  <pfeldman@chromium.org>
 
+        Web Inspector: introduce ParsedURL type, clean up url and displayName mess in Resource and NetworkRequest.
+        https://bugs.webkit.org/show_bug.cgi?id=83871
+
+        Reviewed by Yury Semikhatsky.
+
+        There is a number of random properties created on Resource and NetworkRequest that represent various url
+        fragments. Display name is being based on them and sometimes requires fake Resource instance to be created.
+        This change (officially) introduces WebInspector.ParsedURL as a type that encapsulates this complexity.
+
+        This change also moves documentURL property into the Resource and NetworkRequest constructors and brushes up
+        factory methods used to create the objects.
+
+        * inspector/front-end/AuditRules.js:
+        (WebInspector.AuditRules.GzipRule.prototype._shouldCompress):
+        (WebInspector.AuditRules.CookieSizeRule.prototype.processCookies):
+        * inspector/front-end/Database.js:
+        (WebInspector.Database.prototype.get displayDomain):
+        * inspector/front-end/JavaScriptContextManager.js:
+        (WebInspector.FrameEvaluationContext.prototype.get displayName):
+        * inspector/front-end/NetworkManager.js:
+        (WebInspector.NetworkDispatcher.prototype.webSocketCreated):
+        (WebInspector.NetworkDispatcher.prototype._createNetworkRequest):
+        (get WebInspector):
+        * inspector/front-end/NetworkPanel.js:
+        (WebInspector.NetworkLogView.prototype._highlightNthMatchedRequest):
+        (WebInspector.NetworkDataGridNode.prototype._refreshNameCell):
+        * inspector/front-end/NetworkRequest.js:
+        (WebInspector.NetworkRequest):
+        (WebInspector.NetworkRequest.prototype.set url):
+        (WebInspector.NetworkRequest.prototype.get documentURL):
+        (WebInspector.NetworkRequest.prototype.get parsedURL):
+        (WebInspector.NetworkRequest.prototype.get displayName):
+        (WebInspector.NetworkRequest.prototype.get folder):
+        * inspector/front-end/RequestHeadersView.js:
+        (WebInspector.RequestHeadersView.prototype._refreshUrlFragment):
+        * inspector/front-end/Resource.js:
+        (WebInspector.Resource):
+        (WebInspector.Resource.prototype.set url):
+        (WebInspector.Resource.prototype.get parsedURL):
+        (WebInspector.Resource.prototype.get frameId):
+        (WebInspector.Resource.prototype.get loaderId):
+        (WebInspector.Resource.prototype.get displayName):
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.ResourceTreeModel.prototype._onRequestUpdateDropped):
+        (WebInspector.ResourceTreeModel.prototype._addFramesRecursively):
+        (WebInspector.ResourceTreeModel.prototype._createResourceFromFramePayload):
+        (WebInspector.ResourceTreeFrame.prototype._addRequest):
+        * inspector/front-end/ResourceUtils.js:
+        (WebInspector.ParsedURL):
+        (WebInspector.ParsedURL.prototype.get displayName):
+        (String.prototype.asParsedURL):
+        (WebInspector.displayDomain):
+        (WebInspector.resourceURLForRelatedNode.callback):
+        (WebInspector.resourceURLForRelatedNode):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.FrameTreeElement.prototype.frameNavigated):
+        (WebInspector.ApplicationCacheManifestTreeElement):
+        (WebInspector.ApplicationCacheFrameTreeElement.prototype._refreshTitles):
+        * inspector/front-end/utilities.js:
+
+2012-04-13  Pavel Feldman  <pfeldman@chromium.org>
+
         Web Inspector: extracting NetworkRequest from Resource (step 3)
         https://bugs.webkit.org/show_bug.cgi?id=83802
 
