@@ -1,3 +1,42 @@
+2012-04-13  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Move WebVideoFrame into Platform and remove WebCore::VideoFrameChromium wrapper API
+        https://bugs.webkit.org/show_bug.cgi?id=83851
+
+        Reviewed by Adam Barth.
+
+        Remove VideoFrameChromium wrapper and converts WebCore code to using the Platform WebVideoFrame API directly.
+        Some utility code that previously existed on VideoFrameChromium and only had one caller, such as doing
+        width/height adjustements for YV12 frames, is moved into the calling code (CCVideoLayerImpl).
+
+        Covered by existing media/ and compositing/ layout tests.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::drawYUV):
+        (WebCore::LayerRendererChromium::drawRGBA):
+        (WebCore::LayerRendererChromium::copyFrameToTextures):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        * platform/graphics/chromium/VideoFrameProvider.h:
+        (VideoFrameProvider):
+        * platform/graphics/chromium/cc/CCVideoDrawQuad.cpp:
+        (WebCore::CCVideoDrawQuad::create):
+        (WebCore::CCVideoDrawQuad::CCVideoDrawQuad):
+        * platform/graphics/chromium/cc/CCVideoDrawQuad.h:
+        (WebKit):
+        (CCVideoDrawQuad):
+        (WebCore::CCVideoDrawQuad::frame):
+        * platform/graphics/chromium/cc/CCVideoLayerImpl.cpp:
+        (WebCore):
+        (WebCore::convertVFCFormatToGC3DFormat):
+        (WebCore::CCVideoLayerImpl::willDraw):
+        (WebCore::videoFrameDimension):
+        (WebCore::hasPaddingBytes):
+        (WebCore::CCVideoLayerImpl::computeVisibleSize):
+        (WebCore::CCVideoLayerImpl::reserveTextures):
+        * platform/graphics/chromium/cc/CCVideoLayerImpl.h:
+        (WebKit):
+
 2012-04-13  Rob Flack  <flackr@chromium.org>
 
         Chromium: Should enable -webkit-image-set
