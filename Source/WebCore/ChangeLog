@@ -1,3 +1,32 @@
+2012-04-13  Dean Jackson  <dino@apple.com>
+
+        Don't process filters if the input region is exceptionally large.
+        https://bugs.webkit.org/show_bug.cgi?id=83317
+
+        Reviewed by Simon Fraser.
+
+        An extremely large element causes problems with filters, either by
+        taking too long to compute the output or using too much memory. The
+        filter engine already has some constants for maximum expected size.
+        Make sure the render tree checks them before deciding to apply
+        effects.
+
+        Tests: css3/filters/huge-region-composited.html
+               css3/filters/huge-region.html
+
+        * platform/graphics/filters/FilterEffect.cpp:
+        (WebCore::FilterEffect::apply):
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore):
+        (WebCore::isFilterSizeValid):
+        (WebCore::FilterEffectRenderer::build):
+        (WebCore::FilterEffectRenderer::updateBackingStore):
+        (WebCore::FilterEffectRendererHelper::beginFilterEffect):
+        * rendering/FilterEffectRenderer.h:
+        (FilterEffectRenderer):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateOrRemoveFilterEffect):
+
 2012-04-13  Anna Cavender  <annacc@chromium.org>
 
         Queue the cuechange event on HTMLTrackElement for proper sorting.
