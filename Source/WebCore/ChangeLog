@@ -1,3 +1,84 @@
+2012-04-12  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Background filters for composited layers
+        https://bugs.webkit.org/show_bug.cgi?id=80046
+
+        Reviewed by Adrienne Walker.
+
+        Adds background filters to LayerChromium/CCLayerImpl. These filters are
+        applied to any pixels in the contents behind the layer and seen through
+        it.
+
+        This is done by adding a backgroundTexture() to the render surface, which
+        holds the read-back contents of the target framebuffer, background filter
+        applied, in the surface's own coordinate space. Then this is drawn back
+        into the frame buffer before the contents of the surface itself is drawn.
+
+        Tests: platform/chromium/compositing/filters/background-filter-blur-off-axis.html
+               platform/chromium/compositing/filters/background-filter-blur-outsets.html
+               platform/chromium/compositing/filters/background-filter-blur.html
+
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::setBackgroundFilters):
+        (WebCore):
+        (WebCore::LayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+        (WebCore::LayerChromium::backgroundFilters):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::drawBackgroundFilters):
+        (WebCore):
+        (WebCore::LayerRendererChromium::drawRenderSurfaceQuad):
+        (WebCore::LayerRendererChromium::getFramebufferTexture):
+        (WebCore::LayerRendererChromium::isCurrentRenderSurface):
+        (WebCore::LayerRendererChromium::useRenderSurface):
+        (WebCore::LayerRendererChromium::useManagedTexture):
+        (WebCore::LayerRendererChromium::bindFramebufferToTexture):
+        (WebCore::LayerRendererChromium::setScissorToRect):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromium):
+        * platform/graphics/chromium/RenderSurfaceChromium.h:
+        (WebCore::RenderSurfaceChromium::setBackgroundFilters):
+        (WebCore::RenderSurfaceChromium::backgroundFilters):
+        (RenderSurfaceChromium):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::setBackgroundFilters):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+        (WebCore::CCLayerImpl::backgroundFilters):
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.cpp:
+        (WebCore::subtreeShouldRenderToSeparateSurface):
+        (WebCore::calculateDrawTransformsAndVisibilityInternal):
+        * platform/graphics/chromium/cc/CCRenderSurface.cpp:
+        (WebCore::CCRenderSurface::drawableContentRect):
+        (WebCore::CCRenderSurface::prepareBackgroundTexture):
+        (WebCore):
+        (WebCore::CCRenderSurface::releaseBackgroundTexture):
+        (WebCore::CCRenderSurface::computeDeviceTransform):
+        (WebCore::CCRenderSurface::computeDeviceBoundingBox):
+        (WebCore::CCRenderSurface::computeReadbackDeviceBoundingBox):
+        (WebCore::CCRenderSurface::readbackDeviceContentRect):
+        (WebCore::copyTextureToFramebuffer):
+        (WebCore::CCRenderSurface::copyDeviceToBackgroundTexture):
+        (WebCore::getSkBitmapTextureId):
+        (WebCore::CCRenderSurface::drawContents):
+        (WebCore::CCRenderSurface::drawReplica):
+        (WebCore::CCRenderSurface::drawLayer):
+        (WebCore::CCRenderSurface::drawSurface):
+        (WebCore::CCRenderSurface::applyFilters):
+        * platform/graphics/chromium/cc/CCRenderSurface.h:
+        (CCRenderSurface):
+        (WebCore::CCRenderSurface::setBackgroundFilters):
+        (WebCore::CCRenderSurface::backgroundFilters):
+        (WebCore::CCRenderSurface::backgroundTexture):
+        * testing/Internals.cpp:
+        (WebCore):
+        (WebCore::Internals::setBackgroundBlurOnNode):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-04-12  Adam Barth  <abarth@webkit.org>
 
         Remove V8DOMWindowShell::setLocation
