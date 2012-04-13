@@ -1,3 +1,29 @@
+2012-04-12  Adam Barth  <abarth@webkit.org>
+
+        window.open should prepare for seamless navigation by using findFrameForNavigation
+        https://bugs.webkit.org/show_bug.cgi?id=83835
+
+        Reviewed by Ryosuke Niwa.
+
+        Before this patch, window.open called FrameTree::find and
+        Document::canNavigate separately.  This patch refactors the code to
+        call FrameLoader::findFrameForNavigation, which does both.  This
+        refactoring prepares window.open to understand seamless navigation,
+        which will happen in findFrameForNavigation.
+
+        This patch should have no behavior change today, but once we merge the
+        seamless branch, this change will be tested by
+        https://github.com/eseidel/webkit/blob/seamless/LayoutTests/fast/frames/seamless/seamless-window-open.html
+
+        See https://github.com/eseidel/webkit/commit/a0d8b7defbb63047912aefbc8e22bca4f0638c37 for context.
+
+        * WebCore.exp.in:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::findFrameForNavigation):
+        (WebCore::createWindow):
+        * loader/FrameLoader.h:
+        (FrameLoader):
+
 2012-04-12  Andy Estes  <aestes@apple.com>
 
         REGRESSION (r102262): iAd Producer relies on CSSStyleDeclaration property setters respecting '!important'
