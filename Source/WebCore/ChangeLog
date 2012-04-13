@@ -1,3 +1,32 @@
+2012-04-12  Levi Weintraub  <leviw@chromium.org>
+
+        Prepare functions in LengthFunctions.h for LayoutUnits
+        https://bugs.webkit.org/show_bug.cgi?id=83726
+
+        Reviewed by Eric Seidel.
+
+        Preparing the functions that live in LengthFunctions for sub-pixel layout, which entails
+        using and returning LayoutUnits instead of integers. There are a number of rendering
+        classes that are laid out using integers -- see https://trac.webkit.org/wiki/LayoutUnit
+        for details -- so this also adds integer-specific versions of the length functions for
+        explicit use in those classes.
+
+        No new tests. No change in behavior.
+
+        * css/LengthFunctions.h:
+        (WebCore): Using LayoutUnits for sub-pixel precision and adding integer-specific versions
+        of minimumValueForLength and valueForLength that truncate.
+        * css/LengthFunctions.cpp:
+        (WebCore):
+        * dom/Document.cpp:
+        (WebCore::Document::pageSizeAndMarginsInPixels): Document sizes are integral.
+        * rendering/RenderFrameSet.cpp:
+        (WebCore::RenderFrameSet::layOutAxis): The frame tree continues to be integral.
+        * rendering/RenderMarquee.cpp:
+        (WebCore::RenderMarquee::timerFired): RenderMarquee scrolling uses integral values.
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight): Table layout is integral.
+
 2012-04-12  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r114075.
