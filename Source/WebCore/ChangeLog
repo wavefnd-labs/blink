@@ -1,3 +1,31 @@
+2012-04-12  Adam Barth  <abarth@webkit.org>
+
+        Use _self to represnet self-navigation, like in the HTML5 spec
+        https://bugs.webkit.org/show_bug.cgi?id=83834
+
+        Reviewed by Eric Seidel.
+
+        This patch aligns the internal state representation of the FrameLoader
+        more closely with the HTML5 spec.  Both the null string and "_self"
+        represent self-navigation, but the HTML5 spec distinguishes them when
+        navigating seamless iframes.  In that case, "_self" is explicit
+        self-navigation, whereas a null string will get redirected to the
+        "master" frame (the closest enclosing non-seamless frame).
+
+        This patch shouldn't have any observable behavior changes, but it will
+        be useful when we merge in the seamless branch from GitHub.
+        (See https://github.com/eseidel/webkit/commit/df0e71fcacdb0e7e45fe669afe1314cec5b76523
+        which contains this change.)
+
+        Once the seamless branch lands, this change will be tested by a number
+        of tests in
+        https://github.com/eseidel/webkit/tree/seamless/LayoutTests/fast/frames/seamless
+        including seamless-hyperlink.html.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::loadURLIntoChildFrame):
+        (WebCore::FrameLoader::loadURL):
+
 2012-04-12  James Robinson  <jamesr@chromium.org>
 
         [chromium] Move WebVideoFrame into Platform and remove WebCore::VideoFrameChromium wrapper API
