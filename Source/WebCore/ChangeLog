@@ -1,3 +1,23 @@
+2012-04-12  Kent Tamura  <tkent@chromium.org>
+
+        LocalizedDateICU should ignore timezones
+        https://bugs.webkit.org/show_bug.cgi?id=83859
+
+        Reviewed by Hajime Morita.
+
+        udat_parse() and udat_format() shift the input date by the offset of the
+        default timezone. We don't need this behavior for type=date. So we
+        specify "GMT" to udat_open().
+
+        No new tests. This behavior depends on the timezone setting of the local machine.
+
+        * platform/text/LocalizedDateICU.cpp:
+        (WebCore::createShortDateFormatter):
+        Added. Common factory functio for UDateFormat. Use "GMT" instead of the
+        default timezone.
+        (WebCore::parseLocalizedDate): Use createShortDateFormatter().
+        (WebCore::formatLocalizedDate): ditto.
+
 2012-04-12  Adam Barth  <abarth@webkit.org>
 
         Prepare window.location for seamless navigation
