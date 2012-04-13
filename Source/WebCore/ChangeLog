@@ -1,3 +1,27 @@
+2012-04-13  Jer Noble  <jer.noble@apple.com>
+
+        fullscreen/video-controls-drag.html failing on Mac
+        https://bugs.webkit.org/show_bug.cgi?id=81176
+
+        Reviewed by Eric Carlson.
+
+        No new tests.  Fixes fullscreen/video-controls-drag.html.
+
+        Regressed in r110409.  When the -webkit-media-controls-panel were changed
+        from position:absolute to position:relative, this broke dragging of the 
+        controls in fullscreen, which relies on the panel being absolutely positioned
+        to do its drag positioning. Change the way drag positioning is calculated to
+        accommodate position:relative.
+
+        * css/fullscreenQuickTime.css:
+        (video:-webkit-full-screen::-webkit-media-controls-panel): Instead of bottom:50px,
+            use margin-bottom:50px to push panel up from the bottom of the screen.
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlPanelElement::startDrag): Do not ask for the current renderer location.
+        (WebCore::MediaControlPanelElement::continueDrag): Use the delta between the event locations
+            only to calculate the new panel position.
+        * html/shadow/MediaControlElements.h:
+
 2012-04-13  Simon Fraser  <simon.fraser@apple.com>
 
         Compositing layers not updated after scroll in WebKit1
