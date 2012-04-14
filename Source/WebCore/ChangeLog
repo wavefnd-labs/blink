@@ -1,3 +1,31 @@
+2012-04-13  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Remove viewport memory restrictions
+        https://bugs.webkit.org/show_bug.cgi?id=83316
+
+        Reviewed by Adrienne Walker.
+
+        We remove the memory restriction on web pages based on viewport size
+        on desktop. This is causing pages that have complex use of layers to
+        end up hitting our memory limits, and moreso when the window is small.
+        Page complexity is not really a function of the viewport size.
+
+        We drop the mininum memory limit entirely, and just evict all
+        unprotected textures instead.
+
+        Covered by existing tests.
+
+        * platform/graphics/chromium/TextureManager.cpp:
+        (WebCore::TextureManager::highLimitBytes):
+        (WebCore::TextureManager::reclaimLimitBytes):
+        * platform/graphics/chromium/TextureManager.h:
+        (TextureManager):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::beginCommitOnImplThread):
+        (WebCore::CCLayerTreeHost::setVisible):
+        (WebCore::CCLayerTreeHost::didBecomeInvisibleOnImplThread):
+        (WebCore::CCLayerTreeHost::updateLayers):
+
 2012-04-13  Ken Buchanan  <kenrb@chromium.org>
 
         Optimize tracking of intruding floats being removed from RenderBlock during layout
