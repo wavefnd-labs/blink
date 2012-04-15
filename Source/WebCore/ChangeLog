@@ -1,3 +1,28 @@
+2012-04-14  Kent Tamura  <tkent@chromium.org>
+
+        Day of week labels are wrong if WebCore::firstDayOfWeek() is not 0
+        https://bugs.webkit.org/show_bug.cgi?id=83990
+
+        Reviewed by Kentaro Hara.
+
+        We passed the "weekStartDay" property value as a
+        string. CalendarPickerElement::writeDocument() created:
+            weekStartDay: "1",
+        and the JavaScript code used it in the following code:
+            dayLabels[(weekStartDay + i) % 7]
+        If weekStartDay was "1", the expression (weekStartDay + i)
+        produced "10", "11", "12", ... We expected "1", "2", "3", ...
+
+        We need to pass the "weekStartDay" property as a number.
+
+        No new tests because we have no ways to test this for now. We'll
+        introduce tests for the calendar picker later.
+
+        * html/shadow/CalendarPickerElement.cpp:
+        (WebCore::addProperty): Add addProperty() function for a number.
+        (WebCore::CalendarPickerElement::writeDocument):
+        Pass a number, not a serialized number.
+
 2012-04-14  Joe Thomas  <joethomas@motorola.com>
 
         Viewport-percentage Length units does not work for Replaced elements size
