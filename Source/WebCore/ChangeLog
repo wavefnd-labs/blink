@@ -1,3 +1,107 @@
+2012-04-15  Antti Koivisto  <antti@apple.com>
+
+        Capture CSS parser context
+        https://bugs.webkit.org/show_bug.cgi?id=83998
+
+        Reviewed by Andreas Kling.
+
+        Currently the CSS parser calls to the Document and StyleSheetInternal objects to get settings, base URL etc.
+        The required information should be passed in on parser construction instead. The parser should not need to
+        know about the document at all.
+        
+        The patch adds CSSParserContext struct that captures the parsing context. StyleSheetInternal saves the
+        parsing context and reuses it for any further parsing.
+        
+        If the same stylesheet source is parsed with an identical context then the resulting stylesheet structure will
+        be identical. This will allow sharing parsed stylesheets in the future.
+
+        * css/CSSGrammar.y:
+        * css/CSSImportRule.cpp:
+        (WebCore::StyleRuleImport::setCSSStyleSheet):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::insertRule):
+        * css/CSSPageRule.cpp:
+        (WebCore::CSSPageRule::setSelectorText):
+        * css/CSSParser.cpp:
+        (WebCore):
+        (WebCore::strictCSSParserContext):
+        (WebCore::CSSParserContext::CSSParserContext):
+        (WebCore::CSSParser::CSSParser):
+        (WebCore::CSSParser::parseKeyframeRule):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseSelector):
+        (WebCore::CSSParser::completeURL):
+        (WebCore::CSSParser::parseContent):
+        (WebCore::CSSParser::parseAttr):
+        (WebCore::CSSParser::parseFillImage):
+        (WebCore::CSSParser::parseFontFaceSrcURI):
+        (WebCore::CSSParser::parseFontFaceSrc):
+        (WebCore::CSSParser::parseBorderImage):
+        (WebCore::CSSParser::parseImageSet):
+        (WebCore::CSSParser::parseCustomFilter):
+        (WebCore::CSSParser::parseFilter):
+        (WebCore::CSSParser::cssRegionsEnabled):
+        (WebCore::CSSParser::parseFlowThread):
+        (WebCore::CSSParser::createMediaRule):
+        (WebCore::CSSParser::createStyleRule):
+        (WebCore::CSSParser::createFontFaceRule):
+        (WebCore::CSSParser::createPageRule):
+        (WebCore::CSSParser::createKeyframe):
+        * css/CSSParser.h:
+        (CSSParser):
+        (WebCore::CSSParser::inStrictMode):
+        (WebCore::CSSParser::inQuirksMode):
+        (WebCore::CSSParser::validUnit):
+        * css/CSSParserMode.h:
+        (WebCore):
+        (CSSParserContext):
+        * css/CSSRule.h:
+        (WebCore::CSSRule::parserContext):
+        (CSSRule):
+        * css/CSSStyleRule.cpp:
+        (WebCore::CSSStyleRule::setSelectorText):
+        * css/CSSStyleSheet.cpp:
+        (WebCore::StyleSheetInternal::StyleSheetInternal):
+        (WebCore::StyleSheetInternal::parseString):
+        (WebCore::StyleSheetInternal::parseStringAtLine):
+        (WebCore):
+        (WebCore::StyleSheetInternal::updateBaseURL):
+        (WebCore::StyleSheetInternal::completeURL):
+        (WebCore::CSSStyleSheet::insertRule):
+        * css/CSSStyleSheet.h:
+        (StyleSheetInternal):
+        (WebCore::StyleSheetInternal::parserContext):
+        (WebCore::StyleSheetInternal::charset):
+        (WebCore::StyleSheetInternal::setFinalURL):
+        (WebCore::StyleSheetInternal::baseURL):
+        * css/CSSValuePool.cpp:
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::parseDeclaration):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::WebKitCSSKeyframesRule::insertRule):
+        * dom/Document.cpp:
+        (WebCore::Document::webkitGetFlowByName):
+        (WebCore::Document::pageUserSheet):
+        (WebCore::Document::pageGroupUserSheets):
+        * dom/Element.cpp:
+        (WebCore::Element::webkitMatchesSelector):
+        * dom/Node.cpp:
+        (WebCore::Node::querySelector):
+        (WebCore::Node::querySelectorAll):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::parseStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        * html/shadow/ContentSelectorQuery.cpp:
+        (WebCore::ContentSelectorQuery::ContentSelectorQuery):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyle::setPropertyText):
+        (WebCore::InspectorStyleSheet::reparseStyleSheet):
+        (WebCore::InspectorStyleSheet::ensureSourceData):
+        (WebCore::InspectorStyleSheetForInlineStyle::getStyleAttributeRanges):
+
 2012-04-15  Noel Gordon  <noel.gordon@gmail.com>
 
         [Cairo] Separate image encoding from dataURL construction
