@@ -1,3 +1,80 @@
+2012-04-15  James Robinson  <jamesr@chromium.org>
+
+        [chromium] LayerRendererChromium shouldn't know anything about CCLayerImpl
+        https://bugs.webkit.org/show_bug.cgi?id=83415
+
+        Reviewed by Adrienne Walker.
+
+        This removes all knowledge of CCLayerImpl from LayerRendererChromium. The most significant move code-wise is
+        moving the HUD up to live on CCLayerTreeHostImpl, since it's aware of the layer tree. This involves two changes.
+        First, CCHeadsUpDisplay is in charge of populating a ManagedTexture but the actual drawing code now lives in
+        LayerRendererChromium. Second, since we don't recreate CCLayerTreeHostImpl on a lost context, the font atlas
+        ownership is much simpler. Now a CCFontAtlas is created on the main thread if needed and passed asynchronously
+        to the CCHeadsUpDisplay which takes ownership of the atlas.
+
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::create):
+        (WebCore::LayerRendererChromium::initialize):
+        (WebCore::LayerRendererChromium::~LayerRendererChromium):
+        (WebCore::LayerRendererChromium::beginDrawingFrame):
+        (WebCore::LayerRendererChromium::drawHeadsUpDisplay):
+        (WebCore):
+        (WebCore::LayerRendererChromium::finishDrawingFrame):
+        (WebCore::LayerRendererChromium::swapBuffers):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromiumClient):
+        (LayerRendererChromium):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.cpp:
+        (WebCore::CCHeadsUpDisplay::CCHeadsUpDisplay):
+        (WebCore::CCHeadsUpDisplay::setFontAtlas):
+        (WebCore):
+        (WebCore::CCHeadsUpDisplay::enabled):
+        (WebCore::CCHeadsUpDisplay::showPlatformLayerTree):
+        (WebCore::CCHeadsUpDisplay::draw):
+        (WebCore::CCHeadsUpDisplay::drawHudContents):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.h:
+        (WebCore):
+        (WebCore::CCHeadsUpDisplay::create):
+        (CCHeadsUpDisplay):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::initialize):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::~CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::canDraw):
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        (WebCore::CCLayerTreeHostImpl::prepareToDraw):
+        (WebCore::CCLayerTreeHostImpl::drawLayers):
+        (WebCore::CCLayerTreeHostImpl::swapBuffers):
+        (WebCore::CCLayerTreeHostImpl::initializeLayerRenderer):
+        (WebCore::CCLayerTreeHostImpl::setFullRootLayerDamage):
+        (WebCore::CCLayerTreeHostImpl::layerTreeAsText):
+        (WebCore):
+        (WebCore::CCLayerTreeHostImpl::setFontAtlas):
+        (WebCore::CCLayerTreeHostImpl::dumpRenderSurfaces):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::rootLayer):
+        * platform/graphics/chromium/cc/CCProxy.h:
+        (WebCore):
+        (CCProxy):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::initializeLayerRenderer):
+        (WebCore::CCSingleThreadProxy::recreateContext):
+        (WebCore::CCSingleThreadProxy::setFontAtlas):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::initializeLayerRendererOnImplThread):
+        (WebCore::CCThreadProxy::setFontAtlas):
+        (WebCore):
+        (WebCore::CCThreadProxy::setFontAtlasOnImplThread):
+        (WebCore::CCThreadProxy::recreateContextOnImplThread):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (CCThreadProxy):
+
 2012-04-15  Antti Koivisto  <antti@apple.com>
 
         Capture CSS parser context
