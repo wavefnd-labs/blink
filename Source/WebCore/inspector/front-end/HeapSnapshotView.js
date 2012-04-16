@@ -484,11 +484,11 @@ WebInspector.HeapSnapshotDominatorsDataGrid.prototype.__proto__ = WebInspector.H
  * @constructor
  * @extends {WebInspector.View}
  */
-WebInspector.DetailedHeapshotView = function(parent, profile)
+WebInspector.HeapSnapshotView = function(parent, profile)
 {
     WebInspector.View.call(this);
 
-    this.element.addStyleClass("detailed-heapshot-view");
+    this.element.addStyleClass("heap-snapshot-view");
 
     this.parent = parent;
     this.parent.addEventListener("profile added", this._updateBaseOptions, this);
@@ -582,7 +582,7 @@ WebInspector.DetailedHeapshotView = function(parent, profile)
     this.filterSelectElement.addEventListener("change", this._changeFilter.bind(this), false);
     this._updateFilterOptions();
 
-    this.helpButton = new WebInspector.StatusBarButton("", "heapshot-help-status-bar-item status-bar-item");
+    this.helpButton = new WebInspector.StatusBarButton("", "heap-snapshot-help-status-bar-item status-bar-item");
     this.helpButton.addEventListener("click", this._helpClicked, this);
 
     this._popoverHelper = new WebInspector.ObjectPopoverHelper(this.element, this._getHoverAnchor.bind(this), this._resolveObjectForPopover.bind(this), undefined, true);
@@ -608,7 +608,7 @@ WebInspector.DetailedHeapshotView = function(parent, profile)
     }
 }
 
-WebInspector.DetailedHeapshotView.prototype = {
+WebInspector.HeapSnapshotView.prototype = {
     dispose: function()
     {
         this.profileWrapper.dispose();
@@ -628,7 +628,7 @@ WebInspector.DetailedHeapshotView.prototype = {
 
     get profile()
     {
-        return this.parent.getProfile(WebInspector.DetailedHeapshotProfileType.TypeId, this._profileUid);
+        return this.parent.getProfile(WebInspector.HeapSnapshotProfileType.TypeId, this._profileUid);
     },
 
     get profileWrapper()
@@ -638,7 +638,7 @@ WebInspector.DetailedHeapshotView.prototype = {
 
     get baseProfile()
     {
-        return this.parent.getProfile(WebInspector.DetailedHeapshotProfileType.TypeId, this._baseProfileUid);
+        return this.parent.getProfile(WebInspector.HeapSnapshotProfileType.TypeId, this._baseProfileUid);
     },
 
     get baseProfileWrapper()
@@ -875,7 +875,7 @@ WebInspector.DetailedHeapshotView.prototype = {
 
     _profiles: function()
     {
-        return WebInspector.panels.profiles.getProfiles(WebInspector.DetailedHeapshotProfileType.TypeId);
+        return WebInspector.panels.profiles.getProfiles(WebInspector.HeapSnapshotProfileType.TypeId);
     },
 
     _loadProfile: function(profileUid, callback)
@@ -1042,7 +1042,7 @@ WebInspector.DetailedHeapshotView.prototype = {
                             " a ", "console-formatted-null", "System"];
 
             var contentElement = document.createElement("table");
-            contentElement.className = "heapshot-help";
+            contentElement.className = "heap-snapshot-help";
             var headerRow = document.createElement("tr");
             var propsHeader = document.createElement("th");
             propsHeader.textContent = WebInspector.UIString("Property types:");
@@ -1167,7 +1167,7 @@ WebInspector.DetailedHeapshotView.prototype = {
     }
 };
 
-WebInspector.DetailedHeapshotView.prototype.__proto__ = WebInspector.View.prototype;
+WebInspector.HeapSnapshotView.prototype.__proto__ = WebInspector.View.prototype;
 
 WebInspector.settings.showHeapSnapshotObjectsHiddenProperties = WebInspector.settings.createSetting("showHeaSnapshotObjectsHiddenProperties", false);
 
@@ -1175,14 +1175,14 @@ WebInspector.settings.showHeapSnapshotObjectsHiddenProperties = WebInspector.set
  * @constructor
  * @extends {WebInspector.ProfileType}
  */
-WebInspector.DetailedHeapshotProfileType = function()
+WebInspector.HeapSnapshotProfileType = function()
 {
-    WebInspector.ProfileType.call(this, WebInspector.DetailedHeapshotProfileType.TypeId, WebInspector.UIString("Take Heap Snapshot"));
+    WebInspector.ProfileType.call(this, WebInspector.HeapSnapshotProfileType.TypeId, WebInspector.UIString("Take Heap Snapshot"));
 }
 
-WebInspector.DetailedHeapshotProfileType.TypeId = "HEAP";
+WebInspector.HeapSnapshotProfileType.TypeId = "HEAP";
 
-WebInspector.DetailedHeapshotProfileType.prototype = {
+WebInspector.HeapSnapshotProfileType.prototype = {
     get buttonTooltip()
     {
         return WebInspector.UIString("Take heap snapshot.");
@@ -1210,8 +1210,8 @@ WebInspector.DetailedHeapshotProfileType.prototype = {
 
     createView: function(profile)
     {
-        return new WebInspector.DetailedHeapshotView(WebInspector.panels.profiles, profile);
+        return new WebInspector.HeapSnapshotView(WebInspector.panels.profiles, profile);
     }
 }
 
-WebInspector.DetailedHeapshotProfileType.prototype.__proto__ = WebInspector.ProfileType.prototype;
+WebInspector.HeapSnapshotProfileType.prototype.__proto__ = WebInspector.ProfileType.prototype;

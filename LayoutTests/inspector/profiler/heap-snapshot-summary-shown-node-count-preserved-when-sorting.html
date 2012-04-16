@@ -1,7 +1,7 @@
 <html>
 <head>
   <script src="../../http/tests/inspector/inspector-test.js"></script>
-  <script src="detailed-heapshots-test.js"></script>
+  <script src="heap-snapshot-test.js"></script>
 <script>
 
 function test()
@@ -12,14 +12,14 @@ function test()
         return InspectorTest.createHeapSnapshot(instanceCount);
     }
 
-    InspectorTest.runDetailedHeapshotTestSuite([
-        function testShownNodeCountPreservedWhenSorting(next)
+    InspectorTest.runHeapSnapshotTestSuite([
+        function testExpansionPreservedWhenSorting(next)
         {
             InspectorTest.takeAndOpenSnapshot(createHeapSnapshot, step1);
 
             function step1()
             {
-                InspectorTest.switchToView("Dominators", step2);
+                InspectorTest.switchToView("Summary", step2);
             }
 
             var columns;
@@ -31,18 +31,19 @@ function test()
 
             function step3()
             {
-                InspectorTest.findAndExpandGCRoots(step4);
-            }
-
-            function step4(row)
-            {
-                var buttonsNode = InspectorTest.findButtonsNode(row);
-                InspectorTest.assertEquals(true, !!buttonsNode, "no buttons node found!");
-                InspectorTest.clickShowMoreButton("showNext", buttonsNode, step5);
+                var row = InspectorTest.findRow("object", "B");
+                InspectorTest.assertEquals(true, !!row, "\"B\" row");
+                InspectorTest.expandRow(row, showNext);
+                function showNext(row)
+                {
+                    var buttonsNode = InspectorTest.findButtonsNode(row);
+                    InspectorTest.assertEquals(true, !!buttonsNode, "no buttons node found!");
+                    InspectorTest.clickShowMoreButton("showNext", buttonsNode, step4);
+                }
             }
 
             var nodeCount;
-            function step5(row)
+            function step4(row)
             {
                 // There must be enough nodes to have some unrevealed.
                 var buttonsNode = InspectorTest.findButtonsNode(row);
@@ -72,7 +73,7 @@ function test()
 </head>
 <body onload="runTest()">
 <p>
-Tests Dominators view of detailed heap snapshots.
+Tests Summary view of detailed heap snapshots.
 Shown node count must be preserved after sorting.
 </p>
 </body>

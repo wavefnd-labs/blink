@@ -1,62 +1,64 @@
 <html>
 <head>
   <script src="../../http/tests/inspector/inspector-test.js"></script>
-  <script src="detailed-heapshots-test.js"></script>
+  <script src="heap-snapshot-test.js"></script>
 <script>
 
 function test()
 {
-    var instanceCount = 25;
-    function createHeapSnapshot()
+    var instanceCount = 24;
+    function createHeapSnapshotA()
     {
-        return InspectorTest.createHeapSnapshot(instanceCount);
+        return InspectorTest.createHeapSnapshot(instanceCount, 5);
+    }
+    function createHeapSnapshotB()
+    {
+        return InspectorTest.createHeapSnapshot(instanceCount + 1, 5 + instanceCount);
     }
 
-    InspectorTest.runDetailedHeapshotTestSuite([
+    InspectorTest.runHeapSnapshotTestSuite([
         function testSorting(next)
         {
-            InspectorTest.takeAndOpenSnapshot(createHeapSnapshot, step1);
-
+            InspectorTest.takeAndOpenSnapshot(createHeapSnapshotA, createSnapshotB);
+            function createSnapshotB() {
+                InspectorTest.takeAndOpenSnapshot(createHeapSnapshotB, step1);
+            }
+            
             function step1()
             {
-                InspectorTest.switchToView("Dominators", step2);
+                InspectorTest.switchToView("Comparison", step2);
             }
 
-            var gcRoots;
             var columns;
             var currentColumn;
             var currentColumnOrder;
 
             function step2()
             {
-                InspectorTest.findAndExpandGCRoots(step3);
-            }
-
-            function step3(gcRootsRow)
-            {
-                gcRoots = gcRootsRow;
                 columns = InspectorTest.viewColumns();
                 currentColumn = 0;
                 currentColumnOrder = false;
-                setTimeout(step4, 0);
+                setTimeout(step3, 0);
             }
 
-            function step4()
+            function step3()
             {
                 if (currentColumn >= columns.length) {
                     setTimeout(next, 0);
                     return;
                 }
 
-                InspectorTest.clickColumn(columns[currentColumn], step5);
+                InspectorTest.clickColumn(columns[currentColumn], step4);
             }
 
-            function step5(newColumnState)
+            function step4(newColumnState)
             {
                 columns[currentColumn] = newColumnState;
-                var contents = InspectorTest.columnContents(columns[currentColumn], gcRoots);
+                var contents = InspectorTest.columnContents(columns[currentColumn]);
                 InspectorTest.assertEquals(true, !!contents.length, "column contents");
-                var sortTypes = { object: "id", shallowSize: "size", retainedSize: "size" };
+                var sortTypes = { object: "text",
+                                  addedCount: "number", removedCount: "number", countDelta: "number",
+                                  addedSize: "size", removedSize: "size", sizeDelta: "size" };
                 InspectorTest.assertEquals(true, !!sortTypes[columns[currentColumn].identifier], "sort by identifier");
                 InspectorTest.checkArrayIsSorted(contents, sortTypes[columns[currentColumn].identifier], columns[currentColumn].sort);
 
@@ -66,7 +68,7 @@ function test()
                     currentColumnOrder = false;
                     ++currentColumn;
                 }
-                setTimeout(step4, 0);
+                setTimeout(step3, 0);
             }
         }
     ]);
@@ -76,7 +78,7 @@ function test()
 </head>
 <body onload="runTest()">
 <p>
-Tests sorting in Dominators view of detailed heap snapshots.
+Tests sorting in Comparison view of detailed heap snapshots.
 </p>
 </body>
 </html>

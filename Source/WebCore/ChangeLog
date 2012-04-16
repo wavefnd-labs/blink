@@ -1,3 +1,261 @@
+2012-04-16  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: rename heap profiler files and classes DetailedHeapshot* ->HeapSnapshot*
+        https://bugs.webkit.org/show_bug.cgi?id=84038
+
+        A bunch of renames "detailed heapshot" -> "heap snapshot".
+
+        Reviewed by Pavel Feldman.
+
+        Tests: inspector/profiler/heap-snapshot-comparison-expansion-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-comparison-show-all.html
+               inspector/profiler/heap-snapshot-comparison-show-next.html
+               inspector/profiler/heap-snapshot-comparison-shown-node-count-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-comparison-sorting.html
+               inspector/profiler/heap-snapshot-containment-expansion-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-containment-show-all.html
+               inspector/profiler/heap-snapshot-containment-show-next.html
+               inspector/profiler/heap-snapshot-containment-shown-node-count-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-containment-sorting.html
+               inspector/profiler/heap-snapshot-dominators-expansion-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-dominators-show-all.html
+               inspector/profiler/heap-snapshot-dominators-show-next.html
+               inspector/profiler/heap-snapshot-dominators-shown-node-count-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-dominators-sorting.html
+               inspector/profiler/heap-snapshot-summary-expansion-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-summary-show-all.html
+               inspector/profiler/heap-snapshot-summary-show-next.html
+               inspector/profiler/heap-snapshot-summary-shown-node-count-preserved-when-sorting.html
+               inspector/profiler/heap-snapshot-summary-sorting.html
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/HeapSnapshotGridNodes.js: Renamed from Source/WebCore/inspector/front-end/DetailedHeapshotGridNodes.js.
+        (WebInspector.HeapSnapshotGridNode):
+        (WebInspector.HeapSnapshotGridNode.prototype.ensureContentCreated):
+        (WebInspector.HeapSnapshotGridNode.prototype.createCell):
+        (WebInspector.HeapSnapshotGridNode.prototype.dispose):
+        (WebInspector.HeapSnapshotGridNode.prototype.hasHoverMessage.false.queryObjectContent):
+        (WebInspector.HeapSnapshotGridNode.prototype._toPercentString):
+        (WebInspector.HeapSnapshotGridNode.prototype._createValueCell):
+        (WebInspector.HeapSnapshotGridNode.prototype._populate.sorted):
+        (WebInspector.HeapSnapshotGridNode.prototype._populate):
+        (WebInspector.HeapSnapshotGridNode.prototype.populateChildren.callSerialize):
+        (WebInspector.HeapSnapshotGridNode.prototype.populateChildren.childrenRetrieved.notify):
+        (WebInspector.HeapSnapshotGridNode.prototype.populateChildren.childrenRetrieved):
+        (WebInspector.HeapSnapshotGridNode.prototype.populateChildren):
+        (WebInspector.HeapSnapshotGridNode.prototype._saveChildren):
+        (WebInspector.HeapSnapshotGridNode.prototype.sort.afterSort.afterPopulate):
+        (WebInspector.HeapSnapshotGridNode.prototype.sort.afterSort):
+        (WebInspector.HeapSnapshotGridNode.prototype.sort):
+        (WebInspector.HeapSnapshotLazyGridNode):
+        (WebInspector.HeapSnapshotLazyGridNode.prototype.ensureContentCreated):
+        (WebInspector.HeapSnapshotLazyGridNode.prototype.createCells):
+        (WebInspector.HeapSnapshotGenericObjectNode):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.createCell):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype._createObjectCell):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.get data):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.queryObjectContent.else.formatResult):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.queryObjectContent):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.get _retainedSizePercent):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.get _shallowSizePercent):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.updateHasChildren):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.isWindow):
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.shortenWindowURL):
+        (WebInspector.HeapSnapshotObjectNode):
+        (WebInspector.HeapSnapshotObjectNode.prototype.updateHasChildren):
+        (WebInspector.HeapSnapshotObjectNode.prototype._createChildNode):
+        (WebInspector.HeapSnapshotObjectNode.prototype._childHashForEntity):
+        (WebInspector.HeapSnapshotObjectNode.prototype._childHashForNode):
+        (WebInspector.HeapSnapshotObjectNode.prototype.comparator):
+        (WebInspector.HeapSnapshotObjectNode.prototype._emptyData):
+        (WebInspector.HeapSnapshotObjectNode.prototype._enhanceData):
+        (WebInspector.HeapSnapshotObjectNode.prototype._prefixObjectCell):
+        (WebInspector.HeapSnapshotInstanceNode):
+        (WebInspector.HeapSnapshotInstanceNode.prototype._createChildNode):
+        (WebInspector.HeapSnapshotInstanceNode.prototype._childHashForEntity):
+        (WebInspector.HeapSnapshotInstanceNode.prototype._childHashForNode):
+        (WebInspector.HeapSnapshotInstanceNode.prototype.comparator):
+        (WebInspector.HeapSnapshotInstanceNode.prototype._emptyData):
+        (WebInspector.HeapSnapshotInstanceNode.prototype._enhanceData):
+        (WebInspector.HeapSnapshotInstanceNode.prototype.get isDeletedNode):
+        (WebInspector.HeapSnapshotConstructorNode):
+        (WebInspector.HeapSnapshotConstructorNode.prototype.createCell):
+        (WebInspector.HeapSnapshotConstructorNode.prototype._createChildNode):
+        (WebInspector.HeapSnapshotConstructorNode.prototype._createNodesProvider):
+        (WebInspector.HeapSnapshotConstructorNode.prototype.comparator):
+        (WebInspector.HeapSnapshotConstructorNode.prototype._childHashForEntity):
+        (WebInspector.HeapSnapshotConstructorNode.prototype._childHashForNode):
+        (WebInspector.HeapSnapshotConstructorNode.prototype.get data):
+        (WebInspector.HeapSnapshotConstructorNode.prototype.get _countPercent):
+        (WebInspector.HeapSnapshotConstructorNode.prototype.get _retainedSizePercent):
+        (WebInspector.HeapSnapshotConstructorNode.prototype.get _shallowSizePercent):
+        (WebInspector.HeapSnapshotIteratorsTuple):
+        (WebInspector.HeapSnapshotIteratorsTuple.prototype.dispose):
+        (WebInspector.HeapSnapshotIteratorsTuple.prototype.sortAndRewind):
+        (WebInspector.HeapSnapshotDiffNode):
+        (WebInspector.HeapSnapshotDiffNode.prototype.calculateDiff.diffCalculated):
+        (WebInspector.HeapSnapshotDiffNode.prototype.calculateDiff):
+        (WebInspector.HeapSnapshotDiffNode.prototype.calculateDiff.baseIdsReceived):
+        (WebInspector.HeapSnapshotDiffNode.prototype.calculateDiff.idsReceived):
+        (WebInspector.HeapSnapshotDiffNode.prototype._createChildNode):
+        (WebInspector.HeapSnapshotDiffNode.prototype._createNodesProvider.createProvider):
+        (WebInspector.HeapSnapshotDiffNode.prototype._createNodesProvider):
+        (WebInspector.HeapSnapshotDiffNode.prototype._childHashForEntity):
+        (WebInspector.HeapSnapshotDiffNode.prototype._childHashForNode):
+        (WebInspector.HeapSnapshotDiffNode.prototype.comparator):
+        (WebInspector.HeapSnapshotDiffNode.prototype.populateChildren.firstProviderPopulated):
+        (WebInspector.HeapSnapshotDiffNode.prototype.populateChildren.else.firstProviderPopulated):
+        (WebInspector.HeapSnapshotDiffNode.prototype.populateChildren):
+        (WebInspector.HeapSnapshotDiffNode.prototype._signForDelta):
+        (WebInspector.HeapSnapshotDiffNode.prototype.get data):
+        (WebInspector.HeapSnapshotDominatorObjectNode):
+        (WebInspector.HeapSnapshotDominatorObjectNode.prototype._createChildNode):
+        (WebInspector.HeapSnapshotDominatorObjectNode.prototype._createProvider):
+        (WebInspector.HeapSnapshotDominatorObjectNode.prototype._childHashForEntity):
+        (WebInspector.HeapSnapshotDominatorObjectNode.prototype._childHashForNode):
+        (WebInspector.HeapSnapshotDominatorObjectNode.prototype.comparator):
+        (WebInspector.HeapSnapshotDominatorObjectNode.prototype._emptyData):
+        (MixInSnapshotNodeFunctions):
+        * inspector/front-end/HeapSnapshotView.js: Renamed from Source/WebCore/inspector/front-end/DetailedHeapshotView.js.
+        (WebInspector.HeapSnapshotSortableDataGrid):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.dispose):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.resetSortingCache):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.sortingChanged.SortByTwoFields):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.sortingChanged):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.updateVisibleNodes):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.onResize):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype._onScroll):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype._performSorting):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.recursiveSortingEnter):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.recursiveSortingLeave):
+        (WebInspector.HeapSnapshotContainmentDataGrid):
+        (WebInspector.HeapSnapshotContainmentDataGrid.prototype._defaultPopulateCount.100.expandRoute.nextStep.else.afterExpand):
+        (WebInspector.HeapSnapshotContainmentDataGrid.prototype._defaultPopulateCount.100.expandRoute):
+        (WebInspector.HeapSnapshotContainmentDataGrid.prototype.setDataSource):
+        (WebInspector.HeapSnapshotContainmentDataGrid.prototype.sortingChanged):
+        (WebInspector.HeapSnapshotRetainmentDataGrid):
+        (WebInspector.HeapSnapshotRetainmentDataGrid.prototype._sortFields):
+        (WebInspector.HeapSnapshotRetainmentDataGrid.prototype.reset):
+        (WebInspector.HeapSnapshotConstructorsDataGrid):
+        (WebInspector.HeapSnapshotConstructorsDataGrid.prototype._defaultPopulateCount.100._sortFields):
+        (WebInspector.HeapSnapshotConstructorsDataGrid.prototype.setDataSource):
+        (WebInspector.HeapSnapshotConstructorsDataGrid.prototype.populateChildren):
+        (WebInspector.HeapSnapshotConstructorsDataGrid.prototype._filterSelectIndexChanged):
+        (WebInspector.HeapSnapshotDiffDataGrid):
+        (WebInspector.HeapSnapshotDiffDataGrid.prototype._defaultPopulateCount.50._sortFields):
+        (WebInspector.HeapSnapshotDiffDataGrid.prototype.setDataSource):
+        (WebInspector.HeapSnapshotDiffDataGrid.prototype._baseProfileIndexChanged):
+        (WebInspector.HeapSnapshotDiffDataGrid.prototype.setBaseDataSource):
+        (WebInspector.HeapSnapshotDiffDataGrid.prototype.populateChildren.baseAggregatesReceived.aggregatesReceived.addNodeIfNonZeroDiff):
+        (WebInspector.HeapSnapshotDiffDataGrid.prototype.populateChildren.baseAggregatesReceived.aggregatesReceived):
+        (WebInspector.HeapSnapshotDiffDataGrid.prototype.populateChildren):
+        (WebInspector.HeapSnapshotDominatorsDataGrid):
+        (WebInspector.HeapSnapshotDominatorsDataGrid.prototype._defaultPopulateCount.25.setDataSource):
+        (WebInspector.HeapSnapshotDominatorsDataGrid.prototype.sortingChanged):
+        (WebInspector.HeapSnapshotView.profileCallback):
+        (WebInspector.HeapSnapshotView):
+        (WebInspector.HeapSnapshotView.prototype.dispose):
+        (WebInspector.HeapSnapshotView.prototype.get statusBarItems):
+        (WebInspector.HeapSnapshotView.prototype.get profile):
+        (WebInspector.HeapSnapshotView.prototype.get profileWrapper):
+        (WebInspector.HeapSnapshotView.prototype.get baseProfile):
+        (WebInspector.HeapSnapshotView.prototype.get baseProfileWrapper):
+        (WebInspector.HeapSnapshotView.prototype.wasShown.profileCallback1):
+        (WebInspector.HeapSnapshotView.prototype.wasShown.profileCallback2):
+        (WebInspector.HeapSnapshotView.prototype.wasShown):
+        (WebInspector.HeapSnapshotView.prototype.willHide):
+        (WebInspector.HeapSnapshotView.prototype.onResize):
+        (WebInspector.HeapSnapshotView.prototype.searchCanceled):
+        (WebInspector.HeapSnapshotView.prototype.performSearch.matchesByName):
+        (WebInspector.HeapSnapshotView.prototype.performSearch.matchesById):
+        (WebInspector.HeapSnapshotView.prototype.performSearch.matchesQuery):
+        (WebInspector.HeapSnapshotView.prototype.performSearch):
+        (WebInspector.HeapSnapshotView.prototype.jumpToFirstSearchResult):
+        (WebInspector.HeapSnapshotView.prototype.jumpToLastSearchResult):
+        (WebInspector.HeapSnapshotView.prototype.jumpToNextSearchResult):
+        (WebInspector.HeapSnapshotView.prototype.jumpToPreviousSearchResult):
+        (WebInspector.HeapSnapshotView.prototype.showingFirstSearchResult):
+        (WebInspector.HeapSnapshotView.prototype.showingLastSearchResult):
+        (WebInspector.HeapSnapshotView.prototype._jumpToSearchResult):
+        (WebInspector.HeapSnapshotView.prototype.refreshVisibleData):
+        (WebInspector.HeapSnapshotView.prototype._changeBase):
+        (WebInspector.HeapSnapshotView.prototype._changeFilter):
+        (WebInspector.HeapSnapshotView.prototype._createToolbarWithClassNameFilter):
+        (WebInspector.HeapSnapshotView.prototype._changeNameFilter):
+        (WebInspector.HeapSnapshotView.prototype._profiles):
+        (WebInspector.HeapSnapshotView.prototype._loadProfile):
+        (WebInspector.HeapSnapshotView.prototype._loadProfileByIndex):
+        (WebInspector.HeapSnapshotView.prototype.isDetailedSnapshot):
+        (WebInspector.HeapSnapshotView.prototype.processLoadedSnapshot):
+        (WebInspector.HeapSnapshotView.prototype._selectionChanged):
+        (WebInspector.HeapSnapshotView.prototype._inspectedObjectChanged):
+        (WebInspector.HeapSnapshotView.prototype._setRetainmentDataGridSource):
+        (WebInspector.HeapSnapshotView.prototype._mouseDownInContentsGrid):
+        (WebInspector.HeapSnapshotView.prototype.changeView.sortingComplete):
+        (WebInspector.HeapSnapshotView.prototype.changeView):
+        (WebInspector.HeapSnapshotView.prototype._changeView):
+        (WebInspector.HeapSnapshotView.prototype._getHoverAnchor):
+        (WebInspector.HeapSnapshotView.prototype._resolveObjectForPopover):
+        (WebInspector.HeapSnapshotView.prototype._helpClicked.appendHelp):
+        (WebInspector.HeapSnapshotView.prototype._helpClicked):
+        (WebInspector.HeapSnapshotView.prototype._startRetainersHeaderDragging):
+        (WebInspector.HeapSnapshotView.prototype._retainersHeaderDragging):
+        (WebInspector.HeapSnapshotView.prototype._endRetainersHeaderDragging):
+        (WebInspector.HeapSnapshotView.prototype._updateRetainmentViewHeight):
+        (WebInspector.HeapSnapshotView.prototype._updateBaseOptions):
+        (WebInspector.HeapSnapshotView.prototype._updateFilterOptions):
+        (WebInspector.HeapSnapshotProfileType):
+        (WebInspector.HeapSnapshotProfileType.prototype.get buttonTooltip):
+        (WebInspector.HeapSnapshotProfileType.prototype.buttonClicked):
+        (WebInspector.HeapSnapshotProfileType.prototype.get treeItemTitle):
+        (WebInspector.HeapSnapshotProfileType.prototype.get description):
+        (WebInspector.HeapSnapshotProfileType.prototype.createSidebarTreeElementForProfile):
+        (WebInspector.HeapSnapshotProfileType.prototype.createView):
+        * inspector/front-end/ProfilesPanel.js:
+        (WebInspector.ProfilesPanel.prototype._addHeapSnapshotChunk):
+        (WebInspector.ProfilesPanel.prototype.takeHeapSnapshot):
+        (WebInspector.ProfilesPanel.prototype._reportHeapSnapshotProgress):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/heapProfiler.css:
+        (.heap-snapshot-view):
+        (.heap-snapshot-view.visible):
+        (.heap-snapshot-view .view):
+        (.heap-snapshot-view .view.visible):
+        (.heap-snapshot-view .data-grid tr:empty):
+        (.heap-snapshot-view .data-grid):
+        (.heap-snapshot-view .data-grid td.count-column):
+        (.heap-snapshot-view .data-grid td.addedCount-column):
+        (.heap-snapshot-view .data-grid td.removedCount-column):
+        (.heap-snapshot-view .data-grid td.countDelta-column):
+        (.heap-snapshot-view .data-grid td.addedSize-column):
+        (.heap-snapshot-view .data-grid td.removedSize-column):
+        (.heap-snapshot-view .data-grid td.sizeDelta-column):
+        (.heap-snapshot-view .data-grid td.shallowSize-column):
+        (.heap-snapshot-view .data-grid td.retainedSize-column):
+        (.heap-snapshot-view .data-grid td.distanceToWindow-column):
+        (.heap-snapshot-view .data-grid span.percent-column):
+        (.heap-snapshot-view .console-formatted-object, .console-formatted-node):
+        (.heap-snapshot-view .console-formatted-string):
+        (.heap-snapshot-view .console-formatted-id):
+        (.heap-snapshot-view .data-grid tr.selected *):
+        (.heap-snapshot-view .data-grid:focus tr.selected *):
+        (.heap-snapshot-view .delimiter):
+        (.heap-snapshot-view .views-container):
+        (.heap-snapshot-view .views-container .view):
+        (.heap-snapshot-view .retaining-paths-view):
+        (.heap-snapshot-view .class-view-grid):
+        (.heap-snapshot-view .class-view-toolbar):
+        (.heap-snapshot-view .class-view-toolbar input.class-name-filter):
+        (.heap-snapshot-view .retainers-view-header):
+        (.heap-snapshot-view .retainers-view-header .title > span):
+        (.heap-snapshot-view tr:not(.selected) td.object-column span.highlight):
+        (.heap-snapshot-view td.object-column span.grayed):
+        (.heap-snapshot-help-status-bar-item .glyph):
+        (table.heap-snapshot-help):
+        * inspector/front-end/inspector.html:
+
 2012-04-16  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: touch pad is pain to use in lower pane of Timeline panel due two two-axis scrolling
