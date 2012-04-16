@@ -1,3 +1,151 @@
+2012-04-15  Jia Pu  <jpu@apple.com>
+
+        Introducing DictationCommand.
+        https://bugs.webkit.org/show_bug.cgi?id=83549
+
+        Reviewed by Hajime Morita.
+
+        No new tests. This patch doesn't introduce any change of new functionality. It prepares for
+        additional changes which will inlude tests.
+
+        On OS X, alternative dictation results need to be stored as document markers. This patch introduces
+        following changes to achieve this:
+        1. Added DictationMarkDetails to store non-string type maker detail.
+        2. Introduce DictationCommand, which is similor to TypingCommand, but allows inserting text with
+          attached markers.
+        3. Added Editor::insertDictatedText as interaface to WebKit and WebKit2.
+        4. Added struct DictationAlternative to pass dictation related info from WebKit to WebCore.
+
+        Several fragments of code in TypingCommand can be also used by DictationCommand. So this patch
+        introduced a new class, TextInsertionBaseCommand. It's a subclass of CompositeEditCommmand, and
+        base class of both TypingCommand and DictationCommand.
+
+        This patch also extends InsertTextCommand class. Its constructor will take an TextInsertionMarkerSupplier
+        object. After text is inserted to a node, InsertTextCommand would give marker supplier a chance to
+        add document markers to the inserted text.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/Document.cpp:
+        (WebCore::eventTargetNodeForDocument): Moved this function from EventHandler so that it can be used
+          by AlternativeTextController.
+        (WebCore):
+        * dom/Document.h:
+        (WebCore):
+        * dom/DocumentMarker.cpp:
+        (WebCore::DocumentMarker::DocumentMarker): New constructor that takes a pointer to DocumentMarkerDetails object.
+        (WebCore):
+        * dom/DocumentMarker.h:
+        (WebCore::DocumentMarker::AllMarkers::AllMarkers):
+        (DocumentMarker):
+        * dom/DocumentMarkerController.cpp:
+        (WebCore::DocumentMarkerController::addMarker):
+        (WebCore):
+        * dom/DocumentMarkerController.h:
+        (DocumentMarkerController):
+        * dom/TextEvent.cpp:
+        (WebCore::TextEvent::createForDictation):
+        (WebCore):
+        (WebCore::TextEvent::TextEvent):
+        * dom/TextEvent.h: Added member variable for dictation alternatives.
+        (TextEvent):
+        (WebCore::TextEvent::isDictation):
+        (WebCore::TextEvent::dictationAlternatives):
+        * dom/TextEventInputType.h:
+        * editing/AlternativeTextController.cpp:
+        (WebCore::AlternativeTextController::AlternativeTextController):
+        (WebCore::AlternativeTextController::insertDictatedText): Used by Editor::insertDictatedText().
+        (WebCore):
+        * editing/AlternativeTextController.h:
+        (WebCore):
+        (DictationMarkerDetails):
+        (WebCore::DictationMarkerDetails::create):
+        (WebCore::DictationMarkerDetails::originalText):
+        (WebCore::DictationMarkerDetails::dictationContext):
+        (WebCore::DictationMarkerDetails::DictationMarkerDetails):
+        (AlternativeTextController):
+        * editing/CompositeEditCommand.h:
+        (WebCore::CompositeEditCommand::isDictationCommand):
+        * editing/DictationAlternative.cpp: Added.
+        (WebCore):
+        (WebCore::DictationAlternative::DictationAlternative):
+        * editing/DictationAlternative.h: Added. Data structure for passing dictation related data from WebKit to WebCore.
+        (DictationAlternative):
+        (WebCore):
+        * editing/DictationCommand.cpp: Added.
+        (WebCore):
+        (DictationCommandLineOperation):
+        (WebCore::DictationCommandLineOperation::DictationCommandLineOperation):
+        (WebCore::DictationCommandLineOperation::operator()):
+        (DictationMarkerSupplier):
+        (WebCore::DictationMarkerSupplier::create):
+        (WebCore::DictationMarkerSupplier::addMarkersToTextNode):
+        (WebCore::DictationMarkerSupplier::DictationMarkerSupplier):
+        (WebCore::DictationCommand::DictationCommand):
+        (WebCore::DictationCommand::insertText):
+        (WebCore::DictationCommand::doApply):
+        (WebCore::DictationCommand::insertTextRunWithoutNewlines):
+        (WebCore::DictationCommand::insertParagraphSeparator):
+        (WebCore::DictationCommand::collectDictationAlternativesInRange):
+        * editing/DictationCommand.h: Added.
+        (WebCore):
+        (DictationCommand):
+        (WebCore::DictationCommand::isDictationCommand):
+        (WebCore::DictationCommand::create):
+        * editing/EditingAllInOne.cpp:
+        * editing/Editor.cpp:
+        (WebCore::Editor::insertDictatedText): Main interface that allows WebKit passes in text with attached dictation information.
+        (WebCore):
+        (WebCore::Editor::insertTextWithoutSendingTextEvent):
+        (WebCore::Editor::updateMarkersForWordsAffectedByEditing):
+        * editing/Editor.h:
+        (Editor):
+        * editing/InsertTextCommand.cpp:
+        (WebCore::InsertTextCommand::InsertTextCommand):
+        (WebCore):
+        (WebCore::InsertTextCommand::doApply):
+        * editing/InsertTextCommand.h:
+        (WebCore):
+        (TextInsertionMarkerSupplier): Interface to allow caller of InsertTextCommand to add document markers to inserted text.
+        (WebCore::TextInsertionMarkerSupplier::~TextInsertionMarkerSupplier):
+        (WebCore::TextInsertionMarkerSupplier::TextInsertionMarkerSupplier):
+        (WebCore::InsertTextCommand::createWithMarkerSupplier):
+        (InsertTextCommand):
+        * editing/TextInsertionBaseCommand.cpp: Added. This class contains functions shared by TypingCommand and DictationCommand.
+        (WebCore):
+        (WebCore::TextInsertionBaseCommand::TextInsertionBaseCommand):
+        (WebCore::TextInsertionBaseCommand::applyTextInsertionCommand):
+        (WebCore::dispatchBeforeTextInsertedEvent):
+        (WebCore::canAppendNewLineFeedToSelection):
+        * editing/TextInsertionBaseCommand.h: Added.
+        (WebCore):
+        (TextInsertionBaseCommand):
+        (WebCore::TextInsertionBaseCommand::~TextInsertionBaseCommand):
+        (WebCore::forEachLineInString):
+        * editing/TypingCommand.cpp:
+        (TypingCommandLineOperation):
+        (WebCore::TypingCommandLineOperation::TypingCommandLineOperation):
+        (WebCore::TypingCommandLineOperation::operator()):
+        (WebCore::TypingCommand::TypingCommand):
+        (WebCore::TypingCommand::insertText):
+        (WebCore::TypingCommand::insertLineBreak):
+        (WebCore::TypingCommand::insertParagraphSeparator):
+        * editing/TypingCommand.h:
+        * page/EventHandler.cpp:
+        * rendering/InlineTextBox.cpp:
+        (WebCore::lineStyleForMarkerType):
+        (WebCore::InlineTextBox::paintDocumentMarker): Renamed existing function to reflect new funcationality.
+        (WebCore::InlineTextBox::paintDocumentMarkers):
+        * rendering/InlineTextBox.h:
+        (InlineTextBox):
+        * testing/Internals.cpp:
+        (WebCore::markerTypesFrom):
+
 2012-04-15  James Robinson  <jamesr@chromium.org>
 
         [chromium] LayerRendererChromium shouldn't know anything about CCLayerImpl
