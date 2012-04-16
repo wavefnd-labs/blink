@@ -1,3 +1,32 @@
+2012-04-16  Antti Koivisto  <antti@apple.com>
+
+        REGRESSION (r104445): Style is not recomputed on serenaandlily.com
+        https://bugs.webkit.org/show_bug.cgi?id=83663
+
+        Reviewed by Andreas Kling.
+        
+        CSS class and id selectors are case insensitive in non-strict modes. The code
+        that invalidated the scope elements used getElementByID() which is case
+        sensitive in all modes. As a result we would fail to invalidate elements
+        that would match a style rule but used different case in id.
+        
+        The new code invalidates by crawling the DOM tree. This often (when there are classes) 
+        actually faster than the existing code as we can now handle everything in a single pass.
+        Each class scope required a crawl with the old code.
+        
+        The code uses the same functions as the selector matching code to get the same behavior.
+        
+        The maximum class limit is lifted as number of classes does not affect complexity anymore.
+
+        Test: fast/css/id-or-class-before-stylesheet-strict.html
+
+        * css/SelectorChecker.h:
+        (WebCore::SelectorChecker::elementMatchesSelectorScopes):
+        (WebCore):
+        * dom/Document.cpp:
+        (WebCore::Document::testAddedStylesheetRequiresStyleRecalc):
+        (WebCore):
+
 2012-04-16  Uday Kiran  <udaykiran@motorola.com>
 
         CSS3 Selectors failures on css3test.com
