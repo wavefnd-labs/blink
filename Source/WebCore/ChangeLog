@@ -1,3 +1,35 @@
+2012-04-15  Yuta Kitamura  <yutak@chromium.org>
+
+        Leak in WebSocketChannel with workers/worker-reload.html (part 2)
+        https://bugs.webkit.org/show_bug.cgi?id=83749
+
+        Reviewed by David Levin.
+
+        Second attempt to remove leaks around WorkerThreadableWebSocketChannel.
+
+        No new tests, as this patch does not impose any functional change.
+
+        * Modules/websockets/ThreadableWebSocketChannelClientWrapper.cpp:
+        (WebCore::ThreadableWebSocketChannelClientWrapper::ThreadableWebSocketChannelClientWrapper):
+        (WebCore::ThreadableWebSocketChannelClientWrapper::failedWebSocketChannelCreation):
+        (WebCore::ThreadableWebSocketChannelClientWrapper::setFailedWebSocketChannelCreation):
+        * Modules/websockets/ThreadableWebSocketChannelClientWrapper.h:
+        Add a boolean flag indicating whether Bridge::initialize() has exited without receiving
+        a pointer to the peer object.
+        * Modules/websockets/WorkerThreadableWebSocketChannel.cpp:
+        (WebCore::WorkerThreadableWebSocketChannel::WorkerContextDidInitializeTask::create):
+        (WebCore::WorkerThreadableWebSocketChannel::WorkerContextDidInitializeTask::WorkerContextDidInitializeTask):
+        (WebCore::WorkerThreadableWebSocketChannel::WorkerContextDidInitializeTask::performTask):
+        Kick mainThreadDestroy() to delete the peer if the bridge has failed to receive
+        a pointer to the peer (waitForMethodCompletion() exited due to message queue's
+        termination).
+        (WebCore::WorkerThreadableWebSocketChannel::Bridge::mainThreadInitialize):
+        (WebCore::WorkerThreadableWebSocketChannel::Bridge::initialize):
+        * Modules/websockets/WorkerThreadableWebSocketChannel.h:
+        (WorkerThreadableWebSocketChannel):
+        Make WorkerContextDidInitializeTask an inner class of WorkerThreadableWebSocketChannel
+        so it can refer WorkerThreadableWebSocketChannel's static member function (mainThreadDestroy()).
+
 2012-04-14  Emil A Eklund  <eae@chromium.org>
 
         Fix pixelSnapping for CalendarPicker, MediaControl and ScrollbarPart
