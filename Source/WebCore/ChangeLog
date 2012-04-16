@@ -1,3 +1,53 @@
+2012-04-13  Simon Fraser  <simon.fraser@apple.com>
+
+        Avoid using backing store for compositing layers that just need to clip
+        https://bugs.webkit.org/show_bug.cgi?id=40547
+
+        Reviewed by Dean Jackson.
+        
+        If a layer becomes composited because it needs to clip composited
+        descendants, or if it has perspective, then it doesn't actually
+        needs its own backing store; its contents can be painted by an
+        ancestor, and we can just have an empty layer that does the clipping
+        or applies the perspective transform.
+        
+        This saves backing store memory on some pages.
+
+        Tests: compositing/backing/no-backing-for-clip-overlap.html
+               compositing/backing/no-backing-for-clip.html
+               compositing/backing/no-backing-for-perspective.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore):
+        (WebCore::RenderLayer::enclosingCompositingLayerForRepaint):
+        (WebCore::RenderLayer::paintLayer):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::RenderLayerBacking):
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+        (WebCore::RenderLayerBacking::containsPaintedContent):
+        (WebCore::RenderLayerBacking::setContentsNeedDisplay):
+        (WebCore::RenderLayerBacking::setContentsNeedDisplayInRect):
+        (WebCore::RenderLayerBacking::paintIntoLayer):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+        (WebCore::RenderLayerBacking::paintsIntoCompositedAncestor):
+        (WebCore::RenderLayerBacking::setRequiresOwnBackingStore):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::layerWillBeRemoved):
+        (WebCore::RenderLayerCompositor::recursiveRepaintLayerRect):
+        (WebCore::RenderLayerCompositor::requiresCompositingLayer):
+        (WebCore::RenderLayerCompositor::requiresOwnBackingStore):
+        (WebCore):
+        * rendering/RenderLayerCompositor.h:
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::containerForRepaint):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::write):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::paintBoxDecorations):
+
 2012-04-16  Brady Eidson  <beidson@apple.com>
 
         <rdar://problem/11249336> and https://bugs.webkit.org/show_bug.cgi?id=84050
