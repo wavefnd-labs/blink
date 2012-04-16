@@ -1,3 +1,29 @@
+2012-04-16  Yael Aharon  <yael.aharon@nokia.com>
+
+        [Qt][WK2] Fixed elements position is wrong after zooming.
+        https://bugs.webkit.org/show_bug.cgi?id=83981
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        When setFixedVisibleContentRect is called we mark all fixed elements in the frame for layout.
+        In order to find these elements, RenderView maintains a list of fixed elements.
+        They are added and removed at the same time that they are added and removed from their parent RenderBlock.
+        The idea is taken from the iOS5.1 branch, at opensource.apple.com.
+        Added a manual test that allows removing and adding fixed elements at will.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::setFixedVisibleContentRect):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::insertPositionedObject):
+        (WebCore::RenderBlock::removePositionedObject):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::setFixedPositionedObjectsNeedLayout):
+        (WebCore):
+        (WebCore::RenderView::insertFixedPositionedObject):
+        (WebCore::RenderView::removeFixedPositionedObject):
+        * rendering/RenderView.h:
+        (RenderView):
+
 2012-04-13  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: extract ContentProvider into its own file, make NetworkRequest, Resoruce and others implement it.
