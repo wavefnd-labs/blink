@@ -1,3 +1,52 @@
+2012-04-16  Levi Weintraub  <leviw@chromium.org>
+
+        Make borderBoxRect sub-pixel precise and add a pixel snapped version
+        https://bugs.webkit.org/show_bug.cgi?id=84063
+
+        Reviewed by Eric Seidel.
+
+        In an effort to prevent misuse, we previously decided to have borderBoxRect return a
+        pixel-snapped IntRect. This is because borderBoxRect returns a rect that's positioned
+        at (0,0), and therefore won't snap to the same size as the element it's covering.
+
+        There are a couple uses of borderBoxRect that don't pixel snap the values and require
+        sub-pixel precision. This patch adds a pixelSnappedBorderBoxRect that makes the snapping
+        explicit, and moves uses that would otherwise pixel snap the rect to this version to
+        avoid producing a rect of the incorrect size. For details about pixel snapping with
+        LayoutUnits, please see https://trac.webkit.org/wiki/LayoutUnit
+
+        No new tests. No change in behavior.
+
+        * html/shadow/TextControlInnerElements.cpp:
+        (WebCore::SpinButtonElement::defaultEventHandler):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::addVisualOverflowFromTheme):
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::borderBoxRect):
+        (WebCore::RenderBox::pixelSnappedBorderBoxRect):
+        (WebCore::RenderBox::borderBoundingBox):
+        (WebCore::RenderBox::hasVisualOverflow):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::scrollCornerRect):
+        (WebCore::RenderLayer::scrollCornerAndResizerRect):
+        (WebCore::RenderLayer::horizontalScrollbarStart):
+        (WebCore::RenderLayer::positionOverflowControls):
+        (WebCore::RenderLayer::paintResizer):
+        (WebCore::RenderLayer::hitTestOverflowControls):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+        (WebCore::RenderLayerBacking::startAnimation):
+        (WebCore::RenderLayerBacking::startTransition):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::addOverflowFromChildren):
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::paintSearchFieldCancelButton):
+        (WebCore::RenderThemeMac::paintSearchFieldResultsDecoration):
+        (WebCore::RenderThemeMac::paintSearchFieldResultsButton):
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::paintReplaced):
+        (WebCore::RenderSVGRoot::computeFloatRectForRepaint):
+
 2012-04-16  Anders Carlsson  <andersca@apple.com>
 
         Crash when running some editing related tests
