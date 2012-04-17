@@ -1,3 +1,25 @@
+2012-04-17  Ben Murdoch  <benm@google.com>
+
+        `localStorage.setItem` can overwrite `localStorage` methods
+        https://bugs.webkit.org/show_bug.cgi?id=30996
+
+        Update the JSC and V8 bindings such that if the name of the DOM
+        Storage property being retrieved is a match for a property in the
+        prototype, always return the prototype version. If there is a DOM
+        Storage key of the same name, it can still be retrieved via the
+        getItem method. This prevents storage methods from being
+        accidentally hidden. This brings WebKit behavior in line with the
+        de facto standard implemented by FireFox and IE.
+
+        Reviewed by Kentaro Hara.
+
+        Test: storage/domstorage/storage-functions-not-overwritten.html
+
+        * bindings/js/JSStorageCustom.cpp:
+        (WebCore::JSStorage::nameGetter):
+        * bindings/v8/custom/V8StorageCustom.cpp:
+        (WebCore::V8Storage::namedPropertyGetter):
+
 2012-04-17  Emil A Eklund  <eae@chromium.org>
 
         Fix Chromium/Windows build broken by r114404.
