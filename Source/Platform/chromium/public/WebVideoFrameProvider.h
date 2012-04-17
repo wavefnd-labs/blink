@@ -28,38 +28,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VideoFrameProvider_h
-#define VideoFrameProvider_h
+#ifndef WebVideoFrameProvider_h
+#define WebVideoFrameProvider_h
 
-#include <public/WebVideoFrame.h>
+#include "WebCommon.h"
+#include "WebVideoFrame.h"
 
-namespace WebCore {
+namespace WebKit {
 
-class VideoFrameProvider {
+// Threading notes: This class may be used in a multi threaded manner. Specifically, the implementation
+// may call getCurrentFrame() / putCurrentFrame() from a non-main thread. If so, the caller is responsible
+// for making sure Client::didReceiveFrame and Client::didUpdateMatrix are only called from this thread.
+class WebVideoFrameProvider {
 public:
-    virtual ~VideoFrameProvider() { }
+    virtual ~WebVideoFrameProvider() { }
 
     class Client {
     public:
         // Provider will call this method to tell the client to stop using it.
+        // stopUsingProvider() may be called from any thread.
         virtual void stopUsingProvider() = 0;
+
+        // Notifies the provider's client that a call to getCurrentFrame() will return new data.
         virtual void didReceiveFrame() = 0;
+
+        // Notifies the provider's client of a new UV transform matrix to be used when drawing frames
+        // of type WebVideoFrame::FormatStreamTexture.
         virtual void didUpdateMatrix(const float*) = 0;
     };
 
+    // May be called from any thread.
     virtual void setVideoFrameProviderClient(Client*) = 0;
 
     // This function places a lock on the current frame and returns a pointer to it.
     // Calls to this method should always be followed with a call to putCurrentFrame().
     // The ownership of the object is not transferred to the caller and
     // the caller should not free the returned object.
-    virtual WebKit::WebVideoFrame* getCurrentFrame() = 0;
+    virtual WebVideoFrame* getCurrentFrame() = 0;
     // This function releases the lock on the video frame in chromium. It should
     // always be called after getCurrentFrame(). Frames passed into this method
     // should no longer be referenced after the call is made.
-    virtual void putCurrentFrame(WebKit::WebVideoFrame*) = 0;
+    virtual void putCurrentFrame(WebVideoFrame*) = 0;
 };
 
-} // namespace WebCore
+} // namespace WebKit
 
 #endif
