@@ -1,3 +1,78 @@
+2012-04-17  Kentaro Hara  <haraken@chromium.org>
+
+        [Performance][V8] Skip Isolate look-up to find StringCache
+        https://bugs.webkit.org/show_bug.cgi?id=84103
+
+        Reviewed by Nate Chapin.
+
+        This patch improves the performance of a lot of DOM attribute
+        getters that return a string.
+
+        - Improves the performance of Dromaeo/dom-attr.html(element.property)
+          by 27.7%.
+        - Improves the performance of Dromaeo/dom-attr.html(getAttribute)
+          by 10.6%.
+        - Improves the performance of div.id, div.className,
+          div.nodeName, text.nodeValue, text.textContent by 12% -- 21%.
+
+        The followings are the test results in my Linux desktop.
+
+        Performance test: Dromaeo/dom-attr.html
+        Total:                     674.64runs/s ->  707.03runs/s (+ 4.8%)
+        getAttribute:             1537.60runs/s -> 1700.20runs/s (+10.6%)
+        element.property:         1389.00runs/s -> 1774.20runs/s (+27.7%)
+        setAttribute:              538.88runs/s ->  548.87runs/s (+ 1.9%)
+        element.property = value:  644.07runs/s ->  656.67runs/s (+ 2.0%)
+        element.expando = value:   219.76runs/s ->  207.14runs/s (- 6.8%)
+        element.expando:           578.77runs/s ->  554.67runs/s (- 4.2%)
+
+        Performance test: https://bugs.webkit.org/attachment.cgi?id=137440
+        div.id:           30.70ns -> 26.70ns (+15%)
+        div.className:    31.10ns -> 26.40ns (+18%)
+        div.nodeName:     37.70ns -> 33.00ns (+14%)
+        text.nodeValue:   31.40ns -> 25.90ns (+21%)
+        text.textContent: 51.50ns -> 45.90ns (+12%)
+
+        Previously V8 bindings need to look up an Isolate to find
+        an Isolate-local StringCache. This patch skips the look-up
+        by getting the Isolate from AccessorInfo.GetIsolate()
+        or Arguments.GetIsolate().
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNormalAttrGetter):
+        (GenerateFunctionCallString):
+        (NativeToJSValue):
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::getElementStringAttr):
+        * bindings/v8/V8Binding.h:
+        (WebCore::v8ExternalString): Make 'isolate' an optional argument.
+        Ideally we want to make 'isolate' a non-optional argument,
+        but it is difficult to rewrite all v8ExternalString() callers
+        at a breath. We can rewrite them incrementally.
+        (WebCore::v8String): Ditto.
+        (WebCore::v8StringOrNull): Ditto.
+        (WebCore::v8StringOrUndefined): Ditto.
+        (WebCore::v8StringOrFalse): Ditto.
+
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp: Updated run-bindings-tests results.
+        (WebCore::TestEventConstructorV8Internal::attr1AttrGetter):
+        (WebCore::TestEventConstructorV8Internal::attr2AttrGetter):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalStr1AttrGetter):
+        (WebCore::TestInterfaceV8Internal::supplementalStr2AttrGetter):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::readOnlyStringAttrAttrGetter):
+        (WebCore::TestObjV8Internal::stringAttrAttrGetter):
+        (WebCore::TestObjV8Internal::reflectedStringAttrAttrGetter):
+        (WebCore::TestObjV8Internal::reflectedURLAttrAttrGetter):
+        (WebCore::TestObjV8Internal::reflectedCustomURLAttrAttrGetter):
+        (WebCore::TestObjV8Internal::stringAttrWithGetterExceptionAttrGetter):
+        (WebCore::TestObjV8Internal::stringAttrWithSetterExceptionAttrGetter):
+        (WebCore::TestObjV8Internal::hashAttrGetter):
+        (WebCore::TestObjV8Internal::conditionalMethod1Callback):
+
 2012-04-17  Chris Fleizach  <cfleizach@apple.com>
 
         Crash in invalid index for _textMarkerForIndex
