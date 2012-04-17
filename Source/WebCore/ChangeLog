@@ -1,3 +1,38 @@
+2012-04-17  Tom Sepez  <tsepez@chromium.org>
+
+        Framesniffing defense is too aggressive.
+        https://bugs.webkit.org/show_bug.cgi?id=83721
+
+        Reviewed by James Robinson.
+
+        The RenderLayer code currently propagates scroll position to parent frames
+        without any cross-origin checks.  This gives it a quick origin boundary check
+        that is set by FrameLoader only when performing a fragment navigation.  This 
+        allows us to safely relax the restriction on not scrolling at load time in 
+        FrameLoader since the safe thing will happen later on at scroll time.
+        
+        Test: http/tests/navigation/anchor-frames-same-origin.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::findUnsafeParentScrollPropagationBoundary):
+        * dom/Document.h:
+        (Document):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::finishedParsing):
+        (WebCore::FrameLoader::loadInSameDocument):
+        (WebCore::FrameLoader::scrollToFragmentWithParentBoundary):
+        * loader/FrameLoader.h:
+        (FrameLoader):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::FrameView):
+        (WebCore::FrameView::reset):
+        * page/FrameView.h:
+        (WebCore::FrameView::safeToPropagateScrollToParent):
+        (WebCore::FrameView::setSafeToPropagateScrollToParent):
+        (FrameView):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::scrollRectToVisible):
+
 2012-04-17  Emil A Eklund  <eae@chromium.org>
 
         Add size_t versions of multiplication and division operators to FractionalLayoutUnit
