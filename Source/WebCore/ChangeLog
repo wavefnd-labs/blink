@@ -1,3 +1,318 @@
+2012-04-16  Hajime Morrita  <morrita@chromium.org>
+
+        insertedIntoDocument and insertedIntoTree should be unitifed.
+        https://bugs.webkit.org/show_bug.cgi?id=82701
+
+        Reviewed by Ryosuke Niwa.
+
+        Both Node::insertedIntoTree() and Node::insertedIntoDocument() are
+        served as lifecycle callbacks which are invoked when a node is
+        inserted into its new parent. There are also removedFromTree()
+        and removedFromDocument() respectively. Considering that this pair
+        of virtual functions are laid onto the hot path, it's worth
+        merging them into one, to gain some speedup. Such
+        unification could clarify the semantics as well.
+
+        This change makes following change to merge these functions.
+
+        - pulling the tree traversal out from ContainerNode to ChildNodeInsertionNotifier.
+        - letting new Node::insertInto() do the job for its own, but not
+          for its children and
+        - Pass the parent of each insertion root as a parameter of insertedInto().
+          This root node can tell inserted node where it is inserted,
+          specifically whetehr the insertion is to the document or not.
+
+        Same pattern is also applied to Node::removedFromDocument() and
+        Node::removedFromTree(), which are factored to Node::removedFrom()
+        and ChildNodeRemovalNotifier respectively.
+
+        Speed up on Dromaeo/dom-modify.html is about 2%.
+        Further speed-up by de-virtulization would be possible.
+
+        Caveat:
+
+        There is possible situation where a node need to invoke
+        insertedInto() after its children is nofitied, instead of before
+        that.  It was represented naturally with previous
+        traversal-by-ContainerNode pattern, but is no longer simple with
+        this new external traversal. To support this scenario, we
+        introduced the InsertionNotificationRequest as a return value of insertedInto()
+        and a supplemental hook Node::didNotifyDescendantInseretions(). See for
+        example HTMLFormElement.cpp to learn how it works.
+
+        No new tests. Covered by existing tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::parserInsertBefore):
+        (WebCore::ContainerNode::removeChild):
+        (WebCore::ContainerNode::parserRemoveChild):
+        (WebCore::ContainerNode::removeChildren):
+        (WebCore::ContainerNode::parserAddChild):
+        (WebCore::updateTreeAfterInsertion):
+        * dom/ContainerNode.h:
+        (ContainerNode):
+        (WebCore::Node::highestAncestor):
+        (WebCore):
+        * dom/ContainerNodeAlgorithms.cpp: Added.
+        (WebCore):
+        (WebCore::ChildNodeInsertionNotifier::notifyDescendantInsertedIntoDocument):
+        (WebCore::ChildNodeInsertionNotifier::notifyDescendantInsertedIntoTree):
+        (WebCore::ChildNodeRemovalNotifier::notifyDescendantRemovedFromDocument):
+        (WebCore::ChildNodeRemovalNotifier::notifyDescendantRemovedFromTree):
+        * dom/ContainerNodeAlgorithms.h:
+        (ChildNodeInsertionNotifier):
+        (WebCore::ChildNodeInsertionNotifier::ChildNodeInsertionNotifier):
+        (WebCore):
+        (ChildNodeRemovalNotifier):
+        (WebCore::ChildNodeRemovalNotifier::ChildNodeRemovalNotifier):
+        (WebCore::removeAllChildrenInContainer):
+        (WebCore::appendChildToContainer):
+        (Private):
+        (WebCore::ChildNodeInsertionNotifier::notifyNodeInsertedIntoDocument):
+        (WebCore::ChildNodeInsertionNotifier::notifyNodeInsertedIntoTree):
+        (WebCore::ChildNodeInsertionNotifier::notifyInsertedIntoDocument):
+        (WebCore::ChildNodeInsertionNotifier::notify):
+        (WebCore::ChildNodeRemovalNotifier::notifyNodeRemovedFromDocument):
+        (WebCore::ChildNodeRemovalNotifier::notifyNodeRemovedFromTree):
+        (WebCore::ChildNodeRemovalNotifier::notify):
+        * dom/DOMAllInOne.cpp:
+        * dom/DocumentType.cpp:
+        (WebCore::DocumentType::insertedInto):
+        (WebCore::DocumentType::removedFrom):
+        * dom/DocumentType.h:
+        (DocumentType):
+        * dom/Element.cpp:
+        (WebCore::Element::insertedInto):
+        (WebCore::Element::removedFrom):
+        * dom/Element.h:
+        (Element):
+        * dom/Node.cpp:
+        (WebCore::Node::insertedInto):
+        (WebCore::Node::removedFrom):
+        * dom/Node.h:
+        (Node):
+        (WebCore::Node::didNotifyDescendantInseretions):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::insertedInto):
+        (WebCore::ProcessingInstruction::removedFrom):
+        * dom/ProcessingInstruction.h:
+        (ProcessingInstruction):
+        * dom/ScriptElement.cpp:
+        (WebCore::ScriptElement::insertedInto):
+        * dom/ScriptElement.h:
+        (WebCore):
+        (ScriptElement):
+        * dom/ShadowTree.cpp:
+        (WebCore::ShadowTree::addShadowRoot):
+        (WebCore::ShadowTree::removeAllShadowRoots):
+        * dom/ShadowTree.h:
+        (ShadowTree):
+        (ShadowRootVector):
+        (WebCore::ShadowRootVector::ShadowRootVector):
+        (WebCore):
+        * html/FormAssociatedElement.cpp:
+        (WebCore::FormAssociatedElement::insertedInto):
+        (WebCore::FormAssociatedElement::removedFrom):
+        (WebCore::FormAssociatedElement::formRemovedFromTree):
+        * html/FormAssociatedElement.h:
+        (FormAssociatedElement):
+        * html/HTMLBaseElement.cpp:
+        (WebCore::HTMLBaseElement::insertedInto):
+        (WebCore::HTMLBaseElement::removedFrom):
+        * html/HTMLBaseElement.h:
+        (HTMLBaseElement):
+        * html/HTMLBodyElement.cpp:
+        (WebCore::HTMLBodyElement::insertedInto):
+        (WebCore::HTMLBodyElement::didNotifyDescendantInseretions):
+        * html/HTMLBodyElement.h:
+        (HTMLBodyElement):
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::insertedInto):
+        (WebCore::HTMLFormControlElement::removedFrom):
+        * html/HTMLFormControlElement.h:
+        (HTMLFormControlElement):
+        * html/HTMLFormElement.cpp:
+        (WebCore::HTMLFormElement::insertedInto):
+        (WebCore::HTMLFormElement::didNotifyDescendantInseretions):
+        (WebCore::HTMLFormElement::removedFrom):
+        * html/HTMLFormElement.h:
+        (HTMLFormElement):
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::insertedInto):
+        (WebCore):
+        (WebCore::HTMLFrameElementBase::didNotifyDescendantInseretions):
+        * html/HTMLFrameElementBase.h:
+        (HTMLFrameElementBase):
+        * html/HTMLFrameSetElement.cpp:
+        (WebCore::HTMLFrameSetElement::insertedInto):
+        (WebCore::HTMLFrameSetElement::removedFrom):
+        * html/HTMLFrameSetElement.h:
+        (HTMLFrameSetElement):
+        * html/HTMLIFrameElement.cpp:
+        (WebCore::HTMLIFrameElement::insertedInto):
+        (WebCore::HTMLIFrameElement::removedFrom):
+        * html/HTMLIFrameElement.h:
+        (HTMLIFrameElement):
+        * html/HTMLImageElement.cpp:
+        (WebCore::HTMLImageElement::insertedInto):
+        (WebCore::HTMLImageElement::removedFrom):
+        * html/HTMLImageElement.h:
+        (HTMLImageElement):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::insertedInto):
+        (WebCore::HTMLInputElement::removedFrom):
+        * html/HTMLInputElement.h:
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::insertedInto):
+        (WebCore::HTMLLinkElement::removedFrom):
+        * html/HTMLLinkElement.h:
+        (HTMLLinkElement):
+        * html/HTMLMapElement.cpp:
+        (WebCore::HTMLMapElement::insertedInto):
+        (WebCore::HTMLMapElement::removedFrom):
+        * html/HTMLMapElement.h:
+        (HTMLMapElement):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::insertedInto):
+        (WebCore::HTMLMediaElement::removedFrom):
+        * html/HTMLMediaElement.h:
+        (HTMLMediaElement):
+        * html/HTMLMetaElement.cpp:
+        (WebCore::HTMLMetaElement::insertedInto):
+        * html/HTMLMetaElement.h:
+        (HTMLMetaElement):
+        * html/HTMLObjectElement.cpp:
+        (WebCore::HTMLObjectElement::insertedInto):
+        (WebCore::HTMLObjectElement::removedFrom):
+        * html/HTMLObjectElement.h:
+        (HTMLObjectElement):
+        * html/HTMLOptionElement.cpp:
+        (WebCore::HTMLOptionElement::insertedInto):
+        * html/HTMLOptionElement.h:
+        (HTMLOptionElement):
+        * html/HTMLQuoteElement.cpp:
+        (WebCore::HTMLQuoteElement::insertedInto):
+        * html/HTMLQuoteElement.h:
+        (HTMLQuoteElement):
+        * html/HTMLScriptElement.cpp:
+        (WebCore::HTMLScriptElement::insertedInto):
+        * html/HTMLScriptElement.h:
+        (HTMLScriptElement):
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::insertedInto):
+        * html/HTMLSelectElement.h:
+        * html/HTMLSourceElement.cpp:
+        (WebCore::HTMLSourceElement::insertedInto):
+        * html/HTMLSourceElement.h:
+        (HTMLSourceElement):
+        * html/HTMLStyleElement.cpp:
+        (WebCore::HTMLStyleElement::insertedInto):
+        (WebCore::HTMLStyleElement::removedFrom):
+        * html/HTMLStyleElement.h:
+        (HTMLStyleElement):
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::HTMLTextFormControlElement::insertedInto):
+        * html/HTMLTextFormControlElement.h:
+        * html/HTMLTitleElement.cpp:
+        (WebCore::HTMLTitleElement::insertedInto):
+        (WebCore::HTMLTitleElement::removedFrom):
+        * html/HTMLTitleElement.h:
+        (HTMLTitleElement):
+        * html/HTMLTrackElement.cpp:
+        (WebCore::HTMLTrackElement::insertedInto):
+        * html/HTMLTrackElement.h:
+        (HTMLTrackElement):
+        * mathml/MathMLMathElement.cpp:
+        (WebCore::MathMLMathElement::insertedInto):
+        * mathml/MathMLMathElement.h:
+        (MathMLMathElement):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::removedFrom):
+        * svg/SVGElement.h:
+        (SVGElement):
+        * svg/SVGFEImageElement.cpp:
+        (WebCore::SVGFEImageElement::insertedInto):
+        (WebCore::SVGFEImageElement::removedFrom):
+        * svg/SVGFEImageElement.h:
+        (SVGFEImageElement):
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::insertedInto):
+        (WebCore::SVGFontFaceElement::removedFrom):
+        * svg/SVGFontFaceElement.h:
+        (SVGFontFaceElement):
+        * svg/SVGFontFaceUriElement.cpp:
+        (WebCore::SVGFontFaceUriElement::insertedInto):
+        * svg/SVGFontFaceUriElement.h:
+        (SVGFontFaceUriElement):
+        * svg/SVGGlyphElement.cpp:
+        (WebCore::SVGGlyphElement::insertedInto):
+        (WebCore::SVGGlyphElement::removedFrom):
+        * svg/SVGGlyphElement.h:
+        (SVGGlyphElement):
+        * svg/SVGHKernElement.cpp:
+        (WebCore::SVGHKernElement::insertedInto):
+        (WebCore::SVGHKernElement::removedFrom):
+        * svg/SVGHKernElement.h:
+        (SVGHKernElement):
+        * svg/SVGImageElement.cpp:
+        (WebCore::SVGImageElement::insertedInto):
+        * svg/SVGImageElement.h:
+        (SVGImageElement):
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::insertedInto):
+        (WebCore::SVGSVGElement::removedFrom):
+        * svg/SVGSVGElement.h:
+        (SVGSVGElement):
+        * svg/SVGScriptElement.cpp:
+        (WebCore::SVGScriptElement::insertedInto):
+        * svg/SVGScriptElement.h:
+        (SVGScriptElement):
+        * svg/SVGStyleElement.cpp:
+        (WebCore::SVGStyleElement::insertedInto):
+        (WebCore::SVGStyleElement::removedFrom):
+        * svg/SVGStyleElement.h:
+        (SVGStyleElement):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::insertedInto):
+        (WebCore::SVGStyledElement::removedFrom):
+        (WebCore::SVGStyledElement::updateRelativeLengthsInformation):
+        * svg/SVGStyledElement.h:
+        (SVGStyledElement):
+        * svg/SVGTRefElement.cpp:
+        (WebCore::SVGTRefElement::buildPendingResource):
+        (WebCore::SVGTRefElement::insertedInto):
+        (WebCore::SVGTRefElement::removedFrom):
+        * svg/SVGTRefElement.h:
+        (SVGTRefElement):
+        * svg/SVGTextPathElement.cpp:
+        (WebCore::SVGTextPathElement::insertedInto):
+        * svg/SVGTextPathElement.h:
+        * svg/SVGTitleElement.cpp:
+        (WebCore::SVGTitleElement::insertedInto):
+        (WebCore::SVGTitleElement::removedFrom):
+        * svg/SVGTitleElement.h:
+        (SVGTitleElement):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::insertedInto):
+        (WebCore::SVGUseElement::removedFrom):
+        * svg/SVGUseElement.h:
+        (SVGUseElement):
+        * svg/SVGVKernElement.cpp:
+        (WebCore::SVGVKernElement::insertedInto):
+        (WebCore::SVGVKernElement::removedFrom):
+        * svg/SVGVKernElement.h:
+        (SVGVKernElement):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::insertedInto):
+        (WebCore::SVGSMILElement::removedFrom):
+        * svg/animation/SVGSMILElement.h:
+        (SVGSMILElement):
+
 2012-04-16  David Barr  <davidbarr@chromium.org>
 
         Stack overflow in CSS parser caused by recursive stylesheet import
