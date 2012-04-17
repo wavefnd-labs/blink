@@ -1,3 +1,74 @@
+2012-04-17  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Fix the ACCELERATED_COMPOSITING code to not expose RenderLayer outside rendering
+        https://bugs.webkit.org/show_bug.cgi?id=83816
+
+        Reviewed by James Robinson.
+
+        No change in behavior expected.
+
+        This code adds several functions on RenderBoxModelObject to forward
+        to the associated layer. This removes the RenderLayer dependencies
+        at the call sites.
+
+        Currently only RenderBoxModelObject can be hardware accelerated as
+        we need a RenderLayer, this looks like the best place to put those
+        new functions.
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::contentChanged):
+        (WebCore::RenderBoxModelObject::hasAcceleratedCompositing):
+        (WebCore::RenderBoxModelObject::startTransition):
+        (WebCore::RenderBoxModelObject::transitionPaused):
+        (WebCore::RenderBoxModelObject::transitionFinished):
+        (WebCore::RenderBoxModelObject::startAnimation):
+        (WebCore::RenderBoxModelObject::animationPaused):
+        (WebCore::RenderBoxModelObject::animationFinished):
+        (WebCore::RenderBoxModelObject::suspendAnimations):
+        * rendering/RenderBoxModelObject.h:
+        Added the previous functions to hide the layer need.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::hasAcceleratedCompositing):
+        * rendering/RenderLayer.h:
+        Removed the previous method as it was superseeded by the
+        one on RenderBoxModelObject. Also moved the ContentChangeType
+        enumaration.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::contentChanged):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+        Updated after the ContentChangeType enumaration move.
+
+        * html/HTMLCanvasElement.cpp:
+        (WebCore::HTMLCanvasElement::reset):
+        (WebCore::HTMLCanvasElement::paintsIntoCanvasBuffer):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::didDraw):
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore::WebGLRenderingContext::markContextChanged):
+        (WebCore::WebGLRenderingContext::reshape):
+        * page/animation/AnimationBase.cpp:
+        (WebCore::AnimationBase::freezeAtTime):
+        * page/animation/ImplicitAnimation.cpp:
+        (WebCore::ImplicitAnimation::startAnimation):
+        (WebCore::ImplicitAnimation::pauseAnimation):
+        (WebCore::ImplicitAnimation::endAnimation):
+        * page/animation/KeyframeAnimation.cpp:
+        (WebCore::KeyframeAnimation::startAnimation):
+        (WebCore::KeyframeAnimation::pauseAnimation):
+        (WebCore::KeyframeAnimation::endAnimation):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::imageChanged):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::imageDimensionsChanged):
+        (WebCore::RenderImage::notifyFinished):
+        * rendering/RenderVideo.cpp:
+        (WebCore::RenderVideo::updatePlayer):
+        Updated all those call sites to use the new functions. Also
+        removed unneeded RenderLayer.h include as we went.
+
 2012-04-16  Andy Estes  <aestes@apple.com>
 
         -webkit-mask-box-image does not draw when layer tree flattening is enabled
