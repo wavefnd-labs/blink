@@ -1,3 +1,39 @@
+2012-04-17  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
+        Asserts in XMLHttpRequestProgressEventThrottle
+        https://bugs.webkit.org/show_bug.cgi?id=81506
+
+        Reviewed by Julien Chaffraix.
+
+        The asserts were incorrectly triggered because suspending active DOM objects
+        (which suspends the XMLHttpRequestProgressEventThrottle) doesn't stop JavaScript
+        from running or suspend any running loader we may have. The previous code would
+        assume those 2 cases were impossible.
+
+        When XmlHttpRequest::open is called or data is received while the XmlHttpRequest object
+        is suspended the object may attempt to dispatch events. This patch defers these events
+        until the object is resumed.
+
+        Progress events are coalesced similar to normal throttling, and readystate-change events
+        are coalesced to avoid identical events emitted right after eachother.
+
+        On resume the events are dispatched after a timer to avoid interfering with 
+        ScriptExecutionContext which is iterating over suspended objects.
+
+        Test: fast/events/pagehide-xhr-open.html
+
+        * xml/XMLHttpRequestProgressEventThrottle.cpp:
+        (WebCore::XMLHttpRequestProgressEventThrottle::XMLHttpRequestProgressEventThrottle):
+        (WebCore::XMLHttpRequestProgressEventThrottle::dispatchProgressEvent):
+        (WebCore::XMLHttpRequestProgressEventThrottle::dispatchEvent):
+        (WebCore::XMLHttpRequestProgressEventThrottle::flushProgressEvent):
+        (WebCore::XMLHttpRequestProgressEventThrottle::dispatchDeferredEvents):
+        (WebCore::XMLHttpRequestProgressEventThrottle::fired):
+        (WebCore::XMLHttpRequestProgressEventThrottle::suspend):
+        (WebCore::XMLHttpRequestProgressEventThrottle::resume):
+        * xml/XMLHttpRequestProgressEventThrottle.h:
+        (XMLHttpRequestProgressEventThrottle):
+
 2012-04-16  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: [Chromium] Crash when inspecting empty IndexedDB object store.
