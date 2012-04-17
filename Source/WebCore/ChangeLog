@@ -1,5 +1,40 @@
 2012-04-17  Kent Tamura  <tkent@chromium.org>
 
+        Introduce an internal feature for a fixed placeholder
+        https://bugs.webkit.org/show_bug.cgi?id=84009
+
+        Reviewed by Hajime Morita.
+
+        This change adds a framework to support fixed placeholder string for
+        textfield-like <input> without the palceholder attribute support. This
+        doesn't change any behavior of input types which support the
+        'placeholder' attribute.
+
+        According to the standard, <input type=date> doesn't support the
+        'placeholder' attribute. However it is a kind of text field in WebKit
+        platforms with ENABLE_CALENDAR_PICKER, and we may show something useful
+        information as the default placeholder.
+
+        No new tests because of no behavior changes.
+
+        * html/HTMLTextFormControlElement.h:
+        (HTMLTextFormControlElement): Make isPlaceholderEmpty() virtual.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Overrides isPlaceholderEmpty().
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::isPlaceholderEmpty):
+        Check InputType::defaultPlaceholder() if InputType::usesFixedPlaceholder().
+        * html/InputType.cpp:
+        (WebCore::InputType::usesFixedPlaceholder): Added. Returns false.
+        (WebCore::InputType::fixedPlaceholder): Added. Returns a null string.
+        * html/InputType.h:
+        (InputType): Add usesFixedPlaceholder() and fixedPlaceholder().
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::updatePlaceholderText):
+        Uses fixedPlaceholder() instead of strippedPlaceholder() if usesFixedPlaceholder().
+
+2012-04-17  Kent Tamura  <tkent@chromium.org>
+
         Move some code of LocalizedNumberICU.cpp to ICULocale.cpp
         https://bugs.webkit.org/show_bug.cgi?id=84128
 
