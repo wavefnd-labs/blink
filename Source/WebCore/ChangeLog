@@ -1,3 +1,42 @@
+2012-04-16  Takashi Sakamoto  <tasak@google.com>
+
+        [Shadow DOM] InsertionPoint should have isActive() member function.
+        https://bugs.webkit.org/show_bug.cgi?id=82010
+
+        Reviewed by Hajime Morita.
+
+        This patch adds isActive public member function to InsertionPoint and
+        makes InsertionPoint elements consider whether active or not.
+        If an InsertionPoint is inactive, the element is not shadow boundary
+        and is needed to be rendered.
+        c.f. https://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html#dfn-active-insertion-point
+
+        Test: update existing tests, i.e.
+        LayoutTests/fast/dom/shadow/shadow-contents-fallback-dynamic.html and
+        LayoutTests/fast/dom/shadow/shadow-contents-fallback.html
+
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::isActive):
+        A new public method for checking whether an insertion point is active or inactive.
+        If active, returns true. Otherwise, false.
+        (WebCore::InsertionPoint::isShadowBoundary):
+        Make the method consider whether an insertin point is active or inactive.
+        (WebCore::InsertionPoint::rendererIsNeeded):
+        Changed to return true If an insertion point is inactive.
+        (WebCore::InsertionPoint::attach):
+        Changed to call only HTMLElement::attach If an insertion point is inactive.
+        (WebCore::InsertionPoint::detach):
+        Changed to call only HTMLElement::detach If an insertion point is inactive.
+        * html/shadow/InsertionPoint.h:
+        (InsertionPoint):
+        Added isActive public method.
+        * dom/NodeRenderingContext.cpp:
+        (WebCore::NodeRenderingContext::NodeRenderingContext):
+        Changed to take into account an insertion point's activeness when parent is an insertion point.
+        (WebCore::NodeRenderingContext::firstRendererOf):
+        (WebCore::NodeRenderingContext::lastRendererOf):
+        Changed to take into account an insertion point's activeness.
+
 2012-04-16  MORITA Hajime  <morrita@google.com>
 
         Type tags in NodeFlags could be compressed
