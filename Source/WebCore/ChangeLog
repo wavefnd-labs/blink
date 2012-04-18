@@ -1,3 +1,48 @@
+2012-04-17  John Bauman  <jbauman@chromium.org>
+
+        [chromium] Ensure RateLimiter waits for Swapbuffers completion
+        https://bugs.webkit.org/show_bug.cgi?id=83649
+
+        Reviewed by James Robinson.
+
+        We were waiting only on the canvas context, which with the new GPU
+        scheduling was causing the RateLimiter not to ratelimit enough. We
+        need to insert no-op commands in the compositor context, so that we'll
+        wait for the canvas context and SwapBuffers as well.
+
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::doNoOp):
+        (WebCore):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromium):
+        * platform/graphics/chromium/RateLimiter.cpp:
+        (WebCore::RateLimiter::create):
+        (WebCore::RateLimiter::RateLimiter):
+        (WebCore::RateLimiter::rateLimitContext):
+        * platform/graphics/chromium/RateLimiter.h:
+        (RateLimiterClient):
+        (WebCore):
+        (RateLimiter):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::startRateLimiter):
+        (WebCore::CCLayerTreeHost::rateLimit):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCProxy.h:
+        (CCProxy):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::forceNoOpCommand):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        (CCSingleThreadProxy):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::forceNoOpCommand):
+        (WebCore):
+        (WebCore::CCThreadProxy::forceNoOpCommandOnImplThread):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (CCThreadProxy):
+
 2012-04-17  Andreas Kling  <kling@webkit.org>
 
         CSSValuePool: Made identifier value cache a fixed-size array.
