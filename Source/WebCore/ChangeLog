@@ -1,3 +1,48 @@
+2012-04-18  Mark Pilgrim  <pilgrim@chromium.org>
+
+        Followup to "Call incrementStatsCounter directly"
+        https://bugs.webkit.org/show_bug.cgi?id=83109
+
+        Reviewed by Kentaro Hara.
+
+        Now that incrementStatsCounter has been moved from
+        PlatformSupport.h to Platform.h, we need to be able to call it directly
+        from WebCore/bindings/v8/v8Proxy.h (for the INC_STATS macro). That
+        means we need a new StatsCounter class in WebCore/platform/ and an
+        implementation in
+        WebCore/platform/chromium/StatsCounterChromium.cpp. Other ports
+        are welcome to implement their own stats counters if they
+        wish. This pattern was based on the
+        HistogramSupport/HistogramSupportChromium classes.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/v8/V8Proxy.h:
+        * bindings/v8/custom/V8DedicatedWorkerContextCustom.cpp:
+        (WebCore::V8DedicatedWorkerContext::postMessageCallback):
+        (WebCore::V8DedicatedWorkerContext::webkitPostMessageCallback):
+        * bindings/v8/custom/V8NotificationCenterCustom.cpp:
+        (WebCore::V8NotificationCenter::createHTMLNotificationCallback):
+        (WebCore::V8NotificationCenter::createNotificationCallback):
+        (WebCore::V8NotificationCenter::requestPermissionCallback):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::V8WorkerContext::importScriptsCallback):
+        (WebCore::V8WorkerContext::setTimeoutCallback):
+        (WebCore::V8WorkerContext::setIntervalCallback):
+        * platform/StatsCounter.cpp: Added.
+        (WebCore):
+        (WebCore::StatsCounter::incrementStatsCounter):
+        * platform/StatsCounter.h: Added.
+        (WebCore):
+        (StatsCounter):
+        * platform/chromium/StatsCounterChromium.cpp: Added.
+        (WebCore):
+        (WebCore::StatsCounter::incrementStatsCounter):
+
 2012-04-18  Alexander Pavlov  <apavlov@chromium.org>
 
         [Chromium] REGRESSION: Popup shrinks because of autocomplete
