@@ -1,5 +1,24 @@
 2012-04-17  Pavel Feldman  <pfeldman@chromium.org>
 
+        Web Inspector: [Chromium] Module's require injects scripts before the debug id is set to the context.
+        https://bugs.webkit.org/show_bug.cgi?id=84166
+
+        Reviewed by Yury Semikhatsky.
+
+        V8IsolatedContext was getting debug id assigned post-construction. At the same time, it was compiling all
+        its module scripts within the constructor. As a result, scripts ended up in the main world's list.
+
+        * bindings/v8/V8IsolatedContext.cpp:
+        (WebCore::setInjectedScriptContextDebugId):
+        (WebCore):
+        (WebCore::V8IsolatedContext::V8IsolatedContext):
+        * bindings/v8/V8Proxy.cpp:
+        (WebCore::V8Proxy::evaluateInIsolatedWorld):
+        * bindings/v8/V8Proxy.h:
+        (V8Proxy):
+
+2012-04-17  Pavel Feldman  <pfeldman@chromium.org>
+
         Web Inspector: document.open removes the documentElement, but does not clear the elements panel.
         https://bugs.webkit.org/show_bug.cgi?id=84179
 
