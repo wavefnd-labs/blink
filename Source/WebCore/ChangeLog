@@ -1,3 +1,22 @@
+2012-04-18  Simon Fraser  <simon.fraser@apple.com>
+
+        ASSERT when a layer with a foreground layer is in 'paint into ancestor' mode
+        https://bugs.webkit.org/show_bug.cgi?id=84221
+
+        Reviewed by Dean Jackson.
+        
+        When a RenderLayerBacking doesn't require its own backing store, and is
+        in "paintIntoCompositingAncestor" mode, we would assert when trying to
+        paint its m_foregroundLayer if it had one (because of a negative z-index child).
+        
+        The fix is to set the 'drawsContent' state on the m_foregroundLayer
+        as well as m_graphicsLayer.
+
+        Test: compositing/backing/no-backing-foreground-layer.html
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateDrawsContent):
+
 2012-04-18  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: DataGrid should use explicit root node
