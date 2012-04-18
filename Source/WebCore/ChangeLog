@@ -1,3 +1,36 @@
+ 2012-04-17  Levi Weintraub  <leviw@chromium.org>
+
+        Clean up outstanding LayoutUnit misuse in WebCore
+        https://bugs.webkit.org/show_bug.cgi?id=84209
+
+        Reviewed by Eric Seidel.
+
+        Small changes to a handful of files to prepare trunk for FractionalLayoutUnits.
+        For more details, see https://trac.webkit.org/wiki/LayoutUnit
+
+        No new tests. No change in behavior.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue): minimumValueForLength preserves
+        sub-pixel precision, so we should avoid unnecessarily using integers.
+        * platform/graphics/FractionalLayoutPoint.h:
+        (WebCore::FractionalLayoutPoint::FractionalLayoutPoint): Adding an explicit constructor from
+        FractionalLayoutSizes. This mirrors a method in IntPoint.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::paintBorder): The rects that change come from roundedRects,
+        which are already pixel-snapped.
+        * rendering/RenderBoxModelObject.h: Removing a comment that is no longer applicable.
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::computeLogicalWidth): Since we layout tables using integers, we
+        need to explicitly calculate the width to be integral as well to avoid pushing the next element
+        over by a pixel that we won't later paint with our own box decorations.
+        * rendering/RenderText.h:
+        (RenderText): Correcting an unfortunate mismatch between in the return value of linesBoundingBox
+        between the header and implementation.
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::getRoundedBorderFor): We were incorrectly not using the snapped border
+        rect to pass to calcRadiiFor (which takes an IntRect). Correcting this.
+
 2012-04-17  Luke Macpherson  <macpherson@chromium.org>
 
         Ensure CSSParser member variables are initialized.
