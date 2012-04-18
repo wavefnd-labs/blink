@@ -1,3 +1,24 @@
+2012-04-18  Levi Weintraub  <leviw@chromium.org>
+
+        GraphicsContextCG's roundToDevicePixels should round even when there's no transform
+        https://bugs.webkit.org/show_bug.cgi?id=84191
+
+        Reviewed by Eric Seidel.
+
+        When painting with the identify transform, the roundToDevicePixels function in GraphicsContextCG
+        does an early return that simply returns the FloatRect that was passed in. This proved to be a
+        problem in sub-pixel layout, as we wouldn't adjust the paint rect for text underline, and it could
+        end up being more than one pixel wide. Adding a roundedIntRect method on FloatRect for the simple
+        short-circuit case.
+
+        No new tests. No change in behavior before switching to sub-pixel layout.
+
+        * platform/graphics/FloatRect.cpp:
+        (WebCore::roundedIntRect):
+        * platform/graphics/FloatRect.h:
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore::GraphicsContext::roundToDevicePixels):
+
 2012-04-18  Keishi Hattori  <keishi@webkit.org>
 
         [chromium] Turn on ENABLE_DATALIST for chromium
