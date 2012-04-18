@@ -1,3 +1,63 @@
+2012-04-18  Levi Weintraub  <leviw@chromium.org>
+
+        Convert ShadowData and DropShadowFilterOperation to use IntPoint
+        https://bugs.webkit.org/show_bug.cgi?id=84098
+
+        Reviewed by Eric Seidel.
+
+        Shadows do not flow with the page, so sub-pixel layout doesn't actually offer any benefit that
+        couldn't have been attained before that conversion. With that in mind, this patch reverts
+        drop shadow offsets to integers, but also cleans up the code by switching the x/y location pair
+        to be an IntPoint.
+
+        No new tests. No change in behavior.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::valueForFilter):
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::collectMatchingRulesForList):
+        * css/SVGCSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::applySVGProperty):
+        * page/animation/AnimationBase.cpp:
+        (WebCore::blendFunc):
+        (WebCore::shadowForBlending):
+        * platform/animation/AnimationUtilities.h:
+        (WebCore::blend): New blend function that operates on IntPoints.
+        (WebCore):
+        * platform/chromium/support/WebFilterOperations.cpp:
+        (WebKit::WebDropShadowFilterOperation):
+        * platform/graphics/filters/FilterOperation.cpp:
+        (WebCore::DropShadowFilterOperation::blend):
+        * platform/graphics/filters/FilterOperation.h:
+        (WebCore::DropShadowFilterOperation::clone):
+        (WebCore::DropShadowFilterOperation::x):
+        (WebCore::DropShadowFilterOperation::y):
+        (WebCore::DropShadowFilterOperation::location): Preserved the comment about lengths.
+        (WebCore::DropShadowFilterOperation::operator==):
+        (WebCore::DropShadowFilterOperation::DropShadowFilterOperation):
+        (DropShadowFilterOperation):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::areaCastingShadowInHole): Reverted to integers since this operates on the IntRect from
+        a RoundedRect.
+        (WebCore::RenderBoxModelObject::paintBoxShadow): Reduced the complexity and unnecessary conversion
+        between LayoutUnits and integers by using all integers after we calculate the pixel-snapped
+        RoundedRect that we use for painting.
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::getShadowExtent):
+        (WebCore::RenderStyle::getShadowHorizontalExtent):
+        (WebCore::RenderStyle::getShadowVerticalExtent):
+        * rendering/style/ShadowData.cpp:
+        (WebCore::ShadowData::ShadowData):
+        (WebCore::ShadowData::operator==):
+        (WebCore::calculateShadowExtent):
+        (WebCore::ShadowData::adjustRectForShadow):
+        * rendering/style/ShadowData.h:
+        (WebCore::ShadowData::ShadowData):
+        (WebCore::ShadowData::x):
+        (WebCore::ShadowData::y):
+        (WebCore::ShadowData::location):
+        (ShadowData):
+
 2012-04-17  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Add an optional Isolate argument to wrap()
