@@ -1,3 +1,32 @@
+2012-04-18  David Grogan  <dgrogan@chromium.org>
+
+        IDB: Pending setVersion call in worker prevents document from opening the db, even after worker termination
+        https://bugs.webkit.org/show_bug.cgi?id=83952
+
+        These two tests fail in DRT most proximately because DRT provides
+        different instances of IDBFactoryBackend to a document and worker:
+        https://bugs.webkit.org/show_bug.cgi?id=82776.
+
+        One fails in chromium because of a logic error tracked by
+        http://crbug.com/123418. The plan is to run them both as browser tests
+        when the logic is fixed, but just one in the meantime.
+
+        Also added SKIP for storage/indexeddb/dont-commit-on-blocked.html
+        since it also can't pass in DRT and just turns the flakiness dashboard
+        all red.
+
+        Reviewed by Ojan Vafai.
+
+        * platform/chromium/test_expectations.txt:
+        * storage/indexeddb/pending-version-change-stuck-expected.txt: Added.
+        * storage/indexeddb/pending-version-change-stuck-works-with-terminate-expected.txt: Added.
+        * storage/indexeddb/pending-version-change-stuck-works-with-terminate.html: Added.
+        * storage/indexeddb/pending-version-change-stuck.html: Added.
+        * storage/indexeddb/resources/pending-version-change-stuck.js: Added.
+        (test.request.onsuccess.request.onblocked):
+        (test.request.onsuccess):
+        (test):
+
 2012-04-18  Luiz Agostini  <luiz.agostini@palm.com>
 
         matchMedia() MediaQueryList not updating
