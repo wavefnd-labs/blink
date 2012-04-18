@@ -1,3 +1,35 @@
+2012-04-18  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Filters] Drop-shadow and blur can avoid using full source image
+        https://bugs.webkit.org/show_bug.cgi?id=81263
+
+        Reviewed by Dean Jackson.
+
+        Instead of using the full bounding box of the RenderLayer we now compute the exact rectangle that is needed to 
+        compute filter inside the dirty rectangle on screen. That's easy to calculate by reversing the filter outsets.
+        Even if the element is completely offscreen, but its shadow is in the viewport, we can still compute the source 
+        rectangle that needs to be drawn in order to update the shadow correctly.
+
+        No new tests, this change doesn't have visible results and the functionality should
+        already be covered by previous filter tests.
+
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::build): Save the outsets of the filters, so that we can use them in computeSourceImageRectForDirtyRect.
+        (WebCore::FilterEffectRenderer::updateBackingStoreRect): Only allocate a new source image if the size of the source rectangle changed.
+        (WebCore::FilterEffectRenderer::allocateBackingStoreIfNeeded): There's no need to call clearIntermediateResults() in this function. We do that after
+        the filter is computed.
+        (WebCore::FilterEffectRenderer::computeSourceImageRectForDirtyRect):
+        (WebCore):
+        (WebCore::FilterEffectRendererHelper::prepareFilterEffect):
+        (WebCore::FilterEffectRendererHelper::beginFilterEffect):
+        * rendering/FilterEffectRenderer.h:
+        (FilterEffectRendererHelper):
+        (WebCore::FilterEffectRendererHelper::repaintRect):
+        (FilterEffectRenderer):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayerContents):
+
 2012-04-18  Dominik Röttsches  <dominik.rottsches@linux.intel.com>
 
         [EFL][DRT] @font-face support fails on EFL
