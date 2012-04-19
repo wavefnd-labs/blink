@@ -1,3 +1,37 @@
+2012-04-18  Jason Liu  <jason.liu@torchmobile.com.cn>
+
+        [BlackBerry] Parsed Cookie's m_hasDefaultDomain is not needed.
+        https://bugs.webkit.org/show_bug.cgi?id=82830
+
+        Reviewed by George Staikos.
+
+        RFC 2965
+        3.2.2
+        Domain = value
+        If an explicitly specified value does not start with a dot, the user agent supplies
+        a leading dot.
+        3.3.1
+        Domain  Defaults to the effective request-host.  (Note that because there is no dot
+        at the beginning of effective request-host, the default Domain can only domain-match
+        itself.)
+
+        The first char can show the difference even though it is from the cookie database.
+        But m_hasDefaultDomain is set to false if the cookie is from database although the
+        domain is host as a default value. So m_hasDefaultDomain sometimes is wrong.
+
+        In sum,  we shouldn't use m_hasDefaultDomain.
+
+        Test: http/tests/security/cookies/cookies-wrong-domain-rejected.php
+
+        * platform/blackberry/CookieManager.cpp:
+        (WebCore::CookieManager::shouldRejectForSecurityReason):
+        * platform/blackberry/CookieParser.cpp:
+        (WebCore::CookieParser::parseOneCookie):
+        * platform/blackberry/ParsedCookie.cpp:
+        (WebCore::ParsedCookie::ParsedCookie):
+        * platform/blackberry/ParsedCookie.h:
+        (ParsedCookie):
+
 2012-04-18  Adrienne Walker  <enne@google.com>
 
         [chromium] Consolidate adjustTextRenderMode copypasta into Skia context
