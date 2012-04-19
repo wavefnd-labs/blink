@@ -1,3 +1,76 @@
+2012-04-19  Sami Kyostila  <skyostil@chromium.org>
+
+        [chromium] Allow scrolling non-root layers in the compositor thread
+        https://bugs.webkit.org/show_bug.cgi?id=73350
+
+        Reviewed by James Robinson.
+
+        This patch enables scrolling child layers in the compositor thread.
+        Scroll deltas are accumulated for each scrolled CCLayerImpl and
+        synchronized to the main thread.
+
+        If a layer has no room to scroll in a given direction, one of its
+        ancestor layers is scrolled instead if possible.
+
+        Added new webkit_unit_tests to verify scrolling behavior.
+
+        * platform/graphics/chromium/ContentLayerChromium.cpp:
+        (WebCore::ContentLayerChromium::scrollBy):
+        (WebCore):
+        * platform/graphics/chromium/ContentLayerChromium.h:
+        (ContentLayerDelegate):
+        (ContentLayerChromium):
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        (WebCore::GraphicsLayerChromium::didScroll):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::setMaxScrollPosition):
+        (WebCore):
+        (WebCore::LayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+        (WebCore::LayerChromium::maxScrollPosition):
+        (WebCore::LayerChromium::scrollable):
+        (WebCore::LayerChromium::scrollBy):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::findLayerInSubtree):
+        (WebCore):
+        (WebCore::CCLayerImpl::tryScroll):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::findLayerById):
+        (WebCore):
+        (WebCore::findFirstScrollableLayer):
+        (WebCore::CCLayerTreeHost::applyScrollAndScale):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::startPageScaleAnimation):
+        (WebCore::CCLayerTreeHostImpl::contentSize):
+        (WebCore):
+        (WebCore::CCLayerTreeHostImpl::calculateVisibleLayers):
+        (WebCore::CCLayerTreeHostImpl::prepareToDraw):
+        (WebCore::findRootScrollLayer):
+        (WebCore::findScrollLayerForContentLayer):
+        (WebCore::CCLayerTreeHostImpl::setRootLayer):
+        (WebCore::adjustScrollsForPageScaleChange):
+        (WebCore::applyPageScaleDeltaToScrollLayers):
+        (WebCore::CCLayerTreeHostImpl::setPageScaleFactorAndLimits):
+        (WebCore::CCLayerTreeHostImpl::setPageScaleDelta):
+        (WebCore::CCLayerTreeHostImpl::updateMaxScrollPosition):
+        (WebCore::CCLayerTreeHostImpl::scrollBegin):
+        (WebCore::CCLayerTreeHostImpl::scrollBy):
+        (WebCore::CCLayerTreeHostImpl::scrollEnd):
+        (WebCore::CCLayerTreeHostImpl::pinchGestureUpdate):
+        (WebCore::CCLayerTreeHostImpl::computePinchZoomDeltas):
+        (WebCore::CCLayerTreeHostImpl::makeScrollAndScaleSet):
+        (WebCore::collectScrollDeltas):
+        (WebCore::CCLayerTreeHostImpl::processScrollDeltas):
+        (WebCore::CCLayerTreeHostImpl::animatePageScale):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (WebCore::CCLayerTreeHostImpl::rootScrollLayer):
+        (CCLayerTreeHostImpl):
+        (LayerGeometry):
+
 2012-04-19  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: make constructors and diff heap snapshot data grids use viewport
