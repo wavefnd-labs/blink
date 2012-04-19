@@ -1,3 +1,74 @@
+2012-04-19  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: x-frame security errors logged when typing in the console are annoying.
+        https://bugs.webkit.org/show_bug.cgi?id=81970
+
+        Reviewed by Pavel Feldman.
+
+        Parameter DoNotPauseOnExceptions in Runtime.evaluate() renamed to DoNotPauseOnExceptionsAndMuteConsole.
+        Added this parameter to Runtime.callFunctionOn() and passed true in all call sites.
+        Added this parameter to Debugger.evaluateOnCallFrame().
+        Added a flag to console that mutes all messages unless they have ConsoleAPI message source.
+        This flag is now temporarily set from InspectorRuntimeAgent and InspectorDebuggerAgent for certain injected source calls.
+
+        * inspector/Inspector.json:
+        * inspector/InspectorDebuggerAgent.cpp:
+        (WebCore::asBool):
+        (WebCore):
+        (WebCore::InspectorDebuggerAgent::evaluateOnCallFrame):
+        * inspector/InspectorDebuggerAgent.h:
+        (InspectorDebuggerAgent):
+        * inspector/InspectorRuntimeAgent.cpp:
+        (WebCore):
+        (WebCore::setPauseOnExceptionsState):
+        (WebCore::InspectorRuntimeAgent::evaluate):
+        (WebCore::InspectorRuntimeAgent::callFunctionOn):
+        (WebCore::InspectorRuntimeAgent::getProperties):
+        * inspector/InspectorRuntimeAgent.h:
+        (InspectorRuntimeAgent):
+        * inspector/PageDebuggerAgent.cpp:
+        (WebCore::PageDebuggerAgent::muteConsole):
+        (WebCore):
+        (WebCore::PageDebuggerAgent::unmuteConsole):
+        * inspector/PageDebuggerAgent.h:
+        (PageDebuggerAgent):
+        * inspector/PageRuntimeAgent.cpp:
+        (WebCore::PageRuntimeAgent::muteConsole):
+        (WebCore):
+        (WebCore::PageRuntimeAgent::unmuteConsole):
+        * inspector/PageRuntimeAgent.h:
+        (PageRuntimeAgent):
+        * inspector/WorkerDebuggerAgent.cpp:
+        (WebCore::WorkerDebuggerAgent::muteConsole):
+        (WebCore):
+        (WebCore::WorkerDebuggerAgent::unmuteConsole):
+        * inspector/WorkerDebuggerAgent.h:
+        (WorkerDebuggerAgent):
+        * inspector/WorkerRuntimeAgent.cpp:
+        (WebCore::WorkerRuntimeAgent::muteConsole):
+        (WebCore):
+        (WebCore::WorkerRuntimeAgent::unmuteConsole):
+        * inspector/WorkerRuntimeAgent.h:
+        (WorkerRuntimeAgent):
+        * inspector/front-end/ConsoleView.js:
+        (WebInspector.ConsoleView.prototype.evalInInspectedWindow):
+        * inspector/front-end/DebuggerPresentationModel.js:
+        (WebInspector.DebuggerPresentationModel.prototype.evaluateInSelectedCallFrame):
+        (WebInspector.PresentationCallFrame.prototype.evaluate):
+        * inspector/front-end/RemoteObject.js:
+        (WebInspector.RemoteObject.prototype.setPropertyValue):
+        (WebInspector.RemoteObject.prototype.callFunction):
+        (WebInspector.RemoteObject.prototype.callFunctionJSON):
+        * inspector/front-end/WorkerManager.js:
+        * page/Console.cpp:
+        (WebCore::Console::addMessage):
+        (WebCore::Console::warn):
+        (WebCore):
+        (WebCore::Console::mute):
+        (WebCore::Console::unmute):
+        * page/Console.h:
+        (Console):
+
 2012-04-19  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r114628.
