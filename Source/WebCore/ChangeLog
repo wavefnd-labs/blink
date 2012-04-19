@@ -1,3 +1,29 @@
+2012-04-19  Ken Buchanan  <kenrb@chromium.org>
+
+        Positioned children of ruby runs not handled correctly during layout
+        https://bugs.webkit.org/show_bug.cgi?id=84157
+
+        Reviewed by Julien Chaffraix.
+
+        A positioned ruby text causes a problem because it is excluded from
+        normal layout by its parent and instead gets layout from
+        RenderRubyRun::layoutSpecialExcludedChild; however this means it gets
+        skipped over during the loop in RenderBlock::layoutBlockChildren,
+        which is where positioned RenderBlocks get added to the appropriate
+        positioned object lists. As a result, a dirty positioned ruby text
+        will not get layout again unless the RenderRubyRun also needs layout
+        which is not guaranteed.
+
+        This patch disqualifies ruby text elements from being positioned.
+        If it is necessary to support this in future, ruby text layout will
+        have to be modified to ensure the renderers are added to the
+        appropriate block lists.
+
+        * css/CSSStyleSelector.cpp:
+        (WebCore::CSSStyleSelector::adjustRenderStyle):
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::rubyText):
+
 2012-04-19  vsevik@chromium.org  <vsevik@chromium.org>
 
         Web Inspector: No response body available for cached resource requests with error status codes.
