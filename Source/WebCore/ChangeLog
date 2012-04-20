@@ -1,3 +1,28 @@
+2012-04-04  Jer Noble  <jer.noble@apple.com>
+
+        apple.com top navigation bar appears inside video during full screen exit animation
+        https://bugs.webkit.org/show_bug.cgi?id=83095
+
+        Reviewed by Eric Carlson.
+
+        Test: fullscreen/full-screen-exit-animation-stacking-context.html
+
+        Only tell ancestors of the full screen element that they are no longer ancestors once
+        the full screen animation is complete:
+        * dom/Document.cpp:
+        (WebCore::Document::webkitWillExitFullScreenForElement):
+        (WebCore::Document::webkitDidExitFullScreenForElement):
+
+        To facilitate writing reproducible LayoutTests, expose webkitWill/Did/Enter/ExitFullScreen
+        from the Internals object, so scripts can call them explicitly:
+        * testing/Internals.cpp:
+        (WebCore::Internals::webkitWillEnterFullScreenForElement): Call the Document equivalent.
+        (WebCore::Internals::webkitDidEnterFullScreenForElement): Ditto.
+        (WebCore::Internals::webkitWillExitFullScreenForElement): Ditto.
+        (WebCore::Internals::webkitDidExitFullScreenForElement): Ditto.
+        * testing/Internals.h:
+        * testing/Internals.idl:
+
 2012-04-17  Jer Noble  <jer.noble@apple.com>
 
         media-exit-fullscreen-button (and related enums) is unnecessary and should be removed.
