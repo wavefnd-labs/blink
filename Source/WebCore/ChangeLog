@@ -1,3 +1,100 @@
+2012-04-20  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: extract NavigatorView and NavigatorOverlayController from ScriptsNavigator.
+        https://bugs.webkit.org/show_bug.cgi?id=84441
+
+        Reviewed by Yury Semikhatsky.
+
+        - Moves NavigatorOverlayController out of ScriptsNavigator
+        - Extracts NavigatorView from ScriptsNavigator and makes ScriptsNavigator contain 3 NavigatorView instances (one per tab)
+        - Subclasses SnippetsNavigatorView and leaves it within ScriptsNavigator.
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/NavigatorOverlayController.js: Added.
+        (WebInspector.NavigatorOverlayController.prototype.wasShown):
+        (WebInspector.NavigatorOverlayController.prototype._createNavigatorControlButton):
+        (WebInspector.NavigatorOverlayController.prototype._escDownWhileNavigatorOverlayOpen):
+        (WebInspector.NavigatorOverlayController.prototype._toggleNavigator):
+        (WebInspector.NavigatorOverlayController.prototype._hidePinnedNavigator):
+        (WebInspector.NavigatorOverlayController.prototype.set _pinNavigator):
+        (WebInspector.NavigatorOverlayController.prototype.set showNavigatorOverlay):
+        (WebInspector.NavigatorOverlayController.prototype.hideNavigatorOverlay):
+        (WebInspector.NavigatorOverlayController.prototype._navigatorOverlayWasShown):
+        * inspector/front-end/NavigatorView.js: Added.
+        (WebInspector.NavigatorView):
+        (WebInspector.NavigatorView.prototype._updateScriptTitle.get if):
+        (WebInspector.NavigatorView.prototype._updateScriptTitle):
+        (WebInspector.NavigatorView.prototype._scriptSelected):
+        (WebInspector.NavigatorView.prototype._removeUISourceCode.get while):
+        (WebInspector.NavigatorView.prototype._removeUISourceCode):
+        (WebInspector.NavigatorView.prototype._showScriptFoldersSettingChanged):
+        (WebInspector.NavigatorView.prototype._fileRenamed):
+        (WebInspector.NavigatorView.prototype.rename.commitHandler):
+        (WebInspector.NavigatorView.prototype.rename.cancelHandler):
+        (WebInspector.NavigatorView.prototype.rename.afterEditing):
+        (WebInspector.NavigatorView.prototype.reset):
+        (WebInspector.NavigatorView.prototype.createFolderTreeElement):
+        (WebInspector.NavigatorView.prototype.getOrCreateFolderTreeElement):
+        (WebInspector.NavigatorView.prototype.handleContextMenu):
+        (WebInspector.NavigatorTreeOutline):
+        (WebInspector.NavigatorTreeOutline._treeElementsCompare.compare.typeWeight):
+        (WebInspector.NavigatorTreeOutline._treeElementsCompare):
+        (WebInspector.NavigatorTreeOutline.prototype.scriptTreeElements):
+        (WebInspector.NavigatorTreeOutline.prototype.searchStarted):
+        (WebInspector.NavigatorTreeOutline.prototype.searchFinished):
+        (WebInspector.BaseNavigatorTreeElement):
+        (WebInspector.BaseNavigatorTreeElement.prototype.onattach):
+        (WebInspector.BaseNavigatorTreeElement.prototype.onreveal):
+        (WebInspector.BaseNavigatorTreeElement.prototype.get titleText):
+        (WebInspector.BaseNavigatorTreeElement.prototype.set titleText):
+        (WebInspector.BaseNavigatorTreeElement.prototype.matchesSearchText):
+        (WebInspector.NavigatorFolderTreeElement):
+        (WebInspector.NavigatorFolderTreeElement.prototype.get folderIdentifier):
+        (WebInspector.NavigatorFolderTreeElement.prototype.get isDomain):
+        (WebInspector.NavigatorFolderTreeElement.prototype.onattach):
+        (WebInspector.NavigatorScriptTreeElement):
+        (WebInspector.NavigatorScriptTreeElement.prototype.get uiSourceCode):
+        (WebInspector.NavigatorScriptTreeElement.prototype.onattach):
+        (WebInspector.NavigatorScriptTreeElement.prototype.onspace):
+        (WebInspector.NavigatorScriptTreeElement.prototype._onclick):
+        (WebInspector.NavigatorScriptTreeElement.prototype.onenter):
+        (WebInspector.NavigatorScriptTreeElement.prototype._handleContextMenuEvent):
+        * inspector/front-end/ScriptsNavigator.js:
+        (WebInspector.ScriptsNavigator):
+        (WebInspector.ScriptsNavigator.prototype.addUISourceCode):
+        (WebInspector.ScriptsNavigator.prototype.isScriptSourceAdded):
+        (WebInspector.ScriptsNavigator.prototype.revealUISourceCode):
+        (WebInspector.ScriptsNavigator.prototype.replaceUISourceCodes):
+        (WebInspector.ScriptsNavigator.prototype._scriptSelected):
+        (WebInspector.ScriptsNavigator.prototype.reset):
+        (WebInspector.SnippetsNavigatorView):
+        (WebInspector.SnippetsNavigatorView.prototype.getOrCreateFolderTreeElement):
+        (WebInspector.SnippetsNavigatorView.prototype._getOrCreateSnippetEvaluationsFolderTreeElement):
+        (WebInspector.SnippetsNavigatorView.prototype.handleContextMenu):
+        (WebInspector.SnippetsNavigatorView.prototype._fileRenamed):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/navigatorView.css: Added.
+        (.navigator-domain-tree-item .icon):
+        (.navigator-folder-tree-item .icon):
+        (.navigator-script-tree-item .icon):
+        (.navigator li):
+        (.navigator :focus li.selected):
+        (.navigator li.selected .selection):
+        (.navigator :focus li.selected .selection):
+        (.navigator .search-match-found li.selected .selection):
+        (.navigator .search-match-not-found li.selected .selection):
+        (.navigator .searching li.selected .selection):
+        (.navigator .icon):
+        (.navigator .base-navigator-tree-element-title):
+        (.navigator .base-navigator-tree-element-title.editing):
+        (.navigator-tree-search-box):
+        (.navigator-tree-search-box.visible):
+        (.navigator-tree-search-box > input):
+        * inspector/front-end/scriptsPanel.css:
+
 2012-04-19  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: make ScriptNavigatorController use views only, rename to NavigatorOverlayController.
