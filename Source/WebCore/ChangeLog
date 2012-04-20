@@ -1,5 +1,25 @@
 2012-04-19  Anders Carlsson  <andersca@apple.com>
 
+        computeNonFastScrollableRegion needs to traverse the entire frame tree
+        https://bugs.webkit.org/show_bug.cgi?id=84409
+        <rdar://problem/11285741>
+
+        Reviewed by Dan Bernstein.
+
+        Now that scrollable areas won't be in the set of scrollable areas unless they are actually scrollable, we need to look for scrollable
+        areas in the entire frame tree since there can be a scrollable frame that's a subframe of a non-scrollable frame for example.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::computeNonFastScrollableRegion):
+        Traverse the entire frame tree looking for scrollable areas. Also, remove the scrollability checks because scrollable areas will only be
+        in the set if they have scrollbars that are enabled.
+
+        (WebCore::ScrollingCoordinator::frameViewLayoutUpdated):
+        (WebCore::ScrollingCoordinator::frameViewScrollableAreasDidChange):
+        computeNonFastScrollableRegion now takes the main frame.
+
+2012-04-19  Anders Carlsson  <andersca@apple.com>
+
         Focus ring on wikipedia gets blobs when you type
         https://bugs.webkit.org/show_bug.cgi?id=84407
         <rdar://problem/11011847>
