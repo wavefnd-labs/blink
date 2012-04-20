@@ -1,3 +1,42 @@
+2012-04-20  Mark Pilgrim  <pilgrim@chromium.org>
+
+        [Chromium] Call memoryUsageMB directly
+        https://bugs.webkit.org/show_bug.cgi?id=84376
+
+        Reviewed by Kentaro Hara.
+
+        Now that memoryUsageMB has been moved from PlatformSupport.h to
+        Platform.h, we need to be able to call it directly
+        from WebCore/bindings/v8/V8GCController.cpp.
+        That means we need a new MemoryUsageSupport class in
+        WebCore/platform/ and an implementation in
+        WebCore/platform/chromium/MemoryUsageSupportChromium.cpp.
+        Other ports are welcome to implement their memory usage
+        functions if they wish. This pattern was based on the
+        HistogramSupport/HistogramSupportChromium classes.
+
+        Part of a refactoring series. See tracking bug 82948.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/v8/V8GCController.cpp:
+        (WebCore):
+        * platform/MemoryUsageSupport.cpp: Added.
+        (WebCore):
+        (WebCore::MemoryUsageSupport::memoryUsageMB):
+        * platform/MemoryUsageSupport.h: Added.
+        (WebCore):
+        (MemoryUsageSupport):
+        * platform/chromium/MemoryUsageSupportChromium.cpp: Added.
+        (WebCore):
+        (WebCore::MemoryUsageSupport::memoryUsageMB):
+        * platform/chromium/PlatformSupport.h:
+        (PlatformSupport):
+
 2012-04-20  Anders Carlsson  <andersca@apple.com>
 
         Re-land. The non-fast scrollable region is now always updated after layout, and frameViewScrollableAreasDidChange has been removed.
