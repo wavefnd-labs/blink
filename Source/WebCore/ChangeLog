@@ -1,3 +1,26 @@
+2012-04-20  Adrienne Walker  <enne@google.com>
+
+        [chromium] Clip TransparencyWin to prevent OOM from large Skia canvas
+        https://bugs.webkit.org/show_bug.cgi?id=84289
+
+        Reviewed by James Robinson.
+
+        TransparencyWin will create a Skia canvas of whatever size is passed
+        in, even if the result will ultimately be clipped. Handle the clip
+        implicitly and try (in some cases) to create a smaller canvas. This
+        can happen due to RenderBox::paintBoxDecorations passing a paint rect
+        down of the entire element's size.
+
+        Modes with more complicated transforms (ScaleTransform, UnTransform)
+        are not handled yet.
+
+        Tests: TransparencyWin.ClippedKeepTransformNoLayer
+               TransparencyWin.ClippedKeepTransformOpaqueCompositeLayer
+               TransparencyWin.ClippedKeepTransformOpaqueWhiteLayer
+
+        * platform/graphics/chromium/TransparencyWin.cpp:
+        (WebCore::TransparencyWin::computeLayerSize):
+
 2012-04-04  Jer Noble  <jer.noble@apple.com>
 
         apple.com top navigation bar appears inside video during full screen exit animation
