@@ -1,3 +1,36 @@
+2012-04-20  Brady Eidson  <beidson@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=84490
+        PageGroupLoadDeferrer needs to take a ReasonForSuspension argument
+
+        Reviewed by Anders Carlsson.
+
+        No new tests. (Refactor, no change in behavior)
+
+        - Make PageGroupLoadDeferrer take a ReasonForSuspension argument so it can pass it along.
+        * page/PageGroupLoadDeferrer.cpp:
+        (WebCore::PageGroupLoadDeferrer::PageGroupLoadDeferrer):
+        * page/PageGroupLoadDeferrer.h:
+
+        - Change suspendScheduledTasks to take a ReasonForSuspension.
+        - As long as we're changing Document.h, add a m_suspendedScheduledTasks flag and some
+          ASSERTs to catch what would be epically wrong behavior in the future.
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::suspendScheduledTasks):
+        (WebCore::Document::resumeScheduledTasks):
+        * dom/Document.h:
+
+        - Pass ActiveDOMObject::WillShowDialog along to all PageGroupLoadDeferrers, as it used
+          to be the default behavior
+        * page/Chrome.cpp:
+        (WebCore::Chrome::runModal):
+        (WebCore::Chrome::runBeforeUnloadConfirmPanel):
+        (WebCore::Chrome::runJavaScriptAlert):
+        (WebCore::Chrome::runJavaScriptConfirm):
+        (WebCore::Chrome::runJavaScriptPrompt):
+        (WebCore::Chrome::shouldInterruptJavaScript):
+
 2012-04-20  Anders Carlsson  <andersca@apple.com>
 
         Scrolling after going to a find-in-page result jumps to the top of the page
