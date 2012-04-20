@@ -1,3 +1,31 @@
+2012-04-20  Dan Bernstein  <mitz@apple.com>
+
+        <rdar://problem/10786000> Selection highlights of lines in adjoining blocks can overlap
+        https://bugs.webkit.org/show_bug.cgi?id=84489
+
+        Reviewed by Anders Carlsson.
+
+        Test: fast/block/line-layout/selection-highlight-overlap.html
+
+        * rendering/EllipsisBox.cpp:
+        (WebCore::EllipsisBox::selectionRect): Changed to use
+        selection{Top,Height}AdjustedForPrecedingBlock().
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::paintSelection): Ditto.
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::inlineSelectionGaps): Ditto.
+        (WebCore::RenderBlock::blockBeforeWithinSelectionRoot): Added. Returns the block which is
+        likely to contain the selected line just before the first line in this block, if it is
+        within the same selection root.
+        * rendering/RenderBlock.h:
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::selectionTopAdjustedForPrecedingBlock): Added. If the selection
+        starts before our block, finds the last line in the preceding block and adjusts the selection
+        top to avoid overlap with that line’s selection bottom.
+        * rendering/RootInlineBox.h:
+        (WebCore::RootInlineBox::selectionHeightAdjustedForPrecedingBlock): Added. Like
+        selectionHeight(), but uses selectionTopAdjustedForPrecedingBlock().
+
 2012-04-20  Xianzhu Wang  <wangxianzhu@chromium.org>
 
         Crash in getOrDrawNodeHighlight after r114659
