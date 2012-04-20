@@ -1,3 +1,37 @@
+2012-04-20  Alexandre Elias  <aelias@google.com>
+
+        [chromium] Fix compile errors when DEBUG_GL_CALLS is enabled
+        https://bugs.webkit.org/show_bug.cgi?id=84491
+
+        Reviewed by Ojan Vafai.
+
+        DEBUG_GL_CALLS had not been used in a while and the mode no longer
+        compiled when I tried it.  I improved the GLC macro to support either
+        raw pointers or RefPtrs, and to be a single expression in order to
+        interact properly with if/else blocks.  I fixed the cases where we
+        were passing in the "context" method pointer by mistake, and removed the
+        now-unnecessary "get()" calls for the RefPtrs.
+
+        No new tests. (No-op change in release builds.)
+
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::initialize):
+        (WebCore::LayerRendererChromium::clearRenderSurface):
+        (WebCore::LayerRendererChromium::beginDrawingFrame):
+        (WebCore::LayerRendererChromium::doNoOp):
+        (WebCore::LayerRendererChromium::drawQuad):
+        (WebCore::LayerRendererChromium::drawTextureQuad):
+        (WebCore::LayerRendererChromium::drawHeadsUpDisplay):
+        (WebCore::LayerRendererChromium::finishDrawingFrame):
+        (WebCore::LayerRendererChromium::useRenderSurface):
+        (WebCore::LayerRendererChromium::bindFramebufferToTexture):
+        (WebCore::LayerRendererChromium::setScissorToRect):
+        (WebCore::LayerRendererChromium::setDrawViewportRect):
+        (WebCore::LayerRendererChromium::initializeSharedObjects):
+        (WebCore::LayerRendererChromium::cleanupSharedObjects):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (WebCore):
+
 2012-04-20  Anders Carlsson  <andersca@apple.com>
 
         Fix build.
