@@ -1,3 +1,50 @@
+2012-04-19  Simon Fraser  <simon.fraser@apple.com>
+
+        Set m_compositingDependsOnGeometry to false if possible
+        https://bugs.webkit.org/show_bug.cgi?id=84391
+
+        Reviewed by James Robinson.
+        
+        For some kinds of elements, RenderLayerCompositor has to delay decisions about
+        compositing until the element's size and/or position are known. This was previsouly
+        based on the confusingly named m_compositingDependsOnGeometry flag, but another
+        variant of the same technique, with an additional flag m_compositingNeedsUpdate,
+        was added in r98627.
+        
+        Also, once the m_compositingDependsOnGeometry flag was set to true, nothing
+        set it to false, so every compositing layer update resulted in a computeCompositingRequirements()
+        pass over the layers.
+        
+        Rename the m_compositingDependsOnGeometry flag to m_reevaluateCompositingAfterLayout,
+        and clear the flag when we do a layout-related compositing layer update.
+        Use the same flag for position:fixed compositing.
+        
+        This requires RenderLayerCompositor to distinguish between style- and layout-
+        related updates, requiring some minor refactoring in FrameView.
+
+        Should not change behavior.
+        
+        * dom/Document.cpp:
+        (WebCore::Document::recalcStyle):
+        (WebCore::Document::implicitClose):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::updateCompositingLayersAfterStyleChange):
+        (WebCore::FrameView::updateCompositingLayersAfterLayout):
+        (WebCore::FrameView::restoreBackingStores):
+        (WebCore::FrameView::layout):
+        * page/FrameView.h:
+        (FrameView):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::RenderLayerCompositor):
+        (WebCore::RenderLayerCompositor::updateCompositingLayersTimerFired):
+        (WebCore::RenderLayerCompositor::updateCompositingLayers):
+        (WebCore::RenderLayerCompositor::layerTreeAsText):
+        (WebCore::RenderLayerCompositor::requiresCompositingForPlugin):
+        (WebCore::RenderLayerCompositor::requiresCompositingForFrame):
+        (WebCore::RenderLayerCompositor::requiresCompositingForPosition):
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+
 2012-04-20  Dan Bernstein  <mitz@apple.com>
 
         <rdar://problem/10786000> Selection highlights of lines in adjoining blocks can overlap
