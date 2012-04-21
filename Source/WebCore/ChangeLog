@@ -1,3 +1,60 @@
+2012-04-20  Adrienne Walker  <enne@google.com>
+
+        [chromium] Refactor opaque content transform out of Skia context
+        https://bugs.webkit.org/show_bug.cgi?id=83608
+
+        Reviewed by James Robinson.
+
+        Having PlatformContextSkia know about the transform into content space
+        for a layer is a layering violation. This change lets the
+        PlatformContextSkia deal with opaque rects in its own space and lets
+        the caller handle transforming it into its own space. This also
+        prevents a matrix multiply per draw into the Skia canvas and does it
+        just once at the end to transform the final rect.
+
+        This is an incremental refactoring so that additional tracking for
+        text rects can be added and use the same space as opaque rects.
+
+        Tests: LayerTextureUpdaterTest.testPartialOpaqueRectNoTransform
+               LayerTextureUpdaterTest.testPartialOpaqueRectTranslation
+               LayerTextureUpdaterTest.testPartialOpaqueRectScale
+
+        * platform/graphics/chromium/BitmapCanvasLayerTextureUpdater.cpp:
+        (WebCore::BitmapCanvasLayerTextureUpdater::prepareToUpdate):
+        * platform/graphics/chromium/BitmapCanvasLayerTextureUpdater.h:
+        (BitmapCanvasLayerTextureUpdater):
+        * platform/graphics/chromium/BitmapSkPictureCanvasLayerTextureUpdater.cpp:
+        (WebCore::BitmapSkPictureCanvasLayerTextureUpdater::prepareToUpdate):
+        * platform/graphics/chromium/BitmapSkPictureCanvasLayerTextureUpdater.h:
+        (BitmapSkPictureCanvasLayerTextureUpdater):
+        * platform/graphics/chromium/CanvasLayerTextureUpdater.cpp:
+        (WebCore::CanvasLayerTextureUpdater::paintContents):
+        * platform/graphics/chromium/CanvasLayerTextureUpdater.h:
+        (CanvasLayerTextureUpdater):
+        * platform/graphics/chromium/LayerTextureUpdater.h:
+        (WebCore::LayerTextureUpdater::prepareToUpdate):
+        * platform/graphics/chromium/SkPictureCanvasLayerTextureUpdater.cpp:
+        (WebCore::SkPictureCanvasLayerTextureUpdater::prepareToUpdate):
+        * platform/graphics/chromium/SkPictureCanvasLayerTextureUpdater.h:
+        (SkPictureCanvasLayerTextureUpdater):
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::TiledLayerChromium::updateTiles):
+        * platform/graphics/skia/OpaqueRegionSkia.cpp:
+        (WebCore::OpaqueRegionSkia::didDrawRect):
+        (WebCore::OpaqueRegionSkia::didDrawPath):
+        (WebCore::OpaqueRegionSkia::didDrawPoints):
+        (WebCore::OpaqueRegionSkia::didDrawBounded):
+        (WebCore::OpaqueRegionSkia::didDraw):
+        * platform/graphics/skia/OpaqueRegionSkia.h:
+        (OpaqueRegionSkia):
+        * platform/graphics/skia/PlatformContextSkia.cpp:
+        (WebCore::PlatformContextSkia::didDrawRect):
+        (WebCore::PlatformContextSkia::didDrawPath):
+        (WebCore::PlatformContextSkia::didDrawPoints):
+        (WebCore::PlatformContextSkia::didDrawBounded):
+        * platform/graphics/skia/PlatformContextSkia.h:
+        (PlatformContextSkia):
+
 2012-04-20  Enrica Casucci  <enrica@apple.com>
 
         CRASH at WebCore::ReplaceSelectionCommand::removeRedundantMarkup
