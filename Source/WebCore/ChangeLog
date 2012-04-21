@@ -1,3 +1,22 @@
+2012-04-21  Darin Adler  <darin@apple.com>
+
+        Improve performance of removing user and password from URLs
+        https://bugs.webkit.org/show_bug.cgi?id=84525
+
+        Reviewed by Dan Bernstein.
+
+        Performance improvement only. Correctness covered by existing regression tests.
+
+        The most common use of KURL::setUser and KURL::setPass, by far, is to remove
+        the user and password from a URL that already has neither. Optimize this by
+        not re-parsing the URL in that case.
+
+        * platform/KURL.cpp:
+        (WebCore::KURL::setUser): Restructure code so that the code path that removes
+        the user does no work when there is nothing to remove. Otherwise, leave the
+        logic of the function untouched.
+        (WebCore::KURL::setPass): Same thing, only for password rather than user.
+
 2012-04-20  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r114768.
