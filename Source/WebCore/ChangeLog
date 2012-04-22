@@ -1,3 +1,102 @@
+2012-04-20  Jon Lee  <jonlee@apple.com>
+
+        Add Notification constructor
+        https://bugs.webkit.org/show_bug.cgi?id=80477
+        <rdar://problem/10912431>
+
+        Reviewed by Jian Li.
+
+        Tests will be added once there is support for web notifications on the Mac ports.
+
+        * WebCore.exp.in: Export finalize() function.
+
+        Modify Dictionary to support creation of event listeners.
+        * bindings/js/Dictionary.h:
+        (WebCore::Dictionary::isObject): Return true if the JSDictionary is valid.
+        (WebCore::Dictionary::isUndefinedOrNull): Return true if the JSDictionary is not valid.
+        (WebCore::Dictionary::get): Add convenience function to take const char* for
+        property name, to prevent having to do implicit conversion to WTF::String.
+        (WebCore::Dictionary::getEventListener): Add function to create event listener
+        from the dictionary.
+        (WebCore::Dictionary::asJSObject): Helper to convert WebCore objects to JS wrapper.
+        * bindings/js/Dictionary.cpp:
+        (WebCore::Notification): Implement asJSObject() for Notification.
+        * bindings/js/JSDictionary.h:
+        (WebCore::JSDictionary::execState): Expose the exec state so that the Dictionary
+        can obtain its world for creating the event listener.
+
+        * bindings/v8/Dictionary.h:
+        (WebCore::Dictionary::getEventListener): Stub implementation.
+
+        Add new constructor to idl definitions.
+        * notifications/DOMWindowNotifications.idl: Add Notification constructor, if
+        ENABLE(NOTIFICATIONS) is on.
+        * notifications/Notification.idl: If ENABLE(NOTIFICATIONS) is turned on, define
+        the constructor. Otherwise, use OmitConstructor.
+        * notifications/NotificationCenter.idl: Wrap creation functions in
+        ENABLE(LEGACY_NOTIFICATIONS).
+        * notifications/NotificationCenter.h: Ditto.
+        (NotificationCenter):
+
+        * notifications/Notification.h:
+        (Notification): Wrap legacy constructors in ENABLE(LEGACY_NOTIFICATIONS).
+        (WebCore::Notification::create): New creation function based on discussions in WG.
+        * notifications/Notification.cpp:
+        (WebCore::getAndAddEventListener): Helper function to get the listener from the
+        dictionary, and attach to the notification.
+        (WebCore::Notification::create): Create the notification, then apply whatever
+        properties can be found in the dictionary to the notification. In order to
+        attach the event listeners, the notification has to have been created, which is
+        why this all happens in the factory method and not in the constructor.
+        (WebCore::Notification::setBody): Added so that it can be set if we find it in the
+        dictionary.
+
+        The new constructor queues a task to show when it is created. To support this, we
+        use a one-shot timer that calls show() in the next iteration of the run loop.
+        (WebCore::Notification::Notification): Start the timer.
+        (WebCore::Notification::showTaskTimerFired): Call show().
+
+        Notifications, not being attached to the DOM, could be GC'ed by the JS engine
+        before its life cycle has completed. We add calls to setPendingActivity() when the
+        notification has been shown, and when it is closed, we unsetPendingActivity().
+        To guarantee that we only call this once, we add a new state to the Notification
+        state machine, called NotificationState::Closed.
+        (WebCore::Notification::show): Call setPendingActivity() for all ports. Remove conditional on Mac.
+        (WebCore::Notification::close): Include Closed state to machine; do nothing.
+        (WebCore::Notification::dispatchCloseEvent): Call finalize().
+        (WebCore::Notification::finalize): If the state is not Closed, we unsetPendingActivity()
+        to make it available for GC.
+        (WebCore::Notification::finishLoading): Remove the unsetPendingActivity(). That call
+        was to balance the setPendingActivity() called for loading the icon. Instead of wrapping
+        around the icon load, we wrap around the show() -> finalize() loop.
+
+        In Notification, rename some of the stages and functions to more clearly communicate
+        that they mostly deal with the icon of the notification, instead of general loading.
+        (WebCore::Notification::show): Refactored to use LoadingIcon and CancelledIcon.
+        (WebCore::Notification::close): Refactored to use LoadingIcon and CancelledIcon.
+        (WebCore::Notification::~Notification): Refactor to use LoadingIcon.
+        (WebCore::Notification::startLoadingIcon): Renamed from startLoading().
+        (WebCore::Notification::stopLoadingIcon): Renamed from stopLoading().
+        (WebCore::Notification::finishLoadingIcon): Renamed from finishLoading().
+        (WebCore::Notification::didFinishLoading):
+        (WebCore::Notification::didFail):
+        (WebCore::Notification::didFailRedirectCheck):
+        (WebCore::Notification::didReceiveResponse):
+        (WebCore::Notification::finishLoading):
+
+        Add Dictionary.cpp.
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * UseJSC.cmake:
+        * WebCore.gypi:
+
+        Fix bug in V8 bindings generation code. If the constructor doesn't raise an exception,
+        don't use an exception code.
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateParametersCheck):
+        * bindings/scripts/test/V8/V8TestObj.cpp: Reset results.
+        (WebCore::TestObjV8Internal::optionsObjectCallback):
+
 2012-04-21  Benjamin C Meyer  <bmeyer@rim.com>
 
         Support loading the same plugin in multiple locations in the Blackberry port.
