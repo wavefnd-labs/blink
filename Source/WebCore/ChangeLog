@@ -1,3 +1,24 @@
+2012-04-23  Pierre Rossi  <pierre.rossi@gmail.com>
+
+        [Qt] Ensure zero-width space effectively accounts for a width of zero.
+        https://bugs.webkit.org/show_bug.cgi?id=84595
+
+        Reviewed by Simon Hausmann.
+
+        The logic so far relies on FontCache::getFontDataForCharacters to
+        return a valid fontData in the case where the fonts specified don't
+        have a glyph for the zero-width space character.
+        QTextLayout::glyphRuns simply ignores characters that don't render in
+        the glyph runs it returns, so we need to ensure that the subsequent
+        call to platformWidthForGlyph doesn't lead to a non-zero width.
+
+        Covered by tests containing control characters such as
+        a soft-hyphen like it's the case in:
+        svg/as-image/img-preserveAspectRatio-support-1.html
+
+        * platform/graphics/qt/SimpleFontDataQt.cpp:
+        (WebCore::SimpleFontData::platformWidthForGlyph):
+
 2012-04-23  Ian Vollick  <vollick@chromium.org>
 
         [chromium] When prepareToDraw fails due to animation checkerboard, we need to call setNeedsCommit
