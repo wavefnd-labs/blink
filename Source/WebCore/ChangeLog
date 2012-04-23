@@ -1,3 +1,46 @@
+2012-04-23  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Cut dependency on RenderLayer::scrollRectToVisible outside rendering
+        https://bugs.webkit.org/show_bug.cgi?id=84607
+
+        Reviewed by Simon Fraser.
+
+        Layering fix only, there should be no change behavior.
+
+        Because we don't have an accessor on RenderObject, a lot of the code needs
+        to know about RenderLayer. This is not necessary and exposes RenderLayer to
+        objects that shouldn't know about it.
+
+        This patch adds a RenderObject::scrollRectToVisible with the ad-hoc explanation
+        as to why it isn't on RenderBox (scrolling is a RenderBox concept).
+
+        * WebCore.exp.in:
+        * WebCore.order:
+        Updated to expose the new method.
+
+        * dom/Element.cpp:
+        (WebCore::Element::scrollIntoView):
+        (WebCore::Element::scrollIntoViewIfNeeded):
+        (WebCore::Element::updateFocusAppearance):
+        * editing/Editor.cpp:
+        (WebCore::Editor::findStringAndScrollToVisible):
+        * editing/FrameSelection.cpp:
+        (WebCore::FrameSelection::revealSelection):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scrollToAnchor):
+        Updated those call sites to use the new function.
+
+        * rendering/RenderLayer.h:
+        Removed ScrollBehavior.h #include and default argument values
+        as we are always called through RenderObject now.
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::scrollRectToVisible):
+        * rendering/RenderObject.h:
+        Added a new function that just forwards to the enclosing layer
+        if any. We return whether we actually tried to scroll to match
+        some call sites expectations.
+
 2012-04-23  Zhenyao Mo  <zmo@google.com>
 
         framebuffer binding should not be changed after canvas resize or compositing
