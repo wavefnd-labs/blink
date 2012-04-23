@@ -1,3 +1,164 @@
+2012-04-22  Andreas Kling  <kling@webkit.org>
+
+        Optimize Element attribute storage for the common case (no Attr objects.)
+        <http://webkit.org/b/83440>
+
+        Reviewed by Antti Koivisto.
+
+        Reduce Attribute to its smallest possible size; a qname/value pair.
+        They are no-longer ref-counted, which allows us to store them in Vectors.
+
+        Refactored the DOM Attr object to go with the new Attribute:
+        Attr now wraps either {element, qname} or {qname, value}. The latter is for
+        the case where a standalone Attr object is instantiated via DOM APIs.
+
+        ElementAttributeData.cpp manages a map of pair<element, qname> => Attr.
+        Each Element (well, ElementAttributeData) keeps track of how many Attr
+        objects are pointing to it. This is so we can avoid hash lookups during
+        common operations in the typical case where you have zero Attrs.
+
+        Also removed the inline capacity (was 4) from AttributeVector as that
+        would significantly increase bloat now that we store Attribute (2 pointers)
+        rather than RefPtr<Attribute>. We trade this one piece of indirection
+        for the removal of per-Attribute indirection.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/Attr.cpp:
+        (WebCore::Attr::Attr):
+        (WebCore):
+        (WebCore::Attr::create):
+        (WebCore::Attr::~Attr):
+        (WebCore::Attr::createTextChild):
+        (WebCore::Attr::setPrefix):
+        (WebCore::Attr::setValue):
+        (WebCore::Attr::cloneNode):
+        (WebCore::Attr::childrenChanged):
+        (WebCore::Attr::style):
+        (WebCore::Attr::value):
+        (WebCore::Attr::elementAttribute):
+        (WebCore::Attr::detachFromElementWithValue):
+        (WebCore::Attr::attachToElement):
+        * dom/Attr.h:
+        (WebCore):
+        (Attr):
+        (WebCore::Attr::qualifiedName):
+        (WebCore::Attr::localName):
+        (WebCore::Attr::namespaceURI):
+        (WebCore::Attr::prefix):
+        * dom/Attribute.cpp: Removed.
+        * dom/Attribute.h:
+        (WebCore::Attribute::Attribute):
+        (Attribute):
+        * dom/Document.cpp:
+        (WebCore::Document::importNode):
+        (WebCore::Document::createAttributeNS):
+        * dom/Element.cpp:
+        (WebCore::Element::~Element):
+        (WebCore::Element::detachAttribute):
+        (WebCore):
+        (WebCore::Element::removeAttribute):
+        (WebCore::Element::setAttributeInternal):
+        (WebCore::Element::parserSetAttributes):
+        (WebCore::Element::setAttributeNode):
+        (WebCore::Element::removeAttributeNode):
+        (WebCore::Element::normalizeAttributes):
+        (WebCore::Element::didRemoveAttribute):
+        (WebCore::Element::attrIfExists):
+        (WebCore::Element::ensureAttr):
+        * dom/Element.h:
+        (Element):
+        (WebCore::Element::getAttributeItemIndex):
+        * dom/ElementAttributeData.cpp:
+        (WebCore):
+        (WebCore::attrMap):
+        (WebCore::ElementAttributeData::attrIfExists):
+        (WebCore::ElementAttributeData::ensureAttr):
+        (WebCore::ElementAttributeData::setAttr):
+        (WebCore::ElementAttributeData::removeAttr):
+        (WebCore::AttributeVector::removeAttribute):
+        (WebCore::ElementAttributeData::~ElementAttributeData):
+        (WebCore::ElementAttributeData::addAttribute):
+        (WebCore::ElementAttributeData::removeAttribute):
+        (WebCore::ElementAttributeData::isEquivalent):
+        (WebCore::ElementAttributeData::detachAttributesFromElement):
+        (WebCore::ElementAttributeData::getAttributeItemIndexSlowCase):
+        (WebCore::ElementAttributeData::setAttributes):
+        (WebCore::ElementAttributeData::clearAttributes):
+        (WebCore::ElementAttributeData::replaceAttribute):
+        (WebCore::ElementAttributeData::getAttributeNode):
+        * dom/ElementAttributeData.h:
+        (WebCore):
+        (WebCore::AttributeVector::AttributeVector):
+        (AttributeVector):
+        (WebCore::AttributeVector::getAttributeItem):
+        (WebCore::AttributeVector::getAttributeItemIndex):
+        (WebCore::AttributeVector::insertAttribute):
+        (WebCore::ElementAttributeData::attributeItem):
+        (ElementAttributeData):
+        (WebCore::ElementAttributeData::ElementAttributeData):
+        (WebCore::ElementAttributeData::attributeVector):
+        (WebCore::ElementAttributeData::clonedAttributeVector):
+        (WebCore::ElementAttributeData::removeAttribute):
+        (WebCore::ElementAttributeData::getAttributeItem):
+        (WebCore::ElementAttributeData::getAttributeItemIndex):
+        * dom/NamedNodeMap.cpp:
+        (WebCore::NamedNodeMap::getNamedItem):
+        (WebCore::NamedNodeMap::getNamedItemNS):
+        (WebCore::NamedNodeMap::removeNamedItem):
+        (WebCore::NamedNodeMap::removeNamedItemNS):
+        (WebCore::NamedNodeMap::item):
+        * dom/Node.cpp:
+        (WebCore::Node::compareDocumentPosition):
+        * html/HTMLAnchorElement.cpp:
+        (WebCore::HTMLAnchorElement::parseAttribute):
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::parseAttribute):
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::insertHTMLHtmlStartTagBeforeHTML):
+        (WebCore::HTMLConstructionSite::mergeAttributesFromTokenIntoElement):
+        (WebCore::HTMLConstructionSite::insertScriptElement):
+        (WebCore::HTMLConstructionSite::createElement):
+        (WebCore::HTMLConstructionSite::createHTMLElement):
+        (WebCore::HTMLConstructionSite::createHTMLElementFromSavedElement):
+        * html/parser/HTMLToken.h:
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processFakeStartTag):
+        (WebCore::HTMLTreeBuilder::attributesForIsindexInput):
+        (WebCore::HTMLTreeBuilder::processIsindexStartTagForInBody):
+        (WebCore):
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody):
+        * html/parser/HTMLTreeBuilder.h:
+        * html/parser/TextDocumentParser.cpp:
+        (WebCore::TextDocumentParser::insertFakePreElement):
+        * page/PageSerializer.cpp:
+        (WebCore::SerializerMarkupAccumulator::appendCustomAttributes):
+        * svg/SVGFitToViewBox.cpp:
+        * svg/properties/SVGAnimatedPropertySynchronizer.h:
+        * xml/XMLErrors.cpp:
+        (WebCore::createXHTMLParserErrorHeader):
+        (WebCore::XMLErrors::insertErrorMessageBlock):
+        * xml/XPathNodeSet.cpp:
+        (WebCore::XPath::NodeSet::traversalSort):
+        * xml/XPathStep.cpp:
+        (WebCore::XPath::Step::nodesInAxis):
+        * xml/parser/MarkupTokenBase.h:
+        (WebCore::AtomicMarkupTokenBase::AtomicMarkupTokenBase):
+        (WebCore::AtomicMarkupTokenBase::getAttributeItem):
+        (WebCore::AtomicMarkupTokenBase::attributes):
+        (AtomicMarkupTokenBase):
+        (WebCore::::initializeAttributes):
+        * xml/parser/XMLToken.h:
+        (WebCore::AtomicXMLToken::AtomicXMLToken):
+        * xml/parser/XMLTreeBuilder.cpp:
+        (WebCore::XMLTreeBuilder::processNamespaces):
+        (WebCore::XMLTreeBuilder::processAttributes):
+
 2012-04-22  Sriram Neelakandan  <sriram.neelakandan@gmail.com>
 
         Sync the MOZ_X11 changes from r14 of http://code.google.com/p/npapi-sdk/
