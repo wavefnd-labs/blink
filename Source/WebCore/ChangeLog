@@ -1,3 +1,87 @@
+2012-04-23  Shawn Singh  <shawnsingh@chromium.org>
+
+        [chromium] Visualize accelerated compositor rects.
+        https://bugs.webkit.org/show_bug.cgi?id=79400
+
+        Reviewed by Adrienne Walker.
+
+        No tests, all the code added is only debugging code.
+
+        This patch adds support for visualizing three different types of
+        rects on the chromium heads-up display:
+        1. updateRects that indicate what was painted/uploaded to a resource
+        2. propertyChangedRects that indicate layers that has property changes
+        3. surfaceDamageRects that are the accumulation of updateRects and
+           propertyChangedRects, indicating what pixels on the screen have
+           actually changed.  (Surface damage also accounts for newly exposed
+           areas but that is not explicitly visualized.)
+
+        In addition to adding support for visualizing this, the
+        CCHeadsUpDisplay was significantly refactored, separating the FPS
+        Counter functionality into a different class, so that the heads-up
+        display is all about visualizing annotations, and those
+        annotations (frame rate, debug rects) are logged separately.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/cc/CCDebugRectHistory.cpp: Added.
+        (WebCore):
+        (WebCore::CCDebugRectHistory::CCDebugRectHistory):
+        (WebCore::CCDebugRectHistory::enabled):
+        (WebCore::CCDebugRectHistory::saveDebugRectsForCurrentFrame):
+        (WebCore::CCDebugRectHistory::savePaintRects):
+        (WebCore::CCDebugRectHistory::savePropertyChangedRects):
+        (WebCore::CCDebugRectHistory::saveSurfaceDamageRects):
+        * platform/graphics/chromium/cc/CCDebugRectHistory.h: Added.
+        (WebCore):
+        (WebCore::CCDebugRect::CCDebugRect):
+        (CCDebugRect):
+        (CCDebugRectHistory):
+        (WebCore::CCDebugRectHistory::create):
+        (WebCore::CCDebugRectHistory::debugRects):
+        * platform/graphics/chromium/cc/CCFrameRateCounter.cpp: Added.
+        (WebCore):
+        (WebCore::safeMod):
+        (WebCore::CCFrameRateCounter::frameIndex):
+        (WebCore::CCFrameRateCounter::CCFrameRateCounter):
+        (WebCore::CCFrameRateCounter::markBeginningOfFrame):
+        (WebCore::CCFrameRateCounter::markEndOfFrame):
+        (WebCore::CCFrameRateCounter::isBadFrameInterval):
+        (WebCore::CCFrameRateCounter::isBadFrame):
+        (WebCore::CCFrameRateCounter::getAverageFPSAndStandardDeviation):
+        (WebCore::CCFrameRateCounter::timeStampOfRecentFrame):
+        * platform/graphics/chromium/cc/CCFrameRateCounter.h: Added.
+        (WebCore):
+        (CCFrameRateCounter):
+        (WebCore::CCFrameRateCounter::create):
+        (WebCore::CCFrameRateCounter::currentFrameNumber):
+        (WebCore::CCFrameRateCounter::timeStampHistorySize):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.cpp:
+        (WebCore):
+        (WebCore::CCHeadsUpDisplay::enabled):
+        (WebCore::CCHeadsUpDisplay::showDebugRects):
+        (WebCore::CCHeadsUpDisplay::draw):
+        (WebCore::CCHeadsUpDisplay::drawHudContents):
+        (WebCore::CCHeadsUpDisplay::drawFPSCounter):
+        (WebCore::CCHeadsUpDisplay::drawFPSCounterText):
+        (WebCore::CCHeadsUpDisplay::drawDebugRects):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplay.h:
+        (WebCore):
+        (CCHeadsUpDisplay):
+        (WebCore::CCHeadsUpDisplay::CCHeadsUpDisplay):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (WebCore::CCSettings::CCSettings):
+        (CCSettings):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        (WebCore::CCLayerTreeHostImpl::drawLayers):
+        (WebCore::CCLayerTreeHostImpl::swapBuffers):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (WebCore):
+        (WebCore::CCLayerTreeHostImpl::fpsCounter):
+        (WebCore::CCLayerTreeHostImpl::debugRectHistory):
+        (CCLayerTreeHostImpl):
+
 2012-04-23  Julien Chaffraix  <jchaffraix@webkit.org>
 
         Cut dependency on RenderLayer::scrollRectToVisible outside rendering
