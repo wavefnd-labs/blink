@@ -1,3 +1,30 @@
+2012-04-23  Alexis Menard  <alexis.menard@openbossa.org>
+
+        Simplify CSSParser::parseFont.
+        https://bugs.webkit.org/show_bug.cgi?id=78698
+
+        Reviewed by Antti Koivisto.
+
+        Simplify parseFont by sharing the code we have for
+        the longhands of the font property.
+
+        No new tests : Extend the existing font shorthand test and modify expected files
+        as now the order of the longhands added in the property list of the style
+        has changed. It's very unlikely that some code is relying on this order though. It will
+        also match the way the spec order them http://www.w3.org/TR/css3-fonts/#font-prop
+        even though the order is arbitrary for some values.
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseFont):
+        (WebCore::CSSParser::parseLineHeight):
+        (WebCore):
+        (WebCore::CSSParser::parseFontSize):
+        (WebCore::CSSParser::parseFontWeight):  Fix a bug discovered while using parseFontWeight from
+        the parseFont (case font: 0/0, Arial, sans-serif; in a layout test), we should return true only
+        when we add something in the property list.
+        * css/CSSParser.h:
+
 2012-04-23  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: improve the way heap snapshot diff is calculated
