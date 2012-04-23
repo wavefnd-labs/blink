@@ -1,3 +1,35 @@
+2012-04-23  Zhenyao Mo  <zmo@google.com>
+
+        framebuffer binding should not be changed after canvas resize or compositing
+        https://bugs.webkit.org/show_bug.cgi?id=84609
+
+        Reviewed by Kenneth Russell.
+
+        Test: fast/canvas/webgl/framebuffer-bindings-unaffected-on-resize.html
+
+        * html/canvas/WebGLRenderingContext.cpp: set framebuffer binding to DrawingBuffer.
+        (WebCore):
+        (WebCore::WebGLRenderingContext::bindFramebuffer):
+        (WebCore::WebGLRenderingContext::deleteFramebuffer):
+        (WebCore::WebGLRenderingContext::loseContextImpl):
+        * platform/graphics/cairo/DrawingBufferCairo.cpp: initialize m_framebufferBinding.
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        * platform/graphics/chromium/DrawingBufferChromium.cpp: Ditto.
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        * platform/graphics/chromium/WebGLLayerChromium.cpp: Recover framebuffer binding after update().
+        (WebCore::WebGLLayerChromium::update):
+        * platform/graphics/gpu/DrawingBuffer.cpp: Add a function to restore framebuffer binding.
+        (WebCore::DrawingBuffer::restoreFramebufferBinding):
+        (WebCore):
+        * platform/graphics/gpu/DrawingBuffer.h: Ditto.
+        (WebCore::DrawingBuffer::setTexture2DBinding):
+        (DrawingBuffer):
+        (WebCore::DrawingBuffer::setFramebufferBinding):
+        * platform/graphics/gpu/mac/DrawingBufferMac.mm: initialize m_framebufferBinding.
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        * platform/graphics/gpu/qt/DrawingBufferQt.cpp: initialize m_framebufferBinding.
+        (WebCore::DrawingBuffer::DrawingBuffer):
+
 2012-04-23  Victor Carbune  <vcarbune@adobe.com>
 
         Simplify volume slider rendering
