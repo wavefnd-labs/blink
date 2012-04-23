@@ -1,3 +1,20 @@
+2012-04-23  Andreas Kling  <kling@webkit.org>
+
+        REGRESSION(r114870): Performance hit on DOM/CloneNodes and DOM/CreateNodes.
+        <http://webkit.org/b/84575>
+
+        Reviewed by Antti Koivisto.
+
+        Simplify the cloning of Attributes from one Element to another by simply
+        assigning to m_attributes. This avoids default-constructing a bunch of
+        Attribute objects that we overwrite immediately anyway (this used to be
+        fine because they were RefPtr<Attribute> but now that a default-constructed
+        Attribute contains a QualifiedName, we were doing a bunch of extra hash
+        lookups, etc.)
+
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::setAttributes):
+
 2012-04-20  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: implement "open stylesheet" dialog.
