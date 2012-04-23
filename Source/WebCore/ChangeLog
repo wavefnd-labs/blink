@@ -1,3 +1,19 @@
+2012-04-23  Andreas Kling  <kling@webkit.org>
+
+        REGRESSION(r114870): Assertion failure in ElementAttributeData::setAttr().
+        <http://webkit.org/b/84581>
+
+        Reviewed by Antti Koivisto.
+
+        Attach the Attr and bump m_attrCount manually in ensureAttr() instead of calling
+        setAttr(). The latter asserts that the Attr isn't present in the map, which
+        obviously isn't true after we've just added it.
+
+        This has the added effect of removing one unnecessary hash lookup.
+
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::ensureAttr):
+
 2012-04-23  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: make ParsedURL.prototype.displayName data url friendly.
