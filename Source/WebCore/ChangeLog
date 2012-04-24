@@ -1,3 +1,54 @@
+2012-04-24  Alexandru Chiculita  <achicu@adobe.com>
+
+        CSS Shaders: Custom filters painting is broken
+        https://bugs.webkit.org/show_bug.cgi?id=82803
+
+        Reviewed by Kenneth Russell.
+
+        In this patch I moved CSS Shaders file loading notifications from FilterEffectRenderer to the new RenderLayerFilterInfo.
+        That's because FilterEffectRenderer is only used when running the filters in the software pipeline
+        and has a very short lifetime. Due to a recent change FilterEffectRenderer actually
+        gets deleted if the shader is not loaded, so it doesn't live that much to be notified when the shader
+        was actually loaded.
+
+        Also removed the FilterEffectObserver, that was only used to notify the RenderLayer about the loaded shader.
+
+        No new tests. This is making existing CSS Shaders tests pass again.
+        Cannot un-skip on Mac for now because the feature is compile time disabled.
+        
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/filters/CustomFilterOperation.h:
+        (WebCore::CustomFilterOperation::affectsOpacity):
+        (WebCore::CustomFilterOperation::movesPixels):
+        * platform/graphics/filters/FilterOperations.cpp:
+        (WebCore):
+        (WebCore::FilterOperations::hasCustomFilter):
+        * platform/graphics/filters/FilterOperations.h:
+        (FilterOperations):
+        * platform/graphics/texmap/TextureMapperImageBuffer.cpp:
+        (WebCore::BitmapTextureImageBuffer::applyFilters):
+        * rendering/FilterEffectObserver.h: Removed.
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::~FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::build):
+        * rendering/FilterEffectRenderer.h:
+        (WebCore):
+        (WebCore::FilterEffectRenderer::create):
+        (FilterEffectRenderer):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateOrRemoveFilterEffect):
+        * rendering/RenderLayer.h:
+        * rendering/RenderLayerFilterInfo.cpp:
+        (WebCore::RenderLayerFilterInfo::~RenderLayerFilterInfo):
+        (WebCore::RenderLayerFilterInfo::notifyCustomFilterProgramLoaded):
+        (WebCore):
+        (WebCore::RenderLayerFilterInfo::updateCustomFilterClients):
+        (WebCore::RenderLayerFilterInfo::removeCustomFilterClients):
+        * rendering/RenderLayerFilterInfo.h:
+        (WebCore):
+        (RenderLayerFilterInfo):
+
 2012-04-24  Antti Koivisto  <antti@apple.com>
 
         Another build fix.
