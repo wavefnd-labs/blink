@@ -1,3 +1,45 @@
+2012-04-23  Kent Tamura  <tkent@chromium.org>
+
+        Show the format indicator in a date field
+        https://bugs.webkit.org/show_bug.cgi?id=83872
+
+        Reviewed by Hajime Morita.
+
+        Enable the fixed placeholder feature for the date type, and show
+        the editable date format as the fixed placeholder.
+        The format string is created by the following steps.
+        1. Obtain a pattern string from ICU
+          http://icu-project.org/apiref/icu4c/classSimpleDateFormat.html#details
+        2. Replace a sequence of 'y', 'Y', 'M', or 'd' in the pattern with
+          a natural language string such as "year", "month", or "day".
+
+        Test: fast/forms/date/date-fixed-placeholder.html
+
+        * html/DateInputType.cpp:
+        (WebCore::DateInputType::supportsPlaceholder): Added. Returns true.
+        (WebCore::DateInputType::usesFixedPlaceholder): Added. Returns true.
+        (WebCore::DateInputType::fixedPlaceholder):
+        Added. Calls localizedDateFormatText() provided by LocalizedDate.h.
+        * html/DateInputType.h:
+        (DateInputType): Add declarations of new override functions.
+        * platform/LocalizedStrings.h:
+        (WebCore): Add dateFormat{Year,Month,DayInMonth}Text()
+        * platform/text/ICULocale.cpp:
+        (WebCore::isICUYearSymbol): A function to improve redability.
+        (WebCore::isICUMonthSymbol): ditto.
+        (WebCore::isICUDayInMonthSymbol): ditto.
+        (WebCore::localizeFormat): Step 2 of the above description.
+        (WebCore::ICULocale::initializeLocalizedDateFormatText):
+        Step 1 of the above description.
+        (WebCore::ICULocale::localizedDateFormatText):
+        * platform/text/ICULocale.h:
+        (ICULocale): Add new functions and a data member.
+        * platform/text/LocalizedDate.h:
+        (WebCore): Add localizedDateFormatText().
+        * platform/text/LocalizedDateICU.cpp:
+        (WebCore::localizedDateFormatText):
+        Just call ICULocale::localizedDateFormatText().
+
 2012-04-23  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass Isolate to v8Array()
