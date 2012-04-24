@@ -1,3 +1,47 @@
+2012-04-23  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=84649
+        RenderMathMLOperator currently ignores font families, fails 
+        to use Stix
+
+        Reviewed by Dan Bernstein.
+
+        This patch makes RenderMathMLOperator honor the font-family 
+        list. This means that by default, Stix glyphs will now be 
+        used for operators just like for other MathML content. 
+        Unfortunately, just doing that resulted in a bug because of 
+        the fragile hardcoded glyph sizes. The Stix vertical bar 
+        glyph is much smaller than the code assumed any glyphs would 
+        be. That code should be re-written, but in the meantime, I 
+        put a fix in place to try to make it work for small glyphs.
+
+        These new functions should be used instead of accessing
+        gGlyphHeight or gGlyphLineHeight directly. If the glyph is
+        smaller than the expected hardcoded value, then the actual
+        glyph height is used, and a new line height based on the
+        glyph height is used.
+        (WebCore::RenderMathMLOperator::glyphHeightForCharacter):
+        (WebCore::RenderMathMLOperator::lineHeightForCharacter):
+
+        Use the style's FontDescription to honor the font family
+        list and the style's FontSelector to honor @font-face.
+        Also use glyphHeightForCharacter() instead of gGlyphHeight. 
+        And now that createGlyph() takes a lineHeight, use 
+        lineHeightForCharacter() to determine the right value. 
+        (WebCore::RenderMathMLOperator::updateFromElement):
+
+        size was an ambiguous variable name, so I renamed it to the 
+        more accurate maxHeightForRenderer. This function also now
+        takes a lineHeight instead of using gGlyphLineHeight. And
+        again, use the style's FontDescription and FontSelector.
+        (WebCore::RenderMathMLOperator::createStackableStyle):
+
+        Re-name size to maxHeightForRenderer, and take lineHeight as 
+        a parameter.
+        (WebCore::RenderMathMLOperator::createGlyph):
+        * rendering/mathml/RenderMathMLOperator.h:
+        (RenderMathMLOperator):
+
 2012-04-23  Eriq Augustine  <eaugusti@chromium.org>
 
         Return value from executed script in Chromium.
