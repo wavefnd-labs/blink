@@ -1,3 +1,56 @@
+2012-04-24  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Filters] Move m_filter and related fields from RenderLayer to a different structure and only allocate it when needed
+        https://bugs.webkit.org/show_bug.cgi?id=84460
+
+        Reviewed by Dean Jackson.
+
+        The new RenderLayerFilterInfo is meant to be allocated only when needed by filters. The link to the RenderLayerFilterInfo
+        is maintained using a HashMap and a single boolean in the RenderLayer class.
+
+        No new tests, just extracted a couple of fields inside the RenderLayer to a separate class.
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRendererHelper::prepareFilterEffect):
+        (WebCore::FilterEffectRendererHelper::beginFilterEffect):
+        (WebCore::FilterEffectRendererHelper::applyFilterEffect):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::RenderLayer):
+        (WebCore::RenderLayer::~RenderLayer):
+        (WebCore::RenderLayer::paintsWithFilters):
+        (WebCore::RenderLayer::requiresFullLayerImageForFilters):
+        (WebCore::RenderLayer::setFilterBackendNeedsRepaintingInRect):
+        (WebCore::RenderLayer::paintLayerContents):
+        (WebCore::RenderLayer::updateOrRemoveFilterEffect):
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::filterRenderer):
+        (RenderLayer):
+        (WebCore::RenderLayer::filterInfo):
+        (WebCore::RenderLayer::ensureFilterInfo):
+        (WebCore::RenderLayer::removeFilterInfoIfNeeded):
+        (WebCore::RenderLayer::hasFilterInfo):
+        (WebCore::RenderLayer::setHasFilterInfo):
+        * rendering/RenderLayerFilterInfo.cpp: Added.
+        (WebCore):
+        (WebCore::RenderLayerFilterInfo::filterInfoForRenderLayer):
+        (WebCore::RenderLayerFilterInfo::createFilterInfoForRenderLayerIfNeeded):
+        (WebCore::RenderLayerFilterInfo::removeFilterInfoForRenderLayer):
+        (WebCore::RenderLayerFilterInfo::RenderLayerFilterInfo):
+        (WebCore::RenderLayerFilterInfo::~RenderLayerFilterInfo):
+        (WebCore::RenderLayerFilterInfo::setRenderer):
+        * rendering/RenderLayerFilterInfo.h: Added.
+        (WebCore):
+        (RenderLayerFilterInfo):
+        (WebCore::RenderLayerFilterInfo::dirtySourceRect):
+        (WebCore::RenderLayerFilterInfo::addDirtySourceRect):
+        (WebCore::RenderLayerFilterInfo::resetDirtySourceRect):
+        (WebCore::RenderLayerFilterInfo::renderer):
+
 2012-04-24  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass Isolate around in SerializedScriptValue.cpp (Part1)
