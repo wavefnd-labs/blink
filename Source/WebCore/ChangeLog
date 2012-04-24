@@ -1,3 +1,44 @@
+2012-04-23  Kent Tamura  <tkent@chromium.org>
+
+        Move the content of LocalizedCalendarICU.cpp and LocalizedDateICU.cpp to ICULocale.cpp.
+        https://bugs.webkit.org/show_bug.cgi?id=84568
+
+        Reviewed by Hajime Morita.
+
+        Move it to ICULocal.cpp because we want to share UDateFormat
+        object in LocalizedDate functions and LocalizedCalendar functions,
+        and it becomes easier to cache the UDateFormat object, and making
+        unit tests for these functions easier.
+
+        No new tests because of no bahevior changes.
+
+        * platform/text/ICULocale.cpp:
+        (WebCore::ICULocale::ICULocale): Initialize new members.
+        (WebCore::ICULocale::~ICULocale): Delete m_shortDateFormat.
+        (WebCore::ICULocale::initializeShortDateFormat):
+        Moved from creteShortDateFormatter of LocalizedDateICU.cpp.
+        (WebCore::ICULocale::parseLocalizedDate):
+        Moved from LocalizedDate.cpp, use m_shortDateFormat.
+        (WebCore::ICULocale::formatLocalizedDate): ditto.
+        (WebCore::ICULocale::createLabelVector):
+        Moved from LocalizedCalendarICU.cpp, use m_shortDateFormat.
+        (WebCore::createFallbackMonthLabels): Moved from LocalizedCalendarICU.cpp.
+        (WebCore::createFallbackWeekDayShortLabels): ditto.
+        (WebCore::ICULocale::initializeCalendar):
+        lazy initialization of m_monthLabels, m_weekDayShortLabels, and m_firstDayOfWeek.
+        (WebCore::ICULocale::monthLabels):
+        (WebCore::ICULocale::weekDayShortLabels):
+        (WebCore::ICULocale::firstDayOfWeek):
+        * platform/text/ICULocale.h:
+        (ICULocale): Add declarations.
+        * platform/text/LocalizedCalendarICU.cpp:
+        (WebCore::monthLabels): Use ICULocale::currentLocale().
+        (WebCore::weekDayShortLabels): ditto.
+        (WebCore::firstDayOfWeek): ditto.
+        * platform/text/LocalizedDateICU.cpp:
+        (WebCore::parseLocalizedDate): ditto.
+        (WebCore::formatLocalizedDate): ditto.
+
 2012-04-23  Raymond Toy  <rtoy@google.com>
 
         Move AudioDestinationChromium FIFO class to its own class.
