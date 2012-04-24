@@ -1,3 +1,32 @@
+2012-04-15  Robert Hogan  <robert@webkit.org>
+
+        CSS 2.1 failure: table-columns-example-001 fails
+        https://bugs.webkit.org/show_bug.cgi?id=83978
+
+        Reviewed by David Hyatt.
+
+        Tests: css2.1/20110323/table-columns-example-001.html
+               fast/css/table-rules-attribute-groups-with-frame.html
+               fast/css/table-rules-attribute-groups.html
+               fast/css/table-rules-attribute-none-with-frame.html
+               fast/css/table-rules-attribute-with-frame1.html
+               fast/css/table-rules-attribute-with-frame2.html
+               fast/css/table-rules-attribute.html
+
+        WebKit does not implement the 'cols', 'rows', and 'all' rules attributes correctly
+        for cells that are adjacent to the table's edges. The solution is to follow the hint in the
+        spec at http://www.w3.org/TR/CSS21/tables.html#columns and set the table's border to 
+        hidden when the rules attribute is set to one of 'cols', 'rows' or 'all', and the table itself
+        has no explicit border. Border collapsing will take care of the rest as 'hidden' always wins in 
+        border-conflict resolution. It's not completely clear from the spec that an explicit table border
+        should trump a cols rule but doing so is consistent with FF and Opera at least. A 'rules' attribute
+        is trumped by anything specified for the 'frame' attribute so need to ensure that is respected too.
+
+        In short, any 'rules' attribute means a hidden table border unless there's a frame or border attribute.
+
+        * html/HTMLTableElement.cpp:
+        (WebCore::HTMLTableElement::additionalAttributeStyle):
+
 2012-04-22  Timothy Hatcher  <timothy@apple.com>
 
         Stop installing localizedStrings.js in Production builds.
