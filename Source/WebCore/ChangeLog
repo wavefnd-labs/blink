@@ -1,3 +1,409 @@
+2012-04-24  Alexis Menard  <alexis.menard@openbossa.org>
+
+        Rename CSSStyleSelector class to StyleResolver.
+        https://bugs.webkit.org/show_bug.cgi?id=84734
+
+        Reviewed by Andreas Kling.
+
+        The name CSSStyleSelector is confusing as it conflicts a bit with
+        the CSS concept of selectors. One could think it's an encapsulation
+        of the CSS selectors but it's not, in fact this class is responsible
+        of finding the RenderStyle for a given element. This is the first patch
+        as I will later rename the files, and then rename the local variables.
+
+        No new tests : renaming, no behavior changes should appear.
+
+        * css/CSSCalculationValue.cpp:
+        (WebCore::CSSCalcPrimitiveValue::toCalcValue):
+        * css/CSSFontSelector.cpp:
+        (WebCore::CSSFontSelector::dispatchInvalidationCallbacks):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseSizeParameter):
+        * css/CSSStyleSelector.cpp:
+        (RuleSet):
+        (WebCore::RuleSet::features):
+        (WebCore):
+        (WebCore::StyleResolver::StyleResolver):
+        (WebCore::StyleResolver::addAuthorRulesAndCollectUserRulesFromSheets):
+        (WebCore::makeRuleSet):
+        (WebCore::StyleResolver::collectFeatures):
+        (WebCore::StyleResolver::determineScope):
+        (WebCore::StyleResolver::ruleSetForScope):
+        (WebCore::StyleResolver::appendAuthorStylesheets):
+        (WebCore::StyleResolver::setupScopeStack):
+        (WebCore::StyleResolver::pushScope):
+        (WebCore::StyleResolver::popScope):
+        (WebCore::StyleResolver::pushParentElement):
+        (WebCore::StyleResolver::popParentElement):
+        (WebCore::StyleResolver::pushParentShadowRoot):
+        (WebCore::StyleResolver::popParentShadowRoot):
+        (WebCore::StyleResolver::addKeyframeStyle):
+        (WebCore::StyleResolver::~StyleResolver):
+        (WebCore::StyleResolver::sweepMatchedPropertiesCache):
+        (WebCore::StyleResolver::Features::Features):
+        (WebCore::StyleResolver::Features::~Features):
+        (WebCore::StyleResolver::Features::add):
+        (WebCore::StyleResolver::Features::clear):
+        (WebCore::StyleResolver::addMatchedProperties):
+        (WebCore::StyleResolver::addElementStyleProperties):
+        (WebCore::StyleResolver::collectMatchingRules):
+        (WebCore::StyleResolver::collectMatchingRulesForRegion):
+        (WebCore::StyleResolver::sortAndTransferMatchedRules):
+        (WebCore::StyleResolver::matchScopedAuthorRules):
+        (WebCore::StyleResolver::matchAuthorRules):
+        (WebCore::StyleResolver::matchUserRules):
+        (WebCore::StyleResolver::matchUARules):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * css/CSSStyleSelector.h:
+        (StyleResolver):
+        (Features):
+        * css/MediaQueryEvaluator.cpp:
+        (WebCore::MediaQueryEvaluator::eval):
+        * css/MediaQueryEvaluator.h:
+        (WebCore):
+        (MediaQueryEvaluator):
+        * css/MediaQueryMatcher.cpp:
+        (WebCore::MediaQueryMatcher::prepareEvaluator):
+        * css/SVGCSSStyleSelector.cpp:
+        (WebCore::StyleResolver::applySVGProperty):
+        * css/StyleBuilder.cpp:
+        (WebCore::ApplyPropertyExpanding::applyInheritValue):
+        (WebCore::ApplyPropertyExpanding::applyInitialValue):
+        (WebCore::ApplyPropertyExpanding::applyValue):
+        (WebCore::ApplyPropertyDefaultBase::applyInheritValue):
+        (WebCore::ApplyPropertyDefaultBase::applyInitialValue):
+        (WebCore::ApplyPropertyDefaultBase::applyValue):
+        (WebCore::ApplyPropertyDefault::applyValue):
+        (WebCore::ApplyPropertyNumber::applyValue):
+        (WebCore::ApplyPropertyStyleImage::applyValue):
+        (WebCore::ApplyPropertyAuto::applyInheritValue):
+        (WebCore::ApplyPropertyAuto::applyInitialValue):
+        (WebCore::ApplyPropertyAuto::applyValue):
+        (WebCore::ApplyPropertyClip::convertToLength):
+        (WebCore::ApplyPropertyClip::applyInheritValue):
+        (WebCore::ApplyPropertyClip::applyInitialValue):
+        (WebCore::ApplyPropertyClip::applyValue):
+        (WebCore::ApplyPropertyColor::applyInheritValue):
+        (WebCore::ApplyPropertyColor::applyInitialValue):
+        (WebCore::ApplyPropertyColor::applyValue):
+        (WebCore::ApplyPropertyColor::applyColorValue):
+        (WebCore::ApplyPropertyDirection::applyValue):
+        (WebCore::ApplyPropertyLength::applyValue):
+        (WebCore::ApplyPropertyString::applyValue):
+        (WebCore::ApplyPropertyBorderRadius::applyValue):
+        (WebCore::ApplyPropertyFillLayer::applyInheritValue):
+        (WebCore::ApplyPropertyFillLayer::applyInitialValue):
+        (WebCore::ApplyPropertyFillLayer::applyValue):
+        (WebCore::ApplyPropertyComputeLength::applyValue):
+        (WebCore::ApplyPropertyFont::applyInheritValue):
+        (WebCore::ApplyPropertyFont::applyInitialValue):
+        (WebCore::ApplyPropertyFont::applyValue):
+        (WebCore::ApplyPropertyFontSize::applyInheritValue):
+        (WebCore::ApplyPropertyFontSize::applyInitialValue):
+        (WebCore::ApplyPropertyFontSize::applyValue):
+        (WebCore::ApplyPropertyFontWeight::applyValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyInheritValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyInitialValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyValue):
+        (WebCore::ApplyPropertyBorderImage::applyValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyInheritValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyInitialValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyValue):
+        (WebCore::ApplyPropertyBorderImageSource::applyValue):
+        (WebCore::ApplyPropertyCounter::emptyFunction):
+        (WebCore::ApplyPropertyCounter::applyInheritValue):
+        (WebCore::ApplyPropertyCounter::applyValue):
+        (WebCore::ApplyPropertyCursor::applyInheritValue):
+        (WebCore::ApplyPropertyCursor::applyInitialValue):
+        (WebCore::ApplyPropertyCursor::applyValue):
+        (WebCore::ApplyPropertyTextAlign::applyValue):
+        (WebCore::ApplyPropertyTextDecoration::applyValue):
+        (WebCore::ApplyPropertyUnicodeBidi::applyValue):
+        (WebCore::ApplyPropertyLineHeight::applyValue):
+        (WebCore::ApplyPropertyPageSize::applyInheritValue):
+        (WebCore::ApplyPropertyPageSize::applyInitialValue):
+        (WebCore::ApplyPropertyPageSize::applyValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyInheritValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyInitialValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyValue):
+        (WebCore):
+        (WebCore::ApplyPropertyAnimation::map):
+        (WebCore::ApplyPropertyAnimation::applyInheritValue):
+        (WebCore::ApplyPropertyAnimation::applyInitialValue):
+        (WebCore::ApplyPropertyAnimation::applyValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyInheritValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyInitialValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyValue):
+        (WebCore::ApplyPropertyResize::applyValue):
+        (WebCore::ApplyPropertyVerticalAlign::applyValue):
+        (WebCore::ApplyPropertyAspectRatio::applyInheritValue):
+        (WebCore::ApplyPropertyAspectRatio::applyInitialValue):
+        (WebCore::ApplyPropertyAspectRatio::applyValue):
+        (WebCore::ApplyPropertyZoom::resetEffectiveZoom):
+        (WebCore::ApplyPropertyZoom::applyInheritValue):
+        (WebCore::ApplyPropertyZoom::applyInitialValue):
+        (WebCore::ApplyPropertyZoom::applyValue):
+        (WebCore::ApplyPropertyDisplay::isValidDisplayValue):
+        (WebCore::ApplyPropertyDisplay::applyInheritValue):
+        (WebCore::ApplyPropertyDisplay::applyInitialValue):
+        (WebCore::ApplyPropertyDisplay::applyValue):
+        (WebCore::ApplyPropertyFlex::applyInheritValue):
+        (WebCore::ApplyPropertyFlex::applyInitialValue):
+        (WebCore::ApplyPropertyFlex::applyValue):
+        (WebCore::StyleBuilder::StyleBuilder):
+        * css/StyleBuilder.h:
+        (WebCore):
+        (PropertyHandler):
+        (WebCore::PropertyHandler::applyInheritValue):
+        (WebCore::PropertyHandler::applyInitialValue):
+        (WebCore::PropertyHandler::applyValue):
+        * css/StyleMedia.cpp:
+        (WebCore::StyleMedia::matchMedium):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::WebKitCSSKeyframesRule::setName):
+        * css/WebKitCSSMatrix.cpp:
+        (WebCore::WebKitCSSMatrix::setMatrixValue):
+        * dom/Document.cpp:
+        (WebCore::Document::recalcStyle):
+        (WebCore::Document::createStyleSelector):
+        (WebCore::Document::testAddedStylesheetRequiresStyleRecalc):
+        * dom/Document.h:
+        (WebCore):
+        (WebCore::Document::styleSelectorIfExists):
+        (WebCore::Document::styleSelector):
+        (Document):
+        * dom/Element.cpp:
+        (StyleSelectorParentPusher):
+        (WebCore::Element::attributeChanged):
+        (WebCore::Element::beginParsingChildren):
+        (WebCore::Element::finishParsingChildren):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::attach):
+        * dom/ShadowTree.cpp:
+        (WebCore::ShadowTree::recalcShadowTreeStyle):
+        * editing/EditingStyle.cpp:
+        (WebCore::EditingStyle::mergeStyleFromRules):
+        (WebCore::EditingStyle::removeStyleFromRulesAndContext):
+        (WebCore::EditingStyle::removePropertiesInElementDefaultStyle):
+        (WebCore::legacyFontSizeFromCSSValue):
+        * editing/FrameSelection.cpp:
+        (WebCore::FrameSelection::focusedOrActiveStateChanged):
+        * history/CachedPage.cpp:
+        (WebCore::CachedPage::restore):
+        * html/HTMLCanvasElement.cpp:
+        (WebCore::HTMLCanvasElement::styleSelector):
+        * html/HTMLCanvasElement.h:
+        (HTMLCanvasElement):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::process):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::setFont):
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::getMatchedStylesForNode):
+        (WebCore::InspectorCSSAgent::buildArrayForRuleList):
+        * inspector/InspectorCSSAgent.h:
+        (InspectorCSSAgent):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::getMatchedCSSRules):
+        * page/Page.cpp:
+        (WebCore::Page::allVisitedStateChanged):
+        (WebCore::Page::visitedStateChanged):
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationController::updateAnimations):
+        * platform/blackberry/RenderThemeBlackBerry.cpp:
+        (WebCore::RenderThemeBlackBerry::adjustButtonStyle):
+        (WebCore::RenderThemeBlackBerry::adjustTextAreaStyle):
+        (WebCore::RenderThemeBlackBerry::adjustTextFieldStyle):
+        (WebCore::RenderThemeBlackBerry::adjustSearchFieldStyle):
+        (WebCore::RenderThemeBlackBerry::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeBlackBerry::adjustMenuListButtonStyle):
+        (WebCore::RenderThemeBlackBerry::adjustMenuListStyle):
+        (WebCore::RenderThemeBlackBerry::adjustCheckboxStyle):
+        (WebCore::RenderThemeBlackBerry::adjustRadioStyle):
+        * platform/blackberry/RenderThemeBlackBerry.h:
+        (RenderThemeBlackBerry):
+        * platform/efl/RenderThemeEfl.cpp:
+        (WebCore::RenderThemeEfl::adjustSliderTrackStyle):
+        (WebCore::RenderThemeEfl::adjustSliderThumbStyle):
+        (WebCore::RenderThemeEfl::adjustCheckboxStyle):
+        (WebCore::RenderThemeEfl::adjustRadioStyle):
+        (WebCore::RenderThemeEfl::adjustButtonStyle):
+        (WebCore::RenderThemeEfl::adjustMenuListStyle):
+        (WebCore::RenderThemeEfl::adjustMenuListButtonStyle):
+        (WebCore::RenderThemeEfl::adjustTextFieldStyle):
+        (WebCore::RenderThemeEfl::adjustTextAreaStyle):
+        (WebCore::RenderThemeEfl::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderThemeEfl::adjustSearchFieldResultsButtonStyle):
+        (WebCore::RenderThemeEfl::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeEfl::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeEfl::adjustSearchFieldStyle):
+        (WebCore::RenderThemeEfl::adjustProgressBarStyle):
+        * platform/efl/RenderThemeEfl.h:
+        (RenderThemeEfl):
+        * platform/gtk/RenderThemeGtk.cpp:
+        (WebCore::RenderThemeGtk::adjustButtonStyle):
+        (WebCore::RenderThemeGtk::adjustMenuListStyle):
+        (WebCore::RenderThemeGtk::adjustMenuListButtonStyle):
+        (WebCore::RenderThemeGtk::adjustSearchFieldResultsButtonStyle):
+        (WebCore::RenderThemeGtk::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeGtk::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeGtk::adjustSearchFieldStyle):
+        (WebCore::RenderThemeGtk::adjustSliderTrackStyle):
+        (WebCore::RenderThemeGtk::adjustSliderThumbStyle):
+        (WebCore::RenderThemeGtk::adjustProgressBarStyle):
+        * platform/gtk/RenderThemeGtk.h:
+        (RenderThemeGtk):
+        * platform/gtk/RenderThemeGtk2.cpp:
+        (WebCore::RenderThemeGtk::adjustInnerSpinButtonStyle):
+        * platform/gtk/RenderThemeGtk3.cpp:
+        (WebCore::RenderThemeGtk::adjustInnerSpinButtonStyle):
+        * platform/qt/RenderThemeQt.cpp:
+        (WebCore::RenderThemeQt::adjustTextFieldStyle):
+        (WebCore::RenderThemeQt::adjustTextAreaStyle):
+        (WebCore::RenderThemeQt::adjustMenuListStyle):
+        (WebCore::RenderThemeQt::adjustMenuListButtonStyle):
+        (WebCore::RenderThemeQt::adjustProgressBarStyle):
+        (WebCore::RenderThemeQt::adjustSliderTrackStyle):
+        (WebCore::RenderThemeQt::adjustSliderThumbStyle):
+        (WebCore::RenderThemeQt::adjustSearchFieldStyle):
+        (WebCore::RenderThemeQt::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeQt::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderThemeQt::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeQt::adjustInnerSpinButtonStyle):
+        * platform/qt/RenderThemeQt.h:
+        (RenderThemeQt):
+        * platform/qt/RenderThemeQtMobile.cpp:
+        (WebCore::RenderThemeQtMobile::adjustButtonStyle):
+        (WebCore::RenderThemeQtMobile::adjustTextFieldStyle):
+        (WebCore::RenderThemeQtMobile::adjustMenuListStyle):
+        * platform/qt/RenderThemeQtMobile.h:
+        (RenderThemeQtMobile):
+        * platform/wx/RenderThemeWx.cpp:
+        (RenderThemeWx):
+        (WebCore::RenderThemeWx::adjustButtonStyle):
+        (WebCore::RenderThemeWx::adjustTextFieldStyle):
+        (WebCore::RenderThemeWx::adjustMenuListStyle):
+        (WebCore::RenderThemeWx::adjustMenuListButtonStyle):
+        * rendering/RenderInputSpeech.cpp:
+        (WebCore::RenderInputSpeech::adjustInputFieldSpeechButtonStyle):
+        * rendering/RenderInputSpeech.h:
+        (RenderInputSpeech):
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::adjustStyle):
+        (WebCore::RenderTheme::adjustCheckboxStyle):
+        (WebCore::RenderTheme::adjustRadioStyle):
+        (WebCore::RenderTheme::adjustButtonStyle):
+        (WebCore::RenderTheme::adjustInnerSpinButtonStyle):
+        (WebCore::RenderTheme::adjustTextFieldStyle):
+        (WebCore::RenderTheme::adjustTextAreaStyle):
+        (WebCore::RenderTheme::adjustMenuListStyle):
+        (WebCore::RenderTheme::adjustInputFieldSpeechButtonStyle):
+        (WebCore::RenderTheme::adjustMeterStyle):
+        (WebCore::RenderTheme::adjustProgressBarStyle):
+        (WebCore::RenderTheme::adjustMenuListButtonStyle):
+        (WebCore::RenderTheme::adjustSliderTrackStyle):
+        (WebCore::RenderTheme::adjustSliderThumbStyle):
+        (WebCore::RenderTheme::adjustSearchFieldStyle):
+        (WebCore::RenderTheme::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderTheme::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderTheme::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderTheme::adjustSearchFieldResultsButtonStyle):
+        * rendering/RenderTheme.h:
+        (RenderTheme):
+        * rendering/RenderThemeChromiumAndroid.cpp:
+        (WebCore::RenderThemeChromiumAndroid::adjustInnerSpinButtonStyle):
+        * rendering/RenderThemeChromiumAndroid.h:
+        (RenderThemeChromiumAndroid):
+        * rendering/RenderThemeChromiumLinux.cpp:
+        (WebCore::RenderThemeChromiumLinux::adjustInnerSpinButtonStyle):
+        * rendering/RenderThemeChromiumLinux.h:
+        (RenderThemeChromiumLinux):
+        * rendering/RenderThemeChromiumSkia.cpp:
+        (WebCore::RenderThemeChromiumSkia::adjustButtonStyle):
+        (WebCore::RenderThemeChromiumSkia::adjustSearchFieldStyle):
+        (WebCore::RenderThemeChromiumSkia::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeChromiumSkia::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderThemeChromiumSkia::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeChromiumSkia::adjustSearchFieldResultsButtonStyle):
+        (WebCore::RenderThemeChromiumSkia::adjustMenuListStyle):
+        (WebCore::RenderThemeChromiumSkia::adjustMenuListButtonStyle):
+        * rendering/RenderThemeChromiumSkia.h:
+        (RenderThemeChromiumSkia):
+        * rendering/RenderThemeChromiumWin.cpp:
+        (WebCore):
+        (WebCore::RenderThemeChromiumWin::adjustInnerSpinButtonStyle):
+        (WebCore::RenderThemeChromiumWin::adjustProgressBarStyle):
+        * rendering/RenderThemeChromiumWin.h:
+        (RenderThemeChromiumWin):
+        * rendering/RenderThemeMac.h:
+        (RenderThemeMac):
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::setFontFromControlSize):
+        (WebCore::RenderThemeMac::adjustTextFieldStyle):
+        (WebCore::RenderThemeMac::adjustTextAreaStyle):
+        (WebCore::RenderThemeMac::adjustProgressBarStyle):
+        (WebCore::RenderThemeMac::adjustMenuListStyle):
+        (WebCore::RenderThemeMac::adjustMenuListButtonStyle):
+        (WebCore::RenderThemeMac::adjustSliderTrackStyle):
+        (WebCore::RenderThemeMac::adjustSliderThumbStyle):
+        (WebCore::RenderThemeMac::adjustSearchFieldStyle):
+        (WebCore::RenderThemeMac::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeMac::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderThemeMac::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeMac::adjustSearchFieldResultsButtonStyle):
+        * rendering/RenderThemeSafari.cpp:
+        (WebCore::RenderThemeSafari::setFontFromControlSize):
+        (WebCore::RenderThemeSafari::adjustButtonStyle):
+        (WebCore::RenderThemeSafari::adjustTextFieldStyle):
+        (WebCore::RenderThemeSafari::adjustTextAreaStyle):
+        (WebCore::RenderThemeSafari::adjustMenuListStyle):
+        (WebCore::RenderThemeSafari::adjustMenuListButtonStyle):
+        (WebCore::RenderThemeSafari::adjustSliderThumbStyle):
+        (WebCore::RenderThemeSafari::adjustSearchFieldStyle):
+        (WebCore::RenderThemeSafari::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeSafari::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderThemeSafari::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeSafari::adjustSearchFieldResultsButtonStyle):
+        * rendering/RenderThemeSafari.h:
+        (RenderThemeSafari):
+        * rendering/RenderThemeWin.cpp:
+        (WebCore::RenderThemeWin::adjustInnerSpinButtonStyle):
+        (WebCore::RenderThemeWin::adjustMenuListStyle):
+        (WebCore::RenderThemeWin::adjustMenuListButtonStyle):
+        (WebCore::RenderThemeWin::adjustSearchFieldStyle):
+        (WebCore::RenderThemeWin::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeWin::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderThemeWin::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeWin::adjustSearchFieldResultsButtonStyle):
+        * rendering/RenderThemeWin.h:
+        (RenderThemeWin):
+        (WebCore::RenderThemeWin::adjustButtonStyle):
+        (WebCore::RenderThemeWin::adjustTextFieldStyle):
+        (WebCore::RenderThemeWin::adjustTextAreaStyle):
+        * rendering/RenderThemeWinCE.cpp:
+        (WebCore::RenderThemeWinCE::adjustMenuListStyle):
+        (WebCore::RenderThemeWinCE::adjustSearchFieldStyle):
+        (WebCore::RenderThemeWinCE::adjustSearchFieldCancelButtonStyle):
+        (WebCore::RenderThemeWinCE::adjustSearchFieldDecorationStyle):
+        (WebCore::RenderThemeWinCE::adjustSearchFieldResultsDecorationStyle):
+        (WebCore::RenderThemeWinCE::adjustSearchFieldResultsButtonStyle):
+        (WebCore::RenderThemeWinCE::adjustMenuListButtonStyle):
+        * rendering/RenderThemeWinCE.h:
+        (RenderThemeWinCE):
+        (WebCore::RenderThemeWinCE::adjustButtonStyle):
+        (WebCore::RenderThemeWinCE::adjustTextFieldStyle):
+        (WebCore::RenderThemeWinCE::adjustTextAreaStyle):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::isStyleAvailable):
+        * rendering/style/RenderStyle.h:
+        (WebCore):
+        * rendering/style/StyleRareNonInheritedData.h:
+        (WebCore):
+        * rendering/svg/RenderSVGInlineText.cpp:
+        (WebCore::RenderSVGInlineText::computeNewScaledFontForStyle):
+        * rendering/svg/SVGRenderSupport.cpp:
+        (WebCore::SVGRenderSupport::isOverflowHidden):
+
 2012-04-15  Robert Hogan  <robert@webkit.org>
 
         CSS 2.1 failure: table-columns-example-001 fails
