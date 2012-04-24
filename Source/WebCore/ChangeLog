@@ -1,3 +1,32 @@
+2012-04-24  Sami Kyostila  <skyostil@chromium.org>
+
+        [chromium] Don't keep pointers to released layer tree
+        https://bugs.webkit.org/show_bug.cgi?id=84715
+
+        Reviewed by Adrienne Walker.
+
+        As part of tree synchronization, CCLayerTreeHostImpl loses ownership of
+        the previous tree (as per releaseRootLayer()). After this point we
+        should not retain any pointers to the old tree, because they are
+        effectively invalid as soon as the root layer is released.
+
+        For processing scroll updates we need to keep track of which layer is
+        being scrolled, and this state needs to survive tree synchronizations.
+        Instead of keeping a direct pointer to the scrolled layer, we now save
+        the id of that layer and use it to look up the same layer from the new
+        tree.
+
+        Unit test: CCLayerTreeHostImplTest.replaceTreeWhileScrolling
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::setRootLayer):
+        (WebCore::CCLayerTreeHostImpl::releaseRootLayer):
+        (WebCore::CCLayerTreeHostImpl::scrollBegin):
+        (WebCore::CCLayerTreeHostImpl::scrollEnd):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImpl):
+
 2012-04-24  Alexandru Chiculita  <achicu@adobe.com>
 
         [CSS Filters] Move m_filter and related fields from RenderLayer to a different structure and only allocate it when needed
