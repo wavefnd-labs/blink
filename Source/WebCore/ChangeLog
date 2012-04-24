@@ -1,3 +1,23 @@
+2012-04-24  Florin Malita  <fmalita@chromium.org>
+
+        WebCore::EventTarget::addEventListener crash
+        https://bugs.webkit.org/show_bug.cgi?id=84171
+
+        Reviewed by Nikolas Zimmermann.
+
+        Test: svg/custom/use-tref-crash.svg
+
+        Adding tref target event listeners while building the shadow tree is
+        problematic, because SVGUseElement::buildShadowAndInstanceTree() only
+        sets the element instance<->shadow element association at a later time.
+
+        Fortunately, buildShadowAndInstanceTree() also propagates the event
+        handlers (transferEventListenersToShadowTree) - so we can simply skip
+        them in SVGTRefElement::buildPendingResource() for shadow elements.
+
+        * svg/SVGTRefElement.cpp:
+        (WebCore::SVGTRefElement::buildPendingResource):
+
 2012-04-24  Kent Tamura  <tkent@chromium.org>
 
         Clickable area of a calendar picker indicator is too small.
