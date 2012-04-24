@@ -1,3 +1,49 @@
+2012-04-24  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Image masks are considered opaque incorrectly
+        https://bugs.webkit.org/show_bug.cgi?id=84275
+
+        Reviewed by Adrienne Walker.
+
+        Match the behaviour of SkCanvas layers more closely while tracking
+        opaque paints. SkCanvas layers actually act as a separate device
+        (ie. pixels) and when the layer is popped off, the pixels are copied
+        down to the layer below.
+
+        While we can use the total clip to decide what pixels the the
+        drawing operation will affect in the final device, the blending
+        down through layers needs to consider each layer carefully.
+
+        In this case the image mask is drawn into a layer which is copied
+        down using the DestinationIn operation. Since the layer contains
+        non-opaque pixels, the DestinationIn copy can destroy opaque
+        areas in the next layer. We add OpaqueRegionSkia::FillByCopy to
+        distinguish the case where we are copying a block of pixels, and the
+        alpha values are essentially unknown.
+
+        Unit test: PlatformContextSkiaTest.trackImageMask
+                   PlatformContextSkiaTest.trackImageMaskWithOpaqueRect
+
+        * platform/graphics/skia/OpaqueRegionSkia.cpp:
+        (WebCore::paintIsOpaque):
+        (WebCore::OpaqueRegionSkia::applyOpaqueRegionFromLayer):
+        (WebCore::OpaqueRegionSkia::pushCanvasLayer):
+        (WebCore::OpaqueRegionSkia::popCanvasLayer):
+        (WebCore::OpaqueRegionSkia::didDrawRect):
+        (WebCore::OpaqueRegionSkia::didDrawPath):
+        (WebCore::OpaqueRegionSkia::didDrawPoints):
+        (WebCore::OpaqueRegionSkia::didDrawBounded):
+        (WebCore::OpaqueRegionSkia::didDraw):
+        (WebCore::OpaqueRegionSkia::didDrawUnbounded):
+        (WebCore::OpaqueRegionSkia::markRectAsOpaque):
+        (WebCore::OpaqueRegionSkia::markRectAsNonOpaque):
+        (WebCore::OpaqueRegionSkia::markAllAsNonOpaque):
+        * platform/graphics/skia/OpaqueRegionSkia.h:
+        (OpaqueRegionSkia):
+        (CanvasLayerState):
+        * platform/graphics/skia/PlatformContextSkia.cpp:
+        (WebCore::PlatformContextSkia::restoreLayer):
+
 2012-04-24  Alexandru Chiculita  <achicu@adobe.com>
 
         CSS Shaders: Repainting the FECustomFilter requires full source image
