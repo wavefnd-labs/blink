@@ -1,3 +1,37 @@
+2012-04-23  Andy Estes  <aestes@apple.com>
+
+        Incremental rendering should be unsuppressed after the load event or a configurable timeout, whichever occurs first.
+        https://bugs.webkit.org/show_bug.cgi?id=84583
+
+        Reviewed by Anders Carlsson.
+
+        In high-latency situations, having incremental rendering suppression
+        enabled makes for a worse experience due to the excessively long time
+        it takes for the load event to fire. So that clients that opt in to
+        incremental rendering suppression can mitigate this, add a configurable
+        timeout in which rendering is re-enabled if the load event has yet to
+        fire.
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::setReadyState): When the document transitions to
+        the loading state, start a timer; when it transitions to the completed
+        state, allow visual updates.
+        (WebCore::Document::setVisualUpdatesAllowed): If visual updates are
+        allowed, force a repaint. Otherwise, set a flag that suppresses
+        rendering.
+        (WebCore::Document::visualUpdatesSuppressionTimerFired): When the timer
+        fires, allow visual updates.
+        (WebCore::Document::implicitClose): Remove code that is now called in
+        setVisualUpdatesAllowed().
+        * dom/Document.h:
+        (WebCore::Document::visualUpdatesAllowed):
+        * page/Settings.cpp:
+        (WebCore::Settings::Settings):
+        * page/Settings.h:
+        (WebCore::Settings::setIncrementalRenderingSuppressionTimeoutInSeconds):
+        (WebCore::Settings::incrementalRenderingSuppressionTimeoutInSeconds):
+
 2012-04-23  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Image masks are considered opaque incorrectly
