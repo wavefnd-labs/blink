@@ -1,3 +1,30 @@
+2012-04-24  Alexandru Chiculita  <achicu@adobe.com>
+
+        CSS Shaders: Repainting the FECustomFilter requires full source image
+        https://bugs.webkit.org/show_bug.cgi?id=76689
+
+        Reviewed by Dean Jackson..
+
+        When a pixel of a filtered layer changes we need to update the whole bounding box of the layer and
+        not just the dirty rectangle. That's because the shader might change the color of any of the pixels inside the box.
+
+        Added tests where a shader is moving and rotating the contents and the actual
+        dirty box of the source image is not the same as the output dirty rectangle.
+
+        Tests: css3/filters/custom/filter-repaint-custom-clipped.html
+               css3/filters/custom/filter-repaint-custom-rotated.html
+               css3/filters/custom/filter-repaint-custom.html
+
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::build):
+        (WebCore::FilterEffectRenderer::computeSourceImageRectForDirtyRect):
+        * rendering/FilterEffectRenderer.h:
+        (FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::hasCustomShaderFilter):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::setFilterBackendNeedsRepaintingInRect):
+
 2012-04-24  Alexis Menard  <alexis.menard@openbossa.org>
 
         Replace occurences of style selector from variables and methods names by style resolver.
