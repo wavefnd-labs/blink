@@ -1,3 +1,27 @@
+2012-04-24  Benjamin Poulain  <bpoulain@apple.com>
+
+        Implement the field cache of ObjcClass in WebKit types
+        https://bugs.webkit.org/show_bug.cgi?id=84667
+
+        Reviewed by Geoffrey Garen.
+
+        Every time we get a field through the Objective-C bridge, we waste some time converting
+        the incoming string to an CFString.
+
+        This patch implement the field cache based on WTF types so that we can return directly
+        in case of a positive match.
+
+        When we do not have a match on the Identifier, we allocate the memory and find the valid field
+        as before.
+
+        * bridge/objc/objc_class.h:
+        (ObjcClass):
+        * bridge/objc/objc_class.mm:
+        (JSC::Bindings::deleteMethod):
+        (Bindings):
+        (JSC::Bindings::ObjcClass::ObjcClass):
+        (JSC::Bindings::ObjcClass::fieldNamed):
+
 2012-04-23  Andy Estes  <aestes@apple.com>
 
         Incremental rendering should be unsuppressed after the load event or a configurable timeout, whichever occurs first.
