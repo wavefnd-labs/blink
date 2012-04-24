@@ -1,3 +1,41 @@
+2012-04-18  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Use TextureLayerChromium for WebGL content instead of a dedicated layer type
+        https://bugs.webkit.org/show_bug.cgi?id=84311
+
+        Reviewed by Adrienne Walker.
+
+        WebGL content's interface with the compositor can be expressed in terms of two basic operations:
+        1.) Do some stuff
+        2.) Provide a texture ID for the compositor to use
+
+        This implements (1) in DrawingBufferChromium and uses the already-existing TextureLayerChromium to handle (2).
+        This cuts down the compositor interface significantly and allows for more code reuse in exchange for more code
+        in TextureLayerChromium to handle the features WebGL needs.
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/DrawingBufferChromium.cpp:
+        (WebCore::DrawingBuffer::~DrawingBuffer):
+        (DrawingBufferPrivate):
+        (WebCore::DrawingBufferPrivate::DrawingBufferPrivate):
+        (WebCore::DrawingBufferPrivate::~DrawingBufferPrivate):
+        (WebCore::DrawingBufferPrivate::layer):
+        (WebCore):
+        (WebCore::DrawingBuffer::platformLayer):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        * platform/graphics/chromium/TextureLayerChromium.h:
+        (TextureLayerChromiumClient):
+        (WebCore::TextureLayerChromiumClient::~TextureLayerChromiumClient):
+        (WebCore):
+        (TextureLayerChromium):
+        (WebCore::TextureLayerChromium::clearClient):
+        * platform/graphics/chromium/WebGLLayerChromium.cpp: Removed.
+        * platform/graphics/chromium/WebGLLayerChromium.h: Removed.
+        * platform/graphics/gpu/DrawingBuffer.h:
+        (WebCore):
+        (WebCore::DrawingBuffer::graphicsContext3D):
+        (DrawingBuffer):
+
 2012-04-23  Alec Flett  <alecflett@chromium.org>
 
         IndexedDB: remove IDB(Index|ObjectStore)BackendImpl::get/getKey for IDBKey
