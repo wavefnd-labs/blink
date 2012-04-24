@@ -1,3 +1,51 @@
+2012-04-24  Antti Koivisto  <antti@apple.com>
+
+        Move MediaList CSSOM wrapper ownership to parent rule or stylesheet
+        https://bugs.webkit.org/show_bug.cgi?id=84716
+
+        Reviewed by Anders Carlsson.
+
+        MediaList CSSOM wrapper should be owned by a rule or a stylesheet, not by the underlying 
+        MediaQuerySet.
+        
+        Remove the ref forwarding from MediaList in favor of regular refcounting. Use the usual
+        pattern where the parent wrapper refs the child wrapper and zeroes the backpointer
+        on destruction. 
+
+        * bindings/js/JSDOMBinding.h:
+        (WebCore::root):
+        * css/CSSImportRule.cpp:
+        (WebCore::CSSImportRule::~CSSImportRule):
+        (WebCore::CSSImportRule::media):
+        * css/CSSImportRule.h:
+        (StyleRuleImport):
+        (CSSImportRule):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::~CSSMediaRule):
+        (WebCore::CSSMediaRule::media):
+        * css/CSSMediaRule.h:
+        (CSSMediaRule):
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::~CSSStyleSheet):
+        (WebCore::CSSStyleSheet::media):
+        * css/CSSStyleSheet.h:
+        (CSSStyleSheet):
+        * css/MediaList.cpp:
+        (WebCore::MediaQuerySet::mediaText):
+        (WebCore::MediaList::MediaList):
+        (WebCore):
+        (WebCore::MediaList::notifyChanged):
+        * css/MediaList.h:
+        (MediaQuerySet):
+        (WebCore::MediaList::create):
+        (WebCore::MediaList::parentRule):
+        (WebCore::MediaList::clearParentStyleSheet):
+        (WebCore::MediaList::clearParentRule):
+        (WebCore::MediaList::queries):
+        (MediaList):
+        * css/StyleRule.h:
+        (WebCore::StyleRuleMedia::mediaQueries):
+
 2012-04-24  Carlos Garcia Campos  <cgarcia@igalia.com>
 
         [GTK] Should pass canvas/philip/tests/toDataURL.jpeg.alpha.html
