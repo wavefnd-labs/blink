@@ -1,3 +1,29 @@
+2012-04-24  Rob Buis  <rbuis@rim.com>
+
+        [SVG] getBBox on a <g> within symbol returns 0 but with defs it works correctly
+        https://bugs.webkit.org/show_bug.cgi?id=72796
+
+        SVG <use> of <symbol> containing <linearGradient> renders black
+        https://bugs.webkit.org/show_bug.cgi?id=82775
+
+        Reviewed by Dirk Schulze.
+
+        Create RenderSVGHiddenContainer for each <symbol>, which allows creation of child renderers too. This fixes
+        both bugs since the bbox can be calculated at all times now and gradients in <symbol> are always created.
+        This does allocate more memory but in general <symbol> is not used a lot and they tend to be small subtrees.
+
+        Patch by Leo Yang.
+
+        Tests: svg/custom/bbox-of-g-in-symbol.svg
+               svg/custom/gradient-in-symbol-expected.svg
+               svg/custom/gradient-in-symbol.svg
+
+        * svg/SVGSymbolElement.cpp:
+        (WebCore::SVGSymbolElement::createRenderer):
+        (WebCore):
+        * svg/SVGSymbolElement.h:
+        (SVGSymbolElement):
+
 2012-04-24  Brady Eidson  <beidson@apple.com>
 
         <rdar://problem/10120155> and https://bugs.webkit.org/show_bug.cgi?id=82664
