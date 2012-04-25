@@ -1,3 +1,110 @@
+2012-04-25  Antti Koivisto  <antti@apple.com>
+
+        Remove owner node pointer from StyleSheetInternal 
+        https://bugs.webkit.org/show_bug.cgi?id=84882
+
+        Reviewed by Andread Kling.
+
+        To make sharing between multiple nodes possible StyleSheetInternal should not have a Node pointer.
+        
+        - Make StyleSheetInternal constructor take CSSParserContext instead of Node*
+        - Move owner node pointer to CSSStyleSheet. CSSStyleSheet now acts as a client for StyleSheetInternal.
+        
+        This gets us closer to being able to cache stylesheet data structures.
+        
+        * css/CSSImportRule.cpp:
+        (WebCore::StyleRuleImport::setCSSStyleSheet):
+        (WebCore::StyleRuleImport::requestStyleSheet):
+        
+            Setup CSSParserContext.
+            Remove FIXME about updateBaseURL(). It is no longer possible to change URL of StyleSheetInternal.
+
+        * css/CSSPageRule.cpp:
+        (WebCore::CSSPageRule::setSelectorText):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParserContext::CSSParserContext):
+        * css/CSSParserMode.h:
+        (CSSParserContext):
+    
+            Expand CSSParserContext constructors.
+
+        * css/CSSStyleRule.cpp:
+        (WebCore::CSSStyleRule::setSelectorText):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver):
+        (WebCore::StyleResolver::addAuthorRulesAndCollectUserRulesFromSheets):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * css/StyleResolver.h:
+        (StyleResolver):
+        * css/CSSStyleSheet.cpp:
+
+            User stylesheets went back to being CSSStyleSheets. Adapt to that.
+
+        (WebCore::StyleSheetInternal::StyleSheetInternal):
+        (WebCore):
+        (WebCore::StyleSheetInternal::checkLoaded):
+        (WebCore::StyleSheetInternal::startLoadingDynamicSheet):
+        (WebCore::StyleSheetInternal::rootStyleSheet):
+        (WebCore::StyleSheetInternal::singleOwnerNode):
+        (WebCore::StyleSheetInternal::singleOwnerDocument):
+        (WebCore::StyleSheetInternal::styleSheetChanged):
+        
+            The owner node is now located through CSSStyleSheet. Only one client is supported atm.
+
+        (WebCore::StyleSheetInternal::registerClient):
+        (WebCore::StyleSheetInternal::unregisterClient):
+        
+            Register CSSStyleSheets.
+
+        (WebCore::CSSStyleSheet::CSSStyleSheet):
+        (WebCore::CSSStyleSheet::~CSSStyleSheet):
+        (WebCore::CSSStyleSheet::rules):
+        (WebCore::CSSStyleSheet::cssRules):
+        (WebCore::CSSStyleSheet::ownerDocument):
+        * css/CSSStyleSheet.h:
+        (WebCore::StyleSheetInternal::create):
+        (WebCore::StyleSheetInternal::createInline):
+        (StyleSheetInternal):
+        (WebCore::CSSStyleSheet::create):
+        (CSSStyleSheet):
+        
+            Moved m_ownerNode.
+            Changed constructors
+            Removed setFinalURL(). 
+
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::StyleRuleCSSStyleDeclaration::setNeedsStyleRecalc):
+        * dom/Document.cpp:
+        (WebCore::Document::updateBaseURL):
+        
+            Instead of setFinalURL, construct a new StyleSheetInternal if the base url ever changes.
+
+        (WebCore::Document::pageUserSheet):
+        (WebCore::Document::pageGroupUserSheets):
+        (WebCore::Document::addUserSheet):
+        (WebCore::Document::elementSheet):
+        * dom/Document.h:
+        (Document):
+        (WebCore::Document::documentUserSheets):
+        
+            Adapt to the new interface.
+            Turned user stylesheets CSSStyleSheets so they can find the owner node.
+
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::setCSSStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::SelectorProfile::startSelector):
+        (WebCore::InspectorCSSAgent::bindStyleSheet):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::fillMediaListChain):
+        (WebCore::InspectorStyleSheet::ownerDocument):
+        * page/PageSerializer.cpp:
+        (WebCore::PageSerializer::serializeCSSStyleSheet):
+
 2012-04-25  Adam Klein  <adamk@chromium.org>
 
         Fix uninitialized variable warnings in PasteboardMac.mm after 115145
