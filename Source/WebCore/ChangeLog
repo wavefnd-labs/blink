@@ -1,3 +1,25 @@
+2012-04-24  Jon Lee  <jonlee@apple.com>
+
+        New Notification constructor do not take into account security origin permissions
+        https://bugs.webkit.org/show_bug.cgi?id=84825
+        <rdar://problem/11315405>
+
+        Reviewed by Darin Adler.
+
+        Tests requires support for notifications on Mac (see 79492).
+
+        When the task timer fires, we should check to see that the notification has permission
+        to show. If not, we fire the onError event.
+
+        * notifications/Notification.cpp:
+        (WebCore::Notification::Notification): Since the timer may show, or call the onerror event,
+        we rename it from m_showTaskTimer. to m_taskTimer.
+        (WebCore::Notification::dispatchErrorEvent): The default constructor of ErrorEvent doesn't
+        create the proper event object. Create it using Event::create().
+        (WebCore::Notification::taskTimerFired): Check to see that we have permission first.
+        * notifications/Notification.h:
+        (Notification):
+
 2012-04-24  Simon Fraser  <simon.fraser@apple.com>
 
         Add a logging channel and some ouput for compositing
