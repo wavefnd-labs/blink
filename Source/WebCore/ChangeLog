@@ -1,5 +1,84 @@
 2012-04-25  Nikolas Zimmermann  <nzimmermann@rim.com>
 
+        Refactor to/from/animatedType creation, to share more code between animators
+        https://bugs.webkit.org/show_bug.cgi?id=84846
+
+        Reviewed by Antti Koivisto.
+
+        Share more code bewteen animators, doesn't change functionality yet, except for one bug in SVGAnimatedString.
+        SVGAnimatedString used to mutate the from/to values during animation, leading to problems in animate-element-31-t.svg.
+        It now needs a rebaseline, now that this bug is fixed as side-effect.
+
+        * svg/SVGAnimateColorElement.cpp:
+        (WebCore::attributeValueIsCurrentColor):
+        (WebCore::SVGAnimateColorElement::determinePropertyValueTypes):
+        (WebCore):
+        * svg/SVGAnimateColorElement.h:
+        (SVGAnimateColorElement):
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::SVGAnimateElement):
+        * svg/SVGAnimateElement.h:
+        (SVGAnimateElement):
+        * svg/SVGAnimatedAngle.cpp:
+        (WebCore::SVGAnimatedAngleAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedBoolean.cpp:
+        (WebCore::SVGAnimatedBooleanAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedColor.cpp:
+        (WebCore::adjustForCurrentColor):
+        (WebCore):
+        (WebCore::parseColorFromString):
+        (WebCore::SVGAnimatedColorAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedEnumeration.cpp:
+        (WebCore::SVGAnimatedEnumerationAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedInteger.cpp:
+        (WebCore::SVGAnimatedIntegerAnimator::calculateAnimatedInteger):
+        (WebCore::SVGAnimatedIntegerAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedIntegerOptionalInteger.cpp:
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::parseLengthFromString):
+        (WebCore):
+        (WebCore::SVGAnimatedLengthAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::parseLengthListFromString):
+        (WebCore):
+        (WebCore::SVGAnimatedLengthListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedNumber.cpp:
+        (WebCore::parseNumberFromString):
+        (WebCore):
+        (WebCore::SVGAnimatedNumberAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedNumberOptionalNumber.cpp:
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedPointList.cpp:
+        (WebCore::SVGAnimatedPointListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedPreserveAspectRatio.cpp:
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedRect.cpp:
+        (WebCore::SVGAnimatedRectAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedString.cpp:
+        (WebCore::parseStringFromString):
+        (WebCore):
+        (WebCore::SVGAnimatedStringAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::SVGAnimationElement):
+        (WebCore::SVGAnimationElement::adjustForInheritance):
+        (WebCore):
+        (WebCore::inheritsFromProperty):
+        (WebCore::SVGAnimationElement::determinePropertyValueTypes):
+        * svg/SVGAnimationElement.h:
+        (WebCore::SVGAnimationElement::fromPropertyValueType):
+        (WebCore::SVGAnimationElement::toPropertyValueType):
+        (SVGAnimationElement):
+        (WebCore::SVGAnimationElement::adjustForInheritance):
+        (WebCore::SVGAnimationElement::adjustFromToValues):
+        (WebCore::SVGAnimationElement::adjustFromToListValues):
+
+2012-04-25  Nikolas Zimmermann  <nzimmermann@rim.com>
+
         Share single calculateFromToValues/calculateFromByValues between all SVGAnimatedTypeAnimators
         https://bugs.webkit.org/show_bug.cgi?id=84832
 
