@@ -1,3 +1,35 @@
+2012-04-24  Kent Tamura  <tkent@chromium.org>
+
+        Calendar Picker: Open a calendar picker by keyboard operation
+        https://bugs.webkit.org/show_bug.cgi?id=84680
+
+        Reviewed by Kentaro Hara.
+
+        - Open a calendar picker by the down arrow key.
+        - Remove stepping down/up by keyboard and wheel operations.
+          This behavior was for text fields with spin buttons. Because the date
+        type doesn't have spin buttons, we should remove this behavior.
+
+        No new tests for opening a calendar picker. This behavior is not
+        testable by DRT yet. For removal of stepping up/down,
+        fast/forms/date/date-stepup-stepdown-from-renderer.html is updated.
+
+        * html/BaseDateAndTimeInputType.cpp:
+        (WebCore::BaseDateAndTimeInputType::handleKeydownEvent):
+        Check shouldHaveSpinButton() before spin button key operations.
+        (WebCore::BaseDateAndTimeInputType::handleWheelEvent):
+        Check shouldHaveSpinButton() before spin button wheel operations.
+        * html/BaseDateAndTimeInputType.h:
+        (BaseDateAndTimeInputType):
+        Make handleKeydownEvent() protected because a subclass overrides it.
+        * html/DateInputType.cpp:
+        (WebCore::DateInputType::handleKeydownEvent):
+        Open a calendar picker by the down arrow key.
+        * html/DateInputType.h:
+        (DateInputType): Add handleKeydownEvent() declaration.
+        * html/shadow/CalendarPickerElement.h:
+        (CalendarPickerElement): Make openPopup() public because DateInputType calls it.
+
 2012-04-24  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r115099, r115102, and r115127.
