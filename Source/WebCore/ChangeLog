@@ -1,3 +1,31 @@
+2012-04-24  Enrica Casucci  <enrica@apple.com>
+
+        REGRESSION (r109022) Safari not placing service data on pasteboard.
+        https://bugs.webkit.org/show_bug.cgi?id=84766
+        <rdar://problem/11085756>
+        
+        The support for OS X services requires that the write operations to
+        the pasteboard occur synchronously. This behavior was changed with r109022.
+        This change removes the original synchronous call to the WebProcess to perform
+        the pasteboard write that had become asynchronous after r109022.
+        It implements instead a synchronous call to retrive the content to be placed
+        in the pasteboard.
+
+        Reviewed by Alexey Proskuryakov.
+
+        * WebCore.exp.in:
+        * editing/Editor.h:
+        * editing/mac/EditorMac.mm:
+        (WebCore::Editor::writeSelectionToPasteboard):
+        (WebCore::Editor::stringSelectionForPasteboard): Added.
+        (WebCore::Editor::dataSelectionForPasteboard): Added.
+        * platform/Pasteboard.h:
+        * platform/mac/PasteboardMac.mm:
+        (WebCore::Pasteboard::getStringSelection): Added.
+        (WebCore::Pasteboard::getDataSelection): Added.
+        (WebCore::Pasteboard::writeSelectionForTypes):
+        (WebCore::Pasteboard::writeSelection):
+
 2012-04-24  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Image masks are considered opaque incorrectly
