@@ -1,3 +1,30 @@
+2012-04-25  Douglas Stockwell  <dstockwell@chromium.org>
+
+        IndexedDB: cursor does not correctly iterate over keys added and removed during iteration
+        https://bugs.webkit.org/show_bug.cgi?id=84467
+
+        Reviewed by Ojan Vafai.
+
+        Ensure that the iterator over the tree of cached adds/removes always points at
+        the current key, or if the db iterator is current, the next key:
+        
+        - When refreshing the tree iterator after a mutation, always seek unless the
+        tree iterator is current.
+        
+        - When handing conflicts and delete markers, only advance the tree iterator as
+        far as the db iterator.
+        
+        Remove the expensive (and now redundant) logic that issued a get() to check
+        whether an item had been deleted.
+
+        Test: storage/indexeddb/cursor-added-bug.html
+
+        * Modules/indexeddb/IDBLevelDBBackingStore.cpp:
+        (WebCore):
+        * platform/leveldb/LevelDBTransaction.cpp:
+        (WebCore::LevelDBTransaction::TransactionIterator::refreshTreeIterator):
+        (WebCore::LevelDBTransaction::TransactionIterator::handleConflictsAndDeletes):
+
 2012-04-25  Antti Koivisto  <antti@apple.com>
 
         Try to fix build with STYLE_SCOPED enabled.
