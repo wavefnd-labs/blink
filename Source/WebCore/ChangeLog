@@ -1,3 +1,79 @@
+2012-04-25  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: move sourcemap-agnostic part of the debugger presentation model into the raw debugger.
+        https://bugs.webkit.org/show_bug.cgi?id=84852
+
+        Reviewed by Yury Semikhatsky.
+
+        There is no need to keep that much debugging functionality in the debugger presentation model.
+        It all perfectly applies to the raw script debugger. Methods for selecting call frames, activating breakpoints
+        and paused details were moved to the WebInspector.DebuggerModel.
+
+        * inspector/front-end/BreakpointManager.js:
+        (WebInspector.BreakpointManager.prototype._removeBreakpointFromUI):
+        * inspector/front-end/CallStackSidebarPane.js:
+        (WebInspector.CallStackSidebarPane):
+        (WebInspector.CallStackSidebarPane.prototype.update):
+        (WebInspector.CallStackSidebarPane.prototype.setSelectedCallFrame):
+        (WebInspector.CallStackSidebarPane.prototype._selectedCallFrameIndex):
+        (WebInspector.CallStackSidebarPane.prototype._placardSelected):
+        (WebInspector.CallStackSidebarPane.Placard):
+        (WebInspector.CallStackSidebarPane.Placard.prototype._update):
+        * inspector/front-end/ConsoleView.js:
+        * inspector/front-end/DebuggerModel.js:
+        (WebInspector.DebuggerModel.prototype._globalObjectCleared):
+        (WebInspector.DebuggerModel.prototype._didEditScriptSource):
+        (WebInspector.DebuggerModel.prototype._setDebuggerPausedDetails):
+        (WebInspector.DebuggerModel.prototype._pausedScript):
+        (WebInspector.DebuggerModel.prototype._resumedScript):
+        (WebInspector.DebuggerModel.prototype.isPaused):
+        (WebInspector.DebuggerModel.prototype.setSelectedCallFrame.updateExecutionLine):
+        (WebInspector.DebuggerModel.prototype.setSelectedCallFrame):
+        (WebInspector.DebuggerModel.prototype.selectedCallFrame):
+        (WebInspector.DebuggerModel.prototype.evaluateOnSelectedCallFrame):
+        (WebInspector.DebuggerModel.prototype.getSelectedCallFrameVariables.propertiesCollected):
+        (WebInspector.DebuggerModel.prototype.getSelectedCallFrameVariables):
+        (WebInspector.DebuggerModel.prototype.setBreakpointsActive):
+        (WebInspector.DebuggerModel.prototype.breakpointsActive):
+        (WebInspector.DebuggerModel.CallFrame):
+        (WebInspector.DebuggerModel.CallFrame.prototype.get script):
+        (WebInspector.DebuggerModel.CallFrame.prototype.get type):
+        (WebInspector.DebuggerModel.CallFrame.prototype.get scopeChain):
+        (WebInspector.DebuggerModel.CallFrame.prototype.get this):
+        (WebInspector.DebuggerModel.CallFrame.prototype.get functionName):
+        (WebInspector.DebuggerModel.CallFrame.prototype.get location):
+        (WebInspector.DebuggerModel.CallFrame.prototype.evaluate):
+        (WebInspector.DebuggerModel.CallFrame.prototype.createLiveLocation):
+        (WebInspector.DebuggerModel.CallFrame.prototype.dispose):
+        (WebInspector.DebuggerPausedDetails):
+        (WebInspector.DebuggerPausedDetails.prototype.dispose):
+        * inspector/front-end/DebuggerPresentationModel.js:
+        (WebInspector.DebuggerPresentationModel):
+        (WebInspector.DebuggerPresentationModel.prototype.createLiveLocation):
+        (WebInspector.DebuggerPresentationModel.prototype._parsedScriptSource):
+        (WebInspector.DebuggerPresentationModel.prototype._callFrameSelected):
+        (WebInspector.DebuggerPresentationModel.prototype.setScriptSource.didEditScriptSource):
+        (WebInspector.DebuggerPresentationModel.prototype.setScriptSource):
+        (WebInspector.DebuggerPresentationModel.prototype._debuggerReset):
+        * inspector/front-end/JavaScriptSource.js:
+        (WebInspector.JavaScriptSource.prototype.setBreakpoint):
+        * inspector/front-end/JavaScriptSourceFrame.js:
+        (WebInspector.JavaScriptSourceFrame.prototype._resolveObjectForPopover):
+        * inspector/front-end/Script.js:
+        (WebInspector.Script.prototype.setSourceMapping):
+        (WebInspector.Script.prototype.createLiveLocation):
+        (WebInspector.Script.Location.prototype.update):
+        * inspector/front-end/ScriptMapping.js:
+        (WebInspector.LiveLocation):
+        (WebInspector.LiveLocation.prototype.update):
+        (WebInspector.LiveLocation.prototype.dispose):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype._consoleCommandEvaluatedInSelectedCallFrame):
+        (WebInspector.ScriptsPanel.prototype._debuggerPaused):
+        (WebInspector.ScriptsPanel.prototype._callFrameSelected):
+        (WebInspector.ScriptsPanel.prototype._toggleBreakpointsClicked):
+        * inspector/front-end/UISourceCode.js:
+
 2012-04-25  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: use composite node provider for diff nodes in heap profiler
