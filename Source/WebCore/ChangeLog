@@ -1,3 +1,25 @@
+2012-04-24  Ryosuke Niwa  <rniwa@webkit.org>
+
+        REGRESSION(r112177): listStyleType CSS property gets converted into listStyle
+        https://bugs.webkit.org/show_bug.cgi?id=83026
+
+        Reviewed by Darin Adler.
+
+        Fixed the bug by not using shorthand notations when some values are missing.
+
+        However, we still want to return a value when shorthand border property is explicitly
+        requested so extract borderPropertyValue with a flag to support both behaviors.
+
+        * css/StylePropertySet.cpp:
+        (WebCore::borderPropertyValue): Extracted from getPropertyValue.
+        (WebCore::StylePropertySet::getPropertyValue):
+        (WebCore::StylePropertySet::get4Values): Don't return values when priority don't match.
+        (WebCore::StylePropertySet::getShorthandValue):
+        (WebCore::StylePropertySet::getCommonValue): Don't return null string for initial values
+        to disambiguate missing values and "initial" in getPropertyValue. Also check propriety.
+        (WebCore::StylePropertySet::asText): Support emitting border-width, border-style, and
+        border-color when border doesn't work but the former properties do.
+
 2012-04-25  Ian Vollick  <vollick@chromium.org>
 
         [chromium] Do not clobber synchronized start times.
