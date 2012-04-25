@@ -1,3 +1,120 @@
+2012-04-25  Alexis Menard  <alexis.menard@openbossa.org>
+
+        Unfortunately http://trac.webkit.org/changeset/115055 was landed using webkit-patch
+        land-from bug but didn't do the right thing, we lost the history.
+
+        This commit is merging back CSSStyleApplyProperty.* and their history, rename the files
+        to StyleBuilder and re-apply the two patches on trunk that were apply after the rename.
+
+        Rename CSSStyleSelector class to StyleResolver.
+        https://bugs.webkit.org/show_bug.cgi?id=84734
+
+        The name CSSStyleSelector is confusing as it conflicts a bit with
+        the CSS concept of selectors. One could think it's an encapsulation
+        of the CSS selectors but it's not, in fact this class is responsible
+        of finding the RenderStyle for a given element. This is the first patch
+        as I will later rename the files, and then rename the local variables.
+
+        Replace occurences of style selector from variables and methods names by style resolver.
+        https://bugs.webkit.org/show_bug.cgi?id=84765
+        
+        Rename methods and variables to follow the new name StyleResolver. It requires to update the
+        local variables, methods parameters, and function names to match the new name and to remove
+        the concept of "selector" to avoid clashing with the CSS concept. The next and last patch
+        will be to rename CSSStyleSelector file and update the includes.
+
+        * css/StyleBuilder.cpp: Replaced with Source/WebCore/css/CSSStyleApplyProperty.cpp.
+        (WebCore::ApplyPropertyExpanding::applyInheritValue):
+        (WebCore::ApplyPropertyExpanding::applyInitialValue):
+        (WebCore::ApplyPropertyExpanding::applyValue):
+        (WebCore::ApplyPropertyDefaultBase::applyInheritValue):
+        (WebCore::ApplyPropertyDefaultBase::applyInitialValue):
+        (WebCore::ApplyPropertyDefaultBase::applyValue):
+        (WebCore::ApplyPropertyDefault::applyValue):
+        (WebCore::ApplyPropertyNumber::applyValue):
+        (WebCore::ApplyPropertyStyleImage::applyValue):
+        (WebCore::ApplyPropertyAuto::applyInheritValue):
+        (WebCore::ApplyPropertyAuto::applyInitialValue):
+        (WebCore::ApplyPropertyAuto::applyValue):
+        (WebCore::ApplyPropertyClip::convertToLength):
+        (WebCore::ApplyPropertyClip::applyInheritValue):
+        (WebCore::ApplyPropertyClip::applyInitialValue):
+        (WebCore::ApplyPropertyClip::applyValue):
+        (WebCore::ApplyPropertyColor::applyInheritValue):
+        (WebCore::ApplyPropertyColor::applyInitialValue):
+        (WebCore::ApplyPropertyColor::applyValue):
+        (WebCore::ApplyPropertyColor::applyColorValue):
+        (WebCore::ApplyPropertyDirection::applyValue):
+        (WebCore::ApplyPropertyLength::applyValue):
+        (WebCore::ApplyPropertyString::applyValue):
+        (WebCore::ApplyPropertyBorderRadius::applyValue):
+        (WebCore::ApplyPropertyFillLayer::applyInheritValue):
+        (WebCore::ApplyPropertyFillLayer::applyInitialValue):
+        (WebCore::ApplyPropertyFillLayer::applyValue):
+        (WebCore::ApplyPropertyComputeLength::applyValue):
+        (WebCore::ApplyPropertyFont::applyInheritValue):
+        (WebCore::ApplyPropertyFont::applyInitialValue):
+        (WebCore::ApplyPropertyFont::applyValue):
+        (WebCore::ApplyPropertyFontSize::applyInheritValue):
+        (WebCore::ApplyPropertyFontSize::applyInitialValue):
+        (WebCore::ApplyPropertyFontSize::applyValue):
+        (WebCore::ApplyPropertyFontWeight::applyValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyInheritValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyInitialValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyValue):
+        (WebCore::ApplyPropertyBorderImage::applyValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyInheritValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyInitialValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyValue):
+        (WebCore::ApplyPropertyBorderImageSource::applyValue):
+        (WebCore::ApplyPropertyCounter::emptyFunction):
+        (WebCore::ApplyPropertyCounter::applyInheritValue):
+        (WebCore::ApplyPropertyCounter::applyValue):
+        (WebCore::ApplyPropertyCursor::applyInheritValue):
+        (WebCore::ApplyPropertyCursor::applyInitialValue):
+        (WebCore::ApplyPropertyCursor::applyValue):
+        (WebCore::ApplyPropertyTextAlign::applyValue):
+        (WebCore::ApplyPropertyTextDecoration::applyValue):
+        (WebCore::ApplyPropertyUnicodeBidi::applyValue):
+        (WebCore::ApplyPropertyLineHeight::applyValue):
+        (WebCore::ApplyPropertyPageSize::applyInheritValue):
+        (WebCore::ApplyPropertyPageSize::applyInitialValue):
+        (WebCore::ApplyPropertyPageSize::applyValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyInheritValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyInitialValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyValue):
+        (WebCore):
+        (WebCore::ApplyPropertyAnimation::map):
+        (WebCore::ApplyPropertyAnimation::applyInheritValue):
+        (WebCore::ApplyPropertyAnimation::applyInitialValue):
+        (WebCore::ApplyPropertyAnimation::applyValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyInheritValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyInitialValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyValue):
+        (WebCore::ApplyPropertyResize::applyValue):
+        (WebCore::ApplyPropertyVerticalAlign::applyValue):
+        (WebCore::ApplyPropertyAspectRatio::applyInheritValue):
+        (WebCore::ApplyPropertyAspectRatio::applyInitialValue):
+        (WebCore::ApplyPropertyAspectRatio::applyValue):
+        (WebCore::ApplyPropertyZoom::resetEffectiveZoom):
+        (WebCore::ApplyPropertyZoom::applyInheritValue):
+        (WebCore::ApplyPropertyZoom::applyInitialValue):
+        (WebCore::ApplyPropertyZoom::applyValue):
+        (WebCore::ApplyPropertyDisplay::isValidDisplayValue):
+        (WebCore::ApplyPropertyDisplay::applyInheritValue):
+        (WebCore::ApplyPropertyDisplay::applyInitialValue):
+        (WebCore::ApplyPropertyDisplay::applyValue):
+        (WebCore::ApplyPropertyFlex::applyInheritValue):
+        (WebCore::ApplyPropertyFlex::applyInitialValue):
+        (WebCore::ApplyPropertyFlex::applyValue):
+        (WebCore::StyleBuilder::StyleBuilder):
+        * css/StyleBuilder.h: Replaced with Source/WebCore/css/CSSStyleApplyProperty.h.
+        (WebCore):
+        (PropertyHandler):
+        (WebCore::PropertyHandler::applyInheritValue):
+        (WebCore::PropertyHandler::applyInitialValue):
+        (WebCore::PropertyHandler::applyValue):
+
 2012-04-25  Eric Carlson  <eric.carlson@apple.com>
 
         Not reviewed, fix Windows build after r115165.
