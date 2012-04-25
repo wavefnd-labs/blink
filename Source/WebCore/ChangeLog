@@ -1,3 +1,29 @@
+2012-04-25  Pierre Rossi  <pierre.rossi@gmail.com>
+
+        [SVG] Nothing should be stroked when the stroke-width is 0
+        https://bugs.webkit.org/show_bug.cgi?id=83568
+
+        Reviewed by Nikolas Zimmermann.
+
+        The spec states that "A zero value causes no stroke to be painted".
+        We should avoid calling functions that could incorrectly paint something
+        in that case.
+
+        Test: svg/custom/path-zero-strokewidth.svg
+
+        * rendering/style/SVGRenderStyle.h:
+        (WebCore::SVGRenderStyle::hasVisibleStroke):
+        * rendering/svg/RenderSVGEllipse.cpp:
+        (WebCore::RenderSVGEllipse::strokeShape): Check if the stroke should be visible before painting.
+        * rendering/svg/RenderSVGRect.cpp:
+        (WebCore::RenderSVGRect::strokeShape): Ditto.
+        * rendering/svg/RenderSVGShape.cpp:
+        (WebCore::RenderSVGShape::strokeShape): Ditto.
+        (WebCore::RenderSVGShape::strokePath): Ditto.
+        * rendering/svg/SVGInlineTextBox.cpp:
+        (WebCore::SVGInlineTextBox::paint): Dont call paintText for zero-width stroke.
+        (WebCore::SVGInlineTextBox::paintDecoration): Ditto.
+
 2012-04-25  Alexis Menard  <alexis.menard@openbossa.org>
 
         Unfortunately http://trac.webkit.org/changeset/115055 was landed using webkit-patch
