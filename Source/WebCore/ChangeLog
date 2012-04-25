@@ -1,3 +1,105 @@
+2012-04-25  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Share single calculateFromToValues/calculateFromByValues between all SVGAnimatedTypeAnimators
+        https://bugs.webkit.org/show_bug.cgi?id=84832
+
+        Reviewed by Antti Koivisto.
+
+        calculateFromAndToValues / calculateFromAndByValues don't need to be spread across all SVGAnimatedTypeAnimators.
+        Centralize these new implementations in SVGAnimatedTypeAnimator.h. Refactored addAnimatedTypes() from constructFromAndByValues.
+
+        calculateFromAndToValues:
+            from = constructFromString(fromString)
+            to = constructFromString(toString)
+        
+        calculateFromAndByValues:
+            from = constructFromString(fromString)
+            to = constructFromString(byString)
+            addAnimatedTypes(from, to)
+
+        Doesn't affect any tests, just refactors code.
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::calculateFromAndToValues):
+        (WebCore::SVGAnimateElement::calculateFromAndByValues):
+        * svg/SVGAnimatedAngle.cpp:
+        (WebCore::SVGAnimatedAngleAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedAngle.h:
+        (SVGAnimatedAngleAnimator):
+        * svg/SVGAnimatedBoolean.cpp:
+        (WebCore::SVGAnimatedBooleanAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedBoolean.h:
+        (SVGAnimatedBooleanAnimator):
+        * svg/SVGAnimatedColor.cpp:
+        (WebCore::SVGAnimatedColorAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedColor.h:
+        (SVGAnimatedColorAnimator):
+        * svg/SVGAnimatedEnumeration.cpp:
+        (WebCore::SVGAnimatedEnumerationAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedEnumeration.h:
+        (SVGAnimatedEnumerationAnimator):
+        * svg/SVGAnimatedInteger.cpp:
+        (WebCore::SVGAnimatedIntegerAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedInteger.h:
+        (SVGAnimatedIntegerAnimator):
+        * svg/SVGAnimatedIntegerOptionalInteger.cpp:
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedIntegerOptionalInteger.h:
+        (SVGAnimatedIntegerOptionalIntegerAnimator):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedLength.h:
+        (SVGAnimatedLengthAnimator):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedLengthList.h:
+        (SVGAnimatedLengthListAnimator):
+        * svg/SVGAnimatedNumber.cpp:
+        (WebCore::SVGAnimatedNumberAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedNumber.h:
+        (SVGAnimatedNumberAnimator):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedNumberList.h:
+        (SVGAnimatedNumberListAnimator):
+        * svg/SVGAnimatedNumberOptionalNumber.cpp:
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedNumberOptionalNumber.h:
+        (SVGAnimatedNumberOptionalNumberAnimator):
+        * svg/SVGAnimatedPath.cpp:
+        (WebCore::SVGAnimatedPathAnimator::constructFromString):
+        (WebCore::SVGAnimatedPathAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedPath.h:
+        (SVGAnimatedPathAnimator):
+        * svg/SVGAnimatedPointList.cpp:
+        (WebCore::SVGAnimatedPointListAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedPointList.h:
+        (SVGAnimatedPointListAnimator):
+        * svg/SVGAnimatedPreserveAspectRatio.cpp:
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedPreserveAspectRatio.h:
+        (SVGAnimatedPreserveAspectRatioAnimator):
+        * svg/SVGAnimatedRect.cpp:
+        (WebCore::SVGAnimatedRectAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedRect.h:
+        (SVGAnimatedRectAnimator):
+        * svg/SVGAnimatedString.cpp:
+        (WebCore::SVGAnimatedStringAnimator::addAnimatedTypes):
+        * svg/SVGAnimatedString.h:
+        (SVGAnimatedStringAnimator):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::SVGAnimatedTransformListAnimator):
+        (WebCore::SVGAnimatedTransformListAnimator::constructFromString):
+        (WebCore::SVGAnimatedTransformListAnimator::addAnimatedTypes):
+        (WebCore::SVGAnimatedTransformListAnimator::calculateDistance):
+        * svg/SVGAnimatedTransformList.h:
+        (SVGAnimatedTransformListAnimator):
+        * svg/SVGAnimatedTypeAnimator.h:
+        (SVGAnimatedTypeAnimator):
+        (WebCore::SVGAnimatedTypeAnimator::calculateFromAndToValues):
+        (WebCore::SVGAnimatedTypeAnimator::calculateFromAndByValues):
+        (WebCore::SVGAnimatedTypeAnimator::setContextElement):
+
 2012-04-25  Andreas Kling  <kling@webkit.org>
 
         Shrink RenderText by 8 bytes on 64-bit.
