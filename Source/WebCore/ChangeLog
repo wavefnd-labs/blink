@@ -1,3 +1,34 @@
+2012-04-25  Mark Hahnenberg  <mhahnenberg@apple.com>
+
+        WebCore shouldn't call collectAllGarbage directly
+        https://bugs.webkit.org/show_bug.cgi?id=84897
+
+        Reviewed by Geoffrey Garen.
+
+        No new tests. 
+
+        Currently, GCController calls Heap::collectAllGarbage directly, which leads 
+        to an overload of collections as the timer in GCController and the timer in 
+        GCActivityCallback compete for collection time and fire independently. As a 
+        result, we end up doing almost 600 full collections during an in-browser run 
+        of SunSpider, or 20 full collections on a single load of TechCrunch. 
+
+        We can do better by preventing WebCore from calling collectAllGarbage directly 
+        and instead going through Heap::reportAbandonedObjectGraph, since that is what 
+        WebCore is trying to do--notify the Heap that a lot of garbage may have just 
+        been generated when we left a page.
+
+        * WebCore.exp.in:
+        * bindings/js/GCController.cpp: Removed all timer stuff.
+        (WebCore::GCController::GCController):
+        (WebCore::GCController::garbageCollectSoon): Changed to call Heap::reportAbandonedObjectGraph.
+        (WebCore::GCController::garbageCollectNow): Changed to still directly call collectAllGarbage.
+        We will deprecate this function soon hopefully.
+        * bindings/js/GCController.h: Removed timer stuff.
+        (GCController):
+        * bindings/js/ScriptProfiler.cpp:
+        (WebCore::ScriptProfiler::collectGarbage): Changed to call garbageCollectSoon.
+
 2012-04-25  James Robinson  <jamesr@chromium.org>
 
         [chromium] REGRESSION(112286) Compositor initialization blocks for program compilation / linking
