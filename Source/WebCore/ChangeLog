@@ -1,3 +1,26 @@
+2012-04-26  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        Crash when collecting svg symbol element in named flow.
+        https://bugs.webkit.org/show_bug.cgi?id=84493
+
+        Reviewed by David Hyatt.
+
+        Test: fast/regions/symbol-in-named-flow-crash.svg
+
+        * dom/Element.cpp:
+        (WebCore::Element::~Element):
+        Add an assert that an element that was collected into a named flow was already removed at this point
+        (when the document is not in the process of destruction)
+        (WebCore::Element::unregisterNamedFlowContentNode):
+        Created a new function for unregistering a content node. In the future, this function may be used for
+        content nodes from shadow dom.
+        (WebCore::Element::detach):
+        * dom/Element.h:
+        (Element):
+        * dom/NodeRenderingContext.cpp:
+        (WebCore::NodeRenderingContext::moveToFlowThreadIfNeeded):
+        Prevent elements that are part of shadow dom to be collected into a named flow.
+
 2012-04-26  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         Share code used to animate discrete types between all animators
