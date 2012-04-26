@@ -1,3 +1,35 @@
+2012-04-26  Philip Rogers  <pdr@google.com>
+
+        Fix Skia's SkPathContainsPoint to work with sub-pixel accuracy
+        https://bugs.webkit.org/show_bug.cgi?id=84117
+
+        Reviewed by Eric Seidel.
+
+        Because we do hit testing in object-space (i.e., we may see a 0.1px*0.1px path) we
+        need to support sub-pixel hit testing in Skia. Skia does not provide analytical
+        path hit testing, so hit tests are done by rasterizing a path and checking if a
+        specific pixel is drawn. SkPathContainsPoint did not work with sub-pixel values
+        because this rasterization was sometimes very small which did not give enough
+        resolution to check if the hit test pixel was drawn.
+
+        This patch scales the path to a very large size during hit testing so that Skia's
+        raster-based hit testing will work properly. Because Skia avoids unnecessary
+        path rasterization, this is actually inexpensive.
+
+        Below is a summary of a performance test on simple and complex paths:
+                                                 (before patch, after patch)
+        Skia/Chrome 10,000 hit tests on a simple path:  (229ms, 238ms)
+        Skia/Chrome 10,000 hit tests on a complex path: (701ms, 704ms)
+        For comparison, CG/Safari takes 236ms on the simple path and 466ms on the complex path.
+ 
+        Therefore, this patch introduces small but measurable regression in hit testing
+        performance due to scaling the path.
+
+        Test: svg/hittest/svg-small-path.xhtml
+
+        * platform/graphics/skia/SkiaUtils.cpp:
+        (WebCore::SkPathContainsPoint):
+
 2012-04-26  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r115323.
