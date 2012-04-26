@@ -1,3 +1,22 @@
+2012-04-26  Anders Carlsson  <andersca@apple.com>
+
+        A TileCache should never outlive its WebTileCacheLayer
+        https://bugs.webkit.org/show_bug.cgi?id=85008
+        <rdar://problem/11141172>
+
+        Reviewed by Andreas Kling.
+
+        Since WebTileCacheLayer objects can be destroyed on the scrolling thread, make sure to delete the TileCache layer
+        when the PlatformCALayer is destroyed. This fixes a crash when the tile revalidation timer fires after the WebTileCacheLayer has
+        been destroyed, but before the TileCache itself has been destroyed.
+
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm:
+        (PlatformCALayer::~PlatformCALayer):
+        * platform/graphics/ca/mac/WebTileCacheLayer.h:
+        * platform/graphics/ca/mac/WebTileCacheLayer.mm:
+        (-[WebTileCacheLayer dealloc]):
+        (-[WebTileCacheLayer invalidate]):
+
 2012-04-26  Benjamin Poulain  <bpoulain@apple.com>
 
         Use String instead of RefPtr<StringImpl> for the cache of ObjcClass
