@@ -1,3 +1,33 @@
+2012-04-26  Martin Robinson  <mrobinson@igalia.com>
+
+        [Cairo] Wrap cairo surfaces in a class when storing native images
+        https://bugs.webkit.org/show_bug.cgi?id=83611
+
+        Reviewed by Alejandro G. Castro.
+
+        No new tests. This is just a refactoring. This shouldn't change
+        functionality.
+
+        Added class that wraps Cairo images surfaces to serve as the "native image"
+        type for the Cairo platform. This will allow the addition of caching resampled
+        images as well as versions of the image for non-image Cairo backends. Also
+        split out BitmapImageCairo.cpp from ImageCairo.cpp since these classes are
+        defined in two headers.
+
+        * GNUmakefile.list.am: Added new files.
+        * platform/graphics/BitmapImage.h: Added a factory method that takes an image surface to
+        reduce code churn.
+        * platform/graphics/ImageSource.h: NativeImagePtr is now NativeImageCairo*.
+        (WebCore):
+        * platform/graphics/cairo/BitmapImageCairo.cpp: Copied from Source/WebCore/platform/graphics/cairo/ImageCairo.cpp.
+        * platform/graphics/cairo/GraphicsContext3DCairo.cpp: Updated to reflect use of NativeImageCairo.
+        * platform/graphics/cairo/ImageCairo.cpp: Ditto.
+        * platform/graphics/cairo/NativeImageCairo.cpp: Added.
+        * platform/graphics/cairo/NativeImageCairo.h: Added.
+        * platform/graphics/cairo/PatternCairo.cpp: Updated to reflect use of NativeImageCairo.
+        * platform/graphics/gtk/ImageGtk.cpp: Ditto.
+        * platform/image-decoders/cairo/ImageDecoderCairo.cpp: Ditto.
+
 2012-04-26  Mark Hahnenberg  <mhahnenberg@apple.com>
 
         [GTK] Massive media tests failures since r115288
