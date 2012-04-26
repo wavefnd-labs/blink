@@ -1,3 +1,89 @@
+2012-04-26  Justin Novosad  <junov@chromium.org>
+
+        [Chromium] Single buffered canvas layers with the threaded compositor
+        https://bugs.webkit.org/show_bug.cgi?id=80540
+
+        Reviewed by James Robinson.
+
+        Tests:
+        CCLayerTreeHostTestWriteLayersRedraw
+        CCLayerTreeHostTestWriteLayersAfterVisible
+        Canvas2DLayerChromiumTest.testFullLifecycleSingleThreadDeferred
+        Canvas2DLayerChromiumTest.testFullLifecycleThreadDeferred
+        CCSchedulerTest.VisibilitySwitchWithTextureAcquisition
+        CCSchedulerTest.TextureAcquisitionCollision
+
+        Disable double buffering and rate limiting on accelerated canvas
+        when the threaded compositor and deferred canvas are enabled.
+        Concurrent access to the layer texture by the main renderer thread and
+        the compositor thread is avoided by enforcing a lock. The state of the
+        lock is maintained by CCSchedulerStateMachine. Write access by the main
+        thread is acquired through a signal round trip to the compositor thread,
+        which may block the main thread in the event that one or more committed
+        layers need to be protected until the compositor completes the requested
+        draw. Draws on the impl thread are cancelled if the main thread has
+        obtained write access to the texture.  The write access is relinquished
+        by the main thread upon commit completion.  The scheduler state machine
+        is responsible for preventing the texture lock from causing deadlocks by
+        detecting and resolving problematic states.
+
+        * platform/graphics/chromium/Canvas2DLayerChromium.cpp:
+        (WebCore::Canvas2DLayerChromium::create):
+        (WebCore::Canvas2DLayerChromium::Canvas2DLayerChromium):
+        (WebCore::Canvas2DLayerChromium::~Canvas2DLayerChromium):
+        (WebCore::Canvas2DLayerChromium::drawingIntoImplThreadTexture):
+        (WebCore):
+        (WebCore::Canvas2DLayerChromium::setTextureId):
+        (WebCore::Canvas2DLayerChromium::setNeedsDisplayRect):
+        (WebCore::Canvas2DLayerChromium::update):
+        (WebCore::Canvas2DLayerChromium::layerWillDraw):
+        (WebCore::Canvas2DLayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/Canvas2DLayerChromium.h:
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::acquireLayerTextures):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCProxy.h:
+        (CCProxy):
+        * platform/graphics/chromium/cc/CCScheduler.cpp:
+        (WebCore::CCScheduler::setMainThreadNeedsLayerTextures):
+        (WebCore):
+        (WebCore::CCScheduler::processScheduledActions):
+        * platform/graphics/chromium/cc/CCScheduler.h:
+        (CCSchedulerClient):
+        (CCScheduler):
+        * platform/graphics/chromium/cc/CCSchedulerStateMachine.cpp:
+        (WebCore::CCSchedulerStateMachine::CCSchedulerStateMachine):
+        (WebCore::CCSchedulerStateMachine::drawSuspendedUntilCommit):
+        (WebCore):
+        (WebCore::CCSchedulerStateMachine::scheduledToDraw):
+        (WebCore::CCSchedulerStateMachine::shouldDraw):
+        (WebCore::CCSchedulerStateMachine::shouldAcquireLayerTexturesForMainThread):
+        (WebCore::CCSchedulerStateMachine::nextAction):
+        (WebCore::CCSchedulerStateMachine::updateState):
+        (WebCore::CCSchedulerStateMachine::setMainThreadNeedsLayerTextures):
+        * platform/graphics/chromium/cc/CCSchedulerStateMachine.h:
+        (CCSchedulerStateMachine):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::CCThreadProxy):
+        (WebCore::CCThreadProxy::beginFrame):
+        (WebCore::CCThreadProxy::scheduledActionDrawAndSwapInternal):
+        (WebCore):
+        (WebCore::CCThreadProxy::acquireLayerTextures):
+        (WebCore::CCThreadProxy::acquireLayerTexturesForMainThreadOnImplThread):
+        (WebCore::CCThreadProxy::scheduledActionAcquireLayerTexturesForMainThread):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (CCThreadProxy):
+        * platform/graphics/skia/ImageBufferSkia.cpp:
+        (WebCore):
+        (WebCore::AcceleratedDeviceContext::AcceleratedDeviceContext):
+        (WebCore::AcceleratedDeviceContext::prepareForDraw):
+        (AcceleratedDeviceContext):
+        (WebCore::createAcceleratedCanvas):
+        (WebCore::ImageBuffer::context):
+
 2012-04-26  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass Isolate to toV8() in SerializedScriptValue.cpp
