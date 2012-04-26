@@ -1,3 +1,30 @@
+2012-04-26  Hao Zheng  <zhenghao@chromium.org>
+
+        [chromium] Complex text support for Android.
+        https://bugs.webkit.org/show_bug.cgi?id=84431
+
+        Complex text support is different on Android from other platforms.
+        There are 2 kinds of font on Android: system fonts and fallback fonts.
+        System fonts have a name, and are accessible in FontPlatformData.
+        Fallback fonts do not have specific names, so they are not accessible
+        from WebKit directly. There is one font for each script support.
+        To feed Harfbuzz, use a trick to get correct SkTypeface based on script.
+
+        Reviewed by Tony Chang.
+
+        No new tests. Current tests are runnable on Android.
+
+        * platform/graphics/FontCache.h:
+        (FontCache): Make ComplexTextController friend of FontCache on Android.
+        * platform/graphics/chromium/FontCacheAndroid.cpp:
+        (WebCore::FontCache::createFontPlatformData):
+        * platform/graphics/harfbuzz/ComplexTextControllerHarfBuzz.cpp:
+        (WebCore::ComplexTextController::getComplexFontPlatformData):
+        (WebCore):
+        (WebCore::ComplexTextController::setupFontForScriptRun):
+        * platform/graphics/harfbuzz/ComplexTextControllerHarfBuzz.h:
+        (ComplexTextController):
+
 2012-04-26  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass Isolate to wrap() (Part2)
