@@ -1,3 +1,27 @@
+2012-04-26  Mark Hahnenberg  <mhahnenberg@apple.com>
+
+        [GTK] Massive media tests failures since r115288
+        https://bugs.webkit.org/show_bug.cgi?id=84950
+
+        Reviewed by Filip Pizlo.
+
+        No new tests.
+
+        Since the "cross-platform" WebCore timer is at too high of a level in terms of the layers 
+        of WebKit for JSC to use, we are not currently able to use it in JSC, thus only those 
+        platforms that support CoreFoundation can currently take advantage of the new and improved 
+        GC activity timer. We've restored the old code paths for those platforms that don't have 
+        CF so that they will at least have the same behavior as before when calling garbageCollectSoon.
+
+        * bindings/js/GCController.cpp: Added back the old WebCore timer along with some 
+        if-defs that do away with the WebCore timer on platforms that support CoreFoundation.
+        (WebCore::GCController::GCController):
+        (WebCore::GCController::garbageCollectSoon):
+        (WebCore):
+        (WebCore::GCController::gcTimerFired):
+        * bindings/js/GCController.h: Ditto.
+        (GCController):
+
 2012-04-26  Adam Klein  <adamk@chromium.org>
 
         Don't include V8Proxy.h in ScriptValue.h when V8GCController is all that's required
