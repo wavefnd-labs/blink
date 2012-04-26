@@ -1,3 +1,53 @@
+2012-04-26  Antti Koivisto  <antti@apple.com>
+
+        Implement StyleSheetInternal copying
+        https://bugs.webkit.org/show_bug.cgi?id=84969
+
+        Reviewed by Andreas Kling.
+
+        We need to be able to copy stylesheets to cache them. Copying is already implement for
+        most of the stylesheet data types but StyleSheetInternal::copy() is still missing.
+        
+        Preparation for stylesheet caching. The copying code is not used yet.
+
+        * css/CSSNamespace.h:
+        
+            Instead of making it copyable, remove CSSNamespace class.
+    
+        * css/CSSParser.cpp:
+        (WebCore::operator==):
+        (WebCore):
+        (WebCore::CSSParser::addNamespace):
+        
+            Avoid ping-ponging to StyleSheetInternal and back to set the default namespace.
+
+        * css/CSSParserMode.h:
+        (WebCore):
+        (WebCore::operator!=):
+
+            Add equality comparison operator to CSSParseMode. This will be needed to determine
+            if a cached copy can be used.
+            
+        * css/CSSStyleSheet.cpp:
+        (WebCore::StyleSheetInternal::StyleSheetInternal):
+        (WebCore):
+        (WebCore::StyleSheetInternal::isCacheable):
+        (WebCore::StyleSheetInternal::parserAddNamespace):
+        (WebCore::StyleSheetInternal::determineNamespace):
+        
+            Use HashMap instead of iterating a linked list of CSSNamespaces.
+
+        (WebCore::StyleSheetInternal::styleSheetChanged):
+        
+            Add mutation bit.
+
+        * css/CSSStyleSheet.h:
+        (WebCore):
+        (StyleSheetInternal):
+        (WebCore::StyleSheetInternal::copy):
+        
+            Copy constructor. It only usable for cacheable stylesheets.
+
 2012-04-26  Philip Rogers  <pdr@google.com>
 
         Fix Skia's SkPathContainsPoint to work with sub-pixel accuracy
