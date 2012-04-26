@@ -1,3 +1,27 @@
+2012-04-25  James Robinson  <jamesr@chromium.org>
+
+        [chromium] REGRESSION(112286) Compositor initialization blocks for program compilation / linking
+        https://bugs.webkit.org/show_bug.cgi?id=84822
+
+        Reviewed by Adrienne Walker.
+
+        r112286 introduced a subtle regression in the chromium compositor startup sequence - by querying the texture
+        copy program's uniform location at the end of LayerRendererChromium::initialize(), the compositor's thread was
+        blocked until the service side compiled _all_ eagerly initialized shaders. The intent of the way the compositor
+        programs are created is that a set of commonly-used programs are sent to the service side, but no blocking calls
+        are made until after we go through the first paint (with the hope that the service side will complete the
+        compilation by then).
+
+        Fixed by moving program initialization (which also grabs uniform locations) until the first actual use of the
+        copier. It may be worth deferring the program initialization completely if it's not used very often.
+
+        Added unit test in LayerRendererChromiumTests to make sure LRC initialization does not make any
+        synchronous calls (like getUniformLocation()).
+
+        * platform/graphics/chromium/TextureCopier.cpp:
+        (WebCore::AcceleratedTextureCopier::AcceleratedTextureCopier):
+        (WebCore::AcceleratedTextureCopier::copyTexture):
+
 2012-04-25  Jason Liu  <jason.liu@torchmobile.com.cn>
 
         [BlackBerry] Authenticated proxy isn't working.
