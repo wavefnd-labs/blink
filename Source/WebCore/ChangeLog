@@ -1,3 +1,62 @@
+2012-04-26  Antti Koivisto  <antti@apple.com>
+
+        Cache parsed stylesheets
+        https://bugs.webkit.org/show_bug.cgi?id=85004
+
+        Reviewed by Andreas Kling.
+
+        CSS parsing is 1-2% of WebKit CPU usage on average pages, more on sites with large stylesheets.
+        We currently reparse all stylesheets from source text when they are encountered again. In many
+        browsing scenarios we can eliminate lot of this by caching the parsed stylesheets. For example 
+        it is very common for subpages of a site to share the stylesheets.
+        
+        This patch enables memory caching for stylesheet loaded using the <link> element. Only stylesheets
+        that have no import rules are cacheable for now.
+        
+        Cached stylesheets are copied on restore so there is no sharing (and no memory wins) yet.
+        In the future we will also be able to share the actual data structures between pages for 
+        significant memory savings.
+        
+        After browsing around for a while <5% of the memory cache data was in parsed stylesheets so this
+        does not bloat the cache significantly.
+
+        * css/CSSStyleSheet.cpp:
+        (WebCore):
+        (WebCore::StyleSheetInternal::estimatedSizeInBytes):
+        
+            Estimate stylesheet size so we can handle decoded data pruning correctly.
+
+        * css/CSSStyleSheet.h:
+        (StyleSheetInternal):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::averageSizeInBytes):
+        (WebCore):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        * css/StyleRule.cpp:
+        (WebCore::StyleRule::averageSizeInBytes):
+        (WebCore):
+        * css/StyleRule.h:
+        (StyleRule):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        
+            Save and restore parsed stylesheet. The current CSS parse context must be identical to the cached 
+            stylesheets. This ensures that the parsing results would be identical.
+
+        * loader/cache/CachedCSSStyleSheet.cpp:
+        (WebCore):
+        (WebCore::CachedCSSStyleSheet::destroyDecodedData):
+        (WebCore::CachedCSSStyleSheet::restoreParsedStyleSheet):
+        (WebCore::CachedCSSStyleSheet::saveParsedStyleSheet):
+        * loader/cache/CachedCSSStyleSheet.h:
+        
+            The parsed stylesheet cache is considered decoded data, similar to the image bitmaps. It uses the
+            same mechanism for pruning.
+
+        (WebCore):
+        (CachedCSSStyleSheet):
+
 2012-04-26  Anders Carlsson  <andersca@apple.com>
 
         A TileCache should never outlive its WebTileCacheLayer
