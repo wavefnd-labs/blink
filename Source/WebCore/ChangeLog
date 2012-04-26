@@ -1,3 +1,52 @@
+2012-04-25  Adrienne Walker  <enne@google.com>
+
+        [chromium] Prevent CCLayerImpl::willDraw/didDraw mismatches
+        https://bugs.webkit.org/show_bug.cgi?id=84812
+
+        Reviewed by James Robinson.
+
+        Because some layers lock/unlock resources, it needs to be guaranteed
+        that if willDraw is called on a layer then didDraw will also be called
+        on that layer before another willDraw or before layer destruction. Add
+        asserts to make sure that this is the case.
+
+        willDraw is called via CCLayerTreeHostImpl::prepareToDraw ->
+        calculateRenderPasses. didDraw was previously called in
+        CCLayerTreeHostImpl::drawLayers. Sometimes drawLayers was being
+        skipped by the caller of these functions based on what prepareToDraw
+        returned (causing didDraw to not be called). Fix this by having an
+        explicit step to call didDraw on all layers. This new didDrawAllLayers
+        function must be called if and only if prepareToDraw is called.
+
+        Tested by existing tests via new asserts in CCLayerImpl.
+
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::CCLayerImpl):
+        (WebCore::CCLayerImpl::~CCLayerImpl):
+        (WebCore::CCLayerImpl::willDraw):
+        (WebCore):
+        (WebCore::CCLayerImpl::didDraw):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::drawLayers):
+        (WebCore::CCLayerTreeHostImpl::didDrawAllLayers):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCScrollbarLayerImpl.cpp:
+        (WebCore::CCScrollbarLayerImpl::willDraw):
+        (WebCore::CCScrollbarLayerImpl::didDraw):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::doComposite):
+        * platform/graphics/chromium/cc/CCTextureLayerImpl.cpp:
+        (WebCore::CCTextureLayerImpl::willDraw):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::scheduledActionDrawAndSwapInternal):
+        * platform/graphics/chromium/cc/CCVideoLayerImpl.cpp:
+        (WebCore::CCVideoLayerImpl::willDraw):
+        (WebCore::CCVideoLayerImpl::didDraw):
+
 2012-04-24  Kent Tamura  <tkent@chromium.org>
 
         Calendar Picker: Resize to minimal size to fit the content
