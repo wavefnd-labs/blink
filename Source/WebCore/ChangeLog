@@ -1,3 +1,54 @@
+2012-04-24  Kent Tamura  <tkent@chromium.org>
+
+        Calendar Picker: Resize to minimal size to fit the content
+        https://bugs.webkit.org/show_bug.cgi?id=84826
+
+        Reviewed by Hajime Morita.
+
+        Using fixed-size popup isn't nice. The calender picker popup size should
+        be minimal.
+
+        The minimal size depends on font settings, localized labels, and
+        localized formats. So we put visible objects on a transparent element,
+        calculate minimal size, resize the popup, then show the objects.
+
+        * Resources/calendarPicker.css:
+        (body): Don't use purple. It was for debugging purpose.
+        The body is visible for a short period becuse we use transparent element.
+        (#main):
+         - Add nowrap to avoid text wrapping.
+         - Add wider width to avoid wrapping.
+         - Add opacity to hide incomplete layout.
+        (.year-month-upper): Don't set flexible box yet.
+        (.month-selector-box): Fix incorrect display value.
+        (.days-area):
+        Don't set table-layout:fixed and width:100% in order that it has the
+        minimal width.
+
+        * Resources/calendarPicker.js:
+        (initialize): Make a new functio to resize.
+        (fixWindowSize):
+        Compute the required width from the right edge of the next year button,
+        the maximum cell width, and so on.  Then, set CSS properties to have
+        correct layout.
+        (YearMonthController.prototype.attachTo):
+        Set min-width property for a long year-month string.
+        (YearMonthController.prototype._showPopup):
+        Center the _monthPopup vertically.
+
+        * html/shadow/CalendarPickerElement.cpp:
+        (WebCore::CalendarPickerElement::contentSize):
+        Specify small size for the initial size. It's better than showing a
+        large window then shrink the size.
+        * page/PagePopupClient.h:
+        (PagePopupClient): Remove a false comment. We should support resize*().
+
+2012-04-25  Kent Tamura  <tkent@chromium.org>
+
+        Unreviewed. Sort Xcode project file.
+
+        * WebCore.xcodeproj/project.pbxproj:
+
 2012-04-25  Alpha Lam  <hclam@chromium.org>
 
         Unreviewed, rolling out r115260.
