@@ -1,5 +1,58 @@
 2012-04-27  Nikolas Zimmermann  <nzimmermann@rim.com>
 
+        Fix repetitions & by animation support for SVGAnimateTransformElement
+        https://bugs.webkit.org/show_bug.cgi?id=85051
+
+        Reviewed by Antti Koivisto.
+
+        Repetitions are currently handled by adjusting percentage (percentage += repeatCount).
+        This doesn't work for <animateTransform> as each repetition has to be post-multiplied to the animated transform list. Fix that.
+
+        By-animations are equal to values="0;by" animations in SMIL. '0' is the neutral element of addition, which is the _zero_ matrix,
+        not the identity matrix for SVGTransform. Add a new construction mode to SVGTransform to be able to construct zero transforms.
+
+        Tests: svg/animations/animateTransform-accumulation-expected.svg
+               svg/animations/animateTransform-accumulation.svg
+               svg/animations/animateTransform-by-scale-expected.svg
+               svg/animations/animateTransform-by-scale.svg
+               svg/animations/animateTransform-from-by-from-to-comparision-expected.svg
+               svg/animations/animateTransform-from-by-from-to-comparision.svg
+               svg/animations/animateTransform-from-by-scale-additive-sum-expected.svg
+               svg/animations/animateTransform-from-by-scale-additive-sum.svg
+               svg/animations/animateTransform-from-by-scale-expected.svg
+               svg/animations/animateTransform-from-by-scale.svg
+               svg/animations/animateTransform-rotate-around-point-expected.svg
+               svg/animations/animateTransform-rotate-around-point.svg
+               svg/animations/animateTransform-skewX-expected.svg
+               svg/animations/animateTransform-skewX.svg
+               svg/animations/animateTransform-skewY-expected.svg
+               svg/animations/animateTransform-skewY.svg
+               svg/animations/animateTransform-translate-expected.svg
+               svg/animations/animateTransform-translate.svg
+               svg/animations/multiple-animateTransform-additive-sum-expected.svg
+               svg/animations/multiple-animateTransform-additive-sum.svg
+
+        * svg/SVGAnimateTransformElement.cpp:
+        (WebCore::SVGAnimateTransformElement::parseAttribute):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::addAnimatedTypes):
+        (WebCore::SVGAnimatedTransformListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimationElement.h:
+        (WebCore::SVGAnimationElement::adjustFromToListValues):
+        * svg/SVGTransform.cpp:
+        (WebCore::SVGTransform::SVGTransform):
+        * svg/SVGTransform.h:
+        * svg/SVGTransformDistance.cpp:
+        (WebCore::SVGTransformDistance::SVGTransformDistance):
+        (WebCore::SVGTransformDistance::scaledDistance):
+        (WebCore::SVGTransformDistance::addSVGTransforms):
+        (WebCore::SVGTransformDistance::addToSVGTransform):
+        (WebCore::SVGTransformDistance::distance):
+        * svg/SVGTransformDistance.h:
+        (SVGTransformDistance):
+
+2012-04-27  Nikolas Zimmermann  <nzimmermann@rim.com>
+
         SVG Animations update baseVal instead of animVal
         https://bugs.webkit.org/show_bug.cgi?id=12437
 
