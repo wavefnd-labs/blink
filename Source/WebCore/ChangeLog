@@ -1,3 +1,45 @@
+2012-04-27  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Shaders] Implement CSS Animations and Transitions for CSS Shaders
+        https://bugs.webkit.org/show_bug.cgi?id=71406
+
+        Reviewed by Dean Jackson.
+
+        I've implemented the blend function for the CustomFilterOperation. This should enable animations for CSS Shaders.
+        Currently, just floats are implemented. If any of the filter attributes like shader, mesh size or box mode are different, 
+        the fallback is to use the "to" part of the animation instead. If other shader parameters do not match, it will merge the parameter values
+        between the "from" and "to" states.
+
+        Test: css3/filters/custom/custom-filter-animation.html
+
+        * platform/graphics/filters/CustomFilterNumberParameter.h:
+        (WebCore::CustomFilterNumberParameter::blend):
+        (CustomFilterNumberParameter):
+        (WebCore::CustomFilterNumberParameter::operator==):
+        * platform/graphics/filters/CustomFilterOperation.cpp:
+        (WebCore::equalCustomFilterParameters):
+        (WebCore):
+        (WebCore::checkCustomFilterParametersOrder):
+        (WebCore::blendCustomFilterParameters):
+        (WebCore::CustomFilterOperation::CustomFilterOperation):
+        (WebCore::CustomFilterOperation::blend):
+        * platform/graphics/filters/CustomFilterOperation.h:
+        (WebCore):
+        (CustomFilterOperation):
+        (WebCore::CustomFilterOperation::operator==):
+        (WebCore::CustomFilterOperation::operator!=):
+        * platform/graphics/filters/CustomFilterParameter.h:
+        (CustomFilterParameter):
+        (WebCore::CustomFilterParameter::isSameType):
+        (WebCore::CustomFilterParameter::operator==):
+        (WebCore::CustomFilterParameter::operator!=):
+        * platform/graphics/filters/CustomFilterProgram.h:
+        * rendering/style/StyleCustomFilterProgram.h:
+        (StyleCustomFilterProgram):
+        (WebCore::StyleCustomFilterProgram::cachedVertexShader):
+        (WebCore::StyleCustomFilterProgram::cachedFragmentShader):
+        (WebCore::StyleCustomFilterProgram::operator==):
+
 2012-04-27  Chris Rogers  <crogers@google.com>
 
         Re-factor scheduling logic from AudioBufferSourceNode into AudioScheduledSourceNode
