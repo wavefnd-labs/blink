@@ -1,3 +1,25 @@
+2012-04-26  Benjamin Poulain  <bpoulain@apple.com>
+
+        Use WebKit types for the cache of ObjcClass::methodsNamed()
+        https://bugs.webkit.org/show_bug.cgi?id=85012
+
+        Reviewed by Geoffrey Garen.
+
+        This patch redefines the method cache ObjcClass to avoid memory allocations in the case of positive match.
+
+        Instead of using the converted name as the key, the original identifier string is used. This shortcuts
+        all the other operations when there is a match.
+
+        A side effect is a method can appear multiple times in the cache if it is invoked with different names using
+        the escape character "$". An attaquer could bloat the cache with a few hundreds strings.
+        In the common case, having each name mapped is an improvment.
+
+        * bridge/objc/objc_class.h:
+        (ObjcClass):
+        * bridge/objc/objc_class.mm:
+        (JSC::Bindings::ObjcClass::ObjcClass):
+        (JSC::Bindings::ObjcClass::methodsNamed):
+
 2012-04-26  Ojan Vafai  <ojan@chromium.org>
 
         Delete dead code in Arena.h/cpp
