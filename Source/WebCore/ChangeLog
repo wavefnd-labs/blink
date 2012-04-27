@@ -1,3 +1,50 @@
+2012-04-27  Chris Rogers  <crogers@google.com>
+
+        Re-factor scheduling logic from AudioBufferSourceNode into AudioScheduledSourceNode
+        https://bugs.webkit.org/show_bug.cgi?id=84639
+
+        Reviewed by Eric Carlson.
+
+        Playback logic involving noteOn(), noteOff(), and playbackState were intertwined with
+        the AudioBufferSourceNode's buffer playback code.  These are more general concepts and
+        may be implemented separately in another class called AudioScheduledSourceNode.
+
+        No new tests. Covered by existing layout tests.
+
+        * GNUmakefile.list.am:
+        Add AudioScheduledSourceNode files to makefile.
+
+        * Modules/webaudio/AudioBufferSourceNode.cpp:
+        (WebCore):
+        (WebCore::AudioBufferSourceNode::AudioBufferSourceNode):
+        Re-factor some member variables into new base class AudioScheduledSourceNode.
+
+        (WebCore::AudioBufferSourceNode::process):
+        Re-factor scheduling logic into AudioScheduledSourceNode.
+
+        * Modules/webaudio/AudioBufferSourceNode.h:
+        (AudioBufferSourceNode):
+        Simplify by re-factoring scheduling logic into AudioScheduledSourceNode.
+
+        * Modules/webaudio/AudioScheduledSourceNode.cpp: Added.
+        (WebCore):
+        (WebCore::AudioScheduledSourceNode::AudioScheduledSourceNode):
+        (WebCore::AudioScheduledSourceNode::updateSchedulingInfo):
+        Get frame information for the current time quantum.
+
+        * Modules/webaudio/AudioScheduledSourceNode.h: Added.
+        (WebCore::AudioScheduledSourceNode::noteOn):
+        (WebCore::AudioScheduledSourceNode::noteOff):
+        (WebCore::AudioScheduledSourceNode::finish):
+        (WebCore::AudioScheduledSourceNode::playbackState):
+        (WebCore::AudioScheduledSourceNode::isPlayingOrScheduled):
+        (WebCore::AudioScheduledSourceNode::hasFinished):
+        Re-factored from AudioBufferSourceNode.
+
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        Add AudioScheduledSourceNode files to makefiles.
+    
 2012-04-26  Sam Weinig  <sam@webkit.org>
 
         Add support for the Blob constructor
