@@ -1,3 +1,26 @@
+2012-04-27  Antti Koivisto  <antti@apple.com>
+
+        Memory cache pruning should be protected against reentering.
+        https://bugs.webkit.org/show_bug.cgi?id=85077
+
+        Reviewed by Alexey Proskuryakov.
+
+        MemoryCache::pruneDeadResourcesToSize() has some ad-hock protection against reentering.
+        This patch adds more complete protection.
+
+        * loader/cache/MemoryCache.cpp:
+        (WebCore::MemoryCache::MemoryCache):
+        (WebCore::MemoryCache::pruneLiveResourcesToSize):
+        
+            Protect live resource pruning too.
+
+        (WebCore::MemoryCache::pruneDeadResourcesToSize):
+        
+            Remove the existing weak reentrancy handling in favor of full proctection.
+
+        * loader/cache/MemoryCache.h:
+        (MemoryCache):
+
 2012-04-27  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Implement the "Disable JavaScript" option in the settings dialog
