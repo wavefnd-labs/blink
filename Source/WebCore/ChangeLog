@@ -1,3 +1,20 @@
+2012-04-26  Ryosuke Niwa  <rniwa@webkit.org>
+
+        REGRESSION (r94497): Pressing Command+A when inline (Marked Text) is not empty will clean whole content
+        https://bugs.webkit.org/show_bug.cgi?id=84501
+
+        Reviewed by Alexey Proskuryakov.
+
+        The bug was caused by setComposition, which is called by cancelComposition, deleting the contents when
+        the passed text is empty. Fixed it by not deleting text when canceling compositions. This is okay because
+        as the comment above the line suggests, this particular call to TypingCommand::deleteSelection is only useful
+        when the confirmed text is empty and the composition text had previously been non-empty.
+
+        Test: editing/input/select-all-clear-input-method.html
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::setComposition):
+
 2012-04-26  Keishi Hattori  <keishi@webkit.org>
 
         datalist: Form control in a <datalist> should be barred from constraint validation
