@@ -1,3 +1,69 @@
+2012-04-27  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        SVG Animations update baseVal instead of animVal
+        https://bugs.webkit.org/show_bug.cgi?id=12437
+
+        Reviewed by Dirk Schulze.
+
+        Cleanup animation code, remove last remaining crufts of the old setAttribute() animation model.
+        Now only two animation modes remain: animate SVG DOM animVal properties or CSS properties.
+
+        Stop caching base values per string in SMILTimeContainer, as it breaks additive="sum" for CSS
+        properties if the underlying base value is changed from the outside (eg. when calling
+        style.fontSize="20px", if font-size was 10px, and we're running an additive by-animation with 50px).
+
+        This requires us to cache the computed style of a SVGElement, without SMIL style property changes,
+        in SVGElementRareData, similar to how the computed style itself is cached in ElementRareData.
+        To be able to compute the base value for a CSS property at any time, we have to exclude any
+        previous animation effects residing in the SMIL animated style properties, per SMIL2/3 specs.
+
+        NOTE: This doesn't change or affect the way CSS Animations/Transitions are applied, we still
+              have some bugs in that area, but this patch doesn't address them. The idea is to only
+              remove the cache, to pave the way for future additive="sum" patches.
+
+        Tests: svg/animations/change-css-property-while-animating-fill-freeze.html
+               svg/animations/change-css-property-while-animating-fill-remove.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::recalcStyle):
+        * dom/Node.h:
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::propertyTypesAreConsistent):
+        (WebCore::SVGAnimateElement::resetToBaseValue):
+        (WebCore::SVGAnimateElement::applyResultsToTarget):
+        * svg/SVGAnimateElement.h:
+        (SVGAnimateElement):
+        * svg/SVGAnimateMotionElement.cpp:
+        (WebCore::SVGAnimateMotionElement::resetToBaseValue):
+        * svg/SVGAnimateMotionElement.h:
+        (SVGAnimateMotionElement):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::applyCSSPropertyToTarget):
+        (WebCore::SVGAnimationElement::setTargetAttributeAnimatedCSSValue):
+        * svg/SVGAnimationElement.h:
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::SVGElement):
+        (WebCore::SVGElement::willRecalcStyle):
+        (WebCore):
+        (WebCore::SVGElement::rareSVGData):
+        (WebCore::SVGElement::ensureRareSVGData):
+        (WebCore::SVGElement::computedStyle):
+        (WebCore::SVGElement::isAnimatableAttribute):
+        * svg/SVGElement.h:
+        (SVGElement):
+        * svg/SVGElementRareData.h:
+        (WebCore::SVGElementRareData::SVGElementRareData):
+        (WebCore::SVGElementRareData::ensureAnimatedSMILStyleProperties):
+        (WebCore::SVGElementRareData::destroyAnimatedSMILStyleProperties):
+        (WebCore::SVGElementRareData::overrideComputedStyle):
+        (WebCore::SVGElementRareData::setUseOverrideComputedStyle):
+        * svg/animation/SMILTimeContainer.cpp:
+        (WebCore::SMILTimeContainer::updateAnimations):
+        * svg/animation/SMILTimeContainer.h:
+        (SMILTimeContainer):
+        * svg/animation/SVGSMILElement.h:
+        (SVGSMILElement):
+
 2012-04-26  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Implement the "Disable JavaScript" option in the settings dialog
