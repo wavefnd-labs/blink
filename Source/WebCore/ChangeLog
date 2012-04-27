@@ -1,3 +1,24 @@
+2012-04-27  Ryosuke Niwa  <rniwa@webkit.org>
+
+        FormatBlock crashes when body element is removed prior to the command execution
+        https://bugs.webkit.org/show_bug.cgi?id=84937
+
+        Reviewed by Tony Chang.
+
+        The crash was because because DOM had been modified since the last time selection had been "validated",
+        and therefore frame selection's endpoints are no longer visible when we instantiated visibleStart
+        and visibleEnd from m_endingSelection of the edit command.
+
+        Fixed the bug by checking the nullity and orphanedness of visible start and visible end directly.
+        I suspect we have similar bugs in other commands. The fundamental problem is that the copy constructor
+        of VisibleSelection never validates so when a VisibleSelection is passed from one class to another
+        (e.g. FrameSelection to EditCommand), we may not adjust end points as needed.
+
+        Test: editing/execCommand/format-block-without-body-crash.html
+
+        * editing/ApplyBlockElementCommand.cpp:
+        (WebCore::ApplyBlockElementCommand::doApply):
+
 2012-04-27  Enrica Casucci  <enrica@apple.com>
 
         REGRESSION(r96257): Deleting a large amount of text is very slow.
