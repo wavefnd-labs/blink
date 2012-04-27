@@ -1,3 +1,32 @@
+2012-04-27  Enrica Casucci  <enrica@apple.com>
+
+        REGRESSION(r96257): Deleting a large amount of text is very slow.
+        https://bugs.webkit.org/show_bug.cgi?id=83983
+        <rdar://problem/10826076>
+        
+        Reviewed by Ryosuke Niwa.
+
+        The change in r96257 did not cause the performance regression per se,
+        but exposed a problem in the way we calculate the offset in container
+        node when the anchorType is PositionIsOffsetInAnchor.
+        The offset was computed as the minimum between the given offset and
+        lastOffsetInNode. If the container has a very large number of children,
+        we walk the entire list of child nodes in the container simply to find
+        out how many they are.
+        Looking through the entire editing code, I found other 2 cases (one
+        is only an ASSERT) where we could do a similar optimization.
+
+        No new tests. No behavior change, only performance optimization.
+
+        * dom/Position.cpp:
+        (WebCore::Position::computeOffsetInContainerNode):
+        * dom/Position.h:
+        (WebCore::minOffsetForNode):
+        (WebCore::offsetIsBeforeLastNodeOffset):
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::ApplyStyleCommand::removeInlineStyle):
+        (WebCore::ApplyStyleCommand::mergeEndWithNextIfIdentical):
+
 2012-04-27  Julien Chaffraix  <jchaffraix@webkit.org>
 
         NULL-deref in RenderBox::clippedOverflowRectForRepaint
