@@ -1,3 +1,32 @@
+2012-04-26  Shawn Singh  <shawnsingh@chromium.org>
+
+        Re-implement backFaceVisibility to avoid dealing with perspective w < 0 problem
+        https://bugs.webkit.org/show_bug.cgi?id=84059
+
+        Reviewed by Adrienne Walker.
+
+        Unit tests added to CCMathUtilTest.cpp.
+
+        This patch changes the implementation of backFaceIsVisible so that
+        it doesn't need to deal with the w < 0 problem from of perspective
+        projections. Instead, it is equally correct to simply use the
+        inverse-transpose of the matrix, and quickly check the third row,
+        third column element. Additionally, it was appropriate to move
+        this function into TransformationMatrix itself.
+
+        Making this change fixes some issues related to disappearing
+        layers in Chromium (where the compositor incorrectly thought that
+        the back face was visible, and skipped the layer).
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostCommon.cpp:
+        (WebCore::calculateVisibleLayerRect):
+        (WebCore::layerShouldBeSkipped):
+        * platform/graphics/transforms/TransformationMatrix.cpp:
+        (WebCore::TransformationMatrix::isBackFaceVisible):
+        (WebCore):
+        * platform/graphics/transforms/TransformationMatrix.h:
+        (TransformationMatrix):
+
 2012-04-26  Martin Robinson  <mrobinson@igalia.com>
 
         [Cairo] Wrap cairo surfaces in a class when storing native images
