@@ -1,3 +1,37 @@
+;2012-04-27  Geoffrey Garen  <ggaren@apple.com>
+
+        Removed the sole use of Weak<Unknown>
+        https://bugs.webkit.org/show_bug.cgi?id=85099
+
+        Reviewed by Sam Weinig.
+
+        The semantics and implementation of Weak<Unknown> are unclear because:
+            - Should you call a finalizer for a non-GC thingy? If so, when?
+
+                * Possible answer: No.
+
+            - If WeakImpls for GC thingies live with the GC thingies in the
+              heap, where do WeakImpls for non-GC thingies live?
+
+                * Possible answer: Directly in the Weak<T>.
+
+        Since no clients actually want these behaviors, it's hard to tell if
+        they're the right behaviors, and it's not worth the implementation
+        complexity. If we come up with a client that wants these behaviors, we
+        can always revisit this.
+
+        * bindings/js/JSNodeFilterCondition.cpp:
+        (WebCore::JSNodeFilterCondition::JSNodeFilterCondition): Just leave our
+        filter NULL if it's not an object -- that's a better way to indicate
+        "not a valid filter object".
+
+        (WebCore::JSNodeFilterCondition::acceptNode): Fixed up some naming to
+        clarify that the object we're working with is not necessarily a function.
+
+        * bindings/js/JSNodeFilterCondition.h:
+        (JSNodeFilterCondition): Use Weak<JSObject>, since that more closely
+        matches what we're trying to do.
+
 2012-04-26  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass Isolate to getDOMXXXMap()
