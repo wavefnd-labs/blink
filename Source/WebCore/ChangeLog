@@ -1,3 +1,23 @@
+2012-04-27  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        NULL-deref in RenderBox::clippedOverflowRectForRepaint
+        https://bugs.webkit.org/show_bug.cgi?id=84774
+
+        Reviewed by Tony Chang.
+
+        Test: fast/inline/crash-new-continuation-with-outline.html
+
+        The bug comes from trying to repaint the :after content as part of updateBeforeAfterContent.
+        The repainting logic would query the yet-to-be-inserted continuation(). Then we would crash in
+        RenderBox::clippedOverflowRectForRepaint as we didn't have an enclosingLayer() (which any
+        RenderObject in the tree will have).
+
+        The fix is to check in RenderInline::clippedOverflowRectForRepaint that our continuation()
+        is properly inserted in the tree. We could check that it isRooted() but it's an overkill here.
+
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::clippedOverflowRectForRepaint):
+
 2012-04-27  Antti Koivisto  <antti@apple.com>
 
         Memory cache pruning should be protected against reentering.
