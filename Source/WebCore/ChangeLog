@@ -1,3 +1,32 @@
+2012-04-26  Sam Weinig  <sam@webkit.org>
+
+        Add support for the Blob constructor
+        https://bugs.webkit.org/show_bug.cgi?id=84555
+
+        Reviewed by Maciej Stachowiak.
+
+        Test: fast/files/blob-constructor.html
+
+        This adds an implementation of the Blob constructor that willfully
+        violates the W3C Editor’s Draft 29 February 2012 in the following ways:
+        - Elements in the parts array are coerced to DOMStrings https://www.w3.org/Bugs/Public/show_bug.cgi?id=16721 
+        - Don't throw for invalid key in the dictionary https://www.w3.org/Bugs/Public/show_bug.cgi?id=16727
+        - Values for the endings property are treated as enums https://www.w3.org/Bugs/Public/show_bug.cgi?id=16729 
+
+        * bindings/js/JSBlobCustom.cpp:
+        (WebCore::JSBlobConstructor::constructJSBlob):
+        Implement blob constructor.
+
+        * bindings/v8/custom/V8BlobCustom.cpp:
+        (WebCore::V8Blob::constructorCallback):
+        Implement blob constructor.
+
+        * fileapi/Blob.idl:
+        Add constructor to IDL.
+
+        * workers/WorkerContext.idl:
+        Add Blob constructor to the worker global object.
+
 2012-04-27  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
 
         [Qt] Fix minimal build.
