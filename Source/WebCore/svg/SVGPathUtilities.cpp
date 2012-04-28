@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Research In Motion Limited 2010. All rights reserved.
+ * Copyright (C) Research In Motion Limited 2010, 2012. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -20,8 +20,9 @@
 #include "config.h"
 
 #if ENABLE(SVG)
-#include "SVGPathParserFactory.h"
+#include "SVGPathUtilities.h"
 
+#include "Path.h"
 #include "PathTraversalState.h"
 #include "SVGPathBlender.h"
 #include "SVGPathBuilder.h"
@@ -109,24 +110,7 @@ static SVGPathBlender* globalSVGPathBlender()
     return s_blender;
 }
 
-SVGPathParserFactory* SVGPathParserFactory::self()
-{
-    static SVGPathParserFactory* s_instance = 0;
-    if (!s_instance)
-        s_instance = new SVGPathParserFactory;
-
-    return s_instance;
-}
-
-SVGPathParserFactory::SVGPathParserFactory()
-{
-}
-
-SVGPathParserFactory::~SVGPathParserFactory()
-{
-}
-
-bool SVGPathParserFactory::buildPathFromString(const String& d, Path& result)
+bool buildPathFromString(const String& d, Path& result)
 {
     if (d.isEmpty())
         return false;
@@ -140,7 +124,7 @@ bool SVGPathParserFactory::buildPathFromString(const String& d, Path& result)
     return ok;
 }
 
-bool SVGPathParserFactory::buildSVGPathByteStreamFromSVGPathSegList(const SVGPathSegList& list, SVGPathByteStream* result, PathParsingMode parsingMode)
+bool buildSVGPathByteStreamFromSVGPathSegList(const SVGPathSegList& list, SVGPathByteStream* result, PathParsingMode parsingMode)
 {
     ASSERT(result);
     result->clear();
@@ -156,7 +140,7 @@ bool SVGPathParserFactory::buildSVGPathByteStreamFromSVGPathSegList(const SVGPat
     return ok;
 }
 
-bool SVGPathParserFactory::buildPathFromByteStream(SVGPathByteStream* stream, Path& result)
+bool buildPathFromByteStream(SVGPathByteStream* stream, Path& result)
 {
     ASSERT(stream);
     if (stream->isEmpty())
@@ -171,7 +155,7 @@ bool SVGPathParserFactory::buildPathFromByteStream(SVGPathByteStream* stream, Pa
     return ok;
 }
 
-bool SVGPathParserFactory::buildSVGPathSegListFromByteStream(SVGPathByteStream* stream, SVGPathElement* element, SVGPathSegList& result, PathParsingMode parsingMode)
+bool buildSVGPathSegListFromByteStream(SVGPathByteStream* stream, SVGPathElement* element, SVGPathSegList& result, PathParsingMode parsingMode)
 {
     ASSERT(stream);
     if (stream->isEmpty())
@@ -186,7 +170,7 @@ bool SVGPathParserFactory::buildSVGPathSegListFromByteStream(SVGPathByteStream* 
     return ok;
 }
 
-bool SVGPathParserFactory::buildStringFromByteStream(SVGPathByteStream* stream, String& result, PathParsingMode parsingMode)
+bool buildStringFromByteStream(SVGPathByteStream* stream, String& result, PathParsingMode parsingMode)
 {
     ASSERT(stream);
     if (stream->isEmpty())
@@ -202,7 +186,7 @@ bool SVGPathParserFactory::buildStringFromByteStream(SVGPathByteStream* stream, 
     return ok;
 }
 
-bool SVGPathParserFactory::buildStringFromSVGPathSegList(const SVGPathSegList& list, String& result, PathParsingMode parsingMode)
+bool buildStringFromSVGPathSegList(const SVGPathSegList& list, String& result, PathParsingMode parsingMode)
 {
     result = String();
     if (list.isEmpty())
@@ -218,7 +202,7 @@ bool SVGPathParserFactory::buildStringFromSVGPathSegList(const SVGPathSegList& l
     return ok;
 }
 
-bool SVGPathParserFactory::buildSVGPathByteStreamFromString(const String& d, SVGPathByteStream* result, PathParsingMode parsingMode)
+bool buildSVGPathByteStreamFromString(const String& d, SVGPathByteStream* result, PathParsingMode parsingMode)
 {
     ASSERT(result);
     result->clear();
@@ -234,7 +218,7 @@ bool SVGPathParserFactory::buildSVGPathByteStreamFromString(const String& d, SVG
     return ok;
 }
 
-bool SVGPathParserFactory::buildAnimatedSVGPathByteStream(SVGPathByteStream* fromStream, SVGPathByteStream* toStream, SVGPathByteStream* result, float progress)
+bool buildAnimatedSVGPathByteStream(SVGPathByteStream* fromStream, SVGPathByteStream* toStream, SVGPathByteStream* result, float progress)
 {
     ASSERT(fromStream);
     ASSERT(toStream);
@@ -255,7 +239,7 @@ bool SVGPathParserFactory::buildAnimatedSVGPathByteStream(SVGPathByteStream* fro
     return ok;
 }
 
-bool SVGPathParserFactory::addToSVGPathByteStream(SVGPathByteStream* fromStream, SVGPathByteStream* byStream, unsigned repeatCount)
+bool addToSVGPathByteStream(SVGPathByteStream* fromStream, SVGPathByteStream* byStream, unsigned repeatCount)
 {
     ASSERT(fromStream);
     ASSERT(byStream);
@@ -275,7 +259,7 @@ bool SVGPathParserFactory::addToSVGPathByteStream(SVGPathByteStream* fromStream,
     return ok;
 }
 
-bool SVGPathParserFactory::getSVGPathSegAtLengthFromSVGPathByteStream(SVGPathByteStream* stream, float length, unsigned& pathSeg)
+bool getSVGPathSegAtLengthFromSVGPathByteStream(SVGPathByteStream* stream, float length, unsigned& pathSeg)
 {
     ASSERT(stream);
     if (stream->isEmpty())
@@ -292,7 +276,7 @@ bool SVGPathParserFactory::getSVGPathSegAtLengthFromSVGPathByteStream(SVGPathByt
     return ok;
 }
 
-bool SVGPathParserFactory::getTotalLengthOfSVGPathByteStream(SVGPathByteStream* stream, float& totalLength)
+bool getTotalLengthOfSVGPathByteStream(SVGPathByteStream* stream, float& totalLength)
 {
     ASSERT(stream);
     if (stream->isEmpty())
@@ -309,7 +293,7 @@ bool SVGPathParserFactory::getTotalLengthOfSVGPathByteStream(SVGPathByteStream* 
     return ok;
 }
 
-bool SVGPathParserFactory::getPointAtLengthOfSVGPathByteStream(SVGPathByteStream* stream, float length, FloatPoint& point)
+bool getPointAtLengthOfSVGPathByteStream(SVGPathByteStream* stream, float length, FloatPoint& point)
 {
     ASSERT(stream);
     if (stream->isEmpty())
