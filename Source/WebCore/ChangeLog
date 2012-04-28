@@ -1,3 +1,140 @@
+2012-04-28  Igor Oliveira  <igor.o@sisa.samsung.com>
+
+        Move PropertyWrapper out of the  AnimationBase
+        https://bugs.webkit.org/show_bug.cgi?id=84978
+
+        Reviewed by Dean Jackson.
+
+        AnimationBase is a complex class. It has a state machine and a bunch of
+        property handlers. This patch moves the property handlers to a separate
+        class making AnimationBase simpler.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * page/animation/AnimationBase.cpp:
+        * page/animation/AnimationBase.h:
+        (AnimationBase):
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationController::supportsAcceleratedAnimationOfProperty):
+        * page/animation/CSSPropertyAnimation.cpp: Added.
+        (WebCore):
+        (WebCore::blendFunc):
+        (WebCore::crossfadeBlend):
+        (AnimationPropertyWrapperBase):
+        (WebCore::AnimationPropertyWrapperBase::AnimationPropertyWrapperBase):
+        (WebCore::AnimationPropertyWrapperBase::~AnimationPropertyWrapperBase):
+        (WebCore::AnimationPropertyWrapperBase::isShorthandWrapper):
+        (WebCore::AnimationPropertyWrapperBase::property):
+        (WebCore::AnimationPropertyWrapperBase::animationIsAccelerated):
+        (WebCore::addPropertyWrapper):
+        (WebCore::wrapperForProperty):
+        (PropertyWrapperGetter):
+        (WebCore::PropertyWrapperGetter::PropertyWrapperGetter):
+        (WebCore::PropertyWrapperGetter::equals):
+        (PropertyWrapper):
+        (WebCore::PropertyWrapper::PropertyWrapper):
+        (WebCore::PropertyWrapper::blend):
+        (RefCountedPropertyWrapper):
+        (WebCore::RefCountedPropertyWrapper::RefCountedPropertyWrapper):
+        (WebCore::RefCountedPropertyWrapper::blend):
+        (StyleImagePropertyWrapper):
+        (WebCore::StyleImagePropertyWrapper::StyleImagePropertyWrapper):
+        (WebCore::StyleImagePropertyWrapper::equals):
+        (PropertyWrapperColor):
+        (WebCore::PropertyWrapperColor::PropertyWrapperColor):
+        (WebCore::PropertyWrapperColor::blend):
+        (PropertyWrapperAcceleratedOpacity):
+        (WebCore::PropertyWrapperAcceleratedOpacity::PropertyWrapperAcceleratedOpacity):
+        (WebCore::PropertyWrapperAcceleratedOpacity::animationIsAccelerated):
+        (WebCore::PropertyWrapperAcceleratedOpacity::blend):
+        (PropertyWrapperAcceleratedTransform):
+        (WebCore::PropertyWrapperAcceleratedTransform::PropertyWrapperAcceleratedTransform):
+        (WebCore::PropertyWrapperAcceleratedTransform::animationIsAccelerated):
+        (WebCore::PropertyWrapperAcceleratedTransform::blend):
+        (PropertyWrapperAcceleratedFilter):
+        (WebCore::PropertyWrapperAcceleratedFilter::PropertyWrapperAcceleratedFilter):
+        (WebCore::PropertyWrapperAcceleratedFilter::animationIsAccelerated):
+        (WebCore::PropertyWrapperAcceleratedFilter::blend):
+        (WebCore::shadowListLength):
+        (WebCore::shadowForBlending):
+        (PropertyWrapperShadow):
+        (WebCore::PropertyWrapperShadow::PropertyWrapperShadow):
+        (WebCore::PropertyWrapperShadow::equals):
+        (WebCore::PropertyWrapperShadow::blend):
+        (WebCore::PropertyWrapperShadow::blendSimpleOrMatchedShadowLists):
+        (WebCore::PropertyWrapperShadow::blendMismatchedShadowLists):
+        (PropertyWrapperMaybeInvalidColor):
+        (WebCore::PropertyWrapperMaybeInvalidColor::PropertyWrapperMaybeInvalidColor):
+        (WebCore::PropertyWrapperMaybeInvalidColor::equals):
+        (WebCore::PropertyWrapperMaybeInvalidColor::blend):
+        (PropertyWrapperVisitedAffectedColor):
+        (WebCore::PropertyWrapperVisitedAffectedColor::PropertyWrapperVisitedAffectedColor):
+        (WebCore::PropertyWrapperVisitedAffectedColor::equals):
+        (WebCore::PropertyWrapperVisitedAffectedColor::blend):
+        (FillLayerAnimationPropertyWrapperBase):
+        (WebCore::FillLayerAnimationPropertyWrapperBase::FillLayerAnimationPropertyWrapperBase):
+        (WebCore::FillLayerAnimationPropertyWrapperBase::~FillLayerAnimationPropertyWrapperBase):
+        (FillLayerPropertyWrapperGetter):
+        (WebCore::FillLayerPropertyWrapperGetter::FillLayerPropertyWrapperGetter):
+        (WebCore::FillLayerPropertyWrapperGetter::equals):
+        (FillLayerPropertyWrapper):
+        (WebCore::FillLayerPropertyWrapper::FillLayerPropertyWrapper):
+        (WebCore::FillLayerPropertyWrapper::blend):
+        (FillLayerRefCountedPropertyWrapper):
+        (WebCore::FillLayerRefCountedPropertyWrapper::FillLayerRefCountedPropertyWrapper):
+        (WebCore::FillLayerRefCountedPropertyWrapper::blend):
+        (FillLayerStyleImagePropertyWrapper):
+        (WebCore::FillLayerStyleImagePropertyWrapper::FillLayerStyleImagePropertyWrapper):
+        (WebCore::FillLayerStyleImagePropertyWrapper::equals):
+        (FillLayersPropertyWrapper):
+        (WebCore::FillLayersPropertyWrapper::FillLayersPropertyWrapper):
+        (WebCore::FillLayersPropertyWrapper::equals):
+        (WebCore::FillLayersPropertyWrapper::blend):
+        (ShorthandPropertyWrapper):
+        (WebCore::ShorthandPropertyWrapper::ShorthandPropertyWrapper):
+        (WebCore::ShorthandPropertyWrapper::isShorthandWrapper):
+        (WebCore::ShorthandPropertyWrapper::equals):
+        (WebCore::ShorthandPropertyWrapper::blend):
+        (WebCore::ShorthandPropertyWrapper::propertyWrappers):
+        (PropertyWrapperFlex):
+        (WebCore::PropertyWrapperFlex::PropertyWrapperFlex):
+        (WebCore::PropertyWrapperFlex::equals):
+        (WebCore::PropertyWrapperFlex::blend):
+        (PropertyWrapperSVGPaint):
+        (WebCore::PropertyWrapperSVGPaint::PropertyWrapperSVGPaint):
+        (WebCore::PropertyWrapperSVGPaint::equals):
+        (WebCore::PropertyWrapperSVGPaint::blend):
+        (WebCore::addShorthandProperties):
+        (WebCore::CSSPropertyAnimation::ensurePropertyMap):
+        (WebCore::gatherEnclosingShorthandProperties):
+        (WebCore::CSSPropertyAnimation::blendProperties):
+        (WebCore::CSSPropertyAnimation::animationOfPropertyIsAccelerated):
+        (WebCore::CSSPropertyAnimation::animatableShorthandsAffectingProperty):
+        (WebCore::CSSPropertyAnimation::propertiesEqual):
+        (WebCore::CSSPropertyAnimation::getPropertyAtIndex):
+        (WebCore::CSSPropertyAnimation::getNumProperties):
+        * page/animation/CSSPropertyAnimation.h: Added.
+        (WebCore):
+        (CSSPropertyAnimation):
+        * page/animation/CompositeAnimation.cpp:
+        (WebCore::CompositeAnimation::updateTransitions):
+        (WebCore::CompositeAnimation::pauseTransitionAtTime):
+        * page/animation/ImplicitAnimation.cpp:
+        (WebCore::ImplicitAnimation::animate):
+        (WebCore::ImplicitAnimation::getAnimatedStyle):
+        (WebCore::ImplicitAnimation::isTargetPropertyEqual):
+        (WebCore::ImplicitAnimation::blendPropertyValueInStyle):
+        (WebCore::ImplicitAnimation::timeToNextService):
+        * page/animation/KeyframeAnimation.cpp:
+        (WebCore::KeyframeAnimation::animate):
+        (WebCore::KeyframeAnimation::getAnimatedStyle):
+        (WebCore::KeyframeAnimation::timeToNextService):
+        * rendering/style/RenderStyle.h:
+
 2012-04-28  Geoffrey Garen  <ggaren@apple.com>
 
         Clarified JSGlobalData (JavaScript VM) lifetime
