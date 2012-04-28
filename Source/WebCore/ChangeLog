@@ -1,3 +1,47 @@
+2012-04-28  No'am Rosenthal  <noam.rosenthal@nokia.com>
+
+        [Texmap] Falling leaves demo missing opacity fade out animation
+        https://bugs.webkit.org/show_bug.cgi?id=83691
+
+        Reviewed by Martin Robinson.
+
+        The bug originated from clearing an intermediate surface with glClear while the scissor
+        state was wrong.
+        When using intermediate surfaces, maintain a clip-stack for each surface, rather than
+        a single clip-stack for the whole scene. When a surface is bound, its clip stack should
+        be applied.
+
+        Covered by existing compositing tests.
+
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (SharedGLData):
+        (WebCore::TextureMapperGL::ClipStack::push):
+        (WebCore):
+        (WebCore::TextureMapperGL::ClipStack::pop):
+        (WebCore::scissorClip):
+        (WebCore::TextureMapperGL::ClipStack::apply):
+        (WebCore::TextureMapperGL::clipStack):
+        (WebCore::TextureMapperGL::beginPainting):
+        (WebCore::TextureMapperGL::drawTexture):
+        (WebCore::BitmapTextureGL::didReset):
+        (WebCore::BitmapTextureGL::clearIfNeeded):
+        (WebCore::BitmapTextureGL::createFboIfNeeded):
+        (WebCore::BitmapTextureGL::bind):
+        (WebCore::TextureMapperGL::bindDefaultSurface):
+        (WebCore::TextureMapperGL::bindSurface):
+        (WebCore::TextureMapperGL::beginScissorClip):
+        (WebCore::TextureMapperGL::beginClip):
+        (WebCore::TextureMapperGL::endClip):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (TextureMapperGL):
+        (ClipState):
+        (WebCore::TextureMapperGL::ClipState::ClipState):
+        (ClipStack):
+        (WebCore::TextureMapperGL::ClipStack::current):
+        (WebCore::TextureMapperGL::ClipStack::clear):
+        (BitmapTextureGL):
+        (WebCore::BitmapTextureGL::BitmapTextureGL):
+
 2012-04-26  Emil A Eklund  <eae@chromium.org> and Levi Weintraub  <leviw@chromium.org>
 
         Move Length and CSS length computation to float
