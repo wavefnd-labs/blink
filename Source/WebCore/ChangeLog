@@ -1,3 +1,119 @@
+2012-04-27  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Implement a helper method V8Proxy::throwNotEnoughArgumentsError()
+        https://bugs.webkit.org/show_bug.cgi?id=85097
+
+        Reviewed by Kenneth Russell.
+
+        In bug 84787, kbr requested to avoid hard-coding
+        throwError("Not enough arguments", V8Proxy::TypeError) here and there.
+        This patch implements V8Proxy::throwNotEnoughArgumentsError()
+        and uses it in V8 bindings.
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateArgumentsCountCheck):
+        (GenerateEventConstructorCallback):
+        * bindings/v8/V8Proxy.cpp:
+        (WebCore::V8Proxy::throwNotEnoughArgmentsError):
+        (WebCore):
+        * bindings/v8/V8Proxy.h:
+        (V8Proxy):
+        * bindings/v8/custom/V8DataViewCustom.cpp:
+        (WebCore::V8DataView::getInt8Callback):
+        (WebCore::V8DataView::getUint8Callback):
+        (WebCore::V8DataView::setInt8Callback):
+        (WebCore::V8DataView::setUint8Callback):
+        * bindings/v8/custom/V8DirectoryEntryCustom.cpp:
+        (WebCore::V8DirectoryEntry::getDirectoryCallback):
+        (WebCore::V8DirectoryEntry::getFileCallback):
+        * bindings/v8/custom/V8IntentConstructor.cpp:
+        (WebCore::V8Intent::constructorCallback):
+        * bindings/v8/custom/V8WebKitMutationObserverCustom.cpp:
+        (WebCore::V8WebKitMutationObserver::constructorCallback):
+        (WebCore::V8WebKitMutationObserver::observeCallback):
+
+        Test: bindings/scripts/test/TestObj.idl
+
+        * bindings/scripts/CodeGeneratorV8.pm: Modified as described above.
+        (GenerateArgumentsCountCheck):
+        (GenerateEventConstructorCallback):
+
+        * bindings/v8/V8Proxy.cpp: Ditto.
+        (WebCore::V8Proxy::throwNotEnoughArgumentsError):
+        (WebCore):
+        * bindings/v8/V8Proxy.h:
+        (V8Proxy):
+        * bindings/v8/custom/V8DataViewCustom.cpp:
+        (WebCore::V8DataView::getInt8Callback):
+        (WebCore::V8DataView::getUint8Callback):
+        (WebCore::V8DataView::setInt8Callback):
+        (WebCore::V8DataView::setUint8Callback):
+        * bindings/v8/custom/V8DirectoryEntryCustom.cpp:
+        (WebCore::V8DirectoryEntry::getDirectoryCallback):
+        (WebCore::V8DirectoryEntry::getFileCallback):
+        * bindings/v8/custom/V8IntentConstructor.cpp:
+        (WebCore::V8Intent::constructorCallback):
+        * bindings/v8/custom/V8WebKitMutationObserverCustom.cpp:
+        (WebCore::V8WebKitMutationObserver::constructorCallback):
+        (WebCore::V8WebKitMutationObserver::observeCallback):
+
+        * bindings/scripts/test/V8/V8Float64Array.cpp: Updated run-bindings-tests.
+        (WebCore::Float64ArrayV8Internal::fooCallback):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore::TestActiveDOMObjectV8Internal::excitingFunctionCallback):
+        (WebCore::TestActiveDOMObjectV8Internal::postMessageCallback):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore::TestCustomNamedGetterV8Internal::anotherFunctionCallback):
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp:
+        (WebCore::V8TestEventConstructor::constructorCallback):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore::TestEventTargetV8Internal::itemCallback):
+        (WebCore::TestEventTargetV8Internal::dispatchEventCallback):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalMethod2Callback):
+        (WebCore::V8TestInterface::constructorCallback):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore::TestMediaQueryListListenerV8Internal::methodCallback):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        (WebCore::V8TestNamedConstructorConstructorCallback):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::voidMethodWithArgsCallback):
+        (WebCore::TestObjV8Internal::intMethodWithArgsCallback):
+        (WebCore::TestObjV8Internal::objMethodWithArgsCallback):
+        (WebCore::TestObjV8Internal::methodWithSequenceArgCallback):
+        (WebCore::TestObjV8Internal::methodReturningSequenceCallback):
+        (WebCore::TestObjV8Internal::methodThatRequiresAllArgsAndThrowsCallback):
+        (WebCore::TestObjV8Internal::serializedValueCallback):
+        (WebCore::TestObjV8Internal::idbKeyCallback):
+        (WebCore::TestObjV8Internal::optionsObjectCallback):
+        (WebCore::TestObjV8Internal::methodWithNonOptionalArgAndOptionalArgCallback):
+        (WebCore::TestObjV8Internal::methodWithNonOptionalArgAndTwoOptionalArgsCallback):
+        (WebCore::TestObjV8Internal::methodWithCallbackArgCallback):
+        (WebCore::TestObjV8Internal::methodWithNonCallbackArgAndCallbackArgCallback):
+        (WebCore::TestObjV8Internal::overloadedMethod1Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod2Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod3Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod4Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod5Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod6Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod7Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod11Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod12Callback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeMethod1Callback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeMethod2Callback):
+        (WebCore::TestObjV8Internal::convert1Callback):
+        (WebCore::TestObjV8Internal::convert2Callback):
+        (WebCore::TestObjV8Internal::convert3Callback):
+        (WebCore::TestObjV8Internal::convert4Callback):
+        (WebCore::TestObjV8Internal::convert5Callback):
+        (WebCore::TestObjV8Internal::strictFunctionCallback):
+        (WebCore::V8TestObj::constructorCallback):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::acceptTransferListCallback):
+        (WebCore::V8TestSerializedScriptValueInterface::constructorCallback):
+
 2012-04-27  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Call lowMemoryUsageMB directly
