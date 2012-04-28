@@ -39,7 +39,7 @@ public:
     void finalizeAll();
     ~WeakSet();
 
-    WeakImpl* allocate(JSValue, WeakHandleOwner* = 0, void* context = 0);
+    static WeakImpl* allocate(JSValue, WeakHandleOwner* = 0, void* context = 0);
     static void deallocate(WeakImpl*);
 
     void visitLiveWeakImpls(HeapRootVisitor&);
@@ -67,17 +67,6 @@ inline WeakSet::WeakSet(Heap* heap)
     , m_nextAllocator(0)
     , m_heap(heap)
 {
-}
-
-inline WeakImpl* WeakSet::allocate(JSValue jsValue, WeakHandleOwner* weakHandleOwner, void* context)
-{
-    WeakBlock::FreeCell* allocator = m_allocator;
-    if (UNLIKELY(!allocator))
-        allocator = findAllocator();
-    m_allocator = allocator->next;
-
-    WeakImpl* weakImpl = WeakBlock::asWeakImpl(allocator);
-    return new (NotNull, weakImpl) WeakImpl(jsValue, weakHandleOwner, context);
 }
 
 inline void WeakSet::deallocate(WeakImpl* weakImpl)
