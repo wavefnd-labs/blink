@@ -1,3 +1,52 @@
+2012-04-26  Emil A Eklund  <eae@chromium.org> and Levi Weintraub  <leviw@chromium.org>
+
+        Move Length and CSS length computation to float
+        https://bugs.webkit.org/show_bug.cgi?id=84801
+
+        Reviewed by Eric Seidel.
+
+        Change Length and CSS length computation to floating point. This gets us
+        closer to the goal of supporting subpixel layout and improves precision
+        for SVG which already uses floating point for its layout.
+
+        This change makes computedStyle return fractional values for pixel values
+        if a fraction is specified. It also changes the result of computations
+        where two or more values with fractional precision. Prior to this change
+        the result of Length(2.9) + Length(2.9) would be 4 as each value would be
+        floored. With this change the result is 5 as the addition is done with
+        floating point precision and then the result will be floored. Once we
+        enable subpixel layout the resulting value in this example would be 5.8.
+
+        Updated existing layout tests.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::zoomAdjustedPixelValue):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::computeLength):
+        * css/CSSPrimitiveValue.h:
+        (WebCore):
+        (WebCore::roundForImpreciseConversion):
+        Add specialized float version of roundForImpreciseConversion that matches
+        the int versions rounding logic.
+        
+        If a value is sufficiently close to the next integer round it up to
+        ensure that a style rule such as "width: 4.999px" evaluates to 5px
+        instead of 4px. This is needed as, although Lengths are using floating
+        point, the layout system still uses integer precision and floors the
+        Length values.
+        This will change once we move to FractionalLayoutUnits but for now this
+        is needed to ensure compatibility with the existing system and tests.
+        
+        Without this specialized rounding logic we fail a handful of tests
+        including acid3.
+        
+        * platform/Length.h:
+        (WebCore::Length::value):
+        (Length):
+        (WebCore::Length::intValue):
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::styleOrColLogicalWidth):
+
 2012-04-28  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Enable touch events feature fails touch feature detection
