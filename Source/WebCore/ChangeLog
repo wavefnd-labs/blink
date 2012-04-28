@@ -1,3 +1,27 @@
+2012-04-27  Jochen Eisinger  <jochen@chromium.org>
+
+        Ensure that there's always a provisional document loader if the frame loader is in provisional state
+        https://bugs.webkit.org/show_bug.cgi?id=83894
+
+        Reviewed by Nate Chapin.
+
+        We're still seeing crashes in the FrameLoader where the FrameLoader's
+        state is "provisional" but there is no provisional document loader. I
+        added code to update the FrameLoader's state everytime the provisional
+        document loader is cleared, and added checks that the FrameLoader's
+        state can't be set to provisional without a provisional loader.
+
+        If the crashes go away, or the newly added checks reveal the culprit,
+        we should relex the checks to use ASSERT() instead of CRASH().
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::init):
+        (WebCore::FrameLoader::setupForReplace):
+        (WebCore::FrameLoader::stopAllLoaders):
+        (WebCore::FrameLoader::clearProvisionalLoad):
+        (WebCore::FrameLoader::continueFragmentScrollAfterNavigationPolicy):
+        (WebCore::FrameLoader::continueLoadAfterNavigationPolicy):
+
 2012-04-27  Geoffrey Garen  <ggaren@apple.com>
 
         Try to fix the Qt build.
