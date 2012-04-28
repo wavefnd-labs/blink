@@ -1,3 +1,54 @@
+2012-04-27  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Fix repetitions & by animation support for path animations
+        https://bugs.webkit.org/show_bug.cgi?id=85071
+
+        Reviewed by Antti Koivisto.
+
+        Implement additive="sum" / by-animation support for path animations, eg.
+        <path d="M 10 10 L 10 100 Z">
+            <animate attributeName="d" begin="0s" dur="4s" by="M 0 0 L 90 0 Z"/>
+        <path>
+
+        animates the d attribute to "M 10 10 L 100 100 0 Z".
+
+        Now only <animateColor> and <animateMotion> are left to be fixed, all other types are working as expected now in all additive/accumulate/from-by/by/from-to animations.
+
+        Tests: svg/animations/path-animation-expected.svg
+               svg/animations/repeating-path-animation-expected.svg
+               svg/animations/repeating-path-animation.svg
+
+        * svg/SVGAnimatedPath.cpp:
+        (WebCore::SVGAnimatedPathAnimator::addAnimatedTypes): Implemented, to support by-animations, instead of falling back to to-animations.
+        (WebCore::SVGAnimatedPathAnimator::calculateAnimatedValue): Handle repetitions, accumulation & addition.
+        * svg/SVGPathBlender.cpp: Allow empty from source everywhere, use default values if no from value is specified, needed for by-animations.
+        (WebCore::SVGPathBlender::SVGPathBlender):
+        (WebCore::SVGPathBlender::blendAnimatedDimensonalFloat):
+        (WebCore::SVGPathBlender::blendAnimatedFloatPoint):
+        (WebCore::SVGPathBlender::blendMoveToSegment):
+        (WebCore::SVGPathBlender::blendLineToSegment):
+        (WebCore::SVGPathBlender::blendLineToHorizontalSegment):
+        (WebCore::SVGPathBlender::blendLineToVerticalSegment):
+        (WebCore::SVGPathBlender::blendCurveToCubicSegment):
+        (WebCore::SVGPathBlender::blendCurveToCubicSmoothSegment):
+        (WebCore::SVGPathBlender::blendCurveToQuadraticSegment):
+        (WebCore::SVGPathBlender::blendCurveToQuadraticSmoothSegment):
+        (WebCore::SVGPathBlender::blendArcToSegment):
+        (WebCore::SVGPathBlender::addAnimatedPath):
+        (WebCore::SVGPathBlender::blendAnimatedPath):
+        * svg/SVGPathBlender.h: Add new addAnimatedPath function.
+        (SVGPathBlender):
+        * svg/SVGPathByteStream.h:
+        (SVGPathByteStream): Make SVGPathByteStreams copyable, needed for SVGAnimatedPathAnimator.
+        (WebCore::SVGPathByteStream::size): Returns size of the SVGPathByteStream.
+        * svg/SVGPathParserFactory.cpp:
+        (WebCore::SVGPathParserFactory::buildAnimatedSVGPathByteStream): Allow empty from streams, needed for by animations. 
+        (WebCore::SVGPathParserFactory::addToSVGPathByteStream): Add 'byStream' 'repeatCount' times to 'toStream'. Both streams must match in size.
+        * svg/SVGPathParserFactory.h: Add new addToSVGPathByteStream function.
+        * svg/SVGPointList.cpp: Remove dead code.
+        * svg/SVGPointList.h: Ditto.
+        (SVGPointList):
+
 2012-04-28  Nikolas Zimmermann  <nzimmermann@rim.com>
 
         SVGAnimateMotion does not handle accumulation
