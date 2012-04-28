@@ -1,3 +1,26 @@
+2012-04-28  Geoffrey Garen  <ggaren@apple.com>
+
+        Clarified JSGlobalData (JavaScript VM) lifetime
+        https://bugs.webkit.org/show_bug.cgi?id=85142
+
+        Reviewed by Anders Carlsson.
+
+        * bindings/js/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::~WorkerScriptController): Slightly 
+        simpler than before. We can't just rely on our default destructor 
+        because we need to hold the JSLock when we tear down the VM.
+
+        * bridge/NP_jsobject.cpp:
+        (_NPN_InvokeDefault):
+        (_NPN_Invoke):
+        (_NPN_Evaluate):
+        (_NPN_Construct): Don't RefPtr<> the JSGlobalData because it makes it 
+        seem like you know something the rest of our code doesn't know. The 
+        plugin JSGlobalData is immortal, anyway.
+
+        I also removed some timeout checker related code because that feature 
+        doesn't work anymore, so it was effectively dead code.
+
 2012-04-28  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: InspectorFrontendHost.append has to be implemented for saving heap snapshots.
