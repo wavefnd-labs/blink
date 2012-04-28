@@ -1,3 +1,40 @@
+2012-04-27  Kentaro Hara  <haraken@chromium.org>
+
+        "Not enough arguments" error should be TypeError
+        https://bugs.webkit.org/show_bug.cgi?id=84628
+
+        Reviewed by Darin Adler.
+
+        Currently, some custom bindings implement "Not enough arguments"
+        error as SyntaxError. The Web IDL spec requires that it should be
+        TypeError: http://www.w3.org/TR/WebIDL/#dfn-overload-resolution-algorithm
+        Thus, this patch changes SyntaxError to TypeError.
+
+        Tests: http/tests/websocket/tests/hixie76/url-parsing.html:
+               http/tests/websocket/tests/hybi/url-parsing.html:
+               http/tests/xmlhttprequest/exceptions.html:
+               svg/dom/SVGLength.html:
+               webaudio/audionode.html:
+
+        * bindings/js/JSAudioContextCustom.cpp:
+        (WebCore::JSAudioContextConstructor::constructJSAudioContext):
+        * bindings/js/JSSVGLengthCustom.cpp:
+        (WebCore::JSSVGLength::convertToSpecifiedUnits):
+        * bindings/js/JSWebSocketCustom.cpp:
+        (WebCore::JSWebSocketConstructor::constructJSWebSocket):
+        (WebCore::JSWebSocket::send):
+        * bindings/js/JSXMLHttpRequestCustom.cpp:
+        (WebCore::JSXMLHttpRequest::open):
+        * bindings/v8/custom/V8AudioContextCustom.cpp:
+        (WebCore::V8AudioContext::constructorCallback):
+        * bindings/v8/custom/V8SVGLengthCustom.cpp:
+        (WebCore::V8SVGLength::convertToSpecifiedUnitsCallback):
+        * bindings/v8/custom/V8WebSocketCustom.cpp:
+        (WebCore::V8WebSocket::constructorCallback):
+        (WebCore::V8WebSocket::sendCallback):
+        * bindings/v8/custom/V8XMLHttpRequestCustom.cpp:
+        (WebCore::V8XMLHttpRequest::openCallback):
+
 2012-04-27  Kenneth Russell  <kbr@google.com>
 
         Remove SHADER_COMPILER constant
