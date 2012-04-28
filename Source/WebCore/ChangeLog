@@ -1,3 +1,55 @@
+2012-04-27  Dean Jackson  <dino@apple.com>
+
+        Support reverse and alternate-reverse in CA animations
+        https://bugs.webkit.org/show_bug.cgi?id=78041
+
+        Reviewed by Beth Dakin.
+
+        CoreAnimation does not natively support reverse and alternate-reverse
+        animation directions so we need to flip the animation values (keyframe
+        keys and timing functions) that we send to GraphicsLayerCA. Unfortunately
+        this code adds a lot of conditionals because it isn't as simple as
+        reversing the order of keys. You also now have a different alignment of
+        timing functions to the reversed list.
+
+        New tests to cover the two new directions, making sure the timing
+        functions are correctly inverted, and exercising fill modes.
+
+        Tests: animations/animation-direction-reverse-fill-mode-hardware.html
+               animations/animation-direction-reverse-fill-mode.html
+               animations/animation-direction-reverse-hardware-opacity.html
+               animations/animation-direction-reverse-hardware.html
+               animations/animation-direction-reverse-non-hardware.html
+               animations/animation-direction-reverse-timing-functions-hardware.html
+               animations/animation-direction-reverse-timing-functions.html
+
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+          Handle the previously unsupported animation directions, reversing
+          the list of values and keytimes that would be used to create
+          the CA Animation.
+        (WebCore::GraphicsLayerCA::addAnimation):
+          Do not create an animation if on Windows and using a reverse
+          direction.
+        (WebCore::GraphicsLayerCA::createFilterAnimationsFromKeyframes):
+        (WebCore::GraphicsLayerCA::setupAnimation):
+        (WebCore::GraphicsLayerCA::setAnimationEndpoints):
+        (WebCore::GraphicsLayerCA::setAnimationKeyframes):
+        (WebCore::GraphicsLayerCA::setTransformAnimationEndpoints):
+        (WebCore::GraphicsLayerCA::setTransformAnimationKeyframes):
+        (WebCore::GraphicsLayerCA::setFilterAnimationEndpoints):
+        (WebCore::GraphicsLayerCA::setFilterAnimationKeyframes):
+        * platform/graphics/ca/PlatformCAAnimation.h:
+        (PlatformCAAnimation): Pass through a flag that tells the CA Animation
+        that it should invert the timing functions.
+        * platform/graphics/ca/mac/PlatformCAAnimationMac.mm:
+        (toCAMediaTimingFunction): Add a parameter that will invert the timing
+        function coefficients if necessary.
+        (PlatformCAAnimation::setTimingFunction):
+        (PlatformCAAnimation::setTimingFunctions):
+        * platform/graphics/ca/win/PlatformCAAnimationWin.cpp:
+        (toCACFTimingFunction):
+          New unused parameter.
+
 2012-04-27  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r115407.
