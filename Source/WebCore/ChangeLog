@@ -1,5 +1,47 @@
 2012-04-28  Nikolas Zimmermann  <nzimmermann@rim.com>
 
+        SVGAnimateColorElement doesn't support by/to animations properly
+        https://bugs.webkit.org/show_bug.cgi?id=36704
+
+        Reviewed by Antti Koivisto.
+
+        Switch AnimatedColorAnimator to use the standard animateAdditiveNumber() method, taking progress & repeatCount into account.
+        This gives us accumulation/repeatCount support for free.
+
+        We just animate the four color components on their own now and clamp once at the end after addition/accumulation finished.
+        Import <animateColor> tests from Dr. Olaf Hoffmanns SVG Animation test suite, which all pass now.
+
+        While I was at it, remove the includeSMILProperties boolean from computeCSSPropertyValue - we always use the computed style
+        without SMIL effects included, whenever we want to retrieve the "base value", or handle "inherit/currentColor".
+
+        Tests: svg/animations/animateColor-additive-2a-expected.svg
+               svg/animations/animateColor-additive-2a.svg
+               svg/animations/animateColor-additive-2b-expected.svg
+               svg/animations/animateColor-additive-2b.svg
+               svg/animations/animateColor-additive-2c-expected.svg
+               svg/animations/animateColor-additive-2c.svg
+               svg/animations/animateColor-additive-2d-expected.svg
+               svg/animations/animateColor-additive-2d.svg
+
+        * svg/ColorDistance.cpp:
+        (WebCore::ColorDistance::clampColor):
+        (WebCore::ColorDistance::addColors):
+        (WebCore::ColorDistance::addToColor):
+        * svg/ColorDistance.h:
+        (ColorDistance):
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::resetToBaseValue):
+        * svg/SVGAnimatedColor.cpp:
+        (WebCore::SVGAnimatedColorAnimator::addAnimatedTypes):
+        (WebCore::SVGAnimatedColorAnimator::calculateAnimatedValue):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::computeCSSPropertyValue):
+        (WebCore::SVGAnimationElement::adjustForInheritance):
+        * svg/SVGAnimationElement.h:
+        (SVGAnimationElement):
+
+2012-04-28  Nikolas Zimmermann  <nzimmermann@rim.com>
+
         Not reviewed. Fix Qt build -- I was too quick.
 
         * rendering/svg/SVGPathData.cpp: Add back Path.h include.
