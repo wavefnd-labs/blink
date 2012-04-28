@@ -1,3 +1,194 @@
+2012-04-27  Tim Horton  <timothy_horton@apple.com>
+
+        SMIL animation causes leak of the related Document (and many elements)
+        https://bugs.webkit.org/show_bug.cgi?id=83856
+        <rdar://problem/11216047>
+
+        Reviewed by Dean Jackson.
+
+        The SVGAnimatedProperty cache was previously holding a reference to the properties it contained;
+        said references were cleared in the SVGAnimatedProperty destructor (which was never called because
+        there was always one remaining reference from the cache).
+
+        The SVGAnimatedProperty cache now holds raw pointers instead of RefPtrs; the SVGAnimateElement now
+        owns its own SVGAnimatedProperties, both for itself and for any <use/> instances of itself. They're
+        cleared and destroyed within SVGAnimateElement::targetElementWillChange, at which time they're removed
+        from the cache.
+
+        SVGPropertyTearOffs now keep a reference to their SVGElement (m_contextElement) instead of their SVGAnimatedProperty;
+        this way, there is no reference cycle, but the animated property (owned by the element) and the element itself are
+        kept alive until the TearOff is garbage collected.
+
+        Tests: svg/animations/smil-leak-dynamically-added-element-instances.svg
+               svg/animations/smil-leak-elements.svg
+               svg/animations/smil-leak-element-instances-noBaseValRef.svg
+               svg/animations/smil-leak-element-instances.svg
+               svg/animations/svglength-element-removed-crash.svg
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        (WebCore::propertyTypesAreConsistent):
+        (WebCore::SVGAnimateElement::resetToBaseValue):
+        (WebCore::SVGAnimateElement::applyResultsToTarget):
+        (WebCore::SVGAnimateElement::targetElementWillChange):
+        * svg/SVGAnimateElement.h:
+        (SVGAnimateElement):
+        * svg/SVGAnimatedAngle.cpp:
+        (WebCore::SVGAnimatedAngleAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedAngleAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedAngleAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedAngleAnimator::animValWillChange):
+        (WebCore::SVGAnimatedAngleAnimator::animValDidChange):
+        * svg/SVGAnimatedAngle.h:
+        (SVGAnimatedAngleAnimator):
+        * svg/SVGAnimatedBoolean.cpp:
+        (WebCore::SVGAnimatedBooleanAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedBooleanAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedBooleanAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedBooleanAnimator::animValWillChange):
+        (WebCore::SVGAnimatedBooleanAnimator::animValDidChange):
+        * svg/SVGAnimatedBoolean.h:
+        (SVGAnimatedBooleanAnimator):
+        * svg/SVGAnimatedColor.h:
+        (WebCore::SVGAnimatedColorAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedColorAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedColorAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedColorAnimator::animValWillChange):
+        (WebCore::SVGAnimatedColorAnimator::animValDidChange):
+        * svg/SVGAnimatedEnumeration.cpp:
+        (WebCore::SVGAnimatedEnumerationAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedEnumerationAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedEnumerationAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedEnumerationAnimator::animValWillChange):
+        (WebCore::SVGAnimatedEnumerationAnimator::animValDidChange):
+        * svg/SVGAnimatedEnumeration.h:
+        (SVGAnimatedEnumerationAnimator):
+        * svg/SVGAnimatedInteger.cpp:
+        (WebCore::SVGAnimatedIntegerAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedIntegerAnimator::animValWillChange):
+        (WebCore::SVGAnimatedIntegerAnimator::animValDidChange):
+        * svg/SVGAnimatedInteger.h:
+        (SVGAnimatedIntegerAnimator):
+        * svg/SVGAnimatedIntegerOptionalInteger.cpp:
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::animValWillChange):
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::animValDidChange):
+        * svg/SVGAnimatedIntegerOptionalInteger.h:
+        (SVGAnimatedIntegerOptionalIntegerAnimator):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedLengthAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedLengthAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedLengthAnimator::animValWillChange):
+        (WebCore::SVGAnimatedLengthAnimator::animValDidChange):
+        * svg/SVGAnimatedLength.h:
+        (SVGAnimatedLengthAnimator):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedLengthListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedLengthListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedLengthListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedLengthListAnimator::animValDidChange):
+        * svg/SVGAnimatedLengthList.h:
+        (SVGAnimatedLengthListAnimator):
+        * svg/SVGAnimatedNumber.cpp:
+        (WebCore::SVGAnimatedNumberAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedNumberAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedNumberAnimator::animValWillChange):
+        (WebCore::SVGAnimatedNumberAnimator::animValDidChange):
+        * svg/SVGAnimatedNumber.h:
+        (SVGAnimatedNumberAnimator):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedNumberListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedNumberListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedNumberListAnimator::animValDidChange):
+        * svg/SVGAnimatedNumberList.h:
+        (SVGAnimatedNumberListAnimator):
+        * svg/SVGAnimatedNumberOptionalNumber.cpp:
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::animValWillChange):
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::animValDidChange):
+        * svg/SVGAnimatedNumberOptionalNumber.h:
+        (SVGAnimatedNumberOptionalNumberAnimator):
+        * svg/SVGAnimatedPath.cpp:
+        (WebCore::SVGAnimatedPathAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedPathAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedPathAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedPathAnimator::animValWillChange):
+        (WebCore::SVGAnimatedPathAnimator::animValDidChange):
+        * svg/SVGAnimatedPath.h:
+        (SVGAnimatedPathAnimator):
+        * svg/SVGAnimatedPointList.cpp:
+        (WebCore::SVGAnimatedPointListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedPointListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedPointListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedPointListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedPointListAnimator::animValDidChange):
+        * svg/SVGAnimatedPointList.h:
+        (SVGAnimatedPointListAnimator):
+        * svg/SVGAnimatedPreserveAspectRatio.cpp:
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::animValWillChange):
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::animValDidChange):
+        * svg/SVGAnimatedPreserveAspectRatio.h:
+        (SVGAnimatedPreserveAspectRatioAnimator):
+        * svg/SVGAnimatedRect.cpp:
+        (WebCore::SVGAnimatedRectAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedRectAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedRectAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedRectAnimator::animValWillChange):
+        (WebCore::SVGAnimatedRectAnimator::animValDidChange):
+        * svg/SVGAnimatedRect.h:
+        (SVGAnimatedRectAnimator):
+        * svg/SVGAnimatedString.cpp:
+        (WebCore::SVGAnimatedStringAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedStringAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedStringAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedStringAnimator::animValWillChange):
+        (WebCore::SVGAnimatedStringAnimator::animValDidChange):
+        * svg/SVGAnimatedString.h:
+        (SVGAnimatedStringAnimator):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::startAnimValAnimation):
+        (WebCore::SVGAnimatedTransformListAnimator::stopAnimValAnimation):
+        (WebCore::SVGAnimatedTransformListAnimator::resetAnimValToBaseVal):
+        (WebCore::SVGAnimatedTransformListAnimator::animValWillChange):
+        (WebCore::SVGAnimatedTransformListAnimator::animValDidChange):
+        * svg/SVGAnimatedTransformList.h:
+        (SVGAnimatedTransformListAnimator):
+        * svg/SVGAnimatedTypeAnimator.h:
+        (SVGAnimatedTypeAnimator):
+        (WebCore::SVGAnimatedTypeAnimator::findAnimatedPropertiesForAttributeName):
+        (WebCore::SVGAnimatedTypeAnimator::findAnimatedPropertiesFromInstancesForAttributeName):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::resetFromBaseValue):
+        (WebCore::SVGAnimatedTypeAnimator::stopAnimValAnimationForType):
+        (WebCore::SVGAnimatedTypeAnimator::animValDidChangeForType):
+        (WebCore::SVGAnimatedTypeAnimator::animValWillChangeForType):
+        (WebCore::SVGAnimatedTypeAnimator::constructFromBaseValues):
+        (WebCore::SVGAnimatedTypeAnimator::resetFromBaseValues):
+        (WebCore::SVGAnimatedTypeAnimator::stopAnimValAnimationForTypes):
+        (WebCore::SVGAnimatedTypeAnimator::animValDidChangeForTypes):
+        (WebCore::SVGAnimatedTypeAnimator::animValWillChangeForTypes):
+        (WebCore::SVGAnimatedTypeAnimator::castAnimatedPropertyToActualType):
+        (WebCore::SVGAnimatedTypeAnimator::executeAction):
+        * svg/properties/SVGAnimatedProperty.h:
+        (SVGAnimatedProperty):
+        * svg/properties/SVGPropertyTearOff.h:
+        (WebCore::SVGPropertyTearOff::animatedProperty):
+        (SVGPropertyTearOff):
+
 2012-04-27  Adam Klein  <adamk@chromium.org>
 
         Remove misspelled, unused, unimplemented method from V8Proxy
