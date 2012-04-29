@@ -1,3 +1,70 @@
+2012-04-29  Kentaro Hara  <haraken@chromium.org>
+
+        REGRESSION(r113086): onresize event handler can be deleted in popup window
+        https://bugs.webkit.org/show_bug.cgi?id=84908
+
+        Reviewed by Ojan Vafai.
+
+        In a nutshell, an onresize event handler in the popup window
+        can be non-deterministically deleted. For more details, please
+        look at Chromium issue 123642:
+        http://code.google.com/p/chromium/issues/detail?id=123642
+
+        I confirmed that this bug is the regression caused by r113086.
+
+        r113086 introduced the following code:
+
+        void V8LazyEventListener::prepareListenerObject(...) {
+            if (hasExistingListenerObject())
+                return;
+            ...;
+            // Since we only parse once, there's no need to keep data
+            // used for parsing around anymore.
+            m_functionName = String();
+            m_code = String();
+            m_eventParameterName = String();
+            m_sourceURL = String();
+
+            setListenerObject(wrappedFunction);
+        }
+
+        This is not correct. The parsing can be done more than once,
+        and thus we cannot clear data. This patch removes the above code.
+
+        Consider the following situation:
+
+        (1) Assume '<body onresize="f()"></body>'.
+        (2) prepareListenerObject() runs.
+        (3) Since this is the first parsing, hasExistingListenerObject()
+        returns false. After the parsing, the listener object is set
+        by setListenerObject().
+        (4) GC runs. Since there is no strong reference to the listener
+        object, weakEventListenerCallback() is called back, and the listener
+        object is disposed.
+        (5) A resize event is triggered.
+        (6) prepareListenerObject() is called again. Since the listener object
+        is already disposed, hasExistingListenerObject() returns false,
+        and the second parsing starts.
+
+        In my investigation, the above situation is happening in the reported
+        Chromium bug. Anyway, I am sure that potentially the parsing can be
+        done more than once, and thus we must keep m_xxxx data.
+
+        However, this is just a temporary fix. We should fix the code so that
+        an alive event listener object is never reclaimed.
+        See https://bugs.webkit.org/show_bug.cgi?id=85152 for more details.
+
+        No tests: I tried hard to create a DRT test, but could not.
+        The bug depends on the behavior of GC, and thus the reported bug is
+        non-deterministic. For example, (as explained in the Chromium issue,)
+        the bug does not happen if we load an HTML from network because
+        the network latency hides the bug. Also the bug happens in the
+        popup window only. If we open the reported HTML in the main window,
+        we cannot reproduce the bug.
+
+        * bindings/v8/V8LazyEventListener.cpp:
+        (WebCore::V8LazyEventListener::prepareListenerObject):
+
 2012-04-28  Sam Weinig  <sam@webkit.org>
 
         Smooth scrolling needs a new key
