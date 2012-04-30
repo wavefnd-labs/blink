@@ -1,3 +1,70 @@
+2012-04-30  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=82922
+        border-image with image-set does not render correctly when viewed at 
+        2x
+        -and corresponding-
+        <rdar://problem/11167820>
+
+        Reviewed by Dan Bernstein.
+
+        StyleImage::computeIntrinsicDimensions() is only called from one 
+        place: RenderBoxModelObject::calculateIntrinsicDimensions(), and that 
+        is only used for background images and border images. In my original 
+        image-set work, I decided that 
+        StyleCachedImageSet::computeIntrinsicDimensions() would compute 
+        "intrinsic" dimensions, meaning that they would compute the dimensions 
+        that the image resource was pretending to be rather than the actual 
+        dimensions of the resource. I chose to do this because it made 
+        background images work great without changing the call-site. But border 
+        images need to know the actual intrinsic dimensions, so this design 
+        decision (which was admittedly questionable from the start) won't 
+        stick.
+        
+        This patch makes StyleImage::computeIntrinsicDimensions() return 
+        actual intrinsic dimensions. Then the border-image and background-
+        image code is very lightly patched to account for the image's scale 
+        factor.
+
+        These functions no longer need the scale factor parameter.
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::computeIntrinsicDimensions):
+        * loader/cache/CachedImage.h:
+        (CachedImage):
+        * platform/graphics/GeneratedImage.h:
+        (GeneratedImage):
+        * platform/graphics/GeneratorGeneratedImage.cpp:
+        (WebCore::GeneratedImage::computeIntrinsicDimensions):
+        * platform/graphics/Image.cpp:
+        (WebCore::Image::computeIntrinsicDimensions):
+        * platform/graphics/Image.h:
+        (Image):
+        * platform/graphics/cg/PDFDocumentImage.cpp:
+        (WebCore::PDFDocumentImage::computeIntrinsicDimensions):
+        * platform/graphics/cg/PDFDocumentImage.h:
+        (PDFDocumentImage):
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::computeIntrinsicDimensions):
+        * svg/graphics/SVGImage.h:
+        (SVGImage):
+        * rendering/style/StyleCachedImageSet.cpp:
+        (WebCore::StyleCachedImageSet::computeIntrinsicDimensions):
+        
+        New function on StyleImage returns the image's scale factor. 
+        * rendering/style/StyleCachedImageSet.h:
+        (WebCore::StyleCachedImageSet::imageScaleFactor):
+        * rendering/style/StyleImage.h:
+        (WebCore::StyleImage::imageScaleFactor):
+
+        Scale the intrinsic size of the background image down by the scale 
+        factor.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::calculateFillTileSize):
+        
+        Slices should be multiplied by the image's scale factor since they are 
+        always expected to the specified in the 1x image's coordinate space.
+        (WebCore::RenderBoxModelObject::paintNinePieceImage):
+
 2012-04-30  Arko Saha  <arko@motorola.com>
 
         Remove custom bindings code in JSHTMLCollectionCustom.cpp for HTMLPropertiesCollection.
