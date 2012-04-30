@@ -1,3 +1,35 @@
+2012-04-30  Nate Chapin  <japhet@chromium.org>
+
+        Move more of committing and starting to write a Document
+        to DocumentLoader.
+        https://bugs.webkit.org/show_bug.cgi?id=83908
+
+        Reviewed by Adam Barth.
+
+        No new tests, refactor only.
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::commitIfReady): Ignore m_gotFirstByte here, since
+            it was always true here anyway.
+        (WebCore::DocumentLoader::finishedLoading): If we are finishing an empty
+            document, create the document now, so that FrameLoaderClient doesn't
+            have to do it later (FrameLoaderClient code will be removed in a later
+            patch).
+        (WebCore::DocumentLoader::commitData): Call receivedFirstData() directly and
+            do some work receivedFirstData() used to do, setEncoding() only once per
+            load.
+        (WebCore::DocumentLoader::receivedData):
+        (WebCore::DocumentLoader::maybeCreateArchive):
+        * loader/DocumentLoader.h:
+        * loader/DocumentWriter.cpp:
+        (WebCore::DocumentWriter::setEncoding):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::receivedFirstData): Move DocumentLoader calls
+            to DocumentLoader.
+        * loader/FrameLoader.h: Remove m_hasReceivedFirstData and willSetEncoding(),
+            allow hasReceivedData() to be called directly.
+        (FrameLoader):
+
 2012-04-30  Kentaro Hara  <haraken@chromium.org>
 
         Unreviewed. Fix test crashes in Win/Linux debug builds.
