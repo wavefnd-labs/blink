@@ -1,3 +1,22 @@
+2012-04-29  Luke Macpherson  <macpherson@chromium.org>
+
+        Initialize member variables in CSSParser's constructor.
+        https://bugs.webkit.org/show_bug.cgi?id=84377
+
+        Reviewed by Kentaro Hara.
+
+        It is good practice not to leave member variables uninitialized. They make debugging more difficult by reducing
+        repeatability, and in some cases lead to the possibility of information leakage occuring. This patch simply adds
+        initialization of m_numParsedPropertiesBeforeMarginBox to CSSParser's constructor to INVALID_NUM_PARSED_PROPERTIES
+        so that the initial state is the same as the state after the properties are cleared.
+
+        No tests added because this is a code style fix, not an actual bug so long as the bison generated code calls
+        startDeclarationsForMarginBox() and endDeclarationsForMarginBox() symmetrically. The lack of initialization was
+        originally detected by coverity.
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::CSSParser):
+
 2012-04-29  Kent Tamura  <tkent@chromium.org>
 
         [Mac] Add LocalizedDateMac
