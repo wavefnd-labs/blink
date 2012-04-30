@@ -1,5 +1,26 @@
 2012-04-30  Levi Weintraub  <leviw@chromium.org>
 
+        Update LayoutUnit usage in InlineFlowBox and RenderWidget
+        https://bugs.webkit.org/show_bug.cgi?id=85239
+
+        Reviewed by Eric Seidel.
+
+        Updating LayoutUnit usage in a pair of remaining functions to minimize the remaining work to switching
+        to FractionalLayoutUnits for layout instead of integers.
+
+        No new tests. No change in behavior.
+
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::placeBoxesInBlockDirection): Though stored as a float, the top is always
+        set to an integer value. When we move to sub-pixel, we need to preserve this. Not preserving this
+        behavior affects text decorations, most notably underlines.
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::updateWidgetGeometry): Adding pixel snapping for the content box if it's
+        not transformed (absoluteContentBox includes pixel snapping), and properly treating the boundingBox
+        as an IntRect.
+
+2012-04-30  Levi Weintraub  <leviw@chromium.org>
+
         Prepare RenderDeprecatedFlexibleBox for sub-pixel layout
         https://bugs.webkit.org/show_bug.cgi?id=85217
 
