@@ -1,3 +1,37 @@
+2012-04-29  Kent Tamura  <tkent@chromium.org>
+
+        [Mac] Add LocalizedDateMac
+        https://bugs.webkit.org/show_bug.cgi?id=85039
+
+        Reviewed by Kentaro Hara.
+
+        A date shown <input type=date> should be formatted for user's OS
+        settings. Chromium-Mac used LocalizedDateICU.cpp to format/parse visible
+        date strings and it didn't reflect user-settings.
+
+        Test: covered by fast/forms/date/date-appearance.html
+
+        * WebCore.gyp/WebCore.gyp:
+        Use LocalizedDateMac.mm for OS X instead of LocalizedDateICU.cpp.
+        * WebCore.gypi: Add LocalizedDateMac.mm
+        * platform/text/mac/LocalizedDateMac.mm: Added.
+        (WebCore::createShortDateFormatter):
+        Creates a NSDateFormatter with desired settings.
+        (WebCore::parseLocalizedDate): Impelment for tyep=date.
+        (WebCore::formatLocalizedDate): ditto.
+        (WebCore::isYearSymbol): A readability helper for format string parsing.
+        (WebCore::isMonthSymbol): ditto.
+        (WebCore::isDaySymbol): ditto.
+        (WebCore::localizeDateFormat):
+        Parse a format string, and replace symbols with user-friendly labels.
+        (WebCore::localizedDateFormatText):
+        Gets a format string, and apply localizeDateFormat().
+        (WebCore::monthLabels): Obtain month names from the system.
+        (WebCore::weekDayShortLabels): Obtain week day symbols from the system.
+        (WebCore::firstDayOfWeek): Obtain first day of week from the system.
+        * platform/text/ICULocale.cpp:
+        (WebCore::createFallbackMonthLabels): Uses WTF::monthFullName.
+
 2012-04-29  Sam Weinig  <sam@webkit.org>
 
         Add support for the Blob constructor (Part 2)
