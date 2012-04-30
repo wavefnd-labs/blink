@@ -1,3 +1,52 @@
+2012-04-30  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        Use Vector<Attribute> directly instead of encapsulating it in AttributeVector
+        https://bugs.webkit.org/show_bug.cgi?id=84413
+
+        Reviewed by Andreas Kling.
+
+        As commented in https://bugs.webkit.org/show_bug.cgi?id=79963#c16 we do not
+        usually subclass basic types like Vector. This patch changes code to use
+        Vector<Attribute> directly and move around the functionality of the former
+        methods to more specific helper functions or inline code at the callers.
+
+        * dom/Element.cpp:
+        (WebCore::Element::parserSetAttributes):
+        (WebCore::Element::normalizeAttributes):
+        * dom/Element.h:
+        (Element):
+        * dom/ElementAttributeData.cpp:
+        * dom/ElementAttributeData.h:
+        (WebCore::findAttributeInVector):
+        (WebCore::ElementAttributeData::getAttributeItem):
+        (ElementAttributeData):
+        (WebCore::ElementAttributeData::attributeVector):
+        (WebCore::ElementAttributeData::clonedAttributeVector):
+        (WebCore::ElementAttributeData::getAttributeItemIndex):
+        (WebCore):
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::createHTMLElementFromSavedElement):
+        * html/parser/HTMLToken.h:
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processFakeStartTag):
+        (WebCore::HTMLTreeBuilder::attributesForIsindexInput): Loop through the attributes
+        backwards so we can remove items without affecting the rest of the loop run.
+        * html/parser/HTMLTreeBuilder.h:
+        * html/parser/TextDocumentParser.cpp:
+        (WebCore::TextDocumentParser::insertFakePreElement):
+        * xml/XMLErrors.cpp:
+        (WebCore::createXHTMLParserErrorHeader):
+        (WebCore::XMLErrors::insertErrorMessageBlock):
+        * xml/parser/MarkupTokenBase.h:
+        (WebCore::AtomicMarkupTokenBase::AtomicMarkupTokenBase):
+        (WebCore::AtomicMarkupTokenBase::getAttributeItem):
+        (WebCore::AtomicMarkupTokenBase::attributes):
+        (AtomicMarkupTokenBase):
+        (WebCore::::initializeAttributes):
+        * xml/parser/XMLToken.h:
+        (WebCore::AtomicXMLToken::AtomicXMLToken):
+
 2012-04-30  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Remove PlatformSupport::loadPlatformAudioResource, call loadResource directly
