@@ -1,3 +1,47 @@
+2012-04-30  Kentaro Hara  <haraken@chromium.org>
+
+        WebGLRenderingContext methods should throw TypeError for not enough arguments
+        https://bugs.webkit.org/show_bug.cgi?id=84787
+
+        Reviewed by Kenneth Russell.
+
+        Currently, WebGLRenderingcontext methods implement
+        "Not enough arguments" error as SyntaxError. The Web IDL
+        spec requires that it should be TypeError:
+        http://www.w3.org/TR/WebIDL/#dfn-overload-resolution-algorithm
+
+        This patch changes SyntaxError to TypeError.
+
+        I wanted to confirm the behavior of Firefox and Opera,
+        but they do not implement WebGL yet.
+
+        Test: fast/canvas/webgl/webgl-exceptions.html
+
+        * bindings/js/JSWebGLRenderingContextCustom.cpp:
+        (WebCore::getObjectParameter):
+        (WebCore::JSWebGLRenderingContext::getAttachedShaders):
+        (WebCore::JSWebGLRenderingContext::getExtension):
+        (WebCore::JSWebGLRenderingContext::getFramebufferAttachmentParameter):
+        (WebCore::JSWebGLRenderingContext::getParameter):
+        (WebCore::JSWebGLRenderingContext::getProgramParameter):
+        (WebCore::JSWebGLRenderingContext::getShaderParameter):
+        (WebCore::JSWebGLRenderingContext::getUniform):
+        (WebCore::dataFunctionf):
+        (WebCore::dataFunctioni):
+        (WebCore::dataFunctionMatrix):
+        * bindings/v8/custom/V8WebGLRenderingContextCustom.cpp:
+        (WebCore::getObjectParameter):
+        (WebCore::V8WebGLRenderingContext::getAttachedShadersCallback):
+        (WebCore::V8WebGLRenderingContext::getExtensionCallback):
+        (WebCore::V8WebGLRenderingContext::getFramebufferAttachmentParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getProgramParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getShaderParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getUniformCallback):
+        (WebCore::vertexAttribAndUniformHelperf):
+        (WebCore::uniformHelperi):
+        (WebCore::uniformMatrixHelper):
+
 2012-04-30  Emil A Eklund  <eae@chromium.org>
 
         [gtk, qt, chromium, win] Fix usage of LayoutUnits and rounding in platform code
