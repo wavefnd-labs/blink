@@ -1,3 +1,82 @@
+2012-04-30  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Move RenderTableCell's row index to RenderTableRow
+        https://bugs.webkit.org/show_bug.cgi?id=85229
+
+        Reviewed by Ojan Vafai.
+
+        Covered by the existing table tests.
+
+        Row index is a RenderTableRow concept and as such this change moves
+        the relevant logic into the class.
+
+        While touching the code, renamed row() -> rowIndex() as now RenderTableCell
+        can return its parent RenderTableRow and we were returning an index, not the row
+        itself.
+
+        * accessibility/AccessibilityTable.cpp:
+        (WebCore::AccessibilityTable::cellForColumnAndRow):
+        * accessibility/AccessibilityTableCell.cpp:
+        (WebCore::AccessibilityTableCell::rowIndexRange):
+        (WebCore::AccessibilityTableCell::titleUIElement):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::cellAbove):
+        (WebCore::RenderTable::cellBelow):
+        (WebCore::RenderTable::cellBefore):
+        (WebCore::RenderTable::cellAfter):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::RenderTreeAsText::writeRenderObject):
+        Updated after the renaming RenderTableCell::row() -> rowIndex().
+
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::RenderTableCell):
+        (WebCore::RenderTableCell::computeCollapsedBeforeBorder):
+        (WebCore::RenderTableCell::computeCollapsedAfterBorder):
+        Updated after m_rowIndex removal and row() -> rowIndex() renaming.
+
+        (WebCore::RenderTableCell::styleDidChange):
+        Switched the rowWasSet check to an ASSERT. The new logic guarantees that
+        row index was set straight when we insert the row. The previous logic was
+        opened to some race conditions as we could wait for a recalcCells call before
+        setting the index on the rows which made this check necessary.
+
+        * rendering/RenderTableCell.h:
+        (WebCore::RenderTableCell::row):
+        Added this RenderTableRow getter.
+
+        (WebCore::RenderTableCell::rowIndex):
+        Renamed from row().
+
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::RenderTableRow):
+        (WebCore::RenderTableRow::styleDidChange):
+        Updated after adding m_rowIndex / rowIndex().
+
+        * rendering/RenderTableRow.h:
+        (WebCore::RenderTableRow::setRowIndex):
+        (WebCore::RenderTableRow::rowIndex):
+        Added those getter / setter. Also kept m_rowIndex's smaller size
+        for future optimization and for symmetry with the column index on
+        RenderTableCell.
+
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::addChild):
+        (WebCore::RenderTableSection::recalcCells):
+        Made sure that whenever we insert or update our row index
+        we do call setRowIndex().
+
+        (WebCore::RenderTableSection::addCell):
+        This logic now doesn't need to query insertionRow as the cell's
+        should have the index of the row in which it is inserted.
+
+        (WebCore::RenderTableSection::calcRowLogicalHeight):
+        (WebCore::RenderTableSection::layoutRows):
+        (WebCore::compareCellPositionsWithOverflowingCells):
+        More updates after row() -> rowIndex() renaming.
+
+        * rendering/RenderTableSection.h:
+        Removed rowIndexForRenderer now that the row caches this informatin.
+
 2012-04-30  Keishi Hattori  <keishi@webkit.org>
 
         datalist: Inconsistent behavior of HTMLInputElement::list
