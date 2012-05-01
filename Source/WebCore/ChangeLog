@@ -1,3 +1,18 @@
+2012-05-01  Jessie Berlin  <jberlin@apple.com>
+
+        Crash calling disconnectFrame on a DOMWindowExtension a second time.
+        https://bugs.webkit.org/show_bug.cgi?id=85301
+
+        Reviewed by Darin Adler.
+
+        DOMWindowExtension::disconnectFrame assumed it would only be called when there was a frame
+        to disconnect. However, DOMWindow's destructor invokes disconnectFrame on all its
+        DOMWindowProperties, even if it already did so when it entered the page cache.
+
+        * page/DOMWindowExtension.cpp:
+        (WebCore::DOMWindowExtension::disconnectFrame):
+        Don't do anything if the frame has already been disconnected.
+
 2012-05-01  Aaron Colwell  <acolwell@chromium.org>
 
         Temporarily remove webkitSourceAddId() & webkitSourceRemoveId() from DOM
