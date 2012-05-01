@@ -91,27 +91,10 @@ TEST_F(RenderTableCellDeathTest, CanSetColumn)
     EXPECT_EQ(columnIndex, m_cell->col());
 }
 
-// FIXME: https://bugs.webkit.org/show_bug.cgi?id=85274.
-// row() returns 0 by test design.
-TEST_F(RenderTableCellDeathTest, DISABLED_CanSetRow)
-{
-    static const unsigned rowIndex = 10;
-    m_cell->row()->setRowIndex(rowIndex);
-    EXPECT_EQ(rowIndex, m_cell->rowIndex());
-}
-
 TEST_F(RenderTableCellDeathTest, CanSetColumnToMaxColumnIndex)
 {
     m_cell->setCol(maxColumnIndex);
     EXPECT_EQ(maxColumnIndex, m_cell->col());
-}
-
-// FIXME: https://bugs.webkit.org/show_bug.cgi?id=85274.
-// row() returns 0 by test design.
-TEST_F(RenderTableCellDeathTest, DISABLED_CanSetRowToMaxRowIndex)
-{
-    m_cell->row()->setRowIndex(maxRowIndex);
-    EXPECT_EQ(maxRowIndex, m_cell->rowIndex());
 }
 
 // FIXME: Re-enable these tests once ASSERT_DEATH is supported for Android.
@@ -123,19 +106,9 @@ TEST_F(RenderTableCellDeathTest, CrashIfColumnOverflowOnSetting)
     ASSERT_DEATH(m_cell->setCol(maxColumnIndex + 1), "");
 }
 
-TEST_F(RenderTableCellDeathTest, CrashIfRowOverflowOnSetting)
-{
-    ASSERT_DEATH(m_cell->row()->setRowIndex(maxRowIndex + 1), "");
-}
-
 TEST_F(RenderTableCellDeathTest, CrashIfSettingUnsetColumnIndex)
 {
     ASSERT_DEATH(m_cell->setCol(unsetColumnIndex), "");
-}
-
-TEST_F(RenderTableCellDeathTest, CrashIfSettingUnsetRowIndex)
-{
-    ASSERT_DEATH(m_cell->row()->setRowIndex(unsetRowIndex), "");
 }
 
 #endif
