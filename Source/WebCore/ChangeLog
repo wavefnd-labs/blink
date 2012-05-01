@@ -1,3 +1,126 @@
+2012-04-29  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Accumulation for values-animation is broken
+        https://bugs.webkit.org/show_bug.cgi?id=85158
+
+        Reviewed by Darin Adler.
+
+        Example:
+        <rect width="999" height="100" fill="green"/>
+            <animate begin="0s" values="0; 30; 20" accumulate="sum" repeatCount="5" dur="2s"/>
+        </rect>
+
+        The rect should animate like this:
+        0.000s -> 0
+        0.500s -> 15
+        1.000s -> 30
+        1.500s -> 25
+        1.999s -> 20
+        2.000s -> 20 (first accumulation, starts accumulating from the last set value, here '20').
+        2.500s -> 45
+        3.000s -> 50
+        3.500s -> 45
+        3.999s -> 40
+        4.000s -> 40 (second accumulation)
+        etc.
+
+        This is currently broken for values-animation. The accumulation should happen after a full cycle of the values animation ran (aka. at the end of the duration).
+        A values animation works like this: iterate over the list of values, and calculate a 'from' and 'to' value for a given time. Example for values="0; 30; 20" dur="2s":
+            - 0.0s .. 1.0s -> from=0, to=30
+            - 1.0s .. 2.0s -> from=30, to=20
+
+        Accumulation currently is taken into account at each interval for a values-animation instead of the end of the cycle. Fix that
+        by passing an additional 'toAtEndOfDuration' type to calculateAnimatedValue() which is used for accumulation instead of the
+        current 'to' value.
+
+        Test: svg/animations/accumulate-values-width-animation.html
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::calculateAnimatedValue):
+        * svg/SVGAnimateElement.h:
+        (SVGAnimateElement):
+        * svg/SVGAnimateMotionElement.cpp:
+        (WebCore::SVGAnimateMotionElement::calculateAnimatedValue):
+        * svg/SVGAnimateMotionElement.h:
+        (SVGAnimateMotionElement):
+        * svg/SVGAnimatedAngle.cpp:
+        (WebCore::SVGAnimatedAngleAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedAngle.h:
+        (SVGAnimatedAngleAnimator):
+        * svg/SVGAnimatedBoolean.cpp:
+        (WebCore::SVGAnimatedBooleanAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedBoolean.h:
+        (SVGAnimatedBooleanAnimator):
+        * svg/SVGAnimatedColor.cpp:
+        (WebCore::SVGAnimatedColorAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedColor.h:
+        (SVGAnimatedColorAnimator):
+        * svg/SVGAnimatedEnumeration.cpp:
+        (WebCore::SVGAnimatedEnumerationAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedEnumeration.h:
+        (SVGAnimatedEnumerationAnimator):
+        * svg/SVGAnimatedInteger.cpp:
+        (WebCore::SVGAnimatedIntegerAnimator::calculateAnimatedInteger):
+        (WebCore::SVGAnimatedIntegerAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedInteger.h:
+        (SVGAnimatedIntegerAnimator):
+        * svg/SVGAnimatedIntegerOptionalInteger.cpp:
+        (WebCore::SVGAnimatedIntegerOptionalIntegerAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedIntegerOptionalInteger.h:
+        (SVGAnimatedIntegerOptionalIntegerAnimator):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedLength.h:
+        (SVGAnimatedLengthAnimator):
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedLengthList.h:
+        (SVGAnimatedLengthListAnimator):
+        * svg/SVGAnimatedNumber.cpp:
+        (WebCore::SVGAnimatedNumberAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedNumber.h:
+        (SVGAnimatedNumberAnimator):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedNumberList.h:
+        (SVGAnimatedNumberListAnimator):
+        * svg/SVGAnimatedNumberOptionalNumber.cpp:
+        (WebCore::SVGAnimatedNumberOptionalNumberAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedNumberOptionalNumber.h:
+        (SVGAnimatedNumberOptionalNumberAnimator):
+        * svg/SVGAnimatedPath.cpp:
+        (WebCore::SVGAnimatedPathAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedPath.h:
+        (SVGAnimatedPathAnimator):
+        * svg/SVGAnimatedPointList.cpp:
+        (WebCore::SVGAnimatedPointListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedPointList.h:
+        (SVGAnimatedPointListAnimator):
+        * svg/SVGAnimatedPreserveAspectRatio.cpp:
+        (WebCore::SVGAnimatedPreserveAspectRatioAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedPreserveAspectRatio.h:
+        (SVGAnimatedPreserveAspectRatioAnimator):
+        * svg/SVGAnimatedRect.cpp:
+        (WebCore::SVGAnimatedRectAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedRect.h:
+        (SVGAnimatedRectAnimator):
+        * svg/SVGAnimatedString.cpp:
+        (WebCore::SVGAnimatedStringAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedString.h:
+        (SVGAnimatedStringAnimator):
+        * svg/SVGAnimatedTransformList.cpp:
+        (WebCore::SVGAnimatedTransformListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedTransformList.h:
+        (SVGAnimatedTransformListAnimator):
+        * svg/SVGAnimatedTypeAnimator.h:
+        (SVGAnimatedTypeAnimator):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::currentValuesForValuesAnimation):
+        (WebCore::SVGAnimationElement::updateAnimation):
+        * svg/SVGAnimationElement.h:
+        (WebCore::SVGAnimationElement::animateAdditiveNumber):
+        (SVGAnimationElement):
+
 2012-05-01  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=85231
