@@ -1,3 +1,32 @@
+2012-05-01  Anders Carlsson  <andersca@apple.com>
+
+        Slow scrolling on www.sholby.net
+        https://bugs.webkit.org/show_bug.cgi?id=85304
+        <rdar://problem/11138952>
+
+        Reviewed by Beth Dakin.
+
+        Fix two performance issues that showed up on the profiles.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::checkLoadCompleteForThisFrame):
+        Reset the relevant painted object counter; it's only interesting when loading.
+
+        * page/Page.cpp:
+        (WebCore::Page::startCountingRelevantRepaintedObjects):
+        Set m_isCountingRelevantRepaintedObjects to true after calling reset, since reset now sets it to false.
+
+        (WebCore::Page::resetRelevantPaintedObjectCounter):
+        Set m_isCountingRelevantRepaintedObjects to false.
+
+        (WebCore::Page::addRelevantRepaintedObject):
+        Use HashSet::find to avoid an extra hash lookup.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::updateMainFrameScrollPositionAndScrollLayerPosition):
+        Remove the call to FrameView::updateCompositingLayersAfterLayout now, since FrameView::notifyScrollPositionChanged
+        already calls this and was making us to a lot of work twice.
+
 2012-05-01  Silvia Pfeiffer  <silviapf@chromium.org>
 
         Audio controls have a 1px surplus outline coming from RenderImage::paintReplaced base class,
