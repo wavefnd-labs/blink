@@ -1,3 +1,21 @@
+2012-04-30  Oliver Hunt  <oliver@apple.com>
+
+        Harden arithmetic in ImageBufferDataCG
+        https://bugs.webkit.org/show_bug.cgi?id=61373
+
+        Reviewed by Gavin Barraclough.
+
+        We have a checked type that allows us to automate many of the
+        bounds checks we want here, so let's replace the floating point
+        math, and just use Checked<> throughout.  We use a non-recording
+        Checked<> as no overflows should reach this point, so we'll take
+        a hard early failure, over the cost of many branches when
+        accessing the raw values in loops.
+
+        * platform/graphics/cg/ImageBufferDataCG.cpp:
+        (WebCore::ImageBufferData::getData):
+        (WebCore::ImageBufferData::putData):
+
 2012-04-30  Levi Weintraub  <leviw@chromium.org>
 
         Add absoluteValue method for LayoutUnits to allow overloading abs()
