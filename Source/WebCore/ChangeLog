@@ -1,5 +1,84 @@
 2012-04-30  Kent Tamura  <tkent@chromium.org>
 
+        [Chromium/Windows] Add LocalizedDateWin
+        https://bugs.webkit.org/show_bug.cgi?id=84935
+
+        Reviewed by Kentaro Hara.
+
+        LocalizedDateICU.cpp doesn't reflect system settings. So there were some
+        problems such as <input type=date> doesn't use system's date format.
+
+        We need to use Windows API to get a date format and calendar parameters.
+
+        We obtain a date format like "MM/dd/yy" via Windows API, and
+        format/parse dates for the format by our own code because Windows API
+        can't handle years older than 1601 and doesn't have date parsing API.
+
+        Unit test: Source/WebKit/chromium/tests/LocaleWinTest.cpp
+
+        * WebCore.gypi: Add LocalizedDateWin.cpp.
+        * WebCore.gyp/WebCore.gyp:
+        For Windows, remove LocalizedDateICU.cpp and add LocalizedDateWin.cpp.
+        All of *Win.cpp files are excluded by default.
+
+        * platform/text/LocaleWin.cpp: Added.
+        (WebCore::LocaleWin::LocaleWin):
+        (WebCore::LocaleWin::create):
+        (WebCore::LocaleWin::currentLocale):
+        (WebCore::LocaleWin::~LocaleWin):
+        (WebCore::LocaleWin::getLocaleInfoString):
+        A helper function to obtain a string by GetLocaleInfo().
+        (WebCore::LocaleWin::initializeShortMonthLabels):
+        Obtain short month names from Windows.
+
+        (WebCore::DateFormatToken): A struct to represent a token in a date format.
+        e.g. A format string "MM/dd/yy" generates five DateFormatToken:
+         Month2, Literal, Day2, Literal, Year2.
+        (isEraSymbol): A readability helper function.
+        (isYearSymbol): ditto.
+        (isMonthSymbol): ditto.
+        (isDaySymbol): ditto.
+        (countContinuousLetters):
+        (commitLiteralToken): A helper for parseDateFormat().
+        (parseDateFormat):
+        Parse a format string, and generate a list of DateFormatToken.
+
+        (WebCore::parseNumber): A helper for parseDate().
+        (WebCore::LocaleWin::parseNumberOrMonth): ditto.
+        (WebCore::LocaleWin::parseDate):
+        Parse a user-provided date string by matching with a DateFormatToken list.
+
+        (WebCore::appendNumber): A helper for formatDate().
+        (WebCore::appendTwoDigitsNumber): ditto. Write at least two digits.
+        (WebCore::appendFourDigitsNumber): ditto. Write at least four digits.
+        (WebCore::LocaleWin::formatDate):
+        Format a DateComponents by iterating a DateFormatToken list.
+
+        (WebCore::LocaleWin::initializeShortDateTokens):
+        (WebCore::substituteLabelsIntoFormat):
+        Creates a user-visible format string by iterating a DateFormatToken list.
+        (WebCore::LocaleWin::dateFormatText):
+        (WebCore::LocaleWin::initializeMonthLabels):
+        Creates month names by Windows API.
+        (WebCore::LocaleWin::initializeWeekDayShortLabels):
+         Creates day names by Windows API.
+        (WebCore::LocaleWin::monthLabels):
+        Public accessor function for month names.
+        (WebCore::LocaleWin::weekDayShortLabels):
+        Public accessor function for day names.
+        * platform/text/LocaleWin.h: Added.
+
+        * platform/text/LocalizedDateWin.cpp:
+        Added. The following functions simply delegate to LocaleWin::currentLocale().
+        (WebCore::parseLocalizedDate):
+        (WebCore::formatLocalizedDate):
+        (WebCore::localizedDateFormatText):
+        (WebCore::monthLabels):
+        (WebCore::weekDayShortLabels):
+        (WebCore::firstDayOfWeek):
+
+2012-04-30  Kent Tamura  <tkent@chromium.org>
+
         REGRESSION(r115600): parseLocalizedDate() should fail for invalid inputs
         https://bugs.webkit.org/show_bug.cgi?id=85176
 
