@@ -1,3 +1,60 @@
+2012-05-02  David Barton  <dbarton@mathscribe.com>
+
+        After appending MathML with jquery the table renders with overlaps
+        https://bugs.webkit.org/show_bug.cgi?id=52444
+
+        Reviewed by Julien Chaffraix.
+
+        This patch also fixes bugs 72834 and 47781. The main problem is that correct preferred
+        logical widths are affected by operator stretching. Thus we add a call to
+        setNeedsLayoutAndPrefWidthsRecalc() after the stretching code in
+        RenderMathMLOperator.cpp, and change RenderMathMLBlock and RenderMathMLRow to make sure
+        that stretching of children is done before an <mrow>'s preferred logical widths are
+        computed.
+        
+        Test: Added a test to mathml/presentation/mo-stretch.html
+
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::RenderMathMLBlock):
+        (WebCore::RenderMathMLBlock::computePreferredLogicalWidths):
+        (WebCore::RenderMathMLBlock::computeChildrenPreferredLogicalHeights):
+        (WebCore::RenderMathMLBlock::preferredLogicalHeightAfterSizing):
+        * rendering/mathml/RenderMathMLBlock.h:
+        (WebCore::RenderMathMLBlock::unembellishedOperator):
+        (WebCore::RenderMathMLBlock::isPreferredLogicalHeightDirty):
+        (WebCore::RenderMathMLBlock::preferredLogicalHeight):
+        (WebCore::RenderMathMLBlock::setPreferredLogicalHeight):
+            - Add m_preferredLogicalHeight and methods to compute and return it.
+            - Remove stretchToHeight() from most classes as it no longer needs to be done
+              recursively. We just call it on the base of an embellished operator, and that
+              calls setNeedsLayoutAndPrefWidthsRecalc() to mark itself and its container
+              chain.
+        
+        * rendering/mathml/RenderMathMLOperator.cpp:
+        (WebCore::RenderMathMLOperator::stretchToHeight):
+            - Don't compare an unexpanded height to an expanded one.
+        (WebCore::RenderMathMLOperator::computePreferredLogicalWidths):
+        (WebCore::RenderMathMLOperator::updateFromElement):
+            - After stretching, call setNeedsLayoutAndPrefWidthsRecalc().
+        * rendering/mathml/RenderMathMLOperator.h:
+        (RenderMathMLOperator):
+        
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::computePreferredLogicalWidths):
+        (WebCore::RenderMathMLRow::layout):
+        * rendering/mathml/RenderMathMLRow.h:
+        (RenderMathMLRow):
+            - Add computePreferredLogicalWidths(), using computeChildrenPreferredLogicalHeights()
+              to compute our children's preferred logical heights if necessary, followed by
+              operator stretching.
+        
+        * rendering/mathml/RenderMathMLSubSup.cpp:
+        * rendering/mathml/RenderMathMLSubSup.h:
+        (RenderMathMLSubSup):
+        * rendering/mathml/RenderMathMLUnderOver.cpp:
+        * rendering/mathml/RenderMathMLUnderOver.h:
+        (RenderMathMLUnderOver):
+
 2012-05-02  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Avoid extra Region copies in CCOcclusionTracker
