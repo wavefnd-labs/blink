@@ -1,3 +1,73 @@
+2012-05-02  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        REGRESSION(110072): Clipping is not applied on layers that are animated using platform code
+        https://bugs.webkit.org/show_bug.cgi?id=83954
+
+        Reviewed by Simon Fraser.
+
+        Tests: fast/layers/no-clipping-overflow-hidden-added-after-transform-expected.html
+               fast/layers/no-clipping-overflow-hidden-added-after-transform.html
+               fast/layers/no-clipping-overflow-hidden-added-after-transition-expected.html
+               fast/layers/no-clipping-overflow-hidden-added-after-transition.html
+               fast/layers/no-clipping-overflow-hidden-hardware-acceleration-expected.html
+               fast/layers/no-clipping-overflow-hidden-hardware-acceleration.html
+               (and all the tests that will need to be rebaselined)
+
+        r110072 changed the way we create layers to lazily allocate overflow: hidden ones
+        based on layout overflow. However with hardware acceleration, certain operations
+        do cause overflow without actually calling layout (the test cases added as part
+        of this change are using transition / animation). This means that those cases
+        wouldn't properly clip.
+
+        Due to the above issue and the other regressions from r110072, the easiest fix is
+        to just to roll it out.
+
+        * rendering/RenderBox.h:
+        Changed to allocate a layer whenever we have an overflow clip.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::scrolledContentOffset):
+        (WebCore::RenderBox::cachedSizeForOverflowClip):
+        Reverted those 2 to avoid using the cached size logic.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::updateScrollInfoAfterLayout):
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::paint):
+        (WebCore::RenderBlock::isPointInOverflowControl):
+        * rendering/RenderBlock.h:
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::willBeDestroyed):
+        (WebCore::RenderBox::styleDidChange):
+        (WebCore::RenderBox::layout):
+        (WebCore::RenderBox::scrollWidth):
+        (WebCore::RenderBox::scrollHeight):
+        (WebCore::RenderBox::scrollLeft):
+        (WebCore::RenderBox::scrollTop):
+        (WebCore::RenderBox::setScrollLeft):
+        (WebCore::RenderBox::setScrollTop):
+        (WebCore::RenderBox::includeVerticalScrollbarSize):
+        (WebCore::RenderBox::includeHorizontalScrollbarSize):
+        (WebCore::RenderBox::pushContentsClip):
+        (WebCore::RenderBox::popContentsClip):
+        (WebCore::RenderBox::addLayoutOverflow):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::styleDidChange):
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutBlock):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::layout):
+        * rendering/RenderTableRow.h:
+        (RenderTableRow):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::layout):
+        Removed the previous scaffolding code and reverted some functions to
+        being private (as they were prior to r110072).
+
 2012-05-02  No'am Rosenthal  <noam.rosenthal@nokia.com>
 
         [Texmap] Enable css filters in TextureMapperGL
