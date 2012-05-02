@@ -1,3 +1,71 @@
+2012-05-02  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Add ASSERTs to avoid querying dirtied z-index or normal flow lists on RenderLayer
+        https://bugs.webkit.org/show_bug.cgi?id=84920
+
+        Reviewed by Simon Fraser.
+
+        Covered by existing tests in Debug (at least several time!).
+
+        This change adds some ASSERTs on RenderLayer that prevent any use of its lists if they
+        are dirtied.
+
+        On top of this change, we added an invariant that non-stacking contexts should have their
+        z-index lists NULL (instead of empty or NULL previously). This is enforced at
+        updateZOrderLists time as we now ensure that it is called in a timely manner.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::calculateLayerBounds):
+        Added call to updateLayersIfNeeded as we will query them later and there is no guarantee
+        that they are not dirty (we recurse in our children as part of calculateLayerBounds).
+        This was causing the new ASSERTs to trigger on css3/filter/ tests.
+
+        (WebCore::RenderLayer::dirtyZOrderLists):
+        Added a comment as to why we can't ASSERT that we are in a stacking context here.
+
+        (WebCore::RenderLayer::rebuildZOrderLists):
+        Added an ASSERT that we only rebuild z-index lists for dirtied stacking context.
+
+        (WebCore::RenderLayer::updateLayerListsIfNeeded):
+        Updated to ensure that the reflection layer has its layers updated too. This was triggering
+        the new ASSERTs on fast/runins/run-in-layer-not-removed-crash.html.
+
+        (WebCore::RenderLayer::updateCompositingAndLayerListsIfNeeded):
+        Updated to use the new isDirtyStackingContext function.
+
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::isDirtyStackingContext):
+        New helper function. Also made updateLayerListsIfNeeded() the only way
+        to update layer. That should prevent any misuse.
+
+        (WebCore::RenderLayer::posZOrderList):
+        (WebCore::RenderLayer::negZOrderList):
+        (WebCore::RenderLayer::normalFlowList):
+        ASSERT that we don't query any of the previous lists if they are dirty. Also
+        enforce the invariant that non-stacking contexts should have NULL z-index lists.
+
+        (WebCore::RenderLayer::clearZOrderLists):
+        New function to clearZOrderLists so that we can enfore the previous invariant.
+
+        (WebCore::RenderLayer::updateZOrderLists):
+        Updated to clear the dirty flag and the z-index lists for non-stacking context.
+
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::addToOverlapMapRecursive):
+        (WebCore::RenderLayerCompositor::computeCompositingRequirements):
+        (WebCore::RenderLayerCompositor::rebuildCompositingLayerTree):
+        Removed the explicit ASSERTs.
+
+        (WebCore::RenderLayerCompositor::updateLayerTreeGeometry):
+        (WebCore::RenderLayerCompositor::canBeComposited):
+        Disabled compositing on RenderLayer in flow thread. Because flow thread's
+        RenderLayer are not collected as part of RenderLayer's lists and could be composited,
+        this was causing the new ASSERTs to trigger (e.g. on fast/regions/webkit-flow-renderer-layer.html).
+
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::writeLayers):
+        Updated to use updateLayerListsIfNeeded().
+
 2012-05-02  Levi Weintraub  <leviw@chromium.org>
 
         Remove unused adjustForAbsoluteZoom method in RenderObject.h
