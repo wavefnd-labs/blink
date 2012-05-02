@@ -1,3 +1,31 @@
+2012-05-01  Xiaomei Ji  <xji@chromium.org>
+
+        enable ctrl-arrow move by word visually in non-Windows platforms.
+        https://bugs.webkit.org/show_bug.cgi?id=85017
+
+        Reviewed by Ryosuke Niwa.
+
+        Enable ctrl-arrow moves caret by word in visual order in non-Windows platforms that use ICU word
+        break iterator (it is not enabled for WinCE and Qt where ICU is not used). For those platforms, ctrl-arrow
+        moves caret to word break position before spaces. For example, given a logical text "abc def hij", the word
+        break positions using ctrl-left-arrow from rightmost position are "|abc |def |hij".
+        The word break positions using ctrl-right-arrow from leftmost position are "abc| def| hij|".
+
+        Test: editing/selection/move-by-word-visually-mac.html
+
+        * editing/EditingBehavior.h:
+        (EditingBehavior):
+        (WebCore::EditingBehavior::shouldEatSpaceToNextWord): To control different word break positions
+        (regards to space) for different platforms.
+        * editing/FrameSelection.cpp:
+        (WebCore::FrameSelection::modifyMovingRight): Enable visual word movement for all platforms that use ICU.
+        (WebCore::FrameSelection::modifyMovingLeft):
+        * editing/visible_units.cpp:
+        (WebCore::visualWordPosition): Determine the right word break position (regards to space) based on EditingBehavior.
+        (WebCore::leftWordPosition):
+        (WebCore::rightWordPosition):
+        * editing/visible_units.h:
+
 2012-05-01  Raymond Liu  <raymond.liu@intel.com>
 
         Modify RealtimeAnalyserNode pull mechanism
