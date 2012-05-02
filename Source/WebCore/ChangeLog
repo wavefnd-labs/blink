@@ -1,3 +1,28 @@
+2012-05-01  Eric Seidel  <eric@webkit.org>
+
+        Remove uneeded min/max pref width assignment from RenderView
+        https://bugs.webkit.org/show_bug.cgi?id=85325
+
+        Reviewed by Julien Chaffraix.
+
+        This code has been with us since the original import from KDE:
+        http://trac.webkit.org/browser/trunk/WebCore/khtml/rendering/render_root.cpp?annotate=blame&rev=4#L93
+        It's never been documented, or explained.  Removing it showed no
+        effect on my local layout tests run.
+        However this code blocks proper implementation of <iframe seamless>
+        as we have to do proper min/max width negotiation across the iframe boundary.
+
+        I would remove the whole function, but doing so opens a whole can of worms
+        as this override is public, yet normally this function is *private* (well protected on RenderBox).
+        It seems plausible that frame flattening code needs this override since it doesn't always
+        call the min/maxPreferredWidth() calls which normally automatically call this compute*
+        function if the pref-widths are dirty.
+        Instead of trying to track that all down, I'm just removing this line, and we'll go
+        back and remove the whole function at a later date if possible.
+
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::computePreferredLogicalWidths):
+
 2012-05-01  Nate Chapin  <japhet@chromium.org>
 
         REGRESSION(r115654): PDFs come up blank
