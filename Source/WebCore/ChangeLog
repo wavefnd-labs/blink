@@ -1,3 +1,22 @@
+2012-05-01  Nate Chapin  <japhet@chromium.org>
+
+        REGRESSION(r115654): PDFs come up blank
+        https://bugs.webkit.org/show_bug.cgi?id=85275
+
+        Reviewed by Alexey Proskuryakov.
+
+        Test: http/tests/loading/pdf-commit-load-callbacks.html
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::finishedLoading): The load needs to be
+            committed before we call finishedLoading on the
+            FrameLoaderClient.
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::transitionToCommitted): We're guaranteeing
+            that receivedFirstData() will be called other ways (namely,
+            DocumentLoader won't finish without doing so). This call now
+            causes custom representations to double-commit, which is bad.
+
 2012-05-01  Eric Seidel  <eric@webkit.org>
 
         Add support for seamless attribute as well as seamless sandbox flag and default CSS styling
