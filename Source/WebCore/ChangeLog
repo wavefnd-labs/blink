@@ -1,3 +1,49 @@
+2012-05-02  Kenneth Russell  <kbr@google.com>
+
+        Don't allocate stencil buffer if stencil flag is false in context creation attributes
+        https://bugs.webkit.org/show_bug.cgi?id=85317
+
+        Reviewed by Dimitri Glazkov.
+
+        Make it appear to WebGL application that there is no stencil
+        buffer even if the underlying GraphicsContext3D allocated one.
+        Verified intended behavior with test case from Mozilla's bug report.
+
+        Updated context-attributes-alpha-depth-stencil-antialias.html test
+        from Khronos repository. Ran WebGL layout tests on Linux in
+        Chrome's DRT and on Mac OS in Safari's.
+
+        * html/canvas/WebGLFramebuffer.cpp:
+        (WebCore::WebGLFramebuffer::hasStencilBuffer): Added query method.
+        (WebCore): Changed desired semantics of isValidRenderbuffer.
+        * html/canvas/WebGLFramebuffer.h:
+        (WebGLFramebuffer): Added hasStencilBuffer.
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore):
+        (WebCore::WebGLRenderingContext::initializeNewContext):
+            Clear new flag.
+        (WebCore::WebGLRenderingContext::bindFramebuffer):
+            Reset stencil test upon framebuffer change.
+        (WebCore::WebGLRenderingContext::disable):
+            Cache flag; reset stencil test.
+        (WebCore::WebGLRenderingContext::enable):
+            Cache flag; reset stencil test.
+        (WebCore::WebGLRenderingContext::framebufferRenderbuffer):
+            Reset stencil test upon renderbuffer change.
+        (WebCore::WebGLRenderingContext::getContextAttributes):
+            Force depth and stencil to false if false was requested.
+        (WebCore::WebGLRenderingContext::isEnabled):
+            Return cached flag.
+        (WebCore::WebGLRenderingContext::renderbufferStorage):
+            Reset stencil test upon renderbuffer reallocation.
+        (WebCore::WebGLRenderingContext::applyStencilTest):
+            Enable or disable stencil test based on request and availability.
+        (WebCore::WebGLRenderingContext::enableOrDisable):
+            Helper function.
+        * html/canvas/WebGLRenderingContext.h:
+        (WebGLRenderingContext):
+            Added cache of STENCIL_TEST flag. Deleted unused m_stencilBits.
+
 2012-05-02  Ryosuke Niwa  <rniwa@webkit.org>
 
         Drag and drop text into table is pasting the text in the next <td> element
