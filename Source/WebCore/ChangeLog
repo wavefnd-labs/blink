@@ -1,3 +1,30 @@
+2012-05-02  Ryosuke Niwa  <rniwa@webkit.org>
+
+        NULL ptr in WebCore::AppendNodeCommand::AppendNodeCommand
+        https://bugs.webkit.org/show_bug.cgi?id=75843
+
+        Reviewed by Tony Chang.
+
+        The crash was caused by indentIntoBlockquote's passing a bad outerBlock to moveParagraphsWithClone.
+
+        When the position is created after blockquote in the following DOM:
+        BODY
+        * BLOCKQUOTE style=margin: 0 0 0 40px; border: none; padding: 0px;
+            E
+                #text "\nx\n"
+        VisiblePosition's constructor (of startOfContents) turns the position into a legacy position (blockquote, 0).
+        The crash occurs because this position doesn't belong in the same paragraph as E, which is the paragraph
+        we're trying to move into the blockquote.
+
+        Fixed bug by calling positionInParentAfterNode instead of positionAfterNode for now. We should eventually be
+        able to use positionAfterNode here once VisiblePosition's constructor starts handling before/after positions
+        properly.
+
+        Test: editing/execCommand/indent-with-after-content-crash.html
+
+        * editing/IndentOutdentCommand.cpp:
+        (WebCore::IndentOutdentCommand::indentIntoBlockquote):
+
 2012-05-02  Jer Noble  <jer.noble@apple.com>
 
         WebWindowFadeAnimation ignores "duration" parameter.
