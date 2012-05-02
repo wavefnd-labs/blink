@@ -1,3 +1,59 @@
+2012-05-01  Eric Seidel  <eric@webkit.org>
+
+        Add support for seamless attribute as well as seamless sandbox flag and default CSS styling
+        https://bugs.webkit.org/show_bug.cgi?id=85302
+
+        Reviewed by Ojan Vafai.
+
+        This also adds support for the seamless sandbox flag from HTML 5.
+        The sandbox flag is not speficially overridable in the current HTML5,
+        but it is set (like all sandbox flags) by default when sandbox is specified.
+        Unfortunately this support is not yet observable in this patch, as
+        this patch adds not observable features of seamless.
+
+        This patch also adds the html.css additions for seamless, as specified:
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/rendering.html#replaced-elements
+
+        I noticed that my previous testing did not confirm that iframes marked
+        for seamless (but not possible to display as seamless due to sandbox, etc.)
+        were still to have this seamless styling.  I've added additional testing for this case.
+
+        I also added another test for the about:blank FIXME added as part of this change.
+
+        In order to support srcdoc w/ seamless, we needed to move the srcdoc determination
+        sooner in the initSecurityContext function (before the should-inherit early return).
+
+        The next patch will make seamless actually observable from JS/DOM, this one
+        just lays down all the plumbing, and separates the security aspects for
+        easy review.
+
+        Test: fast/frames/seamless/seamless-inherited-origin.html
+
+        * css/html.css:
+        (iframe:not([seamless])):
+        (iframe[seamless]):
+        * dom/Document.cpp:
+        (WebCore::isEligibleForSeamless):
+        (WebCore):
+        (WebCore::Document::initSecurityContext):
+        (WebCore::Document::seamlessParentIFrame):
+        (WebCore::Document::shouldDisplaySeamlesslyWithParent):
+        * dom/Document.h:
+        (WebCore):
+        (Document):
+        * dom/SecurityContext.cpp:
+        (WebCore::SecurityContext::SecurityContext):
+        * dom/SecurityContext.h:
+        (WebCore::SecurityContext::mayDisplaySeamlessWithParent):
+        (SecurityContext):
+        * html/HTMLAttributeNames.in:
+        * html/HTMLIFrameElement.cpp:
+        (WebCore::HTMLIFrameElement::shouldDisplaySeamlessly):
+        (WebCore):
+        * html/HTMLIFrameElement.h:
+        (HTMLIFrameElement):
+        * html/HTMLIFrameElement.idl:
+
 2012-05-01  Min Qin  <qinmin@google.com>
 
         use USE(NATIVE_FULLSCREEN_VIDEO) instead of ENABLE(NATIVE_FULLSCREEN_VIDEO)
