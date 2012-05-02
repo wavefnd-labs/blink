@@ -1,3 +1,27 @@
+2012-05-01  Vincent Scheib  <scheib@chromium.org>
+
+        Fullscreen pop-up logic restored to using processingUserGesture.
+        https://bugs.webkit.org/show_bug.cgi?id=85105
+
+        WebKit was recently updated to the new Fullscreen API:
+        http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html#api
+        http://trac.webkit.org/changeset/111028
+
+        This change reverts back to using processingUserGesture() instead
+        of DOMWindow::allowPopUp(). This fixes incorrect behavior in
+        at least the Chromium port and is consistent with the cited
+        definition of "allowed to show a pop-up":
+          An algorithm is allowed to show a pop-up if, in the task in which the algorithm is running, either:
+          - an activation behavior is currently being processed whose click event was trusted, or
+          - the event listener for a trusted click event is being handled.
+
+        Reviewed by Dimitri Glazkov.
+
+        No new tests.
+
+        * dom/Document.cpp:
+        (WebCore::Document::requestFullScreenForElement):
+
 2012-05-01  Xiaomei Ji  <xji@chromium.org>
 
         enable ctrl-arrow move by word visually in non-Windows platforms.
