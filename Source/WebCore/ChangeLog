@@ -1,3 +1,25 @@
+2012-05-01  Keishi Hattori  <keishi@webkit.org>
+
+        datalist: Form control in a <datalist> should be barred from constraint validation
+        https://bugs.webkit.org/show_bug.cgi?id=84359
+
+        Reviewed by Kent Tamura.
+
+        Tests: fast/forms/datalist/datalist-child-validation.html
+               fast/forms/form-control-element-crash.html
+
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::HTMLFormControlElement):
+        (WebCore::HTMLFormControlElement::updateAncestors): Updates the ancestor information.
+        (WebCore::HTMLFormControlElement::insertedInto): Invalidate the ancestor information and call setNeedsWillValidateCheck because willValidate might have changed.
+        (WebCore::HTMLFormControlElement::removedFrom): Ditto.
+        (WebCore::HTMLFormControlElement::disabled):
+        (WebCore::HTMLFormControlElement::recalcWillValidate): Returns false if element has a datalist ancestor.
+        (WebCore::HTMLFormControlElement::willValidate): Check if ancestor information is valid too.
+        (WebCore::HTMLFormControlElement::setNeedsWillValidateCheck):
+        * html/HTMLFormControlElement.h:
+        (HTMLFormControlElement):
+
 2012-05-01  Kent Tamura  <tkent@chromium.org>
 
         Calendar Picker: Close the picker by ESC key
