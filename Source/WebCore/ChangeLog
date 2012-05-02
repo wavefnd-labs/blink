@@ -1,3 +1,54 @@
+2012-05-02  Michal Mocny  <mmocny@google.com>
+
+        [chromium] Set contents texture manager preferred memory limit based on GpuMemoryManager suggestion.
+        https://bugs.webkit.org/show_bug.cgi?id=84270
+
+        Reviewed by Kenneth Russell.
+
+        Updates the content texture manager memory limits based on GpuMemoryManager memory allocation suggestions.
+
+        The memory allocation size (in bytes) is fed from LayerRendererChromium memory allocation changed callback
+        handler to CCLayerTreeHost.  At that point we adjust the limits, using the existing notions of preferred and
+        max limits.
+
+        On android, the preferred limit is half the maximum (as it has always been), but on all other platforms the
+        preferred limit is now equal to max, in order to allow more agressive prepainting.
+
+        Finally, android has memory constraints dependant on viewportSize, but that logic has been pushed into
+        the GpuMemoryManager.
+
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererGpuMemoryAllocationChangedCallbackAdapter::onGpuMemoryAllocationChanged):
+        (WebCore::LayerRendererChromium::beginDrawingFrame):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromiumClient):
+        * platform/graphics/chromium/TextureManager.cpp:
+        (WebCore::TextureManager::setMemoryAllocationLimitBytes):
+        (WebCore):
+        * platform/graphics/chromium/TextureManager.h:
+        (TextureManager):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::setViewportSize):
+        (WebCore::CCLayerTreeHost::setContentsMemoryAllocationLimitBytes):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::setContentsMemoryAllocationLimitBytes):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImplClient):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::postSetContentsMemoryAllocationLimitBytesToMainThreadOnImplThread):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::postSetContentsMemoryAllocationLimitBytesToMainThreadOnImplThread):
+        (WebCore):
+        (WebCore::CCThreadProxy::setContentsMemoryAllocationLimitBytes):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (CCThreadProxy):
+
 2012-05-02  Emil A Eklund  <eae@chromium.org>
 
         Fix usage of layout types in platform code
