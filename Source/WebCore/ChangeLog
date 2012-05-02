@@ -1,3 +1,49 @@
+2012-05-02  Antti Koivisto  <antti@apple.com>
+
+        Move title and media queries from StyleSheetInternal to CSSStyleSheet
+        https://bugs.webkit.org/show_bug.cgi?id=85387
+
+        Reviewed by Anders Carlsson.
+
+        Stylesheet title and media queries are determined by the owner, not by the stylesheet itself.
+        The fields belong to CSSStyleSheet.
+        
+        This will make it easier to share StyleSheetInternal instances between documents.
+
+        * css/CSSStyleSheet.cpp:
+        (WebCore::StyleSheetInternal::StyleSheetInternal):
+        (WebCore::StyleSheetInternal::isCacheable):
+        (WebCore):
+        (WebCore::CSSStyleSheet::setDisabled):
+        
+            Invalidate the document style directly instead of ping-ponging through StyleSheetInternal.
+
+        (WebCore::CSSStyleSheet::setMediaQueries):
+        (WebCore::CSSStyleSheet::media):
+        * css/CSSStyleSheet.h:
+        (StyleSheetInternal):
+        (WebCore::StyleSheetInternal::originalURL):
+        (WebCore::StyleSheetInternal::hasCharsetRule):
+        (WebCore::CSSStyleSheet::mediaQueries):
+        (CSSStyleSheet):
+        (WebCore::CSSStyleSheet::setTitle):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::appendAuthorStylesheets):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * dom/DOMImplementation.cpp:
+        (WebCore::DOMImplementation::createCSSStyleSheet):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::setCSSStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::parseAttribute):
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        * html/HTMLStyleElement.cpp:
+        (WebCore::HTMLStyleElement::parseAttribute):
+        * svg/SVGStyleElement.cpp:
+        (WebCore::SVGStyleElement::parseAttribute):
+
 2012-05-02  Alexis Menard  <alexis.menard@openbossa.org>
 
         Unreviewed Qt build fix with GCC 4.7.0.
