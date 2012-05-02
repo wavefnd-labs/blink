@@ -1,3 +1,29 @@
+2012-05-02  Zalan Bujtas  <zbujtas@gmail.com>
+
+        [Qt] Remove redundant updateViewportArguments() call from HTMLBodyElement::didNotifyDescendantInseretions()
+        https://bugs.webkit.org/show_bug.cgi?id=84241
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        No need to update viewport arguments when the body element is inserted into the Document.
+        Viewport arguments are updated first when the Document is set on the Frame, and later
+        on any subsequent occurence of the viewport meta tag in the document.
+        It is sufficient to dispatch viewport update once per main frame, if no viewport meta tag is present.
+
+        Also add a flag to be able to track viewport argument update dispatch.
+
+        No tests. Currrent viewport tests cover this behaviour.
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::updateViewportArguments):
+        (WebCore::Document::documentWillSuspendForPageCache):
+        * dom/Document.h:
+        (Document):
+        (WebCore::Document::didDispatchViewportPropertiesChanged):
+        * html/HTMLBodyElement.cpp:
+        (WebCore::HTMLBodyElement::didNotifyDescendantInseretions):
+
 2012-05-02  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: Cannot read property 'length' of undefined TextEditorModel.js:467
