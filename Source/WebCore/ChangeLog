@@ -1,3 +1,27 @@
+2012-05-03  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: compile time ambiguity happens when I try to assign a TypeBuilder object to an out argument.
+        https://bugs.webkit.org/show_bug.cgi?id=85462
+
+        It happens because we have type casting operators for both types RefPtr<*Type*> and PassRefPtr<*Type*>.
+        I think we can drop PassRefPtr type casting operator and use a named function 'release'.
+
+        Reviewed by Yury Semikhatsky.
+
+        * inspector/CodeGeneratorInspector.py:
+        * inspector/ContentSearchUtils.cpp:
+        (WebCore::ContentSearchUtils::buildObjectForSearchMatch):
+        * inspector/InspectorApplicationCacheAgent.cpp:
+        (WebCore::InspectorApplicationCacheAgent::buildObjectForApplicationCache):
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::buildObjectForCookie):
+        (WebCore::buildObjectForSearchResult):
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::buildObjectForTiming):
+        (WebCore::InspectorResourceAgent::buildInitiatorObject):
+        * inspector/ScriptCallFrame.cpp:
+        (WebCore::ScriptCallFrame::buildInspectorObject):
+
 2012-05-03  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: crash in InspectorResourceAgent::didReceiveWebSocketFrame
