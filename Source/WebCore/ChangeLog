@@ -1,3 +1,100 @@
+2012-04-30  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: migrate breakpoint manager to live locations.
+        https://bugs.webkit.org/show_bug.cgi?id=85136
+
+        Reviewed by Yury Semikhatsky.
+
+        - Merges Breakpoint and UIBreakpoint to have single instance
+        - Extracts storage from the breakpoint manager
+        - Makes breakpoint manager use source mapping from the script, not the presentation model
+        - Removes breakpoints collection from the UISourceCode
+        Unfortunately, there are too many inter-dependencies that require that these changes are done simultaneously.
+
+        * inspector/front-end/BreakpointManager.js:
+        (WebInspector.BreakpointManager):
+        (WebInspector.BreakpointManager.prototype.setBreakpoint):
+        (WebInspector.BreakpointManager.prototype.breakpoint):
+        (WebInspector.BreakpointManager.prototype.breakpointLocationsForUISourceCode):
+        (WebInspector.BreakpointManager.prototype.removeAllBreakpoints):
+        (WebInspector.BreakpointManager.prototype.reset):
+        (WebInspector.BreakpointManager.prototype.debuggerReset):
+        (WebInspector.BreakpointManager.prototype._breakpointResolved):
+        (WebInspector.BreakpointManager.prototype._removeBreakpoint):
+        (WebInspector.BreakpointManager.prototype._uiLocationAdded):
+        (WebInspector.BreakpointManager.prototype._uiLocationRemoved):
+        (WebInspector.BreakpointManager.prototype.storage):
+        (WebInspector.BreakpointManager.Breakpoint):
+        (WebInspector.BreakpointManager.Breakpoint.prototype.primaryUILocation):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._addResolvedLocation):
+        (WebInspector.BreakpointManager.Breakpoint.prototype.enabled):
+        (WebInspector.BreakpointManager.Breakpoint.prototype.setEnabled):
+        (WebInspector.BreakpointManager.Breakpoint.prototype.condition):
+        (WebInspector.BreakpointManager.Breakpoint.prototype.setCondition):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._updateBreakpoint):
+        (WebInspector.BreakpointManager.Breakpoint.prototype.remove):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._setInDebugger.didSetBreakpoint):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._setInDebugger):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._removeFromDebugger):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._resetLocations):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._breakpointStorageId):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._fakeBreakpointAtPrimaryLocation):
+        (WebInspector.BreakpointManager.Storage.get this):
+        (WebInspector.BreakpointManager.Storage):
+        (WebInspector.BreakpointManager.Storage.prototype.restoreBreakpoints):
+        (WebInspector.BreakpointManager.Storage.prototype._updateBreakpoint):
+        (WebInspector.BreakpointManager.Storage.prototype._removeBreakpoint):
+        (WebInspector.BreakpointManager.Storage.prototype._save):
+        (set WebInspector.BreakpointManager.Storage.Item):
+        * inspector/front-end/BreakpointsSidebarPane.js:
+        (WebInspector.JavaScriptBreakpointsSidebarPane):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._breakpointAdded.didRequestContent):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._breakpointAdded):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._breakpointRemoved):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype.highlightBreakpoint):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._createBreakpointItemId):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._breakpointClicked):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._breakpointCheckboxClicked):
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._breakpointContextMenu):
+        * inspector/front-end/DebuggerModel.js:
+        (WebInspector.DebuggerModel):
+        (WebInspector.DebuggerModel.prototype.breakpointsActive):
+        (WebInspector.DebuggerModel.prototype.createLiveLocation):
+        * inspector/front-end/DebuggerPresentationModel.js:
+        (WebInspector.DebuggerPresentationModel.prototype._handleUISourceCodeListChanged):
+        (WebInspector.DebuggerPresentationModelResourceBinding.prototype._setContentWithInitialContent):
+        * inspector/front-end/JavaScriptSource.js:
+        (WebInspector.JavaScriptSource):
+        (WebInspector.JavaScriptSource.prototype.consoleMessagesCleared):
+        * inspector/front-end/JavaScriptSourceFrame.js:
+        (WebInspector.JavaScriptSourceFrame):
+        (WebInspector.JavaScriptSourceFrame.prototype.canEditSource):
+        (WebInspector.JavaScriptSourceFrame.prototype.editContent):
+        (WebInspector.JavaScriptSourceFrame.prototype._onContentChanged):
+        (WebInspector.JavaScriptSourceFrame.prototype.populateLineGutterContextMenu):
+        (WebInspector.JavaScriptSourceFrame.prototype.beforeTextChanged):
+        (WebInspector.JavaScriptSourceFrame.prototype.didEditContent):
+        (WebInspector.JavaScriptSourceFrame.prototype._addBreakpointDecoration):
+        (WebInspector.JavaScriptSourceFrame.prototype._onMouseDown):
+        (WebInspector.JavaScriptSourceFrame.prototype._editBreakpointCondition.finishEditing):
+        (WebInspector.JavaScriptSourceFrame.prototype._editBreakpointCondition):
+        (WebInspector.JavaScriptSourceFrame.prototype._breakpointAdded):
+        (WebInspector.JavaScriptSourceFrame.prototype._breakpointRemoved):
+        (WebInspector.JavaScriptSourceFrame.prototype.onTextViewerContentLoaded):
+        (WebInspector.JavaScriptSourceFrame.prototype._setBreakpoint):
+        (WebInspector.JavaScriptSourceFrame.prototype._continueToLine):
+        (WebInspector.JavaScriptSourceFrame.prototype._updateBreakpointsAfterLiveEdit):
+        * inspector/front-end/Script.js:
+        (WebInspector.Script.prototype.rawLocationToUILocation):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype._uiSourceCodeAdded):
+        (WebInspector.ScriptsPanel.prototype._uiSourceCodeRemoved):
+        (WebInspector.ScriptsPanel.prototype._debuggerPaused.else.didGetUILocation):
+        (WebInspector.ScriptsPanel.prototype._debuggerPaused):
+        (WebInspector.ScriptsPanel.prototype._uiSourceCodeReplaced):
+        * inspector/front-end/UISourceCode.js:
+        (WebInspector.UISourceCode.prototype.contentChanged):
+
 2012-05-03  Andrey Kosyakov  <caseq@chromium.org>
 
         Unreviewed attemp to fix chromium win build broken at r115943.
