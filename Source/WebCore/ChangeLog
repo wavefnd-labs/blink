@@ -1,3 +1,157 @@
+2012-04-23  Levi Weintraub  <leviw@chromium.org> and Emil A Eklund <eae@chromium.org>
+
+        [meta] Switch away from integers representing pixels for layout/event handling/rendering
+        https://bugs.webkit.org/show_bug.cgi?id=60318
+
+        Reviewed by Eric Seidel.
+
+        Swapping the LayoutUnit backend to FractionalLayoutUnit from int.
+        
+        FractionalLayoutUnit is a new type that uses an integer to represent a fraction of a pixel.
+        We're also adding a feature flag -- ENABLE_SUBPIXEL_LAYOUT -- that toggles this fraction
+        between 1/1 and 1/60. Initially, all platforms will default to subpixel layout being off,
+        so FractionalLayoutUnits will effectively continue to act as integers.
+        
+        With ENABLE_SUBPIXEL_LAYOUT turned on, FractionalLayoutUnits accumulate error from sub-pixel
+        CSS values and applied zooming, and painting uses pixel-snapping to align these values
+        to pixels. See http://trac.webkit.org/wiki/LayoutUnit for details.
+
+        In a number of previous patches, LayoutUnits were plumbed throughout the rendering tree
+        to prepare for this change. This included a number of functions in LayoutTypes.h and
+        the IntRect/Point/Size classes that were effectively no-ops while LayoutUnits were
+        integers. Subsequent patches will remove unnecessary versions of these functions; see
+        http://webkit.org/b/84616 for tracking these changes.
+
+        Tests: fast/sub-pixel/client-width-height-snapping.html
+               fast/sub-pixel/layout-boxes-with-zoom.html
+               fast/sub-pixel/size-of-box-with-zoom.html
+
+        * WebCore.exp.in: Updating function signatures that expose FractionalLayoutUnits.
+        * WebCore.xcodeproj/project.pbxproj: Adding missing FractionalLayoutPoint.h header.
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::zoomAdjustedPixelValue): Using adjustFloatForAbsoluteZoom instead of int
+        to make use of extra precision before returning the pixel value.
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::computeLength): No longer rounds for imprecise conversion
+        when sub-pixel layout is enabled.
+        (WebCore::CSSPrimitiveValue::customCssText): Returning integer values for pixels.
+        * dom/Element.cpp:
+        (WebCore::adjustForLocalZoom): Using rounding instead of incrementing the value before
+        adjusting to account for truncation when sub-pixel layout is enabled.
+        * page/SpatialNavigation.cpp:
+        (WebCore::distanceDataForNode): Using FractionalLayoutUnit::abs instead of std::abs.
+        * platform/FractionalLayoutUnit.h: Adding some missing operators and a flag around the
+        constant denominator to switch it between 1/1 and 1/60 depending on the feature flag.
+        * platform/Length.h: Changing the default type for value to float, and adding intValue
+        since this more closely matches usage in a sub-pixel layout world.
+        * platform/win/PopupMenuWin.cpp:
+        (WebCore::PopupMenuWin::paint): Using minimumIntValueForLength in this platform code
+        instead of LayoutUnits.
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::placeBoxesInBlockDirection):
+        * rendering/LayoutTypes.h: This file contains the actual switch for changing LayoutUnits
+        to be FractionalLayoutUnits. Also updating stub methods with their proper implementations.
+        * rendering/PaintInfo.h:
+        (WebCore::PaintInfo::infiniteRect): Ensuring the infiniteRect doesn't overflow the
+        FractionalLayoutUnit bounds.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::checkPaginationAndFloatsAtEndLine): Switch to
+        FractionalLayoutUnit's abs function instead of std::abs.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::calculateBackgroundImageGeometry): Add rounding for
+        setting the phase of the background geometry before applying modulo from the tile size.
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutVerticalBox): Stop applying flex when
+        we have less than a pixel to distribute.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::backgroundClipRect): Replace PaintInfo::infiniteRect with the
+        LayoutRect equivalent.
+        * rendering/RenderLineBoxList.cpp:
+        (WebCore::RenderLineBoxList::rangeIntersectsRect): Using FractionalLayoutUnit::abs
+        instead of std::abs.
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::repaintAfterLayoutIfNeeded): Ditto.
+        * rendering/RenderObject.h:
+        (WebCore): Removing unnecessary adjustForAbsoluteZoom function.
+        (WebCore::RenderObject::outlineSize): Outlines remain ints.
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::styleOrColLogicalWidth): Build fix. Using floats because
+        colWidthSum is a Length which uses floats.
+        * rendering/RenderThemeChromiumSkia.cpp:
+        (WebCore::RenderThemeChromiumSkia::paintSearchFieldResultsButton): Explicit templatization
+        for max.
+        * rendering/RenderTreeAsText.cpp: Adding code to minimize test expectation churn. It
+        may be worth outputting float values in test expectations, but this isn't done with
+        the inline box tree yet, either.
+        * rendering/RenderTreeAsText.h:
+        (WebCore): Adding a FractionalLayoutPoint operator.
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::updateWidgetGeometry): Adding missing pixel snapping, and switching
+        absoluteContentBox to an IntRect, as this is what boundingBox returns.
+        * rendering/svg/SVGRenderTreeAsText.cpp:
+        (WebCore::writePositionAndStyle): Adding an enclosingIntRect for consistency with old results.
+
+<<<<<<< .mine
+2012-05-03  Levi Weintraub  <leviw@chromium.org> and Emil A Eklund <eae@chromium.org>
+
+        [meta] Switch away from integers representing pixels for layout/event handling/rendering
+        https://bugs.webkit.org/show_bug.cgi?id=60318
+
+        Reviewed by Eric Seidel.
+
+        Swapping the LayoutUnit backend to FractionalLayoutUnit from int.
+        
+        FractionalLayoutUnit is a new type that uses an integer that can represent a fraction of a
+        pixel. The ENABLE_SUBPIXEL_LAYOUT feature flags toggles this fraction between 1/1 and 1/60.
+        Initially, all platforms will default to subpixel layout being off, so FractionalLayoutUnits
+        will effectively continue to act as integers.
+        
+        With ENABLE_SUBPIXEL_LAYOUT turned on, FractionalLayoutUnits accumulate error from sub-pixel
+        CSS values and applied zooming, and painting uses pixel-snapping to align these values
+        to pixels and prevent unwanted anti-aliasing. See http://trac.webkit.org/wiki/LayoutUnit for
+        details.
+
+        In a number of previous patches, LayoutUnits were plumbed throughout the rendering tree to
+        prepare for this change. This included a number of functions in LayoutTypes.h and the
+        IntRect/Point/Size classes that were effectively no-ops while LayoutUnits were integers. See
+        http://webkit.org/b/60318 for the exhaustive list of changes that were done in preparation
+        for this. Subsequent patches will remove unnecessary versions of these functions.
+        http://webkit.org/b/84616 tracks these changes.
+
+        Tests: fast/sub-pixel/client-width-height-snapping.html
+               fast/sub-pixel/layout-boxes-with-zoom.html
+               fast/sub-pixel/size-of-box-with-zoom.html
+
+        * WebCore.exp.in: Updating function signatures that expose FractionalLayoutUnits.
+        * WebCore.order: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Adding missing FractionalLayoutPoint.h header.
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::computeLength): No longer rounds for imprecise conversion
+        when sub-pixel layout is enabled.
+        * dom/Element.cpp:
+        (WebCore::adjustForLocalZoom): Using rounding instead of incrementing the value before
+        adjusting to account for truncation when sub-pixel layout is enabled.
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore): Fixing a static initializer build error by moving an integer constant to be
+        an int.
+        * rendering/LayoutTypes.h: This file contains the actual switch for changing LayoutUnits
+        to be FractionalLayoutUnits. Also updating stub methods with their proper implementations.
+        * rendering/PaintInfo.h:
+        (WebCore::PaintInfo::infiniteRect): Ensuring the infiniteRect doesn't overflow the
+        FractionalLayoutUnit bounds. LayoutRect::infiniteRect() is the largest rectangle that can
+        be represented using LayoutUnits.
+        * rendering/RenderLayer.h:
+        (WebCore::ClipRect::operator!=): Add overload of != to fix complaining compilers when
+        * rendering/RenderTreeAsText.cpp: Adding code to minimize test expectation churn. It
+        may be worth outputting float values in test expectations, but this isn't done with
+        the inline box tree yet, either.
+        * rendering/RenderTreeAsText.h:
+        (WebCore): Adding a FractionalLayoutPoint operator.
+        * rendering/svg/SVGRenderTreeAsText.cpp:
+        (WebCore::writePositionAndStyle):
+        (WebCore): Adding a FractionalLayoutPoint operator.
+
+=======
 2012-05-03  Anders Carlsson  <andersca@apple.com>
 
         Move repaint counter drawing code out into a separate function
@@ -138,6 +292,7 @@
         * rendering/RenderLayerCompositor.cpp:
         * rendering/RenderLayerCompositor.h:
 
+>>>>>>> .r116007
 2012-05-03  Andreas Kling  <kling@webkit.org>
 
         REGRESSION(r111387): CSSOM representation of 'background-image' values should be CSSPrimitiveValue.
