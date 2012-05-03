@@ -1,3 +1,26 @@
+2012-05-03  Andreas Kling  <kling@webkit.org>
+
+        REGRESSION(r111387): CSSOM representation of 'background-image' values should be CSSPrimitiveValue.
+        <http://webkit.org/b/85500>
+
+        Reviewed by Antti Koivisto.
+
+        Use the cloneForCSSOM() mechanism in CSSValue to expose CSSImageValue to bindings as a URI
+        primitive value. This matches the specced behavior of computed image values, and restores our
+        previous behavior without having CSSImageValue subclass CSSPrimitiveValue.
+
+        Also added a failsafe return after the isCSSOMSafe() assertion in the JSC bindings, since it's
+        better to expose an incorrect return value than an insecurely shared one, should we have or add
+        bugs in this code.
+
+        * bindings/js/JSCSSValueCustom.cpp:
+        (WebCore::toJS):
+        * css/CSSImageValue.cpp:
+        (WebCore::CSSImageValue::cloneForCSSOM):
+        * css/CSSImageValue.h:
+        * css/CSSValue.cpp:
+        (WebCore::CSSValue::cloneForCSSOM):
+
 2012-05-03  Keishi Hattori  <keishi@webkit.org>
 
         Crash in HTMLFormControlElement::m_fieldSetAncestor
