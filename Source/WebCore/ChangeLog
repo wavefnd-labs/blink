@@ -1,3 +1,45 @@
+2012-05-03  Arpita Bahuguna  <arpitabahuguna@gmail.com>
+
+        Broken handling of pseudo-elements in selectors API
+        https://bugs.webkit.org/show_bug.cgi?id=83446
+
+        Reviewed by Antti Koivisto.
+
+        Test: fast/dom/Window/querySelectorAll-with-pseudo-elements.html
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::SelectorChecker):
+        Setting the default value for the enum member m_mode to ResolvingStyle.
+
+        (WebCore::SelectorChecker::checkSelector):
+        Instead of verifying against the bool m_isCollectingRulesOnly, we now check whether or not
+        m_mode is set to ResolvingStyle.
+
+        (WebCore::SelectorChecker::checkOneSelector):
+        Instead of verifying against the bool m_isCollectingRulesOnly, we now check whether or not
+        m_mode is set to ResolvingStyle. Also, for the pseudo-elements case we check if its
+        value is set to QueryingRules in which case we return false.
+
+        * css/SelectorChecker.h:
+        (WebCore::SelectorChecker::mode):
+        Returns the mode (m_mode) value.
+
+        (WebCore::SelectorChecker::setMode):
+        Sets the mode (m_mode) to the passed enum value.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::sortAndTransferMatchedRules):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        Retrieves SelectorChecker's mode value.
+
+        * dom/SelectorQuery.cpp:
+        (WebCore::SelectorQuery::SelectorQuery):
+        Sets SelectorChecker's mode to QueryingRules.
+
+        * html/shadow/ContentSelectorQuery.cpp:
+        (WebCore::ContentSelectorQuery::ContentSelectorQuery):
+        Sets SelectorChecker's mode to CollectingRules.
+
 2012-05-03  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: EXC_BAD_ACCESS in DOM breakpoint processing code.
