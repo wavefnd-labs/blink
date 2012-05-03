@@ -1,3 +1,20 @@
+2012-05-03  Keishi Hattori  <keishi@webkit.org>
+
+        Crash in HTMLFormControlElement::m_fieldSetAncestor
+        https://bugs.webkit.org/show_bug.cgi?id=85453
+
+        Reviewed by Kent Tamura.
+
+        Modified tests: fast/forms/datalist/datalist-child-validation.html
+                        fast/forms/form-control-element-crash.html
+
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::removedFrom): Only set the invalid ancestor flag.
+        The element will be detached from the document so there is no need to update the style.
+        And the validation message will be hidden by the blur event.
+        (WebCore::HTMLFormControlElement::willValidate): Because of the change to removedFrom,
+        m_ancestorsValid may be false.
+
 2012-05-03  Simon Fraser  <simon.fraser@apple.com>
 
         Keep overlap testing for compositing on pages with 3d transforms when possible
