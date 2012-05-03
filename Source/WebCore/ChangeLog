@@ -1,3 +1,58 @@
+2012-05-03  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Fix multiple begin values support - especially with seeking through setCurrentTime
+        https://bugs.webkit.org/show_bug.cgi?id=85372
+
+        Reviewed by Zoltan Herczeg.
+
+        Multiple begin values aka. begin="0s; 2s" aren't correctly handled - resulting in broken & unexpected behavior.
+        Supporting seeking properly on documents containing such animations is very important, otherwise we can't reliable
+        test animations using either reftests or the SVG JS animation test framework.
+
+        Testcase:
+        <rect height="100" fill="green">
+            <animate attributeName="width" begin="0s; 2s" dur="8s" from="0" to="100" fill="freeze"/>
+        </rect>
+
+        What's expected?
+        Two times should be contained in the 'begin' times list in SVGSMILElement: m_beginTimes = { 0s, 2s }.
+        The initial first resolved interval is: m_intervalBegin=0.0s, m_intervalEnd=8.0s.
+
+        During t=0s..1.9999s the m_intervalBegin/m_intervalEnd are correct.
+        At t=2s, a new interval can be started. m_intervalEnd should be set to nextBeginTime, where nextBeginTime=2s.
+        The current interval should get cropped to: m_intervalBegin=0s, m_intervalEnd=2s. The following call to
+        resolveNextInterval() sees that elapsed >= m_intervalEnd, and thus moves on to the next interval.
+        m_intervalBegin should be 2s and m_intervalEnd=10s after that.
+
+        In trunk this behavior is only partly implemented and broken. Especially broken together with seeking via SVGSVGElement.setCurrentTime.
+        That's because we don't correctly seek to the right interval in case of multiple begin values, eg. if we sample an animation with
+        begin="0s; 3s" dur="6s" we always remain in the first interval and don't move on.
+
+        Fix all of these issues, making lots more tests work in Dr. Olaf Hofmanns SVG Animation test suite.
+
+        Tests: svg/animations/multiple-begin-additive-animation.html
+               svg/animations/multiple-begin-animation-discrete-expected.svg
+               svg/animations/multiple-begin-animation-discrete.svg
+               svg/animations/multiple-begin-animation-expected.svg
+               svg/animations/multiple-begin-animation.svg
+
+        * svg/animation/SMILTimeContainer.cpp:
+        (WebCore::SMILTimeContainer::begin):
+        (WebCore::SMILTimeContainer::setElapsed):
+        (WebCore::SMILTimeContainer::updateAnimations):
+        * svg/animation/SMILTimeContainer.h:
+        (SMILTimeContainer):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::findInstanceTime):
+        (WebCore::SVGSMILElement::resolveInterval):
+        (WebCore::SVGSMILElement::resolveNextInterval):
+        (WebCore):
+        (WebCore::SVGSMILElement::checkRestart):
+        (WebCore::SVGSMILElement::seekToIntervalCorrespondingToTime):
+        (WebCore::SVGSMILElement::progress):
+        * svg/animation/SVGSMILElement.h:
+        (SVGSMILElement):
+
 2012-05-03  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Don't add small opaque areas to the occlusion tracker's Region
