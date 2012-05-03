@@ -1,3 +1,35 @@
+2012-04-13  Jon Honeycutt  <jhoneycutt@apple.com>
+
+        Make Page::setDefersLoading() have a call count so that each time
+        loading is deferred, it must be balanced with a call to resume.
+        https://bugs.webkit.org/show_bug.cgi?id=84522
+
+        Reviewed by Andy Estes.
+
+        * page/Page.cpp:
+        (WebCore::Page::Page):
+        Initialize new call count member.
+        (WebCore::Page::setDefersLoading):
+        Check whether the callers wants balanced defer/resume loading behavior.
+        If the call count is not changing from 0 to 1 or 1 to 0, return early.
+        Otherwise, defer or resume loading for frames in this page.
+
+        * page/Page.h:
+        (WebCore::Page::defersLoading):
+        Added a member to hold the call count.
+
+        * page/Settings.cpp:
+        (WebCore::Settings::Settings):
+        Initialized new member m_wantsBalancedSetDefersLoadingBehavior.
+
+        * page/Settings.h:
+        (Settings):
+        Added new member m_wantsBalancedSetDefersLoadingBehavior.
+        (WebCore::Settings::setWantsBalancedSetDefersLoadingBehavior):
+        Setter.
+        (WebCore::Settings::wantsBalancedSetDefersLoadingBehavior):
+        Getter.
+
 2012-05-02  Ojan Vafai  <ojan@chromium.org>
 
         Add a histogram for rendertree size
