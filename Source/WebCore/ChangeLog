@@ -1,3 +1,51 @@
+2012-05-03  Simon Fraser  <simon.fraser@apple.com>
+
+        Keep overlap testing for compositing on pages with 3d transforms when possible
+        https://bugs.webkit.org/show_bug.cgi?id=62487
+
+        Reviewed by Antti Koivisto.
+        
+        Change RenderLayerCompositor to always use overlap testing when possible.
+
+        Rather than turn off overlap testing wholesale when encountering a non-affine
+        transform, or starting an accelerated transform animation, we constrain
+        the disabling of overlap testing to within overflow:hidden areas when possible.
+
+        Tests: compositing/layer-creation/overlap-animation.html
+               compositing/layer-creation/overlap-transforms.html
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::setCompositedBounds): Whitespace fix.
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::CompositingState::CompositingState):
+        (CompositingState): Add a member boolean to track whether we're testing overlap. Add a copy
+        constructor.
+        (WebCore::RenderLayerCompositor::updateCompositingLayers): Initialize the 'testing overlap'
+        setting based on m_compositingConsultsOverlap (though this will always be true until removed
+        in a future commit).
+        (WebCore::RenderLayerCompositor::updateBacking): No longer turn off overlap testing
+        when we see a non-affine transform.
+        (WebCore::RenderLayerCompositor::computeCompositingRequirements): No need for the 'struct'
+        in the arguments.
+        Consult compositingState.m_testingOverlap to see if we want to test overlap.
+        Use the new CompositingState copy ctor for childState, but set m_subtreeIsCompositing to false
+        as before.
+        If this layer is composited, look to see if need to disable over lap testing based on
+        the transform or an animation.
+        Just as we propagate m_subtreeIsCompositing, we have to propagate m_testingOverlap=false
+        for the rest of the traverse.
+        If we've just processed a layer which clips compositing descendants, we can go back
+        to testing for overlap.
+        (WebCore::RenderLayerCompositor::didStartAcceleratedAnimation): No need to do anything
+        here now. It will be removed in future.
+        (WebCore::RenderLayerCompositor::hasNonAffineTransform): No longer check
+        perspective here, since that doesn't affect whether _this_ layer should disable
+        overlap testing. Checking for a non-affine transform is sufficient.
+        (WebCore::RenderLayerCompositor::isRunningAcceleratedTransformAnimation):
+        New method to check if AnimationController is running a transform animation.
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+
 2012-05-03  Chris Fleizach  <cfleizach@apple.com>
 
         accessibility/misspelled-attributed-string.html test sometimes throws exceptions
