@@ -1,3 +1,58 @@
+2012-05-02  Jon Lee  <jonlee@apple.com>
+
+        Migrate permission functions to Notification from NotificationCenter
+        https://bugs.webkit.org/show_bug.cgi?id=80485
+        <rdar://problem/10965458>
+
+        Reviewed by Jian Li.
+
+        * notifications/Notification.idl: Add permission functions.
+        * notifications/DOMWindowNotifications.idl: Wrap webkitNotifications as part of legacy API.
+
+        * notifications/Notification.cpp: New permission functions are wrapped with ENABLE(NOTIFICATIONS)
+        (WebCore::Notification::taskTimerFired): Use the new permission functions to determine whether we can show the
+        notification.
+        (WebCore::Notification::permissionLevel):
+        (WebCore::Notification::permissionString): Declare three static locals for each of the values, and return
+        based on the permission enum.
+        (WebCore::Notification::requestPermission): Forward request to client.
+        * notifications/Notification.h:
+
+        * notifications/NotificationPermissionCallback.h: Added.
+        (NotificationPermissionCallback):
+        (WebCore::NotificationPermissionCallback::~NotificationPermissionCallback):
+        * notifications/NotificationPermissionCallback.idl: Added.
+
+        * notifications/NotificationCenter.cpp: Wrap permission functions in ENABLE(LEGACY_NOTIFICATIONS)
+        * notifications/NotificationCenter.h: Wrap permission functions in ENABLE(LEGACY_NOTIFICATIONS)
+        * notifications/NotificationCenter.idl: Refactor conditionals to make the center available only when
+        ENABLE(LEGACY_NOTIFICATIONS) is on.
+        * notifications/NotificationPresenter.h:
+        (WebCore::NotificationPresenter::requestPermission): Add new requestPermission() function for new
+        NotificationPermissionCallback type. Make it a stub implementation until all ports have adopted.
+
+        * notifications/NotificationClient.h: Add another requestPermission() client call, wrapped in
+        ENABLE(NOTIFICATIONS) that accepts the NotificationPermissionCallback. Wrap the original one in
+        ENABLE(LEGACY_NOTIFICATIONS).
+
+        * bindings/js/JSDesktopNotificationsCustom.cpp: Change to include the implementation only in
+        ENABLE(LEGACY_NOTIFICATIONS).
+        * bindings/js/JSNotificationsCustom.cpp: Custom implementation of requestPermission().
+        * bindings/v8/custom/V8NotificationCustom.cpp: Custom implementation of requestPermission().
+
+        * notifications/WorkerContextNotifications.idl: Make webktNotifications available only in legacy API.
+        * CMakeLists.txt: Add new callback idl.
+        * DerivedSources.make: Add new callback idl.
+        * DerivedSources.pri: Add new callback idl.
+        * GNUmakefile.list.am: Add NotificationPermissionCallback files.
+        * Target.pri: Include JSNotificationCustom.cpp, V8NotificationCustom.cpp
+        * UseJSC.cmake: Include JSNotificationCustom.cpp
+        * UseV8.cmake: Include V8NotificationCustom.cpp
+        * WebCore.gypi: Include JSNotificationCustom.cpp, V8NotificationCustom.cpp, JSNotificationPermissionCallback.{h,cpp}
+        * WebCore.vcproj/WebCore.vcproj: Include JSNotificationCustom.cpp, JSNotificationPermissionCallback.{h,cpp}
+        * WebCore.exp.in: Export permissionString().
+        * WebCore.xcodeproj/project.pbxproj: Add callback idl, h, and cpp files.
+
 2012-05-02  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r115907.
