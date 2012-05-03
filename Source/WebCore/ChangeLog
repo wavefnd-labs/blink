@@ -1,3 +1,38 @@
+2012-05-02  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Don't occlude pixels in a surface that are needed for a background filter blur
+        https://bugs.webkit.org/show_bug.cgi?id=84317
+
+        Reviewed by Adrienne Walker.
+
+        Blur filters move pixels around, so a pixel can influence the value of
+        pixels at some distance away. If a pixel is not occluded, then all
+        pixels within the radius of the blur may influence the value of that
+        pixel, so they should also stay unoccluded.
+
+        For background filters, the pixels are read from the filter's target
+        surface, so we remove occlusion from that target surface from pixels
+        that will blur into visible pixels.
+
+        Unit test: CCOcclusionTrackerTestDontOccludePixelsNeededForBackgroundFilter
+                   CCOcclusionTrackerTestTwoBackgroundFiltersReduceOcclusionTwice
+                   CCOcclusionTrackerTestDontOccludePixelsNeededForBackgroundFilterWithClip
+                   CCOcclusionTrackerTestDontReduceOcclusionBelowBackgroundFilter
+                   CCOcclusionTrackerTestDontReduceOcclusionIfBackgroundFilterIsOccluded
+                   CCOcclusionTrackerTestReduceOcclusionWhenBackgroundFilterIsPartiallyOccluded
+
+        * platform/graphics/chromium/cc/CCOcclusionTracker.cpp:
+        (WebCore::reduceOcclusion):
+        (WebCore):
+        (WebCore::reduceOcclusionBelowSurface):
+        (WebCore::::leaveToTargetRenderSurface):
+        (WebCore::::unoccludedContributingSurfaceContentRect):
+        * platform/graphics/chromium/cc/CCOcclusionTracker.h:
+        (CCOcclusionTrackerBase):
+        * platform/graphics/chromium/cc/CCQuadCuller.cpp:
+        (WebCore::CCQuadCuller::appendSurface):
+        (WebCore::CCQuadCuller::appendReplica):
+
 2012-05-02  Levi Weintraub  <leviw@chromium.org>
 
         Convert FractionalLayoutUnit overflow assertions to stderr warnings
