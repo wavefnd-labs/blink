@@ -1,3 +1,28 @@
+2012-05-03  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        Remove extra checks for empty string when parsing CSS value
+        https://bugs.webkit.org/show_bug.cgi?id=85480
+
+        Reviewed by Alexis Menard.
+
+        Each parse value helper function was checking whether the value string was empty. For the
+        common case this check is already done by StylePropertySet::setProperty(). So this patch
+        make CSSParser::parseValue() assume the value string is not empty, and fix the other two
+        clients.
+
+        Test: fast/html/font-face-empty-should-not-crash.html
+
+        * css/CSSParser.cpp:
+        (WebCore::parseColorValue): Replace the string empty check by an ASSERT() to document
+        function's expectations.
+        (WebCore::parseSimpleLengthValue): Ditto.
+        (WebCore::parseKeywordValue): Ditto.
+        (WebCore::CSSParser::parseFontFaceValue): This will be covered by the added test.
+        (WebCore::CSSParser::parseValue):
+        * css/WebKitCSSMatrix.cpp:
+        (WebCore::WebKitCSSMatrix::setMatrixValue): This is already covered by
+        transforms/cssmatrix-2d-interface.xhtml.
+
 2012-05-03  Arpita Bahuguna  <arpitabahuguna@gmail.com>
 
         Broken handling of pseudo-elements in selectors API
