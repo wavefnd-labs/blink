@@ -1,3 +1,40 @@
+2012-05-03  Martin Robinson  <mrobinson@igalia.com>
+
+        [GTK] Rework IME handling to fix bugs and prepare for WebKit2
+        https://bugs.webkit.org/show_bug.cgi?id=84556
+
+        Reviewed by Gustavo Noronha Silva.
+
+        No new tests. This change is already covered by a suite of keyboard
+        handling unit tests in WebKitGTK+. There are some changes in behavior,
+        but they are difficult to test without mocking out an entire GtkIMContext.
+
+        Add a struct, CompositionResults, which is used by PlatformKeyboardEvent
+        to package composition information with a keyboard event. Also add some logic
+        to PlatformKeyboardEvent to give the right information when it has composition
+        results.
+
+        * GNUmakefile.list.am: Added new sources to the list.
+        * platform/PlatformKeyboardEvent.h:  Added a new CompositionResults member,
+        getter, and argument to the constructor.
+        * platform/gtk/CompositionResults.h: Added.
+        * platform/gtk/GtkInputMethodFilter.cpp: Added.
+        * platform/gtk/GtkInputMethodFilter.h: Added.
+        * platform/gtk/PlatformKeyboardEventGtk.cpp:
+        (WebCore::PlatformKeyboardEvent::windowsKeyCodeForGdkKeyCode): When
+        the key value is void return the VK_PROCESS keycode, which is the keycode
+        that web content expects with keystrokes that trigger composition events.
+        (WebCore::eventTypeForGdkKeyEvent): Abstract out this helper.
+        (WebCore::modifiersForGdkKeyEvent): Abstract out this helper.
+        (WebCore::PlatformKeyboardEvent::PlatformKeyboardEvent): When a PlatformKeyEvent
+        has composition results, use VK_PROCESS as the keycode for this event.
+        (WebCore::PlatformKeyboardEvent::disambiguateKeyDownEvent): When this event is
+        transformed into a Char event, the PlatformKeyboardEvent used for DOM keypress
+        events, and it has composition results clear the text members. This forces the
+        EventHandler code to drop the keypress event. Platform events that change the
+        composition states do not have corresponding keypress DOM events (only keydown
+        and keyup events), so this is necessary to ensure web compatibility.
+
 2012-05-04  Jochen Eisinger  <jochen@chromium.org>
 
         Correctly update the outgoing referrer when navigating back from an history item created by pushState/replaceState
