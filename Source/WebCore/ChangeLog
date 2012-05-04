@@ -1,3 +1,76 @@
+2012-05-04  Adam Barth  <abarth@webkit.org>
+
+        Refactor CSP state to prepare for having both a ReportOnly and an Enforced policy
+        https://bugs.webkit.org/show_bug.cgi?id=85662
+
+        Reviewed by Eric Seidel.
+
+        This patch refactors the ContentSecurityPolicy state into a separate
+        DirectiveList class to prepare for
+        https://bugs.webkit.org/show_bug.cgi?id=85561, which will cause us to
+        need two directive lists: one for enforcement and one for monitoring.
+
+        This patch shouldn't cause any change in behavior.
+
+        * page/ContentSecurityPolicy.cpp:
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::header):
+        (WebCore::CSPDirectiveList::headerType):
+        (WebCore::CSPDirectiveList::denyIfEnforcingPolicy):
+        (WebCore):
+        (WebCore::CSPDirectiveList::CSPDirectiveList):
+        (WebCore::CSPDirectiveList::create):
+        (WebCore::CSPDirectiveList::reportViolation):
+        (WebCore::CSPDirectiveList::logUnrecognizedDirective):
+        (WebCore::CSPDirectiveList::checkEval):
+        (WebCore::CSPDirectiveList::operativeDirective):
+        (WebCore::CSPDirectiveList::checkInlineAndReportViolation):
+        (WebCore::CSPDirectiveList::checkEvalAndReportViolation):
+        (WebCore::CSPDirectiveList::checkSourceAndReportViolation):
+        (WebCore::CSPDirectiveList::allowJavaScriptURLs):
+        (WebCore::CSPDirectiveList::allowInlineEventHandlers):
+        (WebCore::CSPDirectiveList::allowInlineScript):
+        (WebCore::CSPDirectiveList::allowInlineStyle):
+        (WebCore::CSPDirectiveList::allowEval):
+        (WebCore::CSPDirectiveList::allowScriptFromSource):
+        (WebCore::CSPDirectiveList::allowObjectFromSource):
+        (WebCore::CSPDirectiveList::allowChildFrameFromSource):
+        (WebCore::CSPDirectiveList::allowImageFromSource):
+        (WebCore::CSPDirectiveList::allowStyleFromSource):
+        (WebCore::CSPDirectiveList::allowFontFromSource):
+        (WebCore::CSPDirectiveList::allowMediaFromSource):
+        (WebCore::CSPDirectiveList::allowConnectFromSource):
+        (WebCore::CSPDirectiveList::parse):
+        (WebCore::CSPDirectiveList::parseDirective):
+        (WebCore::CSPDirectiveList::parseReportURI):
+        (WebCore::CSPDirectiveList::createCSPDirective):
+        (WebCore::CSPDirectiveList::applySandboxPolicy):
+        (WebCore::CSPDirectiveList::addDirective):
+        (WebCore::ContentSecurityPolicy::ContentSecurityPolicy):
+        (WebCore::ContentSecurityPolicy::~ContentSecurityPolicy):
+        (WebCore::ContentSecurityPolicy::copyStateFrom):
+        (WebCore::ContentSecurityPolicy::didReceiveHeader):
+        (WebCore::ContentSecurityPolicy::setOverrideAllowInlineStyle):
+        (WebCore::ContentSecurityPolicy::header):
+        (WebCore::ContentSecurityPolicy::headerType):
+        (WebCore::ContentSecurityPolicy::allowJavaScriptURLs):
+        (WebCore::ContentSecurityPolicy::allowInlineEventHandlers):
+        (WebCore::ContentSecurityPolicy::allowInlineScript):
+        (WebCore::ContentSecurityPolicy::allowInlineStyle):
+        (WebCore::ContentSecurityPolicy::allowEval):
+        (WebCore::ContentSecurityPolicy::allowScriptFromSource):
+        (WebCore::ContentSecurityPolicy::allowObjectFromSource):
+        (WebCore::ContentSecurityPolicy::allowChildFrameFromSource):
+        (WebCore::ContentSecurityPolicy::allowImageFromSource):
+        (WebCore::ContentSecurityPolicy::allowStyleFromSource):
+        (WebCore::ContentSecurityPolicy::allowFontFromSource):
+        (WebCore::ContentSecurityPolicy::allowMediaFromSource):
+        (WebCore::ContentSecurityPolicy::allowConnectFromSource):
+        * page/ContentSecurityPolicy.h:
+        (WebCore):
+        * workers/WorkerMessagingProxy.cpp:
+        (WebCore::WorkerMessagingProxy::startWorkerContext):
+
 2012-05-04  Abhishek Arya  <inferno@chromium.org>
 
         ASSERT(beforeChildAnonymousContainer->isTable()); fails in RenderBlock::addChildIgnoringAnonymousColumnBlocks.
