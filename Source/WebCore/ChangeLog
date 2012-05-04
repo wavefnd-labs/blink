@@ -1,3 +1,33 @@
+2012-05-03  Ojan Vafai  <ojan@chromium.org>
+
+        Histogram total allocated bytes in the arena in addition to the render tree size
+        https://bugs.webkit.org/show_bug.cgi?id=85537
+
+        Reviewed by Eric Seidel.
+
+        We only free bytes allocated to a RenderArena when destroying the Document.
+        Histogram both the render tree size and the total bytes allocated. This
+        gives a better sense of the overhead of RenderArena as well as giving a more
+        accurate number for the amount of actual memory used by the render tree.
+
+        No new tests. This is not webfacing, so this can't be tested without adding
+        API to layout test controller, which doesn't seem worth it for this code.
+
+        * page/Page.cpp:
+        (WebCore::Page::renderTreeSize):
+        (WebCore::Page::setVisibilityState):
+        * page/Page.h:
+        (Page):
+        * platform/Arena.cpp:
+        (WebCore::ArenaAllocate):
+        * platform/Arena.h:
+        (WebCore):
+        * rendering/RenderArena.cpp:
+        (WebCore::RenderArena::allocate):
+        * rendering/RenderArena.h:
+        (WebCore::RenderArena::totalRenderArenaAllocatedBytes):
+        (RenderArena):
+
 2012-05-03  Mary Wu  <mary.wu@torchmobile.com.cn>
 
         [BlackBerry] Add missed member in CrossThreadResourceRequestData
