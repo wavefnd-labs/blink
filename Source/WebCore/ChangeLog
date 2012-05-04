@@ -1,3 +1,27 @@
+2012-05-04  Enrica Casucci  <enrica@apple.com>
+
+        REGRESSION: Cursor jumps to the first line after deleting the last word.
+        https://bugs.webkit.org/show_bug.cgi?id=85334
+        <rdar://problem/11210059>
+
+        Reviewed by Ryosuke Niwa.
+
+        This regression was introduced with the work to remove redundant divs.
+        When we decide to remove a DIV, we need to adjust the selection, if it is
+        expressed in terms of the node being removed. The new position was computed
+        using updatePositionForNodeRemoval that was not designed for the case where we
+        remove preserving children.
+        This patch adds a new method to CompositeEditCommand to do this properly.
+        
+        Test: editing/deleting/delete-word-from-unstyled-div.html
+
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::isRemovableBlock): Code clenup.
+        (WebCore::CompositeEditCommand::updatePositionForNodeRemovalPreservingChildren): Added.
+         * editing/CompositeEditCommand.h:
+        * editing/DeleteSelectionCommand.cpp:
+        (WebCore::DeleteSelectionCommand::removeRedundantBlocks): Uses updatePositionForNodeRemovalPreservingChildren.
+
 2012-05-04  Jeffrey Pfau  <jpfau@apple.com>
 
         Prevent early EventListener deletion
