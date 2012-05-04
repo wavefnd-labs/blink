@@ -1,3 +1,37 @@
+2012-05-04  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Remove all index metadata records when deleting an index
+        https://bugs.webkit.org/show_bug.cgi?id=85557
+
+        Reviewed by Tony Chang.
+
+        An assert is hit when re-loading database from backing store due to stale index
+        metadata entry. Do a range delete to clear all metadata entries when deleting an
+        index. Define metadata entries as enum and limits as consts instead of hardcoded ints.
+
+        No new tests - issue does not repro as layout test. Will land test in Chromium.
+
+        * Modules/indexeddb/IDBLevelDBBackingStore.cpp:
+        (WebCore::getBool): Helper functions; replaces pattern of putInt()/read only lead byte.
+        (WebCore):
+        (WebCore::putBool):
+        (WebCore::IDBLevelDBBackingStore::getObjectStores): Skip stale data. Use enums, helpers.
+        (WebCore::IDBLevelDBBackingStore::createObjectStore): Use enums.
+        (WebCore::IDBLevelDBBackingStore::deleteObjectStore): Use enums.
+        (WebCore::getNewVersionNumber): Use enums.
+        (WebCore::IDBLevelDBBackingStore::getIndexes): Skip stale data. Use enums, helpers.
+        (WebCore::getNewIndexId): Use enums.
+        (WebCore::IDBLevelDBBackingStore::createIndex): Use enums.
+        (WebCore::IDBLevelDBBackingStore::deleteIndex): Delete metadata by range.
+        * Modules/indexeddb/IDBLevelDBCoding.cpp:
+        (IDBLevelDBCoding): Add constants for metadata maximum values.
+        (WebCore::IDBLevelDBCoding::encodeBool):
+        (WebCore::IDBLevelDBCoding::decodeBool):
+        (WebCore::IDBLevelDBCoding::ObjectStoreMetaDataKey::encodeMaxKey): Use consts.
+        (WebCore::IDBLevelDBCoding::IndexMetaDataKey::encodeMaxKey): Use consts.
+        * Modules/indexeddb/IDBLevelDBCoding.h:
+        (IDBLevelDBCoding): Expose enums for metadata types.
+
 2012-05-04  Anders Carlsson  <andersca@apple.com>
 
         Move markPagesForFullStyleRecalc to PageCache
