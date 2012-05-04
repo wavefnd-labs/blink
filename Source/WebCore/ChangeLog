@@ -1,3 +1,40 @@
+2012-05-03  Adam Barth  <abarth@webkit.org>
+
+        CSP: Eval isn't blocked in about:blank subframes
+        https://bugs.webkit.org/show_bug.cgi?id=85553
+
+        Reviewed by Eric Seidel.
+
+        ContentSecurityPolicy has a back pointer to ScriptExecutionContext.
+        That means we shouldn't share a single ContentSecurityPolicy object
+        between multiple ScriptExecutionContexts.  This patch copies the state
+        from one ScriptExecutionContext to another rather than sharing the
+        ContentSecurityPolicy object itself.
+
+        This resulted in a subtle but w.r.t. blocking eval.  Because we block
+        eval by setting a bit in the JavaScript engine when enforcing the
+        policy, that bit wasn't copied along with the rest of the state when we
+        were sharing the ContentSecurityPolicy object.  Now that we use the
+        more robust ContentSecurityPolicy::copyStateFrom function, we don't
+        have that bug.
+
+        Test: http/tests/security/contentSecurityPolicy/eval-blocked-in-about-blank-iframe.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::initSecurityContext):
+        (WebCore):
+        (WebCore::Document::initContentSecurityPolicy):
+        * dom/Document.h:
+        (Document):
+        * dom/SecurityContext.cpp:
+        (WebCore::SecurityContext::setContentSecurityPolicy):
+        * dom/SecurityContext.h:
+        (SecurityContext):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didBeginDocument):
+        * page/ContentSecurityPolicy.h:
+        (WebCore::ContentSecurityPolicy::create):
+
 2012-05-03  Abhishek Arya  <inferno@chromium.org>
 
         Regression(r113769): Crash in AudioNodeOutput::disconnectAllParams.
