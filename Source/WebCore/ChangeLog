@@ -1,3 +1,49 @@
+2012-05-04  Chris Rogers  <crogers@google.com>
+
+        Oscillator must implement noteOn() and noteOff()
+        https://bugs.webkit.org/show_bug.cgi?id=85236
+
+        Reviewed by Kenneth Russell.
+
+        Test: webaudio/oscillator-scheduling.html
+        to be landed separately to get proper platform baselines
+
+        * Modules/webaudio/AudioBufferSourceNode.cpp:
+        (WebCore::AudioBufferSourceNode::process):
+        Simplify/remove zeroing-out silence at end of buffer, since it's now handled in the base-class AudioScheduledSourceNode::updateSchedulingInfo().
+
+        * Modules/webaudio/AudioContext.cpp:
+        (WebCore::AudioContext::createBufferSource):
+        Improve comment about ownership and dynamic-lifetime of AudioBufferSourceNode.
+
+        (WebCore::AudioContext::createOscillator):
+        AudioContext keeps a reference to the Oscillator and that reference is released in AudioScheduledSourceNode,
+        when it has finished playing.
+
+        * Modules/webaudio/AudioScheduledSourceNode.h:
+        * Modules/webaudio/AudioScheduledSourceNode.cpp:
+        (WebCore::AudioScheduledSourceNode::updateSchedulingInfo):
+        updateSchedulingInfo() is now responsible for zeroing out the very start (before a note starts)
+        and the very end (after note ends) of the output AudioBus.  We've also simplified the number
+        of arguments passed to this method, because of this. It now handles playbackState transition to FINISHED_STATE.
+
+        * Modules/webaudio/Oscillator.cpp:
+        (WebCore::Oscillator::Oscillator):
+        (WebCore::Oscillator::calculateSampleAccuratePhaseIncrements):
+        The frequency value needs to snap immediately to its correct value the very first time.
+        This bug needs to be fixed here so that the Oscillator layout scheduling test works correctly.
+
+        (WebCore::Oscillator::process):
+        Since Oscillator in now changing to be a AudioScheduledSourceNode, we need to call AudioScheduledSourceNode::updateSchedulingInfo()
+        to handle playbackState for us.
+
+        (WebCore::Oscillator::propagatesSilence):
+        Add scheduling logic for propagatesSilence().
+
+        (Oscillator):
+        * Modules/webaudio/Oscillator.idl:
+        Add noteOn(), noteOff() methods and playbackState according to specification.
+
 2012-05-04  Andy Estes  <aestes@apple.com>
 
         Remove uses of ASSERT(false)
