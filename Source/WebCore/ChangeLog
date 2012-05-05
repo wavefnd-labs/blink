@@ -1,3 +1,33 @@
+2012-05-04  Shawn Singh  <shawnsingh@chromium.org>
+
+        [chromium] Changes to layer tree structure need to be tracked properly
+        https://bugs.webkit.org/show_bug.cgi?id=85421
+
+        Reviewed by Adrienne Walker.
+
+        Unit test added: TreeSynchronizerTest.syncSimpleTreeAndTrackStackingOrderChange
+
+        Earlier, we were relying on WebCore behavior that always called
+        setNeedsDisplay whenever the layer tree structure changed.
+        However, in general it is more correct to consider layer tree
+        changes even when things don't need repainting; for example Aura
+        code is encountring this bug now. This patch corrects the
+        compositor so that layer tree structural changes are considered
+        property changes, without requiring that layers needed to be
+        repainted.
+
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        (WebCore::LayerChromium::insertChild):
+        (WebCore::LayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::setStackingOrderChanged):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+
 2012-05-04  Jeffrey Pfau  <jpfau@apple.com>
 
         Unreviewed; build fix after r116191.
