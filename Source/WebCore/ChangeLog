@@ -1,3 +1,36 @@
+2012-05-05  Dean Jackson  <dino@apple.com>
+
+        Add new Setting/Preference to disable requestAnimationFrame
+        https://bugs.webkit.org/show_bug.cgi?id=85693
+
+        Reviewed by Simon Fraser.
+
+        Hook up the new WebPreference for disabling requestAnimationFrame
+        to Settings. This isn't disabling the feature in the typical
+        WebKit ENABLE() way - it's still available in the DOM, it's
+        just that the animations will never be serviced. This allows a client
+        to disable the machinery without breaking content (other than the
+        animations).
+
+        The new test is currently skipped on all platforms because toggling
+        the preference interferes with the other tests that are running
+        at the same time (and expect a working requestAnimationFrame).
+        https://bugs.webkit.org/show_bug.cgi?id=85689
+
+        Test: fast/animation/request-animation-frame-disabled.html
+
+        * dom/ScriptedAnimationController.cpp:
+        (WebCore::ScriptedAnimationController::serviceScriptedAnimations):
+        (WebCore::ScriptedAnimationController::windowScreenDidChange):
+        (WebCore::ScriptedAnimationController::scheduleAnimation):
+        Check the setting before deciding to act.
+        * page/Settings.cpp:
+        (WebCore::Settings::Settings):
+        * page/Settings.h:
+        (WebCore::Settings::setRequestAnimationFrameEnabled):
+        (WebCore::Settings::requestAnimationFrameEnabled):
+        (Settings):
+
 2012-05-05  Gustavo Noronha Silva  <gns@gnome.org>
 
         Unreviewed, make distcheck fix.
