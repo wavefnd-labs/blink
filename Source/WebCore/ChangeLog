@@ -1,3 +1,23 @@
+2012-05-04  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Leaf non self-painting layers should bail out early in RenderLayer::paintLayer
+        https://bugs.webkit.org/show_bug.cgi?id=85678
+
+        Reviewed by Darin Adler.
+
+        Performance optimization, no expected change in behavior.
+
+        The gist of the change is that leaf non self-painting layers don't need to be painted as their
+        associated RenderBoxModelObject should properly paint itself without any help.
+
+        For RenderLayer trees that have a large number of leafs nodes (like a table with a leaf RenderLayer for
+        each cells), not bailing out is a big overhead as it ends up doing a lot of computation for no real
+        painting. See http://dglazkov.github.com/performance-tests/biggrid.html for a benchmark for that. On
+        my machine, it reduces the paint time when scrolling to 70ms from 120ms (45% speedup).
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayer):
+
 2012-05-04  Rob Buis  <rbuis@rim.com>
 
         Remove InlineBox::next()
