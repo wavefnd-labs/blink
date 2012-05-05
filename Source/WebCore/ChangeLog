@@ -1,3 +1,46 @@
+2012-05-04  Andy Estes  <aestes@apple.com>
+
+        Remove uses of ASSERT(false)
+        https://bugs.webkit.org/show_bug.cgi?id=85686
+
+        Reviewed by Dean Jackson.
+
+        Replace uses of ASSERT(false) with ASSERT_NOT_REACHED(). Also, in two places, there was code structured like:
+
+        if (expr) {
+            // do something
+        } else {
+            ASSERT(false);
+        }
+
+        Replace this with:
+
+        ASSERT(expr);
+        if (!expr)
+            return;
+
+        // do something
+
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::deleteOrigin):
+        (WebCore::DatabaseTracker::doneCreatingDatabase):
+        (WebCore::DatabaseTracker::doneDeletingDatabase):
+        (WebCore::DatabaseTracker::deleteDatabase):
+        * bridge/objc/objc_instance.mm:
+        (ObjcInstance::invokeObjcMethod):
+        * bridge/objc/objc_utility.mm:
+        (JSC::Bindings::convertObjcValueToValue):
+        (JSC::Bindings::objcValueTypeForType):
+        * dom/Node.cpp:
+        (WebCore::Node::createRenderer):
+        * loader/icon/IconDatabase.cpp:
+        (WebCore::IconDatabase::setIconURLForPageURLInSQLDatabase):
+        (WebCore::IconDatabase::setIconIDForPageURLInSQLDatabase):
+        * platform/graphics/GraphicsContext3D.cpp:
+        (WebCore::doPacking):
+        * platform/text/BidiResolver.h:
+        (WebCore::::createBidiRunsForLine):
+
 2012-05-04  Noel Gordon  <noel.gordon@gmail.com>
 
         [CG] Minor refactor of ImageBuffer::CGImageToDataURL and its callers
