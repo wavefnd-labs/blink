@@ -1,3 +1,31 @@
+2012-05-07  Shezan Baig  <shezbaig.wk@gmail.com>
+
+        Selection Background Color Error
+        https://bugs.webkit.org/show_bug.cgi?id=80382
+
+        Reviewed by David Hyatt.
+
+        Determine the text colors and selection colors before painting the
+        background behind the text.  This is because when determining whether
+        to invert the selection background, the selection text color should be
+        used instead of the regular text color.  With this patch, the selection
+        text color is passed to 'paintSelection' so that the selection
+        background can be compared against it, instead of comparing against the
+        CSSPropertyColor value.
+
+        Test: fast/backgrounds/selection-background-color.html
+
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::paint):
+            Pass selection text color to paintSelection
+
+        (WebCore::InlineTextBox::paintSelection):
+            Use the selection text color instead of CSSPropertyColor
+
+        * rendering/InlineTextBox.h:
+        (InlineTextBox):
+            Adjust signature of paintSelection to accept text color
+
 2012-05-07  David Reveman  <reveman@chromium.org>
 
         [Chromium] Use GL_CHROMIUM_command_buffer_query to throttle texture uploads.
