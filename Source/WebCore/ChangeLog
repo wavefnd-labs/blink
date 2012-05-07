@@ -1,3 +1,24 @@
+2012-05-06  MORITA Hajime  <morrita@google.com>
+
+        [Shadow DOM] Node distribution should be refreshed before style recalc.
+        https://bugs.webkit.org/show_bug.cgi?id=85259
+
+        Reviewed by Dimitri Glazkov.
+
+        Element::recalcStyle() calls child element's recalcStyle()
+        recursively, following ShadowTree::recalcShadowTreeStyle(). But
+        recalcShadowTreeStyle() should be called before such recursion if
+        necessary.
+
+        This is because style calculation and following renderer attachment
+        of each child element depends on up-to-date node distribution result
+        which is computed during the recalcShadowTreeStyle().
+
+        Test: fast/dom/shadow/shadow-dynamic-style-change-via-mutation-and-selector.html
+
+        * dom/Element.cpp: Moved recalcShadowTreeStyle() before child traversals.
+        (WebCore::Element::recalcStyle):
+
 2012-05-06  Adam Barth  <abarth@webkit.org>
 
         CSP should let sites both enforce one policy and monitor another
