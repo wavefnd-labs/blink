@@ -1,3 +1,151 @@
+
+2012-05-07  Antti Koivisto  <antti@apple.com>
+
+        Share stylesheet data structures between documents
+        https://bugs.webkit.org/show_bug.cgi?id=85598
+
+        Reviewed by Darin Adler.
+
+        We currently make a copy of the data structures when restoring a cached stylesheet. This patch lets us share
+        the data until someone uses a mutating CSSOM API to modify the sheet.
+        
+        The patch implements copy-on-write for the internal style sheet data structures. If any mutating CSSOM API is
+        invoked, we check if the mutation is safe (there is only one client, the sheet is not cached). If not then the
+        internal structures are copied and any existing CSSOM objects are re-attached to the new style tree. The copied
+        tree is mutated while the other clients stay attached to the original tree.
+        
+        Sharing can save significant amount of memory on sites with large stylesheets. For example if you have
+        multiple articles open on wsj.com this saves ~2.6MB per tab.
+        
+        Test: http/tests/css/shared-stylesheet-mutation.html
+              http/tests/css/shared-stylesheet-mutation-preconstruct.html
+
+        * css/CSSFontFaceRule.cpp:
+        (WebCore::CSSFontFaceRule::reattach):
+        (WebCore):
+        * css/CSSFontFaceRule.h:
+        (CSSFontFaceRule):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::insertRule):
+        (WebCore::CSSMediaRule::deleteRule):
+        (WebCore::CSSMediaRule::reattach):
+        (WebCore):
+        * css/CSSMediaRule.h:
+        (CSSMediaRule):
+        * css/CSSPageRule.cpp:
+        (WebCore::CSSPageRule::setSelectorText):
+        (WebCore::CSSPageRule::reattach):
+        (WebCore):
+        * css/CSSPageRule.h:
+        (CSSPageRule):
+        * css/CSSRule.cpp:
+        (WebCore::CSSRule::reattach):
+        
+            After the internal stylerule tree has been copied, the existing wrappers are re-attached using recursive reattach() function.
+
+        * css/CSSRule.h:
+        (WebCore):
+        (CSSRule):
+        * css/CSSStyleRule.cpp:
+        (WebCore::CSSStyleRule::setSelectorText):
+        (WebCore::CSSStyleRule::reattach):
+        (WebCore):
+        * css/CSSStyleRule.h:
+        (CSSStyleRule):
+        * css/CSSStyleSheet.cpp:
+        (WebCore::StyleSheetInternal::StyleSheetInternal):
+        (WebCore::StyleSheetInternal::isCacheable):
+        (WebCore::StyleSheetInternal::ruleAt):
+        
+            Add ruleAt(), use it for both wrapper creation and reattaching.  Remove createChildRuleCSSOMWrapper .
+
+        (WebCore):
+        (WebCore::StyleSheetInternal::wrapperInsertRule):
+        (WebCore::StyleSheetInternal::wrapperDeleteRule):
+        
+            Invalidation moves to the calling wrapper.
+
+        (WebCore::StyleSheetInternal::addedToMemoryCache):
+        (WebCore::StyleSheetInternal::removedFromMemoryCache):
+        (WebCore::CSSStyleSheet::willMutateRules):
+        
+            This is called whenever StyleSheetInternal is going to be mutated. It will do copy-on-write if needed.
+            
+            Usually invoked by CSSStyleSheet::RuleMutation RAII type.
+
+        (WebCore::CSSStyleSheet::didMutateRules):
+        
+            This is called after the mutation is complete and will trigger the style recalc in the document.
+
+        (WebCore::CSSStyleSheet::didMutate):
+        
+            This is called directly after mutations that don't change StyleSheetInternal so don't require copy-on-write.
+
+        (WebCore::CSSStyleSheet::reattachChildRuleCSSOMWrappers):
+        (WebCore::CSSStyleSheet::setDisabled):
+        (WebCore::CSSStyleSheet::insertRule):
+        (WebCore::CSSStyleSheet::deleteRule):
+        * css/CSSStyleSheet.h:
+        (StyleSheetInternal):
+        (WebCore::StyleSheetInternal::hasOneClient):
+        (WebCore::StyleSheetInternal::isMutable):
+        (WebCore::StyleSheetInternal::setMutable):
+        
+            Track mutability. Mutation is allowed only after willMutate call.
+
+        (WebCore::StyleSheetInternal::isInMemoryCache):
+        
+            Track if the object is in memory cache.
+
+        (WebCore::CSSStyleSheet::clearOwnerRule):
+        (CSSStyleSheet):
+        * css/MediaList.cpp:
+        (WebCore::MediaList::setMediaText):
+        (WebCore::MediaList::deleteMedium):
+        (WebCore::MediaList::appendMedium):
+        (WebCore::MediaList::didMutate):
+        (WebCore):
+        (WebCore::MediaList::reattach):
+        * css/MediaList.h:
+        (MediaList):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::setCssText):
+        (WebCore::PropertySetCSSStyleDeclaration::setProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::removeProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::setPropertyInternal):
+        (WebCore):
+        (WebCore::StyleRuleCSSStyleDeclaration::willMutate):
+        (WebCore::StyleRuleCSSStyleDeclaration::didMutate):
+        (WebCore::StyleRuleCSSStyleDeclaration::reattach):
+        (WebCore::InlineCSSStyleDeclaration::didMutate):
+        * css/PropertySetCSSStyleDeclaration.h:
+        (WebCore::PropertySetCSSStyleDeclaration::willMutate):
+        (WebCore::PropertySetCSSStyleDeclaration::didMutate):
+        (StyleRuleCSSStyleDeclaration):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::WebKitCSSKeyframesRule::setName):
+        (WebCore::WebKitCSSKeyframesRule::insertRule):
+        (WebCore::WebKitCSSKeyframesRule::deleteRule):
+        (WebCore::WebKitCSSKeyframesRule::reattach):
+        (WebCore):
+        * css/WebKitCSSKeyframesRule.h:
+        (WebKitCSSKeyframesRule):
+        * css/WebKitCSSRegionRule.cpp:
+        (WebCore::WebKitCSSRegionRule::reattach):
+        * css/WebKitCSSRegionRule.h:
+        (WebKitCSSRegionRule):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::reparseStyleSheet):
+        * loader/cache/CachedCSSStyleSheet.cpp:
+        (WebCore::CachedCSSStyleSheet::~CachedCSSStyleSheet):
+        (WebCore::CachedCSSStyleSheet::destroyDecodedData):
+        (WebCore::CachedCSSStyleSheet::restoreParsedStyleSheet):
+        
+            Don't copy when restoring. It is no longer necessary.
+            Set the cache bit on the stylesheet.
+
+        (WebCore::CachedCSSStyleSheet::saveParsedStyleSheet):
+
 2012-05-06  Kinuko Yasuda  <kinuko@chromium.org>
 
         Cleanup: Change boolean synchronous flag argument into enum in FileSystem API code
