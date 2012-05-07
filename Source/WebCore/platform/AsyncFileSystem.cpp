@@ -52,18 +52,18 @@ bool AsyncFileSystem::isAvailable()
     return false;
 }
 
-bool AsyncFileSystem::isValidType(Type type)
+bool AsyncFileSystem::isValidType(FileSystemType type)
 {
-    return type == Temporary || type == Persistent;
+    return type == FileSystemTypeTemporary || type == FileSystemTypePersistent;
 }
 
-PassOwnPtr<AsyncFileSystem> AsyncFileSystem::create(Type)
+PassOwnPtr<AsyncFileSystem> AsyncFileSystem::create(FileSystemType)
 {
     notImplemented();
     return nullptr;
 }
 
-void AsyncFileSystem::openFileSystem(const String& basePath, const String& storageIdentifier, Type type, bool, PassOwnPtr<AsyncFileSystemCallbacks> callbacks)
+void AsyncFileSystem::openFileSystem(const String& basePath, const String& storageIdentifier, FileSystemType, bool, PassOwnPtr<AsyncFileSystemCallbacks> callbacks)
 {
     notImplemented();
     callbacks->didFail(NOT_SUPPORTED_ERR);
