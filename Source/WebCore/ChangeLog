@@ -1,3 +1,80 @@
+2012-05-07  David Reveman  <reveman@chromium.org>
+
+        [Chromium] Use GL_CHROMIUM_command_buffer_query to throttle texture uploads.
+        https://bugs.webkit.org/show_bug.cgi?id=81004
+
+        Reviewed by Adrienne Walker.
+
+        Add ThrottledTextureUploader class that uses GL_CHROMIUM_command_buffer_query
+        to throttle texture uploads based on number of currently pending queries.
+
+        Unit test: ThrottledTextureUploaderTest.IsBusy
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::create):
+        (WebCore::LayerRendererChromium::LayerRendererChromium):
+        (WebCore::LayerRendererChromium::initializeSharedObjects):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromium):
+        * platform/graphics/chromium/TextureUploader.cpp: Removed.
+        * platform/graphics/chromium/TextureUploader.h:
+        (TextureUploader):
+        * platform/graphics/chromium/ThrottledTextureUploader.cpp: Added.
+        (WebCore):
+        (WebCore::ThrottledTextureUploader::Query::Query):
+        (WebCore::ThrottledTextureUploader::Query::~Query):
+        (WebCore::ThrottledTextureUploader::Query::begin):
+        (WebCore::ThrottledTextureUploader::Query::end):
+        (WebCore::ThrottledTextureUploader::Query::isPending):
+        (WebCore::ThrottledTextureUploader::Query::wait):
+        (WebCore::ThrottledTextureUploader::ThrottledTextureUploader):
+        (WebCore::ThrottledTextureUploader::~ThrottledTextureUploader):
+        (WebCore::ThrottledTextureUploader::isBusy):
+        (WebCore::ThrottledTextureUploader::beginUploads):
+        (WebCore::ThrottledTextureUploader::endUploads):
+        (WebCore::ThrottledTextureUploader::uploadTexture):
+        (WebCore::ThrottledTextureUploader::processQueries):
+        * platform/graphics/chromium/ThrottledTextureUploader.h: Copied from Source/WebCore/platform/graphics/chromium/TextureUploader.h.
+        (WebCore):
+        (ThrottledTextureUploader):
+        (WebCore::ThrottledTextureUploader::create):
+        (Query):
+        (WebCore::ThrottledTextureUploader::Query::create):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::initializeLayerRenderer):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (UnthrottledTextureUploader):
+        (WebCore::UnthrottledTextureUploader::create):
+        (WebCore::UnthrottledTextureUploader::~UnthrottledTextureUploader):
+        (WebCore::UnthrottledTextureUploader::isBusy):
+        (WebCore::UnthrottledTextureUploader::beginUploads):
+        (WebCore::UnthrottledTextureUploader::endUploads):
+        (WebCore::UnthrottledTextureUploader::uploadTexture):
+        (WebCore::UnthrottledTextureUploader::UnthrottledTextureUploader):
+        (WebCore):
+        (WebCore::CCSingleThreadProxy::initializeLayerRenderer):
+        (WebCore::CCSingleThreadProxy::recreateContext):
+        (WebCore::CCSingleThreadProxy::doCommit):
+        * platform/graphics/chromium/cc/CCTextureUpdater.cpp:
+        (WebCore::CCTextureUpdater::update):
+        * platform/graphics/chromium/cc/CCTextureUpdater.h:
+        (CCTextureUpdater):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore):
+        (UnthrottledTextureUploader):
+        (WebCore::UnthrottledTextureUploader::create):
+        (WebCore::UnthrottledTextureUploader::~UnthrottledTextureUploader):
+        (WebCore::UnthrottledTextureUploader::isBusy):
+        (WebCore::UnthrottledTextureUploader::beginUploads):
+        (WebCore::UnthrottledTextureUploader::endUploads):
+        (WebCore::UnthrottledTextureUploader::uploadTexture):
+        (WebCore::UnthrottledTextureUploader::UnthrottledTextureUploader):
+        (WebCore::CCThreadProxy::initializeLayerRendererOnImplThread):
+        (WebCore::CCThreadProxy::recreateContextOnImplThread):
+
 2012-05-07  Rob Buis  <rbuis@rim.com>
 
         Shrink SVGInlineTextBox object size
