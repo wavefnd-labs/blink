@@ -1,3 +1,54 @@
+2012-05-07  Adam Bergkvist  <adam.bergkvist@ericsson.com>
+
+        MediaStream should not be an ActiveDOMObject
+        https://bugs.webkit.org/show_bug.cgi?id=85191
+
+        Reviewed by Adam Barth.
+
+        The model with MediaStreamDescriptor and MediaStream (and LocalMediaStream)
+        allows the JavaScript objects (MediaStream and LocalMediaStream) to be
+        cleaned up while the MediaStreamDescriptor lives on to manage the stream in
+        the platform. This happens for example when a URL is created to represent
+        a MediaStream (using createObjectURL()). In that case, the MediaStreamDescriptor
+        is put into the MediaStreamRegistry and even though the MediaStream object is
+        lost, the URL still works since the descriptor is kept in the registry.
+
+        The changes introduced in r113460 (http://webkit.org/b/83143) turned
+        MediaStream and LocalMediaStream into ActiveDOMObjects. For example on page
+        reload, LocalMediaStream calls MediaStreamCenter::didStopLocalMediaStream()
+        via its ActiveDOMObject::stop() method. However, when a page reload occurs,
+        the LocalMediaStream object may have been cleaned up already and
+        MediaStreamCenter::didStopLocalMediaStream() will not be called.
+
+        One way to make the behavior consistent would be to call
+        MediaStreamCenter::didStopLocalMediaStream() when the descriptor is cleaned up,
+        cause then we wouldn't be dependent on the LocalMediaStream object being alive.
+        However, calling MediaStreamCenter::didStopLocalMediaStream() might not be the
+        correct thing to do when all references to the descriptor are lost since there
+        can be MediaStream objects constructed from the tracks of the LocalMediaStream
+        that should continue to work. MediaStreamCenter::didStopLocalMediaStream() was
+        intended for LocalMediaStream.stop() which is used to revoke access to devices;
+        that should not necessarily happen when the descriptor of a LocalMediaStream is
+        cleaned up. If it's necessary for some ports to signal to the platform that a
+        MediaStreamDescriptor is cleaned up, then I would suggest adding a new function,
+        willDestroyMediaStreamDescriptor(), to the MediaStreamCenter interface.
+
+        The current resolution is to make MediaStream a ContextDestructionObserver
+        instead of an ActiveDOMObject.
+
+        Currently not testable.
+
+        * Modules/mediastream/LocalMediaStream.cpp:
+        (WebCore::LocalMediaStream::create):
+        * Modules/mediastream/LocalMediaStream.h:
+        (LocalMediaStream):
+        * Modules/mediastream/LocalMediaStream.idl:
+        * Modules/mediastream/MediaStream.cpp:
+        (WebCore::MediaStream::create):
+        (WebCore::MediaStream::MediaStream):
+        (WebCore::MediaStream::scriptExecutionContext):
+        * Modules/mediastream/MediaStream.h:
+
 2012-05-07  Liam Quinn  <lquinn@rim.com>
 
         [BlackBerry] WWW-Authenticate header on 200 response pops up authentication dialog
