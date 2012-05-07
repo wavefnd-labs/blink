@@ -1,3 +1,18 @@
+2012-05-07  Michal Mocny  <mmocny@google.com>
+
+        [chromium] setContentsMemoryAllocationLimitBytes needs to setNeedsCommit.
+        https://bugs.webkit.org/show_bug.cgi?id=85801
+
+        Reviewed by Adrienne Walker.
+
+        CCLayerTreeHost::setContentsMemoryAllocationLimitBytes needs to call setNeedsCommit after adjusting memory
+        limits, so that we push a new frame.  In particular, when returning from non visibile state, we adjust
+        memory allocation from 0 to non 0, and we need to push a non blank frame.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::setVisible):
+        (WebCore::CCLayerTreeHost::setContentsMemoryAllocationLimitBytes):
+
 2012-05-07  Christophe Dumez  <christophe.dumez@intel.com>
 
         [EFL] media/track/track-cue-rendering-snap-to-lines-not-set.html fails
