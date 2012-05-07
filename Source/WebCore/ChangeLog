@@ -1,3 +1,45 @@
+2012-05-06  Adam Barth  <abarth@webkit.org>
+
+        CSP should let sites both enforce one policy and monitor another
+        https://bugs.webkit.org/show_bug.cgi?id=85561
+
+        Reviewed by Eric Seidel.
+
+        This patch lets us enforce and/or monitor multiple CSP policies.
+        Rather than having a single directive list, we now have a vector of
+        directive lists.
+
+        Tests: http/tests/security/contentSecurityPolicy/combine-multiple-policies.html
+               http/tests/security/contentSecurityPolicy/report-and-enforce.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::ContentSecurityPolicy::copyStateFrom):
+        (WebCore::ContentSecurityPolicy::didReceiveHeader):
+        (WebCore::ContentSecurityPolicy::deprecatedHeader):
+        (WebCore::ContentSecurityPolicy::deprecatedHeaderType):
+            - Even after this patch, workers aren't smart enough to enforce
+              multiple policies.  They just use the first header, like they did
+              before.  We'll need to teach workers how to enforce multiple
+              policies in a future patch.
+        (WebCore::ContentSecurityPolicy::allowJavaScriptURLs):
+        (WebCore::ContentSecurityPolicy::allowInlineEventHandlers):
+        (WebCore::ContentSecurityPolicy::allowInlineScript):
+        (WebCore::ContentSecurityPolicy::allowInlineStyle):
+        (WebCore::ContentSecurityPolicy::allowEval):
+        (WebCore::ContentSecurityPolicy::allowScriptFromSource):
+        (WebCore::ContentSecurityPolicy::allowObjectFromSource):
+        (WebCore::ContentSecurityPolicy::allowChildFrameFromSource):
+        (WebCore::ContentSecurityPolicy::allowImageFromSource):
+        (WebCore::ContentSecurityPolicy::allowStyleFromSource):
+        (WebCore::ContentSecurityPolicy::allowFontFromSource):
+        (WebCore::ContentSecurityPolicy::allowMediaFromSource):
+        (WebCore::ContentSecurityPolicy::allowConnectFromSource):
+        * page/ContentSecurityPolicy.h:
+        * workers/DefaultSharedWorkerRepository.cpp:
+        (WebCore::SharedWorkerScriptLoader::notifyFinished):
+        * workers/WorkerMessagingProxy.cpp:
+        (WebCore::WorkerMessagingProxy::startWorkerContext):
+
 2012-05-06  Rob Buis  <rbuis@rim.com>
 
         InlineBox::setHasBadParent should be debug only
