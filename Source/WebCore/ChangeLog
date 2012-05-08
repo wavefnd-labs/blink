@@ -1,3 +1,56 @@
+2012-05-08  Shezan Baig  <shezbaig.wk@gmail.com>
+
+        offsetLeft broken within CSS3 columns
+        https://bugs.webkit.org/show_bug.cgi?id=34875
+
+        Reviewed by Julien Chaffraix.
+
+        Reimplement offsetLeft and offsetTop in terms of a new method called
+        'offsetTopLeft'. The new method starts from a reference point (the
+        top-left coordinate of a box or inline) and adjusts this reference
+        point for columns as we traverse each parent. Note that the reference
+        point needs to be adjusted in both dimensions, even though offsetLeft
+        and offsetTop return only one of them.
+
+        A new method called 'offsetForColumns' was added to RenderObject. This
+        method is similar to adjustForColumns, except that it returns the
+        offset instead of modifying a reference. This method is necessary to
+        simplify the implementation of offsetTopLeft.
+
+        Tests: fast/block/positioning/offsetLeft-offsetTop-multicolumn-expected.txt
+               fast/block/positioning/offsetLeft-offsetTop-multicolumn.html
+
+        * rendering/RenderBox.h:
+        (RenderBox):
+        Override offsetLeft and offsetTop.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::offsetLeft):
+        Implemented in terms of RenderBoxModelObject::offsetTopLeft, using
+        topLeftLocation as startPoint.
+        (WebCore::RenderBox::offsetTop):
+        Implemented in terms of RenderBoxModelObject::offsetTopLeft, using
+        topLeftLocation as startPoint.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::offsetTopLeft):
+        New method to compute offsetLeft and offsetTop simultaneously, and
+        adjusting for columns at each parent.
+        (WebCore::RenderBoxModelObject::offsetLeft):
+        Reimplemented in terms of offsetTopLeft.
+        (WebCore::RenderBoxModelObject::offsetTop):
+        Reimplemented in terms of offsetTopLeft.
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        Declare new offsetTopLeft method.
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::offsetLeft):
+        Reimplemented in terms of RenderBoxModelObject::offsetTopLeft.
+        (WebCore::RenderInline::offsetTop):
+        Reimplemented in terms of RenderBoxModelObject::offsetTopLeft.
+        * rendering/RenderObject.h:
+        (RenderObject):
+        (WebCore::RenderObject::offsetForColumns):
+        New helper method to simplify implementation of offsetTopLeft.
+
 2012-03-31  Robert Hogan  <robert@webkit.org>
 
         CSS 2.1 failure: first-letter-nested-004.htm fails
