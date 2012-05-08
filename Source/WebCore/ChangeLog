@@ -1,3 +1,149 @@
+2012-05-07  Kinuko Yasuda  <kinuko@chromium.org>
+
+        Support cross-filesystem operations in FileSystem API
+        https://bugs.webkit.org/show_bug.cgi?id=84135
+
+        Reviewed by David Levin.
+
+        Currently we pass Entry's fullPath to AsyncFileSystem layer where
+        we convert the given path to filesystem URL which includes origin and
+        filesystem type information, but in that way we cannot handle
+        cross-filesystem operations (e.g. cross-filesystem copy and move)
+        well since we end up with always attaching the source filesystem's
+        origin and type information for argument paths.
+
+        This patch does:
+        - change AsyncFileSystem's operation methods not to take entry paths
+          but complete filesystem URLs.
+        - move type and rootURL information from AsyncFileSystem instance into
+          DOMFileSystemBase instance (platform layer to Modules/filesystem layer)
+        - move filesystem-type related code in AsyncFileSystemChromium.cpp into
+          DOMFileSystemChromium.cpp, which implements chromioum-specific
+          DOMFileSystem code.
+        - move platform/FileSystemType.h into Modules/filesystem/FileSystemType.h.
+        - adding FileSystemType.h entry to build files (e.g. WebCore.gypi, WebCore.xcodeproj etc)
+
+        Test: fast/filesystem/cross-filesystem-op.html
+
+        * Modules/filesystem/DOMFileSystem.cpp:
+        (WebCore::DOMFileSystem::create):
+        (WebCore::DOMFileSystem::DOMFileSystem):
+        (WebCore::DOMFileSystem::createWriter):
+        (WebCore::DOMFileSystem::createFile):
+        * Modules/filesystem/DOMFileSystem.h:
+        * Modules/filesystem/DOMFileSystemBase.cpp:
+        (WebCore::DOMFileSystemBase::DOMFileSystemBase):
+        (WebCore::DOMFileSystemBase::createFileSystemURL): Added as an internal
+        implementation of Entry.toURL().
+        (WebCore::DOMFileSystemBase::getMetadata):
+        (WebCore::verifyAndGetDestinationPathForCopyOrMove):
+        (WebCore::DOMFileSystemBase::move):
+        (WebCore::DOMFileSystemBase::copy):
+        (WebCore::DOMFileSystemBase::remove):
+        (WebCore::DOMFileSystemBase::removeRecursively):
+        (WebCore::DOMFileSystemBase::getParent):
+        (WebCore::DOMFileSystemBase::getFile):
+        (WebCore::DOMFileSystemBase::getDirectory):
+        (WebCore::DOMFileSystemBase::readDirectory):
+        * Modules/filesystem/DOMFileSystemBase.h: Changed to make each
+        DOMFileSystemBase instance have filesystem type and rootURL (they were
+        held by AsyncFileSystem previously)
+        (WebCore::DOMFileSystemBase::create): Changed to take additional parameters.
+        (WebCore::DOMFileSystemBase::type): Added.(Moved from AsyncFileSystem::type)
+        (WebCore::DOMFileSystemBase::rootURL): Added.(Moved from AsyncFileSystem::rootURL).
+        * Modules/filesystem/DOMFileSystemSync.cpp:
+        (WebCore::DOMFileSystemSync::create):
+        (WebCore::DOMFileSystemSync::DOMFileSystemSync):
+        (WebCore::DOMFileSystemSync::createFile):
+        (WebCore::DOMFileSystemSync::createWriter):
+        * Modules/filesystem/DOMFileSystemSync.h:
+        (WebCore::DOMFileSystemSync::create):
+        * Modules/filesystem/DOMWindowFileSystem.cpp:
+        (WebCore::DOMWindowFileSystem::webkitRequestFileSystem):
+        (WebCore::DOMWindowFileSystem::webkitResolveLocalFileSystemURL):
+        * Modules/filesystem/EntryBase.cpp:
+        (WebCore::EntryBase::toURL):
+        * Modules/filesystem/FileSystemCallbacks.cpp:
+        (WebCore::FileSystemCallbacks::create):
+        (WebCore::FileSystemCallbacks::FileSystemCallbacks):
+        (WebCore::FileSystemCallbacks::didOpenFileSystem):
+        (WebCore::ResolveURICallbacks::create):
+        (WebCore::ResolveURICallbacks::ResolveURICallbacks):
+        (WebCore::ResolveURICallbacks::didOpenFileSystem):
+        * Modules/filesystem/FileSystemCallbacks.h:
+        (FileSystemCallbacks):
+        (ResolveURICallbacks):
+        * Modules/filesystem/FileSystemType.h: Renamed from Source/WebCore/platform/FileSystemType.h.
+        * Modules/filesystem/LocalFileSystem.cpp:
+        (WebCore::openFileSystem):
+        (WebCore::LocalFileSystem::readFileSystem):
+        (WebCore::LocalFileSystem::requestFileSystem):
+        * Modules/filesystem/LocalFileSystem.h:
+        * Modules/filesystem/WorkerContextFileSystem.cpp:
+        (WebCore::WorkerContextFileSystem::webkitRequestFileSystem):
+        (WebCore::WorkerContextFileSystem::webkitRequestFileSystemSync):
+        (WebCore::WorkerContextFileSystem::webkitResolveLocalFileSystemURL):
+        (WebCore::WorkerContextFileSystem::webkitResolveLocalFileSystemSyncURL):
+        * Modules/filesystem/chromium/DOMFileSystemChromium.cpp: Added for chromium-specific
+        implementation. Almost all of the code is moved from AsyncFileSystemChromium.
+        (WebCore::DOMFileSystemBase::isValidType):
+        (WebCore::DOMFileSystemBase::crackFileSystemURL):
+        (WebCore::DOMFileSystemBase::supportsToURL):
+        (WebCore::DOMFileSystemBase::createFileSystemURL):
+        (WebCore::DOMFileSystemChromium::createIsolatedFileSystem):
+        * Modules/filesystem/chromium/DOMFileSystemChromium.h: Added.
+        * Modules/filesystem/chromium/DataTransferItemFileSystemChromium.cpp:
+        (WebCore::DataTransferItemFileSystem::webkitGetAsEntry):
+        * Modules/filesystem/chromium/DraggedIsolatedFileSystem.cpp:
+        (WebCore::DraggedIsolatedFileSystem::getDOMFileSystem):
+        * WebCore.gypi:
+        * platform/AsyncFileSystem.cpp:
+        (WebCore::AsyncFileSystem::openFileSystem):
+        * platform/AsyncFileSystem.h:
+        (AsyncFileSystem):
+        (WebCore::AsyncFileSystem::AsyncFileSystem):
+        * platform/AsyncFileSystemCallbacks.h:
+        (WebCore::AsyncFileSystemCallbacks::didOpenFileSystem):
+        * platform/blackberry/AsyncFileSystemBlackBerry.cpp:
+        (WebCore::AsyncFileSystem::create):
+        (WebCore::AsyncFileSystem::openFileSystem):
+        (WebCore::AsyncFileSystemBlackBerry::AsyncFileSystemBlackBerry):
+        (WebCore::AsyncFileSystemBlackBerry::move):
+        (WebCore::AsyncFileSystemBlackBerry::copy):
+        (WebCore::AsyncFileSystemBlackBerry::remove):
+        (WebCore::AsyncFileSystemBlackBerry::removeRecursively):
+        (WebCore::AsyncFileSystemBlackBerry::readMetadata):
+        (WebCore::AsyncFileSystemBlackBerry::createFile):
+        (WebCore::AsyncFileSystemBlackBerry::createDirectory):
+        (WebCore::AsyncFileSystemBlackBerry::fileExists):
+        (WebCore::AsyncFileSystemBlackBerry::directoryExists):
+        (WebCore::AsyncFileSystemBlackBerry::readDirectory):
+        (WebCore::AsyncFileSystemBlackBerry::createWriter):
+        (WebCore::AsyncFileSystemBlackBerry::createSnapshotFileAndReadMetadata):
+        * platform/blackberry/AsyncFileSystemBlackBerry.h:
+        * platform/chromium/PlatformSupport.h:
+        * platform/gtk/AsyncFileSystemGtk.cpp:
+        (WebCore::AsyncFileSystem::create):
+        (WebCore::AsyncFileSystem::openFileSystem):
+        (WebCore::AsyncFileSystemGtk::AsyncFileSystemGtk):
+        (WebCore::AsyncFileSystemGtk::move):
+        (WebCore::AsyncFileSystemGtk::copy):
+        (WebCore::AsyncFileSystemGtk::remove):
+        (WebCore::AsyncFileSystemGtk::removeRecursively):
+        (WebCore::AsyncFileSystemGtk::readMetadata):
+        (WebCore::AsyncFileSystemGtk::createFile):
+        (WebCore::AsyncFileSystemGtk::createDirectory):
+        (WebCore::AsyncFileSystemGtk::fileExists):
+        (WebCore::AsyncFileSystemGtk::directoryExists):
+        (WebCore::AsyncFileSystemGtk::readDirectory):
+        (WebCore::AsyncFileSystemGtk::createWriter):
+        * platform/gtk/AsyncFileSystemGtk.h:
+
+        * GNUmakefile.list.am: Added FileSystemType.h.
+        * WebCore.gypi: Added FileSystemType.h.
+        * WebCore.vcproj/WebCore.vcproj: Added FileSystemType.h.
+        * WebCore.xcodeproj/project.pbxproj: Added FileSystemType.h.
+
 2012-05-07  Adam Barth  <abarth@webkit.org>
 
         [Chromium] Android wishes to use an empty implementation if AXObjectCache
