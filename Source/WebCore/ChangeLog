@@ -1,3 +1,87 @@
+2012-05-04  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Tie lifetime of SVGAnimateElement::m_animatedType to the duration of the animation
+        https://bugs.webkit.org/show_bug.cgi?id=85627
+
+        Reviewed by Antti Koivisto.
+
+        Example:
+        <rect width="10" height="100">
+            <animate attributeName="width" from="10" to="100" begin="2s" dur="4s" fill="remove"/>
+        </rect>
+
+        At t=0s the <animate> element receives its first interval: begin=2s, end=6s.
+        At this point we've created the 'OwnPtr<SVGAnimatedType> m_animatedType' in
+        SVGAnimateElement, which holds the current animated value of the target type.
+        In this example it contains a SVGLength with '10' as value at t=0s.
+
+        Calling "rect.width.animVal.value" will return the value currently contained in the
+        m_animatedType from the SVGAnimateElement, even though the animation didn't begin
+        yet. This is fine, as the animVal equals to the baseVal, as long as no animation is
+        running.
+
+        At t=6s you'd expect that the whole 'animVal' object is destructed again, as it's no
+        longer needed, as animVal will be equal to baseVal again, but the current code keeps
+        the animVal alive, and just resets it to the baseVal. The animVals will be destructed
+        once the animate element leaves the tree.
+
+        CSS animations suffer from the same problem, we never remove the animated SMIL properties
+        but we only reset them to the base value. This makes integration with CSS Animations and
+        CSS Transitions harder, so this needs to be changed.
+
+        This patch starts tracking the start/end of an animation chain properly, to destruct
+        the animation effect for non-frozen animations at the end of their duration. This has to
+        work properly together with seeking (SVGSVGElement.setCurrentTime), as our testing relies
+        on the ability to drive the SMIL timeline from script.
+
+        Tests: svg/animations/list-wrapper-assertion-expected.svg
+               svg/animations/list-wrapper-assertion.svg
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::resetAnimatedType):
+        (WebCore::applyCSSPropertyToTarget):
+        (WebCore::removeCSSPropertyFromTarget):
+        (WebCore::applyCSSPropertyToTargetAndInstances):
+        (WebCore::removeCSSPropertyFromTargetAndInstances):
+        (WebCore::notifyTargetAboutAnimValChange):
+        (WebCore::notifyTargetAndInstancesAboutAnimValChange):
+        (WebCore::SVGAnimateElement::clearAnimatedType):
+        (WebCore::SVGAnimateElement::applyResultsToTarget):
+        (WebCore::SVGAnimateElement::targetElementWillChange):
+        * svg/SVGAnimateElement.h:
+        (SVGAnimateElement):
+        * svg/SVGAnimateMotionElement.cpp:
+        (WebCore::SVGAnimateMotionElement::resetAnimatedType):
+        (WebCore::SVGAnimateMotionElement::clearAnimatedType):
+        * svg/SVGAnimateMotionElement.h:
+        (SVGAnimateMotionElement):
+        * svg/SVGAnimationElement.cpp:
+        * svg/SVGAnimationElement.h:
+        * svg/animation/SMILTimeContainer.cpp:
+        (WebCore::SMILTimeContainer::updateAnimations):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::reset):
+        (WebCore::SVGSMILElement::targetElementWillChange):
+        (WebCore::SVGSMILElement::determineActiveState):
+        (WebCore::SVGSMILElement::progress):
+        * svg/animation/SVGSMILElement.h:
+        (SVGSMILElement):
+        * svg/properties/SVGAnimatedListPropertyTearOff.h:
+            Remove svgAttributeChanged() calls from animationEnded/animValDidChange.
+            Callers are now required to notify the target about changes. There are cases
+            where we want to call animValDidChange without invoking svgAttributeChanged().
+            That is supported now.
+        (WebCore::SVGAnimatedListPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedListPropertyTearOff::animValDidChange):
+        * svg/properties/SVGAnimatedProperty.h: Ditto.
+        (WebCore::SVGAnimatedProperty::commitChange): Add safety guard.
+        * svg/properties/SVGAnimatedPropertyTearOff.h: Ditto.
+        (WebCore::SVGAnimatedPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedPropertyTearOff::animValDidChange):
+        * svg/properties/SVGAnimatedStaticPropertyTearOff.h: Ditto.
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animationEnded):
+        (WebCore::SVGAnimatedStaticPropertyTearOff::animValDidChange):
+
 2012-05-08  Ryuan Choi  <ryuan.choi@samsung.com>
 
         [EFL][DRT]Do not create ScrollbarEfl when mockScrollbar is enabled.
