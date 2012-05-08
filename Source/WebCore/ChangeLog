@@ -1,3 +1,38 @@
+2012-05-08  Philip Rogers  <pdr@google.com>
+
+        Prevent crash in animated lists
+        https://bugs.webkit.org/show_bug.cgi?id=85382
+
+        Reviewed by Nikolas Zimmermann.
+
+        Animated lists blindly assign the last list value to m_toAtEndOfDurationType
+        in SVGAnimationElement::startedActiveInterval. If the last list value's length
+        is larger or smaller than the animated "to" length, we crash.
+
+        This change prevents accessing values off the end of toAtEndOfDuration by adding
+        a check for this case. It may seem inefficient to perform this check on every
+        animation update but the "to" value can change (in cardinality) while animating.
+
+        I checked each of the other animation types (e.g., SVGAnimatedAngle,
+        SVGAnimatedBoolean, etc.) and was only able to hit this style of crash
+        in the three types modified in this change:
+        SVGAnimatedLengthList, SVGAnimatedNumberList, and SVGAnimatedPointList.
+
+        Tests: svg/animations/animate-linear-discrete-additive-b-expected.svg
+               svg/animations/animate-linear-discrete-additive-b.svg
+               svg/animations/animate-linear-discrete-additive-c-expected.svg
+               svg/animations/animate-linear-discrete-additive-c.svg
+               svg/animations/animate-linear-discrete-additive-expected.svg
+               svg/animations/animate-linear-discrete-additive.svg
+               svg/animations/animate-list-crash.svg
+
+        * svg/SVGAnimatedLengthList.cpp:
+        (WebCore::SVGAnimatedLengthListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedNumberList.cpp:
+        (WebCore::SVGAnimatedNumberListAnimator::calculateAnimatedValue):
+        * svg/SVGAnimatedPointList.cpp:
+        (WebCore::SVGAnimatedPointListAnimator::calculateAnimatedValue):
+
 2012-05-08  Rafael Weinstein  <rafaelw@chromium.org>
 
         HTMLElementStack::hasOnlyHTMLElementsInScope is no longer called
