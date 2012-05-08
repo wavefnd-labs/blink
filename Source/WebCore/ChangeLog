@@ -1,3 +1,40 @@
+2012-03-31  Robert Hogan  <robert@webkit.org>
+
+        CSS 2.1 failure: first-letter-nested-004.htm fails
+        https://bugs.webkit.org/show_bug.cgi?id=72987
+
+        Reviewed by Eric Seidel.
+
+        When styling first-letter check each sibling and drill into its inlines until we find either (i) a text node 
+        that is not all whitespace, or (ii) a line break.
+
+        This makes our rendering of the following tests compatible with FF and Opera. Our current behaviour is also conformant
+        since the spec allows UAs to style just one element:
+            css2.1/20110323/first-letter-quote-002.htm
+            css2.1/20110323/first-letter-quote-003.htm
+            css2.1/20110323/first-letter-quote-004.htm
+            css2.1/20110323/first-letter-quote-005.htm
+
+        This fixes the following two tests. We now drill into the descendants of an element styled with :first-letter looking
+        for text to style:
+            css2.1/20110323/first-letter-nested-004.htm
+            css2.1/20110323/first-letter-nested-006.htm
+
+        This patch changes our rendering of first-letter-dynamic-001.htm as we now render adjacent quotes in the second line as 
+        green. This is consistent with the spec, which allows this behaviour but does not require it. It's the 'right' behaviour
+        since it is consistent with the rendering of such quotes in a single element with :first-letter style.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::findLastObjectWithFirstLetterText): Iterate through the child's siblings looking for the last
+          object to be styled :first-letter.
+        (WebCore::RenderBlock::findLastObjectAfterFirstLetterPunctuation): Style any leading punctuation as first-letter, drill
+          down into the child's descendants looking for text if necessary.
+        (WebCore::RenderBlock::updateFirstLetter): Refactor to drill into sibling's children looking for inlines
+         that should be styled as first-letter.
+        (WebCore::RenderBlock::addFirstLetter): Split out from updateFirstLetter so that it can be used when a
+         descendant node inside a sibling is found in findLastObjectWithFirstLetterText() needs to be styled as first-letter.
+        * rendering/RenderBlock.h:
+
 2012-05-08  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r116402.
