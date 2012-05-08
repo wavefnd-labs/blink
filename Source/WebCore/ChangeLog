@@ -1,3 +1,47 @@
+2012-05-07  Dana Jansens  <danakj@chromium.org>
+
+        Region::intersects() and Region::contains() are slow due to copy overhead
+        https://bugs.webkit.org/show_bug.cgi?id=81076
+
+        Reviewed by Anders Carlsson.
+
+        Testing contains() and intersects() requires a copy which ends up
+        invoking a malloc on sufficiently complicated web pages, and slows down
+        the test unnecessarily. These methods can be done by iterating over the
+        Region::Shape values rather than making a copy of the entire region and
+        manipulating it.
+
+        This uses Region::Shape::compareShapes() to walk the query regions and
+        compute the result of the intersects or contains tests without making a
+        copy.
+
+        This change improves the performance of the Region overlap testing for
+        composited layers, and allows for testing contains() before unite() to
+        avoid unnecessary copies of the Region when inserting into complex
+        Regions. With a layout test that has 225 composited layers, and tests
+        Region.intersects() for 1000 layers above them, this change decreases
+        the running time of the test by 1.2% by avoiding a copy of the 225
+        rects each time.
+
+        Unit test: RegionTest.intersectsRegion
+                   RegionTest.containsRegion
+
+        * platform/graphics/Region.cpp:
+        (WebCore::Region::contains):
+        (WebCore::Region::intersects):
+        (WebCore):
+        (WebCore::Region::Shape::compareShapes):
+        (Region::Shape::CompareContainsOperation):
+        (WebCore::Region::Shape::CompareContainsOperation::aOutsideB):
+        (WebCore::Region::Shape::CompareContainsOperation::bOutsideA):
+        (WebCore::Region::Shape::CompareContainsOperation::aOverlapsB):
+        (Region::Shape::CompareIntersectsOperation):
+        (WebCore::Region::Shape::CompareIntersectsOperation::aOutsideB):
+        (WebCore::Region::Shape::CompareIntersectsOperation::bOutsideA):
+        (WebCore::Region::Shape::CompareIntersectsOperation::aOverlapsB):
+        * platform/graphics/Region.h:
+        (Shape):
+
 2012-05-07  David Tseng  <dtseng@google.com>
 
         Correct logical error in accessibilityIsIgnored.
