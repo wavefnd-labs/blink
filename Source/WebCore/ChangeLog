@@ -1,3 +1,28 @@
+2012-05-08  Dana Jansens  <danakj@chromium.org>
+
+        Region reads past end of spans
+        https://bugs.webkit.org/show_bug.cgi?id=85909
+
+        Reviewed by Anders Carlsson.
+
+        Region currently checks aSpan == aSpanEnd as the indicator that
+        we passed all the spans. When aSpan < aSpanEnd, it uses aSpan+1
+        to find the height of the span.
+
+        If aSpan == aSpanEnd - 1, then aSpan+1 == aSpanEnd. This does not
+        represent a valid span, since aSpanEnd is past the end of the
+        array, not the last element in the array. The loop should terminate
+        in this case.
+
+        Checking aSegment != aSegmentEnd is acceptable in the inner loop since
+        it increments by two each time (segments come in pairs, while spans
+        come in singles).
+
+        Test: RegionTest.ReadPastFullSpanVectorInIntersectsTest
+
+        * platform/graphics/Region.cpp:
+        (WebCore::Region::Shape::compareShapes):
+
 2012-05-08  Philip Rogers  <pdr@google.com>
 
         Prevent crash in animated lists
