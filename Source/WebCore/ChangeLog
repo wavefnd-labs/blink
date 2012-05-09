@@ -1,3 +1,38 @@
+2012-05-08  Abhishek Arya  <inferno@chromium.org>
+
+        Crash due to owning renderer not removed from custom scrollbar.
+        https://bugs.webkit.org/show_bug.cgi?id=80610
+
+        Reviewed by Eric Seidel.
+
+        Test: scrollbars/scrollbar-owning-renderer-crash.html
+
+        Changed RenderScrollbar to keep pointer to owning node, instead of the
+        renderer. Renderer can get destroyed without informing the scrollbar, causing
+        crashes later. Remove code from r94107 since it is not needed anymore and saves
+        times when RenderBox is getting destroyed.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::createScrollbar): pass renderer's node.
+        * page/FrameView.h:
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::willBeDestroyed): no longer need this. came originally from r94107.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::createScrollbar): pass renderer's node.
+        (WebCore::RenderLayer::destroyScrollbar): no longer need to clear owning renderer.
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::createScrollbar): pass renderer's node.
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::createScrollbar): pass renderer's node.
+        * rendering/RenderScrollbar.cpp:
+        (WebCore::RenderScrollbar::createCustomScrollbar): Store owner node instead of renderer.
+        (WebCore::RenderScrollbar::RenderScrollbar): Store owner node instead of renderer.
+        (WebCore::RenderScrollbar::owningRenderer): calculate owning renderer from owner node.
+        * rendering/RenderScrollbar.h:
+        (RenderScrollbar):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::createScrollbar): pass renderer's node.
+
 2012-05-08  Jon Lee  <jonlee@apple.com>
 
         Safari warns that it needs to resend the form in an iFrame when going back
