@@ -1,5 +1,28 @@
 2012-05-09  Takashi Sakamoto  <tasak@google.com>
 
+        Crash in WebCore::RenderBoxModelObject::paddingLeft
+        https://bugs.webkit.org/show_bug.cgi?id=83889
+
+        Reviewed by Abhishek Arya.
+
+        RenderScrollbar creates RenderScrollbarPart without any parent
+        renderers. However, if the scrollbar has percent padding styles,
+        non-null parent renderer is required. So after creating/destroying
+        RenderScrollbarPart instances, set owningRenderer(creating)/0
+        (destroying) as its parent renderer.
+
+        Test: scrollbars/scrollbar-percent-padding-crash.html
+              scrollbars/scrollbar-percent-padding-crash-expected.txt
+
+        * rendering/RenderScrollbar.cpp:
+        (WebCore::RenderScrollbar::updateScrollbarPart):
+        Added setParent after creating/destroying RenderScrollbarPart.
+        * rendering/RenderScrollbarPart.cpp:
+        Made RenderScollbar friend, because setParent is protected and
+        RenderScrollbar is not inherited from class RenderObject.
+
+2012-05-09  Takashi Sakamoto  <tasak@google.com>
+
         ShadowRoot needs applyAuthorStyles
         https://bugs.webkit.org/show_bug.cgi?id=78472
 
