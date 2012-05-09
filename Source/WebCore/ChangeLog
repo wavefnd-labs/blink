@@ -1,3 +1,23 @@
+2012-05-03  Shawn Singh  <shawnsingh@chromium.org>
+
+        Hit testing is incorrect in some cases with perspective transforms
+        https://bugs.webkit.org/show_bug.cgi?id=79136
+
+        Reviewed by Simon Fraser.
+
+        Tests: transforms/3d/hit-testing/coplanar-with-camera.html
+               transforms/3d/hit-testing/perspective-clipped.html
+
+        * platform/graphics/transforms/TransformationMatrix.cpp:
+        (WebCore::TransformationMatrix::projectPoint): Fix a
+        divide-by-zero error so that values do not become Inf or Nan. Also
+        fix an overflow error by using a large, but not-too-large constant
+        to represent infinity.
+
+        (WebCore::TransformationMatrix::projectQuad): Fix an error where
+        incorrect quads were being returned. Incorrect quads can occur
+        when projectPoint clamped==true after returning.
+
 2012-05-09  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
 
         Simplify CSSParser::parseSimpleLengthValue()
