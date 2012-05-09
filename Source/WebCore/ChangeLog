@@ -1,3 +1,43 @@
+2012-05-08  Eric Seidel  <eric@webkit.org>
+
+        Add stylesheet inheritance support to IFRAME_SEAMLESS
+        https://bugs.webkit.org/show_bug.cgi?id=85914
+
+        Reviewed by Ojan Vafai.
+
+        This work is already guarded by IFRAME_SEAMLESS, as
+        Document::shouldDisplaySeamlesslyWithParent always returns false
+        when IFRAME_SEAMLESS is off.
+
+        This makes the child document use all author stylesheets from all parent documents,
+        per the seamless spec:
+        http://www.whatwg.org/specs/web-apps/current-work/#attr-iframe-seamless
+
+        This support is slightly inefficient as every time a sheet is added
+        to a parent document, the child document must do a full style selector recalc.
+        Normally author sheet additions have a fast-path which avoids the full selector recalc,
+        but such is not possible in the seamless case as we're inserting the parents sheets
+        earlier in the child's cascade (instead of just appending them to the end of the list).
+
+        The test covers both the static inheritance as well as addition of a stylesheet
+        to the parent and testing that it caused a recalc of the child.
+
+        Covered by fast/frames/seamless/seamless-css-cascade.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver):
+        (WebCore::StyleResolver::addStylesheetsFromSeamlessParents):
+        (WebCore):
+        * css/StyleResolver.h:
+        (StyleResolver):
+        * dom/Document.cpp:
+        (WebCore::Document::seamlessParentUpdatedStylesheets):
+        (WebCore):
+        (WebCore::Document::notifySeamlessChildDocumentsOfStylesheetUpdate):
+        (WebCore::Document::updateActiveStylesheets):
+        * dom/Document.h:
+        (Document):
+
 2012-05-08  Raphael Kubo da Costa  <rakuco@webkit.org>
 
         [CMake] FindGStreamer: Fix the build with static WebCore.
