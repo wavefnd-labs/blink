@@ -1,3 +1,53 @@
+2012-05-09  Levi Weintraub  <leviw@chromium.org>
+
+        Fix performance regression for floats caused by LayoutUnit change
+        https://bugs.webkit.org/show_bug.cgi?id=85834
+
+        Reviewed by Ojan Vafai.
+
+        Refactoring FractionalLayout types to alleviate performance issues. Explicitly
+        inlining constructor and operator functions in FractionalLayoutUnit, as well as
+        pixelSnappedIntSize and pixelSnappedIntRect (particularly hot code paths). Also
+        further simplifying round and ceil functions when sub-pixel layout is not enabled.
+
+        pixelSnappedIntSize was the only function defined in FractionalLayoutSize.cpp,
+        so it is removed.
+
+        No new tests. No change in functionality.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/FractionalLayoutUnit.h:
+        (WebCore::FractionalLayoutUnit::FractionalLayoutUnit):
+        (FractionalLayoutUnit):
+        (WebCore::FractionalLayoutUnit::toInt):
+        (WebCore::FractionalLayoutUnit::toFloat):
+        (WebCore::FractionalLayoutUnit::toDouble):
+        (WebCore::FractionalLayoutUnit::toUnsigned):
+        (WebCore::FractionalLayoutUnit::operator int):
+        (WebCore::FractionalLayoutUnit::operator unsigned):
+        (WebCore::FractionalLayoutUnit::operator float):
+        (WebCore::FractionalLayoutUnit::operator double):
+        (WebCore::FractionalLayoutUnit::operator bool):
+        (WebCore::FractionalLayoutUnit::ceil):
+        (WebCore::FractionalLayoutUnit::round):
+        * platform/graphics/FractionalLayoutRect.cpp:
+        (WebCore):
+        * platform/graphics/FractionalLayoutRect.h:
+        (WebCore::FractionalLayoutRect::pixelSnappedSize):
+        (WebCore::pixelSnappedIntRect):
+        (WebCore):
+        * platform/graphics/FractionalLayoutSize.cpp: Removed.
+        * platform/graphics/FractionalLayoutSize.h:
+        (WebCore):
+        * rendering/LayoutTypes.h:
+        (WebCore::pixelSnappedIntSize):
+        (WebCore):
+
 2012-05-09  Abhishek Arya  <inferno@chromium.org>
 
         Crash in ReplaceSelectionCommand::performTrivialReplace
