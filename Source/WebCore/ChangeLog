@@ -1,3 +1,77 @@
+2012-05-08  Rakesh KN  <rakesh.kn@motorola.com>
+
+        RadioNodeList support in HTMLFormElement::elements
+        https://bugs.webkit.org/show_bug.cgi?id=81854
+
+        Reviewed by Ryosuke Niwa.
+
+        Implement RadioNodeList support spec'ed at
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/common-dom-interfaces.html#radionodelist
+
+        Test: fast/forms/form-collection-radio-node-list.html
+
+        * CMakeLists.txt:
+        Added entries for new files.
+        * DerivedSources.cpp: Ditto.
+        * DerivedSources.make: Ditto.
+        * DerivedSources.pri: Ditto.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/js/JSHTMLCollectionCustom.cpp:
+        (WebCore::getNamedItems):
+        Modified to create RadioNodeList object when FormControlCollection has more than
+        one element of same name/id.
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateImplementation):
+        Added code to include Node.h and JSNode.h in JSRadioNodeElement.cpp.
+        * bindings/v8/custom/V8HTMLCollectionCustom.cpp:
+        (WebCore::getNamedItems):
+        Modified to create RadioNodeList object when FormControlCollection has more than
+        one element of same name/id.
+        * dom/Node.cpp:
+        (WebCore::Node::invalidateNodeListsCacheAfterAttributeChanged):
+        Invalidate lists even for change in id, type, checked attributes.
+        (WebCore::NodeListsNodeData::invalidateCachesThatDependOnAttributes):
+        Invalidate radioNodeList cache.
+        (WebCore::NodeListsNodeData::isEmpty):
+        Changes for radioNodeList.
+        (WebCore::Node::radioNodeList):
+        Creates if needed a RadioNodeList and adds it to the cache.
+        (WebCore::Node::removeCachedRadioNodeList):
+        Removes a cached radioNodeList.
+        * dom/Node.h: Ditto
+        * dom/NodeRareData.h:
+        (WebCore):
+        (NodeListsNodeData):
+        Added radioNodeList list.
+        * html/CollectionType.h:
+        Added new FormControls type.
+        * html/HTMLCollection.cpp:
+        (WebCore::HTMLCollection::shouldIncludeChildren):
+        (WebCore::HTMLCollection::isAcceptableElement):
+        Handle FormControls collection type.
+        * html/HTMLFormCollection.cpp:
+        (WebCore::HTMLFormCollection::HTMLFormCollection):
+        Contruct collection of FormControls type.
+        * html/RadioNodeList.cpp: Added.
+        (WebCore):
+        (WebCore::RadioNodeList::RadioNodeList):
+        (WebCore::RadioNodeList::~RadioNodeList):
+        (WebCore::toRadioButtonInputElement):
+        (WebCore::RadioNodeList::value):
+        (WebCore::RadioNodeList::setValue):
+        (WebCore::RadioNodeList::nodeMatches):
+        * html/RadioNodeList.h: Added.
+        (WebCore):
+        (RadioNodeList):
+        (WebCore::RadioNodeList::create):
+        RadioNodeList implementation.
+        * html/RadioNodeList.idl: Added.
+        Idl for generating RadioNodeList JS/V8 bindings.
+
 2012-05-08  Benjamin Poulain  <bpoulain@apple.com>
 
         [JSC] Regression: addEventListener() and removeEventListener() raise an exception on missing args
