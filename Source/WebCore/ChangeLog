@@ -1,3 +1,41 @@
+2012-05-09  Shinya Kawanaka  <shinyak@chromium.org>
+
+        Position should be able to have ShadowRoot as a container.
+        https://bugs.webkit.org/show_bug.cgi?id=82021
+
+        Reviewed by Ryosuke Niwa.
+
+        Since Position could not take a shadow root as a container node, pointing the direct children
+        of a shadow root was difficult.
+
+        This patch makes it enabled, and fixes a lot of crashes caused by that limitation.
+        Also, we confirm that ShadowRoot is not exposed to JavaScript layer.
+
+        Currently this change is only enabled if shadow dom flag is enabled, since we cannot
+        prove this change does not destroy the existing behavior. However, this change is really required
+        to fix other editing bugs in Shadow DOM. A bunch of patches and tests will be added to
+        fix other editing bugs and they will check this patch does not break editing.
+        We will also add a fuzzer to check the stability of editing in Shadow DOM later, and it will
+        also help to confirm the patch will not break the editing.
+
+        Tests: editing/shadow/doubleclick-on-meter-in-shadow-crash.html
+               editing/shadow/rightclick-on-meter-in-shadow-crash.html
+               editing/shadow/shadow-selection-not-exported.html
+
+        * dom/Position.cpp:
+        (WebCore::Position::Position):
+        (WebCore::Position::containerNode):
+        (WebCore::Position::parentAnchoredEquivalent):
+        (WebCore::Position::previous):
+        (WebCore::Position::next):
+        (WebCore::Position::atStartOfTree):
+        (WebCore::Position::atEndOfTree):
+        (WebCore::Position::findParent):
+        * dom/Position.h:
+        (WebCore):
+        (WebCore::positionInParentBeforeNode):
+        (WebCore::positionInParentAfterNode):
+
 2012-05-09  Zoltan Horvath  <zoltan@webkit.org>
 
         [Qt] Build fix when using libpng version != 1.2
