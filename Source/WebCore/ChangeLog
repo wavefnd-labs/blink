@@ -1,3 +1,44 @@
+2012-05-09  Dana Jansens  <danakj@chromium.org>
+
+        Early-out and avoid any copying when possible for Region operations
+        https://bugs.webkit.org/show_bug.cgi?id=85260
+
+        Reviewed by Anders Carlsson.
+
+        For an empty region, any intersection or subtraction will not modify
+        the region, so we can simply return instead of creating a new Shape
+        and replacing the current empty Shape.
+
+        When a region is united with a region it contains, the orignal
+        containing region is the result. So, if A.unite(B) and A.contains(B)
+        then A does not need to change at all and we can return without making
+        a copy of A's shape. When A is a rect, we can do this test even more
+        simply.
+
+        We also remove redundant checks from trySimpleOperation() methods, where
+        the test is already done in the Region calling site.
+
+        This change improves the performance of the Region overlap testing for
+        composited layers, and allows us to avoid unnecessary copies of the
+        Region during unite. With a layout test (attached to bug #81087), that
+        creates a Region from the union of 225 composited layers, as well as
+        600 overlapping layers above them, this change decreases the running
+        time of the test by 3.2% by avoiding a copy of the entire Region for
+        each insertion that does not change the resulting Region.
+
+        Unit tests: RegionTest.unite
+
+        * platform/graphics/Region.cpp:
+        (WebCore::Region::Shape::UnionOperation::trySimpleOperation):
+        (WebCore::Region::Shape::IntersectOperation::trySimpleOperation):
+        (WebCore::Region::Shape::SubtractOperation::trySimpleOperation):
+        (WebCore::Region::intersect):
+        (WebCore::Region::unite):
+        (WebCore::Region::subtract):
+        * platform/graphics/Region.h:
+        (WebCore::Region::isRect):
+        (WebCore::Region::Shape::isRect):
+
 2012-05-09  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: SessionDescription::addCandidate should not crash for malformed input
