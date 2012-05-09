@@ -1,3 +1,46 @@
+2012-05-09  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=86025
+        RTL and vertical text documents do no scroll properly with the new 
+        tiled scrolling model
+        -and corresponding-
+        <rdar://problem/11077589>
+
+        Reviewed by Dan Bernstein.
+        
+        Most of the fix here is just to teach the scrolling tree about the 
+        scroll origin.
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::frameViewLayoutUpdated):
+        (WebCore::ScrollingCoordinator::setScrollParameters):
+        * page/scrolling/ScrollingCoordinator.h:
+        (ScrollParameters):
+        * page/scrolling/ScrollingTreeNode.cpp:
+        (WebCore::ScrollingTreeNode::update):
+        * page/scrolling/ScrollingTreeNode.h:
+        (WebCore::ScrollingTreeNode::scrollOrigin):
+        (ScrollingTreeNode):
+        * page/scrolling/ScrollingTreeState.cpp:
+        (WebCore::ScrollingTreeState::setScrollOrigin):
+        (WebCore):
+        * page/scrolling/ScrollingTreeState.h:
+        (WebCore::ScrollingTreeState::scrollOrigin):
+        (ScrollingTreeState):
+        * page/scrolling/mac/ScrollingTreeNodeMac.mm:
+        (WebCore::ScrollingTreeNodeMac::scrollPosition):
+        (WebCore::ScrollingTreeNodeMac::setScrollLayerPosition):
+        (WebCore::ScrollingTreeNodeMac::minimumScrollPosition):
+        (WebCore::ScrollingTreeNodeMac::maximumScrollPosition):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::frameViewDidScroll):
+
+        Teaching the scrolling tree about the scroll origin revealed this pre-
+        existing bug. layoutOverflowRect() is not the right rect to use since 
+        it is not writing-mode savvy. unscaledDocumentRect() is the right rect 
+        for the view's bounds.
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateCompositedBounds):
+
 2012-05-09  Rob Buis  <rwlbuis@webkit.org>
 
         Cleanup SVGElement.cpp
