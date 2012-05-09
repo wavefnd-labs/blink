@@ -1,3 +1,47 @@
+2012-05-09  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        REGRESSION(r105057): Infinite loop inside SVGTextLayoutEngine::currentLogicalCharacterMetrics
+        https://bugs.webkit.org/show_bug.cgi?id=83405
+
+        Reviewed by Darin Adler.
+
+        Dynamically adding tspans carrying position information in the x/y/dx/dy/rotate lists is broken.
+        To avoid mistakes like this in future, simplify the calling code in RenderSVGInlineText and centralize
+        the managment of all caches (text positioning element cache / metrics map / layout attributes) in
+        RenderSVGText. This avoids the hack in SVGRootInlineBox::computePerCharacterLayoutInformation() which
+        called textRoot->rebuildLayoutAttributes(), which was used to fix previous security issues with this code.
+        Instead correctly handle destruction of RenderSVGInlineText in RenderSVGText, keeping the m_layoutAttributes
+        synchronized with the current state of the render tree. Fixes highcharts problems.
+
+        Tests: svg/text/add-tspan-position-bug.html
+               svg/text/modify-tspan-position-bug.html
+
+        * rendering/svg/RenderSVGInline.cpp:
+        (WebCore::RenderSVGInline::addChild):
+        * rendering/svg/RenderSVGInlineText.cpp:
+        (WebCore::RenderSVGInlineText::willBeDestroyed):
+        (WebCore::RenderSVGInlineText::setTextInternal):
+        (WebCore::RenderSVGInlineText::styleDidChange):
+        * rendering/svg/RenderSVGText.cpp:
+        (WebCore::recursiveUpdateMetrics):
+        (WebCore::RenderSVGText::subtreeChildAdded):
+        (WebCore::RenderSVGText::subtreeChildWillBeDestroyed):
+        (WebCore::recursiveCollectLayoutAttributes):
+        (WebCore::checkLayoutAttributesConsistency):
+        (WebCore::RenderSVGText::subtreeChildWasDestroyed):
+        (WebCore::RenderSVGText::subtreeStyleChanged):
+        (WebCore::RenderSVGText::subtreeTextChanged):
+        (WebCore::RenderSVGText::layout):
+        (WebCore::RenderSVGText::addChild):
+        (WebCore::RenderSVGText::rebuildAllLayoutAttributes):
+        (WebCore::RenderSVGText::rebuildLayoutAttributes):
+        * rendering/svg/RenderSVGText.h:
+        (WebCore::RenderSVGText::layoutAttributes):
+        * rendering/svg/SVGRootInlineBox.cpp:
+        (WebCore::SVGRootInlineBox::computePerCharacterLayoutInformation):
+        * rendering/svg/SVGTextLayoutAttributesBuilder.cpp:
+        (WebCore::SVGTextLayoutAttributesBuilder::buildLayoutAttributes):
+
 2012-05-08  Dongwoo Im  <dw.im@samsung.com>
 
         NavigatorRegisterProtocolHandler can call ChromeClient directly.
