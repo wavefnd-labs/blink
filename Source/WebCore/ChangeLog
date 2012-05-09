@@ -1,3 +1,25 @@
+2012-05-08  Benjamin Poulain  <bpoulain@apple.com>
+
+        [JSC] Regression: addEventListener() and removeEventListener() raise an exception on missing args
+        https://bugs.webkit.org/show_bug.cgi?id=85928
+
+        Reviewed by Geoffrey Garen.
+
+        The functions addEventListener() and removeEventListener() raise an exception if there are missin arguments.
+        This behavior breaks existing content.
+
+        This patch change the code generator of JavaScript core to have an exception for addEventListener() and removeEventListener().
+        For those function, we do not raise an exception on missin argument.
+
+        This patch does not modify the V8 code generator because such exceptions are already in place there.
+
+        Tests: fast/dom/Window/window-legacy-event-listener.html
+               fast/dom/XMLHttpRequest-legacy-event-listener.html
+               fast/dom/node-legacy-event-listener.html
+
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateImplementation):
+
 2012-05-08  Chris Rogers  <crogers@google.com>
 
         AudioParam should directly be given context in create() method
