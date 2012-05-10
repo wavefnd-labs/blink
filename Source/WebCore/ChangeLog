@@ -1,3 +1,20 @@
+2012-05-10  Abhishek Arya  <inferno@chromium.org>
+
+        Crash in FontCache::releaseFontData due to infinite float size.
+        https://bugs.webkit.org/show_bug.cgi?id=86110
+
+        Reviewed by Andreas Kling.
+
+        New callers always forget to clamp the font size, which overflows
+        to infinity on multiplication. It is best to clamp it at the end
+        to avoid getting greater than std::numeric_limits<float>::max().
+
+        Test: fast/css/large-font-size-crash.html
+
+        * platform/graphics/FontDescription.h:
+        (WebCore::FontDescription::setComputedSize):
+        (WebCore::FontDescription::setSpecifiedSize):
+
 2012-05-10  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=82131
