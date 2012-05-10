@@ -1,3 +1,162 @@
+2012-05-09  Jessie Berlin  <jberlin@apple.com>
+
+        Crash using the new WKBundleDOMWindowExtensions APIs.
+        https://bugs.webkit.org/show_bug.cgi?id=85888
+
+        Reviewed by Brady Eidson.
+
+        WKBundlePageWillDestroyGlobalObjectForDOMWindowExtensionCallback was only being invoked when
+        the WKPage was destroyed, and then only for the child frames. In addition, the
+        DOMWindowExtension was holding onto a destroyed DOMWindow and attempting to unregister from
+        when the WK2 wrapper object was attempting to destroy the DOMWindowExtension.
+
+        The underlying issue here was that the DOMWindowProperties were getting disconnectFrame
+        and willDetachPage called on them at the wrong times.
+
+        Rename DOMWindowProperty::disconnectFrame and reconnectFrame to disconnectFrameForPageCache
+        and reconnectFrameFromPageCache for clarity.
+
+        Only invoke DOMWindowProperty::disconnectFrameForPageCache when the frame is going into the
+        page cache.
+
+        In the cases where the DOMWindow is getting destroyed, the frame is being destroyed, or the
+        DOMWindow is getting cleared because the frame is being navigated, invoke
+        DOMWindowProperty::willDestroyGlobalObjectInFrame instead of disconnectFrame.
+
+        Invoke DOMWindowProperty::willDetachGlobalObjectFromFrame when a document is being detached
+        because the frame has been detached (e.g. fast/storage/storage-detached-iframe.html) and
+        won't be immediately destroyed.
+
+        Invoke DOMWindowProperty::willDestroyGlobalObjectInCachedFrame when a cached frame is
+        being destroyed.
+
+        New WK2 API Test: DOMWindowExtensionNoCache.
+
+        * Modules/indexeddb/DOMWindowIndexedDatabase.cpp:
+        (WebCore::DOMWindowIndexedDatabase::disconnectFrameForPageCache):
+        Updated for disconnectFrame rename.
+        (WebCore::DOMWindowIndexedDatabase::reconnectFrameFromPageCache):
+        Updated for reconnectFrame rename.
+        (WebCore::DOMWindowIndexedDatabase::willDestroyGlobalObjectInCachedFrame):
+        Get rid of the suspended IDBFactory.
+        (WebCore::DOMWindowIndexedDatabase::willDestroyGlobalObjectInFrame):
+        Get rid of the IDBFactory.
+        (WebCore::DOMWindowIndexedDatabase::willDetachGlobalObjectFromFrame):
+        Ditto.
+        * Modules/indexeddb/DOMWindowIndexedDatabase.h:
+
+        * dom/Document.cpp:
+        (WebCore::Document::prepareForDestruction):
+        Tell the DOMWindow before detaching the Document.
+        * dom/Document.h:
+
+        * history/CachedFrame.cpp:
+        (WebCore::CachedFrame::destroy):
+        Tell the DOMWindow.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::clear):
+        Use Document::prepareForDestruction so that the DOMWindow is told about the main frame
+        navigation before detaching the Document.
+
+        * loader/appcache/DOMApplicationCache.cpp:
+        (WebCore::DOMApplicationCache::disconnectFrameForPageCache):
+        Updated for the disconnectFrame rename.
+        (WebCore::DOMApplicationCache::reconnectFrameFromPageCache):
+        Updated for the reconnectFrame rename.
+        (WebCore::DOMApplicationCache::willDestroyGlobalObjectInFrame):
+        Cover the cases formerly covered by disconnectFrame (which was sometimes being called when
+        called when the frame was destroyed).
+        * loader/appcache/DOMApplicationCache.h:
+
+        * notifications/DOMWindowNotifications.cpp:
+        (WebCore::DOMWindowNotifications::disconnectFrameForPageCache):
+        Updated for the disconnectFrame rename.
+        (WebCore::DOMWindowNotifications::reconnectFrameFromPageCache):
+        Updated for the reconnectFrame rename.
+        (WebCore::DOMWindowNotifications::willDestroyGlobalObjectInCachedFrame):
+        Get rid of the suspended notification center.
+        (WebCore::DOMWindowNotifications::willDestroyGlobalObjectInFrame):
+        Get rid of the notification center.
+        (WebCore::DOMWindowNotifications::willDetachGlobalObjectFromFrame):
+        Do not allow use of the notification center by detached frames.
+        * notifications/DOMWindowNotifications.h:
+
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::clearDOMWindowProperties):
+        Do not call disconnectDOMWindowProperties. It is now the responsibility of the callers to
+        tell the DOMWindowProperties the correct cause of being cleared.
+        (WebCore::DOMWindow::~DOMWindow):
+        Make sure the DOMWindowProperties still know that the DOMWindow is going away.
+        (WebCore::DOMWindow::frameDestroyed):
+        Invoke willDestroyGlobalObjectInFrame on the DOMWindowProperties.
+        (WebCore::DOMWindow::willDetachPage):
+        It is no longer necessary to tell the DOMWindowProperties anything here.
+        (WebCore::DOMWindow::willDestroyCachedFrame):
+        Tell the DOMWindowProperties.
+        (WebCore::DOMWindow::willDestroyDocumentInFrame):
+        Ditto.
+        (WebCore::DOMWindow::willDetachDocumentFromFrame):
+        Ditto.
+        (WebCore::DOMWindow::clear):
+        Ditto.
+        (WebCore::DOMWindow::disconnectDOMWindowProperties):
+        Updated for the disconnectFrame rename.
+        (WebCore::DOMWindow::reconnectDOMWindowProperties):
+        Ditto.
+        * page/DOMWindow.h:
+
+        * page/DOMWindowExtension.cpp:
+        (WebCore::DOMWindowExtension::DOMWindowExtension):
+        Move the responsibility for tracking the disconnected DOMWindow to DOMWindowProperty, since
+        DOMWindowProperty will need it to unregister the property when a cached frame is destroyed.
+        (WebCore::DOMWindowExtension::disconnectFrameForPageCache):
+        Remove the code to check for disconnectFrame being called twice - it is now only called when
+        a frame goes into the page cache.
+        Let the DOMWindowProperty keep track of the disconnected DOMWindow.
+        (WebCore::DOMWindowExtension::reconnectFrameFromPageCache):
+        Let the DOMWindowProperty keep track of the disconnected DOMWindow.
+        (WebCore::DOMWindowExtension::willDestroyGlobalObjectInCachedFrame):
+        Dispatch the willDestroyGlobalObjectForDOMWindowExtension callback.
+        (WebCore::DOMWindowExtension::willDestroyGlobalObjectInFrame):
+        Ditto, but only if the callback hasn't already been sent because the frame has been detached.
+        (WebCore::DOMWindowExtension::willDetachGlobalObjectFromFrame):
+        Send the callback because nothing interesting can be done in the frame once it has been
+        detached.
+        * page/DOMWindowExtension.h:
+
+        * page/DOMWindowProperty.cpp:
+        (WebCore::DOMWindowProperty::DOMWindowProperty):
+        Keep track of the disconnected DOMWindow so it can be used to unregister the property when a
+        cached frame is destroyed.
+        (WebCore::DOMWindowProperty::~DOMWindowProperty):
+        Also unregister the property when a DOMWindowProperty for a cached frame is destroyed.
+        (WebCore::DOMWindowProperty::disconnectFrameForPageCache):
+        Keep track of the disconnected DOMWindow.
+        (WebCore::DOMWindowProperty::reconnectFrameFromPageCache):
+        Ditto.
+        (WebCore::DOMWindowProperty::willDestroyGlobalObjectInCachedFrame):
+        Unregister the property from the disconnected DOMWindow.
+        (WebCore::DOMWindowProperty::willDestroyGlobalObjectInFrame):
+        Unregister the property from the DOMWindow and stop keeping track of the frame.
+        (WebCore::DOMWindowProperty::willDetachGlobalObjectFromFrame):
+        Do not set m_frame to 0 because detached frames still have access to the DOMWindow, even if
+        they can't do anything meaningful with it.
+        * page/DOMWindowProperty.h:
+
+        * page/Frame.cpp:
+        (WebCore::Frame::setView):
+        Tell the DOMWindow that the Document is being detached so it can tell the
+        DOMWindowProperties.
+
+        * page/PointerLock.cpp:
+        (WebCore::PointerLock::disconnectFrameForPageCache):
+        Updated for disconnectFrame rename.
+        (WebCore::PointerLock::willDestroyGlobalObjectInFrame):
+        Cover the cases formerly covered by disconnectFrame (which was sometimes being called when
+        called when the frame was destroyed).
+        * page/PointerLock.h:
+
 2012-05-09  Ian Vollick  <vollick@chromium.org>
 
         [chromium] Ensure animations get ticked at least once when added.
