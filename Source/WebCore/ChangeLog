@@ -1,3 +1,20 @@
+2012-05-09  Anders Carlsson  <andersca@apple.com>
+
+        Speed up some parts of TileCache drawing
+        https://bugs.webkit.org/show_bug.cgi?id=86033
+        <rdar://problem/10919373>
+
+        Reviewed by Sam Weinig.
+
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::tileCoverageRect):
+        If we can't have scrollbars, there's not much need to extend the tile coverage rect outside of the visible rect, since it's
+        unlikely that we'll do any form of scrolling here.
+
+        (WebCore::TileCache::revalidateTiles):
+        Don't update the tile layer frame if it's big enough to contain the tile size. Also, if there are no new tiles created,
+        don't call platformCALayerDidCreateTiles since that will trigger an extra layer flush.
+
 2012-05-09  Alexandre Elias  <aelias@google.com>
 
         setPageScaleFactor should setScrollPosition if scale is unchanged
