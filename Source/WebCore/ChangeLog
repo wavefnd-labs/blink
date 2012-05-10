@@ -1,3 +1,61 @@
+2012-05-10  Eric Seidel  <eric@webkit.org>
+
+        Make IFRAME_SEAMLESS child documents inherit styles from their parent iframe element
+        https://bugs.webkit.org/show_bug.cgi?id=85940
+
+        Reviewed by Ojan Vafai.
+
+        The HTML5 <iframe seamless> spec says:
+        In a CSS-supporting user agent: the user agent must, for the purpose of CSS property
+        inheritance only, treat the root element of the active document of the iframe
+        element's nested browsing context as being a child of the iframe element.
+        (Thus inherited properties on the root element of the document in the
+        iframe will inherit the computed values of those properties on the iframe
+        element instead of taking their initial values.)
+
+        Initially I implemented this support to the letter of the spec. However, doing so I learned
+        that WebKit has a RenderStyle for the Document Node, not just the root element of the document.
+        In this RenderStyle on the Document, we add a bunch of per-document styles from settings
+        including designMode.
+
+        This change makes StyleResolver::styleForDocument inherit style from the parent iframe's
+        style, before applying any of these per-document styles.  This may or may not be correct
+        depending on what behavior we want for rtl-ordering, page-zoom, locale, design mode, etc.
+        For now, we continue to treat the iframe's document as independent in these regards, and
+        the settings on that document override those inherited from the iframe.
+
+        Also, intially when making this work, I added redirects in recalcStyle and scheduleStyleRecalc
+        from the child document to the parent document in the case of seamless (since the parent
+        document effectively manages the style resolve and layout of the child in seamless mode).
+        However, I was not able to find a test which depended on this code change, so in this final patch
+        I have removed both of these modifications and replaced them with FIXMEs.  Based on discussions
+        with Ojan and James Robinson, I believe both of those changes may eventually be wanted.
+
+        This change basically does 3 things:
+        1.  Makes StyleResolver::styleForDocument inherit from the parent iframe.
+        2.  Makes any recalcStyle calls on the iframe propogate down into the child document (HTMLIFrameElement::didRecalcStyle).
+        3.  Makes Document::recalcStyle aware of the fact that the Document's style *can* change
+            for reasons other than recalcStyle(Force).
+
+        I'm open to more testing suggestions, if reviewers have settings on the Document's style
+        that you want to make sure we inherit from the parent iframe, or don't inherit, etc.
+        I view this as a complete solution to this aspect of the current <iframe seamless> spec,
+        but likely not the last code we will write for this aspect of the seamless feature. :)
+
+        Tested by fast/frames/seamlesss/seamless-css-cascade.html and seamless-designMode.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * dom/Document.cpp:
+        (WebCore::Document::scheduleStyleRecalc):
+        (WebCore::Document::recalcStyle):
+        * html/HTMLIFrameElement.cpp:
+        (WebCore::HTMLIFrameElement::HTMLIFrameElement):
+        (WebCore::HTMLIFrameElement::didRecalcStyle):
+        (WebCore):
+        * html/HTMLIFrameElement.h:
+        (HTMLIFrameElement):
+
 2012-05-10  Julien Chaffraix  <jchaffraix@webkit.org>
 
         Crash in computedCSSPadding* functions due to RenderImage::imageDimensionsChanged called during attachment
