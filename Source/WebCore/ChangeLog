@@ -1,3 +1,34 @@
+2012-05-10  Brady Eidson  <beidson@apple.com>
+
+        <rdar://problem/10972577> and https://bugs.webkit.org/show_bug.cgi?id=80170
+        Contents of noscript elements turned into strings in WebArchives
+
+        Reviewed by Andy Estes.
+
+        There's a much deeper question about how innerHTML of <noscript> is expected to work in 
+        both a scripting and non-scripting environment that we should pursue separately.
+
+        But for webarchives, we can solve this by filtering out the <noscript> elements completely 
+        if scripting is enabled.
+
+        Test: webarchive/ignore-noscript-if-scripting-enabled.html
+
+        * WebCore.exp.in:
+
+        Add arguments to createMarkup and MarkupAccumulator methods to pass a Vector of QualifiedNames
+        that should be filtered from the resulting markup:
+        * editing/MarkupAccumulator.cpp:
+        (WebCore::MarkupAccumulator::serializeNodes):
+        (WebCore::MarkupAccumulator::serializeNodesWithNamespaces):
+        * editing/MarkupAccumulator.h:
+        * editing/markup.cpp:
+        (WebCore::createMarkup):
+        * editing/markup.h:
+
+        If scripting is enabled, add the noscriptTag to the tag names to filter:
+        * loader/archive/cf/LegacyWebArchive.cpp:
+        (WebCore::LegacyWebArchive::create):
+
 2012-05-10  Abhishek Arya  <inferno@chromium.org>
 
         Crash due to floats not removed from first-letter element.
