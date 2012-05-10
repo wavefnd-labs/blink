@@ -1,3 +1,30 @@
+2012-05-10  Alexandre Elias  <aelias@google.com>
+
+        Default to null value for HistoryItem::m_pageScaleFactor
+        https://bugs.webkit.org/show_bug.cgi?id=84385
+
+        Reviewed by Adam Barth.
+
+        Previously, HistoryItem::m_pageScaleFactor defaulted to a value
+        of 1, making it impossible to determine whether this value was never
+        set, or intentionally set to 1.  This patch introduces a default value
+        of 0 and makes restoreScrollPositionAndViewState not touch the page
+        scale factor if this value is still present at time of reload.
+
+        This is a no-op change for common navigation scenarios.  The
+        motivation for this change is the corner case of syncing history items
+        from a desktop browser to a mobile device.  In that case, we need a
+        way to specify that the history item does not contain a
+        pageScaleFactor so that the mobile device does not display the page
+        overly zoomed in.
+
+        No new tests.
+
+        * history/HistoryItem.cpp:
+        (WebCore::HistoryItem::HistoryItem):
+        * loader/HistoryController.cpp:
+        (WebCore::HistoryController::restoreScrollPositionAndViewState):
+
 2012-05-10  Csaba Osztrogonác  <ossy@webkit.org>
 
         Use suitable viewport values when a Mobile DTD is used.
