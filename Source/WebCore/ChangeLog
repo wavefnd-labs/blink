@@ -1,3 +1,28 @@
+2012-05-10  Stephen Chenney  <schenney@chromium.org>
+
+        SVG Filters allow invalid elements as children
+        https://bugs.webkit.org/show_bug.cgi?id=83979
+
+        Reviewed by Nikolas Zimmermann.
+
+        According to the SVG spec, there are numerous restrictions on the
+        content of nodes (that is, their children). Specific to this problem,
+        SVGFilter elements may only contain SVGFilterPrimitive elements, and
+        those may only contain animation related elements. This patch enforces
+        the restriction on filters in the render tree, thus preventing us from
+        having (for instance) content that is inside a filter yet filtered by
+        the filter.
+
+        Manual test: ManualTests/bugzilla-83979.svg
+
+        * svg/SVGFilterElement.cpp:
+        (WebCore::SVGFilterElement::childShouldCreateRenderer): Added to only allow renderers for fe* children
+        (WebCore):
+        * svg/SVGFilterElement.h:
+        (SVGFilterElement):
+        * svg/SVGFilterPrimitiveStandardAttributes.h: Do not allow any children at all for fe* elements.
+        (SVGFilterPrimitiveStandardAttributes):
+
 2012-05-10  Joe Thomas  <joethomas@motorola.com>
 
         [CSS3 Backgrounds and Borders] Add background-size to the background shorthand
