@@ -1,3 +1,97 @@
+2012-05-10  MORITA Hajime  <morrita@google.com>
+
+        Remove support for Node::willRemove()
+        https://bugs.webkit.org/show_bug.cgi?id=55209
+
+        Reviewed by Ryosuke Niwa.
+
+        This change de-virtualizes Node::willRemove(), gains
+        5% speedup on Dromaeo dom-modify.
+
+        Originally there were 5 willRemove() overrides:
+        - Element
+        - HTMLStyleElement
+        - HTMLSourceElement
+        - HTMLTrackElement
+        - HTMLFrameOwnerElement
+
+        For first 4 items, this change moves their implementations to
+        Node::removedFrom() overrides.
+
+        Then HTMLFrameOwnerElement is the only class which needs the
+        notification.  Because it emits the "unload" event, it needs some
+        notification _before_ its removal. To handle that, this change
+        introduces ChildFrameDisconnector which collects
+        corresponding decendant elements and disconnect their content frame.
+
+        Even though this approach doesn't kill pre-removal tree traversal
+        completely, it's a bit more efficient due to the de-virtualization.
+
+        No new tests. Covered by existing test.
+
+        * dom/ContainerNode.cpp:
+        (WebCore::willRemoveChild): Replaced willRemove() call with ChildFrameDisconnector.
+        (WebCore::willRemoveChildren): Ditto.
+        (WebCore::ContainerNode::disconnectDescendantFrames): Added. Used from FrameLoader to replace Document::willRemove() call.
+        (WebCore):
+        * dom/ContainerNode.h:
+        (ContainerNode):
+        * dom/ContainerNodeAlgorithms.cpp:
+        (WebCore::ChildFrameDisconnector::collectDescendant):
+        (WebCore):
+        (WebCore::ChildFrameDisconnector::Target::disconnect):
+        * dom/ContainerNodeAlgorithms.h:
+        (ChildFrameDisconnector):
+        (Target):
+        (WebCore::ChildFrameDisconnector::Target::Target):
+        (WebCore::ChildFrameDisconnector::Target::isValid):
+        (WebCore):
+        (WebCore::ChildFrameDisconnector::ChildFrameDisconnector):
+        (WebCore::ChildFrameDisconnector::collectDescendant):
+        (WebCore::ChildFrameDisconnector::disconnect):
+        * dom/Element.cpp:
+        (WebCore::Element::removedFrom):
+        * dom/Element.h:
+        * dom/ElementShadow.cpp:
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        * dom/Node.cpp:
+        * dom/Node.h: Added IsFrameOwnerElement flag to de-virtualize IsFrameOwnerElement().
+        (WebCore::Node::isFrameOwnerElement): De-virtualized.
+        (Node):
+        * html/HTMLElement.h:
+        (HTMLElement):
+        (WebCore::HTMLElement::HTMLElement):
+        * html/HTMLFrameOwnerElement.cpp:
+        (WebCore::HTMLFrameOwnerElement::HTMLFrameOwnerElement):
+        (WebCore::HTMLFrameOwnerElement::disconnectContentFrame): Extracted from original willRemove().
+        * html/HTMLFrameOwnerElement.h:
+        (HTMLFrameOwnerElement):
+        (WebCore::toFrameOwnerElement):
+        (WebCore):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::sourceWasRemoved): Renamed from sourceWillBeRemoved(), dealing with the timing change.
+        * html/HTMLMediaElement.h:
+        (HTMLMediaElement):
+        (WebCore::isMediaElement):
+        (WebCore):
+        (WebCore::toMediaElement):
+        * html/HTMLSourceElement.cpp:
+        (WebCore::HTMLSourceElement::removedFrom): Moved some code from willRemove().
+        * html/HTMLSourceElement.h:
+        (HTMLSourceElement):
+        * html/HTMLStyleElement.cpp:
+        (WebCore::HTMLStyleElement::removedFrom):
+        (WebCore):
+        * html/HTMLStyleElement.h:
+        (HTMLStyleElement):
+        * html/HTMLTrackElement.cpp:
+        (WebCore::HTMLTrackElement::removedFrom): Moved some code from willRemove().
+        * html/HTMLTrackElement.h:
+        (HTMLTrackElement):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::clear):
+
 2012-05-10  Kinuko Yasuda  <kinuko@chromium.org>
 
         Change the return type of Entry.toURL() back to String from KURL
