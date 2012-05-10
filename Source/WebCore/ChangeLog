@@ -1,3 +1,39 @@
+2012-05-10  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=82131
+        [Mac] REGRESSION (r110480): Text field that specifies background-color 
+        (or is auto-filled) gets un-themed border
+        -and corresponding-
+        <rdar://problem/11115221>
+
+        Reviewed by Maciej Stachowiak.
+
+        This change rolls out r110480 which is what caused styled text fields 
+        to get the un-themed border, and it does a bunch of work to make sure 
+        we get the pretty, new version of the NSTextField art whenever 
+        possible. We do this differently for post-Lion OS's since there is now 
+        a way to opt into it all the time. Lion and SnowLeopard can only use 
+        the new art in HiDPI mode when the background color of the text field 
+        is just white.
+
+        RenderThemeMac::textField() takes a boolean paramter used to determine 
+        if the new gradient will be used.
+        * rendering/RenderThemeMac.h:
+        (RenderThemeMac):
+        
+        This is the post-Lion workaround. This code has no effect on Lion and 
+        SnowLeopard. This allows up to opt into a version of [NSTextField drawWithFrame:] that will only draw the frame of the text field; without this, it will draw the frame and the background, which creates a number of problems with styled text fields and text fields in HiDPI. There is a less comprehesive workaround for Lion and SnowLeopard in place in RenderThemeMac::textField().
+        * rendering/RenderThemeMac.mm:
+        (-[WebCoreTextFieldCell _coreUIDrawOptionsWithFrame:inView:includeFocus:]):
+        
+        This is the roll-out of r110480.
+        (WebCore::RenderThemeMac::isControlStyled):
+        
+        See the comments for a full explanation, but this is mostly code for 
+        Lion and SnowLeopard to determine if we can opt into the new artwork.
+        (WebCore::RenderThemeMac::paintTextField):
+        (WebCore::RenderThemeMac::textField):
+
 2012-05-10  Anders Carlsson  <andersca@apple.com>
 
         WebKit1: Add a way to blacklist specific plug-ins/plug-in versions
