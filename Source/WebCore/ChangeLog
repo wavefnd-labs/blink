@@ -1,3 +1,23 @@
+2012-05-10  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Crash in computedCSSPadding* functions due to RenderImage::imageDimensionsChanged called during attachment
+        https://bugs.webkit.org/show_bug.cgi?id=85912
+
+        Reviewed by Eric Seidel.
+
+        Tests: fast/images/link-body-content-imageDimensionChanged-crash.html
+               fast/images/script-counter-imageDimensionChanged-crash.html
+
+        The bug comes from CSS generated images that could end up calling imageDimensionsChanged during attachment. As the
+        rest of the code (e.g. computedCSSPadding*) would assumes that we are already inserted in the tree, we would crash.
+
+        The solution is to bail out in this case as newly inserted RenderObject will trigger layout later on and properly
+        handle what we would be doing as part of imageDimensionChanged (the only exception being updating our intrinsic
+        size which should be done as part of imageDimensionsChanged).
+
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::imageDimensionsChanged):
+
 2012-05-10  Adam Barth  <abarth@webkit.org>
 
         ASSERT in BidiResolver<Iterator, Run>::commitExplicitEmbedding makes running debug builds annoying
