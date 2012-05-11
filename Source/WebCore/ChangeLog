@@ -1,3 +1,74 @@
+2012-05-11  Martin Robinson  <mrobinson@igalia.com>
+
+        [TextureMapper] Support drawing debug borders
+        https://bugs.webkit.org/show_bug.cgi?id=86237
+
+        Reviewed by Noam Rosenthal.
+
+        No new tests. This is the implementation of an interactive debugging
+        feature.
+
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.cpp:
+        (WebCore::GraphicsLayer::create): Moved this to the top of the file to
+        reduce contention for the coveted last spot in the file. This also
+        follows the pattern used in many WebCore files of having the factories
+        at the top.
+        (WebCore::GraphicsLayerTextureMapper::setDebugBorder): Added this
+        plumbing.
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.h: Added
+        plumbing.
+        * platform/graphics/texmap/TextureMapper.h: Ditto.
+        * platform/graphics/texmap/TextureMapperBackingStore.cpp:
+        (WebCore::TextureMapperTiledBackingStore::TextureMapperTiledBackingStore):
+        Initialize the new member.
+        (WebCore::TextureMapperTiledBackingStore::paintToTextureMapper): When
+        debug borders are enabled call the new drawBorder method on the TM.
+        (WebCore::TextureMapperTiledBackingStore::setDebugBorder): Added this
+        plumbing.
+        * platform/graphics/texmap/TextureMapperBackingStore.h: Added plumbing
+        and members to store debug border states. This is necessary because of
+        the when painting there is no handle on the GraphicsLayers.
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::drawRect): Factored out the common bits of
+        drawTexture and drawBorder into this helper.
+        (WebCore::TextureMapperGL::drawBorder): Added this method, which works
+        very similarly to drawTexture, but uses a different shader program and
+        must also set the line width and color.
+        (WebCore::TextureMapperGL::drawTexture): Factored out the bits that
+        are shared with drawRect.
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (TextureMapperGL): Added the new method declarations.
+        * platform/graphics/texmap/TextureMapperImageBuffer.h:
+        (WebCore::TextureMapperImageBuffer::drawBorder): Added an empty
+        implementation. Later we can add an implementation for the ImageBuffer
+        TM.
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::updateBackingStore): When updating the
+        backing store send the debug border information through.
+        (WebCore::TextureMapperLayer::syncCompositingStateSelf): When updating
+        the layer state, also update the debug indicators. This is required to
+        initialize the debug border values for the layer.
+        (WebCore::TextureMapperLayer::setDebugBorder): Added this plumbing.
+        * platform/graphics/texmap/TextureMapperLayer.h: Ditto.
+        * platform/graphics/texmap/TextureMapperShaderManager.cpp: Added a
+        solid color shader that doesn't care about texture coordinates or
+        opacity values.
+        (WebCore::TextureMapperShaderManager::solidColorProgram): Added. This
+        is a shorter getter for the solid color program that doesn't require
+        casting from the caller.
+        (WebCore::TextureMapperShaderManager::getShaderProgram): Added support
+        for the solid color program.
+        (WebCore::TextureMapperShaderProgramSolidColor::create): Added.
+        (WebCore::TextureMapperShaderProgramSolidColor::TextureMapperShaderProgramSolidColor):
+        Ditto.
+        (WebCore::TextureMapperShaderProgramSolidColor::vertexShaderSource):
+        Ditto.
+        (WebCore::TextureMapperShaderProgramSolidColor::fragmentShaderSource):
+        Ditto.
+        * platform/graphics/texmap/TextureMapperShaderManager.h:
+        (TextureMapperShaderProgramSolidColor): Added.
+        (WebCore::TextureMapperShaderProgramSolidColor::colorVariable): Added.
+
 2012-05-10  Timothy Hatcher  <timothy@apple.com>
 
         Instrument timer function calls so they show up in the Web Inspector Timeline.
