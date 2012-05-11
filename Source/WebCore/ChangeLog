@@ -1,3 +1,45 @@
+2012-05-11  Christophe Dumez  <christophe.dumez@intel.com>
+
+        Web Intents code only supports V8
+        https://bugs.webkit.org/show_bug.cgi?id=85954
+
+        Reviewed by Adam Barth.
+
+        Add necessary abstraction for js Dictionary and ScriptValue so that
+        the Web Intents code in WebCore compiles with JSC, not just V8.
+
+        This required changes in the JSC bindings generator to pass
+        callback arguments of type SerializedScriptValue as raw pointers
+        instead of RefPtr. This matches the change made to the V8 bindings
+        generator in r104531.
+
+        * CMakeLists.txt:
+        * Modules/intents/Intent.cpp:
+        * Modules/intents/Intent.h:
+        * bindings/js/Dictionary.cpp:
+        (WebCore::Dictionary::Dictionary):
+        (WebCore):
+        (WebCore::Dictionary::getOwnPropertiesAsStringHashMap):
+        * bindings/js/Dictionary.h:
+        (Dictionary):
+        * bindings/js/JSBindingsAllInOne.cpp:
+        * bindings/js/JSDictionary.cpp:
+        (WebCore::JSDictionary::convertValue):
+        (WebCore):
+        * bindings/js/JSDictionary.h:
+        (WebCore):
+        (WebCore::JSDictionary::initializerObject):
+        * bindings/js/ScriptValue.cpp:
+        (WebCore::ScriptValue::serialize):
+        (WebCore):
+        * bindings/js/ScriptValue.h:
+        (ScriptValue):
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (AddIncludesForType):
+        (GenerateCallbackHeader):
+        (GenerateCallbackImplementation):
+        (GetNativeTypeForCallbacks):
+
 2012-05-11  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Can't type spaces in "Override User Agent" field
