@@ -1,3 +1,70 @@
+2012-05-11  Simon Fraser  <simon.fraser@apple.com>
+
+        CVDisplayLink keeps running after a single requestAnimationFrame
+        https://bugs.webkit.org/show_bug.cgi?id=86174
+        
+        Reviewed by Sam Weinig.
+        
+        A DisplayRefreshMonitor would keep its CVDisplayLink alive for as long
+        as it had clients, and the client is the ScriptedAnimationController, which
+        lives on the document. So a single requestAnimationFrame call would kick
+        off a CVDisplayLink which lived until the document was destroyed.
+        
+        Fix by having the DisplayRefreshMonitor kill itself if the CVDisplayLink
+        fires for 10 times with no scheduled callbacks (to avoid creation/deletion
+        thrash on pages that call requestAnimationFrames with short setTimeouts,
+        as some do).
+        
+        Use a HashMap in DisplayRefreshMonitorManager for the set of DisplayRefreshMonitor,
+        with the displayID as the key (using UnsignedWithZeroKeyHashTraits<uint64_t> since
+        we want to allow for 0 to be a valid displayID).
+        
+        Use a HashSet in DisplayRefreshMonitor for the client set, so that we don't have to
+        worry about adding clients twice.
+        
+        Also fix a possible crash when the only client of a DisplayRefreshMonitor
+        was removed from inside the callback by making DisplayRefreshMonitor ref-counted,
+        with a protector.
+
+        Test: fast/animation/request-animation-frame-detach-element2.html
+
+        * platform/graphics/DisplayRefreshMonitor.cpp:
+        (WebCore::DisplayRefreshMonitor::DisplayRefreshMonitor): Initialize m_unscheduledFireCount
+        (WebCore::DisplayRefreshMonitor::handleDisplayRefreshedNotificationOnMainThread): Renamed
+        from refreshDisplayOnMainThread, since it doesn't just refresh the display.
+        (WebCore::DisplayRefreshMonitor::addClient): No longer inline.
+        (WebCore::DisplayRefreshMonitor::removeClient): No longer inline.
+        (WebCore::DisplayRefreshMonitor::displayDidRefresh): Keep track of m_unscheduledFireCount,
+        which we used to kill this monitor if it has been idle for a while.
+        Use a RefPtr<DisplayRefreshMonitor> to prevent deletion while running the callback.
+        Copy the clients to a vector to protect against mutating the set while enumerating it.
+        Notify the DisplayRefreshMonitorManager when we're done, so that it can decide
+        to delete inactive monitors.
+        
+        (WebCore::DisplayRefreshMonitorManager::ensureMonitorForClient): find or allocate
+        a DisplayRefreshMonitor for a given client.
+        (WebCore::DisplayRefreshMonitorManager::registerClient): Simplified by use of HashMap.
+        (WebCore::DisplayRefreshMonitorManager::unregisterClient): Ditto.
+        (WebCore::DisplayRefreshMonitorManager::scheduleAnimation): Ditto. Uses
+        ensureMonitorForClient() since an earlier inactive monitor may have been removed.
+        (WebCore::DisplayRefreshMonitorManager::displayDidRefresh): Remove inactive
+        monitors.
+        * platform/graphics/DisplayRefreshMonitor.h: Make DisplayRefreshMonitor
+        ref-counted, to make it easier to avoid deletion while it's on the stack.
+        (WebCore::DisplayRefreshMonitor::create):
+        (DisplayRefreshMonitor):
+        (WebCore::DisplayRefreshMonitor::shouldBeTerminated):
+        (DisplayRefreshMonitorManager):
+        * platform/graphics/blackberry/DisplayRefreshMonitorBlackBerry.cpp: Attempt to
+        keep things building.
+        (WebCore::DisplayRefreshMonitor::~DisplayRefreshMonitor):
+        (WebCore::DisplayRefreshMonitor::displayLinkFired):
+        to give the manager a chance to kill this monitor.
+        * platform/graphics/mac/DisplayRefreshMonitorMac.cpp:
+        (WebCore::DisplayRefreshMonitor::~DisplayRefreshMonitor):
+        (WebCore::DisplayRefreshMonitor::displayLinkFired): Don't bail early
+        if not scheduled; we want to call handleDisplayRefreshedNotificationOnMainThread(),
+
 2012-05-11  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: move canEditScriptSource and setScriptSource from DebuggerPresentationModel into ResourceBinding
