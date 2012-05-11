@@ -1,3 +1,47 @@
+2012-05-10  Alexey Proskuryakov  <ap@apple.com>
+
+        Crash in 3rd party WebKit apps that disable cache at a wrong time
+        https://bugs.webkit.org/show_bug.cgi?id=86027
+        <rdar://problem/10615880>
+
+        Reviewed by Antti Koivisto.
+
+        Added an API test.
+
+        The fix is to use CachedResourceHandle throughout MemoryCache, which will certainly
+        keep the resource alive. Also removed earlier fixes.
+
+        * css/CSSImageSetValue.cpp: (WebCore::CSSImageSetValue::cachedImageSet):
+        * css/CSSImageValue.cpp: (WebCore::CSSImageValue::cachedImage):
+        * css/WebKitCSSShaderValue.cpp: (WebCore::WebKitCSSShaderValue::cachedShader):
+        * history/PageCache.cpp: (WebCore::PageCache::releaseAutoreleasedPagesNow):
+        * loader/ImageLoader.cpp: (WebCore::ImageLoader::updateFromElement):
+        * loader/TextTrackLoader.cpp: (WebCore::TextTrackLoader::load):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::requestImage):
+        (WebCore::CachedResourceLoader::requestFont):
+        (WebCore::CachedResourceLoader::requestTextTrack):
+        (WebCore::CachedResourceLoader::requestShader):
+        (WebCore::CachedResourceLoader::requestCSSStyleSheet):
+        (WebCore::CachedResourceLoader::requestUserCSSStyleSheet):
+        (WebCore::CachedResourceLoader::requestScript):
+        (WebCore::CachedResourceLoader::requestXSLStyleSheet):
+        (WebCore::CachedResourceLoader::requestSVGDocument):
+        (WebCore::CachedResourceLoader::requestLinkResource):
+        (WebCore::CachedResourceLoader::requestRawResource):
+        (WebCore::CachedResourceLoader::requestResource):
+        (WebCore::CachedResourceLoader::revalidateResource):
+        (WebCore::CachedResourceLoader::loadResource):
+        (WebCore::CachedResourceLoader::requestPreload):
+        * loader/cache/CachedResourceLoader.h: (CachedResourceLoader):
+        * loader/cache/MemoryCache.h: (WebCore::MemoryCache::setPruneEnabled):
+
+        * loader/cache/CachedResourceHandle.h:
+        (WebCore::CachedResourceHandle::CachedResourceHandle):
+        (WebCore::CachedResourceHandle::operator=):
+        Teach CachedResourceHandle how to make CachedResourceHandle<CachedResource> from
+        a handle to subclass.
+
 2012-05-10  Tien-Ren Chen  <trchen@chromium.org>
 
         Eliminate duplicated code for culled line box in RenderInline
