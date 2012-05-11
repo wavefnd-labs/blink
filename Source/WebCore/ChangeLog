@@ -1,3 +1,99 @@
+2012-05-10  MORITA Hajime  <morrita@google.com>
+
+        ElementShadow should minimize the usage of "ShadowRoot" name
+        https://bugs.webkit.org/show_bug.cgi?id=85970
+
+        Reviewed by Dimitri Glazkov.
+
+        This change cleans two out dated assumptions which brought in at
+        early stage of Shadow DOM implementation.
+
+        - Removed Element::hasShadowRoot(): shadow existence can be checked by Element::shadow().
+        - Made ElementShadow::removeAllShadowRoots() private: we no longer allow ShadowRoot removal.
+          It can only happens at the ElementShadow destruction.
+
+        Most of changes in element implementations are basically simple
+        replacement from hasShadowRoot() to shadow().
+
+        No new tests. Covered by existing tests.
+
+        * WebCore.exp.in:
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore::ChildFrameDisconnector::collectDescendant):
+        * dom/ComposedShadowTreeWalker.cpp:
+        (WebCore::ComposedShadowTreeWalker::traverseChild):
+        * dom/Document.cpp:
+        (WebCore::Document::buildAccessKeyMap):
+        * dom/Element.cpp:
+        (WebCore::Element::recalcStyle):
+        (WebCore::Element::ensureShadowRoot):
+        (WebCore::Element::childrenChanged):
+        * dom/Element.h:
+        (Element):
+        (WebCore::isShadowHost):
+        (WebCore):
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::~ElementShadow):
+        (WebCore::ElementShadow::removeAllShadowRoots):
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        (WebCore::ElementShadow::host):
+        * dom/EventDispatcher.cpp:
+        * dom/Node.cpp:
+        (WebCore::oldestShadowRootFor):
+        * dom/NodeRenderingContext.cpp:
+        (WebCore::NodeRenderingContext::NodeRenderingContext):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::create):
+        * html/ColorInputType.cpp:
+        (WebCore::ColorInputType::createShadowSubtree):
+        * html/FileInputType.cpp:
+        (WebCore::FileInputType::createShadowSubtree):
+        (WebCore::FileInputType::multipleAttributeChanged):
+        * html/HTMLDetailsElement.cpp:
+        (WebCore::HTMLDetailsElement::createShadowSubtree):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::createShadowSubtree):
+        * html/HTMLKeygenElement.cpp:
+        (WebCore::HTMLKeygenElement::HTMLKeygenElement):
+        (WebCore::HTMLKeygenElement::shadowSelect):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::hasMediaControls):
+        * html/HTMLMeterElement.cpp:
+        (WebCore::HTMLMeterElement::createShadowSubtree):
+        * html/HTMLProgressElement.cpp:
+        (WebCore::HTMLProgressElement::createShadowSubtree):
+        * html/HTMLSummaryElement.cpp:
+        (WebCore::HTMLSummaryElement::createShadowSubtree):
+        * html/HTMLTextAreaElement.cpp:
+        (WebCore::HTMLTextAreaElement::createShadowSubtree):
+        * html/InputType.cpp:
+        (WebCore::InputType::destroyShadowSubtree):
+        * html/RangeInputType.cpp:
+        (WebCore::RangeInputType::handleMouseDownEvent):
+        (WebCore::RangeInputType::createShadowSubtree):
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::createShadowSubtree):
+        * html/shadow/SliderThumbElement.cpp:
+        (WebCore::trackLimiterElementOf):
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::unbind):
+        (WebCore::InspectorDOMAgent::buildObjectForNode):
+        * page/FocusController.cpp:
+        (WebCore):
+        * rendering/RenderFileUploadControl.cpp:
+        (WebCore::RenderFileUploadControl::uploadButton):
+        * svg/SVGTRefElement.cpp:
+        (WebCore::SVGTRefElement::updateReferencedText):
+        (WebCore::SVGTRefElement::detachTarget):
+        * testing/Internals.cpp:
+        (WebCore::Internals::ensureShadowRoot):
+        (WebCore::Internals::youngestShadowRoot):
+        (WebCore::Internals::oldestShadowRoot):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-05-10  Gyuyoung Kim  <gyuyoung.kim@samsung.com>
 
         Move resumeAnimations to use Internals interface
