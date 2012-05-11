@@ -1,3 +1,75 @@
+2012-05-11  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: load heap snapshot implementation.
+        https://bugs.webkit.org/show_bug.cgi?id=86097
+
+        The idea is to have a hidden file selector control.
+        When the user select a context menu item or click a button
+        we redirect this user-action to file selector.
+        As result we see the standard file selector dialog.
+        When the user selects a file we load it's chunks and push the chunks to the worker.
+        The loaded snapshot can be completely unrelated to the current page.
+        Thats why we have to skip range selection options in Summary tab.
+
+        Reviewed by Yury Semikhatsky.
+
+        * English.lproj/localizedStrings.js:
+        * inspector/front-end/CSSSelectorProfileView.js:
+        (WebInspector.CSSSelectorProfileType.prototype.createTemporaryProfile): now it accepts a custom title.
+        * inspector/front-end/HeapSnapshotView.js:
+        (WebInspector.HeapSnapshotView.prototype._updateFilterOptions): we have to skip the profiles loaded from file because there is no guaranty t
+        (WebInspector.HeapSnapshotProfileType.prototype.createTemporaryProfile): now it accepts a custom title.
+        (WebInspector.HeapSnapshotProfileType.prototype.createProfile): cosmetic changes.
+        (WebInspector.HeapProfileHeader):
+        (WebInspector.HeapProfileHeader.prototype._setupWorker): a common part was extracted from load method and reused in loadFromFile.
+        (WebInspector.HeapProfileHeader.prototype._saveStatusUpdate): cosmetic changes.
+        (WebInspector.HeapProfileHeader.prototype.finishHeapSnapshot):
+        (WebInspector.HeapProfileHeader.prototype.canSaveToFile): cosmetic rename for better consistency with 'load' part.
+        (WebInspector.HeapProfileHeader.prototype.saveToFile): cosmetic rename for better consistency with 'load' part.
+        (WebInspector.HeapProfileHeader.prototype.canLoadFromFile): cosmetic rename for better consistency with 'load' part.
+        (WebInspector.HeapProfileHeader.prototype.loadFromFile): chunk based file loader.
+        (WebInspector.HeapProfileHeader.prototype.loadFromFile.loadNextChunk):
+        (WebInspector.HeapProfileHeader.prototype.loadFromFile.onLoad):
+        * inspector/front-end/ProfileView.js:
+        (WebInspector.CPUProfileType.prototype.createTemporaryProfile): now it accepts a custom title.
+        * inspector/front-end/ProfilesPanel.js:
+        (WebInspector.ProfileType.prototype.createTemporaryProfile): now it accepts a custom title.
+        (WebInspector.ProfileHeader.prototype.canSaveToFile): cosmetic rename for better consistency with 'load' part.
+        (WebInspector.ProfileHeader.prototype.saveToFile): cosmetic rename for better consistency with 'load' part.
+        (WebInspector.ProfileHeader.prototype.canLoadFromFile): default implementation for 'load' part.
+        (WebInspector.ProfileHeader.prototype.loadFromFile): default implementation for 'load' part.
+        (WebInspector.ProfilesPanel.prototype._createFileSelectorElement):
+        (WebInspector.ProfilesPanel.prototype._loadFromFile):
+        (WebInspector.ProfileSidebarTreeElement.prototype.handleContextMenuEvent):
+
+2012-05-11  Dominik Röttsches  <dominik.rottsches@intel.com>
+
+        [EFL][DRT] Input Attribute Placeholder RefTests failing
+        https://bugs.webkit.org/show_bug.cgi?id=85603
+
+        Reviewed by Hajime Morita.
+
+        Refrain from overriding style coloring by theme coloring.
+        RenderThemeEfl was always overriding colors and whitespace
+        handling leading to failures in reftests that verify placeholder styling
+        which expect the user agent stylesheet to be applied correctly
+        without any color overrides. Also, leave whitespace handling untouched.
+
+        No new tests, covered by existing tests. See also
+        the LayoutTests/ChangeLog in this commit for the required
+        rebaselining.
+
+        * platform/efl/RenderThemeEfl.cpp:
+        (WebCore::RenderThemeEfl::createEdje):
+        (WebCore::RenderThemeEfl::applyEdjeColors):
+        (WebCore::RenderThemeEfl::RenderThemeEfl):
+        (WebCore::RenderThemeEfl::adjustButtonStyle):
+        (WebCore::RenderThemeEfl::adjustMenuListStyle):
+        (WebCore::RenderThemeEfl::adjustTextFieldStyle):
+        (WebCore::RenderThemeEfl::adjustSearchFieldStyle):
+        * platform/efl/RenderThemeEfl.h:
+        (RenderThemeEfl):
+
 2012-05-11  Christophe Dumez  <christophe.dumez@intel.com>
 
         Web Intents code only supports V8
