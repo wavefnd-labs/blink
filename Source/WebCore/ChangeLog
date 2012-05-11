@@ -1,3 +1,33 @@
+2012-05-10  Tien-Ren Chen  <trchen@chromium.org>
+
+        Eliminate duplicated code for culled line box in RenderInline
+        https://bugs.webkit.org/show_bug.cgi?id=85725
+
+        This patch extracts the common part of culledInlineBoundingBox() /
+        culledInlineAbsoluteRects() / culledInlineAbsoluteQuads() to become a
+        template function generateCulledLineBoxRects(). The template function
+        accepts a new parameter, GeneratorContext functor, which will be
+        invoked everytime a new line box rect has been generated. The generated
+        rect will be in local coordinate. The functor will be responsible for
+        appropriate transformation, then appending to vector or union with
+        existing bounding box.
+
+        Reviewed by Eric Seidel.
+
+        No new tests. No change in behavior.
+
+        * rendering/RenderInline.cpp:
+        (WebCore):
+        (WebCore::RenderInline::generateLineBoxRects):
+        (WebCore::RenderInline::generateCulledLineBoxRects):
+        (WebCore::RenderInline::absoluteRects):
+        (WebCore::RenderInline::absoluteQuads):
+        (WebCore::RenderInline::linesBoundingBox):
+        (WebCore::RenderInline::culledInlineVisualOverflowBoundingBox):
+        (WebCore::RenderInline::addFocusRingRects):
+        * rendering/RenderInline.h:
+        (RenderInline):
+
 2012-05-10  Abhishek Arya  <inferno@chromium.org>
 
         Crash in swapInNodePreservingAttributesAndChildren.
