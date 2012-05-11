@@ -1,3 +1,37 @@
+2012-05-10  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=86158
+        Overlay scrollbars without layers never paint in overflow regions in 
+        tiled drawing mode
+        -and corresponding-
+        <rdar://problem/11289546>
+
+        Reviewed by Darin Adler.
+
+        RenderLayers paint scrollbars that do not have their own layers by 
+        running a second pass through the layer tree after the layer tree has 
+        painted. This ensures that the scrollbars always paint on top of 
+        content. However, this mechanism was relying on 
+        FrameView::paintContents() as a choke-point for all painting to 
+        trigger the second painting pass. That is not a reasonable choke-point 
+        in tiled drawing, so this patch adds similar code to 
+        RenderLayerBacking.
+
+        Only opt into the second painting pass for scrollbars that do not have 
+        their own layers.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintOverflowControls):
+        
+        A layer that paints into its backing cannot return early here if it 
+        has overlay scrollbars to paint.
+        (WebCore::RenderLayer::paintLayer):
+        
+        This replicates code in FrameView::paintContents(). After painting the 
+        owning layer, do a second pass if there are overlay scrollbars to 
+        paint.
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::paintIntoLayer):
+
 2012-05-10  Anders Carlsson  <andersca@apple.com>
 
         Well, at least fixing the GTK+ build is something!
