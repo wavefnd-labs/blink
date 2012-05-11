@@ -1,3 +1,22 @@
+2012-05-11  Tommy Widenflycht  <tommyw@google.com>
+
+        MediaStream API: Fix a reference counting issue in UserMediaRequest
+        https://bugs.webkit.org/show_bug.cgi?id=86210
+
+        Reviewed by Abhishek Arya.
+
+        When contextDestroyed() is called on UserMediaRequest it does a callback to the
+        page client. If the receiving code clears their stored copy the UserMediaRequest
+        object is destroyed in the middle of the call.
+
+        Currently only testable manually against chrome, preferably with asan turned on.
+        I have added a manual test that verifies the fix, but I have started work
+        to make DumpRenderTree able to test this and many other things. The first patch is here:
+        https://bugs.webkit.org/show_bug.cgi?id=86215
+
+        * Modules/mediastream/UserMediaRequest.cpp:
+        (WebCore::UserMediaRequest::contextDestroyed):
+
 2012-05-11  Min Qin  <qinmin@google.com>
 
         split MediaPlayer::enterFullscreen into 2 seperate functions
