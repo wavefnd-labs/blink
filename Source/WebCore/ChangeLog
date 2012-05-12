@@ -1,3 +1,26 @@
+2012-05-11  Adrienne Walker  <enne@google.com>
+
+        [chromium] Prevent deadlock on CCVideoLayerImpl destruction
+        https://bugs.webkit.org/show_bug.cgi?id=86258
+
+        Reviewed by James Robinson.
+
+        ~CCVideoLayerImpl had a common deadlock issue where if it got
+        destroyed before WebMediaPlayerClientImpl, it would take a lock,
+        call WebMediaPlayerClientImpl::setVideoFrameProviderClient(0),
+        which in turn would call CCVideoLayerImpl::stopUsingProvider(),
+        which would try to take the same lock and would deadlock.
+
+        CCVideoLayerImpl is only created and destroyed during tree
+        synchronization in a commit or during synchronous compositor thread
+        destruction. In either case, the main thread is blocked, and so no
+        lock needs to be taken at all.
+
+        * platform/graphics/chromium/cc/CCVideoLayerImpl.cpp:
+        (WebCore::CCVideoLayerImpl::CCVideoLayerImpl):
+        (WebCore::CCVideoLayerImpl::~CCVideoLayerImpl):
+        (WebCore::CCVideoLayerImpl::stopUsingProvider):
+
 2012-05-11  Jeffrey Pfau  <jpfau@apple.com>
 
         REGRESSION (r114170): Scroll areas in nested frames improperly placed when tiled drawing is enabled
