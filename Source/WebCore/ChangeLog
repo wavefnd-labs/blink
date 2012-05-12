@@ -1,3 +1,37 @@
+2012-05-11  Anders Carlsson  <andersca@apple.com>
+
+        Comcast website displays bottom of page when loaded
+        https://bugs.webkit.org/show_bug.cgi?id=86277
+        <rdar://problem/11426887>
+
+        Reviewed by Beth Dakin.
+
+        There were two bugs here. The first bug was that FrameView::setScrollPosition didn't end up calling into the scrolling coordinator
+        to update the scroll position. The second bug was that ScrollingTreeNodeMac::setScrollPosition didn't constrain the scroll position
+        to the edge of the page.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::setScrollPosition):
+        Call requestScrollPositionUpdate.
+
+        * page/scrolling/ScrollingTree.cpp:
+        * page/scrolling/ScrollingTree.h:
+        Remove setMainFrameScrollPosition, it is not called by anyone.
+
+        * page/scrolling/mac/ScrollingTreeNodeMac.h:
+        * page/scrolling/mac/ScrollingTreeNodeMac.mm:
+        (WebCore::ScrollingTreeNodeMac::setScrollPosition):
+        Clamp to the page size and call setScrollPositionWithoutContentEdgeConstraints.
+
+        (WebCore::ScrollingTreeNodeMac::setScrollPositionWithoutContentEdgeConstraints):
+        Update the scroll layer position and call back to the main thread.
+
+        (WebCore::ScrollingTreeNodeMac::scrollBy):
+        Call setScrollPosition.
+
+        (WebCore::ScrollingTreeNodeMac::scrollByWithoutContentEdgeConstraints):
+        Call setScrollPositionWithoutContentEdgeConstraints.
+
 2012-05-11  Gavin Barraclough  <barraclough@apple.com>
 
         Introduce PropertyName class
