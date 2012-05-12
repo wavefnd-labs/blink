@@ -1,3 +1,58 @@
+2012-05-12  Eugene Klyuchnikov  <eustas.bug@gmail.com>
+
+        Web Inspector: Turn HelpScreen to be View.
+        https://bugs.webkit.org/show_bug.cgi?id=85711
+
+        Reviewed by Yury Semikhatsky.
+
+        Motivation: for further UI changes, HelpSceen needs to be View.
+        It is planned to combine Settings Screen and Shortcuts Screen in one
+        tabbed screen.
+        Bonus: "helpScreen.css" will be lazy-loaded.
+        Additional changes: move settingsScreen logic out of inspector.js
+
+        UI change, no test required.
+
+        * WebCore.gypi: Change "helpScreen.css" file group.
+        * inspector/front-end/HelpScreen.js: 
+        (WebInspector.HelpScreen): Turned to View subclass.
+        (WebInspector.HelpScreen.prototype.showModal): Remove "onHide" param
+        (WebInspector.HelpScreen.prototype.hide): Ditto.
+        (WebInspector.HelpScreen.prototype._onKeyDown): Adopt View members.
+        (WebInspector.HelpScreen.prototype._onBlur): Ditto.
+        * inspector/front-end/SettingsScreen.js: Adopt new workflow.
+        (WebInspector.SettingsScreen): Put onHide function to member
+        (WebInspector.SettingsScreen.prototype.willHide): Invoke onHide
+        (WebInspector.SettingsController): Mediator pattern - this class
+        takes care of status bar button - settings screen relationship.
+        (WebInspector.SettingsController.prototype.get statusBarItem):
+        Getter fot representative element.
+        (WebInspector.SettingsController.prototype._buttonClicked):
+        Classifies user action.
+        (WebInspector.SettingsController.prototype._onHideSettingsScreen):
+        Cleanup after settings screen is hidden.
+        (WebInspector.SettingsController.prototype._showSettingsScreen):
+        Presents settings screen.
+        (WebInspector.SettingsController.prototype._hideSettingsScreen):
+        Hides settings screen.
+        * inspector/front-end/ShortcutsScreen.js: Adopt new workflow.
+        (WebInspector.ShortcutsScreen.prototype.wasShown): Lazy initialization.
+        * inspector/front-end/WorkerManager.js: Adopt new workflow.
+        (WebInspector.WorkerManager.prototype._disconnectedFromWorker): Ditto.
+        (WebInspector.WorkerTerminatedScreen.prototype.willHide): Ditto.
+        * inspector/front-end/helpScreen.css: Fix spacing.
+        (.help-window-outer): Ditto.
+        (body.compact .help-window-outer): Ditto.
+        (body.compact .help-window-main): Ditto.
+        (body.compact .help-window-caption): Ditto.
+        (.help-content): Ditto.
+        (body.compact .help-content): Ditto.
+        (.help-content select): Ditto.
+        * inspector/front-end/inspector.html: Ditto.
+        * inspector/front-end/inspector.js: Ditto.
+        (WebInspector._createGlobalStatusBarItems): Create SettingsController.
+        (WebInspector.documentKeyDown): Adopt new workflow.
+
 2012-05-12  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: add tab context menu
