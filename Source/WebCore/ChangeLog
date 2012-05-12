@@ -1,3 +1,26 @@
+2012-05-11  David Barton  <dbarton@mathscribe.com>
+
+        use after free in WebCore::RenderObject::document
+        https://bugs.webkit.org/show_bug.cgi?id=84891
+
+        Reviewed by Julien Chaffraix.
+
+        Change RenderMathMLFenced::addChild() to use the beforeChild parameter. When beforeChild
+        is 0, insert child renderers before the closing fence, which might not be the same as
+        this->lastChild(), e.g. possibly due to anonymous blocks or generated content.
+
+        Tests: mathml/presentation/mfenced-add-child1-expected.html
+               mathml/presentation/mfenced-add-child1.html
+               mathml/presentation/mfenced-add-child2-expected.html
+               mathml/presentation/mfenced-add-child2.html
+
+        * rendering/mathml/RenderMathMLFenced.cpp:
+        (WebCore::RenderMathMLFenced::RenderMathMLFenced):
+        (WebCore::RenderMathMLFenced::makeFences):
+        (WebCore::RenderMathMLFenced::addChild):
+        * rendering/mathml/RenderMathMLFenced.h:
+        (RenderMathMLFenced):
+
 2012-05-11  Anders Carlsson  <andersca@apple.com>
 
         Can't scroll on webpage after following links from Blogger
