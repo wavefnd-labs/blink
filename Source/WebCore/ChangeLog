@@ -1,3 +1,229 @@
+2012-05-11  Gavin Barraclough  <barraclough@apple.com>
+
+        Introduce PropertyName class
+        https://bugs.webkit.org/show_bug.cgi?id=86241
+
+        Reviewed by Geoff Garen.
+
+        Replace 'const Identifier&' arguments to functions accessing object properties with a new 'PropertyName' type.
+        This change paves the way to allow for properties keyed by values that are not Identifiers.
+
+        This change is largely a mechanical find & replace.
+        It also changes JSFunction's constructor to take a UString& instead of an Identifier&
+        (since in some cases we can no longer guarantee that we'lll have an Identifier), and
+        unifies Identifier's methods to obtain array indices onto PropertyName.
+
+        The new PropertyName class retains the ability to support .impl() and .ustring(), but
+        in a future patch we may need to rework this, since not all PropertyNames should be
+        equal based on their string representation.
+
+        * WebCore.exp.in:
+        * bindings/js/JSCSSStyleDeclarationCustom.cpp:
+        (WebCore::cssPropertyIDForJSCSSPropertyName):
+        (WebCore::JSCSSStyleDeclaration::getOwnPropertySlotDelegate):
+        (WebCore::JSCSSStyleDeclaration::getOwnPropertyDescriptorDelegate):
+        (WebCore::JSCSSStyleDeclaration::putDelegate):
+        * bindings/js/JSDOMBinding.cpp:
+        (WebCore::findAtomicString):
+        (WebCore::objectToStringFunctionGetter):
+        * bindings/js/JSDOMBinding.h:
+        (WebCore):
+        (WebCore::propertyNameToString):
+        (WebCore::propertyNameToAtomicString):
+        * bindings/js/JSDOMMimeTypeArrayCustom.cpp:
+        (WebCore::JSDOMMimeTypeArray::canGetItemsForName):
+        (WebCore::JSDOMMimeTypeArray::nameGetter):
+        * bindings/js/JSDOMPluginArrayCustom.cpp:
+        (WebCore::JSDOMPluginArray::canGetItemsForName):
+        (WebCore::JSDOMPluginArray::nameGetter):
+        * bindings/js/JSDOMPluginCustom.cpp:
+        (WebCore::JSDOMPlugin::canGetItemsForName):
+        (WebCore::JSDOMPlugin::nameGetter):
+        * bindings/js/JSDOMStringMapCustom.cpp:
+        (WebCore::JSDOMStringMap::canGetItemsForName):
+        (WebCore::JSDOMStringMap::nameGetter):
+        (WebCore::JSDOMStringMap::deleteProperty):
+        (WebCore::JSDOMStringMap::putDelegate):
+        * bindings/js/JSDOMWindowCustom.cpp:
+        (WebCore::nonCachingStaticFunctionGetter):
+        (WebCore::childFrameGetter):
+        (WebCore::namedItemGetter):
+        (WebCore::JSDOMWindow::getOwnPropertySlot):
+        (WebCore::JSDOMWindow::getOwnPropertyDescriptor):
+        (WebCore::JSDOMWindow::put):
+        (WebCore::JSDOMWindow::deleteProperty):
+        (WebCore::JSDOMWindow::defineOwnProperty):
+        * bindings/js/JSDOMWindowShell.cpp:
+        (WebCore::JSDOMWindowShell::getOwnPropertySlot):
+        (WebCore::JSDOMWindowShell::getOwnPropertyDescriptor):
+        (WebCore::JSDOMWindowShell::put):
+        (WebCore::JSDOMWindowShell::putDirectVirtual):
+        (WebCore::JSDOMWindowShell::defineOwnProperty):
+        (WebCore::JSDOMWindowShell::deleteProperty):
+        * bindings/js/JSDOMWindowShell.h:
+        (JSDOMWindowShell):
+        * bindings/js/JSHTMLAllCollectionCustom.cpp:
+        (WebCore::getNamedItems):
+        (WebCore::callHTMLAllCollection):
+        (WebCore::JSHTMLAllCollection::canGetItemsForName):
+        (WebCore::JSHTMLAllCollection::nameGetter):
+        (WebCore::JSHTMLAllCollection::item):
+        * bindings/js/JSHTMLAppletElementCustom.cpp:
+        (WebCore::JSHTMLAppletElement::getOwnPropertySlotDelegate):
+        (WebCore::JSHTMLAppletElement::getOwnPropertyDescriptorDelegate):
+        (WebCore::JSHTMLAppletElement::putDelegate):
+        * bindings/js/JSHTMLCollectionCustom.cpp:
+        (WebCore::getNamedItems):
+        (WebCore::JSHTMLCollection::canGetItemsForName):
+        (WebCore::JSHTMLCollection::nameGetter):
+        * bindings/js/JSHTMLDocumentCustom.cpp:
+        (WebCore::JSHTMLDocument::canGetItemsForName):
+        (WebCore::JSHTMLDocument::nameGetter):
+        * bindings/js/JSHTMLEmbedElementCustom.cpp:
+        (WebCore::JSHTMLEmbedElement::getOwnPropertySlotDelegate):
+        (WebCore::JSHTMLEmbedElement::getOwnPropertyDescriptorDelegate):
+        (WebCore::JSHTMLEmbedElement::putDelegate):
+        * bindings/js/JSHTMLFormElementCustom.cpp:
+        (WebCore::JSHTMLFormElement::canGetItemsForName):
+        (WebCore::JSHTMLFormElement::nameGetter):
+        * bindings/js/JSHTMLFrameSetElementCustom.cpp:
+        (WebCore::JSHTMLFrameSetElement::canGetItemsForName):
+        (WebCore::JSHTMLFrameSetElement::nameGetter):
+        * bindings/js/JSHTMLObjectElementCustom.cpp:
+        (WebCore::JSHTMLObjectElement::getOwnPropertySlotDelegate):
+        (WebCore::JSHTMLObjectElement::getOwnPropertyDescriptorDelegate):
+        (WebCore::JSHTMLObjectElement::putDelegate):
+        * bindings/js/JSHistoryCustom.cpp:
+        (WebCore::nonCachingStaticBackFunctionGetter):
+        (WebCore::nonCachingStaticForwardFunctionGetter):
+        (WebCore::nonCachingStaticGoFunctionGetter):
+        (WebCore::JSHistory::getOwnPropertySlotDelegate):
+        (WebCore::JSHistory::getOwnPropertyDescriptorDelegate):
+        (WebCore::JSHistory::putDelegate):
+        (WebCore::JSHistory::deleteProperty):
+        * bindings/js/JSLocationCustom.cpp:
+        (WebCore::nonCachingStaticReplaceFunctionGetter):
+        (WebCore::nonCachingStaticReloadFunctionGetter):
+        (WebCore::nonCachingStaticAssignFunctionGetter):
+        (WebCore::JSLocation::getOwnPropertySlotDelegate):
+        (WebCore::JSLocation::getOwnPropertyDescriptorDelegate):
+        (WebCore::JSLocation::putDelegate):
+        (WebCore::JSLocation::deleteProperty):
+        (WebCore::JSLocation::defineOwnProperty):
+        (WebCore::JSLocationPrototype::putDelegate):
+        (WebCore::JSLocationPrototype::defineOwnProperty):
+        * bindings/js/JSNamedNodeMapCustom.cpp:
+        (WebCore::JSNamedNodeMap::canGetItemsForName):
+        (WebCore::JSNamedNodeMap::nameGetter):
+        * bindings/js/JSNodeListCustom.cpp:
+        (WebCore::JSNodeList::canGetItemsForName):
+        (WebCore::JSNodeList::nameGetter):
+        * bindings/js/JSPluginElementFunctions.cpp:
+        (WebCore::runtimeObjectPropertyGetter):
+        (WebCore::runtimeObjectCustomGetOwnPropertySlot):
+        (WebCore::runtimeObjectCustomGetOwnPropertyDescriptor):
+        (WebCore::runtimeObjectCustomPut):
+        * bindings/js/JSPluginElementFunctions.h:
+        (WebCore):
+        * bindings/js/JSStorageCustom.cpp:
+        (WebCore::JSStorage::canGetItemsForName):
+        (WebCore::JSStorage::nameGetter):
+        (WebCore::JSStorage::deleteProperty):
+        (WebCore::JSStorage::putDelegate):
+        * bindings/js/JSStyleSheetListCustom.cpp:
+        (WebCore::JSStyleSheetList::canGetItemsForName):
+        (WebCore::JSStyleSheetList::nameGetter):
+        * bindings/js/JSWorkerContextCustom.cpp:
+        (WebCore::JSWorkerContext::getOwnPropertySlotDelegate):
+        (WebCore::JSWorkerContext::getOwnPropertyDescriptorDelegate):
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateGetOwnPropertySlotBody):
+        (GenerateGetOwnPropertyDescriptorBody):
+        (GenerateHeader):
+        (GenerateImplementation):
+        (GenerateConstructorDeclaration):
+        (GenerateConstructorDefinition):
+        * bridge/c/c_class.cpp:
+        (JSC::Bindings::CClass::methodsNamed):
+        (JSC::Bindings::CClass::fieldNamed):
+        * bridge/c/c_class.h:
+        (CClass):
+        * bridge/c/c_instance.cpp:
+        (JSC::Bindings::CRuntimeMethod::create):
+        (JSC::Bindings::CRuntimeMethod::finishCreation):
+        (JSC::Bindings::CInstance::getMethod):
+        * bridge/c/c_instance.h:
+        (CInstance):
+        * bridge/jni/jsc/JavaClassJSC.cpp:
+        (JavaClass::methodsNamed):
+        (JavaClass::fieldNamed):
+        * bridge/jni/jsc/JavaClassJSC.h:
+        (JavaClass):
+        * bridge/jni/jsc/JavaInstanceJSC.cpp:
+        (JavaRuntimeMethod::create):
+        (JavaRuntimeMethod::finishCreation):
+        * bridge/jni/jsc/JavaInstanceJSC.h:
+        (JavaInstance):
+        * bridge/jsc/BridgeJSC.h:
+        (Class):
+        (JSC::Bindings::Class::fallbackObject):
+        (JSC::Bindings::Instance::setValueOfUndefinedField):
+        (Instance):
+        (JSC::Bindings::Instance::getOwnPropertySlot):
+        (JSC::Bindings::Instance::getOwnPropertyDescriptor):
+        (JSC::Bindings::Instance::put):
+        * bridge/objc/objc_class.h:
+        (ObjcClass):
+        * bridge/objc/objc_class.mm:
+        (JSC::Bindings::ObjcClass::methodsNamed):
+        (JSC::Bindings::ObjcClass::fieldNamed):
+        (JSC::Bindings::ObjcClass::fallbackObject):
+        * bridge/objc/objc_instance.h:
+        (ObjcInstance):
+        * bridge/objc/objc_instance.mm:
+        (ObjCRuntimeMethod::create):
+        (ObjCRuntimeMethod::finishCreation):
+        (ObjcInstance::setValueOfUndefinedField):
+        (ObjcInstance::getValueOfUndefinedField):
+        * bridge/objc/objc_runtime.h:
+        (JSC::Bindings::ObjcFallbackObjectImp::create):
+        (JSC::Bindings::ObjcFallbackObjectImp::propertyName):
+        (ObjcFallbackObjectImp):
+        * bridge/objc/objc_runtime.mm:
+        (JSC::Bindings::ObjcFallbackObjectImp::ObjcFallbackObjectImp):
+        (JSC::Bindings::ObjcFallbackObjectImp::getOwnPropertySlot):
+        (JSC::Bindings::ObjcFallbackObjectImp::getOwnPropertyDescriptor):
+        (JSC::Bindings::ObjcFallbackObjectImp::put):
+        (JSC::Bindings::callObjCFallbackObject):
+        (JSC::Bindings::ObjcFallbackObjectImp::deleteProperty):
+        (JSC::Bindings::ObjcFallbackObjectImp::defaultValue):
+        * bridge/runtime_array.cpp:
+        (JSC::RuntimeArray::lengthGetter):
+        (JSC::RuntimeArray::getOwnPropertySlot):
+        (JSC::RuntimeArray::getOwnPropertyDescriptor):
+        (JSC::RuntimeArray::put):
+        (JSC::RuntimeArray::deleteProperty):
+        * bridge/runtime_array.h:
+        (RuntimeArray):
+        * bridge/runtime_method.cpp:
+        (JSC::RuntimeMethod::finishCreation):
+        (JSC::RuntimeMethod::lengthGetter):
+        (JSC::RuntimeMethod::getOwnPropertySlot):
+        (JSC::RuntimeMethod::getOwnPropertyDescriptor):
+        * bridge/runtime_method.h:
+        (JSC::RuntimeMethod::create):
+        (RuntimeMethod):
+        * bridge/runtime_object.cpp:
+        (JSC::Bindings::RuntimeObject::fallbackObjectGetter):
+        (JSC::Bindings::RuntimeObject::fieldGetter):
+        (JSC::Bindings::RuntimeObject::methodGetter):
+        (JSC::Bindings::RuntimeObject::getOwnPropertySlot):
+        (JSC::Bindings::RuntimeObject::getOwnPropertyDescriptor):
+        (JSC::Bindings::RuntimeObject::put):
+        (JSC::Bindings::RuntimeObject::deleteProperty):
+        * bridge/runtime_object.h:
+        (RuntimeObject):
+
 2012-05-11  David Barton  <dbarton@mathscribe.com>
 
         use after free in WebCore::RenderObject::document
