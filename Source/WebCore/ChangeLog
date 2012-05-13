@@ -1,3 +1,18 @@
+2012-05-13  Darin Adler  <darin@apple.com>
+
+        Dangling node to ID maps vector uses raw pointers, but should use OwnPtr
+        https://bugs.webkit.org/show_bug.cgi?id=86299
+
+        Reviewed by Pavel Feldman.
+
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::releaseDanglingNodes): Removed now-unneeded call
+        to deleteAllValues since the clear function now takes care of that.
+        (WebCore::InspectorDOMAgent::pushNodePathToFrontend): Added code that uses
+        adoptPtr and release as neeed to deal with a Vector<OwnPtr>.
+        * inspector/InspectorDOMAgent.h: Changed m_danglingNodeToIdMaps to be
+        Vector<OwnPtr> instead of a vector of raw pointers.
+
 2012-05-13  Victor Carbune  <vcarbune@adobe.com>
 
         Volume slider needs to be displayed below the mute button
