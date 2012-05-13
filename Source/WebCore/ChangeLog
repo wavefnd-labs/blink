@@ -1,3 +1,40 @@
+2012-05-13  Victor Carbune  <vcarbune@adobe.com>
+
+        Volume slider needs to be displayed below the mute button
+        https://bugs.webkit.org/show_bug.cgi?id=85990
+
+        Reviewed by Dimitri Glazkov.
+
+        Added back code for rendering offset, but used only when the volume slider
+        needs to be displayed below the controls.
+
+        Test: media/media-volume-slider-rendered-below.html
+
+        * css/mediaControlsChromium.css:
+        (audio::-webkit-media-controls-volume-slider-container, video::-webkit-media-controls-volume-slider-container):
+        Changed positioning of the slider to absolute, otherwise it is not possible to position it from the layout() method.
+        * css/mediaControlsQuickTime.css:
+        Added back the double mute-button and changed the z-index of the original button. When the slider is displayed
+        the second mute button is actually there.
+        (audio::-webkit-media-controls-mute-button, video::-webkit-media-controls-mute-button):
+        (audio::-webkit-media-controls-volume-slider-container, video::-webkit-media-controls-volume-slider-container):
+        (audio::-webkit-media-controls-volume-slider-mute-button, video::-webkit-media-controls-volume-slider-mute-button):
+        Added copy.
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlPanelElement::makeTransparent): Disabled the possible of hiding controls. WebVTT rendering
+        in the place of controls when these are visible is not possible with the current code.
+        (RenderMediaVolumeSliderContainer):
+        (WebCore):
+        (WebCore::RenderMediaVolumeSliderContainer::RenderMediaVolumeSliderContainer):
+        (WebCore::RenderMediaVolumeSliderContainer::layout):
+        Checked if the absolute coordinates of the corner of the slider would be rendered outside the page. This part of the
+        code is faulty if display:none is toggled on the controls.
+        (WebCore::MediaControlVolumeSliderContainerElement::createRenderer):
+        * html/shadow/MediaControlElements.h:
+        (MediaControlVolumeSliderContainerElement):
+        * html/shadow/MediaControlRootElement.cpp:
+        (WebCore::MediaControlRootElement::create):
+
 2012-05-13  Igor Oliveira  <igor.o@sisa.samsung.com>
 
         [Texmap] TextureMapperAnimations does not support keyframe with multiple animations
