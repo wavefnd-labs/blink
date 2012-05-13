@@ -1,3 +1,29 @@
+2012-05-13  Igor Oliveira  <igor.o@sisa.samsung.com>
+
+        [Texmap] TextureMapperAnimations does not support keyframe with multiple animations
+        https://bugs.webkit.org/show_bug.cgi?id=86303
+
+        Qt and GTK, in WebKit1, use TextureMapper to store AC animations using
+        TextureMapperAnimations::add(keyframeName, TextureMapperAnimation). And when a 
+        CSS animation animates several CSS properties, TextureMapperAnimations::add is
+        called more than once with the same keyframeName value. However, currently,
+        TextureMapperAnimations can not store more than one animated property in the keyframe
+        because it is using HashMap<String, TextureMapperAnimation>, and WebKit HashMap 
+        does not support add the same key twice.
+
+        Reviewed by Noam Rosenthal.
+
+        * platform/graphics/texmap/TextureMapperAnimation.cpp:
+        (WebCore::TextureMapperAnimations::hasActiveAnimationsOfType):
+        (WebCore::TextureMapperAnimations::hasRunningAnimations):
+        (WebCore::TextureMapperAnimations::add):
+        (WebCore):
+        (WebCore::TextureMapperAnimations::pause):
+        (WebCore::TextureMapperAnimations::apply):
+        * platform/graphics/texmap/TextureMapperAnimation.h:
+        (TextureMapperAnimations): Use HashMap<String, Vector<TextureMapperAnimation> >,
+        so we can support an keyframe with multiple animations.
+
 2012-05-12  Abhishek Arya  <inferno@chromium.org>
 
         Crash in HTMLSelectElement::setOption
