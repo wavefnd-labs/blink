@@ -1,3 +1,47 @@
+2012-05-14  Takashi Sakamoto  <tasak@google.com>
+
+        Crash in WebCore::RenderObject::repaint
+        https://bugs.webkit.org/show_bug.cgi?id=86162
+
+        Reviewed by Abhishek Arya.
+
+        As RenderScrollbarPart has no parent renderer, we crash in
+        WebCore::RenderBoxModelObject::paddingLeft when paddingLeft has
+        percent value, e.g. 5%. However if we set the scrollbar's parent
+        renderer to a renderer owning the scrollbar by using setParent method,
+        RenderScrollbarPart::styleWillChange will invoke parent renderer's
+        repaint. This causes crash in WebCore::RenderObject::repaint if the
+        owning renderer is already destroyed.
+        To fix the first crash without the second crash, modify
+        RenderObject::containingBlock() to check isRenderScrollbarPart or not,
+        if parent() is 0.
+        If so, use scrollbar's owningRenderer from RenderScrollbarPart.
+
+        Test: scrollbars/scrollbar-percent-padding-crash.html
+              scrollbars/scrollbar-scrollbarparts-repaint-crash.html
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::containingBlock):
+        Modifying containingBlock. If parent() is 0 and isRenderScrollbarPart()
+        is true, use RenderScrollbarPart's m_scrollbar->owningRenderer()
+        instead of parent().
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isRenderScrollbarPart):
+        (RenderObject):
+        Adding a new method, isRenderScrollbarPart.
+        * rendering/RenderScrollbarPart.cpp:
+        (WebCore::RenderScrollbarPart::rendererOwningScrollbar):
+        (WebCore):
+        Adding a new method, scrollbarOwningRenderer to obtain m_scrollar's
+        owningRenderer.
+        * rendering/RenderScrollbarPart.h:
+        (RenderScrollbarPart):
+        Removing "friend class RenderScrollbar".
+        (WebCore::RenderScrollbarPart::isRenderScrollbarPart):
+        (WebCore::toRenderScrollbarPart):
+        (WebCore):
+        Implementing isRenderScrollbarPart and toRenderScrollbarPart.
+
 2012-05-14  Mike West  <mike@mikewest.org>
 
         Content Security Policy console errors include violated directive.
