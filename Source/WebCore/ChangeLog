@@ -1,3 +1,41 @@
+2012-05-14  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: Request / response headers should be stored in name-value pairs array, not a map on front-end.
+        https://bugs.webkit.org/show_bug.cgi?id=86357
+
+        Reviewed by Pavel Feldman.
+
+        Storing headers as name-value pairs array information more accurate and allows
+        to treat Set-Cookie headers (which become not parseable when joined by comma) correctly.
+
+        * inspector/front-end/AuditRules.js:
+        (WebInspector.AuditRules.GzipRule.prototype._isCompressed):
+        (WebInspector.AuditRules.CacheControlRule.prototype.responseHeader):
+        (WebInspector.AuditRules.CacheControlRule.prototype.hasResponseHeader):
+        (WebInspector.AuditRules.CacheControlRule.prototype.responseHeaderMatch):
+        * inspector/front-end/HAREntry.js:
+        (WebInspector.HAREntry.prototype._buildRequest):
+        (WebInspector.HAREntry.prototype._buildResponse):
+        * inspector/front-end/NetworkManager.js:
+        (WebInspector.NetworkDispatcher.prototype._headersMapToHeadersArray):
+        (WebInspector.NetworkDispatcher.prototype._updateNetworkRequestWithRequest):
+        (WebInspector.NetworkDispatcher.prototype._updateNetworkRequestWithResponse):
+        (WebInspector.NetworkDispatcher.prototype.webSocketWillSendHandshakeRequest):
+        (WebInspector.NetworkDispatcher.prototype.webSocketHandshakeResponseReceived):
+        * inspector/front-end/NetworkRequest.js:
+        (WebInspector.NetworkRequest.prototype.get transferSize):
+        (WebInspector.NetworkRequest.prototype.get requestHeaders):
+        (WebInspector.NetworkRequest.prototype.get requestHeadersText):
+        (WebInspector.NetworkRequest.prototype.get responseHeaders):
+        (WebInspector.NetworkRequest.prototype.get responseHeadersText):
+        (WebInspector.NetworkRequest.prototype._headerValue):
+        * inspector/front-end/RequestHeadersView.js:
+        (WebInspector.RequestHeadersView.prototype._refreshRequestHeaders):
+        (WebInspector.RequestHeadersView.prototype._refreshResponseHeaders):
+        (WebInspector.RequestHeadersView.prototype._refreshHeaders):
+        * platform/chromium/support/WebHTTPLoadInfo.cpp:
+        (WebKit::addHeader):
+
 2012-05-14  Sriram Neelakandan  <sriram.neelakandan@gmail.com>
 
         [Gtk][DOM Bindings] Feature-protected interface usage in set/get property must be under condition guards
