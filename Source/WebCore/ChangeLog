@@ -1,3 +1,108 @@
+2012-05-14  MORITA Hajime  <morrita@google.com>
+
+        [Shadow DOM][Refactoring] HTMLContentSelector family should have better name
+        https://bugs.webkit.org/show_bug.cgi?id=86064
+
+        Reviewed by Dimitri Glazkov.
+
+        This change renames classes around shadow content distribution.
+        - Renamed HTMLContentSelector to ContentDistributor
+        - Renamed HTMLContentSelectionList to ContentDistribution
+        - Renamed HTMLContentSelection to ContentDistribution::Item
+        - Inlined HTMLContentSelectionSet into ContentDistributor
+
+        Associated rename and inlining are also happening for method names.
+
+        No new tests. No behavior change.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/ComposedShadowTreeWalker.cpp:
+        (WebCore::ComposedShadowTreeWalker::traverseNode):
+        (WebCore::ComposedShadowTreeWalker::traverseSiblingOrBackToInsertionPoint):
+        (WebCore::ComposedShadowTreeWalker::traverseParent):
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::ElementShadow):
+        (WebCore::ElementShadow::attach):
+        (WebCore::ElementShadow::insertionPointFor):
+        (WebCore::ElementShadow::distributionItemFor):
+        (WebCore::ElementShadow::recalcStyle):
+        (WebCore::ElementShadow::needsRedistributing):
+        (WebCore::ElementShadow::hostChildrenChanged):
+        (WebCore::ElementShadow::setNeedsRedistributing):
+        * dom/ElementShadow.h:
+        (WebCore):
+        (ElementShadow):
+        (WebCore::ElementShadow::distributor):
+        (WebCore::ElementShadow::clearNeedsRedistributing):
+        * dom/NodeRenderingContext.cpp:
+        (WebCore::NodeRenderingContext::NodeRenderingContext):
+        (WebCore::nextRendererOfInsertionPoint):
+        (WebCore::previousRendererOfInsertionPoint):
+        (WebCore::firstRendererOfInsertionPoint):
+        (WebCore::lastRendererOfInsertionPoint):
+        * dom/ShadowRoot.cpp:
+        * dom/ShadowRoot.h:
+        (WebCore):
+        * html/shadow/ContentDistributor.cpp: Renamed from Source/WebCore/html/shadow/HTMLContentSelector.cpp.
+        (WebCore):
+        (WebCore::ContentDistribution::ContentDistribution):
+        (WebCore::ContentDistribution::~ContentDistribution):
+        (WebCore::ContentDistribution::find):
+        (WebCore::ContentDistribution::clear):
+        (WebCore::ContentDistribution::append):
+        (WebCore::ContentDistributor::ContentDistributor):
+        (WebCore::ContentDistributor::~ContentDistributor):
+        (WebCore::ContentDistributor::distribute):
+        (WebCore::ContentDistributor::clearDistribution):
+        (WebCore::ContentDistributor::findFor):
+        (WebCore::ContentDistributor::findInsertionPointFor):
+        (WebCore::ContentDistributor::willDistribute):
+        (WebCore::ContentDistributor::didDistribute):
+        (WebCore::ContentDistributor::preparePoolFor):
+        * html/shadow/ContentDistributor.h: Added.
+        (WebCore):
+        (ContentDistribution):
+        (Item):
+        (WebCore::ContentDistribution::Item::insertionPoint):
+        (WebCore::ContentDistribution::Item::node):
+        (WebCore::ContentDistribution::Item::next):
+        (WebCore::ContentDistribution::Item::previous):
+        (WebCore::ContentDistribution::Item::create):
+        (WebCore::ContentDistribution::Item::Item):
+        (WebCore::ContentDistribution::first):
+        (WebCore::ContentDistribution::last):
+        (WebCore::ContentDistribution::firstNode):
+        (WebCore::ContentDistribution::lastNode):
+        (WebCore::ContentDistribution::isEmpty):
+        (ContentDistributor):
+        (Translator):
+        (WebCore::ContentDistributor::Translator::hash):
+        (WebCore::ContentDistributor::Translator::equal):
+        (WebCore::ContentDistributor::Hash::hash):
+        (WebCore::ContentDistributor::Hash::equal):
+        (Hash):
+        (WebCore::ContentDistributor::inDistribution):
+        (WebCore::ContentDistributor::poolIsReady):
+        * html/shadow/HTMLContentElement.cpp:
+        (WebCore::HTMLContentElement::parseAttribute):
+        * html/shadow/HTMLContentSelector.h: Removed.
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::InsertionPoint):
+        (WebCore::InsertionPoint::detach):
+        (WebCore::InsertionPoint::distributeHostChildren):
+        (WebCore::InsertionPoint::clearDistribution):
+        (WebCore::InsertionPoint::attachDistributedNode):
+        (WebCore::InsertionPoint::assignShadowRoot):
+        (WebCore::InsertionPoint::clearAssignment):
+        * html/shadow/InsertionPoint.h:
+        (WebCore::InsertionPoint::distribution):
+        (WebCore::InsertionPoint::hasDistribution):
+
 2012-05-14  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r116969.
