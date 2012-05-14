@@ -1,3 +1,89 @@
+2012-05-13  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Move ValidityState methods implementation to another place
+        https://bugs.webkit.org/show_bug.cgi?id=86058
+
+        Reviewed by Kent Tamura.
+
+        This patch changes ValidityState class for limiting scope of
+        number/range input type related methods for introducing decimal
+        arithmetic.
+
+        Methods related to validation are moved from ValidateState to
+        input, select and textarea elements with virtual method based
+        dispatching via FormAssociateElement instead of tag name
+        dispatching so far for code simplification.
+
+        No new tests. This patch doesn't change behavior.
+
+        * html/FormAssociatedElement.cpp:
+        (WebCore::FormAssociatedElement::customError): Added. Called from ValidateState. Returns custom error mssage in member variable.
+        (WebCore::FormAssociatedElement::patternMismatch): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::rangeOverflow): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::rangeUnderflow): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::stepMismatch): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::tooLong): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::typeMismatch): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::valid): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::valueMissing): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::customValidationMessage): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::validationMessage): Added.  Called from ValidateState. This is default implementation.
+        (WebCore::FormAssociatedElement::setCustomValidity): Added.  set custom error message.
+        * html/FormAssociatedElement.h:
+        (FormAssociatedElement): Added new instance value m_customValidationMessage.
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::validationMessage): Removed. Note: HTMLInputElement, HTMLSelectElement, and HTMLTextAreaElement implement this method.
+        (WebCore::HTMLFormControlElement::setCustomValidity): Changed. Calls base class setCustomValidity.
+        * html/HTMLFormControlElement.h:
+        (HTMLFormControlElement):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::isValidValue): Call m_inputType methods instead of HTMLInputElement's.
+        (WebCore::HTMLInputElement::tooLong): Call m_inputType methods instead of HTMLInputElement's.
+        (WebCore):
+        (WebCore::HTMLInputElement::typeMismatch): Move implementation to InputType.
+        (WebCore::HTMLInputElement::valueMissing):  Move implementation to InputType.
+        (WebCore::HTMLInputElement::patternMismatch): Move implementation to InputType.
+        (WebCore::HTMLInputElement::rangeUnderflow): Move implementation to InputType.
+        (WebCore::HTMLInputElement::rangeOverflow): Move implementation to InputType.
+        (WebCore::HTMLInputElement::validationMessage): Move implementation to InputType.
+        (WebCore::HTMLInputElement::stepMismatch): Move implementation to InputType.
+        (WebCore::HTMLInputElement::isInRange): Call m_inputType methods instead of HTMLInputElement's.
+        (WebCore::HTMLInputElement::isOutOfRange): Call m_inputType methods instead of HTMLInputElement's.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Make tooLong method private.
+        * html/HTMLObjectElement.h: Add "virtual" and "OVERRIDE".
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::validationMessage): Added. Implementation for HTMLSelectElement.
+        (WebCore::HTMLSelectElement::valueMissing): Added. Implementation for HTMLSelectElement.
+        * html/HTMLSelectElement.h:
+        (HTMLSelectElement):  Added entries for newly added methods.
+        * html/HTMLTextAreaElement.cpp:
+        (WebCore::HTMLTextAreaElement::validationMessage): Added. Implementation for HTMLTextAreaElement.
+        (WebCore::HTMLTextAreaElement::valueMissing): Added. Implementation for HTMLTextAreaElement.
+        (WebCore::HTMLTextAreaElement::tooLong): Added. Implementation for HTMLTextAreaElement.
+        * html/HTMLTextAreaElement.h:
+        (HTMLTextAreaElement): Added entries for newly added methods. Change tooLong and valueMissing private.
+        * html/InputType.cpp:
+        (WebCore::InputType::stepMismatch): Change method signature.
+        (WebCore::InputType::alignValueForStep):  Changed for calling InputClass instead of HTMLINputElement.
+        (WebCore::InputType::stepUpFromRenderer):  Added. Moved from HTMLInputElement.
+        (WebCore::InputType::validationMessage): Added.  Moved from HTMLInputElement.
+        * html/InputType.h:
+        (InputType): Added entries for newly added methods and update methods signature.
+        * html/ValidityState.cpp: Move actual implementation to FormAssociatedElement and derived classes for localizing implementation change of elements and input types.
+        (WebCore::ValidityState::validationMessage): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::valueMissing): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::typeMismatch): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::patternMismatch): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::tooLong): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::rangeUnderflow): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::rangeOverflow): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::stepMismatch): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::customError): Changed to call FormAssociatedElement's method.
+        (WebCore::ValidityState::valid):
+        * html/ValidityState.h:
+        (ValidityState): Remove custom validation message related things.
+
 2012-05-13  Mike Lawther  <mikelawther@chromium.org>
 
         Heap-use-after-free in WTF::HashMap<int, WTF::RefPtr<WebCore::CalculationValue>, WTF::IntHash<unsigned int>, WTF::HashTrait
