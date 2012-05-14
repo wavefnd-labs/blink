@@ -1,3 +1,30 @@
+2012-05-14  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: [Extensions API] allow extensions to evaluate in the context of their content scripts
+        https://bugs.webkit.org/show_bug.cgi?id=86361
+
+        Reviewed by Yury Semikhatsky.
+
+        Test: inspector/extensions/extensions-eval-content-script.html
+
+        * inspector/front-end/ExtensionAPI.js: 
+        (injectedExtensionAPI.ExtensionSidebarPaneImpl.prototype.setExpression): Added evaluateOptions optional parameter.
+        (injectedExtensionAPI.InspectedWindow.prototype.eval):
+        (injectedExtensionAPI.extractCallbackArgument): A helper to extract callback function from last argument.
+        * inspector/front-end/ExtensionPanel.js:
+        (WebInspector.ExtensionSidebarPane.prototype.setExpression): Added evaluateOptions optional parameter.
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onSetSidebarContent): Use ExtensionServer.evaluate() wrapper.
+        (WebInspector.ExtensionServer.prototype._onEvaluateOnInspectedPage): Ditto.
+        (WebInspector.ExtensionServer.prototype._normalizePath):
+        (WebInspector.ExtensionServer.prototype.evaluate): A wrapper for PageAgent.evaluate() that handles evaluateOptions.
+        * inspector/front-end/JavaScriptContextManager.js:
+        (WebInspector.JavaScriptContextManager.prototype.contextByFrameAndSecurityOrigin): Expose interface to locate context id by frame and content script security origin.
+        (WebInspector.FrameEvaluationContext.prototype._addExecutionContext): Maintain contexts sorted by name.
+        (WebInspector.FrameEvaluationContext.prototype.isolatedContexts): ditto (skip sorting when returning contexts)
+        (WebInspector.FrameEvaluationContext.prototype.contextBySecurityOrigin):
+        * inspector/front-end/inspector.js: Hold/expose javaScriptContextManager.
+
 2012-05-14  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: preserve tab index while widening / shrinking tabbed pane area.
