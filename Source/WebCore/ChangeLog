@@ -1,3 +1,46 @@
+2012-05-13  Mike Lawther  <mikelawther@chromium.org>
+
+        Heap-use-after-free in WTF::HashMap<int, WTF::RefPtr<WebCore::CalculationValue>, WTF::IntHash<unsigned int>, WTF::HashTrait
+        https://bugs.webkit.org/show_bug.cgi?id=85195
+
+        This bug was caused by Length not understanding that calc expressions shouldn't be 
+        blended - a Length with a calc expression handle was created without incrementing
+        the ref count of the expression. Length no longer attempts to blend calc expressions,
+        http://webkit.org/b/86160 has been filed to track expression blending. Fixing this fixed
+        the crash.
+
+        Once this was fixed, the RenderStyle diff checker thought the style was changing,
+        as Length didn't know how to compare calc expressions, resulting in an infinite
+        loop of style recalcs. Expressions can now compare themselves.
+
+        Reviewed by Darin Adler.
+
+        Tests: css3/calc/transition-crash.html
+               css3/calc/transition-crash2.html
+
+        * platform/CalculationValue.h:
+        (WebCore::CalcExpressionNode::CalcExpressionNode):
+        (CalcExpressionNode):
+        (WebCore::CalcExpressionNode::type):
+        (CalculationValue):
+        (WebCore::CalculationValue::operator==):
+        (WebCore::CalcExpressionNumber::CalcExpressionNumber):
+        (WebCore::CalcExpressionNumber::operator==):
+        (CalcExpressionNumber):
+        (WebCore::CalcExpressionLength::CalcExpressionLength):
+        (WebCore::CalcExpressionLength::operator==):
+        (CalcExpressionLength):
+        (WebCore::CalcExpressionBinaryOperation::CalcExpressionBinaryOperation):
+        (WebCore::CalcExpressionBinaryOperation::operator==):
+        (CalcExpressionBinaryOperation):
+        * platform/Length.cpp:
+        (WebCore::Length::isCalculatedEqual):
+        (WebCore):
+        * platform/Length.h:
+        (WebCore::Length::operator==):
+        (Length):
+        (WebCore::Length::blend):
+
 2012-05-13  Darin Adler  <darin@apple.com>
 
         Roll out local changes accidentally landed in r116905.
