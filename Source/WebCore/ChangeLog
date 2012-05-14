@@ -1,3 +1,27 @@
+2012-05-13  Darin Adler  <darin@apple.com>
+
+        Listeners map uses raw pointers, but should use OwnPtr
+        https://bugs.webkit.org/show_bug.cgi?id=86298
+
+        Reviewed by Dan Bernstein.
+
+        * bindings/js/PageScriptDebugServer.cpp:
+        (WebCore::PageScriptDebugServer::~PageScriptDebugServer): Removed call
+        to deleteAllValues since the destructor now takes care of this
+        (WebCore::PageScriptDebugServer::addListener): Changed idiom of the add
+        function call here to use adoptPtr.
+        (WebCore::PageScriptDebugServer::removeListener): Added a now-needed
+        call to get and removed a now-uneeeded call to delete.
+        * bindings/js/PageScriptDebugServer.h: Changed the key type of
+        PageListenersMap to OwnPtr.
+
+        * bindings/js/ScriptDebugServer.cpp:
+        (WebCore::ScriptDebugServer::~ScriptDebugServer): Removed code to delete
+        the values in m_pageListenersMap. This map was never used and so I have
+        removed it.
+        * bindings/js/ScriptDebugServer.h: Removed the type PageListenersMap
+        and the unused data member, m_pageListenersMap.
+
 2012-05-13  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Move ValidityState methods implementation to another place
