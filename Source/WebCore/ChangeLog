@@ -1,3 +1,25 @@
+2012-05-14  Eric Seidel  <eric@webkit.org>
+
+        Styles are not recalculated when the seamless attribute is dynamically added/removed
+        https://bugs.webkit.org/show_bug.cgi?id=86315
+
+        Reviewed by Andreas Kling.
+
+        Covered by fast/frames/seamless/seamless-css-cascade.html.
+
+        * html/HTMLIFrameElement.cpp:
+        (WebCore::HTMLIFrameElement::isPresentationAttribute):
+         - Make seamless a presentational attribute, which means style on the <iframe> will
+           be forced to recalculate when it changes.  This is correct, but not observable
+           until the layout changes are landed (as then the iframe should correctly revert to not
+           being sized to fit its content if seamless is removed).
+        (WebCore::HTMLIFrameElement::parseAttribute):
+         - When the seamless attribute is added or remove, force the content document to recalc
+           its style resolver, which will refresh the list of inherited stylesheets from the
+           parent.  This doesn't need to happen synchronously.  When the layout changes land
+           the content document will actually cause that recalc to redirect to the parent document
+           in the seamless case anyway, but it's more correct to ask the content document directly.
+
 2012-05-14  Alexandre Elias  <aelias@google.com>
 
         [chromium] Prevent KeyCodeConversionAndroid from breaking on next NDK roll
