@@ -1,3 +1,24 @@
+2012-05-15  Jessie Berlin  <jberlin@apple.com>
+
+        WKContextSetCacheModel(contextref, kWKCacheModelDocumentViewer) doesn't prevent pages from
+        going into the PageCache.
+        https://bugs.webkit.org/show_bug.cgi?id=85891
+
+        Reviewed by Brady Eidson.
+
+        Do not claim that it is possible to cache a page when the page cache has a capacity of 0.
+
+        Covered by the modified DOMWindowExtensionNoCache WK2 API test.
+
+        * history/PageCache.cpp:
+        (WebCore::PageCache::canCache):
+        Check m_capacity.
+        * history/PageCache.h:
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::commitProvisionalLoad):
+        canCache is no longer static on PageCache.
+
 2012-05-15  James Robinson  <jamesr@chromium.org>
 
         Unreviewed, rolling out r116811.
