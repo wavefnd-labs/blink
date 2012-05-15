@@ -1,3 +1,33 @@
+2012-05-14  Shinya Kawanaka  <shinyak@chromium.org> 
+
+        document.execCommand('Indent') in the direct child of ShadowRoot causes a crash.
+        https://bugs.webkit.org/show_bug.cgi?id=86341
+
+        Reviewed by Ryosuke Niwa.
+
+        When document.execCommand('Indent') is executed in the direct child of ShadowRoot,
+        the scope variable of TextIterator becomes ShadowRoot. However, an element is assumed for it,
+        so a crash happended.
+
+        This patch enables TextIterator to have ShadowRoot as a scope variable.
+
+        Test: editing/shadow/execcommand-indent-in-shadow.html
+
+        * WebCore.exp.in:
+        * editing/ApplyBlockElementCommand.cpp:
+        (WebCore::ApplyBlockElementCommand::doApply):
+        * editing/InsertListCommand.cpp:
+        (WebCore::InsertListCommand::doApply):
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::rangeFromLocationAndLength):
+        * editing/TextIterator.h:
+        (TextIterator):
+        * editing/htmlediting.cpp:
+        (WebCore::indexForVisiblePosition):
+        (WebCore::visiblePositionForIndex):
+        * editing/htmlediting.h:
+        (WebCore):
+
 2012-05-14  Shinya Kawanaka  <shinyak@chromium.org>
 
         Node::shadowTreeRootNode() should return ShadowRoot instead of Node.
