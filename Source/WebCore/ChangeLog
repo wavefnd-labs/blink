@@ -1,3 +1,29 @@
+2012-05-15  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Use posZOrderList() / negZOrderList() everywhere to avoid querying dirtied lists
+        https://bugs.webkit.org/show_bug.cgi?id=86416
+
+        Reviewed by Simon Fraser.
+
+        Covered by existing tests that are not ASSERTing after this change.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerConfiguration):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::update3DTransformedDescendantStatus):
+        Added a call to updateZOrderLists() to the previous sites as nothing guarantees
+        that we have recomputed our z-order lists.
+
+        (WebCore::RenderLayer::paintLayerContents):
+        (WebCore::RenderLayer::hitTestLayer):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::needsContentsCompositingLayer):
+        Converted those functions to use the safe getters.
+
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::hasNegativeZOrderList):
+        Newly added funtion to return if we have a negative z-order list.
+
 2012-05-15  Abhishek Arya  <inferno@chromium.org>
 
         Crash due shadow tree parent confusion in SVG.
