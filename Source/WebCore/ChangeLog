@@ -1,3 +1,32 @@
+2012-05-15  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        [Qt] WebKit with Qt5 hangs on Mac
+        https://bugs.webkit.org/show_bug.cgi?id=79785
+
+        Reviewed by Tor Arne Vestbø.
+
+        Delay the initialization of our QNetworkConfigurationManager used in
+        NetworkStateNotifierPrivate. On Mac it was causing a race condition because it
+        spawns a thread that triggers a static initializer in Qt, while in the main
+        thread NetworkStateNotifier is being static initialized. On Mac the lock for
+        static initializers is shared between all of them, causing a deadlock.
+
+        The issue was also reported in http://openradar.appspot.com/11217150.
+
+        * platform/network/qt/NetworkStateNotifierPrivate.h:
+        (NetworkStateNotifierPrivate):
+        (WebCore::NetworkStateNotifierPrivate::effectivelyOnline):
+        * platform/network/qt/NetworkStateNotifierQt.cpp:
+        (WebCore::NetworkStateNotifierPrivate::NetworkStateNotifierPrivate):
+        (WebCore::NetworkStateNotifierPrivate::setNetworkAccessAllowed):
+        (WebCore::NetworkStateNotifierPrivate::setOnlineState):
+        (WebCore::NetworkStateNotifierPrivate::initialize):
+        (WebCore):
+        (WebCore::NetworkStateNotifierPrivate::~NetworkStateNotifierPrivate):
+        (WebCore::NetworkStateNotifier::updateState):
+        (WebCore::NetworkStateNotifier::NetworkStateNotifier):
+        (WebCore::NetworkStateNotifier::setNetworkAccessAllowed):
+
 2012-05-15  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
 
         Factor HitTestPoint out of HitTestResult.
