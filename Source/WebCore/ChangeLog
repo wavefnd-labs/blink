@@ -1,3 +1,47 @@
+2012-05-14  Jer Noble  <jer.noble@apple.com>
+
+        Site-specific hack: Disclaim WebM as a supported type on Mac for YouTube.
+        https://bugs.webkit.org/show_bug.cgi?id=86409
+
+        Reviewed by Darin Adler.
+
+        No new tests; site specific hack.
+
+        Add a Mac-only site-specific hack which disclaims both video/webm and video/x-flv
+        as supported types when the media element's document has a host of youtube.com.
+
+        Add a new, pure-virtual prototype class for use by MediaPlayer::supportsType:
+        * platform/graphics/MediaPlayer.h:
+        (MediaPlayerSupportsTypeClient):
+        (WebCore::MediaPlayerSupportsTypeClient::~MediaPlayerSupportsTypeClient):
+        (WebCore::MediaPlayerSupportsTypeClient::mediaPlayerNeedsSiteSpecificHacks):
+        (WebCore::MediaPlayerSupportsTypeClient::mediaPlayerDocumentHost):
+
+        Use these new client calls to determine whether to apply the site-specific
+        hack:
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::MediaPlayer::supportsType):
+
+        Add this prototype class as a superclass of HTMLMediaElement.  Pass in the
+        HTMLMediaElement's this pointer when calling MediaPlayer::supportsType():
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::canPlayType):
+        (WebCore::HTMLMediaElement::selectNextSourceChild):
+        (WebCore::HTMLMediaElement::mediaPlayerNeedsSiteSpecificHacks):
+        (WebCore::HTMLMediaElement::mediaPlayerDocumentHost):
+        * html/HTMLMediaElement.h:
+
+        As is HTMLMediaElement, a MediaPlayerSupportsTypeClient class is needed. Add a
+        new class DOMImplementationSupportsTypeClient, an instance of which will be 
+        passed to MediaPlayer::supportsType():
+        * dom/DOMImplementation.cpp:
+        (DOMImplementationSupportsTypeClient):
+        (WebCore::DOMImplementationSupportsTypeClient::DOMImplementationSupportsTypeClient):
+        (WebCore::DOMImplementation::createDocument):
+        (WebCore::DOMImplementation::mediaPlayerNeedsSiteSpecificHacks):
+        (WebCore::DOMImplementation::mediaPlayerDocumentHost):
+        * dom/DOMImplementation.h:
+
 2012-05-15  Anders Carlsson  <andersca@apple.com>
 
         Use unaccelerated scrolling deltas when rubber-banding
