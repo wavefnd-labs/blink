@@ -1,3 +1,128 @@
+2012-05-14  Gavin Peters  <gavinp@chromium.org>
+
+        Add Prerenderer, PrerenderHandle and a chromium interface for Prerendering.
+        https://bugs.webkit.org/show_bug.cgi?id=85005
+
+        Reviewed by Adam Barth.
+
+        The prerender case isn't quite a resource load, and using resource loading to
+        retrieve them has constrained the API, and unnecessarily complicated the loader.
+
+        The new Prerenderer and PrerenderHandle let <link rel=prerender...> elements signal
+        removal and unload to their platform.
+
+        No new tests, as this interface requires a full platform to work, and doesn't affect layout.  Test
+        it with your platform when implemented for it.
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        * dom/Document.h:
+        (WebCore):
+        (Document):
+        (WebCore::Document::prerenderer):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::removedFrom):
+        * html/LinkRelAttribute.cpp:
+        (WebCore::LinkRelAttribute::LinkRelAttribute):
+        * html/LinkRelAttribute.h:
+        (LinkRelAttribute):
+        * loader/LinkLoader.cpp:
+        (WebCore::LinkLoader::loadLink):
+        (WebCore::LinkLoader::released):
+        * loader/LinkLoader.h:
+        (WebCore):
+        (LinkLoader):
+        * loader/Prerenderer.cpp: Added.
+        (WebCore):
+        (WebCore::Prerenderer::create):
+        (WebCore::Prerenderer::Prerenderer):
+        (WebCore::Prerenderer::~Prerenderer):
+        (WebCore::Prerenderer::render):
+        (WebCore::Prerenderer::stop):
+        (WebCore::Prerenderer::suspend):
+        (WebCore::Prerenderer::resume):
+        (WebCore::Prerenderer::document):
+        (WebCore::Prerenderer::client):
+        * loader/Prerenderer.h: Copied from Source/Platform/chromium/public/WebPrerender.h.
+        (WebCore):
+        (Prerenderer):
+        * loader/PrerendererClient.cpp: Copied from Source/WebCore/html/LinkRelAttribute.h.
+        (WebCore):
+        (WebCore::PrerendererClient::supplementName):
+        (WebCore::PrerendererClient::from):
+        (WebCore::providePrerendererClientTo):
+        * loader/PrerendererClient.h: Copied from Source/WebCore/html/LinkRelAttribute.h.
+        (WebCore):
+        (PrerendererClient):
+        (WebCore::PrerendererClient::~PrerendererClient):
+        (WebCore::PrerendererClient::PrerendererClient):
+        * loader/cache/CachedResource.cpp:
+        (WebCore::defaultPriorityForResourceType):
+        (WebCore::cachedResourceTypeToTargetType):
+        (WebCore::CachedResource::load):
+        * loader/cache/CachedResource.h:
+        (WebCore::CachedResource::ignoreForRequestCount):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::createResource):
+        (WebCore::CachedResourceLoader::requestLinkResource):
+        (WebCore::CachedResourceLoader::checkInsecureContent):
+        (WebCore::CachedResourceLoader::canRequest):
+        * platform/PrerenderHandle.h: Copied from Source/Platform/chromium/public/WebPrerender.h.
+        (WebCore):
+        (PrerenderHandle):
+        * platform/chromium/Prerender.cpp: Added.
+        (WebCore):
+        (WebCore::Prerender::Prerender):
+        (WebCore::Prerender::~Prerender):
+        (WebCore::Prerender::setState):
+        (WebCore::Prerender::add):
+        (WebCore::Prerender::cancel):
+        (WebCore::Prerender::abandon):
+        (WebCore::Prerender::suspend):
+        (WebCore::Prerender::resume):
+        * platform/chromium/Prerender.h: Copied from Source/Platform/chromium/public/WebPrerender.h.
+        (WebCore):
+        (Prerender):
+        (ExtraData):
+        (WebCore::Prerender::ExtraData::~ExtraData):
+        (WebCore::Prerender::url):
+        (WebCore::Prerender::referrer):
+        (WebCore::Prerender::referrerPolicy):
+        (WebCore::Prerender::setExtraData):
+        (WebCore::Prerender::extraData):
+        * platform/chromium/PrerenderHandle.cpp: Copied from Source/Platform/chromium/public/WebPrerender.h.
+        (WebCore):
+        (WebCore::PrerenderHandle::create):
+        (WebCore::PrerenderHandle::PrerenderHandle):
+        (WebCore::PrerenderHandle::~PrerenderHandle):
+        (WebCore::PrerenderHandle::prerender):
+        (WebCore::PrerenderHandle::add):
+        (WebCore::PrerenderHandle::cancel):
+        (WebCore::PrerenderHandle::abandon):
+        (WebCore::PrerenderHandle::suspend):
+        (WebCore::PrerenderHandle::resume):
+        (WebCore::PrerenderHandle::url):
+        (WebCore::PrerenderHandle::referrer):
+        (WebCore::PrerenderHandle::referrerPolicy):
+        * platform/chromium/support/WebPrerender.cpp: Copied from Source/Platform/chromium/public/WebPrerender.h.
+        (WebKit::WebPrerender::WebPrerender):
+        (WebKit):
+        (WebKit::WebPrerender::~WebPrerender):
+        (WebKit::WebPrerender::url):
+        (WebKit::WebPrerender::referrer):
+        (WebKit::WebPrerender::referrerPolicy):
+        (WebKit::WebPrerender::setExtraData):
+        (WebKit::WebPrerender::extraData):
+        * platform/network/blackberry/ResourceRequest.h:
+        * platform/network/blackberry/ResourceRequestBlackBerry.cpp:
+        (WebCore::platformTargetTypeForRequest):
+        * platform/network/chromium/ResourceRequest.h:
+
 2012-05-14  Luke Macpherson  <macpherson@chromium.org>
 
         Introduce ENABLE_CSS_VARIABLES compile flag.
