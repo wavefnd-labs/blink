@@ -1,3 +1,51 @@
+2012-05-14  MORITA Hajime  <morrita@google.com>
+
+        [Refactoring] Get rid of ContentDistribution::Item
+        https://bugs.webkit.org/show_bug.cgi?id=86350
+
+        This change replaces the linked list on ContentDistribution with a Vector.
+        We no longer link item class ContentDistribution::Item.
+        This simplification also allows ContentDistribution to go.
+        ContentDistribution is now just a typedef of Vector<RefPtr<Node> >.
+
+        Reviewed by Dimitri Glazkov.
+
+        No new tests. Covered by existing tests.
+
+        * dom/ComposedShadowTreeWalker.cpp:
+        (WebCore::ComposedShadowTreeWalker::traverseNode):
+        (WebCore::ComposedShadowTreeWalker::traverseSiblingOrBackToInsertionPoint):
+        * dom/ElementShadow.cpp:
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        * dom/NodeRenderingContext.cpp:
+        (WebCore::nextRendererOfInsertionPoint):
+        (WebCore::previousRendererOfInsertionPoint):
+        (WebCore::firstRendererOfInsertionPoint):
+        (WebCore::lastRendererOfInsertionPoint):
+        * html/shadow/ContentDistributor.cpp:
+        (WebCore::ContentDistributor::distribute):
+        (WebCore::ContentDistributor::clearDistribution):
+        (WebCore::ContentDistributor::findInsertionPointFor):
+        * html/shadow/ContentDistributor.h:
+        (WebCore):
+        (ContentDistributor):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::InsertionPoint):
+        (WebCore::InsertionPoint::attachDistributedNode):
+        (WebCore::InsertionPoint::assignShadowRoot):
+        (WebCore::InsertionPoint::nextTo):
+        (WebCore):
+        (WebCore::InsertionPoint::previousTo):
+        * html/shadow/InsertionPoint.h: Added a set of delegate method to m_distribution.
+        (WebCore::InsertionPoint::hasDistribution):
+        (WebCore::InsertionPoint::indexOf):
+        (WebCore::InsertionPoint::size):
+        (WebCore::InsertionPoint::at):
+        (WebCore::InsertionPoint::first):
+        (WebCore::InsertionPoint::last):
+        (InsertionPoint):
+
 2012-05-14  Tim Horton  <timothy_horton@apple.com>
 
         RenderLayer::repaintRectIncludingDescendants shouldn't include repaint rects of composited descendants
