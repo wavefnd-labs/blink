@@ -1,3 +1,23 @@
+2012-05-15  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=86506
+        REGRESSION (tiled drawing): No scrollbar while page is loading
+        -and corresponding
+        <rdar://problem/11444589>
+
+        Reviewed by Anders Carlsson.
+
+        We have always had a mechanism in place to suppress painting overlay 
+        scrollbars while the page is loading. However, that mechaism is 
+        overriden if the page has been scrolled. It should be, anyway. It was 
+        not being overriden when the scrolling was handled as a wheel event by 
+        the scrolling tree. This patch takes advantage of the fact that 
+        ScrollingTree::handleWheelEvent() already calls back to the main 
+        thread for handleWheelEventPhase() and just patches 
+        handleWheelEventPhase to mark m_haveScrolledSincePageLoad as true.
+        * platform/mac/ScrollAnimatorMac.mm:
+        (WebCore::ScrollAnimatorMac::handleWheelEventPhase):
+
 2012-05-15  Jessie Berlin  <jberlin@apple.com>
 
         WKContextSetCacheModel(contextref, kWKCacheModelDocumentViewer) doesn't prevent pages from
