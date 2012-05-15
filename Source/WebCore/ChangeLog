@@ -1,3 +1,70 @@
+2012-05-15  Darin Adler  <darin@apple.com>
+
+        Optimize save/restore with no drawing operations between them (shows up on some canvas benchmarks)
+        https://bugs.webkit.org/show_bug.cgi?id=86448
+
+        Reviewed by Simon Fraser.
+
+        Since canvas programmers sometimes end up doing extra save/restore pairs with no actual drawing
+        in between, optimize that case by not realizing saves until we have to. This is doubly important
+        because saves are costly.
+
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::CanvasRenderingContext2D): Initialize m_unrealizedSaveCount.
+        (WebCore::CanvasRenderingContext2D::isAccelerated): Improve performance by calling the
+        drawingContext function only once.
+        (WebCore::CanvasRenderingContext2D::reset): Set m_unrealizedSaveCount to 0.
+        (WebCore::CanvasRenderingContext2D::realizeSavesLoop): Added. Replaces the save function as the
+        function that actually pushes context onto the state stack.
+        (WebCore::CanvasRenderingContext2D::restore): Added code to do an early return if we can do the
+        restore just by decrementing the unrealized save count.
+        (WebCore::CanvasRenderingContext2D::setStrokeStyle): Added calls to realizeSaves and replaced
+        calls to state with calls to modifiableState.
+        (WebCore::CanvasRenderingContext2D::setFillStyle): Ditto.
+        (WebCore::CanvasRenderingContext2D::setLineWidth): Ditto. Also added an early out for cases where
+        the line width is not changing.
+        (WebCore::CanvasRenderingContext2D::setLineCap): Ditto.
+        (WebCore::CanvasRenderingContext2D::setLineJoin): Ditto.
+        (WebCore::CanvasRenderingContext2D::setMiterLimit): Ditto.
+        (WebCore::CanvasRenderingContext2D::setShadowOffsetX): Ditto.
+        (WebCore::CanvasRenderingContext2D::setShadowOffsetY): Ditto.
+        (WebCore::CanvasRenderingContext2D::setShadowBlur): Ditto.
+        (WebCore::CanvasRenderingContext2D::setShadowColor): Ditto.
+        (WebCore::CanvasRenderingContext2D::setWebkitLineDash): Ditto.
+        (WebCore::CanvasRenderingContext2D::setWebkitLineDashOffset): Ditto.
+        (WebCore::CanvasRenderingContext2D::setGlobalAlpha): Ditto.
+        (WebCore::CanvasRenderingContext2D::setGlobalCompositeOperation): Ditto.
+        (WebCore::CanvasRenderingContext2D::scale): Ditto.
+        (WebCore::CanvasRenderingContext2D::rotate): Ditto.
+        (WebCore::CanvasRenderingContext2D::translate): Ditto.
+        (WebCore::CanvasRenderingContext2D::transform): Ditto.
+        (WebCore::CanvasRenderingContext2D::setTransform): Ditto.
+        (WebCore::CanvasRenderingContext2D::setStrokeColor): Ditto.
+        (WebCore::CanvasRenderingContext2D::setFillColor): Ditto.
+        (WebCore::CanvasRenderingContext2D::clip): Ditto.
+        (WebCore::CanvasRenderingContext2D::clearRect): Changed implementation so it does not save
+        the graphics context in the common case where shadows, global alpha, and global compositing
+        operators do not interfer with the function's operation. This allowed us to get rid of the
+        setAllAttributesToDefault function, which was used nowhere else.
+        (WebCore::CanvasRenderingContext2D::setShadow): Added a new common bottleneck and made all
+        the setShadow functions call it.
+        (WebCore::CanvasRenderingContext2D::clearShadow): Changed to call the new setShadow.
+        (WebCore::CanvasRenderingContext2D::setFont): Renamed tempDecl to the more friendly
+        parsedStyle. Changed code structure so the CSS parser is deleted right after parsing is
+        done. Used string concatenation instead of more expensive string append. Added calls to
+        realizeSaves and modifiableState.
+        (WebCore::CanvasRenderingContext2D::setTextAlign): Added calls to realizeSaves and replaced
+        calls to state with calls to modifiableState. Also added an early out for cases where the
+        alignment is not changing.
+        (WebCore::CanvasRenderingContext2D::setTextBaseline): Ditto.
+
+        * html/canvas/CanvasRenderingContext2D.h: Made save an inline function that bumps
+        m_unrealizedSaveCount. Removed setAllAttributesToDefault. Added OVERRIDE for all the
+        virtual function overrides, and made them all private. Moved m_path down with the other data
+        members. Renamed the non-const state function to modifiableState. Added a realizeSaves
+        function and the realizeSavesLoop for the unusual case where there is work to do.
+        Added m_unrealizedSaveCount.
+
 2012-05-15  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Setting onended on a LocalMediaStream triggers an assertion in V8
