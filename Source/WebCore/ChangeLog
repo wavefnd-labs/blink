@@ -1,3 +1,47 @@
+2012-05-15  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
+        Factor HitTestPoint out of HitTestResult.
+        https://bugs.webkit.org/show_bug.cgi?id=85965
+
+        Reviewed by Simon Fraser.
+
+        In preparation for handling transformations on area-based hit-testing, 
+        we need to factor test-point and test-area out of HitTestResult so that
+        it can be transformed independently.
+
+        To maintain the current API as closely as possible HitTestResult now
+        inherit from HitTestPoint, representing the original untransformed
+        hitTestPoint.
+
+        No change in functionality. No new tests. 
+
+        * rendering/HitTestResult.cpp:
+        (WebCore::HitTestPoint::HitTestPoint):
+        (WebCore::HitTestPoint::~HitTestPoint):
+        (WebCore::HitTestPoint::operator=):
+        (WebCore::HitTestPoint::rectForPoint):
+        (WebCore::HitTestResult::HitTestResult):
+        (WebCore::HitTestResult::operator=):
+        (WebCore::HitTestResult::isSelected):
+        (WebCore::HitTestResult::spellingToolTip):
+        (WebCore::HitTestResult::replacedString):
+        * rendering/HitTestResult.h:
+        (HitTestPoint):
+        (WebCore::HitTestPoint::point):
+        (WebCore::HitTestPoint::roundedPoint):
+        (WebCore::HitTestPoint::setPoint):
+        (WebCore::HitTestPoint::isRectBasedTest):
+        (WebCore::HitTestPoint::topPadding):
+        (WebCore::HitTestPoint::rightPadding):
+        (WebCore::HitTestPoint::bottomPadding):
+        (WebCore::HitTestPoint::leftPadding):
+        (HitTestResult):
+        (WebCore::HitTestResult::hitTestPoint):
+        (WebCore::HitTestPoint::rectForPoint):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::hitTestLayer):
+        (WebCore::RenderLayer::hitTestList):
+
 2012-05-15  Rob Buis  <rbuis@rim.com>
 
         Refactor SVG parts of Node::addEventListener/removeEventListener
