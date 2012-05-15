@@ -1,3 +1,29 @@
+2012-05-15  Darin Adler  <darin@apple.com>
+
+        [CG] CGImageCreateWithImageInRect is too slow, but for now we still need to use it
+        https://bugs.webkit.org/show_bug.cgi?id=86340
+
+        Reviewed by Geoffrey Garen.
+
+        This patch adds a subimage cache to defray the cost of CGImageCreateWithImageInRect.
+        Later, we will restructure the code so it doesn't use that function, but at the
+        moment there are CG issues blocking that change.
+
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (SubimageCacheEntry): Added. An entry in the cache.
+        (SubimageCacheEntryTraits): Added. Traits for the cache.
+        (SubimageCacheHash): Added. Hash function for the cache.
+        (SubimageCacheTimer): Added. Timer that clears the cache after a second
+        of inactivity.
+        (SubimageCacheWithTimer): Added. Cache and its timer.
+        (WebCore::subimageCache): Added. Function returning the single global timer.
+        (WebCore::SubimageCacheTimer::restart): Added. Start the timer.
+        (WebCore::SubimageCacheTimer::fired): Added. Clear the cache when the timer fires.
+        (SubimageRequest): Added. A key to look up in the cache.
+        (SubimageCacheAdder): Added. Translator to add to the cache.
+        (WebCore::subimage): Added. Puts an entry in the cache.
+        (WebCore::GraphicsContext::drawNativeImage): Changed to call the subimage function.
+
 2012-05-15  Eugene Klyuchnikov  <eustas.bug@gmail.com>
 
         Web Inspector: AdvancedSearchController is not stopped then view is hidden.
