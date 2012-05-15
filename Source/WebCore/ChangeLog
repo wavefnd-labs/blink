@@ -1,3 +1,50 @@
+2012-05-15  Chris Rogers  <crogers@google.com>
+
+        Add AudioSummingJunction class to handle fan-in (abstracted from AudioNodeInput)
+        https://bugs.webkit.org/show_bug.cgi?id=86396
+
+        Reviewed by Kenneth Russell.
+
+        No new tests.  Existing layout tests already extensively test summing.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        Add AudioSummingJunction files to makefiles.
+
+        * Modules/webaudio/AudioContext.cpp:
+        * Modules/webaudio/AudioContext.h:
+        (WebCore::AudioContext::handlePreRenderTasks):
+        (WebCore::AudioContext::handlePostRenderTasks):
+        (WebCore::AudioContext::deleteMarkedNodes):
+        (WebCore::AudioContext::markSummingJunctionDirty):
+        (WebCore::AudioContext::removeMarkedSummingJunction):
+        (WebCore::AudioContext::handleDirtyAudioSummingJunctions):
+        Simple munge from AudioNodeInput -> AudioSummingJunction
+
+        * Modules/webaudio/AudioNodeInput.cpp:
+        * Modules/webaudio/AudioNodeInput.h:
+        (WebCore::AudioNodeInput::AudioNodeInput):
+        (WebCore::AudioNodeInput::didUpdate):
+        Remove logic from AudioNodeInput which now is being moved to AudioSummingJunction.
+
+        * Modules/webaudio/AudioSummingJunction.cpp: Added.
+        * Modules/webaudio/AudioSummingJunction.h: Added.
+        (WebCore::AudioSummingJunction::AudioSummingJunction):
+        (WebCore::AudioSummingJunction::~AudioSummingJunction):
+        (WebCore::AudioSummingJunction::changedOutputs):
+        (WebCore::AudioSummingJunction::updateRenderingState):
+        (WebCore::AudioSummingJunction::context):
+        (WebCore::AudioSummingJunction::numberOfRenderingConnections):
+        (WebCore::AudioSummingJunction::renderingOutput):
+        (WebCore::AudioSummingJunction::isConnected):
+        (WebCore::AudioSummingJunction::numberOfConnections):
+        Add AudioSummingJunction which is an abstraction to manage/track the connections from AudioNodeOutputs
+        representing the fan-in points for unity gain summing junctions.
+
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        Add AudioSummingJunction files to makefiles.
+
 2012-05-15  Dan Bernstein  <mitz@apple.com>
 
         Ruby annotation is incorrectly identified as a paragraph boundary
