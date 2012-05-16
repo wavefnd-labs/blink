@@ -1,3 +1,26 @@
+2012-05-16  Tim Horton  <timothy_horton@apple.com>
+
+        FrameView::scrollContentsFastPath should use painted area to determine whether to drop out of the fast path
+        https://bugs.webkit.org/show_bug.cgi?id=86651
+        <rdar://problem/11459243>
+
+        Reviewed by Simon Fraser.
+
+        Previously, we decided to fall out of the fast scrolling path by the number of fixed-position elements
+        on the page. This was less than ideal if a single fixed position element took up a significant portion
+        of the page, or if there were many small, cheap-to-paint fixed elements.
+
+        Instead, we should use the fast path if less than 50% of the page will be repainted by fixed-position
+        elements, and otherwise fall back to the slow path.
+
+        I've tested a few different thresholds with an internal test; 50% seems to work relatively well,
+        but the ideal value is hard to determine and likely depends on hardware.
+
+        No new tests, performance improvement with few large fixed-position objects or many small ones.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scrollContentsFastPath):
+
 2012-05-16  David Reveman  <reveman@chromium.org>
 
         [Chromium] Use ThrottledTextureUploader with threaded compositing.
