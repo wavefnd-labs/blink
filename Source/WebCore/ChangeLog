@@ -1,3 +1,49 @@
+2012-05-16  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Merge nextRootInlineBox with nextLinePosition
+        https://bugs.webkit.org/show_bug.cgi?id=81593
+
+        Reviewed by Enrica Casucci.
+
+        Call previousRootInlineBox and nextRootInlineBox in previousLinePosition and nextLinePosition respectively
+        to share the code. Moved out the nullity check of startBox and extracted the renderer's node from the former
+        two, and added editableType to their argument lists to match the interface in both use cases.
+
+        Also moved out the code to extract root inline box using RenderedPosition from those two functions and
+        expanded in call sites since previousLinePosition and nextLinePosition need to return the candidate position
+        even when the root inline box doesn't exist. To this end, renamed previousRootInlineBox and nextRootInlineBox
+        to previousRootInlineBoxCandidatePosition and nextRootInlineBoxCandidatePosition respectively.
+
+        In addition, got rid of one version of nextLeafWithSameEditability that adjusted node with respect to offset
+        This variant did:
+
+        Node* child = node->childNode(offset);
+        node = child ? child->nextLeafNode() : node->lastDescendant()->nextLeafNode();
+
+        instead of:
+
+        node = node->nextLeafNode();
+
+        at the beginning of the function. Observe that the former code is logically equivalent to:
+
+        Node* child = node->childNode(offset);
+        node = child ? child : node->lastDescendant();
+        node = node->nextLeafNode();
+
+        Thus, the first two lines of this logically equivalent code is added in nextLinePosition wherein we used to
+        call the removed variant.
+
+        This refactoring with no behavioral change would help us resolving the bug 81490.
+
+        * editing/visible_units.cpp:
+        (WebCore::previousRootInlineBoxCandidatePosition): Renamed from previousRootInlineBox.
+        (WebCore::nextRootInlineBoxCandidatePosition): Renamed from nextRootInlineBox.
+        (WebCore::logicallyPreviousBox): Checks the nullity of startBox's renderer and node. Also extracts the root
+        inline box out of the position per the interface change.
+        (WebCore::logicallyNextBox): Ditto.
+        (WebCore::previousLinePosition): Calls previousRootInlineBoxCandidatePosition.
+        (WebCore::nextLinePosition): Calls nextRootInlineBoxCandidatePosition.
+
 2012-05-16  Noel Gordon  <noel.gordon@gmail.com>
 
         [chromium] Remove ImageDecoderCG.cpp from platform/image-decoders
