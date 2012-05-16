@@ -1,3 +1,53 @@
+2012-05-16  Andreas Kling  <kling@webkit.org>
+
+        Avoid reparsing the style attribute when cloning elements.
+        <http://webkit.org/b/86574>
+
+        Reviewed by Antti Koivisto.
+
+        Refactor cloning of attributes a bit to dodge the styleAttr reparse previously
+        caused by ElementAttributeData::setAttributes().
+
+        Introduced Element::cloneDataFromElement() which takes care of cloning the
+        ElementAttributeData as well as "non-attribute properties" (which is currently
+        specific to HTMLInputElement.)
+
+        Also includes some additional dodging of attribute vector traversal to find
+        old/new 'id' and 'name' attributes.
+
+        I'm seeing a ~10% improvement on PerformanceTests/DOM/CloneNodes locally.
+
+        * dom/Document.cpp:
+        (WebCore::Document::importNode):
+        * dom/Element.cpp:
+        (WebCore::Element::cloneElementWithoutChildren):
+        (WebCore::Element::cloneAttributesFromElement):
+        (WebCore::Element::cloneDataFromElement):
+        * dom/Element.h:
+        (WebCore::Element::copyNonAttributePropertiesFromElement):
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::cloneDataFrom):
+        * dom/ElementAttributeData.h:
+        (ElementAttributeData):
+        * dom/Node.h:
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::styleAttributeChanged):
+        (WebCore::StyledElement::parseAttribute):
+        * dom/StyledElement.h:
+        * editing/ReplaceNodeWithSpanCommand.cpp:
+        (WebCore::swapInNodePreservingAttributesAndChildren):
+        * html/HTMLElement.cpp:
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::copyNonAttributePropertiesFromElement):
+        * html/HTMLInputElement.h:
+        * inspector/DOMPatchSupport.cpp:
+        (WebCore::DOMPatchSupport::innerPatchNode):
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::setNodeName):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::expandSymbolElementsInShadowTree):
+        (WebCore::SVGUseElement::transferUseAttributesToReplacedElement):
+
 2012-05-16  Brent Fulgham  <bfulgham@webkit.org>
 
         [WinCairo] Unreviewed build change after r115385.  Several Cairo
