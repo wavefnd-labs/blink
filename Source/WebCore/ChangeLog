@@ -1,3 +1,24 @@
+2012-05-16  Ken Buchanan  <kenrb@chromium.org>
+
+        Crash due to first-letter not getting computed on RenderTableCell
+        https://bugs.webkit.org/show_bug.cgi?id=86133
+
+        Reviewed by Abhishek Arya.
+
+        RenderTableCell overrides RenderBlock::layout() but doesn't call
+        updateFirstLetter() in it. This is normally not a problem because
+        updateFirstLetter() gets called during preferred logical width
+        computation, but there exist rare occasions when layout of the table
+        cell happens without preferred logical widths being dirty, in which
+        case the first-letter update can be skipped.
+
+        This patch adds a call to updateFirstLetter() to
+        RenderTableCell::layout(). This ensures that the first-letter is up
+        to date before commencing block layout.
+
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::layout)
+
 2012-05-16  Mikhail Naganov  <mnaganov@chromium.org>
 
         Avoid jumpscroll when entering new text in a multi-line editor.
