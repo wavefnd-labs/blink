@@ -1,3 +1,49 @@
+2012-05-16  Shinya Kawanaka  <shinyak@chromium.org>
+
+        ShadowRoot.selection should return the seleciton whose range is in a shadow tree.
+        https://bugs.webkit.org/show_bug.cgi?id=82698
+
+        Reviewed by Ryosuke Niwa.
+
+        The selection object returned from shadowRoot.selection should be able to see
+        the inner object of the shadowRoot.
+
+        In the previous code, the node out of the shadow subtree was returned for
+        anchorNode, focusNode, baseNode, and extentNode. This patch enables us to get
+        the corresponding shadow ancestor in the specified TreeScope (m_treeScope).
+
+        Tests: editing/shadow/selection-of-orphan-shadowroot.html
+               editing/shadow/selection-of-shadowroot.html
+
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::selection):
+        * dom/ShadowRoot.h:
+        (ShadowRoot):
+        * dom/TreeScope.cpp:
+        (WebCore::TreeScope::getSelection): When shadow DOM feature is not enabled, we want to use the same
+        instance of DOMSelection among Document and ShadowRoot.
+        * dom/TreeScopeAdjuster.cpp:
+        (WebCore::TreeScopeAdjuster::TreeScopeAdjuster):
+        (WebCore::TreeScopeAdjuster::ancestorInThisScope): Since node could be null, I've added a node check code.
+        * dom/TreeScopeAdjuster.h:
+        (TreeScopeAdjuster):
+        (WebCore::TreeScopeAdjuster::treeScope):
+        * page/DOMSelection.cpp:
+        (WebCore::DOMSelection::anchorNode):
+        (WebCore::DOMSelection::anchorOffset):
+        (WebCore::DOMSelection::focusNode):
+        (WebCore::DOMSelection::focusOffset):
+        (WebCore::DOMSelection::baseNode):
+        (WebCore::DOMSelection::baseOffset):
+        (WebCore::DOMSelection::extentNode):
+        (WebCore::DOMSelection::extentOffset):
+        (WebCore::DOMSelection::shadowAdjustedNode): Gets the corresponding node in the m_treeScope from the Position.
+        (WebCore):
+        (WebCore::DOMSelection::shadowAdjustedOffset): Gets the corresponding node offset in the m_treeScope from the Position.
+        * page/DOMSelection.h:
+        (WebCore):
+        (DOMSelection):
+
 2012-05-16  Jason Liu  <jason.liu@torchmobile.com.cn>
 
         [BlackBerry] xhr request to non existent file response is 0 and not 404.
