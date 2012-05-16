@@ -1,3 +1,26 @@
+2012-05-16  Jason Liu  <jason.liu@torchmobile.com.cn>
+
+        [BlackBerry] xhr request to non existent file response is 0 and not 404.
+        https://bugs.webkit.org/show_bug.cgi?id=86344
+
+        Reviewed by George Staikos.
+
+        NetworkJob receives 404 for a XMLHttpRequest which calls open("HEAD", "notExist.html", true).
+        There are no data received because its method is HEAD.
+        This case should not be treated as a failure.
+
+        Add shouldNotifyClientFailed() to treat XMLHttpRequest as a special case.
+        XMLHttpRequest will fail when status code is smaller than zero.
+
+        If we use "GET" and receive 404 without body, NetworkJob won't go through failing code path, too.
+        So add http/tests/xmlhttprequest/xmlhttprequest-check-get-readystate-for-404-without-body.html
+        to check this case.
+
+        Test: http/tests/xmlhttprequest/xmlhttprequest-check-head-readystate-for-404.html
+              http/tests/xmlhttprequest/xmlhttprequest-check-get-readystate-for-404-without-body.html
+        * platform/network/blackberry/NetworkJob.cpp:
+        (WebCore::NetworkJob::sendResponseIfNeeded):
+
 2012-05-16  MORITA Hajime  <morrita@google.com>
 
         HasCustomWillOrDidRecalcStyleFlag and family should live in a bit.
