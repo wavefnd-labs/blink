@@ -1,3 +1,24 @@
+2012-05-15  Igor Oliveira  <igor.o@sisa.samsung.com>
+
+        regression(111639): Issue with simultaneous CSS animations
+        https://bugs.webkit.org/show_bug.cgi?id=85929
+
+        Currently, previousTimeToNextService is just saving the previous CompositeAnimation::timeToNextService
+        for AnimationControllerPrivate::updateAnimationTimerForRenderer, however CompositeAnimation::timeToNextService
+        is also called and used by updateAnimationTimer. Make sure we save the existing timeToNextService from
+        both places, updateAnimationTimerForRenderer and updateAnimationTimer.
+
+        Reviewed by Dean Jackson.
+
+        Test: animations/fill-mode-forwards.html
+
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationControllerPrivate::AnimationControllerPrivate):
+        (WebCore::AnimationControllerPrivate::updateAnimationTimerForRenderer):
+        (WebCore::AnimationControllerPrivate::updateAnimationTimer):
+        * page/animation/AnimationControllerPrivate.h:
+        (AnimationControllerPrivate):
+
 2012-05-15  Tien-Ren Chen  <trchen@chromium.org>
 
         [Chromium] CCTimer::isActive() is incorrect inside tick callback
