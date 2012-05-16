@@ -1,3 +1,25 @@
+2012-05-16  Arpita Bahuguna  <arpitabahuguna@gmail.com>
+
+        "border: collapse" + "display: none" rows in the tbody while having thead or tfoot doesn't render the opposite border
+        https://bugs.webkit.org/show_bug.cgi?id=67877
+
+        Reviewed by Antti Koivisto.
+
+        Test: fast/css/table-collapsed-borders.html
+
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::computeCollapsedBeforeBorder):
+        When getting the previous row group's after border, pass SkipEmptySections as the second param
+        to the RenderTable::sectionAbove() call. Thus if the currSection is the top most section of the
+        table passing SkipEmptySections to sectionAbove() would return null which should be the expected
+        behavior.
+
+        (WebCore::RenderTableCell::computeCollapsedAfterBorder):
+        When getting the following row group's before border, pass SkipEmptySections as the second param
+        to the RenderTable::sectionBelow() call. Thus if the currSection is the bottom most section of the
+        table passing SkipEmptySections to sectionBelow() would return null which should be the expected
+        behavior.
+
 2012-05-16  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: follow up to r117267 - fixing typo and removing unnecessary dispatch.
