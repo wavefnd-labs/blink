@@ -1,3 +1,57 @@
+2012-05-15  Kenneth Russell  <kbr@google.com>
+
+        Assertion failure running Mozilla's WebGL performance regression tests
+        https://bugs.webkit.org/show_bug.cgi?id=85942
+
+        Reviewed by Stephen White.
+
+        Fixed incorrect assumptions about source formats and buffer sizes
+        when uploading to floating-point textures. Added code paths
+        supporting the necessary conversions.
+
+        Tests have been added to the WebGL conformance suite which cover
+        these new code paths; they verify uploads of HTMLCanvasElement,
+        HTMLImageElement, HTMLVideoElement, and ImageData to
+        floating-point textures. However, because floating-point texture
+        support is optional, and generally only supported on bots which
+        run with real GPUs and not in virtual machines, it isn't feasible
+        to incorporate these tests as layout tests.
+
+        Ran the new WebGL conformance tests in Chromium on Linux; all
+        pass.
+
+        * platform/graphics/GraphicsContext3D.cpp:
+        (WebCore::GraphicsContext3D::extractImageData):
+        Properly compute size of destination buffer.
+
+        (WebCore):
+        Add pack/unpack routines for converting RGBA8/BGRA8 to floating point.
+
+        (WebCore::doFloatingPointPacking):
+        Support RGBA8 and BGRA8 source formats.
+
+        (WebCore::isFloatingPointSource):
+        Factored out logic for assertions.
+
+        (WebCore::GraphicsContext3D::packPixels):
+        Generalized assertions and logic.
+
+        * platform/graphics/cairo/GraphicsContext3DCairo.cpp:
+        (WebCore::GraphicsContext3D::getImageData):
+        Properly compute size of destination buffer.
+
+        * platform/graphics/cg/GraphicsContext3DCG.cpp:
+        (WebCore::GraphicsContext3D::getImageData):
+        Properly compute size of destination buffer.
+
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (WebCore::GraphicsContext3D::getImageData):
+        Properly compute size of destination buffer.
+
+        * platform/graphics/skia/GraphicsContext3DSkia.cpp:
+        (WebCore::GraphicsContext3D::getImageData):
+        Properly compute size of destination buffer.
+
 2012-05-15  James Robinson  <jamesr@chromium.org>
 
         [chromium] Chromium port never sets USE(CG) so code behind it is dead
