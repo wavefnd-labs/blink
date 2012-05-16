@@ -1,3 +1,30 @@
+2012-05-16  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: [Extensions API] expose evaluateOptions in audit formatters
+        https://bugs.webkit.org/show_bug.cgi?id=86617
+
+        Reviewed by Pavel Feldman.
+
+        Test: inspector/extensions/extensions-audits-content-script.html
+
+        - apply extension-specific audit formatters earlier (in ExtensionAduitCategory, not along with the rest in AuditFormatters);
+        - use ExtensionServer.evaluate() to handle evaluateOptions instead of PageAgent.evaluate();
+
+        * inspector/front-end/AuditFormatters.js: Move node and object formatters to ExtensionAuditCategory.
+        (WebInspector.partiallyApplyFormatters): Added a method to traverse formatters tree and apply formatters that are passed as input.
+        * inspector/front-end/ExtensionAuditCategory.js:
+        (WebInspector.ExtensionAuditCategory): Pass extensionOrigin.
+        (WebInspector.ExtensionAuditCategoryResults.prototype._addNode): Apply extensions formatters before adding the result.
+        (WebInspector.ExtensionAuditCategoryResults.prototype._addResult):
+        (WebInspector.ExtensionAuditCategoryResults.prototype.evaluate): moved from AuditFormatters.
+        (WebInspector.ExtensionAuditFormatters.object.onEvaluate):
+        (WebInspector.ExtensionAuditFormatters.object):
+        (WebInspector.ExtensionAuditFormatters.node.onNodeAvailable):
+        (WebInspector.ExtensionAuditFormatters.node.onEvaluate):
+        (WebInspector.ExtensionAuditFormatters.node):
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onAddAuditCategory): Plumb extensionOrigin through to audit category.
+
 2012-05-16  Donald Carr  <donald.carr@nokia.com>
 
         Fixes the build with Qt 5 HEAD
