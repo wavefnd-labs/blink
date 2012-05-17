@@ -1,3 +1,46 @@
+2012-05-15  Andreas Kling  <kling@webkit.org>
+
+        IconDatabase: Move icon retain/release off of the main thread.
+        <http://webkit.org/b/85799>
+        <rdar://problem/9507113>
+
+        Reviewed by Brady Eidson.
+
+        Batch up the retain/release operations and execute them as part of the sync thread loop.
+        The batch execution is guarded by a new mutex (m_urlsToRetainOrReleaseLock.)
+        This avoids blocking the main thread on m_urlAndIconLock for basic retain/release.
+
+        There is one exception; if there are pending retain/release operations in synchronousIconForPageURL,
+        it will acquire the lock and flush the operations.
+
+        There should be no behavior change, this is only meant to reduce lock contention.
+
+        * loader/icon/PageURLRecord.h:
+        (WebCore::PageURLRecord::retain):
+        (WebCore::PageURLRecord::release):
+
+            Added a 'count' argument to these so we can batch up the operations in IconDatabase.
+
+        * loader/icon/IconDatabase.h:
+        * loader/icon/IconDatabase.cpp:
+        (WebCore::IconDatabase::performScheduleOrDeferSyncTimer):
+        (WebCore::IconDatabase::performScheduleOrDeferSyncTimerOnMainThread):
+        (WebCore::IconDatabase::scheduleOrDeferSyncTimer):
+
+            Perform the the timer scheduling on the main thread as it can be done on a different
+            thread by way of retainIconForPageURL or releaseIconForPageURL.
+
+        (WebCore::IconDatabase::synchronousIconForPageURL):
+        (WebCore::IconDatabase::retainIconForPageURL):
+        (WebCore::IconDatabase::performRetainIconForPageURL):
+        (WebCore::IconDatabase::releaseIconForPageURL):
+        (WebCore::IconDatabase::performReleaseIconForPageURL):
+        (WebCore::IconDatabase::retainedPageURLCount):
+        (WebCore::IconDatabase::IconDatabase):
+        (WebCore::IconDatabase::performURLImport):
+        (WebCore::IconDatabase::syncThreadMainLoop):
+        (WebCore::IconDatabase::performPendingRetainAndReleaseOperations):
+
 2012-05-17  Julien Chaffraix  <jchaffraix@webkit.org>
 
         Kill RenderLayer::relativePositionOffset(LayoutUnit& relX, LayoutUnit& relY) and cleanup RenderInline::clippedOverflowRectForRepaint
