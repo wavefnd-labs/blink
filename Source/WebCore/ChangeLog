@@ -1,5 +1,55 @@
 2012-05-16  Kentaro Hara  <haraken@chromium.org>
 
+        [V8][Refactoring] Replace throwError("message", XXXError)
+        with throwError(XXXError, "message")
+        https://bugs.webkit.org/show_bug.cgi?id=86579
+
+        Reviewed by Adam Barth.
+
+        This is one of a series of refactoring commented in
+        https://bugs.webkit.org/show_bug.cgi?id=84074#c5
+
+        Currently there are two equivalent throwError()s; i.e. throwError("message", XXXError)
+        and throwError(XXXError, "message"). In this bug we replace
+        throwError("message", XXXError) with throwError(XXXError, "message")
+        (except for the case where XXXError == TypeError. This is because
+        throwError("message", TypeError) will be replaced with throwTypeError("message")
+        in a follow-up patch).
+
+        No tests. No change in behavior.
+
+        * bindings/v8/V8NPObject.cpp:
+        (WebCore::npObjectInvokeImpl):
+        (WebCore::npObjectGetProperty):
+        (WebCore::npObjectSetProperty):
+        (WebCore::npObjectPropertyEnumerator):
+        * bindings/v8/V8Proxy.cpp:
+        (WebCore::handleMaxRecursionDepthExceeded):
+        * bindings/v8/custom/V8ArrayBufferCustom.cpp:
+        (WebCore::V8ArrayBuffer::constructorCallback):
+        * bindings/v8/custom/V8ArrayBufferViewCustom.h:
+        (WebCore::constructWebGLArrayWithArrayBufferArgument):
+        (WebCore::constructWebGLArray):
+        * bindings/v8/custom/V8AudioContextCustom.cpp:
+        (WebCore::V8AudioContext::constructorCallback):
+        * bindings/v8/custom/V8BlobCustom.cpp:
+        (WebCore::V8Blob::constructorCallback):
+        * bindings/v8/custom/V8ClipboardCustom.cpp:
+        (WebCore::V8Clipboard::clearDataCallback):
+        (WebCore::V8Clipboard::setDragImageCallback):
+        * bindings/v8/custom/V8DOMFormDataCustom.cpp:
+        (WebCore::V8DOMFormData::appendCallback):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.cpp:
+        (WebCore::v8HTMLImageElementConstructorCallback):
+        * bindings/v8/custom/V8WebKitMutationObserverCustom.cpp:
+        (WebCore::V8WebKitMutationObserver::constructorCallback):
+        * bindings/v8/custom/V8WebSocketCustom.cpp:
+        (WebCore::V8WebSocket::constructorCallback):
+        * bindings/v8/custom/V8XMLHttpRequestConstructor.cpp:
+        (WebCore::V8XMLHttpRequest::constructorCallback):
+
+2012-05-16  Kentaro Hara  <haraken@chromium.org>
+
         [V8] Pass Isolate to remaining toV8()
         https://bugs.webkit.org/show_bug.cgi?id=86570
 
