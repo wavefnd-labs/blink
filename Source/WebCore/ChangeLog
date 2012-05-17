@@ -1,3 +1,129 @@
+2012-05-16  Hayato Ito  <hayato@chromium.org>
+
+        Implement a Shadow DOM spec's section 6 'Events'.
+        https://bugs.webkit.org/show_bug.cgi?id=78586
+
+        Reviewed by Dimitri Glazkov.
+
+        This implements a Shadow DOM spec's section 6 'Events', introducing a new
+        algorithm so that event dispatching use a composed shadow DOM tree,
+        instead of normal DOM tree, in dispatching events to each node.
+
+        The spec is here: http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html#events
+
+        Summary of changes:
+        - Attaching shadow DOM does not affect an event dispatching
+        behavior of enclosing DOM tree. This applies even if some nodes
+        are distributed to insertion points. We keep a compatibility of
+        existing event dispatching mechanism so that we won't break Web.
+        - Event ancestors, which are used in dispatching events in capture (or
+        bubble) phase, are now the result of traversing ancestors in composed
+        shadow DOM tree order, instead of normal DOM tree order.
+        - Event's target and related-target are correctly adjusted so that
+        we don't leak any node which is inaccessible from the event's
+        current-target node. We enforce both upper and lower boundary
+        encapsulation of Shadow DOM in event dispatching
+
+        Here is an example of event dispatching. Suppose we have the following DOM tree, which
+        includes some nested shadow hosts and insertion points
+        A
+        `--B-----[SR-B]
+           |-C     `--G--------------[SR-G]
+           | `-D      |-<H select=C>    |--J---------------[SR-J]
+           `-E        `-<I select=E>    |  `-<K select=H>    `-<N select=K>
+             `-F                        |
+                                        `--L---------------[SR-L]
+                                           `-<M select=I>    `-<O select=M>
+
+          Notation: [SR-X]: Shadow Root
+                    <X select=Y>: Insertion Point, called X, which selects Y.
+
+        If a mouse moves from node '#F' to node '#D', the following
+        'mouseover' events are dispatched in each ancestor node:
+
+        [currentTarget] [target] [related-target]
+          #D             #D       #F
+          #C             #D       #F
+          #H             #H       #I
+          #K             #K       #M
+          #N             #N       #M
+          #SR-J          #N       #M
+          #J             #K       #M
+          #SR-G          #K       #M
+          #G             #H       #I
+          #SR-B          #H       #I
+          #B             #D       #F
+          #A             #D       #F
+
+        Details are:
+        - Insertion points, such as <content> or <shadow>, are resolved correctly
+        in calculating event ancestors. That means if a node is distributed to
+        an insertion point, the insertion point is now an ancestor of the node in
+        bubbling (or capturing) events.
+        - Both insertion points and shadow roots now can receive events. We can add
+        event listeners to insertion points and shadow roots.
+        - Dispatched event's target is now adjusted correctly using the re-targeting
+        algorithm. The algorithm is now fully aware of insertion points.
+        - Dispatched event's related-target can now differ in each tree scope of
+        event ancestors. We choose the most appropriate related-target using the
+        related target resolution algorithm for each node.
+
+        Performance consideration:
+        This patch can achieve the competitive performance. The results of
+        ./Tools/Scripts/run-perf-tests PerformanceTests/DOM/Events.html for
+        before/after this patch are:
+
+        Before applying this patch:
+            Running DOM/Events.html (1 of 1)
+            RESULT DOM: Events= 270.310714286 ms
+            median= 269.75 ms, stdev= 2.0042397663 ms, min= 267.357142857 ms, max= 276.5 ms
+
+        After applying this patch:
+            Running DOM/Events.html (1 of 1)
+            RESULT DOM: Events= 268.108333333 ms
+            median= 267.5 ms, stdev= 2.41883157195 ms, min= 263.625 ms, max= 273.142857143 ms
+
+        I've also conducted a micro benchmark using both
+        Shadow-Free-DOM-Tree and DOM-Tree-With-Shadow-Host.
+        See https://bugs.webkit.org/show_bug.cgi?id=78586#c40 for the results.
+        It seems that the new implementation has more capabilities, but
+        doesn't sacrifice a performance of event dispatching in either cases.
+
+        Test: fast/dom/shadow/shadow-dom-event-dispatching.html
+
+        * dom/ComposedShadowTreeWalker.cpp:
+        (WebCore::ComposedShadowTreeWalker::parentIncludingInsertionPointAndShadowRoot):
+        (WebCore):
+        (WebCore::ComposedShadowTreeWalker::traverseParentIncludingInsertionPointAndShadowRoot):
+        * dom/ComposedShadowTreeWalker.h:
+        (ComposedShadowTreeWalker):
+        * dom/EventContext.cpp:
+        (WebCore::EventContext::EventContext):
+        (WebCore::EventContext::handleLocalEvents):
+        * dom/EventContext.h:
+        (EventContext):
+        (WebCore::EventContext::relatedTarget):
+        (WebCore):
+        (WebCore::EventContext::setRelatedTarget):
+        * dom/EventDispatcher.cpp:
+        (WebCore::EventRelatedTargetAdjuster::EventRelatedTargetAdjuster):
+        (WebCore):
+        (WebCore::EventRelatedTargetAdjuster::adjust):
+        (WebCore::EventRelatedTargetAdjuster::findRelatedTarget):
+        (WebCore::EventDispatcher::adjustRelatedTarget):
+        (WebCore::EventDispatcher::ensureEventAncestors):
+        (WebCore::EventDispatcher::dispatchEvent):
+        (WebCore::EventDispatcher::determineDispatchBehavior):
+        * dom/EventDispatcher.h:
+        (WebCore):
+        (EventRelatedTargetAdjuster):
+        (EventDispatcher):
+        * dom/MouseEvent.cpp:
+        (WebCore::MouseEventDispatchMediator::dispatchEvent):
+        * dom/MouseEvent.h:
+        (WebCore::toMouseEvent):
+        (WebCore):
+
 2012-05-16  Ryosuke Niwa  <rniwa@webkit.org>
 
         Moving caret up or down skips lines when there's a non-editable line
