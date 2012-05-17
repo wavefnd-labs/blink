@@ -1,3 +1,26 @@
+2012-05-16  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Moving caret up or down skips lines when there's a non-editable line
+        https://bugs.webkit.org/show_bug.cgi?id=81490
+
+        Reviewed by Eric Seidel.
+
+        The bug was caused by previousRootInlineBoxCandidatePosition and nextRootInlineBoxCandidatePosition
+        skipping leaf nodes that constitute a new line and belong to the same editable region because block elements
+        that separate lines are not editable so it looked as if all editable lines belong to a single line as far as
+        those two functions are concerned.
+
+        Fixed the bug by using the first leaf node that belongs to the same editable region but does not belong in
+        the same as the start node.
+
+        This patch is based on a patch authored by Yi Shen (Nokia).
+
+        Test: editing/selection/move-between-lines-of-different-editabilities.html
+
+        * editing/visible_units.cpp:
+        (WebCore::previousRootInlineBoxCandidatePosition):
+        (WebCore::nextRootInlineBoxCandidatePosition):
+
 2012-05-16  MORITA Hajime <morrita@google.com>
 
         Unreviewed attempt to fix Mac SL build.
