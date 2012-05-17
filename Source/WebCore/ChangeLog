@@ -1,3 +1,22 @@
+2012-05-16  James Robinson  <jamesr@chromium.org>
+
+        CachedImage does not clear the ImageObserver pointer when dropping its Image ref
+        https://bugs.webkit.org/show_bug.cgi?id=86689
+
+        Reviewed by Eric Seidel.
+
+        Image instances keep a weak pointer to their ImageObserver, which may be null. CachedImage is an ImageObserver
+        and holds a RefPtr<Image> m_image. When CachedImage initializes its m_image to either an SVGImage or BitmapImage,
+        it sets itself as that Image's ImageObserver. However, CachedImage never clears the ImageObserver pointer, even
+        when dropping its reference to the Image. This means if other code holds a RefPtr<Image> there is no promise
+        that calls on that Image will be valid. This patch clears the CachedImage::m_image's ImageObserver pointer
+        whenever the CachedImage drops its reference. Image already has null checks for its m_imageObserver so this is
+        always a safe operation.
+
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::~CachedImage):
+        (WebCore::CachedImage::clear):
+
 2012-05-16  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Fix a broken copyright of V8SVGElementCustom.cpp
