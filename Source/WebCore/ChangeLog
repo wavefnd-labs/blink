@@ -1,3 +1,28 @@
+2012-05-16  Joshua Bell  <jsbell@chromium.org>
+
+        SerializedScriptValue: lazy initialization of static nullValue not threadsafe
+        https://bugs.webkit.org/show_bug.cgi?id=70833
+
+        Reviewed by Kentaro Hara.
+
+        Remove unsafe lazy initialization of static |null| SSV. None of the callers
+        appeared to be in performance-critical areas - most were preparing an event to
+        be dispatched to script - so no per-call-site caching was added.
+
+        No new tests - no functional changes.
+
+        * bindings/js/SerializedScriptValue.cpp: Mint a new one each time.
+        (WebCore::SerializedScriptValue::nullValue):
+        * bindings/js/SerializedScriptValue.h: Return via PassRefPtr.
+        * bindings/v8/SerializedScriptValue.cpp: Mint a new one each time.
+        (WebCore::SerializedScriptValue::nullValue):
+        * bindings/v8/SerializedScriptValue.h: Return via PassRefPtr.
+        (SerializedScriptValue):
+        * dom/Document.cpp:
+        (WebCore::Document::statePopped): Change to PassRefPtr to maintain refcount.
+        * dom/Document.h:
+        (Document):
+
 2012-05-16  James Robinson  <jamesr@chromium.org>
 
         CachedImage does not clear the ImageObserver pointer when dropping its Image ref
