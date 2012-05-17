@@ -1,5 +1,32 @@
 2012-05-17  Joshua Bell  <jsbell@chromium.org>
 
+        IndexedDB: Remove IDBIndex.storeName
+        https://bugs.webkit.org/show_bug.cgi?id=86676
+
+        Reviewed by Tony Chang.
+
+        Older versions of the IDB spec exposed IDBIndex.storeName. While it's been removed
+        from the IDL, the additional storage/plumbing are unnecessary clutter. Nuke it!
+
+        No new tests - no functional changes.
+
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp:
+        (WebCore::IDBIndexBackendImpl::IDBIndexBackendImpl): Remove storeName parameter, and
+        const declaration on object store param. The former was used to get a non-const pointer
+        via indirection in openCursorInternal.
+        (WebCore::IDBIndexBackendImpl::openCursorInternal): Use store pointer directly, don't
+        look it up by name in the transaction.
+        * Modules/indexeddb/IDBIndexBackendImpl.h:
+        (WebCore::IDBIndexBackendImpl::create): Remove storeName parameters.
+        (IDBIndexBackendImpl): Remove storeName() method.
+        * Modules/indexeddb/IDBIndexBackendInterface.h:
+        (IDBIndexBackendInterface): Remove storeName parameter.
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::createIndex): Remove storeName parameter.
+        (WebCore::IDBObjectStoreBackendImpl::loadIndexes): Remove storeName parameter.
+
+2012-05-17  Joshua Bell  <jsbell@chromium.org>
+
         IndexedDB: Implement IDBObjectStore.autoIncrement
         https://bugs.webkit.org/show_bug.cgi?id=86662
 
