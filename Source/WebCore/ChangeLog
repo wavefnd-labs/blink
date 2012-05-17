@@ -1,3 +1,42 @@
+2012-05-11  Kinuko Yasuda  <kinuko@chromium.org>
+
+        Allow FileSystem API implementation to pass snapshot metadata at File creation time
+        https://bugs.webkit.org/show_bug.cgi?id=78879
+
+        Reviewed by Jian Li.
+
+        We query File metadata (e.g. size and modifiedTime) when File.size,
+        lastModifiedTime or webkitSlice() is accessed / called, but in some
+        platform-specific filesystems it may not be feasible since synchronous
+        metadata query could take very long time.
+
+        This patch adds new File constructor which takes metadata argument
+        to allow each FileSystem API implementation to pass snapshot metadata
+        so that File object could cache the given metadata not to make
+        synchronous query.
+
+        We only call this constructor if the filesystem type is neither
+        Temporary nor Persistent, therefore this patch should not affect
+        existing code behavior.
+
+        Test: fast/filesystem/file-read-after-write.html
+
+        * Modules/filesystem/DOMFileSystem.cpp:
+        (WebCore::DOMFileSystem::createFile):
+        * Modules/filesystem/DOMFileSystemSync.cpp:
+        * fileapi/Blob.cpp:
+        (WebCore::Blob::webkitSlice): Updated implementation.
+        * fileapi/Blob.h:
+        * fileapi/File.cpp:
+        (WebCore::File::File): Added new constructor.
+        (WebCore::File::lastModifiedDate): Updated implementation.
+        (WebCore::File::size): Updated implementation.
+        (WebCore::File::captureSnapshot): Updated implementation.
+        * fileapi/File.h:
+        (WebCore::File::createForFileSystemFile): Added.
+        * platform/AsyncFileSystem.h:
+        (AsyncFileSystem): Updated comment.
+
 2012-05-17  Gyuyoung Kim  <gyuyoung.kim@samsung.com>
 
         Convert setDomainRelaxationForbiddenForURLScheme to use InternalSettings interface
