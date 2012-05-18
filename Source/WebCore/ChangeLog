@@ -1,3 +1,23 @@
+2012-05-18  Dan Bernstein  <mitz@apple.com>
+
+        <rdar://problem/11467250> No focus ring around popup buttons
+
+        Reviewed by Anders Carlsson.
+
+        The exact same issue was fixed for buttons drawn in ThemeMac.mm in <rdar://problem/10542095>.
+        This change extends the fix to also cover buttons drawn in RenderThemeMac.mm.
+
+        * WebCore.xcodeproj/project.pbxproj: Added WebCoreNSCellExtras.{h.m}.
+        * platform/mac/ThemeMac.mm: Removed the definitions of BUTTON_CELL_DRAW_WITH_FRAME_DRAWS_FOCUS_RING
+        and -[NSCell _web_drawFocusRingWithFrame:inView:] from here. They are now in WebCoreNSCellExtras.
+        * platform/mac/WebCoreNSCellExtras.h: Added.
+        * platform/mac/WebCoreNSCellExtras.m: Added.
+        (-[NSCell _web_drawFocusRingWithFrame:inView:]): Moved from ThemeMac.mm here.
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::paintMenuList): Changed to use -_web_drawFocusRingWithFrame:inView:.
+        (WebCore::RenderThemeMac::setPopupButtonCellState): Removed call to updateFocusedState() when
+        the focus ring is drawn separately.
+
 2012-05-18  Philippe Normand  <pnormand@igalia.com>
 
         [GStreamer] Fix early return of the mimeTypeCache function after r117207.
