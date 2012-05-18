@@ -1,3 +1,30 @@
+2012-05-18  Levi Weintraub  <leviw@chromium.org>
+
+        Revert to float method of selection rect alignment for line box tree
+        https://bugs.webkit.org/show_bug.cgi?id=86904
+
+        Reviewed by Eric Seidel.
+
+        In r117491, we introduced a new method of alignment for the selection rect in the sub-pixel case.
+        It turns out there is at least one case on Mac where this leaves a gap when painting selection rects
+        originating in the line box tree. This patch reverts us to the float method for the line box tree,
+        but retains the LayoutRect snapping for gap rects.
+
+        No new tests. Covered by existing tests with sub-pixel layout enabled.
+
+        * rendering/EllipsisBox.cpp:
+        (WebCore::EllipsisBox::paintSelection): Re-enabling the FloatRect flavor of
+        alignSelectionRectToDevicePixels for the line box tree.
+        * rendering/InlineTextBox.cpp:
+        (WebCore::alignSelectionRectToDevicePixels): Moving LayoutRect flavor to RenderBlock.
+        (WebCore::InlineTextBox::paintSelection): Happily clearing up the bifurcation of algorithms for
+        sub-pixel layout.
+        * rendering/InlineTextBox.h: Re-enabling the FloatRect flavor of alignSelectionRectToDevicePixels
+        for the line box tree.
+        * rendering/RenderBlock.cpp:
+        (WebCore::alignSelectionRectToDevicePixels): Re-seating the LayoutRect version of
+        alignSelectionRectToDevicePixels for use with GapRects.
+
 2012-05-18  Eric Seidel  <eric@webkit.org>
 
         Assertion failure in BidiResolver::commitExplicitEmbedding() (!inIsolate() || m_currentExplicitEmbeddingSequence.isEmpty()) at wikipedia.org
