@@ -1,3 +1,42 @@
+2012-05-18  Martin Robinson  <mrobinson@igalia.com>
+
+        OOM running webgl/sdk/tests/conformance/context/context-creation-and-destruction.html
+        https://bugs.webkit.org/show_bug.cgi?id=80509
+
+        Reviewed by Alejandro G. Castro.
+
+        No new tests. This is covered by by context-creation-and-destruction.html
+        Khronos conformance test which will be part of the WebKit repository once
+        bug 44310 is closed.
+
+        Rework the ownership of GLContexts. Instead of having them managed by the
+        state of window mapping or removed by calling a static method, always have
+        them owned by the callers. This makes all GLContext creators factory methods
+        that return PassOwnPtr.
+
+        This change also switches the sharing context for a WebView from the window
+        context to a global shared context. This simplifies things greatly, allowing
+        the removal of GLContextGtk and makes the factory change easier.
+
+        * GNUmakefile.list.am: Remove GLContextGtk.cpp from the source list.
+        * platform/graphics/cairo/GLContext.cpp:
+        (WebCore::GLContext::sharingContext): Added, getter for the global sharing context.
+        (WebCore::GLContext::createContextForWindow): Added, a factory method for creating
+        window contexts.
+        (WebCore::GLContext::createOffscreenContext): Allow passing a sharing context here.
+        (WebCore::GLContext::makeContextCurrent): Assert that this is the main thread, to
+        increase the guarantee that we are only using these contexts on the main thread.
+        (WebCore::GLContext::getCurrent): Ditto.
+        * platform/graphics/cairo/GLContext.h: Update the above method signatures and remove
+        createOffscreenContext, which has just been subsumed into the other factory methods.
+        * platform/graphics/cairo/GraphicsContext3DCairo.cpp: The HostWindow is no longer needed
+        to get the sharing context, so we can simplify things quite a bit and make a platform
+        independent implementation here.
+        * platform/graphics/cairo/GraphicsContext3DPrivate.cpp: Ditto.
+        * platform/graphics/glx/GLContextGLX.cpp: Modify all the factory methods to return PassOwnPtr.
+        * platform/graphics/glx/GLContextGLX.h: Ditto.
+        * platform/graphics/gtk/GLContextGtk.cpp: Removed.
+
 2012-05-18  Pablo Flouret  <pablof@motorola.com>
 
         Script elements inserted while fragment parsing should have their "already started" flag set.
