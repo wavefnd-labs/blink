@@ -1,3 +1,67 @@
+2012-05-18  Tony Chang  <tony@chromium.org>
+
+        remove the CSS_GRID_LAYOUT compiler define, but default grid layout to off
+        https://bugs.webkit.org/show_bug.cgi?id=86767
+
+        Reviewed by Ojan Vafai.
+
+        We disable grid by ignoring the display type at CSS parse time.
+
+        Test: fast/css-grid-layout/grid-disabled-by-default.html
+
+        * Configurations/FeatureDefines.xcconfig:
+        * css/CSSComputedStyleDeclaration.cpp: Remove compile checks.
+        (WebCore):
+        (WebCore::valueForGridPosition):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParserContext::CSSParserContext):
+        (WebCore::operator==):
+        (WebCore::isValidKeywordPropertyAndValue): Move display into parseValue.
+        (WebCore::isKeywordPropertyID):
+        (WebCore::CSSParser::parseValue): Ignore while parsing if not enabled.
+        (WebCore::CSSParser::parseGridTrackList):
+        (WebCore::CSSParser::cssGridLayoutEnabled):
+        (WebCore):
+        * css/CSSParser.h:
+        * css/CSSParserMode.h:
+        (CSSParserContext):
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/CSSPropertyNames.in:
+        * css/CSSValueKeywords.in:
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * dom/Document.cpp:
+        (WebCore::Document::cssGridLayoutEnabled): Added to keep track of whether grid is enabled or not.
+        (WebCore):
+        * dom/Document.h:
+        * page/Settings.cpp:
+        (WebCore::Settings::Settings):
+        * page/Settings.h:
+        (WebCore::Settings::setCSSGridLayoutEnabled): Added.
+        (WebCore::Settings::cssGridLayoutEnabled): Added.
+        (Settings):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::createObject):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::RenderStyle):
+        (WebCore::RenderStyle::diff):
+        * rendering/style/RenderStyle.h:
+        * rendering/style/RenderStyleConstants.h:
+        * rendering/style/StyleGridData.cpp:
+        * rendering/style/StyleGridData.h:
+        * rendering/style/StyleGridItemData.cpp:
+        * rendering/style/StyleGridItemData.h:
+        * rendering/style/StyleRareNonInheritedData.cpp:
+        (WebCore::StyleRareNonInheritedData::StyleRareNonInheritedData):
+        (WebCore::StyleRareNonInheritedData::operator==):
+        * rendering/style/StyleRareNonInheritedData.h:
+        (WebCore):
+        (StyleRareNonInheritedData):
+
 2012-05-18  Martin Robinson  <mrobinson@igalia.com>
 
         OOM running webgl/sdk/tests/conformance/context/context-creation-and-destruction.html
