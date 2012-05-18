@@ -1,3 +1,57 @@
+2012-05-17  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Scale all compositor output by the defaultDeviceScaleFactor
+        https://bugs.webkit.org/show_bug.cgi?id=86051
+
+        Reviewed by James Robinson.
+
+        On initialization, give the defaultDeviceScaleFactor to the compositor
+        to have it scale all output from WebCore's layout size to physical
+        pixels. This allows us to scale up to high-dpi devices without using
+        fixed-layout, so we can leave the WebCore frame size in layout pixels,
+        while drawing the frame into a larger physical pixel size.
+
+        CCLayerTreeHost becomes aware of the deviceScaleFactor and scales all
+        output by this factor by scaling the viewport and all drawing
+        transforms.
+
+        Anything that works in physical pixels (content space), uses the
+        deviceViewportSize() in place of the viewportSize(), since when
+        deviceScaleFactor != 1 in CCLayerTreeHost, the WebCore viewport
+        is no longer physical pixels.
+
+        Scroll positions are in layout pixels, and must be scaled to/from
+        content space within the compositor.
+
+        Unit tests: CCLayerTreeHostTestDeviceScaleFactorScalesViewportAndLayers
+
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromiumClient):
+        (WebCore::LayerRendererChromium::viewportSize):
+        (WebCore::LayerRendererChromium::viewportWidth):
+        (WebCore::LayerRendererChromium::viewportHeight):
+        (LayerRendererChromium):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::initializeLayerRenderer):
+        (WebCore::CCLayerTreeHost::setViewportSize):
+        (WebCore::CCLayerTreeHost::updateLayers):
+        (WebCore::CCLayerTreeHost::paintLayerContents):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (WebCore::CCSettings::CCSettings):
+        (CCSettings):
+        (CCLayerTreeHost):
+        (WebCore::CCLayerTreeHost::deviceViewportSize):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::calculateRenderSurfaceLayerList):
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        (WebCore::CCLayerTreeHostImpl::setViewportSize):
+        (WebCore::CCLayerTreeHostImpl::updateMaxScrollPosition):
+        (WebCore::CCLayerTreeHostImpl::scrollBegin):
+        (WebCore::CCLayerTreeHostImpl::computePinchZoomDeltas):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (WebCore::CCLayerTreeHostImpl::viewportSize):
+        (CCLayerTreeHostImpl):
+
 2012-05-17  Hayato Ito  <hayato@chromium.org>
 
         [Shadow DOM] Add an assertion to make sure a visited node is not an active insertion point.
