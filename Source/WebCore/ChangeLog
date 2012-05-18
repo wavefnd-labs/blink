@@ -1,3 +1,42 @@
+2012-05-18  Eric Seidel  <eric@webkit.org>
+
+        Assertion failure in BidiResolver::commitExplicitEmbedding() (!inIsolate() || m_currentExplicitEmbeddingSequence.isEmpty()) at wikipedia.org
+        https://bugs.webkit.org/show_bug.cgi?id=76574
+
+        Reviewed by Levi Weintraub.
+
+        Consider this example:
+        <span style="unicode-bidi: embed"><span style="unicode-bidi: isolate">a</span></span>
+        Before this patch, we would ASSERT when computing the text runs, as we would have encountered
+        the "embed LTR" directive from the outer span, but not try to "commit" this embedding until
+        we encountered the first charater (an optimization to avoid creating unnecessary bidi embedding contexts).
+        The ASSERT we were hitting was to ensure that embedding directives inside an isolated span
+        did not bleed out and effect the surrounding text.
+
+        bidi "isolate" support uses a multi-pass Unicode Bidi Algorithm (UBA), which when encountering
+        "isolated" sections of text ignores them in the first pass, and then goes back and runs
+        a separate instance of the UBA on those isolated sections.
+
+        Once we scan into an "isolate" section (during an outer UBA application) we should not respect
+        any embedding directives inside that "isolate" section.
+
+        However, in the above example, our "don't commit embeddings until we need them" and
+        "assert we don't respect embeddings inside isolated spans" were conflicting.
+        The fix is to make sure we always commit any pending embedding directives *before*
+        we enter an isolate section.
+
+        Luckly there was no functional bug here as we were still respecting
+        the embedding directives we were belatedly committing. After this change we're commiting
+        those directives at a more appropriate time, thus avoiding the ASSERT.
+
+        Test: fast/text/bidi-isolate-embedding-crash.html
+
+        * platform/text/BidiResolver.h:
+        (WebCore::::commitExplicitEmbedding):
+        * rendering/InlineIterator.h:
+        (WebCore::notifyObserverEnteredObject):
+        (WebCore::IsolateTracker::commitExplicitEmbedding):
+
 2012-05-18  Pratik Solanki  <psolanki@apple.com>
 
         BitmapImage::BitmapImage(CGImageRef, ImageObserver*) needs to set m_sizeRespectingOrientation
