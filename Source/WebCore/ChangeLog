@@ -1,3 +1,25 @@
+2012-05-18  Ryosuke Niwa  <rniwa@webkit.org>
+
+        WebKit erroneously add 1px padding in input elements
+        https://bugs.webkit.org/show_bug.cgi?id=86784
+
+        Reviewed by Kent Tamura.
+
+        Fixed the bug by removing the code that added left and right paddings in input elements.
+        The code was added in r13567 to match a very old version of Internet Explorer but this quirk
+        does not seem to exists in IE9 (both in quirks and standard modes).
+
+        A lot of tests need to be rebaselined due to 1px difference inside input elements, and 2px
+        differences for the width of input elements. (In some extreme cases, line breaking changed
+        due to the width change).
+
+        Test: fast/forms/input-textarea-padding-match.html
+
+        * css/html.css:
+        (input::-webkit-input-placeholder, isindex::-webkit-input-placeholder):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::createInnerTextStyle):
+
 2012-05-18  Adrienne Walker  <enne@google.com>
 
         [chromium] Add diagnostic CRASH calls for tiler crashes
