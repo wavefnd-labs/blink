@@ -1,3 +1,94 @@
+2012-05-19  Emil A Eklund  <eae@chromium.org>
+
+        Simplify RenderOverflow by using Rects
+        https://bugs.webkit.org/show_bug.cgi?id=86894
+
+        Reviewed by Eric Seidel.
+
+        Simplify the RenderOverflow class and the uses of it by storing the
+        overflow values in rects and using the rects instead of the individual
+        values where it makes sense.
+
+        No new tests, no change in functionality.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::adjustPageHeightDeprecated):
+        Change to use layoutOverflowRect().maxX() and replace C style casts with
+        C++ style to comply with style guide.
+        
+        * rendering/InlineFlowBox.h:
+        (WebCore::InlineFlowBox::logicalLeftLayoutOverflow):
+        (WebCore::InlineFlowBox::logicalRightLayoutOverflow):
+        (WebCore::InlineFlowBox::logicalTopLayoutOverflow):
+        (WebCore::InlineFlowBox::logicalBottomLayoutOverflow):
+        (WebCore::InlineFlowBox::logicalLeftVisualOverflow):
+        (WebCore::InlineFlowBox::logicalRightVisualOverflow):
+        (WebCore::InlineFlowBox::logicalTopVisualOverflow):
+        (WebCore::InlineFlowBox::logicalBottomVisualOverflow):
+        Change methods to use layoutOverflowRect() and visualOverflowRect().
+        
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::scrollWidth):
+        (WebCore::RenderBox::scrollHeight):
+        Change methods to use visualOverflowRect().
+        
+        (WebCore::RenderBox::clearLayoutOverflow):
+        Use setLayoutOverflow instead of resetLayoutOverflow (which has been
+        removed as it did exactly the same thing as the set method).
+        
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::maxLayoutOverflow):
+        (WebCore::RenderBox::logicalLeftLayoutOverflow):
+        (WebCore::RenderBox::logicalRightLayoutOverflow):
+        (WebCore::RenderBox::logicalLeftVisualOverflow):
+        (WebCore::RenderBox::logicalRightVisualOverflow):
+        Remove minYLayoutOverflow, maxYLayoutOverflow, minXLayoutOverflow and
+        maxXLayoutOverflow and update the remaining methods to use
+        layoutOverflowRect().
+        
+        * rendering/RenderMarquee.cpp:
+        (WebCore::RenderMarquee::computePosition):
+        Change to use layoutOverflowRect().
+        
+        * rendering/RenderOverflow.h:
+        (WebCore::RenderOverflow::RenderOverflow):
+        (WebCore::RenderOverflow::layoutOverflowRect):
+        (WebCore::RenderOverflow::visualOverflowRect):
+        (RenderOverflow):
+        (WebCore::RenderOverflow::setMinYLayoutOverflow):
+        (WebCore::RenderOverflow::setMaxYLayoutOverflow):
+        (WebCore::RenderOverflow::setMinXLayoutOverflow):
+        (WebCore::RenderOverflow::setMaxXLayoutOverflow):
+        (WebCore::RenderOverflow::setMinYVisualOverflow):
+        (WebCore::RenderOverflow::setMaxYVisualOverflow):
+        (WebCore::RenderOverflow::setMinXVisualOverflow):
+        (WebCore::RenderOverflow::setMaxXVisualOverflow):
+        (WebCore):
+        (WebCore::RenderOverflow::move):
+        (WebCore::RenderOverflow::addLayoutOverflow):
+        (WebCore::RenderOverflow::addVisualOverflow):
+        (WebCore::RenderOverflow::setLayoutOverflow):
+        (WebCore::RenderOverflow::setVisualOverflow):
+        Change RenderOverflow to use two rects instead of two sets of four
+        values. Remove [min|max][Layout|Visual]Overflow getters and change the
+        layoutOverflowRect and visualOverflowRect methods to return the rects.
+        
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::shouldPaint):
+        Change to use visualOverflowRect().
+        
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::layout):
+        Change to use visualOverflowRect().
+        
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::clippedOverflowRectForRepaint):
+        Change to use visualOverflowRect().
+        
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::writeLayers):
+        Change to use layoutOverflowRect().
+
 2012-05-19  Rob Buis  <rbuis@rim.com>
 
         Remove bbox caching from SVGPathElement
