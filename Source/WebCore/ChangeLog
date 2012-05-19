@@ -1,3 +1,50 @@
+2012-05-18  Aaron Colwell  <acolwell@chromium.org>
+
+        Update Media Source implementation to reflect changes in 0.5 spec.
+        https://bugs.webkit.org/show_bug.cgi?id=83607
+
+        Reviewed by Darin Fisher.
+
+        Tests: http/tests/media/media-source/video-media-source-event-attributes.html
+               http/tests/media/media-source/webm/video-media-source-abort.html
+               http/tests/media/media-source/webm/video-media-source-add-and-remove-ids.html
+
+        * html/HTMLAttributeNames.in: Add onwebkitsourcexxx event attribute names.
+        * html/HTMLMediaElement.cpp: 
+        (WebCore::HTMLMediaElement::parseAttribute): Add code to register event listeners for the onwebkitsourcexxx attributes.
+        (WebCore::HTMLMediaElement::pauseInternal):
+        (WebCore):
+        (WebCore::HTMLMediaElement::webkitSourceAddId): Changed code to pass the parsed type & codecs to m_player instead of the whole MIME-type string. This was done to allow some simple parsing & validation code to be shared in WebKit instead of reimplemented in every port.
+        (WebCore::HTMLMediaElement::webkitSourceBuffered): New method in the v0.5 spec. It validates the parameters & that it is being called in the correct state. If so it forwards the call to m_player.
+        (WebCore::HTMLMediaElement::webkitSourceAppend): Adds id parameter to match v0.5 signature. Minor logic changes that avoid calling m_player for 0 byte arrays and fixes exceptions reported for a null array and a parse error so they match the spec text.
+        (WebCore::HTMLMediaElement::webkitSourceAbort): New method in the v0.5 spec. It validates the parameter & that it is being called in athe correct state. If so it forwards the call to m_player.
+        * html/HTMLMediaElement.h:
+        (HTMLMediaElement): Added new methods, signature updates, and onwebitsourcexxx event listener attributes.
+        * html/HTMLMediaElement.idl: Added new methods, signature updates, and onwebitsourcexxx event listener attributes.
+        * platform/ContentType.cpp:
+        (WebCore::ContentType::codecs): A new method that parses the codecs parameter into a vector of codec strings.
+        (WebCore):
+        * platform/ContentType.h: 
+        (ContentType):
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::NullMediaPlayerPrivate::sourceAddId): Update the signature to take the parsed type and codecs vector.
+        (WebCore::NullMediaPlayerPrivate::sourceBuffered): Add default implementation for this new method.
+        (WebCore::NullMediaPlayerPrivate::sourceRemoveId): Remove id parameter name to match other methods.
+        (WebCore::NullMediaPlayerPrivate::sourceAppend): Updated signature to include id parameter.
+        (WebCore::NullMediaPlayerPrivate::sourceAbort): Add default implementation for this new method.
+        (WebCore::NullMediaPlayerPrivate::sourceEndOfStream): Remove parameter name to match other methods.
+        (WebCore::MediaPlayer::sourceAddId): Update the signature to take the parsed type and codecs vector.
+        (WebCore):
+        (WebCore::MediaPlayer::sourceBuffered): Add implementation for new method that forwards the call to the MediaPlayerPrivate interface.
+        (WebCore::MediaPlayer::sourceAppend): Update method to forward the new id parameter in the signature.
+        (WebCore::MediaPlayer::sourceAbort): Add implementation for new method that forwards the call to the MediaPlayerPrivate interface.
+        * platform/graphics/MediaPlayer.h: Update interface to include new methods and updated signatures.
+        * platform/graphics/MediaPlayerPrivate.h:
+        (WebCore::MediaPlayerPrivateInterface::sourceAddId): Update the signature to take the parsed type and codecs vector.
+        (WebCore::MediaPlayerPrivateInterface::sourceBuffered): Add default implementation for new method.
+        (WebCore::MediaPlayerPrivateInterface::sourceAppend): Update method to forward the new id parameter in the signature.
+        (WebCore::MediaPlayerPrivateInterface::sourceAbort): Add default implementation for new method.
+
 2012-05-18  Levi Weintraub  <leviw@chromium.org>
 
         Revert to float method of selection rect alignment for line box tree
