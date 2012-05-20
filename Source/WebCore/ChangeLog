@@ -1,3 +1,39 @@
+2012-05-20  Philip Rogers  <pdr@google.com>
+
+        Fix hit testing on non-scaling strokes
+        https://bugs.webkit.org/show_bug.cgi?id=82628
+
+        Reviewed by Nikolas Zimmermann.
+
+        This change fixes hit testing on non-scaling strokes. It contains fixes for 3 bugs:
+        1) RenderSVGRect::shapeDependentStrokeContains was not falling back to shape-based hit testing.
+        2) m_strokeAndMarkerBoundingBox did not account for non-scaling strokes.
+        3) RenderSVGShape::shapeDependentStrokeContains did not have any support for non-scaling strokes.
+
+        This change also contains some refactoring/cleanup of the non-scale-stroke codepaths.
+
+        Test: svg/hittest/svg-shapes-non-scale-stroke.html
+
+        * rendering/svg/RenderSVGEllipse.cpp:
+        (WebCore::RenderSVGEllipse::createShape):
+        * rendering/svg/RenderSVGRect.cpp:
+        (WebCore::RenderSVGRect::createShape):
+        (WebCore::RenderSVGRect::shapeDependentStrokeContains):
+        * rendering/svg/RenderSVGShape.cpp:
+        (WebCore::RenderSVGShape::shapeDependentStrokeContains):
+        (WebCore::RenderSVGShape::shapeDependentFillContains):
+        (WebCore::RenderSVGShape::nonScalingStrokePath):
+        (WebCore):
+        (WebCore::RenderSVGShape::setupNonScalingStrokeContext):
+        (WebCore::RenderSVGShape::nonScalingStrokeTransform):
+        (WebCore::RenderSVGShape::strokePath):
+        (WebCore::RenderSVGShape::fillAndStrokePath):
+        (WebCore::RenderSVGShape::updateCachedBoundaries):
+        (WebCore::RenderSVGShape::inflateWithStrokeAndMarkerBounds):
+        * rendering/svg/RenderSVGShape.h:
+        (WebCore::RenderSVGShape::hasNonScalingStroke):
+        (RenderSVGShape):
+
 2012-05-19  Emil A Eklund  <eae@chromium.org>
 
         Simplify RenderOverflow by using Rects
