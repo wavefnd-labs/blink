@@ -1,5 +1,25 @@
 2012-05-21  Stephen Chenney  <schenney@chromium.org>
 
+        [Chromium] REGRESSION: Assertion failure on svg/custom/acid3-test-77.html
+        https://bugs.webkit.org/show_bug.cgi?id=86715
+
+        Reviewed by Nikolas Zimmermann.
+
+        Calls to clear the text positioning elements in RenderSVGText must be
+        protected with a FontCachePurgeProtector so that fonts are not removed
+        before the SVG metrics are rebuilt. The protection must cover both the
+        cache clearing and the reconstruction calls.
+
+        Patch fixes existing tests.
+
+        * rendering/svg/RenderSVGText.cpp:
+        (WebCore::RenderSVGText::subtreeChildWasAdded):
+        (WebCore::RenderSVGText::subtreeChildWasRemoved):
+        (WebCore::RenderSVGText::subtreeTextDidChange):
+        (WebCore::RenderSVGText::removeChild):
+
+2012-05-21  Stephen Chenney  <schenney@chromium.org>
+
         SVGTextRunRenderingContext can return null font, calling code asserts not null
         https://bugs.webkit.org/show_bug.cgi?id=86738
 
