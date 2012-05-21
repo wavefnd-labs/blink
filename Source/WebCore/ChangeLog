@@ -1,3 +1,86 @@
+2012-05-20  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Using createContextualFragment to insert a <script> does not cause the script to execute
+        https://bugs.webkit.org/show_bug.cgi?id=12234
+
+        Reviewed by Adam Barth.
+
+        Renamed FragmentScriptingAllowed and FragmentScriptingNotAllowed to DisallowScriptingContent
+        and AllowScriptingContent as these two flags are used in code for non-fragment cases and they
+        indicate whether attributes and elements that can invoke scripting should be removed or not.
+
+        To fix the bug, added a new value AllowScriptingContentAndDoNotMarkAlreadyStarted unset
+        already-started and parser-inserted flags [1] on script elements in addition to allowing
+        scripting contents.
+
+        While the HTML5 specification and the DOM Parsing and Serialization specification [2] state that
+        we should set these flags in the parser and later unset them, doing so would require traversing
+        the parsed fragment to find relevant script elements. We short circuit this logic by simply not
+        setting parser-inserted and already-started flags in createContextualFragment.
+
+        [1] http://www.whatwg.org/specs/web-apps/current-work/multipage/scripting-1.html#already-started
+        [2] http://html5.org/specs/dom-parsing.html#dom-range-createcontextualfragment
+
+        Tests: fast/dom/Range/create-contextual-fragment-script-not-ran.html
+               fast/dom/Range/create-contextual-fragment-script-unmark-already-started.html
+
+        * dom/DocumentFragment.h:
+        (DocumentFragment):
+        * dom/Element.cpp:
+        (WebCore::Element::parserSetAttributes):
+        (WebCore::Element::setAttributeNS):
+        * dom/Element.h:
+        (Element):
+        * dom/FragmentScriptingPermission.h:
+        * dom/Range.cpp:
+        (WebCore::Range::createContextualFragment): Removed FragmentScriptingPermission from the argument
+        list since no one uses it. Always use AllowScriptingContentAndDoNotMarkAlreadyStarted instead.
+        * dom/Range.h:
+        * editing/markup.h:
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::HTMLConstructionSite):
+        (WebCore::HTMLConstructionSite::insertScriptElement): Pass false to both parserInserted and
+        alreadyStarted when the scripting permission is AllowScriptingContentAndDoNotMarkAlreadyStarted.
+        Also call parserSetAttributes when the scripting permission is either AllowScriptingContent or
+        AllowScriptingContentAndDoNotMarkAlreadyStarted.
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::FragmentParsingContext::FragmentParsingContext):
+        (WebCore::HTMLTreeBuilder::processEndTag):
+        * html/parser/HTMLTreeBuilder.h:
+        (FragmentParsingContext):
+        * platform/blackberry/PasteboardBlackBerry.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/chromium/DragDataChromium.cpp:
+        (WebCore::DragData::asFragment):
+        * platform/chromium/PasteboardChromium.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/gtk/PasteboardGtk.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/mac/PasteboardMac.mm:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/qt/DragDataQt.cpp:
+        (WebCore::DragData::asFragment):
+        * platform/qt/PasteboardQt.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/win/ClipboardUtilitiesWin.cpp:
+        (WebCore::fragmentFromCFHTML):
+        (WebCore::fragmentFromHTML):
+        * xml/XMLErrors.cpp:
+        (WebCore::createXHTMLParserErrorHeader):
+        (WebCore::XMLErrors::insertErrorMessageBlock):
+        * xml/parser/NewXMLDocumentParser.h:
+        (NewXMLDocumentParser):
+        * xml/parser/XMLDocumentParser.h:
+        (XMLDocumentParser):
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+        (WebCore::XMLDocumentParser::endElementNs):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+        (WebCore::XMLDocumentParser::parseEndElement):
+
 2012-05-20  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass Isolate to V8Utilities::createFunctionCallback()
