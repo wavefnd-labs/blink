@@ -1,3 +1,146 @@
+2012-05-21  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Move numeric related methods in HTMLInputElement class to another place
+        https://bugs.webkit.org/show_bug.cgi?id=82034
+
+        Reviewed by Kent Tamura.
+
+        This patch moves step and range related methods into StepRange class
+        for ease of using step calculation other than double floating point
+        number arithmetic, e.g. decimal, long double, and so on.
+
+        New class StepRange::StepDescription holds values for calculating
+        stepped value, defaultStep, defaultStepBase, integer rounding flags,
+        step scale factor instead of virtual methods in InputType class.
+
+        No new tests because of this patch doesn't change behavior.
+
+        * WebCore.xcodeproj/project.pbxproj: Set attribute of StepRange.h to "Private" for including it in HTMLInputElement.cpp.
+        * html/BaseDateAndTimeInputType.cpp:
+        (WebCore::InputType::rangeOverflow): Moved to use InputType class.
+        (WebCore::InputType::rangeUnderflow): Moved to use InputType class.
+        (WebCore::BaseDateAndTimeInputType::stepMismatch): Moved to use stepRange.
+        * html/BaseDateAndTimeInputType.h:
+        (BaseDateAndTimeInputType): Removed method declaration for stepBase.
+        * html/DateInputType.cpp:
+        (WebCore::DateInputType::setupStepRange): Added.
+        * html/DateInputType.h:
+        (DateInputType): Removed method declarations.
+        * html/DateTimeInputType.cpp:
+        (WebCore::DateTimeInputType::defaultStep): Removed.
+        (WebCore::DateTimeInputType::maximum): Removed.
+        (WebCore::DateTimeInputType::minimum): Removed.
+        (WebCore::DateTimeInputType::setupStepRange): Added
+        (WebCore::DateTimeInputType::stepScaleFactor): Removed.
+        * html/DateTimeInputType.h:
+        (DateTimeInputType): Removed deprecated method declarations.
+        * html/DateTimeLocalInputType.cpp:
+        (WebCore::DateTimeLocalInputType::defaultStep): Removed.
+        (WebCore::DateTimeLocalInputType::maximum): Removed.
+        (WebCore::DateTimeLocalInputType::minimum): Removed.
+        (WebCore::DateTimeLocalInputType::setupStepRange): Added.
+        (WebCore::DateTimeLocalInputType::stepScaleFactor): Removed.
+        * html/DateTimeLocalInputType.h:
+        (DateTimeLocalInputType):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::isInRange): Changed to call InputType::isInRange.
+        (WebCore::HTMLInputElement::isOutOfRange): Changed to call InputType::isOutOfRange.
+        (WebCore::HTMLInputElement::setupStepRange): Added.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement):
+        * html/InputType.cpp:
+        (WebCore::InputType::acceptableError): Moved to StepRange class.
+        (WebCore::InputType::alignValueForStep): Moved to StepRange class.
+        (WebCore::InputType::minimum): Changed to use StepRange class.
+        (WebCore::InputType::maximum): Changed to use StepRange class.
+        (WebCore::InputType::parseToDouble): Changed to have ASSERT_NOT_REACHED.
+        (WebCore::InputType::stepBaseWithDecimalPlaces): Changed to use StepRange class.
+        (WebCore::InputType::validationMessage):  Changed to use StepRange class.
+        (WebCore::InputType::applyStep):  Changed to use StepRange class.
+        (WebCore::InputType::getAllowedValueStep):  Changed to use StepRange class.
+        (WebCore::InputType::isInRange): Added.
+        (WebCore::InputType::isOutOfRange): Added.
+        (WebCore::InputType::rangeOverflow): Changed to use StepRange class.
+        (WebCore::InputType::rangeUnderflow): Changed to use StepRange class.
+        (WebCore::InputType::setupStepRange): Added.
+        (WebCore::InputType::stepUpFromRenderer):  Changed to use StepRange class.
+        (WebCore::InputType::stepMismatch): Changed to use StepRange class.
+        * html/InputType.h:
+        (InputType):
+        * html/MonthInputType.cpp:
+        (WebCore::MonthInputType::defaultStep): Removed.
+        (WebCore::MonthInputType::maximum): Removed.
+        (WebCore::MonthInputType::minimum): Removed.
+        (WebCore::MonthInputType::setupStepRange): Added.
+        (WebCore::MonthInputType::stepScaleFactor): Removed.
+        * html/MonthInputType.h:
+        (MonthInputType):
+        * html/NumberInputType.cpp:
+        (WebCore):
+        (WebCore::NumberInputType::defaultStep): Removed.
+        (WebCore::NumberInputType::maximum): Removed.
+        (WebCore::NumberInputType::minimum): Removed.
+        (WebCore::NumberInputType::rangeOverflow): Moved to InputType class.
+        (WebCore::NumberInputType::rangeUnderflow): Moved to InputType class.
+        (WebCore::NumberInputType::setupStepRange): Added.
+        (WebCore::NumberInputType::stepMismatch): Moved to InputType class.
+        (WebCore::NumberInputType::stepBaseWithDecimalPlaces): Changed to use StepRange class.
+        (WebCore::NumberInputType::stepScaleFactor): Removed.
+        * html/NumberInputType.h:
+        (NumberInputType):
+        * html/RangeInputType.cpp:
+        (WebCore::RangeInputType::defaultStep): Removed.
+        (WebCore::RangeInputType::maximum): Removed.
+        (WebCore::RangeInputType::minimum): Removed.
+        (WebCore::RangeInputType::setupStepRange): Added.
+        (WebCore::RangeInputType::stepScaleFactor): Removed.
+        (WebCore::RangeInputType::handleKeydownEvent): Changed to use StepRange class.
+        (WebCore::RangeInputType::fallbackValue): Changed to use StepRange class.
+        (WebCore::RangeInputType::sanitizeValue): Changed to use StepRange class.
+        * html/RangeInputType.h:
+        (RangeInputType):
+        * html/StepRange.cpp:
+        (WebCore::StepRange::StepRange): Added.
+        (WebCore::StepRange::clampValue): Changed for member variable name changes.
+        (WebCore::StepRange::hasStep): Added.
+        (WebCore::StepRange::maximum): Added.
+        (WebCore::StepRange::minimum): Added.
+        (WebCore::StepRange::step): Added.
+        (WebCore::StepRange::stepBase): Added.
+        (WebCore::StepRange::stepDecimalPlaces): Added.
+        (WebCore::StepRange::stepScaleFactor): Added.
+        (WebCore::StepRange::setHasStep): Added.
+        (WebCore::StepRange::setup): Added.
+        (WebCore::StepRange::parse): Added.
+        * html/StepRange.h:
+        (StepDescription): Added
+        (WebCore::StepRange::StepDescription::StepDescription):
+        (WebCore::StepRange::acceptableError): Moved from InputType class.
+        (WebCore::StepRange::alignValueForStep): Moved from InputType class.
+        (WebCore::StepRange::defaultValue): Changed for member variable name changes.
+        (WebCore::StepRange::proportionFromValue): Changed for member variable name changes.
+        (WebCore::StepRange::valueFromProportion): Changed for member variable name changes.
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::defaultStep): Removed.
+        (WebCore::TimeInputType::maximum): Removed.
+        (WebCore::TimeInputType::minimum): Removed.
+        (WebCore::TimeInputType::setupStepRange): Added.
+        (WebCore::TimeInputType::stepScaleFactor): Removed.
+        * html/TimeInputType.h:
+        (TimeInputType):
+        * html/WeekInputType.cpp:
+        (WebCore):
+        (WebCore::WeekInputType::defaultStep): Removed.
+        (WebCore::WeekInputType::maximum): Removed.
+        (WebCore::WeekInputType::minimum): Removed.
+        (WebCore::WeekInputType::setupStepRange): Added.
+        (WebCore::WeekInputType::stepScaleFactor): Removed.
+        * html/WeekInputType.h:
+        (WeekInputType):
+        * html/shadow/SliderThumbElement.cpp:
+        (WebCore::sliderPosition): Changed to use StepRange class.
+        (WebCore::SliderThumbElement::setPositionFromPoint): Changed to use StepRange class.
+
 2012-05-21  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass Isolate to throwNotEnoughArgumentsError()
