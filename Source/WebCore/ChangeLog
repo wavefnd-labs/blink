@@ -1,3 +1,41 @@
+2012-05-21  Mike West  <mkwst@chromium.org>
+
+        Improving console error for CSP-blocked  `setTimeout` and `setInterval` evaluation.
+        https://bugs.webkit.org/show_bug.cgi?id=86943
+
+        Reviewed by Adam Barth.
+
+        If the inspector is open, a stack trace is generated before calling
+        ContentSecurityPolicy::allowEval, and passed through to
+        ContentSecurityPolicy::reportViolation for use in the console message.
+
+        Test: http/tests/inspector-enabled/contentSecurityPolicy-blocks-setInterval.html
+              http/tests/inspector-enabled/contentSecurityPolicy-blocks-setTimeout.html
+
+        * bindings/js/ScheduledAction.cpp:
+        (WebCore::ScheduledAction::create):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::WindowSetTimeoutImpl):
+        * page/ContentSecurityPolicy.cpp:
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::reportViolation):
+        (WebCore::CSPDirectiveList::checkEvalAndReportViolation):
+        (WebCore::CSPDirectiveList::allowEval):
+        (WebCore):
+        (WebCore::isAllowedByAllWithCallStack):
+        (WebCore::isAllowedByAllWithURL):
+        (WebCore::ContentSecurityPolicy::allowEval):
+        (WebCore::ContentSecurityPolicy::allowScriptFromSource):
+        (WebCore::ContentSecurityPolicy::allowObjectFromSource):
+        (WebCore::ContentSecurityPolicy::allowChildFrameFromSource):
+        (WebCore::ContentSecurityPolicy::allowImageFromSource):
+        (WebCore::ContentSecurityPolicy::allowStyleFromSource):
+        (WebCore::ContentSecurityPolicy::allowFontFromSource):
+        (WebCore::ContentSecurityPolicy::allowMediaFromSource):
+        (WebCore::ContentSecurityPolicy::allowConnectToSource):
+        * page/ContentSecurityPolicy.h:
+        (WebCore):
+
 2012-05-21  Antoine Labour  <piman@chromium.org>
 
         Don't force rendering in finishAllRendering
