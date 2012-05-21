@@ -1,3 +1,36 @@
+2012-05-21  Andreas Kling  <kling@webkit.org>
+
+        CSS: Move duplicate property elimination to parser.
+        <http://webkit.org/b/86948>
+
+        Reviewed by Antti Koivisto.
+
+        Remove the StylePropertySet constructor that handled elimination of duplicate
+        properties and move that to a new parser method, CSSParser::filteredProperties().
+        Call sites are converted to using StylePropertySet(const Vector<CSSProperty>&).
+
+        Instead of building a hashmap of seen properties, use the new WTF::BitArray class
+        to track whether a given property ID has been seen, and whether we have an
+        !important entry for a given ID.
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseDeclaration):
+        (WebCore::CSSParser::filteredProperties):
+        (WebCore::CSSParser::createStyleRule):
+        (WebCore::CSSParser::createFontFaceRule):
+        (WebCore::CSSParser::createPageRule):
+        (WebCore::CSSParser::createKeyframe):
+        * css/CSSParser.h:
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::StylePropertySet):
+        (WebCore::StylePropertySet::addParsedProperties):
+        * css/StylePropertySet.h:
+        (WebCore::StylePropertySet::create):
+        (StylePropertySet):
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::rebuildFontFace):
+
 2012-05-21  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Index key paths that yield invalid keys should not fail an add/put
