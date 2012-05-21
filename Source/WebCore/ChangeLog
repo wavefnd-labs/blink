@@ -1,3 +1,41 @@
+2012-05-21  Rakesh KN  <rakesh.kn@motorola.com>
+
+        [Forms] Refactor HTMLFormCollection
+        https://bugs.webkit.org/show_bug.cgi?id=86602
+
+        Reviewed by Kent Tamura.
+
+        Modify HTMLFormCollection to be independent of HTMLFormElement which is needed
+        for implementing HTMLFieldSetElement's element attribute.
+
+        Covered by existing tests.
+
+        * html/HTMLFormCollection.cpp:
+        (WebCore::HTMLFormCollection::HTMLFormCollection):
+        Modified to take more generic HTMLElement* instead of HTMLFormElement* so that
+        HTMLFormCollection for HTMLFieldSetElement can also be created.
+        (WebCore::HTMLFormCollection::create): Ditto.
+        (WebCore::HTMLFormCollection::formControlElements):
+        Helper function for getting the array of FormAssociatedElements for this form.
+        (WebCore::HTMLFormCollection::formImageElements):
+        Helper function for getting the array of image elements for this form.
+        (WebCore::HTMLFormCollection::numberOfFormControlElements):
+        Helper function for getting the number of elements in this form.
+        (WebCore::HTMLFormCollection::calcLength):
+        Modified to use new helper functions defined for getting the FormAssociatedElements
+        and image elements array instead of static_cast to HTMLFormElement.
+        (WebCore::HTMLFormCollection::item): Ditto.
+        (WebCore::HTMLFormCollection::getNamedFormItem): Ditto.
+        (WebCore::HTMLFormCollection::updateNameCache): Ditto.
+        * html/HTMLFormCollection.h:
+        (WebCore):
+        (HTMLFormCollection):
+        * html/HTMLFormElement.h:
+        (WebCore::HTMLFormElement::imageElements):
+        New accessor for image elements array of form element.
+        Also HTMLFormCollection is not needed to be friend of HTMLFormElement as collection
+        does not access the form element memebers directly now.
+
 2012-05-21  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: expand only neighbors of the highlighted node when revealing it in heap snapshot
