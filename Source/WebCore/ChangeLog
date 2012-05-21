@@ -1,3 +1,32 @@
+2012-05-18  Andreas Kling  <kling@webkit.org>
+
+        REGRESSION(r117501): IconDatabase asserts on startup in synchronousIconForPageURL().
+        <http://webkit.org/b/86935>
+        <rdar://problem/11480012>
+
+        Reviewed by Anders Carlsson.
+
+        - Correctly set m_retainOrReleaseIconRequested to true in retainIconForPageURL().
+          This was causing the assertions, as we would end up doing nothing until the first
+          icon release request came in.
+
+        - Require that m_urlsToRetainOrReleaseLock be held when accessing m_retainOrReleaseIconRequested.
+          This removes a possible race condition in double checked locking.
+
+        - Swap over the retain/release work queues while holding m_urlsToRetainOrReleaseLock
+          and release it right away to avoid sitting on the lock while updating the database.
+
+        * loader/icon/IconDatabase.cpp:
+        (WebCore::IconDatabase::synchronousIconForPageURL):
+        (WebCore::IconDatabase::retainIconForPageURL):
+        (WebCore::IconDatabase::releaseIconForPageURL):
+        (WebCore::IconDatabase::retainedPageURLCount):
+        (WebCore::IconDatabase::performURLImport):
+        (WebCore::IconDatabase::syncThreadMainLoop):
+        (WebCore::IconDatabase::performPendingRetainAndReleaseOperations):
+        * loader/icon/IconDatabase.h:
+        (IconDatabase):
+
 2012-05-21  Kent Tamura  <tkent@chromium.org>
 
         Unreviewed, build fix.
