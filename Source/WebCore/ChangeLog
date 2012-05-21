@@ -1,3 +1,25 @@
+2012-05-21  Stephen Chenney  <schenney@chromium.org>
+
+        SVGTextRunRenderingContext can return null font, calling code asserts not null
+        https://bugs.webkit.org/show_bug.cgi?id=86738
+
+        Reviewed by Nikolas Zimmermann.
+
+        SVGTextRunRenderingContext::glyphDataForCharacter was returning a glyph with
+        null font data for numerous code paths. It seems that it was doing so
+        whenever it detected null fontData, rather than try to continue.
+        Calling code would then immediately assert on this null fontData.
+
+        This patch refactors SVGTextRunRenderingContext::glyphDataForCharacter
+        so that it never returns null font data, adding an assertion to that
+        effect. In particular, when the font data is null the code will reach
+        the fallback glyph calculations.
+
+        Refactoring covered by existing tests. A previously crashing test, svg/custom/acid3-test-77.html, no longer crashes.
+
+        * rendering/svg/SVGTextRunRenderingContext.cpp:
+        (WebCore::SVGTextRunRenderingContext::glyphDataForCharacter):
+
 2012-05-21  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: switch buildDominatedNodes function to front-end calculated _dominatorsTree
