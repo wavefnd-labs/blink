@@ -1,3 +1,22 @@
+2012-05-21  Antoine Labour  <piman@chromium.org>
+
+        Don't force rendering in finishAllRendering
+        https://bugs.webkit.org/show_bug.cgi?id=86919
+
+        Reviewed by James Robinson.
+
+        After we acquire the texture layers on the main thread, we can't draw.
+        In particular if we destroyed the texture ids used previously by
+        TextureLayerChromium, drawing before a commit would cause a
+        bind-after-destroy.
+
+        Tested by CCLayerTreeHostTestFinishAllRendering.
+
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::CCThreadProxy):
+        (WebCore::CCThreadProxy::finishAllRenderingOnImplThread):
+        (WebCore::CCThreadProxy::scheduledActionDrawAndSwapInternal):
+
 2012-05-21  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Store key paths in IDBKeyPath type instead of String
