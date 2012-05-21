@@ -1,3 +1,39 @@
+2012-05-21  MORITA Hajime  <morrita@google.com>
+
+        [Refactoring] Node should have youngestShadowRoot.
+        https://bugs.webkit.org/show_bug.cgi?id=86427
+
+        Reviewed by Dimitri Glazkov.
+
+        This change adds Node::youngestShadowRoot() and replaced
+        ElementShadow::youngestShadowRoot() with it if appropriate.
+
+        By introducing this, traversal across node and its shadow tree can
+        look more fluent and idiomatic. There are a few non-trivial traversal
+        remaining like ElementShadow::recalcStyle() and attach().
+        But they should be flattened out eventually.
+
+        No new tests. Refactoring.
+
+        * dom/ContainerNodeAlgorithms.cpp:
+        (WebCore::ChildNodeInsertionNotifier::notifyDescendantInsertedIntoTree):
+        * dom/Document.cpp:
+        (WebCore::Document::buildAccessKeyMap):
+        * dom/ElementShadow.cpp:
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        (WebCore::Node::youngestShadowRoot):
+        (WebCore):
+        * dom/Node.h:
+        (Node):
+        * dom/TreeScopeAdopter.cpp:
+        (WebCore::TreeScopeAdopter::moveTreeToNewScope):
+        (WebCore::TreeScopeAdopter::moveTreeToNewDocument):
+        * dom/TreeScopeAdopter.h:
+        (TreeScopeAdopter):
+        * html/shadow/TextFieldDecorationElement.cpp:
+        (WebCore::getDecorationRootAndDecoratedRoot):
+
 2012-05-21  Christophe Dumez  <christophe.dumez@intel.com>
 
         Add support for MessagePortArray type to JSC
