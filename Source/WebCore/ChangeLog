@@ -1,3 +1,128 @@
+2012-05-21  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Store key paths in IDBKeyPath type instead of String
+        https://bugs.webkit.org/show_bug.cgi?id=85298
+
+        Reviewed by Tony Chang, Kentaro Hara and James Robinson.
+
+        Migrate from storing key paths as (nullable) Strings to a dedicated IDBKeyPath
+        type. Prep work for supporting array-type key paths: http://webkit.org/b/84207
+
+        Only functional change is handling of null/undefined parameters for key paths,
+        to align with IDB spec, covered by layout test.
+
+        Test: storage/indexeddb/keypath-basics.html
+        Test: WebKit/chromium/IDBLevelDBCodingTest.cpp
+
+        * Modules/indexeddb/IDBAny.cpp: Allow IDBAny to yield DOMStrings.
+        (WebCore::IDBAny::createString):
+        (WebCore):
+        (WebCore::IDBAny::string):
+        (WebCore::IDBAny::set):
+        * Modules/indexeddb/IDBAny.h:
+        (IDBAny):
+        * Modules/indexeddb/IDBBackingStore.h: Switch from String to IDBKeyPath.
+        (IDBBackingStore):
+        * Modules/indexeddb/IDBDatabase.cpp: Switch from String to IDBKeyPath.
+        (WebCore::IDBDatabase::createObjectStore):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp: Switch from String to IDBKeyPath.
+        (WebCore::IDBDatabaseBackendImpl::createObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::loadObjectStores):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h: Switch from String to IDBKeyPath.
+        (IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBDatabaseBackendInterface.h: Switch from String to IDBKeyPath.
+        (WebCore):
+        (IDBDatabaseBackendInterface):
+        * Modules/indexeddb/IDBIndex.h: Switch from String to IDBAny (via IDBKeyPath).
+        (WebCore::IDBIndex::keyPath):
+        * Modules/indexeddb/IDBIndex.idl: Switch from DOMString? to IDBAny.
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp: Switch from String to IDBKeyPath.
+        (WebCore::IDBIndexBackendImpl::IDBIndexBackendImpl):
+        * Modules/indexeddb/IDBIndexBackendImpl.h: Switch from String to IDBKeyPath.
+        (WebCore::IDBIndexBackendImpl::create):
+        (WebCore::IDBIndexBackendImpl::keyPath):
+        (IDBIndexBackendImpl):
+        * Modules/indexeddb/IDBIndexBackendInterface.h: Switch from String to IDBKeyPath.
+        (WebCore):
+        (IDBIndexBackendInterface):
+        * Modules/indexeddb/IDBKeyPath.cpp: Non-trivial method implementations.
+        (WebCore::IDBKeyPath::isValid):
+        (WebCore):
+        (WebCore::IDBKeyPath::operator PassRefPtr<IDBAny>):
+        * Modules/indexeddb/IDBKeyPath.h: Introduce IDBKeyPath type.
+        (IDBKeyPath):
+        (WebCore::IDBKeyPath::IDBKeyPath):
+        (WebCore::IDBKeyPath::type):
+        (WebCore::IDBKeyPath::array):
+        (WebCore::IDBKeyPath::string):
+        (WebCore::IDBKeyPath::isNull):
+        (WebCore):
+        * Modules/indexeddb/IDBKeyPathBackendImpl.cpp: Switch from String to IDBKeyPath.
+        (WebCore::IDBKeyPathBackendImpl::createIDBKeysFromSerializedValuesAndKeyPath):
+        (WebCore::IDBKeyPathBackendImpl::injectIDBKeyIntoSerializedValue):
+        * Modules/indexeddb/IDBKeyPathBackendImpl.h: Switch from String to IDBKeyPath.
+        (WebCore):
+        (IDBKeyPathBackendImpl):
+        * Modules/indexeddb/IDBLevelDBBackingStore.cpp: Switch from String to IDBKeyPath, with back-compat.
+        (WebCore):
+        (WebCore::putIDBKeyPath):
+        (WebCore::IDBLevelDBBackingStore::getObjectStores):
+        (WebCore::IDBLevelDBBackingStore::createObjectStore):
+        (WebCore::IDBLevelDBBackingStore::getIndexes):
+        (WebCore::IDBLevelDBBackingStore::createIndex):
+        * Modules/indexeddb/IDBLevelDBBackingStore.h:
+        (IDBLevelDBBackingStore):
+        * Modules/indexeddb/IDBLevelDBCoding.cpp: New coding scheme for key paths (with back-compat).
+        (IDBLevelDBCoding):
+        (WebCore::IDBLevelDBCoding::encodeIDBKeyPath):
+        (WebCore::IDBLevelDBCoding::decodeIDBKeyPath):
+        * Modules/indexeddb/IDBLevelDBCoding.h: Add key-path-specific methods.
+        (WebCore):
+        (IDBLevelDBCoding):
+        * Modules/indexeddb/IDBObjectStore.cpp: Switch from String to IDBKeyPath.
+        (WebCore::IDBObjectStore::keyPath):
+        (WebCore::IDBObjectStore::createIndex):
+        (WebCore):
+        * Modules/indexeddb/IDBObjectStore.h: Switch from String to IDBAny (via IDBKeyPath).
+        (IDBObjectStore):
+        * Modules/indexeddb/IDBObjectStore.idl: Switch from DOMString? to IDBAny.
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp: Switch from String to IDBKeyPath.
+        (WebCore::IDBObjectStoreBackendImpl::IDBObjectStoreBackendImpl):
+        (WebCore::fetchKeyFromKeyPath):
+        (WebCore::injectKeyIntoKeyPath):
+        (WebCore::IDBObjectStoreBackendImpl::createIndex):
+        (WebCore::IDBObjectStoreBackendImpl::loadIndexes):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.h: Switch from String to IDBKeyPath.
+        (WebCore::IDBObjectStoreBackendImpl::create):
+        (WebCore::IDBObjectStoreBackendImpl::keyPath):
+        (IDBObjectStoreBackendImpl):
+        * Modules/indexeddb/IDBObjectStoreBackendInterface.h: Switch from String to IDBKeyPath.
+        (WebCore):
+        (IDBObjectStoreBackendInterface):
+        * bindings/v8/Dictionary.cpp: Add getter for DOMString[] (i.e. Vector<String>)
+        (WebCore):
+        (WebCore::Dictionary::get):
+        * bindings/v8/Dictionary.h:
+        (Dictionary):
+        * bindings/v8/IDBBindingUtilities.cpp: Switch from String to IDBKeyPath.
+        (WebCore::createIDBKeyFromSerializedValueAndKeyPath):
+        (WebCore::injectIDBKeyIntoSerializedValue):
+        * bindings/v8/IDBBindingUtilities.h: Switch from String to IDBKeyPath.
+        (WebCore):
+        * bindings/v8/custom/V8IDBAnyCustom.cpp: Support String/DOMString.
+        (WebCore::toV8):
+        * dom/DOMStringList.h: Allow easy (const) access to strings.
+        (WebCore::DOMStringList::operator const Vector<String>&):
+        (DOMStringList):
+        * inspector/InspectorIndexedDBAgent.cpp: Temporary shim for non-strings: see http://webkit.org/b/84303
+        (WebCore):
+        * platform/chromium/PlatformSupport.h: Switch from String to IDBKeyPath.
+        (WebCore):
+        (PlatformSupport):
+        * storage/chromium/IDBKeyPathBackendImpl.cpp: Switch from String to IDBKeyPath.
+        (WebCore::IDBKeyPathBackendImpl::createIDBKeysFromSerializedValuesAndKeyPath):
+        (WebCore::IDBKeyPathBackendImpl::injectIDBKeyIntoSerializedValue):
+
 2012-05-21  Zhenyao Mo  <zmo@google.com>
 
         Restore WebGL's framebuffer binding after DrawingBuffer's prepareBackBuffer()
