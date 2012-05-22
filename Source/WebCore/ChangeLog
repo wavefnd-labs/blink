@@ -1,3 +1,46 @@
+2012-05-22  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Centralize and clean-up table column iteration
+        https://bugs.webkit.org/show_bug.cgi?id=87051
+
+        Reviewed by Eric Seidel.
+
+        Tests: fast/table/caption-between-column-and-column-group.html
+               fast/table/caption-between-column-group-and-column.html
+               fast/table/caption-between-columns.html
+
+        The existing code had duplications between different classes and some
+        of the iterating functions could use a better place. That's what this
+        change solves, along with several renamings.
+
+        * rendering/RenderTableCol.h:
+        (WebCore::RenderTableCol::isTableColumnGroupWithColumnChildren):
+        Renamed isTableColGroup to this to better reflect what it checks.
+        Also added a new function: nextColumn.
+
+        * rendering/FixedTableLayout.cpp:
+        (WebCore::FixedTableLayout::calcWidthArray):
+        Updated after isTableColGroup renaming.
+
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::firstColumn):
+        Added this new function to get the first column (or column group).
+
+        (WebCore::RenderTable::colElement):
+        Cleaned up this function: switched the loop to a 'for' now that the
+        helper functions make it easy. Cleaned up the ordering and the naming.
+
+        * rendering/RenderTable.h:
+        Added firstColumn.
+
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::styleOrColLogicalWidth):
+        Updated to use nextColumn().
+
+        * rendering/RenderTableCol.cpp:
+        (WebCore::RenderTableCol::nextColumn):
+        Added this new helper function to centralize the code to iterate over columns.
+
 2012-05-22  Hao Zheng  <zhenghao@chromium.org>
 
         [chromium] Make color of spelling check marker cross-platform.
