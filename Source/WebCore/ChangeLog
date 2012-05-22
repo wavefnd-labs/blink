@@ -1,3 +1,55 @@
+2012-05-21  Tim Horton  <timothy_horton@apple.com>
+
+        GeneratorGeneratedImage should cache intermediate images
+        https://bugs.webkit.org/show_bug.cgi?id=86906
+        <rdar://problem/11484852>
+
+        Reviewed by Dean Jackson.
+
+        Cache generated images in GeneratorGeneratedImage. The cache is invalidated:
+            a) if the Generator's hash changes.
+            b) if the rendered size changes.
+            c) if the cached image is incompatible with the destination context (acceleration state or CTM scale).
+            d) after one second of disuse.
+
+        Add a hash() function to Generator, which should be implemented in subclasses
+        to provide a straightforward way to determine if Generators have been mutated
+        in a way that will affect the resultant rendering.
+
+        No new tests, performance optimization. Correctness is covered by the multitude of existing gradient tests.
+
+        * platform/graphics/Generator.h:
+        (Generator):
+        * platform/graphics/GeneratorGeneratedImage.cpp:
+        (WebCore::GeneratorGeneratedImage::drawPattern):
+        * platform/graphics/GeneratorGeneratedImage.h:
+        (WebCore):
+        (GeneratorGeneratedImage):
+        (WebCore::GeneratorGeneratedImage::~GeneratorGeneratedImage):
+        (WebCore::GeneratorGeneratedImage::GeneratorGeneratedImage):
+        (GeneratedImageCacheTimer):
+        (WebCore::GeneratorGeneratedImage::GeneratedImageCacheTimer::GeneratedImageCacheTimer):
+        (WebCore::GeneratorGeneratedImage::GeneratedImageCacheTimer::restart):
+        * platform/graphics/Gradient.cpp:
+        (WebCore::Gradient::Gradient):
+        (WebCore::Gradient::addColorStop):
+        (WebCore::Gradient::sortStopsIfNecessary):
+        (WebCore::Gradient::setSpreadMethod):
+        (WebCore::Gradient::setGradientSpaceTransform):
+        (WebCore::Gradient::hash):
+        * platform/graphics/Gradient.h:
+        (WebCore::Gradient::setP0):
+        (WebCore::Gradient::setP1):
+        (WebCore::Gradient::setStartRadius):
+        (WebCore::Gradient::setEndRadius):
+        (Gradient):
+        (WebCore::Gradient::clearHashCache):
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::isCompatibleWithBuffer):
+        (WebCore):
+        * platform/graphics/GraphicsContext.h:
+        (GraphicsContext):
+
 2012-05-21  Emil A Eklund  <eae@chromium.org>
 
         Fix bug in paintNinePieceImage exposed by subpixel change
