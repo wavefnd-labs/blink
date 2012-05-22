@@ -1,3 +1,76 @@
+2012-05-21  Hajime Morrita  <morrita@chromium.org>
+
+        [V8] Shadow DOM should be per-window-configurable.
+        https://bugs.webkit.org/show_bug.cgi?id=86555
+
+        Reviewed by Kentaro Hara.
+
+        This change introduces an IDL attribute named "V8EnabledAtContext"
+        which allows DOMWindow properties to be turned on or off per
+        windows basis. RuntimeEnabledFeatures::xxxAllowed() method decides the availability.
+
+        - CodeGeneratorV8.pm now accepts V8EnabledAtContext and allows such properties
+          to be configured per-Object basis, instead of per-ObjectTemplate basis.
+          The script generates V8Window::installPerContextProperties(), which injects such
+          per-object-turnable properties to newly created DOMWindow wrapper.
+        - Added RuntimeEnabledFeatures::shadowDOMAllowed(DOMWindow*) which is used to
+          decide the shadow dom availability of Shadow DOM feature.
+          It delegates the call to FrameLoaderClient::shadowDOMAllowed() to make the decision.
+        - The new IDL attribute is applied to DOMWindow.WebKitShadowRoot.
+        - Updated existing shadowDOMEnabled() call sites with shadowDOMAllowed().
+
+        No new tests except run-bindings-test. This isn't testable from
+        DRT and this change itself doesn't chagne the behaviour.  It needs
+        a client implementation.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/generic/ContextEnabledFeatures.cpp: Added.
+        (WebCore):
+        (WebCore::ContextEnabledFeatures::shadowDOMEnabled):
+        * bindings/generic/ContextEnabledFeatures.h: Added.
+        (WebCore):
+        (ContextEnabledFeatures):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        (GenerateImplementation):
+        (GetContextEnableFunction):
+        * bindings/scripts/IDLAttributes.txt:
+        * bindings/scripts/test/TestObj.idl:
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::enabledAtContextAttr1AttrGetter):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::enabledAtContextAttr1AttrSetter):
+        (WebCore::TestObjV8Internal::enabledAtContextAttr2AttrGetter):
+        (WebCore::TestObjV8Internal::enabledAtContextAttr2AttrSetter):
+        (WebCore::V8TestObj::installPerContextProperties):
+        * bindings/scripts/test/V8/V8TestObj.h:
+        (V8TestObj):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::installDOMWindow): Adopted installPerContextProperties()
+        * bindings/v8/V8Proxy.h:
+        (WebCore):
+        (WebCore::configureAttribute): Generalized to accept both ObjectTemplate and Object.
+        * dom/Position.cpp: Adopted ContextEnabledFeatures
+        (WebCore::Position::Position):
+        (WebCore::Position::findParent):
+        * dom/ShadowRoot.idl:
+        * dom/TreeScope.cpp:
+        (WebCore::TreeScope::getSelection):
+        * html/shadow/HTMLContentElement.cpp: Adopted ContextEnabledFeatures
+        (WebCore::contentTagName):
+        (WebCore::HTMLContentElement::create):
+        * loader/FrameLoaderClient.h:
+        (FrameLoaderClient):
+        (WebCore::FrameLoaderClient::shadowDOMAllowed): Added with a default behavior.
+        * page/DOMWindow.cpp:
+        * page/DOMWindow.idl:
+
+
 2012-05-21  Tony Chang  <tony@chromium.org>
 
         auto margins on flexbox should allocate space in the flex direction
