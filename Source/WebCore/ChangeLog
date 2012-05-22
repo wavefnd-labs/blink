@@ -1,3 +1,37 @@
+2012-05-21  Abhishek Arya  <inferno@chromium.org>
+
+        Regression(r117482): Run-in crashes relating to generated content and inline line box clearing.
+        https://bugs.webkit.org/show_bug.cgi?id=86879
+
+        Reviewed by Julien Chaffraix.
+
+        Tests: fast/runin/generated-content-crash.html
+               fast/runin/move-run-in-original-position-crash.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::addChildIgnoringAnonymousColumnBlocks): Use the new helper
+        placeRunInIfNeeded. Do not place the run-in if it is a generated container since
+        the caller such as updateBeforeAfterContent might be keeping a reference to it
+        and adding children to it later.
+        (WebCore::destroyRunIn): Add ability to clear line box tree for inlines.
+        (WebCore::RenderBlock::placeRunInIfNeeded): Helper to place run-in. Add an
+        argument to not modify generated content during addChild, it should be moved
+        only at end of updateBeforeAfterContent.
+        (WebCore::RenderBlock::moveRunInUnderSiblingBlockIfNeeded): 
+        (WebCore::RenderBlock::runInIsPlacedIntoSiblingBlock): helper to tell if this run-in
+        is actually placed into the next sibling block.
+        (WebCore::RenderBlock::moveRunInToOriginalPosition):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::deleteLineBoxTree): like RenderBlock, add a helper
+        for deleteLineBoxTree. Virtualizing this might not be good, since this is
+        the only call site for inline line box tree clearing and RenderBlock::deleteLineBoxTree
+        is called a lot.
+        * rendering/RenderObjectChildList.cpp:
+        (WebCore::createRendererForBeforeAfterContent): fix a typo.
+        (WebCore::RenderObjectChildList::updateBeforeAfterContent): If insertBefore is equal
+        to the intruded run-in, then set it to next sibling so that new child will come after it. At
+        the end, place the generatedContainer if it is a run-in.
+
 2012-05-21  James Robinson  <jamesr@chromium.org>
 
         [chromium] Port chromium compositor to use WebFilterOperation(s)
