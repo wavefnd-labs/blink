@@ -1,3 +1,53 @@
+2012-05-21  Adam Barth  <abarth@webkit.org>
+
+        !HAVE(ACCESSIBILITY) should be able to build without linking in any code from WebCore/accessibility
+        https://bugs.webkit.org/show_bug.cgi?id=87035
+
+        Reviewed by Chris Fleizach.
+
+        The OS(ANDROID) already builds with !HAVE(ACCESSIBILITY), but because
+        there are a few straggling references to objects in the
+        WebCore/accessibility directory, we end up pulling in a bunch of code
+        into the binary that we don't need.
+
+        This patch stubs out a few more functions for !HAVE(ACCESSIBILITY) so
+        we can link without any objects from WebCore/accessibility. This patch
+        also locks in that property by actually excluding the
+        WebCore/accessibility directory from the build on OS(ANDROID).
+
+        * WebCore.gyp/WebCore.gyp:
+        * accessibility/AXObjectCache.h:
+        (AXObjectCache):
+        (WebCore::AXObjectCache::enableAccessibility):
+        (WebCore::AXObjectCache::setEnhancedUserInterfaceAccessibility):
+        (WebCore::AXObjectCache::accessibilityEnabled):
+        (WebCore::AXObjectCache::accessibilityEnhancedUserInterfaceEnabled):
+        (WebCore::AXObjectCache::AXObjectCache):
+        (WebCore::AXObjectCache::~AXObjectCache):
+        (WebCore::AXObjectCache::get):
+        (WebCore::AXObjectCache::getOrCreate):
+        (WebCore::AXObjectCache::rootObject):
+        (WebCore::AXObjectCache::rootObjectForFrame):
+        (WebCore::AXObjectCache::rootAXEditableElement):
+        (WebCore::AXObjectCache::childrenChanged):
+        (WebCore::AXObjectCache::contentChanged):
+        (WebCore::AXObjectCache::detachWrapper):
+        (WebCore::AXObjectCache::handleActiveDescendantChanged):
+        (WebCore::AXObjectCache::handleAriaRoleChanged):
+        (WebCore::AXObjectCache::handleFocusedUIElementChanged):
+        (WebCore::AXObjectCache::handleScrolledToAnchor):
+        (WebCore::AXObjectCache::nodeTextChangeNotification):
+        (WebCore::AXObjectCache::nodeTextChangePlatformNotification):
+        (WebCore::AXObjectCache::postNotification):
+        (WebCore::AXObjectCache::postPlatformNotification):
+        (WebCore::AXObjectCache::remove):
+        (WebCore::AXObjectCache::selectedChildrenChanged):
+        * accessibility/AccessibilityObject.h:
+        (WebCore):
+        (WebCore::AccessibilityObject::updateBackingStore):
+        (WebCore::AccessibilityObject::lineForPosition):
+        (WebCore::AccessibilityObject::children):
+
 2012-05-21  Andreas Kling  <kling@webkit.org>
 
         Use stack-allocated BitArray in StylePropertySet serialization.
