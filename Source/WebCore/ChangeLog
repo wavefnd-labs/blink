@@ -1,3 +1,31 @@
+2012-05-22  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Support Array-type key paths
+        https://bugs.webkit.org/show_bug.cgi?id=84207
+
+        Reviewed by Tony Chang.
+
+        Implement IDB spec behavior that key paths can be arrays of strings; when 
+        evaluated, these yield arrays of keys, providing compound key support. Also
+        changes exception types to match the spec.
+
+        Test: storage/indexeddb/keypath-arrays.html
+        Test: storage/indexeddb/keypath-basics.html
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::createObjectStore): Look for both string and array in option dict,
+        throw exceptions for forbidden combinations of key generator and key paths.
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore::IDBObjectStore::createIndex): Handle special cases (accepted and forbidden).
+        (WebCore):
+        * Modules/indexeddb/IDBObjectStore.h:
+        (IDBObjectStore):
+        (WebCore::IDBObjectStore::createIndex): Overloads to satisfy IDL overloads and optional dicts.
+        * Modules/indexeddb/IDBObjectStore.idl: Add DOMString array overload.
+        * bindings/v8/IDBBindingUtilities.cpp: Implement spec logic for evaluating array key paths.
+        (WebCore::createIDBKeyFromSerializedValueAndKeyPath):
+        (WebCore):
+
 2012-05-22  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] REGRESSION(r116135): Keys that confirm composition trigger a default action
