@@ -1,3 +1,75 @@
+2012-05-21  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Port chromium compositor to use WebFilterOperation(s)
+        https://bugs.webkit.org/show_bug.cgi?id=87046
+
+        Reviewed by Adrienne Walker.
+
+        This converts all compositor implementation logic to use WebFilterOperation(s) directly instead of the WebCore
+        types. GraphicsLayerChromium bridges between a WebCore::FilterOperations to WebFilterOperations, doing the
+        necessary type conversions and checking for filters that our compositor implementation supports. This cleans up
+        the chromium compositor's dependencies and removes any thread constraints from WebCore::FilterOperation /
+        WebCore::FilterOperations.
+
+        Covered by existing layout tests and unit tests in FilterOperationsTest.cpp
+
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        * platform/chromium/support/WebFilterOperations.cpp: Moved to Source/Platform/chromium/src/
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        (WebCore::copyWebCoreFilterOperationsToWebFilterOperations):
+        (WebCore):
+        (WebCore::GraphicsLayerChromium::setFilters):
+        (WebCore::GraphicsLayerChromium::setBackgroundFilters):
+        (WebCore::GraphicsLayerChromium::updateTransform):
+        (WebCore::GraphicsLayerChromium::updateChildrenTransform):
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        (GraphicsLayerChromium):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::setFilters):
+        (WebCore::LayerChromium::setBackgroundFilters):
+        (WebCore::LayerChromium::pushPropertiesTo):
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+        (WebCore::LayerChromium::filters):
+        (WebCore::LayerChromium::backgroundFilters):
+        * platform/graphics/chromium/RenderSurfaceChromium.h:
+        (WebCore::RenderSurfaceChromium::setFilters):
+        (WebCore::RenderSurfaceChromium::filters):
+        (WebCore::RenderSurfaceChromium::setBackgroundFilters):
+        (WebCore::RenderSurfaceChromium::backgroundFilters):
+        (RenderSurfaceChromium):
+        * platform/graphics/chromium/cc/CCDamageTracker.cpp:
+        (WebCore::expandDamageRectWithFilters):
+        (WebCore::expandDamageRectInsideRectWithFilters):
+        (WebCore::CCDamageTracker::updateDamageTrackingState):
+        * platform/graphics/chromium/cc/CCDamageTracker.h:
+        (WebKit):
+        (WebCore):
+        (CCDamageTracker):
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::CCLayerImpl::setFilters):
+        (WebCore::CCLayerImpl::setBackgroundFilters):
+        * platform/graphics/chromium/cc/CCLayerImpl.h:
+        (CCLayerImpl):
+        (WebCore::CCLayerImpl::filters):
+        (WebCore::CCLayerImpl::backgroundFilters):
+        * platform/graphics/chromium/cc/CCRenderSurface.cpp:
+        (WebCore::CCRenderSurface::applyFilters):
+        * platform/graphics/chromium/cc/CCRenderSurface.h:
+        (WebCore::CCRenderSurface::setFilters):
+        (WebCore::CCRenderSurface::filters):
+        (CCRenderSurface):
+        (WebCore::CCRenderSurface::setBackgroundFilters):
+        (WebCore::CCRenderSurface::backgroundFilters):
+        * platform/graphics/chromium/cc/CCRenderSurfaceFilters.cpp:
+        (WebCore::CCRenderSurfaceFilters::apply):
+        * platform/graphics/chromium/cc/CCRenderSurfaceFilters.h:
+        (WebKit):
+        (CCRenderSurfaceFilters):
+        * testing/Internals.cpp:
+        (WebCore::Internals::setBackgroundBlurOnNode):
+
 2012-05-15  Gavin Barraclough  <barraclough@apple.com>
 
         Add support for private names
