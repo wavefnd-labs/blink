@@ -1,5 +1,41 @@
 2012-05-22  Yury Semikhatsky  <yurys@chromium.org>
 
+        Web Inspector: allow showing selected object in another heap profiler view
+        https://bugs.webkit.org/show_bug.cgi?id=87098
+
+        Reviewed by Vsevolod Vlasov.
+
+        Added 2 context menu actions: 1) to jump from a node in the heap snapshot summary
+        view to the same node in the dominators view; 2) to jump from a node in the dominators
+        view to the same node in the summary view.
+
+        * inspector/front-end/HeapSnapshotDataGrids.js:
+        (WebInspector.HeapSnapshotSortableDataGrid): "sorting complete" event is only dispatched on
+        when the data grid is populated. If we switch to already populated data grid the event is not
+        dispatched. However when switching between different views of a heap snapshot we want to track
+        the moment when the data grid is shown and populated. I added
+        WebInspector.HeapSnapshotSortableDataGrid.Events.ContentShown for such cases. The event will always
+        be dispatched after the data grid is shown and its content is populated.
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.wasShown):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype._sortingComplete):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.populateContextMenu.revealInDominatorsView):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.populateContextMenu.else.revealInSummaryView):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype.populateContextMenu):
+        (WebInspector.HeapSnapshotSortableDataGrid.prototype._performSorting):
+        * inspector/front-end/HeapSnapshotGridNodes.js:
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype._createObjectCell):
+        (WebInspector.HeapSnapshotDominatorObjectNode.prototype.retrieveChildBySnapshotObjectId):
+        * inspector/front-end/HeapSnapshotView.js:
+        (WebInspector.HeapSnapshotView.prototype.populateContextMenu):
+        (WebInspector.HeapSnapshotView.prototype.changeView.dataGridContentShown):
+        (WebInspector.HeapSnapshotView.prototype.changeView):
+        (WebInspector.HeapSnapshotView.prototype._onSelectedViewChanged):
+        (WebInspector.HeapSnapshotView.prototype._changeView):
+        * inspector/front-end/ProfilesPanel.js:
+        (WebInspector.ProfilesPanel.prototype._handleContextMenuEvent):
+
+2012-05-22  Yury Semikhatsky  <yurys@chromium.org>
+
         Web Inspector: show more button node should have height multiple of row height
         https://bugs.webkit.org/show_bug.cgi?id=87104
 
