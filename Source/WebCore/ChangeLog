@@ -1,3 +1,46 @@
+2012-05-22  Takashi Sakamoto  <tasak@google.com>
+
+        Implement DOM_KEY_LOCATION_LEFT and RIGHT of KeyboardEvent's location property
+        https://bugs.webkit.org/show_bug.cgi?id=86694
+
+        As KeyboardEvent for left/right location key, e.g. left-control,
+        right-control, provides DOM_KEY_LOCATION_STANDARD as keyLocation property,
+        modified KeyCodeConversion to make PlatformKeyboardEvent
+        provide virtual keycodes with location information, e.g. VK_LCONTROL or
+        VK_RCONTROL, and modified KeyboardEvent to generate location information
+        from the virtual keycodes, e.g. genrating DOM_KEY_LOCATION_LEFT for
+        VK_LCONTROL. KeyboardEvent also removes location information from
+        the virtual keycodes, e.g. genrating VK_CONTROL for VK_LCONTROL.
+        The location property is defined in the W3C DOM3 specification:
+        http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
+
+        Reviewed by Alexey Proskuryakov.
+
+        Test: fast/events/keydown-leftright-keys.html
+
+        * dom/KeyboardEvent.cpp:
+        (WebCore::windowsVirtualKeyCodeWithoutLocation):
+        Added a function which removes location information from a given
+        keycode. For example, when VK_LCONTROL is given, returns VK_CONTROL.
+        (WebCore::keyLocationCode):
+        Added a function which provides location information from a given
+        keycode. For example, when VK_LCONTROL is given,
+        returns DOM_KEY_LOCATION_LEFT.
+        (WebCore::KeyboardEvent::KeyboardEvent):
+        Initialized m_keyLocation by using the above keyLocationCode.
+        (WebCore::KeyboardEvent::keyCode):
+        Modified to use the above two functions to initialize keycode property
+        and keylocation property.
+        * platform/chromium/KeyCodeConversionAndroid.cpp:
+        (WebCore::windowsKeyCodeForKeyEvent):
+        * platform/chromium/KeyCodeConversionGtk.cpp:
+        (WebCore::windowsKeyCodeForKeyEvent):
+        * platform/cocoa/KeyEventCocoa.mm:
+        (WebCore::windowsKeyCodeForKeyCode):
+        Modified these keycode conversions to return keycodes with location
+        information, e.g. modified keycode conversions returns VK_LCONTROL
+        for left control.
+
 2012-05-22  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: provide content-related actions on the sources panel.
