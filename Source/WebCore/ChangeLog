@@ -1,3 +1,31 @@
+2012-05-22  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Expand damage from the background-blurred layer to ensure readback is only including pixels below that layer
+        https://bugs.webkit.org/show_bug.cgi?id=86884
+
+        Reviewed by Adrienne Walker.
+
+        Consider layers in back-to-front order A, B, and C, where layer B has
+        a blur background filter applied, and C exactly covers A. When B does
+        its readback to perform its blur, it should include the pixels of A
+        not C. With partial swap, if B is damaged, that damaged area will read
+        pixels from outside of the damage rect. Those pixels should use the
+        contents of A, not C, so we must expand the damage to ensure we redraw
+        all pixels that are going to be included in the blur for the current
+        frame.
+
+        Also, when a layer below B has damage outside the contentBounds of B
+        but within its blur radius, then that damage will be blurred inside B,
+        so expand all damage within B's blurred contentBounds.
+
+        Unit test: CCDamageTrackerTest.verifyDamageForBackgroundBlurredChild
+
+        * platform/graphics/chromium/cc/CCDamageTracker.cpp:
+        (WebCore::expandRectWithFilters):
+        (WebCore::expandDamageRectInsideRectWithFilters):
+        (WebCore::CCDamageTracker::updateDamageTrackingState):
+        (WebCore::CCDamageTracker::extendDamageForRenderSurface):
+
 2012-05-22  Mihnea Ovidenie  <mihnea@adobe.com>
 
         [CSSRegions] Add region styling support for color property
