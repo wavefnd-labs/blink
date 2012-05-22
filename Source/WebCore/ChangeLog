@@ -1,5 +1,41 @@
 2012-05-22  Kentaro Hara  <haraken@chromium.org>
 
+        REGRESSION r110315: Event handler throws TypeError for an input element with name="arguments"
+        https://bugs.webkit.org/show_bug.cgi?id=86991
+
+        Reviewed by Ojan Vafai.
+
+        Original Chromium bug: http://code.google.com/p/chromium/issues/detail?id=128723
+
+        Consider the following html:
+
+        <html><body><form>
+        <input type="hidden" name="arguments"></input>
+        <div onclick="onclicked()" id="divInsideForm">Click here</div>
+        </form></body>
+        <script>
+        function onclicked() {
+          alert("onclicked");
+        }
+        </script>
+        </html>
+
+        If we click "Click here", JavaScript throws "Uncaught TypeError: undefined has no properties".
+
+        This is a regression caused by r110315. V8LazyEventListener should not use
+        'arguments' to retrieve the execution contexts, since 'arguments' can be
+        shadowed by JavaScript.
+
+        This patch changes V8LazyEventListener so that it retrieves contexts
+        by this[2], this[1] and this[0].
+
+        Test: fast/forms/form-input-named-arguments.html
+
+        * bindings/v8/V8LazyEventListener.cpp:
+        (WebCore::V8LazyEventListener::prepareListenerObject):
+
+2012-05-22  Kentaro Hara  <haraken@chromium.org>
+
         [V8] setDOMException() should return v8::Handle<v8::Value>()
         https://bugs.webkit.org/show_bug.cgi?id=87083
 
