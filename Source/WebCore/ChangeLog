@@ -1,3 +1,61 @@
+2012-05-22  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Crash in WebCore::RenderSVGContainer::paint
+        https://bugs.webkit.org/show_bug.cgi?id=86392
+
+        Reviewed by Rob Buis.
+
+        Modernize the <marker> code, switch to the same design pattern used for handling zero-length subpaths.
+        Decouple the generation of the marker start/mid/end positions from the actual usage of these information.
+        Only generate those marker positions if the underlying Path changes, and never else.
+
+        When figuring out the bounds for a shape, access to current set of RenderSVGResourceMarker start/mid/end resources
+        and ask the marker resources for their bounds using the previously figured out marker positions on the Path.
+        Drawing markers is handled in the same way.
+
+        Remove SVGMarkerLayoutInfo alltogether which stored raw pointers to the RenderSVGResourceMarkers.
+        We assumed that those objects would stay alive from layout() to paint(), but that assumption is wrong.
+
+        Tests: svg/custom/bug86392.html
+               svg/custom/marker-zero-length-linecaps-expected.svg
+               svg/custom/marker-zero-length-linecaps.svg
+
+        * CMakeLists.txt: Remove SVGMarkerLayoutInfo.*.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.order: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * rendering/svg/RenderSVGAllInOne.cpp: Ditto.
+        * rendering/svg/RenderSVGShape.cpp: Handle markers just like the existing zero leng subpath code, which is superior.
+        (WebCore::RenderSVGShape::createShape):
+        (WebCore::RenderSVGShape::layout):
+        (WebCore::RenderSVGShape::shouldGenerateMarkerPositions):
+        (WebCore::RenderSVGShape::paint):
+        (WebCore::markerForType):
+        (WebCore::RenderSVGShape::markerRect):
+        (WebCore::RenderSVGShape::inflateWithStrokeAndMarkerBounds):
+        (WebCore::RenderSVGShape::drawMarkers):
+        (WebCore::RenderSVGShape::processMarkerPositions):
+        * rendering/svg/RenderSVGShape.h:
+        (RenderSVGShape):
+        * rendering/svg/SVGMarkerData.h:
+        (WebCore::MarkerPosition::MarkerPosition):
+        (MarkerPosition):
+        (WebCore::SVGMarkerData::SVGMarkerData):
+        (WebCore::SVGMarkerData::updateFromPathElement):
+        (WebCore::SVGMarkerData::pathIsDone):
+        (SVGMarkerData):
+        (WebCore::SVGMarkerData::currentAngle):
+        * rendering/svg/SVGMarkerLayoutInfo.cpp: Removed.
+        * rendering/svg/SVGMarkerLayoutInfo.h: Removed.
+        * rendering/svg/SVGResourcesCache.cpp:
+        (WebCore::resourcesCacheFromRenderObject):
+        (WebCore::SVGResourcesCache::cachedResourcesForRenderObject):
+        * rendering/svg/SVGResourcesCache.h:
+        (SVGResourcesCache):
+
 2012-05-22  Alexander Pavlov  <apavlov@chromium.org>
 
         [Chromium] Implement the ContextMenuItem SubMenu type
