@@ -1,3 +1,31 @@
+2012-05-22  Vitaly Buka  <vitalybuka@chromium.org>
+
+        Fix iframe printing.
+        https://bugs.webkit.org/show_bug.cgi?id=85118
+
+        Reviewed by Darin Adler, Eric Seidel.
+
+        Patch fixed two issues by disabling special handling of subframes for printing.
+        1. Regression. Division by zero when forceLayoutForPagination called for subframes
+        and page sizes set to zero.
+        2. Old issue. RendererView adjusted layout of subframes for printing and set invalid
+        dimensions. Sometimes it caused missing iframe when printed.
+
+        Test: printing/iframe-print.html
+
+        * page/Frame.cpp:
+        (WebCore::Frame::setPrinting): Calls forceLayoutForPagination for root frames only.
+        (WebCore::Frame::resizePageRectsKeepingRatio): Added ASSERTs to catch division by zero.
+        * rendering/RenderView.cpp: Replaced printing() with shouldUsePrintingLayout() for most calls.
+        (WebCore::RenderView::computeLogicalHeight):
+        (WebCore::RenderView::computeLogicalWidth):
+        (WebCore::RenderView::layout):
+        (WebCore::RenderView::shouldUsePrintingLayout): Returns true only if printing enabled and it's a root frame.
+        (WebCore::RenderView::viewRect):
+        (WebCore::RenderView::viewHeight):
+        (WebCore::RenderView::viewWidth):
+        * rendering/RenderView.h:
+
 2012-05-22  Rafael Brandao  <rafael.lobo@openbossa.org>
 
         [Qt] canvas/philip/tests/2d.path.stroke.overlap.html fails with Qt-4.6.2 or higher
