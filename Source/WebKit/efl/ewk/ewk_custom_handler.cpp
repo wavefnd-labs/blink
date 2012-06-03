@@ -21,7 +21,7 @@
 
 #if ENABLE(REGISTER_PROTOCOL_HANDLER)
 
-#include "ewk_view_private.h"
+#include "ewk_custom_handler_private.h"
 
 bool ewk_custom_handler_register_protocol_handler(Ewk_Custom_Handler_Data* data)
 {
