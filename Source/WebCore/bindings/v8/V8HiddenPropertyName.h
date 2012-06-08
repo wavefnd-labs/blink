@@ -46,7 +46,8 @@ namespace WebCore {
     V(state) \
     V(domStringMap) \
     V(domTokenList) \
-    V(ownerNode)
+    V(ownerNode) \
+    V(textTracks)
 
     class V8HiddenPropertyName {
     public:
