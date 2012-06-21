@@ -46,9 +46,9 @@ InjectedScriptModule::InjectedScriptModule(const String& name)
 {
 }
 
-void InjectedScriptModule::ensureInjected(InjectedScriptManager& injectedScriptManager, ScriptState* scriptState)
+void InjectedScriptModule::ensureInjected(InjectedScriptManager* injectedScriptManager, ScriptState* scriptState)
 {
-    InjectedScript injectedScript = injectedScriptManager.injectedScriptFor(scriptState);
+    InjectedScript injectedScript = injectedScriptManager->injectedScriptFor(scriptState);
     ASSERT(!injectedScript.hasNoValue());
     if (injectedScript.hasNoValue())
         return;
@@ -71,7 +71,7 @@ void InjectedScriptModule::ensureInjected(InjectedScriptManager& injectedScriptM
     }
 
     ScriptObject moduleObject(scriptState, resultValue);
-    initialize(moduleObject, injectedScriptManager.inspectedStateAccessCheck());
+    initialize(moduleObject, injectedScriptManager->inspectedStateAccessCheck());
 }
 
 } // namespace WebCore
