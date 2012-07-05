@@ -48,6 +48,11 @@ enum { kWKBatteryProviderCurrentVersion = 0 };
 
 WK_EXPORT WKTypeID WKBatteryManagerGetTypeID();
 
+WK_EXPORT void WKBatteryManagerSetProvider(WKBatteryManagerRef batteryManager, const WKBatteryProvider* provider);
+
+WK_EXPORT void WKBatteryManagerProviderDidChangeBatteryStatus(WKBatteryManagerRef batteryManager, WKStringRef eventType, WKBatteryStatusRef status);
+WK_EXPORT void WKBatteryManagerProviderUpdateBatteryStatus(WKBatteryManagerRef batteryManager, WKBatteryStatusRef status);
+
 #ifdef __cplusplus
 }
 #endif
