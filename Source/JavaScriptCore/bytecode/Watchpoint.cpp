@@ -39,30 +39,6 @@ Watchpoint::~Watchpoint()
         remove();
 }
 
-#if ENABLE(JIT)
-void Watchpoint::correctLabels(LinkBuffer& linkBuffer)
-{
-    MacroAssembler::Label label;
-    label.m_label.m_offset = m_source;
-    m_source = bitwise_cast<uintptr_t>(linkBuffer.locationOf(label).dataLocation());
-    label.m_label.m_offset = m_destination;
-    m_destination = bitwise_cast<uintptr_t>(linkBuffer.locationOf(label).dataLocation());
-}
-#endif
-
-void Watchpoint::fire()
-{
-#if ENABLE(JIT)
-    MacroAssembler::replaceWithJump(
-        CodeLocationLabel(bitwise_cast<void*>(m_source)),
-        CodeLocationLabel(bitwise_cast<void*>(m_destination)));
-    if (isOnList())
-        remove();
-#else
-    UNREACHABLE_FOR_PLATFORM();
-#endif
-}
-
 WatchpointSet::WatchpointSet(InitialWatchpointSetMode mode)
     : m_isWatched(mode == InitializedWatching)
     , m_isInvalidated(false)
