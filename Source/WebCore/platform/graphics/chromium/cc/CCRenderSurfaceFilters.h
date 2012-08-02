@@ -42,6 +42,7 @@ class GraphicsContext3D;
 class CCRenderSurfaceFilters {
 public:
     static SkBitmap apply(const WebKit::WebFilterOperations& filters, unsigned textureId, const FloatSize&, GraphicsContext3D*);
+    static WebKit::WebFilterOperations optimize(const WebKit::WebFilterOperations& filters);
 private:
     CCRenderSurfaceFilters();
 };
