@@ -26,51 +26,37 @@
 #ifndef CCTextureUpdater_h
 #define CCTextureUpdater_h
 
-#include "IntRect.h"
-#include "LayerTextureUpdater.h"
-#include <wtf/Vector.h>
+#include "TextureCopier.h"
+#include "TextureUploader.h"
+#include <wtf/Deque.h>
+#include <wtf/Noncopyable.h>
 
 namespace WebCore {
 
-class CCResourceProvider;
-class TextureCopier;
-class TextureUploader;
-
 class CCTextureUpdater {
+    WTF_MAKE_NONCOPYABLE(CCTextureUpdater);
 public:
     CCTextureUpdater();
-    ~CCTextureUpdater();
+    virtual ~CCTextureUpdater();
 
-    void appendFullUpdate(LayerTextureUpdater::Texture*, const IntRect& sourceRect, const IntRect& destRect);
-    void appendPartialUpdate(LayerTextureUpdater::Texture*, const IntRect& sourceRect, const IntRect& destRect);
-    void appendCopy(unsigned sourceTexture, unsigned destTexture, const IntSize&);
+    void appendFullUpload(TextureUploader::Parameters);
+    void appendPartialUpload(TextureUploader::Parameters);
+    void appendCopy(TextureCopier::Parameters);
+
+    TextureUploader::Parameters takeFirstFullUpload();
+    TextureUploader::Parameters takeFirstPartialUpload();
+    TextureCopier::Parameters takeFirstCopy();
+
+    size_t fullUploadSize() const { return m_fullEntries.size(); }
+    size_t partialUploadSize() const { return m_partialEntries.size(); }
+    size_t copySize() const { return m_copyEntries.size(); }
 
     bool hasMoreUpdates() const;
 
-    // Update some textures.
-    void update(CCResourceProvider*, TextureCopier*, TextureUploader*, size_t count);
-
-    void clear();
-
 private:
-    struct UpdateEntry {
-        LayerTextureUpdater::Texture* texture;
-        IntRect sourceRect;
-        IntRect destRect;
-    };
-
-    struct CopyEntry {
-        IntSize size;
-        unsigned sourceTexture;
-        unsigned destTexture;
-    };
-
-    static void appendUpdate(LayerTextureUpdater::Texture*, const IntRect& sourceRect, const IntRect& destRect, Vector<UpdateEntry>&);
-
-    size_t m_entryIndex;
-    Vector<UpdateEntry> m_fullEntries;
-    Vector<UpdateEntry> m_partialEntries;
-    Vector<CopyEntry> m_copyEntries;
+    Deque<TextureUploader::Parameters> m_fullEntries;
+    Deque<TextureUploader::Parameters> m_partialEntries;
+    Deque<TextureCopier::Parameters> m_copyEntries;
 };
 
 }
