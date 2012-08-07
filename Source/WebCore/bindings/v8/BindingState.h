@@ -44,8 +44,8 @@ public:
     static BindingState* instance();
 };
 
-DOMWindow* activeWindow(BindingState*);
-DOMWindow* firstWindow(BindingState*);
+DOMWindow* activeDOMWindow(BindingState*);
+DOMWindow* firstDOMWindow(BindingState*);
 
 Frame* activeFrame(BindingState*);
 Frame* firstFrame(BindingState*);
