@@ -25,14 +25,14 @@
 #include "config.h"
 #include "SafeAllocation.h"
 
-#include "V8Proxy.h"
+#include "V8Binding.h"
 
 namespace WebCore {
 
 v8::Handle<v8::Value> SafeAllocation::isValidConstructorMode(const v8::Arguments& args)
 {
     if (ConstructorMode::current() == ConstructorMode::CreateNewObject)
-        return V8Proxy::throwTypeError("Illegal constructor", args.GetIsolate());
+        return throwTypeError("Illegal constructor", args.GetIsolate());
     return args.This();
 }
 
