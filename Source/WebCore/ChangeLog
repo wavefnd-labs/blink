@@ -1,3 +1,67 @@
+2012-08-16  Alexandre Elias  <aelias@google.com>
+
+        [chromium] Replace destRect with destOffset in texture upload
+        https://bugs.webkit.org/show_bug.cgi?id=94154
+
+        Reviewed by James Robinson.
+
+        Previously, texture upload code implicitly assumed that sourceRect and
+        destRect have the same size. The behavior is undefined if they are
+        different, since they are used interchangeably and there's no support
+        for scaling from one rect to the other. This patch enforces that
+        constraint at the interface level by replacing all instances of
+        "IntRect destRect" by "IntSize destOffset".
+
+        No new tests (no-op refactoring).
+
+        * platform/graphics/chromium/BitmapCanvasLayerTextureUpdater.cpp:
+        (WebCore::BitmapCanvasLayerTextureUpdater::Texture::updateRect):
+        (WebCore::BitmapCanvasLayerTextureUpdater::updateTextureRect):
+        * platform/graphics/chromium/BitmapCanvasLayerTextureUpdater.h:
+        (Texture):
+        (BitmapCanvasLayerTextureUpdater):
+        * platform/graphics/chromium/BitmapSkPictureCanvasLayerTextureUpdater.cpp:
+        (WebCore::BitmapSkPictureCanvasLayerTextureUpdater::Texture::updateRect):
+        * platform/graphics/chromium/BitmapSkPictureCanvasLayerTextureUpdater.h:
+        (Texture):
+        * platform/graphics/chromium/FrameBufferSkPictureCanvasLayerTextureUpdater.cpp:
+        (WebCore::FrameBufferSkPictureCanvasLayerTextureUpdater::Texture::updateRect):
+        (WebCore::FrameBufferSkPictureCanvasLayerTextureUpdater::updateTextureRect):
+        * platform/graphics/chromium/FrameBufferSkPictureCanvasLayerTextureUpdater.h:
+        (Texture):
+        (FrameBufferSkPictureCanvasLayerTextureUpdater):
+        * platform/graphics/chromium/ImageLayerChromium.cpp:
+        (WebCore::ImageLayerTextureUpdater::updateTextureRect):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        * platform/graphics/chromium/LayerTextureSubImage.cpp:
+        (WebCore::LayerTextureSubImage::upload):
+        (WebCore::LayerTextureSubImage::uploadWithTexSubImage):
+        (WebCore::LayerTextureSubImage::uploadWithMapTexSubImage):
+        * platform/graphics/chromium/LayerTextureSubImage.h:
+        (LayerTextureSubImage):
+        * platform/graphics/chromium/LayerTextureUpdater.h:
+        (Texture):
+        * platform/graphics/chromium/ScrollbarLayerChromium.cpp:
+        (WebCore::ScrollbarLayerChromium::updatePart):
+        * platform/graphics/chromium/TextureUploader.h:
+        (Parameters):
+        * platform/graphics/chromium/ThrottledTextureUploader.cpp:
+        (WebCore::ThrottledTextureUploader::uploadTexture):
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::TiledLayerChromium::updateTileTextures):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplayLayerImpl.cpp:
+        (WebCore::CCHeadsUpDisplayLayerImpl::willDraw):
+        * platform/graphics/chromium/cc/CCPrioritizedTexture.cpp:
+        (WebCore::CCPrioritizedTexture::upload):
+        * platform/graphics/chromium/cc/CCPrioritizedTexture.h:
+        (CCPrioritizedTexture):
+        * platform/graphics/chromium/cc/CCResourceProvider.cpp:
+        (WebCore::CCResourceProvider::upload):
+        * platform/graphics/chromium/cc/CCResourceProvider.h:
+        (CCResourceProvider):
+        * platform/graphics/chromium/cc/CCVideoLayerImpl.cpp:
+        (WebCore::CCVideoLayerImpl::copyPlaneData):
+
 2012-08-16  James Robinson  <jamesr@chromium.org>
 
         [chromium] Remove unnecessary tree hierarchy inspection APIs from WebLayer
