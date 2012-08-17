@@ -1,3 +1,38 @@
+2012-08-16  Michael Saboff  <msaboff@apple.com>
+
+        HTML Parser should produce 8bit substrings for inline style and script elements
+        https://bugs.webkit.org/show_bug.cgi?id=93742
+
+        Reviewed by Benjamin Poulain.
+
+        Currently all data associated with a token is stored and processed as UChars.
+        Added code to determine that the contents of token data is all 8 bit by keeping
+        the logical OR value of all prior characters. Also added a flag that the parser
+        can set to indicate when the token data is converted to a String that we want
+        to make an 8 bit string if possible. Enabled this handling for script, style,
+        iframe, noembed, noframes, noscript and xmp tags.
+
+        No new tests. Existing tests provide coverage.
+
+        * html/parser/HTMLTokenizer.cpp:
+        (WebCore::HTMLTokenizer::nextToken):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::ExternalCharacterTokenBuffer::ExternalCharacterTokenBuffer):
+        (WebCore::HTMLTreeBuilder::ExternalCharacterTokenBuffer::isAll8BitData):
+        (HTMLTreeBuilder::ExternalCharacterTokenBuffer):
+        (WebCore::HTMLTreeBuilder::ExternalCharacterTokenBuffer::takeRemaining):
+        * xml/parser/MarkupTokenBase.h:
+        (WebCore::MarkupTokenBase::clear):
+        (WebCore::MarkupTokenBase::appendToCharacter):
+        (MarkupTokenBase):
+        (WebCore::MarkupTokenBase::eraseCharacters):
+        (WebCore::MarkupTokenBase::setConvertTo8Bit):
+        (WebCore::MarkupTokenBase::isAll8BitData):
+        (WebCore::AtomicMarkupTokenBase::AtomicMarkupTokenBase):
+        (WebCore::AtomicMarkupTokenBase::isAll8BitData):
+        (AtomicMarkupTokenBase):
+        (WebCore::AtomicMarkupTokenBase::clearExternalCharacters):
+
 2012-08-16  Michelangelo De Simone  <michelangelo@webkit.org>
 
         [Part 3] Parse the custom() function in -webkit-filter: parse the 3d-transforms parameters
