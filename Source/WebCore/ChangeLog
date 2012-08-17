@@ -1,3 +1,29 @@
+2012-08-16  Nate Chapin  <japhet@chromium.org>
+
+        ProgressTracker never completes if iframe detached during parsing 
+        https://bugs.webkit.org/show_bug.cgi?id=92272
+
+        Reviewed by Adam Barth.
+
+        Add a simple helper class to FrameLoader to ensure progressStarted/progressCompleted calls are matched,
+        and balance the calls when the Frame is detached.
+
+        No new tests, as this behavior has only been producing reliably by setting a breakpoint in a specific place.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::init):
+        (WebCore::FrameLoader::FrameProgressTracker::progressStarted):
+        (WebCore::FrameLoader::FrameProgressTracker::progressCompleted):
+        (WebCore::FrameLoader::FrameProgressTracker::~FrameProgressTracker):
+        (WebCore::FrameLoader::prepareForLoadStart):
+        (WebCore::FrameLoader::clearProvisionalLoad):
+        (WebCore::FrameLoader::checkLoadCompleteForThisFrame):
+        (WebCore::FrameLoader::detachFromParent):
+        * loader/FrameLoader.h:
+        (FrameProgressTracker):
+        (WebCore::FrameLoader::FrameProgressTracker::create):
+        (WebCore::FrameLoader::FrameProgressTracker::FrameProgressTracker):
+
 2012-08-16  Arnaud Renevier  <a.renevier@sisa.samsung.com>
 
         Update TypedArrays to throw RangeError or similar instead of INDEX_SIZE_ERR
