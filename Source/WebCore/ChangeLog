@@ -1,3 +1,131 @@
+2012-08-17  John Mellor  <johnme@chromium.org>
+
+        Text Autosizing: Increase line height in proportion to font size.
+        https://bugs.webkit.org/show_bug.cgi?id=91660
+
+        Reviewed by Julien Chaffraix.
+
+        This patch causes line heights to be increased in proportion to font
+        size (so autosized text doesn't overlap itself). It does this by adding
+        a textAutosizingMultiplier() to RenderStyle, which the lineHeight()
+        getter multiplies its response by.
+
+        It also cleans up one or two things, for example treatAsInline is
+        renamed isNotAnAutosizingContainer to clarify that its purpose is to
+        discriminate autosizing containers (the smallest unit that we can turn
+        Text Autosizing on or off for; in particular these are not allowed to
+        be line participants, since multiple sizes on one line looks awful).
+
+        Tests: fast/text-autosizing/em-margin-border-padding.html
+               fast/text-autosizing/narrow-child.html
+               fast/text-autosizing/nested-em-line-height.html
+               fast/text-autosizing/simple-paragraph.html
+               fast/text-autosizing/span-child.html
+               fast/text-autosizing/wide-child.html
+
+        * css/StyleBuilder.cpp:
+        (WebCore::ApplyPropertyLineHeight::applyValue):
+
+            Replaced Length(-100.0, Percent) with RenderStyle::initialLineHeight(),
+            which is equivalent but makes the intent clearer.
+
+        (WebCore::ApplyPropertyLineHeight::createHandler):
+
+            Use specifiedLineHeight to match setLineHeight which takes a specified
+            line height (and generally this avoids accidentally inheriting text
+            autosizing).
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::applyProperty):
+
+            Similarly use specifiedLineHeight when inheriting line height.
+
+        * page/animation/CSSPropertyAnimation.cpp:
+        (WebCore::CSSPropertyAnimation::ensurePropertyMap):
+
+            Get and set specified lineHeight/fontSize if Text Autosizing is
+            enabled to avoid setting the specified value to the computed value
+            (causing values to be multiplied more than once!).
+
+        * platform/blackberry/RenderThemeBlackBerry.cpp:
+        (WebCore::RenderThemeBlackBerry::adjustMediaControlStyle):
+
+            Adjust for renamed setBlendedFontSize, and maintain cast to int.
+
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::createInnerTextStyle):
+
+            Replaced Length(-100.0, Percent) with RenderStyle::initialLineHeight(),
+            which is equivalent but makes the intent clearer.
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::processSubtree):
+
+            Use nextInPreOrderMatchingFilter instead of traverseNext, and some
+            other methods that got renamed.
+
+        (WebCore::TextAutosizer::processBox):
+
+            Renamed from processBlock, since RenderBoxes are sufficient; use
+            renamed nextInPreOrderMatchingFilter; make two calls to setMultiplier
+            (one for parent for line height) instead of processText.
+
+        (WebCore::TextAutosizer::setMultiplier):
+
+            Simplified from previous processText method; this just sets the
+            style's textAutosizingMultiplier (and the style does the rest).
+
+        (WebCore::TextAutosizer::isNotAnAutosizingContainer):
+
+            Renamed from treatAsInline; added explanatory comment; changed
+            isRenderBlock to isBox as boxes still have logicalWidth; changed
+            isInlineBlockOrInlineTable to isInline as it was an omission that
+            other inlines were allowed.
+
+        (WebCore::TextAutosizer::nextInPreOrderMatchingFilter):
+
+            Renamed from TextAutosizer::traverseNext.
+
+        (RenderObjectFilterFunctor):
+
+            Renamed from RenderObjectFilter to clafiry that it's a function ptr.
+
+        * rendering/TextAutosizer.h:
+        (TextAutosizer): Previously mentioned renamings.
+
+        * rendering/mathml/RenderMathMLSubSup.cpp:
+        (WebCore::RenderMathMLSubSup::fixScriptsStyle):
+
+            Adjust for renamed setBlendedFontSize.
+
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::diff):
+
+            textAutosizingMultiplier is a StyleDifferenceLayout (we want
+            setNeedsLayoutAndPrefWidthsRecalc to get called).
+
+        (WebCore::RenderStyle::setFontSize):
+
+            Renamed from setBlendedFontSize; if Text Autosizing is enabled and a
+            multiplier is set it auto-calculates the computedSize; float
+            param instead of int as discussed on webkit.org/b/91660.
+
+        * rendering/style/RenderStyle.h:
+
+            Added specifiedFontSize, computedFontSize and specifiedLineHeight
+            getters; changed lineHeight to dynamically calculate autosized line
+            height, and made computedLineHeight use this value instead of the
+            specified line height; also added textAutosizingMultiplier
+            getter/setter (the setter updated the font description's computed
+            size, by calling setFontSize); also renamed the parameter to
+            setLineHeight to explicitly note that it's setting the
+            specifiedLineHeight (and can still be adjusted by autosizing).
+
+        * rendering/style/StyleVisualData.cpp/.h:
+
+            Added m_textAutosizingMultiplier (this seems the best place to put a
+            non-inherited non-rare presentational property).
+
 2012-08-17  Raphael Kubo da Costa  <rakuco@webkit.org>
 
         [CMake] Add FindDBus.cmake and use it in the EFL port.
