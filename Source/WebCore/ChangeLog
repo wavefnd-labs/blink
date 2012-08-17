@@ -1,3 +1,35 @@
+2012-08-17  Benjamin Poulain  <bpoulain@apple.com>
+
+        Share the StringImpl the CSS property names
+        https://bugs.webkit.org/show_bug.cgi?id=94187
+
+        Reviewed by Alexey Proskuryakov.
+
+        Previously, we would instanciate a new String every time a CSS property name was needed.
+
+        This patches moves the creation of the AtomicString to CSSPropertyNames and reuse that
+        StringImpl whenever needed.
+
+        With the patch, accessing CSS property names from JavaScript gets about 2.1 times faster.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        (WebCore::CSSComputedStyleDeclaration::item):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::valueOrPropertyName):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::cssName):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::item):
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyShorthand):
+        * css/makeprop.pl:
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::getSupportedCSSProperties):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyle::styleWithProperties):
+        * page/animation/ImplicitAnimation.cpp:
+        (WebCore::ImplicitAnimation::sendTransitionEvent):
+
 2012-08-16  James Robinson  <jamesr@chromium.org>
 
         [chromium] Add Source/WebCore/platform/graphics/chromium/cc/ to include path and remove cc/ prefix from includes
