@@ -1,3 +1,21 @@
+2012-08-17  Anthony Berent  <aberent@chromium.org>
+
+        View source doesn't interpret escape characters in hrefs.
+        https://bugs.webkit.org/show_bug.cgi?id=94216
+
+        Reviewed by Adam Barth.
+
+        The cause was that HTMLViewSourceDocument was passing the unparsed content of the href attribute to the DOM as the URL for the link.
+        The fix is to pass the parsed content of the href attribute to the DOM.
+
+        Test: fast/forms/frames/viewsource-link-on-href-value.html extended to test this case.
+
+        * html/HTMLViewSourceDocument.cpp:
+        (WebCore::HTMLViewSourceDocument::processTagToken): Pass parsed URL to AddRange.
+        (WebCore::HTMLViewSourceDocument::addRange):Added argument for parsed URL, and used this instead of text, to create link.
+        * html/HTMLViewSourceDocument.h:
+        (HTMLViewSourceDocument): Add new link argument to addRange for parsed URL, defaulting to "".
+
 2012-08-17  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Rename SpinButtonElement::StepActionHandler to SpinButtonOwner
