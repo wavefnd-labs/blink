@@ -1,3 +1,26 @@
+2012-08-17  Adam Barth  <abarth@webkit.org>
+
+        REGRESSION (r125592): Crash in Console::addMessage, under InjectedBundle::reportException
+        https://bugs.webkit.org/show_bug.cgi?id=94220
+
+        Reviewed by Alexey Proskuryakov.
+
+        Previously, this code was trying to detect whether a DOMWindow is
+        currently displayed in a Frame by testing whether
+        DOMWindow->scriptExecutionContext is zero. That used to work, but now
+        that DOMWindow->scriptExecutionContext is non-zero for detached
+        DOMWindow, this code doesn't work anymore. This patch replaces the code
+        with the current idiom, which is to call
+        DOMWindow::isCurrentDisplayedInFrame.
+
+        Alexey and I couldn't figure out how to test this change. This bug
+        causes a crash when some Safari extensions are installed, but it's not
+        clear whether this bug can be triggered from the web platform. We're
+        going to ask Jessie for ideas when she gets back from vacation.
+
+        * bindings/js/JSDOMBinding.cpp:
+        (WebCore::reportException):
+
 2012-08-17  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r125892.
