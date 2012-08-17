@@ -1,3 +1,123 @@
+2012-08-16  David Grogan  <dgrogan@chromium.org>
+
+        IndexedDB: Frontend and plumbing for integer versions
+        https://bugs.webkit.org/show_bug.cgi?id=92897
+
+        Reviewed by Tony Chang.
+
+        This patch exposes integer versions and the upgradeneeded event to
+        script.
+
+        The events surrounding an IDBOpenDBRequest follow a new pattern
+        compared to other idb requests. An open request can receive a blocked
+        event, an upgradeneeded event, and then a success event. When
+        dispatching the upgradeneeded and success events the request has its
+        readyState set to DONE and its result property set to an IDBDatabase.
+        We usually think of IDBRequests firing one event with one result,
+        cursors being the big exception. There are some minor changes around
+        enqueuing and dispatching events to support this.
+
+        There's also some funkiness in
+        IDBRequest::onSuccess(PassRefPtr<IDBDatabaseBackendInterface>) so that
+        the IDBDatabase object delivered in upgradeneeded is reused for the
+        success event.
+
+        Tests - expectations are updated in this patch.
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::setVersion):
+        (WebCore::IDBDatabase::onVersionChange):
+        (WebCore):
+        (WebCore::IDBDatabase::registerFrontendCallbacks):
+        * Modules/indexeddb/IDBDatabase.h:
+        (IDBDatabase):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::runIntVersionChangeTransaction):
+        * Modules/indexeddb/IDBDatabaseCallbacks.h:
+        (IDBDatabaseCallbacks):
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.cpp:
+        (WebCore::IDBDatabaseCallbacksImpl::onVersionChange):
+        (WebCore):
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.h:
+        (IDBDatabaseCallbacksImpl):
+        * Modules/indexeddb/IDBFactory.cpp:
+        (WebCore::IDBFactory::open):
+        (WebCore):
+        * Modules/indexeddb/IDBFactory.h:
+        (IDBFactory):
+        * Modules/indexeddb/IDBFactory.idl:
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp:
+        (WebCore::IDBFactoryBackendImpl::open):
+        * Modules/indexeddb/IDBFactoryBackendImpl.h:
+        (IDBFactoryBackendImpl):
+        * Modules/indexeddb/IDBFactoryBackendInterface.h:
+        (IDBFactoryBackendInterface):
+        * Modules/indexeddb/IDBOpenDBRequest.cpp: Added.
+        (WebCore):
+        (WebCore::IDBOpenDBRequest::create):
+        (WebCore::IDBOpenDBRequest::IDBOpenDBRequest):
+        (WebCore::IDBOpenDBRequest::~IDBOpenDBRequest):
+        (WebCore::IDBOpenDBRequest::interfaceName):
+        (WebCore::IDBOpenDBRequest::onBlocked):
+        (WebCore::IDBOpenDBRequest::onUpgradeNeeded):
+        (WebCore::IDBOpenDBRequest::shouldEnqueueEvent):
+        * Modules/indexeddb/IDBOpenDBRequest.h: Copied from Source/WebCore/Modules/indexeddb/IDBDatabaseCallbacksImpl.h.
+        (WebCore):
+        (IDBOpenDBRequest):
+        * Modules/indexeddb/IDBOpenDBRequest.idl: Copied from Source/WebCore/Modules/indexeddb/IDBDatabaseCallbacks.h.
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::IDBRequest):
+        (WebCore::IDBRequest::shouldEnqueueEvent):
+        (WebCore::IDBRequest::onSuccess):
+        This function works with WebIDBCallbacksImpl::onSuccess to reuse its
+        IDBDatabaseBackendInterface that it got during
+        IDBOpenDBRequest::onUpgradeNeeded.
+
+        (WebCore::IDBRequest::dispatchEvent):
+        (WebCore::IDBRequest::transactionDidDispatchCompleteOrAbort):
+        (WebCore):
+        (WebCore::IDBRequest::enqueueEvent):
+        * Modules/indexeddb/IDBRequest.h:
+        (WebCore::IDBRequest::onBlocked):
+        (IDBRequest):
+        * Modules/indexeddb/IDBTransaction.cpp:
+        We now take a pointer to the openDBRequest if this is a version
+        change transaction as a result of an open-with-version call so that we
+        can clear the transaction property on the openDBRequest as soon as the
+        upgradeneeded event is dispatched per the spec ("... set request's
+        transaction property to null... ", currently 4.8.12).
+
+        (WebCore::IDBTransaction::create):
+        (WebCore):
+        (WebCore::IDBTransaction::IDBTransaction):
+        (WebCore::IDBTransaction::setActive):
+        (WebCore::IDBTransaction::onComplete):
+        (WebCore::IDBTransaction::dispatchEvent):
+        * Modules/indexeddb/IDBTransaction.h:
+        (WebCore):
+        (IDBTransaction):
+        * Modules/indexeddb/IDBTransactionBackendImpl.cpp:
+        (WebCore::IDBTransactionBackendImpl::commit):
+        * Modules/indexeddb/IDBUpgradeNeededEvent.cpp: Copied from Source/WebCore/Modules/indexeddb/IDBDatabaseCallbacksImpl.cpp.
+        (WebCore):
+        (WebCore::IDBUpgradeNeededEvent::create):
+        (WebCore::IDBUpgradeNeededEvent::IDBUpgradeNeededEvent):
+        (WebCore::IDBUpgradeNeededEvent::~IDBUpgradeNeededEvent):
+        (WebCore::IDBUpgradeNeededEvent::oldVersion):
+        (WebCore::IDBUpgradeNeededEvent::newVersion):
+        (WebCore::IDBUpgradeNeededEvent::interfaceName):
+        * Modules/indexeddb/IDBUpgradeNeededEvent.h: Copied from Source/WebKit/chromium/src/WebIDBDatabaseCallbacksImpl.h.
+        (WebCore):
+        (IDBUpgradeNeededEvent):
+        * Modules/indexeddb/IDBUpgradeNeededEvent.idl: Copied from Source/WebCore/Modules/indexeddb/IDBDatabaseCallbacks.h.
+        * WebCore.gypi:
+        * dom/EventNames.h:
+        (WebCore):
+        * dom/EventNames.in:
+        * dom/EventTargetFactory.in:
+        * inspector/InspectorIndexedDBAgent.cpp:
+        (WebCore):
+
 2012-08-16  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Cleanup CSS selectors for multiple fields time input UI
