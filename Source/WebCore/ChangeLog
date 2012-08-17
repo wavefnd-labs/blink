@@ -1,3 +1,40 @@
+2012-08-17  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: hovering over an image link in Timeline popup kills popup
+        https://bugs.webkit.org/show_bug.cgi?id=94213
+
+        Reviewed by Pavel Feldman.
+
+        - Fixed bug with ElementsPanel PopoverHelper acting on the TimelinePanel (due to which the original issue occurs).
+        - Image preview added to resource entries popover in the timeline.
+        - Extracted the core image preview building code into UIUtils.js.
+        - Drive-by: fixed image centering in the preview element.
+
+        * inspector/front-end/ElementsPanel.js:
+        (WebInspector.ElementsPanel):
+        (WebInspector.ElementsPanel.prototype._showPopover.showPopover):
+        (WebInspector.ElementsPanel.prototype._showPopover):
+        * inspector/front-end/TimelinePanel.js:
+        (WebInspector.TimelinePanel.prototype._showPopover.showCallback):
+        (WebInspector.TimelinePanel.prototype._showPopover):
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel.needsPreviewElement):
+        (WebInspector.TimelinePresentationModel.Record.prototype.generatePopupContent):
+        First build the image preview element if necessary, then do everything else.
+        (WebInspector.TimelinePresentationModel.Record.prototype._generatePopupContentWithImagePreview):
+        Original generatePopupContent() code plus the preview generation when necessary.
+        * inspector/front-end/UIUtils.js:
+        (WebInspector.buildImagePreviewContents.errorCallback):
+        (WebInspector.buildImagePreviewContents.buildContent):
+        (WebInspector.buildImagePreviewContents): Extracted from ElementsPanel. Enabled building of preview elements without the dimensions text data.
+        * inspector/front-end/elementsPanel.css:
+        (.image-preview-container):
+        (.image-preview-container img):
+        * inspector/front-end/timelinePanel.css:
+        (.image-preview-container): Fixed centering of the preview container contents.
+        (.image-preview-container img):
+        (.image-container):
+
 2012-08-17  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: decouple extension server from the Elements panel
