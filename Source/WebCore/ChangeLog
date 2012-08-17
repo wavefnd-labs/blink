@@ -1,3 +1,104 @@
+2012-08-16  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: build Elements, Resources, Timeline, Audits and Console panels lazily.
+        https://bugs.webkit.org/show_bug.cgi?id=94222
+
+        Reviewed by Vsevolod Vlasov.
+
+        There is no need to construct these panels on inspector startup - we can do that lazily.
+        This change introduces the concept of PanelDescriptor that is sufficient for the panel
+        representation before it has been selected. It also makes selected panels build lazily.
+
+        The next step is to migrate rest of the panels and load the panel code lazily as well.
+        That should speed up startup time significantly.
+
+        * inspector/front-end/AuditsPanel.js:
+        (WebInspector.AuditsPanel):
+        (WebInspector.AuditsPanel.prototype._auditFinishedCallback):
+        (WebInspector.AuditsSidebarTreeElement):
+        (WebInspector.AuditsSidebarTreeElement.prototype.onselect):
+        (WebInspector.AuditResultSidebarTreeElement):
+        (WebInspector.AuditResultSidebarTreeElement.prototype.onselect):
+        * inspector/front-end/ConsolePanel.js:
+        * inspector/front-end/DOMStorage.js:
+        (WebInspector.DOMStorageDispatcher.prototype.addDOMStorage):
+        (WebInspector.DOMStorageDispatcher.prototype.domStorageUpdated):
+        * inspector/front-end/Database.js:
+        (WebInspector.DatabaseDispatcher.prototype.addDatabase):
+        * inspector/front-end/ElementsPanel.js:
+        (WebInspector.ElementsPanel):
+        (WebInspector.ElementsPanel.prototype.revealAndSelectNode):
+        (WebInspector.ElementsPanel.prototype.setSearchingForNode):
+        (WebInspector.ElementsPanel.prototype.toggleSearchingForNode):
+        * inspector/front-end/ElementsTreeOutline.js:
+        (WebInspector.ElementsTreeElement.prototype._populateForcedPseudoStateItems):
+        * inspector/front-end/ExtensionPanel.js:
+        (WebInspector.ExtensionPanel):
+        (WebInspector.ExtensionPanel.prototype.jumpToPreviousSearchResult):
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onCreatePanel):
+        (WebInspector.ExtensionServer.prototype._onAddAuditCategory):
+        * inspector/front-end/InspectorFrontendAPI.js:
+        (InspectorFrontendAPI.isTimelineProfilingEnabled):
+        (InspectorFrontendAPI.setTimelineProfilingEnabled):
+        (InspectorFrontendAPI.showConsole):
+        (InspectorFrontendAPI.showResources):
+        (InspectorFrontendAPI.enterInspectElementMode):
+        * inspector/front-end/InspectorView.js:
+        (WebInspector.InspectorView):
+        (WebInspector.InspectorView.prototype.addPanel):
+        (WebInspector.InspectorView.prototype.panel):
+        (WebInspector.InspectorView.prototype.showPanel):
+        (WebInspector.InspectorView.prototype._keyDownInternal):
+        * inspector/front-end/NetworkPanel.js:
+        * inspector/front-end/Panel.js:
+        (WebInspector.Panel.prototype.wasShown):
+        (WebInspector.Panel.prototype.willHide):
+        (WebInspector.PanelDescriptor):
+        (WebInspector.PanelDescriptor.prototype.name):
+        (WebInspector.PanelDescriptor.prototype.title):
+        (WebInspector.PanelDescriptor.prototype.iconURL):
+        (WebInspector.PanelDescriptor.prototype.setIconURL):
+        (WebInspector.PanelDescriptor.prototype.panel):
+        (WebInspector.PanelDescriptor.prototype.lazy):
+        * inspector/front-end/ProfilesPanel.js:
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.ResourceTreeModel.prototype.cachedResourcesLoaded):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.ResourcesPanel):
+        * inspector/front-end/ScriptsPanel.js:
+        * inspector/front-end/StylesSidebarPane.js:
+        (WebInspector.StylePropertiesSection.prototype.editingSelectorCommitted.successCallback):
+        (WebInspector.StylePropertiesSection.prototype.editingSelectorCommitted):
+        (WebInspector.StylePropertyTreeElement.prototype.updateTitle.linkifyURL):
+        * inspector/front-end/TimelinePanel.js:
+        * inspector/front-end/Toolbar.js:
+        (WebInspector.Toolbar.prototype.addPanel):
+        (WebInspector.Toolbar.prototype._createPanelToolbarItem.onToolbarItemClicked):
+        (WebInspector.Toolbar.prototype._createPanelToolbarItem.panelSelected):
+        (WebInspector.Toolbar.prototype._createPanelToolbarItem):
+        (WebInspector.Toolbar.prototype._panelSelected):
+        (WebInspector.Toolbar.prototype._setDropdownVisible):
+        (WebInspector.ToolbarDropdown):
+        (WebInspector.ToolbarDropdown.prototype.show):
+        (WebInspector.ToolbarDropdown.prototype._populate):
+        * inspector/front-end/inspector.css:
+        (.toolbar-small .toolbar-icon.custom-toolbar-icon):
+        * inspector/front-end/inspector.js:
+        (WebInspector._panelDescriptors):
+        (WebInspector._panelSelected):
+        (WebInspector._createGlobalStatusBarItems):
+        (WebInspector.documentClick.followLink):
+        (WebInspector.documentClick):
+        (WebInspector.openResource):
+        (WebInspector.showPanel):
+        (WebInspector.panel):
+        (WebInspector.inspect.):
+        (WebInspector.inspect):
+        (WebInspector._showAnchorLocation):
+        (WebInspector.showProfileForURL):
+        (WebInspector.frontendReused):
+
 2012-08-17  Pascal Massimino  <pascal.massimino@gmail.com>
 
         libwebp-0.2.0: handle alpha channel if present
