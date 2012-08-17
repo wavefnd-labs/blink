@@ -1,3 +1,114 @@
+2012-08-17  Sukolsak Sakshuwong  <sukolsak@google.com>
+
+        Implement UndoManager's V8 bindings
+        https://bugs.webkit.org/show_bug.cgi?id=93912
+
+        Reviewed by Ryosuke Niwa.
+
+        This patch implements V8 bindings for UndoManager's transact() method.
+        We keep alive the user objects passed to transact() by storing them in
+        a hidden property of DOMTransaction's wrapper and registering implicit
+        references from UndoManager to DOMTransaction.
+
+        Tests: editing/undomanager/domtransaction-survives-gc.html
+               editing/undomanager/undomanager-isolated-world.html
+               editing/undomanager/undomanager-transact.html
+               editing/undomanager/undomanager-undo-redo.html
+               editing/undomanager/undomanager-use-after-free.html
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * UseJSC.cmake:
+        * UseV8.cmake:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/DOMTransaction.cpp: Added.
+        (WebCore):
+        (WebCore::DOMTransaction::DOMTransaction):
+        (WebCore::DOMTransaction::create):
+        (WebCore::DOMTransaction::apply):
+        (WebCore::DOMTransaction::unapply):
+        (WebCore::DOMTransaction::reapply):
+        * bindings/js/DOMTransaction.h: Added.
+        (WebCore):
+        (DOMTransaction):
+        (WebCore::DOMTransaction::undoManager):
+        (WebCore::DOMTransaction::setUndoManager):
+        * bindings/js/JSBindingsAllInOne.cpp:
+        * bindings/js/JSUndoManagerCustom.cpp: Added.
+        (WebCore):
+        (WebCore::JSUndoManager::transact):
+        * bindings/v8/DOMTransaction.cpp: Added.
+        (WebCore):
+        (WebCore::DOMTransaction::DOMTransaction):
+        (WebCore::DOMTransaction::create):
+        (WebCore::DOMTransaction::apply):
+        (WebCore::DOMTransaction::unapply):
+        (WebCore::DOMTransaction::reapply):
+        (WebCore::DOMTransaction::getFunction):
+        (WebCore::DOMTransaction::callFunction):
+        * bindings/v8/DOMTransaction.h: Added.
+        (WebCore):
+        (DOMTransaction):
+        (WebCore::DOMTransaction::undoManager):
+        (WebCore::DOMTransaction::setUndoManager):
+        * bindings/v8/V8HiddenPropertyName.h:
+        (WebCore):
+        * bindings/v8/custom/V8DOMTransactionCustom.cpp: Added.
+        (WebCore):
+        (WebCore::V8DOMTransaction::visitDOMWrapper):
+        * bindings/v8/custom/V8UndoManagerCustom.cpp: Added.
+        (WebCore):
+        (WebCore::V8UndoManager::transactCallback):
+        * dom/Document.cpp:
+        (WebCore::Document::~Document):
+        (WebCore::Document::undoManager):
+        * dom/Element.cpp:
+        (WebCore::Element::undoManager):
+        (WebCore::Element::disconnectUndoManager):
+        * editing/CompositeEditCommand.h:
+        * editing/DOMTransaction.idl: Added.
+        * editing/Editor.cpp:
+        (WebCore::Editor::appliedEditing):
+        (WebCore::Editor::unappliedEditing):
+        (WebCore::Editor::reappliedEditing):
+        (WebCore::Editor::canUndo):
+        (WebCore::Editor::undo):
+        (WebCore::Editor::canRedo):
+        (WebCore::Editor::redo):
+        * editing/UndoManager.cpp:
+        (WebCore::UndoManager::create):
+        (WebCore::UndoManager::UndoManager):
+        (WebCore::clearStack):
+        (WebCore):
+        (WebCore::UndoManager::disconnect):
+        (WebCore::UndoManager::stop):
+        (WebCore::UndoManager::~UndoManager):
+        (WebCore::createUndoManagerEntry):
+        (WebCore::UndoManager::transact):
+        (WebCore::UndoManager::undo):
+        (WebCore::UndoManager::redo):
+        (WebCore::UndoManager::registerUndoStep):
+        (WebCore::UndoManager::registerRedoStep):
+        (WebCore::UndoManager::clearUndo):
+        (WebCore::UndoManager::clearRedo):
+        * editing/UndoManager.h:
+        (WebCore):
+        (UndoManager):
+        (WebCore::UndoManager::position):
+        (WebCore::UndoManager::canUndo):
+        (WebCore::UndoManager::canRedo):
+        (WebCore::UndoManager::undoScopeHost):
+        (WebCore::UndoManager::ownerNode):
+        * editing/UndoManager.idl:
+        * editing/UndoStep.h:
+        (UndoStep):
+
 2012-08-16  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: CPU profile view select overlaps with status bar buttons
