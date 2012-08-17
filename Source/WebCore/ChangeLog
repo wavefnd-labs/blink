@@ -1,3 +1,24 @@
+2012-08-17  Brian Anderson  <brianderson@chromium.org>
+
+        Fix vsyncTick drought when vsync throttling is disabled
+        https://bugs.webkit.org/show_bug.cgi?id=94012
+
+        Reviewed by James Robinson.
+
+        CCFrameRateController made an assumption that every vsyncTick results
+        in a call to didBeginFrame, which is not necessarily true and causes
+        the CCFrameRateController to stop ticking when vsync is disabled. We
+        move the manual ticks out of didBeginFrame and manually tick in the
+        proper place.
+
+        CCFrameRateControllerTest updated with use cases that should tick
+        without a didBeginFrame and will fail without this patch.
+
+        * platform/graphics/chromium/cc/CCFrameRateController.cpp:
+        (WebCore::CCFrameRateController::setActive):
+        (WebCore::CCFrameRateController::onTimerTick):
+        (WebCore::CCFrameRateController::didBeginFrame):
+
 2012-08-16  Ojan Vafai  <ojan@chromium.org>
 
         Delete some dead code in RenderBox::computePercentageLogicalHeight
