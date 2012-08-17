@@ -1,3 +1,42 @@
+2012-08-16  Simon Hausmann  <simon.hausmann@nokia.com>
+
+        [Qt] Replace use of internal Weak smart pointer with JSWeakObjectMap
+        https://bugs.webkit.org/show_bug.cgi?id=93872
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        The intention of this patch series is to replace use of internal JSC
+        API with use of the stable and public C API.
+
+        The JSC::Weak template is internal API and the only part of the C API
+        that exposes similar functionality is the JSWeakObjectMap. It is
+        special in the sense that its life-time is tied to the life-time of the
+        JS global object, which in turn is subject to garbage collection. In
+        order to maximize re-use of the same map across different JSContextRef
+        instances, we use one JSWeakObjectMap per context group and store the
+        map in a separate context.
+
+        * bridge/qt/qt_instance.cpp:
+        (JSC::Bindings::unusedWeakObjectMapCallback):
+        (Bindings):
+        (JSC::Bindings::WeakMapImpl::WeakMapImpl):
+        (JSC::Bindings::WeakMapImpl::~WeakMapImpl):
+        (JSC::Bindings::WeakMap::~WeakMap):
+        (JSC::Bindings::WeakMap::set):
+        (JSC::Bindings::WeakMap::get):
+        (JSC::Bindings::WeakMap::remove):
+        * bridge/qt/qt_instance.h:
+        (WeakMapImpl):
+        (Bindings):
+        (WeakMap):
+        (QtInstance):
+        * bridge/qt/qt_runtime.cpp:
+        (JSC::Bindings::QtRuntimeMethod::~QtRuntimeMethod):
+        (JSC::Bindings::QtRuntimeMethod::jsObjectRef):
+        * bridge/qt/qt_runtime.h:
+        (QtRuntimeMethod):
+
+
 2012-08-16  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: build Elements, Resources, Timeline, Audits and Console panels lazily.
