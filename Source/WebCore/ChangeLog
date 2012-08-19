@@ -1,3 +1,38 @@
+2012-08-19  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Add 'plugin-types' and 'form-action' DOM API.
+        https://bugs.webkit.org/show_bug.cgi?id=94415
+
+        Reviewed by Adam Barth.
+
+        Experimental implementations of the new 'plugin-types' and 'form-action'
+        directives recently landed, but we neglected to add DOM API endpoints to
+        query their state. Those APIs have been added to the specification[1],
+        and this patch brings our implementation up to date.
+
+        Tests: http/tests/security/contentSecurityPolicy/1.1/securitypolicy-allowformaction.html
+               http/tests/security/contentSecurityPolicy/1.1/securitypolicy-allowplugintype.html
+
+        * page/DOMSecurityPolicy.cpp:
+        (isAllowed):
+            As a drive-by, change a parameter from a KURL to a String to match
+            the actual template. There's no reason to stringify an empty URL
+            when we can just use an empty string instead.
+        (isAllowedWithType):
+            Call out to the ContentSecurityPolicy object to check the protected
+            resource's ability to load a given media type.
+        (WebCore::DOMSecurityPolicy::allowsFormAction):
+            Call out to the ContentSecurityPolicy object to check the protected
+            resource's ability to submit a form to the given URL.
+        (WebCore):
+        (WebCore::DOMSecurityPolicy::allowsPluginType):
+            Pipes the plugin type through 'isAllowedWithType' for resolution.
+        * page/DOMSecurityPolicy.h:
+            Add the 'allowsPluginType' and 'allowsFormAction' methods.
+        (DOMSecurityPolicy):
+        * page/DOMSecurityPolicy.idl:
+            Add the 'allowsPluginType' and 'allowsFormAction' methods.
+
 2012-08-19  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: load network panel lazily
