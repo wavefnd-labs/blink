@@ -1,3 +1,27 @@
+2012-08-20  Dean Jackson  <dino@apple.com>
+
+        [WebGL] OES_vertex_array_object is not correctly un/binding or deleting
+        https://bugs.webkit.org/show_bug.cgi?id=94029
+
+        Reviewed by Ken Russell.
+
+        When the currently bound vertex array is deleted, the specification says that
+        the default object should be bound in its place. Also, binding a null object
+        as a vertex array was not actually clearing the bound object at the GL layer.
+        And lastly, it should not be possible to bind a deleted vertex array.
+
+        The test case for this is the public Khronos WebGL conformance suite, in particular:
+        conformance/extensions/oes-vertex-array-object.html
+
+        * html/canvas/OESVertexArrayObject.cpp:
+        (WebCore::OESVertexArrayObject::deleteVertexArrayOES): Check if the deleted array is
+        currently bound, and if so, unbind it.
+        (WebCore::OESVertexArrayObject::bindVertexArrayOES): Make sure never to bind an
+        array that has been marked as deleted.
+        * platform/graphics/opengl/Extensions3DOpenGL.cpp:
+        (WebCore::Extensions3DOpenGL::bindVertexArrayOES): Remove the null check on bind. We
+        do need to call glBindVertexArrayAPPLE with a null value in order to clear it.
+
 2012-08-20  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Move clearForClose() and clearForNavigation() from V8Proxy to ScriptController
