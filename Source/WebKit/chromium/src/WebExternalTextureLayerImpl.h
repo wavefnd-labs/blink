@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Google Inc. All rights reserved.
+ * Copyright (C) 2011 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,31 +23,42 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include <public/WebIOSurfaceLayer.h>
+#ifndef WebExternalTextureLayerImpl_h
+#define WebExternalTextureLayerImpl_h
 
-#include "IOSurfaceLayerChromium.h"
-#include <public/WebSize.h>
-
-using namespace WebCore;
+#include "TextureLayerChromium.h"
+#include <public/WebExternalTextureLayer.h>
 
 namespace WebKit {
 
-WebIOSurfaceLayer WebIOSurfaceLayer::create()
-{
-    RefPtr<IOSurfaceLayerChromium> layer = IOSurfaceLayerChromium::create();
-    layer->setIsDrawable(true);
-    return WebIOSurfaceLayer(layer.release());
+class WebLayerImpl;
+
+class WebExternalTextureLayerImpl : public WebExternalTextureLayer,
+                                    public WebCore::TextureLayerChromiumClient {
+public:
+    explicit WebExternalTextureLayerImpl(WebExternalTextureLayerClient*);
+    virtual ~WebExternalTextureLayerImpl();
+
+    // WebExternalTextureLayer implementation.
+    virtual WebLayer* layer() OVERRIDE;
+    virtual void setTextureId(unsigned) OVERRIDE;
+    virtual void setFlipped(bool) OVERRIDE;
+    virtual void setUVRect(const WebFloatRect&) OVERRIDE;
+    virtual void setOpaque(bool) OVERRIDE;
+    virtual void setPremultipliedAlpha(bool) OVERRIDE;
+    virtual void willModifyTexture() OVERRIDE;
+    virtual void setRateLimitContext(bool) OVERRIDE;
+
+    // TextureLayerChromiumClient implementation.
+    virtual unsigned prepareTexture(WebCore::CCTextureUpdateQueue&) OVERRIDE;
+    virtual WebGraphicsContext3D* context() OVERRIDE;
+
+private:
+    WebExternalTextureLayerClient* m_client;
+    OwnPtr<WebLayerImpl> m_layer;
+};
+
 }
 
-void WebIOSurfaceLayer::setIOSurfaceProperties(unsigned ioSurfaceId, WebSize size)
-{
-    unwrap<IOSurfaceLayerChromium>()->setIOSurfaceProperties(ioSurfaceId, size);
-}
+#endif // WebExternalTextureLayerImpl_h
 
-WebIOSurfaceLayer::WebIOSurfaceLayer(PassRefPtr<IOSurfaceLayerChromium> layer)
-    : WebLayer(layer)
-{
-}
-
-} // namespace WebKit
