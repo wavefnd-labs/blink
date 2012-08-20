@@ -1,3 +1,74 @@
+2012-08-20  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: load scripts panel lazily
+        https://bugs.webkit.org/show_bug.cgi?id=94416
+
+        Reviewed by Vsevolod Vlasov.
+
+        - removes access to WebInspector.panels.scripts and loads it lazily.
+        - extracts classes to their own files when classes residing in one file belong to different modules
+        - removes StylesPanel.js in favor of the actual classes it contains 
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/AdvancedSearchController.js:
+        (WebInspector.AdvancedSearchController.prototype.handleShortcut):
+        * inspector/front-end/BreakpointsSidebarPane.js:
+        * inspector/front-end/FilteredItemSelectionDialog.js:
+        * inspector/front-end/InspectorFrontendAPI.js:
+        (InspectorFrontendAPI._pendingCommands.isDebuggingEnabled):
+        (InspectorFrontendAPI.setDebuggingEnabled):
+        * inspector/front-end/NativeBreakpointsSidebarPane.js: Added.
+        (WebInspector.NativeBreakpointsSidebarPane):
+        (WebInspector.NativeBreakpointsSidebarPane.prototype._addListElement):
+        (WebInspector.NativeBreakpointsSidebarPane.prototype._removeListElement):
+        (WebInspector.NativeBreakpointsSidebarPane.prototype._reset):
+        * inspector/front-end/ObjectPropertiesSection.js:
+        (WebInspector.ObjectPropertyTreeElement.prototype._functionContextMenuEventFired):
+        * inspector/front-end/ScriptSnippetModel.js:
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype.showGoToSourceDialog):
+        * inspector/front-end/SnippetJavaScriptSourceFrame.js: Added.
+        (WebInspector.SnippetJavaScriptSourceFrame):
+        (WebInspector.SnippetJavaScriptSourceFrame.prototype.statusBarItems):
+        (WebInspector.SnippetJavaScriptSourceFrame.prototype._runButtonClicked):
+        * inspector/front-end/StyleSheetOutlineDialog.js: Added.
+        (WebInspector.StyleSheetOutlineDialog):
+        (WebInspector.StyleSheetOutlineDialog.show):
+        (WebInspector.StyleSheetOutlineDialog.prototype.itemTitleAt):
+        (WebInspector.StyleSheetOutlineDialog.prototype.itemSubtitleAt):
+        (WebInspector.StyleSheetOutlineDialog.prototype.itemKeyAt):
+        (WebInspector.StyleSheetOutlineDialog.prototype.itemsCount):
+        (WebInspector.StyleSheetOutlineDialog.prototype.requestItems):
+        (WebInspector.StyleSheetOutlineDialog.prototype.requestItems.didGetStyleSheet):
+        (WebInspector.StyleSheetOutlineDialog.prototype.selectItem):
+        (WebInspector.StyleSheetOutlineDialog.prototype.rewriteQuery):
+        * inspector/front-end/StyleSource.js: Renamed from Source/WebCore/inspector/front-end/StylesPanel.js.
+        (WebInspector.StylesUISourceCodeProvider):
+        (WebInspector.StylesUISourceCodeProvider.prototype.uiSourceCodes):
+        (WebInspector.StylesUISourceCodeProvider.prototype.rawLocationToUILocation):
+        (WebInspector.StylesUISourceCodeProvider.prototype.uiLocationToRawLocation):
+        (WebInspector.StylesUISourceCodeProvider.prototype._populate):
+        (WebInspector.StylesUISourceCodeProvider.prototype._resourceAdded):
+        (WebInspector.StylesUISourceCodeProvider.prototype.reset):
+        (WebInspector.StyleSource):
+        (WebInspector.StyleSource.prototype.isEditable):
+        (WebInspector.StyleSource.prototype.workingCopyCommitted):
+        (WebInspector.StyleSource.prototype.workingCopyChanged):
+        (WebInspector.StyleSource.prototype._callOrSetTimeout):
+        (WebInspector.StyleSource.prototype._commitIncrementalEdit):
+        (WebInspector.StyleSource.prototype._clearIncrementalUpdateTimer):
+        (WebInspector.InspectorStyleSource):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/inspector.js:
+        (WebInspector._panelDescriptors):
+        (WebInspector._registerShortcuts):
+        (WebInspector.documentKeyDown):
+        (WebInspector._showAnchorLocation):
+
 2012-08-20  Dominik Röttsches  <dominik.rottsches@intel.com>
 
         [EFL] Get rid of pango backend support once harfbuzz-ng is working
