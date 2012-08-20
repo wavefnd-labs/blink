@@ -1,3 +1,30 @@
+2012-08-19  Kentaro Hara  <haraken@chromium.org>
+
+        Remove RefPtr from SearchInputType::m_resultsButton and SearchInputType::m_cancelButton
+        https://bugs.webkit.org/show_bug.cgi?id=94339
+
+        Reviewed by Kent Tamura.
+
+        To avoid reference cycles of RefPtr<Node>s, we want to remove unnecessary
+        RefPtr<Node>s. The rationale is described in bug 94324.
+
+        SearchInputType::m_resultsButton and SearchInputType::m_cancelButton do not
+        need to be RefPtr<Node>s, because they are guaranteed to point to the shadow
+        DOM tree of the SearchInputType node, which is guaranteed to exist in the
+        subtree of the SearchInputType node.
+
+        No tests. No change in behavior.
+
+        * html/SearchInputType.cpp:
+        (WebCore::SearchInputType::SearchInputType):
+        (WebCore::SearchInputType::createShadowSubtree):
+        (WebCore::SearchInputType::resultsButtonElement):
+        (WebCore::SearchInputType::cancelButtonElement):
+        (WebCore::SearchInputType::destroyShadowSubtree):
+        (WebCore::SearchInputType::subtreeHasChanged):
+        * html/SearchInputType.h:
+        (SearchInputType):
+
 2012-08-19  Mike West  <mkwst@chromium.org>
 
         CSP 1.1: Add 'plugin-types' and 'form-action' DOM API.
