@@ -1,3 +1,82 @@
+2012-08-20  Alexandre Elias  <aelias@google.com>
+
+        [chromium] Move non-GL-specific code out of LayerRendererChromium
+        https://bugs.webkit.org/show_bug.cgi?id=93927
+
+        Reviewed by Adrienne Walker.
+
+        This patch moves most of the generic logic dealing with matrices and
+        render passes into a new class "CCDirectRenderer" that sits between
+        CCRenderer and LayerRendererChromium, and also publicly exposes a
+        few other things like the UnthrottledTextureUploader.
+
+        The plan is for the future software compositing implementation to also
+        derive from CCDirectRenderer, whereas the ubercompositor delegating
+        renderer will still derive from CCRenderer.
+
+        No new tests (no-op refactoring).
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/GeometryBinding.cpp:
+        (WebCore::GeometryBinding::GeometryBinding):
+        * platform/graphics/chromium/GeometryBinding.h:
+        (GeometryBinding):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::LayerRendererChromium::LayerRendererChromium):
+        (WebCore::LayerRendererChromium::beginDrawingFrame):
+        (WebCore::LayerRendererChromium::drawQuad):
+        (WebCore::LayerRendererChromium::drawRenderPassQuad):
+        (WebCore::LayerRendererChromium::drawTileQuad):
+        (WebCore::LayerRendererChromium::finishDrawingFrame):
+        (WebCore::LayerRendererChromium::drawQuadGeometry):
+        (WebCore::LayerRendererChromium::bindFramebufferToOutputSurface):
+        (WebCore):
+        (WebCore::LayerRendererChromium::bindFramebufferToTexture):
+        (WebCore::LayerRendererChromium::enableScissorTestRect):
+        (WebCore::LayerRendererChromium::disableScissorTest):
+        (WebCore::LayerRendererChromium::setDrawViewportSize):
+        (WebCore::LayerRendererChromium::makeContextCurrent):
+        (WebCore::LayerRendererChromium::initializeSharedObjects):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (LayerRendererChromium):
+        * platform/graphics/chromium/TextureCopier.h:
+        (TextureCopier):
+        * platform/graphics/chromium/TextureUploader.h:
+        (UnthrottledTextureUploader):
+        (WebCore::UnthrottledTextureUploader::create):
+        (WebCore::UnthrottledTextureUploader::~UnthrottledTextureUploader):
+        (WebCore::UnthrottledTextureUploader::UnthrottledTextureUploader):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCDirectRenderer.cpp: Added.
+        (projectionMatrix):
+        (canvasMatrix):
+        (WebCore):
+        (WebCore::CCDirectRenderer::DrawingFrame::initializeMatrices):
+        (WebCore::CCDirectRenderer::DrawingFrame::initializeScissors):
+        (WebCore::CCDirectRenderer::decideRenderPassAllocationsForFrame):
+        (WebCore::CCDirectRenderer::drawFrame):
+        (WebCore::CCDirectRenderer::drawRenderPass):
+        (WebCore::CCDirectRenderer::useRenderPass):
+        (WebCore::CCDirectRenderer::haveCachedResourcesForRenderPassId):
+        (WebCore::CCDirectRenderer::renderPassTextureSize):
+        (WebCore::CCDirectRenderer::renderPassTextureFormat):
+        * platform/graphics/chromium/cc/CCDirectRenderer.h: Added.
+        (WebCore):
+        (CCDirectRenderer):
+        (WebCore::CCDirectRenderer::~CCDirectRenderer):
+        (WebCore::CCDirectRenderer::resourceProvider):
+        (WebCore::CCDirectRenderer::CCDirectRenderer):
+        (DrawingFrame):
+        (WebCore::CCDirectRenderer::DrawingFrame::DrawingFrame):
+        (CachedTexture):
+        (WebCore::CCDirectRenderer::CachedTexture::create):
+        (WebCore::CCDirectRenderer::CachedTexture::~CachedTexture):
+        (WebCore::CCDirectRenderer::CachedTexture::isComplete):
+        (WebCore::CCDirectRenderer::CachedTexture::setIsComplete):
+        (WebCore::CCDirectRenderer::CachedTexture::CachedTexture):
+        (WebCore::CCDirectRenderer::quadVertexRect):
+        (WebCore::CCDirectRenderer::quadRectTransform):
+
 2012-08-20  Julien Chaffraix  <jchaffraix@webkit.org>
 
         Introduce a will-be-removed-from-tree notification in RenderObject
