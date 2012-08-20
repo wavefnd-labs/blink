@@ -1,3 +1,37 @@
+2012-08-20  Adam Klein  <adamk@chromium.org>
+
+        Remove redundant TOUCH_LISTENER event type
+        https://bugs.webkit.org/show_bug.cgi?id=94524
+
+        Reviewed by Ryosuke Niwa.
+
+        Code that needs to determine whether there are touch listeners
+        can instead call Document::touchEventHandlerCount(), added in r107832.
+        TOUCH_LISTENER didn't fit very well into the hasListenerType() model
+        anyway, as there's not a 1:1 correspondance between the enum value and
+        an event.
+
+        * dom/Document.cpp:
+        (WebCore::Document::addListenerTypeIfNeeded): Remove two bits of code:
+        the bookkeeping for TOUCH_LISTENER, and the notification into
+        ChromeClient (which is handled by calls to didAddTouchEventHandler in
+        all the places that call addListenerTypeIfNeeded).
+        (WebCore::Document::didRemoveTouchEventHandler): Remove bookkeeping for TOUCH_LISTENER.
+        * dom/Document.h:
+        * history/CachedFrame.cpp:
+        (WebCore::CachedFrameBase::restore): Call touchEventHandlerCount instead of hasListenerType.
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::updateType): ditto
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleTouchEvent): ditto
+        * page/Frame.cpp:
+        (WebCore::Frame::setDocument): ditto
+        * testing/Internals.cpp: Remove hasTouchEventListener method since its
+        data source no longer exists.
+        * testing/Internals.h: ditto
+        (Internals):
+        * testing/Internals.idl: ditto
+
 2012-08-16  James Robinson  <jamesr@chromium.org>
 
         [chromium] Change WebLayer from a concrete type to a pure virtual interface
