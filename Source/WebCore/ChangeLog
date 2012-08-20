@@ -1,3 +1,27 @@
+2012-08-20  Tony Chang  <tony@chromium.org>
+
+        RenderGrid children should always be RenderBoxes
+        https://bugs.webkit.org/show_bug.cgi?id=94305
+
+        Reviewed by Abhishek Arya.
+
+        During RenderGrid::layout, we assume all the children are RenderBoxes.
+        When removing children, if the last child is an anonymous block, we don't
+        want to remove the anonymous block for grids. Ensure this doesn't happen
+        by adding canCollapseAnonymousBlockChild to RenderBlock (flexboxen and
+        grid can override this method).
+
+        Test: fast/css-grid-layout/should-not-collapse-anonymous-blocks.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::removeChild): Check canCollapseAnonymousBlockChild().
+        * rendering/RenderBlock.h:
+        (WebCore::RenderBlock::canCollapseAnonymousBlockChild):
+        (RenderBlock):
+        * rendering/RenderDeprecatedFlexibleBox.h: canCollapseAnonymousBlockChild returns false.
+        * rendering/RenderFlexibleBox.h: canCollapseAnonymousBlockChild returns false.
+        * rendering/RenderGrid.h: canCollapseAnonymousBlockChild returns false.
+
 2012-08-20  Kenneth Russell  <kbr@google.com>
 
         Unreviewed, rolling out r126026.
