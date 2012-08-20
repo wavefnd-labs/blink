@@ -1,5 +1,27 @@
 2012-08-19  Benjamin Poulain  <benjamin@webkit.org>
 
+        Do not allocate SQLiteDatabase's m_openErrorMessage until its needed
+        https://bugs.webkit.org/show_bug.cgi?id=94434
+
+        Reviewed by Andreas Kling.
+
+        Previously, m_openErrorMessage was initialized from a static literal string whenever
+        the database is not open.
+
+        This patch changes the way we use m_openErrorMessage to only allocate a string in the
+        few cases where we need it. If there is no error message, we fallback to the previous
+        default string.
+
+        The goal is to prevent allocating the string unless needed. That saves initialization time
+        and memory.
+
+        * platform/sql/SQLiteDatabase.cpp:
+        (WebCore::SQLiteDatabase::SQLiteDatabase):
+        (WebCore::SQLiteDatabase::close):
+        (WebCore::SQLiteDatabase::lastErrorMsg):
+
+2012-08-19  Benjamin Poulain  <benjamin@webkit.org>
+
         Use initialization from literal for HTML Input type names
         https://bugs.webkit.org/show_bug.cgi?id=94421
 
