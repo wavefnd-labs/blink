@@ -1,3 +1,37 @@
+2012-08-20  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Update HUD resources as a final step to drawing a frame
+        https://bugs.webkit.org/show_bug.cgi?id=93743
+
+        Reviewed by Adrienne Walker.
+
+        The HUD should be painted as a last step, after the whole frame has been
+        generated. This introduces a new "updateHudTexture" method on the HUD layer
+        and has the HUD layer save itself on CCLayerTreeHostImpl so that it can
+        call back to this method.
+
+        This allows the CCLayerTreeHostImpl to cause the HUD layer to update its
+        texture as a final step before drawing the frame, allowing the HUD texture
+        to contain all possible information about the current frame.
+
+        * platform/graphics/chromium/cc/CCHeadsUpDisplayLayerImpl.cpp:
+        (WebCore::CCHeadsUpDisplayLayerImpl::willDraw):
+        (WebCore):
+        (WebCore::CCHeadsUpDisplayLayerImpl::appendQuads):
+        (WebCore::CCHeadsUpDisplayLayerImpl::updateHudTexture):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplayLayerImpl.h:
+        (CCHeadsUpDisplayLayerImpl):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::finishCommitOnImplThread):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::drawLayers):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (WebCore):
+        (WebCore::CCLayerTreeHostImpl::setHudLayer):
+        (WebCore::CCLayerTreeHostImpl::hudLayer):
+        (CCLayerTreeHostImpl):
+
 2012-08-20  Ian Vollick  <vollick@chromium.org>
 
         [chromium] Add tracing for active composited animations
