@@ -1,3 +1,21 @@
+2012-08-20  Ken Buchanan  <kenrb@chromium.org>
+        Line boxes not being dirtied correctly during inline removal
+        https://bugs.webkit.org/show_bug.cgi?id=93156
+
+        Reviewed by David Hyatt.
+
+        When two inline objects were being removed from different lineboxes
+        in an ancestral RenderBlock, the way the RenderBlock was being marked
+        prevented the second linebox from being marked dirty. This causes
+        it to not get layout in the subsequent layout pass.
+
+        This patch causes only the descendants corresponding to actual changed
+        lineboxes to have their ancestorLineBoxDirty bit set, rather than
+        the RenderBlock that contains the lineboxes themselves.
+
+        * rendering/RenderLineBoxList.cpp:
+        (WebCore::RenderLineBoxList::dirtyLinesFromChangedChild):
+
 2012-08-20  John Mellor  <johnme@chromium.org>
 
         Text Autosizing: Only take into account block width <= document layout width.
