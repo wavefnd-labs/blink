@@ -1,3 +1,36 @@
+2012-08-19  MORITA Hajime  <morrita@google.com>
+
+        DOM mutation against including <link> shouldn't trigger pending HTML parser.
+        https://bugs.webkit.org/show_bug.cgi?id=93641
+
+        Reviewed by Ryosuke Niwa.
+
+        HTMLLinkElement::removedFrom() invoked Document::removePendingSheet(), which can trigger
+        HTMLParser that can mutate DOM tree. DOM mutation reentrancy on like this is problematic and
+        should be prohibited.
+
+        This change add an variation of Document::removePendingSheet() which postpones the notification
+        which triggers DOM mutation, and flush such pending notifications at the end of ongoing mutation.
+
+        Test: http/tests/loading/remove-child-triggers-parser.html
+
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore::ChildNodeRemovalNotifier::notify): Flushed pending notifications at the end.
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::removePendingSheet): Added RemovePendingSheetNotificationType parameter.
+        (WebCore):
+        (WebCore::Document::didRemoveAllPendingStylesheet): Extracted from removePendingSheet()
+        * dom/Document.h:
+        (Document):
+        (WebCore::Document::setNeedsNotifyRemoveAllPendingStylesheet): A flag setter.
+        (WebCore::Document::notifyRemovePendingSheetIfNeeded):
+        (WebCore):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::removedFrom): Switched to use "notification later" version of removePendingSheet()
+        (WebCore::HTMLLinkElement::removePendingSheet): Added RemovePendingSheetNotificationType parameter.
+        * html/HTMLLinkElement.h:
+
 2012-08-19  Kentaro Hara  <haraken@chromium.org>
 
         Remove RefPtr from HTMLProgressElement::m_value
