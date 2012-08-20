@@ -1,5 +1,45 @@
 2012-08-19  Yoshifumi Inoue  <yosin@chromium.org>
 
+        [Forms] Set SpinButtonElement free from HTMLInputElement
+        https://bugs.webkit.org/show_bug.cgi?id=93941
+
+        Reviewed by Kent Tamura.
+
+        This patch removes dependency to HTMLInputElement from SpinButtonElement.
+
+        Functionalities used to be calling HTMLInputElement functions are
+        replaced to calling functions SpinButtonOwner class.
+
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::focusAndSelectSpinButtonOwner): Moved functionality from SpinButtonElement::defaultEventHandler.
+        (WebCore::TextFieldInputType::shouldSpinButtonRespondToMouseEvents): Moved code from SpinButtonElement::willRespondToMouseClickEvents
+        (WebCore::TextFieldInputType::shouldSpinButtonRespondToWheelEvents): Moved code from SpinButtonElement::forwardEvent
+        * html/TextFieldInputType.h:
+        (TextFieldInputType):
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::focusAndSelectEditControlOwner): Moved functionality from SpinButtonElement::defaultEventHandler.
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::isEditControlOwnerFocused): Added for DateTimeEditElement::shouldSpinButtonRespondToWheelEvents.
+        * html/TimeInputType.h:
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditElement::focusAndSelectSpinButtonOwner): Added for SpinButtonElementOwner class change.
+        (WebCore::DateTimeEditElement::shouldSpinButtonRespondToMouseEvents): ditto
+        (WebCore::DateTimeEditElement::shouldSpinButtonRespondToWheelEvents): ditto
+        * html/shadow/DateTimeEditElement.h:
+        (EditControlOwner): Added new virtual function declarations for SpinButtonElementOwner class change.
+        (DateTimeEditElement): Added new function declarations for SpinButtonElementOwner.
+        * html/shadow/SpinButtonElement.cpp:
+        (WebCore::SpinButtonElement::defaultEventHandler): Changed to use SpinButtonElementOwner instead of HTMLInputElement.
+        (WebCore::SpinButtonElement::forwardEvent): ditto
+        (WebCore::SpinButtonElement::willRespondToMouseMoveEvents): ditto
+        (WebCore::SpinButtonElement::willRespondToMouseClickEvents): ditto
+        (WebCore::SpinButtonElement::step): ditto
+        (WebCore::SpinButtonElement::shouldRespondToMouseEvents): Added helper function for calling SpinButtonOwner instance.
+        * html/shadow/SpinButtonElement.h:
+        (SpinButtonOwner): Added new virtual function declarations.
+        (SpinButtonElement):
+
+2012-08-19  Yoshifumi Inoue  <yosin@chromium.org>
+
         [Tests] time-multiple-fields-appearance-basic.html and time-multiple-fields-appearance-pseudo-elements.html are failed on Chromium Mac
         https://bugs.webkit.org/show_bug.cgi?id=94439
 
