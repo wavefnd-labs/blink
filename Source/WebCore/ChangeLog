@@ -1,3 +1,61 @@
+2012-08-20  John Mellor  <johnme@chromium.org>
+
+        Text Autosizing: Only take into account block width <= document layout width.
+        https://bugs.webkit.org/show_bug.cgi?id=93862
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Instead of calculating the textAutosizingMultiplier purely based on the
+        width of each block, we now work out the maximum width of the block
+        that could be displayed onscreen at any one time, and use that value.
+        This avoids excessive text size multiplication (there's no point making
+        text bigger than this, since you wouldn't be able to zoom out far
+        enough to read it!).
+
+        To determine the maximum onscreen block width, we take the minimum of
+        the block width and the layoutWidth of the narrowest non-flattened
+        ancestor frame. Flattened frames are ignored since they don't impose a
+        hard limit on the maximum width that can be displayed, instead they can
+        stretch to fit their contents. Note that on mobile the layoutWidth of
+        the main frame is the fixed layout width aka viewport width.
+
+        In practice this caps the maximum multiplier to a value that depends
+        on the metrics of the device. For example on a Nexus S (480 x 800px
+        and 1.5x devicePixelRatio) with a 980px default fixed layout width,
+        this limits the multiplier to: 980 / (480/1.5) = 3.0625
+
+        Most pages won't have blocks that actually hit this cap, or they will
+        only slightly exceed it (so their multiplier will only be slightly
+        reduced). For example it's not uncommon for desktop pages to be
+        slightly wider than 980px, but they would have to additionally have
+        text that spans the full width of the page for this to affect them, and
+        even then it would merely slightly decrease their multiplier).
+
+        This will have more dramatic effects on the rare desktop pages which
+        give a width=device-width (or similar) mobile viewport tag (on ports
+        which support viewports). A follow-up patch will hopefully address this
+        by wrapping the text in such excessively wide blocks to the layoutWidth.
+
+        Tests: fast/text-autosizing/narrow-iframe-flattened.html
+               fast/text-autosizing/narrow-iframe.html
+               fast/text-autosizing/wide-block.html
+               fast/text-autosizing/wide-iframe.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::isInChildFrameWithFrameFlattening):
+
+            Made public and const, so can be used from TextAutosizer.
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::processSubtree):
+
+            Computes the minimum layout width of the parent frames, as described
+            above.
+
+        (WebCore::TextAutosizer::processBlock):
+
+            Limits used block width to this min layout width.
+
 2012-08-20  Hans Wennborg  <hans@chromium.org>
 
         Respect runtime flags for Device Orientation and Device Motion
