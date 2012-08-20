@@ -1,3 +1,62 @@
+2012-08-20  Sami Kyostila  <skyostil@chromium.org>
+
+        [chromium] Convert screen space scroll gestures to layer space
+        https://bugs.webkit.org/show_bug.cgi?id=92499
+
+        Reviewed by James Robinson.
+
+        Scroll gestures should be converted from screen space to local layer space to
+        correctly apply the scroll delta to page scaled and/or transformed layers.
+        Visually this means that the scrolled content will always follow the user's
+        finger for any "well-formed" layer transform.
+
+        Wheel scroll deltas will still be directly interpreted as local layer scroll
+        coordinates.
+
+        We also adjust the logic for propagating ("bubbling") scroll events to parent
+        layers. Previously a parent layer was allowed to scroll in the screen-space
+        axis orthogonal to the direction the starting layer scrolled toward. For
+        example if a vertically scrolling layer is scrolled diagonally down and right,
+        the layer moves down and its parent to the right.
+
+        This patch generalizes this behavior to non-axis aligned transformed layers so
+        that the scrolling direction of any parent is constrained to be perpendicular
+        direction of movement of the starting layer. This makes the scrolling behavior
+        of transformed layers physically plausible. For instance, assume a 45 degree
+        rotated, vertically scrollable layer. Dragging your finger vertically
+        (relative to the layer) scrolls the layer up and down, while horizontal
+        movement results in the parent of the layer moving in a corresponding way.
+
+        Since generally users want to scroll a single layer in one direction, this
+        patch also introduces a rule that if the resulting movement of a layer is
+        within 45 degrees of the original scroll input, the bubbling process is
+        stopped. This makes it possible to reliably scroll a single layer without
+        affecting any of its parents.
+
+        Added new unit tests:
+            CCLayerTreeHostImplTest.scrollAxisAlignedRotatedLayer
+            CCLayerTreeHostImplTest.scrollNonAxisAlignedRotatedLayer
+            CCLayerTreeHostImplTest.scrollScaledLayer
+            CCMathUtilTest.smallestAngleBetweenVectors
+            CCMathUtilTest.vectorProjection
+
+        * platform/graphics/chromium/cc/CCInputHandler.h:
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::scrollBegin):
+        (WebCore::scrollLayerWithScreenSpaceDelta):
+        (WebCore):
+        (WebCore::scrollLayerWithLocalDelta):
+        (WebCore::CCLayerTreeHostImpl::scrollBy):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCMathUtil.cpp:
+        (WebCore::CCMathUtil::smallestAngleBetweenVectors):
+        (WebCore):
+        (WebCore::CCMathUtil::projectVector):
+        * platform/graphics/chromium/cc/CCMathUtil.h:
+        (CCMathUtil):
+
 2012-08-20  Carlos Garcia Campos  <cgarcia@igalia.com>
 
         [GTK] Add API to set preferred languages to WebKit2 GTK+
