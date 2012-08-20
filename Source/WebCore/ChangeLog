@@ -1,3 +1,48 @@
+2012-08-20  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
+
+        [css3-text] Add parsing support for -webkit-text-decoration-style
+        https://bugs.webkit.org/show_bug.cgi?id=94093
+
+        Reviewed by Julien Chaffraix.
+
+        This patch implements the "text-decoration-style" property parsing as specified
+        in CSS3 working draft, with "-webkit-" prefix. The specification can be found
+        here: http://dev.w3.org/csswg/css3-text/#text-decoration-style
+
+        Additionally, Mozilla implementation details can be found here:
+        https://developer.mozilla.org/en-US/docs/CSS/text-decoration-style
+
+        This is an individual task for bug 90958. Rendering support will be handled on a
+        different bug.
+
+        Test: fast/css3-text-decoration/getComputedStyle/getComputedStyle-text-decoration-style.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::renderTextDecorationStyleFlagsToCSSValue):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::operator TextDecorationStyle):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/CSSPropertyNames.in:
+        * css/CSSValueKeywords.in:
+        * css/StyleBuilder.cpp:
+        (WebCore::StyleBuilder::StyleBuilder):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::diff):
+        * rendering/style/RenderStyle.h:
+        * rendering/style/RenderStyleConstants.h: Added non-bitwise TextDecorationStyle enum.
+        * rendering/style/StyleRareNonInheritedData.cpp:
+        (WebCore::StyleRareNonInheritedData::StyleRareNonInheritedData): Added m_textDecorationStyle to default and copy constructors.
+        (WebCore::StyleRareNonInheritedData::operator==): Include m_textDecorationStyle in comparison.
+        * rendering/style/StyleRareNonInheritedData.h:
+        (StyleRareNonInheritedData):
+        Added m_textDecorationStyle here as it won't be used regularly.
+
 2012-08-20  Jakob Petsovits  <jpetsovits@rim.com>
 
         [BlackBerry] Persist cookies not from atexit() but the new onThreadFinished()
