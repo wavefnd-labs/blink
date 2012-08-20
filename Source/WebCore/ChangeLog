@@ -1,5 +1,46 @@
 2012-08-20  Kentaro Hara  <haraken@chromium.org>
 
+        [V8] Move V8Proxy::newInstance() to V8ObjectConstructor
+        https://bugs.webkit.org/show_bug.cgi?id=94443
+
+        Reviewed by Adam Barth.
+
+        To kill V8Proxy, this patch moves V8Proxy::newInstance() to
+        V8ObjectConstructor::newInstanceInFrame().
+        In addition, this patch does the following things:
+
+        - For consistency with V8ObjectConstructor::newInstanceInFrame(),
+        this patch inserts an if(v8::V8::IsDead()) check to just after
+        Function::NewInstance(). The check is done by V8Binding::assertIfV8IsDead().
+
+        - To avoid #include circular dependency, this patch de-inline
+        V8ObjectConstructor::newInstance()s. I didn't observe any perf regression.
+        I don't think these methods are worth being inlined, because
+        these methods call Function::NewInstance(), which is not inlined
+        and calls a bunch of heavy mehtods in V8.
+
+        No tests. No change in behavior.
+
+        * bindings/v8/NPV8Object.cpp:
+        (_NPN_Construct):
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::assertIfV8IsDead):
+        (WebCore):
+        * bindings/v8/V8Binding.h:
+        (WebCore):
+        * bindings/v8/V8ObjectConstructor.cpp:
+        (WebCore::V8ObjectConstructor::newInstance):
+        (WebCore):
+        (WebCore::V8ObjectConstructor::newInstanceInFrame):
+        * bindings/v8/V8ObjectConstructor.h:
+        (WebCore):
+        (V8ObjectConstructor):
+        * bindings/v8/V8Proxy.cpp:
+        (WebCore::V8Proxy::runScript):
+        (WebCore::V8Proxy::instrumentedCallFunction):
+
+2012-08-20  Kentaro Hara  <haraken@chromium.org>
+
         [V8] Move V8Proxy::m_extensions to ScriptController
         https://bugs.webkit.org/show_bug.cgi?id=94444
 
