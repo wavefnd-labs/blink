@@ -1,3 +1,35 @@
+2012-08-20  Adam Klein  <adamk@chromium.org>
+
+        Allow MutationEvents to be enabled/disabled per context
+        https://bugs.webkit.org/show_bug.cgi?id=94016
+
+        Reviewed by Ojan Vafai.
+
+        Chromium wants to be able to turn MutationEvents off for some
+        Documents (e.g., for Apps V2). This patch makes the firing (and the
+        constructor on DOMWindow) of MutationEvents a per-context feature, with
+        the default being enabled.
+
+        No functional change (since the feature defaults to enabled).
+        It's not clear to me that there's a way to test this in DRT without
+        adding a special hook for this one feature. It will be tested in
+        Chromium once it's implemented in Chromium.
+
+        * dom/ContextFeatures.cpp:
+        (WebCore::ContextFeatures::mutationEventsEnabled): Add new method,
+        with the default being enabled.
+        * dom/ContextFeatures.h:
+        * dom/Document.cpp:
+        (WebCore::Document::addMutationEventListenerTypeIfEnabled): Add new
+        method that checks the ContextFeature flag before adding the passed-in
+        listener type.
+        (WebCore::Document::addListenerTypeIfNeeded): Call the new method
+        instead of addListenerType for MutationEvent types.
+        * dom/Document.h:
+        (WebCore::Document::addListenerType): Make private to avoid anyone
+        outside Document from enabling MutationEvent listeners. All callers
+        must go through addListenerTypeIfNeeded.
+
 2012-08-20  Levi Weintraub  <leviw@chromium.org>
 
         [Sub-pixel Layout] Block selection gap repainting can leave one pixel gaps
