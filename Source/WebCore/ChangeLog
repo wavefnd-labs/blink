@@ -1,3 +1,26 @@
+2012-08-21  Mike West  <mkwst@chromium.org>
+
+        Blocking a resource via Content Security Policy should trigger an Error event.
+        https://bugs.webkit.org/show_bug.cgi?id=89440
+
+        Reviewed by Jochen Eisinger.
+
+        If a CSP directive is violated, CachedResourceLoader will trigger a
+        console error, and return a null image. In that case, we now dispatch
+        an error on the relevant element.
+
+        Adjusted http/tests/security/contentSecurityPolicy/image-blocked.html
+        and http/tests/security/contentSecurityPolicy/register-bypassing-scheme.html
+        to test the new behavior.
+
+        This has the side-effect of also generating errors for images blocked by
+        Chromium's content settings. Adjusted
+        platform/chromium/permissionclient/image-permissions.html to agree with
+        the new behavior.
+
+        * loader/ImageLoader.cpp:
+        (WebCore::ImageLoader::updateFromElement):
+
 2012-08-21  Taiju Tsuiki  <tzik@chromium.org>
 
         Web Inspector: Split out crumb list part of styles from elementsPanel.css
