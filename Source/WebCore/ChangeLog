@@ -1,3 +1,35 @@
+2012-08-20  MORITA Hajime  <morrita@google.com>
+
+        load event shouldn't fired during node insertion traversals.
+        https://bugs.webkit.org/show_bug.cgi?id=94447
+
+        Reviewed by Ryosuke Niwa.
+
+        HTMLFrameElementBase::didNotifyDescendantInsertions() with empty @src
+        can trigger a load event during ChildNodeInsertionNotifier
+        traversal, whose handler can make DOM tree state inconsistent.
+
+        This change introduces a post traversal hook,
+        didNotifySubtreeInsertions(), for the insertion traversal and
+        replaces the problematic didNotifyDescendantInsertions() with it.
+
+        Since didNotifySubtreeInsertions() is invoked after the traversal,
+        it is safe for event handlers to mutate the tree.
+
+        Test: fast/frames/iframe-onload-and-domnodeinserted.html
+
+        * dom/ContainerNodeAlgorithms.h:
+        (ChildNodeInsertionNotifier): Added a post subtree notification.
+        (WebCore::ChildNodeInsertionNotifier::notifyNodeInsertedIntoDocument):
+        (WebCore::ChildNodeInsertionNotifier::notify):
+        * dom/Node.h:
+        (WebCore::Node::didNotifySubtreeInsertions): Newly added.
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::insertedInto): Now returns InsertionShouldCallDidNotifySubtreeInsertions
+        (WebCore::HTMLFrameElementBase::didNotifySubtreeInsertions): Replaced didNotifyDescendantInsertions()
+        * html/HTMLFrameElementBase.h:
+        (HTMLFrameElementBase):
+
 2012-08-20  Shinya Kawanaka  <shinyak@chromium.org> 
 
         Regression(r126127): Build break on multiple platforms
