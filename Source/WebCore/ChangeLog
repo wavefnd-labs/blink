@@ -1,3 +1,27 @@
+2012-08-20  Kent Tamura  <tkent@chromium.org>
+
+        [Chromium-win] Use native digits in parsing/formatting dates in the textfield part of input[type=date]
+        https://bugs.webkit.org/show_bug.cgi?id=94281
+
+        Reviewed by Hajime Morita.
+
+        Tests: Add some cases to Source/WebKit/chromium/tests/LocaleWinTest.cpp
+
+        * platform/text/LocaleWin.cpp:
+        (WebCore::LocaleWin::isLocalizedDigit): A helper for parseNumber(). This
+        return true if the specified character is one of native digits.
+        (WebCore::LocaleWin::parseNumber):
+        Try to parse ASCII digits, then try to parse native digtis. This
+        becomes a member of LocaleWin because it uses
+        convertFromLocalizedNumber().
+        (WebCore::LocaleWin::appendNumber): Apply convertToLocalizedNumber().
+        (WebCore::LocaleWin::appendTwoDigitsNumber): ditto.
+        (WebCore::LocaleWin::appendFourDigitsNumber): ditto.
+        * platform/text/LocaleWin.h:
+        (LocaleWin):
+        - Make some static functions member functions of LocaleWin.
+        - Add isLocalizedDigit().
+
 2012-08-20  Kentaro Hara  <haraken@chromium.org>
 
         Rename collectGarbageIfNecessary() to hintForCollectGarbage()
