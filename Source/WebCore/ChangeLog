@@ -1,3 +1,66 @@
+2012-08-21  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Make column rules paint properly.
+        https://bugs.webkit.org/show_bug.cgi?id=94616
+
+        Reviewed by Simon Fraser.
+
+        Make the new multi-column code paint column rules and also prepare it for painting
+        the actual column contents.
+
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::RenderMultiColumnBlock::ensureColumnSets):
+        Remove the addRegionToThread call, since this is now done automatically in RenderRegion::insertedIntoTree.
+        
+        * rendering/RenderMultiColumnBlock.h:
+        (WebCore::RenderMultiColumnBlock::flowThread):
+        Make public so that RenderMultiColumnSet can access it.
+        
+        (RenderMultiColumnBlock):
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::columnGap):
+        Add a column gap fetch method. It's identical to the one on RenderBlock (which will eventually go away
+        when we kill the old multi-column code).
+        
+        (WebCore::RenderMultiColumnSet::columnRectAt):
+        Also identical to the RenderBlock version of this method. Gets the rect for the nth column.
+        
+        (WebCore::RenderMultiColumnSet::paintReplaced):
+        Subclass paintReplaced in order to do column rules and contents painting.
+        
+        (WebCore::RenderMultiColumnSet::paintColumnRules):
+        (WebCore::RenderMultiColumnSet::paintColumnContents):
+        Similar to the methods on RenderBlock. The former paints the rules and the latter paints the contents of
+        the flow thread into the columns.
+        
+        * rendering/RenderMultiColumnSet.h:
+        (RenderMultiColumnSet):
+        Add the declarations of all the new methods.
+        
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::installFlowThread):
+        Added a new virtual function for installing flow threads when they didn't exist at construction time.
+        This only applies to actual CSS Regions, so the subclass of the method in RenderRegionSet just does
+        nothing.
+        
+        (WebCore::RenderRegion::attachRegion):
+        Get the named flow thread code out of attachRegion, since it broke multi-column. Moved it into a
+        virtual function, installFlowThread, that is only used by actual CSS regions. Eventually we may
+        want a RenderRegion subclass that represents a region for a named flow thread only, but for now
+        let the code sit in installFlowThread in the base class.
+        
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        Add installFlowThread declaration.
+        
+        * rendering/RenderRegionSet.cpp:
+        (WebCore::RenderRegionSet::installFlowThread):
+        installFlowThread for region sets just does nothing, since we don't use named flow threads.
+        
+        * rendering/RenderRegionSet.h:
+        (RenderRegionSet):
+        Add the override of installFlowThread.
+
 2012-08-21  Patrick Gansterer  <paroga@webkit.org>
 
         [WIN] Build fix for !ENABLE(DRAG_SUPPORT).
