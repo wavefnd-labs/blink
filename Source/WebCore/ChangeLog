@@ -1,3 +1,21 @@
+2012-08-21  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Should be able to destroy a CCLayerTreeHost without manually setting the root layer
+        https://bugs.webkit.org/show_bug.cgi?id=94631
+
+        Reviewed by Adrienne Walker.
+
+        In the depths of time when dinosaurs roamed the earth, LayerChromium and CCLayerTreeHost were both reference
+        counted and there was a cycle between the root LayerChromium and CCLayerTreeHost. This required all users of
+        CCLayerTreeHost to manually break the cycle by calling setRootLayer(0) before dropping their reference to the
+        host. Nowadays, CCLayerTreeHost has a single owner and LayerChromiums only have a weak pointer to their host
+        so we should just do this cleanup ourselves instead of imposing it on callers.
+
+        Unit test added to LayerChromiumTest.cpp
+
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::~CCLayerTreeHost):
+
 2012-08-21  Ulan Degenbaev  <ulan@chromium.org>
 
         Call AdjustAmountOfExternalAllocatedMemory when V8ArrayBuffer constructed and destructed
