@@ -1,3 +1,72 @@
+2012-08-21  Alexandre Elias  <aelias@google.com>
+
+        [chromium] Add software bitmap resources to CCResourceProvider
+        https://bugs.webkit.org/show_bug.cgi?id=93677
+
+        Reviewed by Adrienne Walker.
+
+        This adds the ability to CCResourceProvider to use software bitmaps.
+        They are allocated as plain-old-memory, and exposed as Skia objects.
+
+        We want the ResourceProvider to be able to handle different resource
+        types at the same time.  In practice, a default resource type is
+        desired for most uses within a single compositor instance, which is
+        specified by the default resource type.  Default resource types are
+        expected to be mostly 1-to-1 with CCRenderer types.
+
+        New tests added by parametrizing existing CCResourceProvider tests.
+
+        * platform/graphics/chromium/FrameBufferSkPictureCanvasLayerTextureUpdater.cpp:
+        (WebCore::FrameBufferSkPictureCanvasLayerTextureUpdater::updateTextureRect):
+        * platform/graphics/chromium/LayerRendererChromium.cpp:
+        (WebCore::applyFilters):
+        (WebCore::LayerRendererChromium::drawRenderPassQuad):
+        (WebCore::LayerRendererChromium::drawTileQuad):
+        (WebCore::LayerRendererChromium::drawYUVVideoQuad):
+        (WebCore::LayerRendererChromium::drawTextureQuad):
+        (WebCore::LayerRendererChromium::getFramebufferTexture):
+        (WebCore::LayerRendererChromium::bindFramebufferToTexture):
+        * platform/graphics/chromium/LayerRendererChromium.h:
+        (DrawingFrame):
+        * platform/graphics/chromium/cc/CCResourceProvider.cpp:
+        (WebCore::CCResourceProvider::createResource):
+        (WebCore):
+        (WebCore::CCResourceProvider::createGLTexture):
+        (WebCore::CCResourceProvider::createBitmap):
+        (WebCore::CCResourceProvider::createResourceFromExternalTexture):
+        (WebCore::CCResourceProvider::deleteResource):
+        (WebCore::CCResourceProvider::upload):
+        (WebCore::CCResourceProvider::flush):
+        (WebCore::CCResourceProvider::shallowFlushIfSupported):
+        (WebCore::CCResourceProvider::lockForRead):
+        (WebCore::CCResourceProvider::unlockForRead):
+        (WebCore::CCResourceProvider::lockForWrite):
+        (WebCore::CCResourceProvider::unlockForWrite):
+        (WebCore::CCResourceProvider::ScopedReadLockGL::ScopedReadLockGL):
+        (WebCore::CCResourceProvider::ScopedReadLockGL::~ScopedReadLockGL):
+        (WebCore::CCResourceProvider::ScopedWriteLockGL::ScopedWriteLockGL):
+        (WebCore::CCResourceProvider::ScopedWriteLockGL::~ScopedWriteLockGL):
+        (WebCore::CCResourceProvider::populateSkBitmapWithResource):
+        (WebCore::CCResourceProvider::ScopedReadLockSoftware::ScopedReadLockSoftware):
+        (WebCore::CCResourceProvider::ScopedReadLockSoftware::~ScopedReadLockSoftware):
+        (WebCore::CCResourceProvider::ScopedWriteLockSoftware::ScopedWriteLockSoftware):
+        (WebCore::CCResourceProvider::ScopedWriteLockSoftware::~ScopedWriteLockSoftware):
+        (WebCore::CCResourceProvider::CCResourceProvider):
+        * platform/graphics/chromium/cc/CCResourceProvider.h:
+        (WebCore):
+        (WebCore::CCResourceProvider::setCreationPolicy):
+        (WebCore::CCResourceProvider::creationPolicy):
+        (CCResourceProvider):
+        (ScopedReadLockGL):
+        (WebCore::CCResourceProvider::ScopedReadLockGL::textureId):
+        (ScopedWriteLockGL):
+        (WebCore::CCResourceProvider::ScopedWriteLockGL::textureId):
+        (ScopedReadLockSoftware):
+        (WebCore::CCResourceProvider::ScopedReadLockSoftware::skBitmap):
+        (ScopedWriteLockSoftware):
+        (WebCore::CCResourceProvider::ScopedWriteLockSoftware::skCanvas):
+        (Resource):
+
 2012-08-21  Tab Atkins  <tabatkins@google.com>
 
         Track -webkit property usage.
