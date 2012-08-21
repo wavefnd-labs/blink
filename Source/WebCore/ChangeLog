@@ -1,3 +1,24 @@
+2012-08-20  Sudarsana Nagineni  <sudarsana.nagineni@linux.intel.com>
+
+        Cancel the outstanding vibration pattern if the pattern is 0 or an empty list
+        https://bugs.webkit.org/show_bug.cgi?id=94085
+
+        Reviewed by Kentaro Hara.
+
+        vibrate() method to stop the device from vibrating is getting called before the
+        vibration is in effect. Hence, it is failing to cancel the pre-existing instance
+        of processing vibration patterns. 
+
+        This patch cancel the pre-existing instance of the processing vibration patterns
+        always when the vibrate() method called with pattern 0 or an empty list.
+
+        No new tests since there is no return value in the Vibration API to test this
+        particular case. Existing test fast/dom/navigator-vibration.html covers testing of
+        the Vibration API.
+
+        * Modules/vibration/Vibration.cpp:
+        (WebCore::Vibration::vibrate):
+
 2012-08-20  Adam Klein  <adamk@chromium.org>
 
         Allow MutationEvents to be enabled/disabled per context
