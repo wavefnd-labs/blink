@@ -1,3 +1,24 @@
+2012-08-20  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: NMI: wrong size was reported for immutable StylePropertySet
+        https://bugs.webkit.org/show_bug.cgi?id=94489
+
+        Reviewed by Yury Semikhatsky.
+
+        Immutable StylePropertySet is created via placement new.
+        The rest of the allocated buffer is used as an array of CSSProperty.
+        This means that we don't need to report m_properties member but have to report actual size of the buffer
+        used for both, the object and CSSProperty array.
+
+        * css/StylePropertySet.cpp:
+        (WebCore::immutableStylePropertySetSize):
+        (WebCore):
+        (WebCore::StylePropertySet::createImmutable):
+        (WebCore::StylePropertySet::reportMemoryUsage):
+        * dom/MemoryInstrumentation.h:
+        (WebCore::MemoryObjectInfo::reportObjectInfo):
+        (WebCore::MemoryClassInfo::MemoryClassInfo):
+
 2012-08-20  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Move handleOutOfMemory() from V8Proxy to V8Binding
