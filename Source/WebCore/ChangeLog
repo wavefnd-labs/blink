@@ -1,3 +1,30 @@
+2012-08-21  Florin Malita  <fmalita@chromium.org>
+
+        ASSERT triggered in SVGTRefTargetEventListener::handleEvent()
+        https://bugs.webkit.org/show_bug.cgi?id=94487
+
+        Reviewed by Nikolas Zimmermann.
+
+        The current way of tracking tref target elements by id can leave stale event listeners
+        under certain circumstances. This patch switches to storing a target RefPtr instead
+        to avoid an id lookup which may not return the original/attached element.
+
+        Test: svg/custom/tref-stale-listener-crash.html
+
+        * svg/SVGTRefElement.cpp:
+        (SVGTRefTargetEventListener):
+        (WebCore::SVGTRefTargetEventListener::isAttached): use m_target instead of an explicit bool.
+        (WebCore::SVGTRefTargetEventListener::SVGTRefTargetEventListener):
+        (WebCore::SVGTRefTargetEventListener::attach): save a target RefPtr instead of an id.
+        (WebCore::SVGTRefTargetEventListener::detach): detach the target element directly without
+        going through a lookup.
+        (WebCore::SVGTRefTargetEventListener::handleEvent):
+        (WebCore::SVGTRefElement::updateReferencedText): use an explicit target pointer instead of
+        the id-based lookup.
+        (WebCore::SVGTRefElement::buildPendingResource):
+        * svg/SVGTRefElement.h:
+        (SVGTRefElement):
+
 2012-08-21  Alexandre Elias  <aelias@google.com>
 
         [chromium] Add software bitmap resources to CCResourceProvider
