@@ -1,3 +1,30 @@
+2012-08-20  MORITA Hajime  <morrita@google.com>
+
+        InsertionShouldCallDidNotifyDescendantInsertions should be merged to InsertionShouldCallDidNotifySubtreeInsertions
+        https://bugs.webkit.org/show_bug.cgi?id=94570
+
+        Reviewed by Ryosuke Niwa.
+
+        Node::didNotifySubtreeInsertions() and Node::didNotifyDescendantInsertions() are used for similar purpose and
+        we could unify them to the safer one, which is didNotifySubtreeInsertions().
+
+        This change replaces the last didNotifyDescendantInsertions() implementation in HTMLBodyElement with didNotifySubtreeInsertions()
+        then eliminates related code which is no longer used.
+
+        No new tests. Covered by existing tests.
+
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore::ChildNodeInsertionNotifier::notifyNodeInsertedIntoDocument):
+        (WebCore::ChildNodeInsertionNotifier::notifyNodeInsertedIntoTree):
+        * dom/Node.h: Removed didNotifyDescendantInsertions() stub and InsertionShouldCallDidNotifyDescendantInsertions enum value.
+        * html/HTMLBodyElement.cpp:
+        (WebCore::HTMLBodyElement::insertedInto):
+        (WebCore::HTMLBodyElement::didNotifySubtreeInsertions): morphed from didNotifyDescendantInsertions()
+        * html/HTMLBodyElement.h:
+        (HTMLBodyElement):
+        * html/HTMLFormElement.cpp:
+        (WebCore::HTMLFormElement::insertedInto): Remove useless InsertionShouldCallDidNotifyDescendantInsertions return statement.
+
 2012-08-20  Rob Buis  <rbuis@rim.com>
 
         Reduce GradientAttributes object size
