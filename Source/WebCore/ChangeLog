@@ -1,3 +1,21 @@
+2012-08-22  Robert Hogan  <robert@webkit.org>
+
+        REGRESSION(r125578): fast/regex/unicodeCaseInsensitive.html crash on Linux Debug Chromium
+        https://bugs.webkit.org/show_bug.cgi?id=94010
+
+        Reviewed by Tony Chang.
+
+        r125578 inspected the raw text run for word-end but the index it used to do so was for a normalized
+        version of the run that could be longer than the raw text run. So to allow proper detection of word-end
+        in complex text (i) do not normalize tabs to plain white-space and (ii) go back to using the normalized version
+        of the run for detecting word-end. There is a risk that some fonts may create glyphs for the '\t' character 
+        but this does not turn up in any of our regression tests and the more common risk appears to be the new-line.
+
+        Test: fast/regex/unicodeCaseInsensitive.html
+
+        * platform/graphics/harfbuzz/HarfBuzzShaperBase.cpp:
+        (WebCore::normalizeSpacesAndMirrorChars):
+
 2012-08-22  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [WebGL] Support the communication protocol from the injected script
