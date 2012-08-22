@@ -1,3 +1,34 @@
+2012-08-22  Erik Arvidsson  <arv@chromium.org>
+
+        Changing class attribute is not reflected in the classList property
+        https://bugs.webkit.org/show_bug.cgi?id=93665
+
+        Reviewed by Ojan Vafai.
+
+        Before this change classAttributeChanged was only called for StyledElement. With this refactoring
+        it gets called for all Elements when the class attribute changes.
+
+        Test: fast/dom/Element/class-list-update.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRules): To match the old behavior we only include StyledElements.
+        * dom/ClassNodeList.cpp:
+        (WebCore::ClassNodeList::nodeMatches): Ditto.
+        * dom/Element.cpp:
+        (WebCore::Element::attributeChanged): Moved the call to parseAttribute here, from StyledElement::attributeChanged.
+        (WebCore::Element::parseAttribute): Moved from StyledElement.
+        (WebCore):
+        (WebCore::Element::classAttributeChanged): Ditto.
+        * dom/Element.h:
+        (Element):
+        (WebCore::Element::classNames): Ditto.
+        (WebCore):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::attributeChanged): Let Element::attributeChanged call parseAttribtue instead.
+        (WebCore::StyledElement::parseAttribute): Move the class attribute handling to Element::parseAttribute.
+        * dom/StyledElement.h:
+        (StyledElement):
+
 2012-08-22  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Replace v8::String::NewSymbol() in CodeGeneratorV8.pm with v8String()
