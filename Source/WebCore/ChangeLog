@@ -1,3 +1,35 @@
+2012-08-22  Christophe Dumez  <christophe.dumez@intel.com>
+
+        window.postMessage() / MessagePort.postMessage() throw wrong exception for invalid ports argument
+        https://bugs.webkit.org/show_bug.cgi?id=94581
+
+        Reviewed by Kentaro Hara.
+
+        Update JSC and V8 implementations of window.postMessage() and
+        MessagePort.postMessage() in order to throw an
+        INVALID_STATE_ERR instead of a DATA_CLONE_ERR when values
+        in the "ports" argument are invalid. Additionally, we now
+        check for duplicate ports and throw an exception for this
+        case as well.
+
+        This change was made to comply with the latest HTML5
+        specification at:
+        http://www.w3.org/TR/html5/comms.html
+
+        No new tests, already tested by:
+        fast/events/constructors/message-event-constructor.html
+        fast/events/message-port-clone.html
+        fast/events/message-port-multi.html
+        fast/workers/worker-context-multi-port.html
+        fast/workers/worker-multi-port.html
+
+        * bindings/js/JSMessagePortCustom.cpp:
+        (WebCore::fillMessagePortArray):
+        * bindings/v8/V8Utilities.cpp:
+        (WebCore::extractTransferables):
+        * dom/MessagePort.cpp:
+        (WebCore::MessagePort::postMessage):
+
 2012-08-22  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
 
         [TouchAdjustment] Adjust to word or selection
