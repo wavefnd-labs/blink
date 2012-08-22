@@ -1,3 +1,26 @@
+2012-08-22  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: IDBRequest can be destructed during abort
+        https://bugs.webkit.org/show_bug.cgi?id=94618
+
+        Reviewed by Tony Chang.
+
+        If there are no script references, an IDBRequest could be kept alive
+        only by enqueued events. On document destruction, the parent transaction
+        is aborted, which aborts the request. During the abort, the enqueued events
+        are deleted, releasing the last reference to the IDBRequest which then
+        destructs in mid-method call and an "unfinished" state, hitting an assert.
+
+        This patch keeps the IDBRequest alive through the completion of the abort()
+        method, which will enqueue another event. In the document destruction case,
+        this will end up with the IDBRequest having stop() called on it which will
+        send the IDBRequest into EarlyDeath state, satisfying the destructor assert.
+
+        Addresses existing layout tests that behave flakily in Chromium port.
+
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::abort):
+
 2012-08-22  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Move precompileScript() from V8Proxy to ScriptSourceCode
