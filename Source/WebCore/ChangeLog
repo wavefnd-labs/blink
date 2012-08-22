@@ -1,3 +1,46 @@
+2012-08-22  Kwang Yul Seo  <skyul@company100.net>
+
+        HTMLTreeBuilder::furthestBlockForFormattingElement should belong to HTMLElementStack
+        https://bugs.webkit.org/show_bug.cgi?id=93857
+
+        Reviewed by Eric Seidel.
+
+        HTMLTreeBuilder::furthestBlockForFormattingElement should belong to
+        HTMLElementStack because it traverses the element stack and finds the
+        furthest block for the given formatting element.
+
+        Currently, it belongs to HTMLTreeBuilder just because
+        isSpecialNode(const HTMLStackItem*) function used by
+        furthestBlockForFormattingElement is internal to HTMLTreeBuilder.
+
+        Moved isSpecialNode to HTMLStackItem and changed
+        furthestBlockForFormattingElement to be a method of HTMLElementStack.
+
+        No behavior change. Just a refactoring.
+
+        * html/parser/HTMLElementStack.cpp:
+        (WebCore):
+        (WebCore::HTMLElementStack::popUntilNumberedHeaderElementPopped):
+        (WebCore::HTMLElementStack::hasNumberedHeaderElementInScope):
+        (WebCore::HTMLElementStack::furthestBlockForFormattingElement):
+        * html/parser/HTMLElementStack.h:
+        (HTMLElementStack):
+        * html/parser/HTMLStackItem.h:
+        (WebCore::HTMLStackItem::isInHTMLNamespace):
+        (HTMLStackItem):
+        (WebCore::HTMLStackItem::isNumberedHeaderElement):
+        (WebCore::HTMLStackItem::isTableBodyContextElement):
+        (WebCore::HTMLStackItem::isSpecialNode):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::constructTreeFromAtomicToken):
+        (WebCore::HTMLTreeBuilder::processCloseWhenNestedTag):
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody):
+        (WebCore::HTMLTreeBuilder::processAnyOtherEndTagForInBody):
+        (WebCore::HTMLTreeBuilder::callTheAdoptionAgency):
+        (WebCore::HTMLTreeBuilder::shouldProcessTokenInForeignContent):
+        (WebCore::HTMLTreeBuilder::processTokenInForeignContent):
+        * html/parser/HTMLTreeBuilder.h:
+
 2012-08-22  Alexandre Elias  <aelias@google.com>
 
         [chromium] Add software bitmap resources to CCResourceProvider
