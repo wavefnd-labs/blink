@@ -1,3 +1,39 @@
+2012-08-22  Koji Ishii  <kojiishi@gmail.com>
+
+        FontMetrics.unitsPerEm(), FontPlatformData.orientation(), SimpleFontData::platformBoundsForGlyph are not implemented on Chromium Windows
+        https://bugs.webkit.org/show_bug.cgi?id=83512
+
+        Reviewed by Tony Chang.
+
+        Chromium Windows does not implement following 3 functions that are required for bug 51450.
+        1. FontMetrics.unitsPerEm() always returns the default value (gDefaultUnitsPerEm = 1000).
+        2. FontPlatformData.orientation() always returns Horizontal.
+        3. SimpleFontData::platformBoundsForGlyph() always returns FloatRect().
+        Tony suggested in bug 51450 review to split code that is not behind
+        #if ENABLE(OPENTYPE_VERTICAL) to a separate patch.
+
+        Test: Following 3 existing but skipped tests are now enabled and pass.
+              fast/text/emphasis-overlap.html
+              fast/text/emphasis-avoid-ruby.html
+              fast/repaint/text-emphasis-v.html
+
+        * platform/graphics/chromium/FontCacheChromiumWin.cpp:
+        (WebCore::FontCache::createFontPlatformData): Add orientation.
+        * platform/graphics/chromium/FontPlatformDataChromiumWin.cpp:
+        (WebCore::FontPlatformData::FontPlatformData): Add orientation.
+        (WebCore::FontPlatformData::operator=): Add orientation.
+        * platform/graphics/chromium/FontPlatformDataChromiumWin.h:
+        (FontPlatformData):
+        (WebCore::FontPlatformData::orientation): Add orientation.
+        (WebCore::FontPlatformData::setOrientation): Add orientation.
+        (WebCore::FontPlatformData::operator==): Add orientation.
+        * platform/graphics/chromium/SimpleFontDataChromiumWin.cpp:
+        (WebCore::SimpleFontData::platformInit): Set FontMetrics.unitsPerEm.
+        (WebCore::SimpleFontData::createScaledFontData): Add orientation.
+        (WebCore::SimpleFontData::platformBoundsForGlyph): Implemented.
+        * platform/graphics/skia/FontCustomPlatformData.cpp:
+        (WebCore::FontCustomPlatformData::fontPlatformData): Add orientation.
+
 2012-08-22  Robert Hogan  <robert@webkit.org>
 
         REGRESSION(r125578): fast/regex/unicodeCaseInsensitive.html crash on Linux Debug Chromium
