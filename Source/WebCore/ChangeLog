@@ -1,3 +1,128 @@
+2012-08-22  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: make "sdk" component compile independently from the rest of the front-end.
+        https://bugs.webkit.org/show_bug.cgi?id=94705
+
+        Reviewed by Vsevolod Vlasov.
+
+        This change refactors the way we compile. Running "compile-front-end.py sdk" will compile sdk only.
+        It also introduces DOMStorageModel and DatabaseModel that are used to split model / UI layers.
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/InjectedScriptExterns.js:
+        (InjectedScriptHost.prototype.evaluate):
+        * inspector/Inspector.json:
+        * inspector/compile-front-end.py:
+        (dump_module):
+        * inspector/front-end/CompilerScriptMapping.js:
+        * inspector/front-end/ConsoleModel.js:
+        (WebInspector.ConsoleMessage):
+        (WebInspector.ConsoleMessage.prototype.clone):
+        (WebInspector.ConsoleMessage.prototype.location):
+        * inspector/front-end/DOMAgent.js:
+        * inspector/front-end/DOMStorage.js:
+        (WebInspector.DOMStorageModel):
+        (WebInspector.DOMStorageModel.prototype._addDOMStorage):
+        (WebInspector.DOMStorageModel.prototype._domStorageUpdated):
+        (WebInspector.DOMStorageModel.prototype.storageForId):
+        (WebInspector.DOMStorageModel.prototype.storages):
+        (WebInspector.DOMStorageDispatcher):
+        (WebInspector.DOMStorageDispatcher.prototype.addDOMStorage):
+        (WebInspector.DOMStorageDispatcher.prototype.domStorageUpdated):
+        * inspector/front-end/Database.js:
+        (WebInspector.Database):
+        (WebInspector.Database.prototype.executeSql):
+        (WebInspector.DatabaseModel):
+        (WebInspector.DatabaseModel.prototype.databases):
+        (WebInspector.DatabaseModel.prototype.databaseForId):
+        (WebInspector.DatabaseModel.prototype._addDatabase):
+        (WebInspector.DatabaseModel.prototype._sqlTransactionSucceeded):
+        (WebInspector.DatabaseModel.prototype._sqlTransactionFailed):
+        (WebInspector.DatabaseDispatcher):
+        (WebInspector.DatabaseDispatcher.prototype.addDatabase):
+        (WebInspector.DatabaseDispatcher.prototype.sqlTransactionSucceeded):
+        (WebInspector.DatabaseDispatcher.prototype.sqlTransactionFailed):
+        * inspector/front-end/DebuggerModel.js:
+        * inspector/front-end/FileUtils.js:
+        (WebInspector.OutputStreamDelegate.prototype.onTransferStarted):
+        (WebInspector.OutputStreamDelegate.prototype.onChunkTransferred):
+        (WebInspector.OutputStreamDelegate.prototype.onTransferFinished):
+        (WebInspector.OutputStreamDelegate.prototype.onError):
+        (WebInspector.OutputStream):
+        (WebInspector.OutputStream.prototype.startTransfer):
+        (WebInspector.OutputStream.prototype.transferChunk):
+        (WebInspector.OutputStream.prototype.finishTransfer):
+        (WebInspector.OutputStream.prototype.dispose):
+        * inspector/front-end/HandlerRegistry.js:
+        * inspector/front-end/HeapSnapshotView.js:
+        * inspector/front-end/InspectorFrontendHostStub.js:
+        * inspector/front-end/PresentationConsoleMessageHelper.js:
+        (WebInspector.PresentationConsoleMessageHelper.prototype._parsedScriptSource):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.ResourcesPanel):
+        (WebInspector.ResourcesPanel.prototype._reset):
+        (WebInspector.ResourcesPanel.prototype._databaseAdded):
+        (WebInspector.ResourcesPanel.prototype._addDatabase):
+        (WebInspector.ResourcesPanel.prototype._domStorageAdded):
+        (WebInspector.ResourcesPanel.prototype._addDOMStorage):
+        (WebInspector.ResourcesPanel.prototype._showDatabase.get if):
+        (WebInspector.ResourcesPanel.prototype._showDatabase.else.get if):
+        (WebInspector.ResourcesPanel.prototype._showDatabase):
+        (WebInspector.ResourcesPanel.prototype._showDOMStorage.get if):
+        (WebInspector.ResourcesPanel.prototype._showDOMStorage):
+        (WebInspector.ResourcesPanel.prototype._updateDatabaseTables.get if):
+        (WebInspector.ResourcesPanel.prototype._updateDatabaseTables.tableNamesCallback):
+        (WebInspector.DatabaseTreeElement.prototype.onselect):
+        (WebInspector.DatabaseTableTreeElement.prototype.onselect):
+        (WebInspector.DOMStorageTreeElement.prototype.onselect):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype.showFunctionDefinition):
+        * inspector/front-end/SearchController.js:
+        (WebInspector.SearchController.prototype.disableSearchUntilExplicitAction):
+        * inspector/front-end/Settings.js:
+        * inspector/front-end/Spectrum.js:
+        * inspector/front-end/TextEditorModel.js:
+        * inspector/front-end/UIString.js: Added.
+        (WebInspector.UIString):
+        * inspector/front-end/UIUtils.js:
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/externs.js:
+        (InspectorFrontendHostAPI.prototype.platform):
+        (InspectorFrontendHostAPI.prototype.port):
+        (InspectorFrontendHostAPI.prototype.bringToFront):
+        (InspectorFrontendHostAPI.prototype.closeWindow):
+        (InspectorFrontendHostAPI.prototype.requestAttachWindow):
+        (InspectorFrontendHostAPI.prototype.requestDetachWindow):
+        (InspectorFrontendHostAPI.prototype.requestSetDockSide):
+        (InspectorFrontendHostAPI.prototype.setAttachedWindowHeight):
+        (InspectorFrontendHostAPI.prototype.moveWindowBy):
+        (InspectorFrontendHostAPI.prototype.setInjectedScriptForOrigin):
+        (InspectorFrontendHostAPI.prototype.loaded):
+        (InspectorFrontendHostAPI.prototype.localizedStringsURL):
+        (InspectorFrontendHostAPI.prototype.hiddenPanels):
+        (InspectorFrontendHostAPI.prototype.inspectedURLChanged):
+        (InspectorFrontendHostAPI.prototype.documentCopy):
+        (InspectorFrontendHostAPI.prototype.copyText):
+        (InspectorFrontendHostAPI.prototype.openInNewTab):
+        (InspectorFrontendHostAPI.prototype.canSave):
+        (InspectorFrontendHostAPI.prototype.save):
+        (InspectorFrontendHostAPI.prototype.canAppend):
+        (InspectorFrontendHostAPI.prototype.append):
+        (InspectorFrontendHostAPI.prototype.sendMessageToBackend):
+        (InspectorFrontendHostAPI.prototype.recordActionTaken):
+        (InspectorFrontendHostAPI.prototype.recordPanelShown):
+        (InspectorFrontendHostAPI.prototype.recordSettingChanged):
+        (InspectorFrontendHostAPI.prototype.loadResourceSynchronously):
+        (InspectorFrontendHostAPI.prototype.setZoomFactor):
+        (InspectorFrontendHostAPI.prototype.canInspectWorkers):
+        (SourceMapV3):
+        (SourceMapV3.Section):
+        (SourceMapV3.Offset):
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/inspector.js:
+        (WebInspector.inspect):
+
 2012-08-22  Gustavo Noronha Silva  <gns@gnome.org>
 
         Unreviewed build fix. libWebCore needs include paths
