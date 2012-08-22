@@ -1,3 +1,85 @@
+2012-08-21  Sukolsak Sakshuwong  <sukolsak@google.com>
+
+        Implement UndoManager's automatic DOM transactions
+        https://bugs.webkit.org/show_bug.cgi?id=91812
+
+        Reviewed by Ryosuke Niwa.
+
+        This patch implements automatic DOM transactions in UndoManager
+        by recording changes in tree structure, attributes, and character data
+        of nodes under undo scope host.
+
+        Tests: editing/undomanager/automatic-transaction-attribute.html
+               editing/undomanager/automatic-transaction-data.html
+               editing/undomanager/automatic-transaction-node.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/DOMTransaction.h:
+        (WebCore::DOMTransaction::addTransactionStep):
+        (DOMTransaction):
+        * bindings/v8/DOMTransaction.cpp:
+        (DOMTransactionScope):
+        (WebCore::DOMTransactionScope::DOMTransactionScope):
+        (WebCore::DOMTransactionScope::~DOMTransactionScope):
+        (WebCore):
+        (WebCore::DOMTransaction::apply):
+        (WebCore::DOMTransaction::unapply):
+        (WebCore::DOMTransaction::reapply):
+        * bindings/v8/DOMTransaction.h:
+        (WebCore::DOMTransaction::addTransactionStep):
+        (DOMTransaction):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::setCssText):
+        (WebCore::PropertySetCSSStyleDeclaration::setProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::removeProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::setPropertyInternal):
+        * dom/CharacterData.cpp:
+        (WebCore::CharacterData::setDataAndUpdate):
+        * dom/ContainerNode.cpp:
+        (WebCore::willRemoveChild):
+        (WebCore::willRemoveChildren):
+        (WebCore::updateTreeAfterInsertion):
+        * dom/Element.cpp:
+        (WebCore::Element::willModifyAttribute):
+        * editing/DOMTransactionStep.cpp: Added.
+        (WebCore):
+        (WebCore::NodeInsertingDOMTransactionStep::NodeInsertingDOMTransactionStep):
+        (WebCore::NodeInsertingDOMTransactionStep::create):
+        (WebCore::NodeInsertingDOMTransactionStep::unapply):
+        (WebCore::NodeInsertingDOMTransactionStep::reapply):
+        (WebCore::NodeRemovingDOMTransactionStep::NodeRemovingDOMTransactionStep):
+        (WebCore::NodeRemovingDOMTransactionStep::create):
+        (WebCore::NodeRemovingDOMTransactionStep::unapply):
+        (WebCore::NodeRemovingDOMTransactionStep::reapply):
+        (WebCore::DataReplacingDOMTransactionStep::DataReplacingDOMTransactionStep):
+        (WebCore::DataReplacingDOMTransactionStep::create):
+        (WebCore::DataReplacingDOMTransactionStep::unapply):
+        (WebCore::DataReplacingDOMTransactionStep::reapply):
+        (WebCore::AttrChangingDOMTransactionStep::AttrChangingDOMTransactionStep):
+        (WebCore::AttrChangingDOMTransactionStep::create):
+        (WebCore::AttrChangingDOMTransactionStep::unapply):
+        (WebCore::AttrChangingDOMTransactionStep::reapply):
+        * editing/DOMTransactionStep.h: Added.
+        (WebCore):
+        (DOMTransactionStep):
+        (WebCore::DOMTransactionStep::~DOMTransactionStep):
+        (NodeInsertingDOMTransactionStep):
+        (NodeRemovingDOMTransactionStep):
+        (DataReplacingDOMTransactionStep):
+        (AttrChangingDOMTransactionStep):
+        * editing/UndoManager.cpp:
+        (WebCore):
+        (WebCore::UndoManager::isRecordingAutomaticTransaction):
+        (WebCore::UndoManager::addTransactionStep):
+        * editing/UndoManager.h:
+        (WebCore):
+        (WebCore::UndoManager::setRecordingDOMTransaction):
+        (UndoManager):
+
 2012-08-21  Shezan Baig  <sbaig1@bloomberg.net>
 
         Fix cross-direction stretch for replaced elements in row flexbox
