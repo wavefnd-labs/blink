@@ -1,3 +1,59 @@
+2012-08-17  Jeffrey Pfau  <jpfau@apple.com>
+
+        Allow blocking of Web SQL databases in third-party web workers
+        https://bugs.webkit.org/show_bug.cgi?id=94170
+
+        Reviewed by Adam Barth.
+
+        Web workers did not previously know anything about the document that
+        spawned them. This is undefined for shared workers, but for dedicated
+        workers, we now pipe the information through.
+
+        Tests: http/tests/security/cross-origin-worker-websql-allowed.html
+               http/tests/security/cross-origin-worker-websql.html
+
+        * Modules/webdatabase/WorkerContextWebDatabase.cpp: Pass information about the top origin to canAccessDatabase
+        (WebCore::WorkerContextWebDatabase::openDatabase):
+        (WebCore::WorkerContextWebDatabase::openDatabaseSync):
+        * WebCore.exp.in: Make SecurityOrigin::isolatedCopy const
+        * page/SecurityOrigin.cpp:
+        (WebCore::SecurityOrigin::isolatedCopy):
+        (WebCore::SecurityOrigin::canAccessStorage):
+        * page/SecurityOrigin.h:
+        * workers/DedicatedWorkerContext.cpp: Pass topOrigin
+        (WebCore::DedicatedWorkerContext::create):
+        (WebCore::DedicatedWorkerContext::DedicatedWorkerContext):
+        * workers/DedicatedWorkerContext.h:
+        (DedicatedWorkerContext):
+        * workers/DedicatedWorkerThread.cpp: Pass topOrigin
+        (WebCore::DedicatedWorkerThread::create):
+        (WebCore::DedicatedWorkerThread::DedicatedWorkerThread):
+        (WebCore::DedicatedWorkerThread::createWorkerContext):
+        * workers/DedicatedWorkerThread.h:
+        (DedicatedWorkerThread):
+        * workers/SharedWorkerContext.cpp: Pass topOrigin
+        (WebCore::SharedWorkerContext::SharedWorkerContext):
+        * workers/SharedWorkerThread.cpp:
+        (WebCore::SharedWorkerThread::SharedWorkerThread):
+        (WebCore::SharedWorkerThread::createWorkerContext):
+        * workers/SharedWorkerThread.h:
+        (SharedWorkerThread): Pass topOrigin
+        * workers/WorkerContext.cpp:
+        (WebCore::WorkerContext::WorkerContext):
+        * workers/WorkerContext.h:
+        (WebCore::WorkerContext::topOrigin):
+        (WorkerContext):
+        * workers/WorkerMessagingProxy.cpp: Pass topOrigin
+        (WebCore::WorkerMessagingProxy::startWorkerContext):
+        * workers/WorkerThread.cpp:
+        (WebCore::WorkerThreadStartupData::create):
+        (WorkerThreadStartupData):
+        (WebCore::WorkerThreadStartupData::WorkerThreadStartupData):
+        (WebCore::WorkerThread::WorkerThread):
+        (WebCore::WorkerThread::workerThread):
+        * workers/WorkerThread.h:
+        (WorkerThread):
+
 2012-08-22  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Move context() from V8Proxy to ScriptController
