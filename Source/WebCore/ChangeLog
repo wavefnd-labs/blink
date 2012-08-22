@@ -1,3 +1,53 @@
+2012-08-20  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Remove getToStringName() and getToStringTemplate() from V8Binding
+        https://bugs.webkit.org/show_bug.cgi?id=94573
+
+        Reviewed by Adam Barth.
+
+        - Remove V8Binding::getToStringName() and V8Binding::getToStringTemplate().
+
+        - Replace getToStringName() with String::NewSymbol("toString").
+
+        - Fix V8PerIsolateData::getToStringTemplate() so that it caches a persistent
+        handle of a created FunctionTemplate. Before this patch, a FunctionTemplate
+        had been created for each toString().
+
+        No tests. No change in behavior.
+
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::constructorToString):
+        * bindings/v8/V8Binding.h:
+        (WebCore):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore::ConfigureV8Float64ArrayTemplate):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore::ConfigureV8TestActiveDOMObjectTemplate):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore::ConfigureV8TestCustomNamedGetterTemplate):
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp:
+        (WebCore::ConfigureV8TestEventConstructorTemplate):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore::ConfigureV8TestEventTargetTemplate):
+        * bindings/scripts/test/V8/V8TestException.cpp:
+        (WebCore::ConfigureV8TestExceptionTemplate):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::ConfigureV8TestInterfaceTemplate):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore::ConfigureV8TestMediaQueryListListenerTemplate):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        (WebCore::ConfigureV8TestNamedConstructorTemplate):
+        * bindings/scripts/test/V8/V8TestNode.cpp:
+        (WebCore::ConfigureV8TestNodeTemplate):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::ConfigureV8TestObjTemplate):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::ConfigureV8TestSerializedScriptValueInterfaceTemplate):
+        * bindings/v8/V8PerIsolateData.h:
+        (V8PerIsolateData):
+
 2012-08-21  Arvid Nilsson  <anilsson@rim.com>
 
         [BlackBerry] WebGL Aquarium fails to render
