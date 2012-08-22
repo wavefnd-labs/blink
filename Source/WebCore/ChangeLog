@@ -1,3 +1,40 @@
+2012-08-21  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: IDBRequest can be GCd during event dispatch
+        https://bugs.webkit.org/show_bug.cgi?id=94235
+
+        Reviewed by Ojan Vafai.
+
+        Avoid a "race" where GC may attempt to reclaim IDB objects that are marked
+        "done" prior to the completion of the event dispatch. The script runtime
+        may decide to do a GC pass before calling the event handler, releasing the
+        object and turning the dispatch into a no-op.
+
+        This is a partial reversion (with renames, etc) of r123275, r124842,
+        and r121492. Added a new test, although it does not exercise the "race"
+        condition directly.
+
+        Test: storage/indexeddb/pending-activity.html
+              storage/indexeddb/pending-activity-workers.html
+
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::close): Let the IDBRequest know it this cursor won't
+        make it fire again.
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::IDBRequest): Reintroduce "am I done?" flag.
+        (WebCore::IDBRequest::finishCursor): Cursors may fire events at the same
+        IDBRequest repeatedly, so we need to know when they're are really done.
+        (WebCore):
+        (WebCore::IDBRequest::hasPendingActivity): Test the flag.
+        (WebCore::IDBRequest::dispatchEvent): Set the flag.
+        * Modules/indexeddb/IDBRequest.h:
+        (IDBRequest):
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::IDBTransaction): Reintroduce "am I done?" flag.
+        (WebCore::IDBTransaction::hasPendingActivity): Test the flag.
+        (WebCore::IDBTransaction::dispatchEvent): Set the flag.
+        * Modules/indexeddb/IDBTransaction.h:
+
 2012-08-21  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: [regression] Settings panel fails to open.
