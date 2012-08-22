@@ -1,3 +1,44 @@
+2012-08-22  Raul Hudea  <rhudea@adobe.com>
+
+        Crash in WebCore::RenderBlock::removeChild
+        https://bugs.webkit.org/show_bug.cgi?id=93879
+
+        Reviewed by Abhishek Arya.
+
+        By adding the lifetime state to the RenderNamedFlowThread (r122556), it become possible for the a RenderRegion object to delete its sibling,
+        the RenderNamedFlowThread. This is unexpected in the rendering world and cause problems in RenderBlock::removeChild where we retain previous
+        and next sibling pointers.
+        So, all the RenderNamedFlowThread are created under a RenderFlowThreadContainer object insted of the RenderView. The new object is created only
+        when the first named flow is created.
+
+        Test: fast/regions/remove-flow-thread-crash.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * rendering/FlowThreadController.cpp:
+        (WebCore::FlowThreadController::FlowThreadController): Added initialization for the new RenderFlowThreadContainer member
+        (WebCore::FlowThreadController::ensureRenderFlowThreadWithName): Added the creation of the RenderFlowThreadContainer object and use it as a parent for all RenderNamedFlowThreads
+        (WebCore::FlowThreadController::styleDidChange): Inform all the RenderNamedFlowThreads that the style changed in regions (initially this code was in RenderView, but now all RenderNamedFlowThreads are children of RenderFlowThreadContainer)
+        (WebCore):
+        * rendering/FlowThreadController.h:
+        (WebCore):
+        (FlowThreadController):
+        * rendering/RenderFlowThreadContainer.cpp: Added.
+        (WebCore):
+        (WebCore::RenderFlowThreadContainer::RenderFlowThreadContainer):
+        (WebCore::RenderFlowThreadContainer::layout):
+        * rendering/RenderFlowThreadContainer.h: Added.
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::markContainingBlocksForLayout): Skip to RenderView if the current object is an RenderFlowThreadContainer.
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isRenderFlowThreadContainer):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::styleDidChange): Moved the code associated to RenderNamedFlowThreads to FlowThreadController:styleDidChange and call it instead.
+
 2012-08-22  Rob Buis  <rbuis@rim.com>
 
         [BlackBerry] Add RSS content handling support
