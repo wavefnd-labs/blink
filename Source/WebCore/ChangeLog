@@ -1,3 +1,77 @@
+2012-08-22  W. James MacLean  <wjmaclean@chromium.org>
+
+        [chromium] Add touch link highlight animation layers.
+        https://bugs.webkit.org/show_bug.cgi?id=84487
+
+        Reviewed by James Robinson.
+
+        Adds support for creating composited touch link highlights in renderer thread. Clipping not yet
+        implemented for non-composited frames/overflow divs, but scrolling and layout changes are supported.
+        Transform support currently limited to translation.
+
+        Unit tests for LinkHighlight revised.
+
+        Tests: platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe-composited-scrolled-clipped.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe-composited-scrolled-late-composite.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe-composited-scrolled-late-noncomposite.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe-composited-scrolled.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe-composited.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe-scrolled-clipped.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe-scrolled.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-iframe.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-composited-scroll-clip.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-composited-scrolled.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-composited.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-layout-change-2.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-layout-change.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-scroll-clip.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-scrolled-late-composite.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-scrolled-late-noncomposite.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div-scrolled.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-1-overflow-div.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-composited-inner.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-composited-outer.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-scrolled-inner-clipped.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-scrolled-inner-late-composite.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-scrolled-inner.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-scrolled-outer-clipped.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-scrolled-outer-late-composite.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe-scrolled-outer.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-iframe.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-composited-inner-scroll-inner.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-composited-inner-scroll-outer.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-composited-inner.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-composited-outer-scroll-inner.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-composited-outer-scroll-outer.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-composited-outer.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-scrolled-inner.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div-scrolled-outer.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-2-overflow-div.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-simple-rotated.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-simple-scaledX.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-simple-scaledY.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-simple-window-scroll.html
+               platform/chromium-linux/compositing/gestures/gesture-tapHighlight-simple.html
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        (WebCore::GraphicsLayerChromium::GraphicsLayerChromium):
+        (WebCore::GraphicsLayerChromium::willBeDestroyed): Adds notification to LinkHighlight when layer goes away.
+        (WebCore::GraphicsLayerChromium::updateNames): Now sets debug name for LinkHighlight layer.
+        (WebCore::GraphicsLayerChromium::setSize): Invalidates LinkHighlight if present.
+        (WebCore::GraphicsLayerChromium::setNeedsDisplay): Invalidates LinkHighlight if present.
+        (WebCore::GraphicsLayerChromium::setNeedsDisplayInRect): Invalidates LinkHighlight if present.
+        (WebCore::GraphicsLayerChromium::setLinkHighlight): Registers LinkHighlightClient* with GraphicsLayerChromium.
+        (WebCore::GraphicsLayerChromium::updateChildList): Now adds LinkHighlight WebLayer if highlight active.
+        (WebCore::GraphicsLayerChromium::updateLayerIsDrawable): Invalidates LinkHighlight if present.
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        (WebCore):
+        (LinkHighlightClient): Abstract interface seen by GraphicsLayerChromium.
+        (WebCore::LinkHighlightClient::~LinkHighlightClient):
+        (GraphicsLayerChromium):
+        (WebCore::GraphicsLayerChromium::linkHighlight):
+        * platform/graphics/chromium/LinkHighlight.cpp: Removed.
+
 2012-08-22  Gustavo Noronha Silva  <gns@gnome.org>
 
         Unreviewed build fix. Missing PANGO_CFLAGS.
