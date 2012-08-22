@@ -1,3 +1,26 @@
+2012-08-21  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        [Gtk] No accessible caret-moved events found in certain content
+        https://bugs.webkit.org/show_bug.cgi?id=72811
+
+        Reviewed by Chris Fleizach.
+
+        Part of the bug is due to objects which should claim to implement AtkText
+        failed to do so as a result of containing a mixture of inline and block
+        spans.
+
+        An updated unit test was provided.
+
+        * accessibility/gtk/WebKitAccessibleWrapperAtk.cpp:
+        (roleIsTextType): New method to check if a role is one expected to have
+        implemented the AtkText interface. Currently that is defined as:
+         - ParagraphRole
+         - HeadingRole
+         - DivRole
+         - CellRole
+        (getInterfaceMaskFromObject): If a role is one of the text type roles,
+        automatically add WAI_TEXT to the accessible object's interface mask.
+
 2012-08-21  Tony Chang  <tony@chromium.org>
 
         Force XML comments to maintain whitespace
