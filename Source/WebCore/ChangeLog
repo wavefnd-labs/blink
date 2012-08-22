@@ -1,3 +1,23 @@
+2012-08-21  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Crash in RenderTableSection::setCellLogicalWidths
+        https://bugs.webkit.org/show_bug.cgi?id=94291
+
+        Reviewed by Abhishek Arya.
+
+        This issue was that splitAnonymousBoxesAroundChild would move a table section
+        into a newly created table *without* marking it as needing cell recalc. The table
+        would thus never build its structure to match its sections. The fix is to hop on
+        the new willBeRemovedFromTree signal so that the section invalidates itself properly.
+
+        Test: fast/table/crash-split-table-section-no-cell-recalc.html
+
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::willBeRemovedFromTree):
+        * rendering/RenderTableSection.h:
+        Replaced willBeDestroyed by willBeRemovedFromTree in RenderTableSection. This ensures that it is called
+        when moving sections in the tree to mark them as needing cell recalc.
+
 2012-08-21  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] multiple fields time input UI should not have two focus ring.
