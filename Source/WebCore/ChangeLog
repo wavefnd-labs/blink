@@ -1,3 +1,67 @@
+2012-08-22  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Replace v8::String::NewSymbol() in CodeGeneratorV8.pm with v8String()
+        https://bugs.webkit.org/show_bug.cgi?id=94588
+
+        Reviewed by Eric Seidel.
+
+        v8String() is faster than String::NewSymbol().
+        This patch implements v8String(char*, Isolate*) and
+        replaces String::NewSymbol(char*) in CodeGeneratorV8.pm
+        with v8String(char*, Isolate*).
+
+        Performance result:
+
+        // 272 nano sec
+        static v8::Handle<v8::Value> attr3AttrGetter(v8::Local<v8::String> name, const v8::AccessorInfo& info)
+        {
+            v8::Handle<v8::Value> v1 = v8String(String("foo"));
+            v8::Handle<v8::Value> v2 = v8String(String("bar"));
+            if (!v1.IsEmpty() && !v2.IsEmpty())
+                return v8Undefined();
+            return v8::Null(); // Never reach.
+        }
+
+        // 377 nano sec
+        static v8::Handle<v8::Value> attr4AttrGetter(v8::Local<v8::String> name, const v8::AccessorInfo& info)
+        {
+            v8::Handle<v8::Value> v1 = v8::String::NewSymbol("foo");
+            v8::Handle<v8::Value> v2 = v8::String::NewSymbol("bar");
+            if (!v1.IsEmpty() && !v2.IsEmpty())
+                return v8Undefined();
+            return v8::Null(); // Never reach.
+        }
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNormalAttrGetter):
+        (GenerateNormalAttrSetter):
+        (GenerateNamedConstructorCallback):
+        (GenerateNonStandardFunction):
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore::ConfigureV8Float64ArrayTemplate):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore::ConfigureV8TestActiveDOMObjectTemplate):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore::ConfigureV8TestEventTargetTemplate):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::ConfigureV8TestInterfaceTemplate):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        (WebCore::V8TestNamedConstructorConstructor::GetTemplate):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::ConfigureV8TestObjTemplate):
+        (WebCore::V8TestObj::installPerContextProperties):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrGetter):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrSetter):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedReadonlyValueAttrGetter):
+        * bindings/v8/V8Binding.h:
+        (WebCore):
+        (WebCore::v8String):
+        * html/HTMLDivElement.idl:
+
 2012-08-22  Pratik Solanki  <psolanki@apple.com>
 
         Setting WebKitEnableHTTPPipelining doesn't work if default is true
