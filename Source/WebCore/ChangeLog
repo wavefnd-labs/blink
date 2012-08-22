@@ -1,3 +1,137 @@
+2012-08-21  Lianghui Chen  <liachen@rim.com>
+
+        [BlackBerry] Add RSS content handling support
+        https://bugs.webkit.org/show_bug.cgi?id=93496
+
+        Reviewed by Rob Buis.
+
+        Add code to filter RSS content, and properly convert them to HTML
+        content so they can display nicely, instead of as plain text.
+
+        Following modules are included:
+
+        RSSFilterStream: the code for detecting RSS content, and controlling
+        the handling of these content.
+
+        RSSParserBase: the base class for the following 3 RSS parser.
+        RSS10Parser: the code for decoding RSS 1.0 content.
+        RSS20Parser: the code for decoding RSS 2.0 content.
+        RSSAtomParser: the code for decoding Atom format RSS content.
+        RSSGenerator: the code for generating HTML content based on RSS feed.
+
+        No new tests as it's not changing how HTML content is handled.
+
+        * PlatformBlackBerry.cmake:
+        * platform/network/blackberry/NetworkJob.cpp:
+        (WebCore::NetworkJob::initialize):
+        * platform/network/blackberry/rss/RSS10Parser.cpp: Added.
+        (WebCore):
+        (WebCore::RSS10Parser::RSS10Parser):
+        (WebCore::RSS10Parser::parseBuffer):
+        (WebCore::RSS10Parser::parseXmlDoc):
+        (WebCore::RSS10Parser::parseItemBaseAttribute):
+        (WebCore::RSS10Parser::parseItem):
+        (WebCore::RSS10Parser::parseFeed):
+        * platform/network/blackberry/rss/RSS10Parser.h: Added.
+        (WebCore):
+        (RSS10Parser):
+        * platform/network/blackberry/rss/RSS20Parser.cpp: Added.
+        (WebCore):
+        (WebCore::RSS20Parser::RSS20Parser):
+        (WebCore::RSS20Parser::parseBuffer):
+        (WebCore::RSS20Parser::parseXmlDoc):
+        (WebCore::RSS20Parser::parseItemBaseAttribute):
+        (WebCore::RSS20Parser::parseItem):
+        (WebCore::RSS20Parser::parseFeed):
+        (WebCore::RSS20Parser::parseEnclosure):
+        * platform/network/blackberry/rss/RSS20Parser.h: Added.
+        (WebCore):
+        (RSS20Parser):
+        * platform/network/blackberry/rss/RSSAtomParser.cpp: Added.
+        (WebCore):
+        (WebCore::isRelativePath):
+        (WebCore::RSSAtomLink::relType):
+        (WebCore::RSSAtomParser::RSSAtomParser):
+        (WebCore::RSSAtomParser::parseBuffer):
+        (WebCore::RSSAtomParser::parseXmlDoc):
+        (WebCore::RSSAtomParser::parseItemBaseAttribute):
+        (WebCore::RSSAtomParser::parseItem):
+        (WebCore::RSSAtomParser::parseFeed):
+        (WebCore::RSSAtomParser::parseLink):
+        (WebCore::RSSAtomParser::enclosureFromLink):
+        (WebCore::RSSAtomParser::parseContent):
+        (WebCore::RSSAtomParser::parseAuthor):
+        (WebCore::RSSAtomParser::parseCategory):
+        * platform/network/blackberry/rss/RSSAtomParser.h: Added.
+        (WebCore):
+        (RSSAtomLink):
+        (WebCore::RSSAtomLink::RSSAtomLink):
+        (RSSAtomParser):
+        * platform/network/blackberry/rss/RSSFilterStream.cpp: Added.
+        (WebCore):
+        (WebCore::isASCIISpaceLowerByte):
+        (WebCore::stripWhiteSpace):
+        (WebCore::equalIgnoringCase):
+        (WebCore::isAtomMIMEType):
+        (WebCore::isRSSMIMEType):
+        (WebCore::isPotentialRSSMIMEType):
+        (WebCore::isRSSContent):
+        (WebCore::RSSTypeFromContentType):
+        (WebCore::RSSTypeFromContent):
+        (WebCore::createParser):
+        (WebCore::findXMLEncodingPosition):
+        (WebCore::findXMLLanguagePosition):
+        (WebCore::defaultEncodingForLanguage):
+        (WebCore::isTranscodingNeeded):
+        (WebCore::transcode):
+        (WebCore::transcodeContent):
+        (WebCore::RSSFilterStream::RSSFilterStream):
+        (WebCore::RSSFilterStream::notifyStatusReceived):
+        (WebCore::RSSFilterStream::notifyHeadersReceived):
+        (WebCore::RSSFilterStream::notifyDataReceived):
+        (WebCore::RSSFilterStream::notifyClose):
+        (WebCore::RSSFilterStream::convertContentToHtml):
+        (WebCore::RSSFilterStream::handleRSSContent):
+        (WebCore::RSSFilterStream::charset):
+        (WebCore::RSSFilterStream::encoding):
+        (WebCore::RSSFilterStream::saveHeaders):
+        (WebCore::RSSFilterStream::removeHeader):
+        (WebCore::RSSFilterStream::updateHeader):
+        (WebCore::RSSFilterStream::updateRSSHeaders):
+        (WebCore::RSSFilterStream::sendSavedHeaders):
+        (WebCore::RSSFilterStream::appendData):
+        * platform/network/blackberry/rss/RSSFilterStream.h: Added.
+        (WebCore):
+        (RSSFilterStream):
+        * platform/network/blackberry/rss/RSSGenerator.cpp: Added.
+        (WebCore):
+        (WebCore::RSSGenerator::RSSGenerator):
+        (WebCore::RSSGenerator::~RSSGenerator):
+        (WebCore::RSSGenerator::generateHtml):
+        * platform/network/blackberry/rss/RSSGenerator.h: Added.
+        (WebCore):
+        (RSSGenerator):
+        * platform/network/blackberry/rss/RSSParserBase.cpp: Added.
+        (WebCore):
+        (WebCore::RSSEnclosure::RSSEnclosure):
+        (WebCore::RSSEnclosure::typeInEnum):
+        (WebCore::RSSEnclosure::suggestedName):
+        (WebCore::RSSFeed::RSSFeed):
+        (WebCore::RSSFeed::~RSSFeed):
+        (WebCore::RSSFeed::clear):
+        (WebCore::RSSItem::RSSItem):
+        (WebCore::RSSItem::~RSSItem):
+        (WebCore::RSSItem::clear):
+        (WebCore::RSSParserBase::RSSParserBase):
+        (WebCore::RSSParserBase::~RSSParserBase):
+        (WebCore::textFromXMLAttr):
+        (WebCore::textFromXMLNode):
+        * platform/network/blackberry/rss/RSSParserBase.h: Added.
+        (WebCore):
+        (RSSEnclosure):
+        (RSSItemBase):
+        (RSSParserBase):
+
 2012-08-21  Andrew Lo  <anlo@rim.com>
 
         [BlackBerry] requestAnimationFrame: Unscheduled display link frames need to be sent to main thread
