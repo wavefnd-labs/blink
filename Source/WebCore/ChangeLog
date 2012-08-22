@@ -1,3 +1,119 @@
+2012-08-22  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=94401
+        Add support for making a web site become paginated using overflow: 
+        paged-x | paged-y
+        -and corresponding-
+        <rdar://problem/11831783> 
+
+        Reviewed by Dave Hyatt.
+
+        This patch adds two new possible values for overflow-y. They are -
+        webkit-paged-x and -webkit-paged-y. When you set these as overflow-y 
+        values on the html or body element, they make the RenderView 
+        paginated, much like the API on Page.
+
+        -webkit-paged-x and -webkit-paged-y are only valid values for 
+        overflow-y, NOT overflow-x. overflow-x defaults to a value of auto 
+        (for now) unless it has been set to something else.
+        * css/CSSParser.cpp:
+        (WebCore::isValidKeywordPropertyAndValue):
+        (WebCore::CSSParser::parseValue):
+
+        Two new CSS value keywords.
+        * css/CSSValueKeywords.in:
+
+        EOverflow has two new values for pagination. 
+        * rendering/style/RenderStyleConstants.h:
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore::CSSPrimitiveValue::operator EOverflow):
+
+        A bunch of existing code from StyleResolver::styleForDocument() is 
+        moved into a helper function so that it can be called from two 
+        places. 
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+
+        Even though this pagination is very similar to Page::pagination(), it 
+        is different in one critical way. Page::pagination() will apply to 
+        all FrameViews, even those in the page cache. For this reason, 
+        FrameView needs to keep its own Pagination value that just applies to 
+        this FrameView.
+        * page/FrameView.cpp:
+        * page/FrameView.h:
+        (WebCore):
+        (FrameView):
+
+        Map RenderStyle values to a Pagination::Mode.
+        (WebCore::paginationModeForRenderStyle):
+        (WebCore):
+
+        Account for paged-x and paged-y here.
+        (WebCore::FrameView::applyOverflowToViewport):
+
+        As is explained in the header, FrameView::pagination() will return 
+        m_pagination if it has been set. Otherwise, it will return 
+        Page::pagination() since currently there are no callers that need to 
+        distinguish between the two.
+        (WebCore::FrameView::pagination):
+        (WebCore::FrameView::setPagination):
+
+        Generally this means that everywhere in WebCore should ask FrameView 
+        for the pagination(), not Page. These call sites all look to 
+        FrameView now.
+        (WebCore::FrameView::paintContents):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::requiresColumns):
+        (WebCore::RenderView::calcColumnWidth):
+        (WebCore::RenderView::paginationUnit):
+        (WebCore::RenderView::viewLogicalHeight):
+
+        Since we need to define Pagination in Page.h AND FrameView.h, it is 
+        now in its own header, Pagination.h. And therefore it is no longer 
+        WebCore::Page::Pagination, but rather it is just WebCore::Pagination.
+        * page/Page.h:
+        (Page):
+        * rendering/Pagination.h: Added.
+        (WebCore):
+        (WebCore::Pagination::Pagination):
+        (Pagination):
+        (WebCore::Pagination::operator==):
+        (WebCore::Pagination::operator!=):
+        * WebCore.exp.in:
+        * WebCore.xcodeproj/project.pbxproj:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+
+        Certain ColumnInfo values are set based on the RenderStyle. So if 
+        those RenderStyle values change, the ColumnInfo needs to be updated.
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::updateColumnInfoFromStyle):
+        (WebCore):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+
+        Factor in paged-x and paged-y when determining if a RenderBlock 
+        requires columns.
+        (WebCore::RenderBlock::requiresColumns):
+
+        RenderStyle::specifiesColumns() is an odd and probably broken 
+        function. At the very least, it should be re-named, if not removed 
+        entirely. It does not accurately assess if columns have been 
+        specified. I had to add this code here because specifiesColumns() 
+        returns false for paged-x and true for paged-y. We were hitting a 
+        number of crashes with paged-y because of this, so I chose for the 
+        time being to limit this check to non-root layers.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::shouldBeNormalFlowOnly):
+
+        It's just Pagination now, not Page::Pagination.
+        * testing/InternalSettings.cpp:
+        (WebCore::InternalSettings::reset):
+        (WebCore::InternalSettings::setPagination):
+
 2012-08-22  Dean Jackson  <dino@apple.com>
 
         [WebGL] Mac/ATI/AMD systems need to translate built-in GLSL functions
