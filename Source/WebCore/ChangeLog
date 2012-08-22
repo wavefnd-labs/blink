@@ -1,3 +1,111 @@
+2012-08-21  Victor Carbune  <victor@rosedu.org>
+
+        Display a TextTrackCue when snap-to-lines flag is set
+        https://bugs.webkit.org/show_bug.cgi?id=79751
+
+        Reviewed by Tony Chang.
+
+        This patch implements rendering functionality for a given text track,
+        following closer the exact WebVTT specification. There are two new classes
+        which have been added in order to succesfully cover rendering when of a text
+        track cue.
+
+        RenderTextTrackCue handles the specific rendering algorithm required,
+        by checking for overlaps with other boxes that are in the same
+        container (these can be any other boxes, not necessarily other cues,
+        the video controls, for example).
+
+        TextTrackCueBox extends HTMLDivElement and is an intermediate layer
+        between the renderer class and the actual cue object. Its purpose is
+        to instantiate the particular renderer and cover all the default CSS
+        styling that needs to be applied to the cue.
+
+        The layout is done in two steps:
+          - Step 1: Layout the TextTrackCue with default CSS properties set (this is
+        the TextTrackCueBox decorated with the respective CSS elements)
+          - Step 2: RenderTextTrackCue adjusts the box position depending on the
+        parameters of the TextTrackCue object and the overlaps that may occur with
+        previously positioned cues.
+
+        Tests: media/track/track-cue-rendering-horizontal.html
+               media/track/track-cue-rendering-vertical.html
+
+        * CMakeLists.txt: Updated to include RenderTextTrackCue.
+        * GNUmakefile.list.am: Updated to include RenderTextTrackCue.
+        * Target.pri: Updated to include RenderTextTrackCue.
+        * WebCore.gypi: Updated to include RenderTextTrackCue.
+        * WebCore.vcproj/WebCore.vcproj: Updated to include RenderTextTrackCue.
+        * WebCore.xcodeproj/project.pbxproj: Updated to include RenderTextTrackCue.
+        * css/mediaControls.css: Removed unreliable CSS.
+        (video::-webkit-media-text-track-display): Removed properties.
+        * html/shadow/MediaControlElements.cpp: Updated to not use the new class.
+        (RenderTextTrackContainerElement):
+        (WebCore::MediaControlTextTrackContainerElement::updateDisplay): Simplified
+        the function by moving the check if track is rendered in TextTrack and used
+        the TextTrackCueBox for cues.
+        * html/track/TextTrack.cpp: Added a new method.
+        (WebCore::TextTrack::isRendered): Method that returns whether the track should
+        be rendered or not.
+        (WebCore):
+        * html/track/TextTrack.h: Added the isRendered method.
+        (TextTrack):
+        * html/track/TextTrackCue.cpp: Added several helper methods and
+        the TextTrackCueBox.
+        (WebCore):
+        (WebCore::TextTrackCueBox::TextTrackCueBox): The TextTrackCueBox extends
+        the HTMLDivElement and represents a bridge class between RenderTextTrackCue
+        and TextTrackCue. This is required as the layout is done in two steps, as
+        explained on top of the ChangeLog entry.
+        (WebCore::TextTrackCueBox::getCue): Returns the associated TextTrackCue object.
+        (WebCore::TextTrackCueBox::applyCSSProperties): Applies a part of the default CSS
+        properties, as defined by section 3.5.1 of the WebVTT specification.
+        (WebCore::TextTrackCueBox::shadowPseudoId): Moved the shadow pseudo id.
+        (WebCore::TextTrackCueBox::createRenderer): Creates the particular renderer.
+        (WebCore::TextTrackCue::TextTrackCue): Corrected the internal writing mode map.
+        (WebCore::TextTrackCue::calculateComputedLinePosition): Updated the compute line
+        position algorithm. This requires, however, a method to consider only rendered
+        tracks (and therefore will be addressed completely in subsequent changeset).
+        (WebCore::TextTrackCue::calculateDisplayParameters): Updated and corrected the
+        computed display parameters to match the current specification.
+        (WebCore::TextTrackCue::getDisplayTree): Update to use the TextTrackCueBox class
+        and moved CSS application to the respective class.
+        (WebCore::TextTrackCue::getPositionCoordinates): Added comment to specify in which
+        situation this method is used and change visibility to private.
+        (WebCore::TextTrackCue::getCSSWritingMode): Returns the CSS writing mode corresponding
+        to the cue writing mode.
+        (WebCore::TextTrackCue::getCSSSize): Returns the cue width / height (depending on the
+        writing direction.
+        (WebCore::TextTrackCue::getCSSPosition): Returns the default display position, that is
+        used in the first layout step.
+        * html/track/TextTrackCue.h:
+        (WebCore):
+        (TextTrackCueBox):
+        (WebCore::TextTrackCueBox::create): Initialization method.
+        (TextTrackCue):
+        (WebCore::TextTrackCue::getWritingDirection): Helper method to return the internal
+        values used to represent the writing direction.
+        * rendering/RenderTextTrackCue.cpp: Added.
+        (WebCore):
+        (WebCore::RenderTextTrackCue::RenderTextTrackCue):
+        (WebCore::RenderTextTrackCue::layout): The rendering steps, as mentioned in
+        the WebVTT rendering rules. Currently, this treats only the snap-to-lines set
+        case. It is implemented following closely the spec, and might be subject to
+        change as discussions on various bugs evolve.
+        (WebCore::RenderTextTrackCue::initializeLayoutParameters): Steps 1 - 7.
+        (WebCore::RenderTextTrackCue::placeBoxInDefaultPosition): Steps 8 - 10.
+        (WebCore::RenderTextTrackCue::isOutside): Inline method to check if the cue is outside.
+        (WebCore::RenderTextTrackCue::isOverlapping): Inline method to check if the cue overlaps other boxes.
+        (WebCore::RenderTextTrackCue::shouldSwitchDirection): Step 12.
+        (WebCore::RenderTextTrackCue::moveBoxesByStep): Step 13.
+        (WebCore::RenderTextTrackCue::switchDirection): Steps 15 - 18.
+        (WebCore::RenderTextTrackCue::repositionCueSnapToLinesSet): Cue repositioning
+        for text track cue when the snap to lines flag is set.
+        (WebCore::RenderTextTrackCue::repositionCueSnapToLinesNotSet): Cue repositioning
+        for text track cue when the snap to lines flag is not set. Not implemented yet.
+        * rendering/RenderTextTrackCue.h: Added.
+        (WebCore):
+        (RenderTextTrackCue): Rendering class, handling the display of cues.
+
 2012-08-21  Lianghui Chen  <liachen@rim.com>
 
         [BlackBerry] Add RSS content handling support
