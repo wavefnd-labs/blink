@@ -1,3 +1,37 @@
+2012-08-21  Shezan Baig  <sbaig1@bloomberg.net>
+
+        Fix cross-direction stretch for replaced elements in row flexbox
+        https://bugs.webkit.org/show_bug.cgi?id=94237
+
+        Reviewed by Ojan Vafai.
+
+        When stretching, don't take into account the instrinsic size of child
+        replaced elements. Only the fixed size, min size, and max size of the
+        child should be taken into account. The logic that computed this was
+        moved from RenderBox::computeLogicalHeight to a new helper method
+        called logicalHeightConstrainedByMinMax.  This helper method is now
+        used from RenderFlexibleBox::applyStretchAlignmentToChild, instead of
+        using RenderBox::computeLogicalHeight.
+
+        A similar change will need to be made for column-flowing flexboxes.
+        This will be addressed in https://webkit.org/b/94604.
+
+        No new tests.  The existing css3/flexbox/flexitem.html test was
+        extended to cover this case.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::logicalHeightConstrainedByMinMax): New helper
+        method that is used by RenderBox::computeLogicalHeight and also by
+        RenderFlexibleBox::applyStretchAlignmentToChild.
+        (WebCore):
+        (WebCore::RenderBox::computeLogicalHeight): Updated to use the new
+        logicalHeightConstrainedByMinMax helper method.
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::applyStretchAlignmentToChild): Use
+        logicalHeightConstrainedByMinMax instead of computeLogicalHeight.
+
 2012-08-21  Hayato Ito  <hayato@chromium.org>
 
         Make an event object clonable to support an event propagation across seamless iframes.
