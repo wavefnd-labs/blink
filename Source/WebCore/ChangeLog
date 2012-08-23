@@ -1,3 +1,86 @@
+2012-08-23  Emil A Eklund  <eae@chromium.org>
+
+        Remove dependency on RenderStyle from FractionalLayoutBoxExtent and LayoutBox
+        https://bugs.webkit.org/show_bug.cgi?id=94146
+
+        Reviewed by Eric Seidel.
+
+        FractionalLayoutBoxExtent and LayoutBox currently have a dependency on
+        RenderStyle to resolve writing mode and text direction.
+        This is undesirable and breaks encapsulation.
+
+        Change FractionalLayoutBoxExtent and LengthBox to take a writing mode
+        parameter, and text direction as needed, instead of a pointer to a
+        RenderStyle object.
+
+        No new tests, no change in functionality.
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        Add new WritingMode.h file.
+        
+        * css/CSSPrimitiveValueMappings.h:
+        * css/CSSProperty.h:
+        * css/CSSToStyleMap.h:
+        Change includes as needed.
+
+        * platform/LengthBox.h:
+        * platform/LengthBox.cpp:
+        (WebCore::LengthBox::logicalLeft):
+        (WebCore::LengthBox::logicalRight):
+        (WebCore::LengthBox::before):
+        (WebCore::LengthBox::after):
+        Change methods to take a WirtingMode parameter instead of a RenderStyle pointer.
+        
+        (WebCore::LengthBox::start):
+        (WebCore::LengthBox::end):
+        Change methods to take WritingMode and TextDirection parameters instead of a RenderStyle pointer.
+        
+        * platform/graphics/FractionalLayoutBoxExtent.h:
+        * platform/graphics/FractionalLayoutBoxExtent.cpp:
+        (WebCore::FractionalLayoutBoxExtent::logicalTop):
+        (WebCore::FractionalLayoutBoxExtent::logicalBottom):
+        (WebCore::FractionalLayoutBoxExtent::logicalLeft):
+        (WebCore::FractionalLayoutBoxExtent::logicalRight):
+        (WebCore::FractionalLayoutBoxExtent::before):
+        (WebCore::FractionalLayoutBoxExtent::after):
+        (WebCore::FractionalLayoutBoxExtent::setBefore):
+        (WebCore::FractionalLayoutBoxExtent::setAfter):
+        (WebCore::FractionalLayoutBoxExtent::mutableLogicalLeft):
+        (WebCore::FractionalLayoutBoxExtent::mutableLogicalRight):
+        (WebCore::FractionalLayoutBoxExtent::mutableBefore):
+        (WebCore::FractionalLayoutBoxExtent::mutableAfter):
+        Change methods to take a WritingMode parameter instead of a RenderStyle pointer.
+
+        (WebCore::FractionalLayoutBoxExtent::start):
+        (WebCore::FractionalLayoutBoxExtent::end):
+        (WebCore::FractionalLayoutBoxExtent::setStart):
+        (WebCore::FractionalLayoutBoxExtent::setEnd):
+        Change methods to take WritingMode and TextDirection parameters instead of a RenderStyle pointer.
+
+        * platform/text/TextDirection.h:
+        (WebCore::isLeftToRightDirection):
+        Add convenience method.
+        
+        * platform/text/WritingMode.h: Added.
+        Move WritingMode enum from RenderStyleConstants to new file.
+        
+        (WebCore::isHorizontalWritingMode):
+        (WebCore::isFlippedLinesWritingMode):
+        (WebCore::isFlippedBlocksWritingMode):
+        Add convenience methods for working with writing modes.
+        
+        * rendering/InlineFlowBox.cpp:
+        * rendering/RenderBox.cpp:
+        * rendering/RenderBox.h:
+        * rendering/style/RenderStyle.h:
+        Update calls to FractionalLayoutBoxExtent/LengthBox to pass WritingMode/
+        TextDirection as needed.
+
+        * rendering/style/RenderStyleConstants.h:
+        Remove WritingMode enum as it is now in a dedicated file.
+
 2012-08-23  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: introduce canFilter on panel (otherwise we check for function existence).
