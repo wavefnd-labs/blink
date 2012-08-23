@@ -1,3 +1,42 @@
+2012-08-23  John Mellor  <johnme@chromium.org>
+
+        Text Autosizing: Multiply large fonts less, as they are already more legible.
+        https://bugs.webkit.org/show_bug.cgi?id=94227
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Rather than uniformly multiplying font sizes by the multiplier (derived
+        from the width of the block), we should multiply fonts that are already
+        large less, since they are already more legible hence there is less need
+        for them to grow.
+
+        However it is still important to maintain differentiation between text
+        that the author specified to be of different sizes.
+
+        This algorithm multiplies text by the multiplier up until a predefined
+        "pleasant" font size; beyond that the computedSize goes up with
+        specifiedSize but at a gradient of less than 1 in order to gradually
+        fade out the size increase; finally for very large specifiedSizes the
+        computedSize will be the same as the specifiedSize.
+
+        For further details, including a graph, please see the bug report.
+
+        Test: fast/text-autosizing/various-font-sizes.html
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::computeAutosizedFontSize):
+
+            Implements the custom multiplication. See comment for details.
+
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::lineHeight):
+
+            Use computeAutosizedFontSize instead of directly multiplying.
+
+        (WebCore::RenderStyle::setFontSize):
+
+            Use computeAutosizedFontSize instead of directly multiplying.
+
 2012-08-23  Emil A Eklund  <eae@chromium.org>
 
         Remove dependency on RenderStyle from FractionalLayoutBoxExtent and LayoutBox
