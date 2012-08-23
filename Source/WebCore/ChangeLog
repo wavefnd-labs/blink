@@ -1,3 +1,36 @@
+2012-08-23  Takashi Sakamoto  <tasak@google.com>
+
+        Distributed nodes should not share styles.
+        https://bugs.webkit.org/show_bug.cgi?id=90661
+
+        Reviewed by Hajime Morita.
+
+        styleForElement tries to use previous sibling's style for distributed
+        nodes. However distributed nodes are children of a shadow host, but
+        the nodes are not siblings as the result of distribution.
+        The spec is:
+        http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html#shadow-dom-subtrees
+        So sharing previous sibling's style should be disabled for distrbuted
+        nodes.
+
+        Test: fast/dom/shadow/style-of-distributed-node.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver):
+        Initialized m_distributedToInsertionPoint. Its initial value is false.
+        (WebCore::StyleResolver::initForStyleResolve):
+        After invoking NodeRenderingContext, if the context returns any
+        insertion point, set m_distributedToInsertionPoint to be true.
+        Otherwise, false. The value is used in styleForElement.
+        (WebCore::StyleResolver::styleForElement):
+        If m_distributedToInsertionPoint is true, disable local sibling style
+        cache.
+        * css/StyleResolver.h:
+        (StyleResolver):
+        Added a new member variable, m_distributedToInsertionPoint.
+        The variable keeps whether the m_element is distributed to an
+        insertion point.
+
 2012-08-23  John Griggs  <jgriggs@rim.com>
 
                 Replace access ot HTMLMediaElement from MediaPlayerPrivateBlackBerry with methods in MediaPlayerClient - updated with notes from initial reviews.  https://bugs.webkit.org/show_bug.cgi?id=84291
