@@ -1,3 +1,37 @@
+2012-08-23  Shezan Baig  <shezbaig.wk@gmail.com>
+
+        Fix cross-direction stretch for replaced elements in column flexbox
+        https://bugs.webkit.org/show_bug.cgi?id=94604
+
+        Reviewed by Ojan Vafai.
+
+        Moved the logic that constrains logical width by MinSize and MaxSize to
+        a new helper function called constrainLogicalWidthInRegionByMinMax.
+        This helper function is used from both computeLogicalWidthInRegion and
+        RenderFlexibleBox::applyStretchAlignmentToChild.
+
+        RenderFlexibleBox no longer checks for isMultiline when stretching
+        elements in a column flexbox. Instead, we now constrain the available
+        width by the child's min-width and max-width, and set the override
+        width only if that constrained width is different from the child's
+        current logicalWidth.
+
+        No new tests. The existing css3/flexbox/flexitem.html test was extended
+        to exercise the new code.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::constrainLogicalWidthInRegionByMinMax): New helper
+        method to constrain logical width by min-width and max-width.
+        (WebCore):
+        (WebCore::RenderBox::computeLogicalWidthInRegion): Changed to use the
+        new constrainLogicalWidthInRegionByMinMax helper method.
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::applyStretchAlignmentToChild): Changed to
+        use constrainLogicalWidthInRegionByMinMax to determine the override
+        width for the child.
+
 2012-08-23  Adam Barth  <abarth@webkit.org>
 
         [V8] ScriptState is using stone knifes and bear skins
