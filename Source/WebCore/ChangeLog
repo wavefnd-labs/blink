@@ -1,3 +1,26 @@
+2012-08-23  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
+
+        Remove redundant check for negative values when using WebCore::Color::alpha()
+        https://bugs.webkit.org/show_bug.cgi?id=94811
+
+        Reviewed by Eric Seidel.
+
+        Though alpha() returns a signed value (int), its value is stored on an unsigned
+        typedef (RGBA32) and is safeguarded by alphaChannel() that its value never goes
+        beyond 255, so no integer overflow, thus we can safely remove redundant check
+        for negative values while using it.
+
+        This change does not affect behavior, so no new tests needed.
+
+        * platform/graphics/Image.cpp:
+        (WebCore::Image::fillWithSolidColor):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::paintFillLayerExtended):
+        (WebCore::RenderBoxModelObject::boxShadowShouldBeAppliedToBackground): Using hasAlpha() for readibility.
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::paintBoxDecorations):
+        * rendering/style/RenderStyle.h:
+
 2012-08-23  Zan Dobersek  <zandobersek@gmail.com>
 
         [Gtk] Move feature defines processing into a GNUmakefile that's simple to autogenerate
