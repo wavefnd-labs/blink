@@ -1,3 +1,32 @@
+2012-08-23  Andrei Onea  <onea@adobe.com>
+
+        [CSSRegions]Crash when moving anonymous block children inside a named flow
+        https://bugs.webkit.org/show_bug.cgi?id=90865
+
+        Reviewed by Abhishek Arya.
+
+        When an anonymous block's children are detached in RenderBlock::collapseAnonymousBoxChild, the reference
+        to their enclosingRenderFlowThread is lost and causes a crash in RenderObject::willBeRemovedFromTree.
+        Because of this, we now maintain the enclosingRenderFlowThread during the whole lifetime of the
+        RenderBlock::collapseAnonymousBoxChild function, using a CurrentRenderFlowThreadMaintainer local.
+        
+
+        Test: fast/regions/move-anonymous-block-inside-named-flow-crash.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::collapseAnonymousBoxChild):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::CurrentRenderFlowThreadMaintainer::CurrentRenderFlowThreadMaintainer):
+        (WebCore):
+        (WebCore::CurrentRenderFlowThreadMaintainer::~CurrentRenderFlowThreadMaintainer):
+        Moved CurrentRenderFlowThreadMaintaner declaration from .cpp to .h, so that we can access it from
+        RenderBlock::collapseAnonymousBoxChild.
+        * rendering/RenderFlowThread.h:
+        (CurrentRenderFlowThreadMaintainer):
+        (WebCore):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::willBeRemovedFromTree):
+
 2012-08-23  Kevin Ollivier  <kevino@theolliviers.com>
 
         [wx] Unreviewed build fix. Add wx to the list of platforms that use CoreText
