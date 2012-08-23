@@ -1,3 +1,32 @@
+2012-08-23  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Remove RenderTable::removeChild
+        https://bugs.webkit.org/show_bug.cgi?id=94842
+
+        Reviewed by Abhishek Arya.
+
+        This change removed removeChild, replaced by willBeRemovedFromTree calls. The upside is that
+        the invalidations are now guaranteed to run if we split a table (which is not guaranteed when
+        using removeChild). This change also shows that our code may be doing too much work in some
+        of the child's removal, in which case the code was marked as needed.
+
+        Covered by existing tests.
+
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::removeCaption):
+        Helper function used to remove the caption from our Vector. The invalidation are very likely
+        unneeded so added a comment about that.
+
+        * rendering/RenderTable.h:
+        * rendering/RenderTableCaption.cpp:
+        (WebCore::RenderTableCaption::willBeRemovedFromTree):
+        (WebCore::RenderTableCaption::table):
+        * rendering/RenderTableCaption.h:
+        * rendering/RenderTableCol.cpp:
+        (WebCore::RenderTableCol::willBeRemovedFromTree):
+        * rendering/RenderTableCol.h:
+        Added the following functions to do the invalidation.
+
 2012-08-23  Mark Hahnenberg  <mhahnenberg@apple.com>
 
         Change behavior of MasqueradesAsUndefined to better accommodate DFG changes
