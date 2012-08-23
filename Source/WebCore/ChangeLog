@@ -1,3 +1,30 @@
+2012-08-23  Shezan Baig  <shezbaig.wk@gmail.com>
+
+        Flexbox doesn't need to compute logical height for stretched items in row flow
+        https://bugs.webkit.org/show_bug.cgi?id=94807
+
+        Reviewed by Tony Chang.
+
+        Change logicalHeightConstrainedByMinMax to
+        constrainLogicalHeightByMinMax. The new method doesn't compute the
+        MainOrPreferred logical height (that computation has been moved back to
+        computeLogicalHeight). RenderFlexibleBox now just constrains the
+        stretchedLogicalHeight by min/max.
+
+        No new tests. This is a cleanup of bug 94237.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::constrainLogicalHeightByMinMax): Instead of
+        computing the MainOrPreferred logical height, just constrain the given
+        logical height by MinSize and MaxSize.
+        (WebCore::RenderBox::computeLogicalHeight): Compute the MainOrPreferred
+        logical height before constraining by min/max.
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::applyStretchAlignmentToChild): Use
+        constrainLogicalHeightByMinMax to constrain the stretchedLogicalHeight.
+
 2012-08-23  Adam Barth  <abarth@webkit.org>
 
         [V8] V8ScriptInstance is much more complicated than necessary
