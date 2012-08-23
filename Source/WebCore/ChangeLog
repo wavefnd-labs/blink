@@ -1,3 +1,191 @@
+2012-08-23  Alexandre Elias  <aelias@chromium.org>
+
+        [chromium] Rename LayerRendererChromium to GL-specific name
+        https://bugs.webkit.org/show_bug.cgi?id=94835
+
+        Reviewed by James Robinson.
+
+        Over time, LayerRendererChromium has evolved to be a GL-specific
+        subclass of CCRenderer that has no awareness of layers (as it operates
+        only with drawQuads).
+
+        This patch renames LayerRendererChromium to CCRendererGL, replaces all
+        instances of "layerRenderer" with just "renderer", and removes a
+        few unnecessary includes of LayerRendererChromium.h.
+
+        No new tests (no-op refactoring).
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/Canvas2DLayerBridge.cpp:
+        * platform/graphics/chromium/ContentLayerChromium.cpp:
+        (WebCore::ContentLayerChromium::createTextureUpdaterIfNeeded):
+        * platform/graphics/chromium/GeometryBinding.cpp:
+        * platform/graphics/chromium/HeadsUpDisplayLayerChromium.cpp:
+        (WebCore::HeadsUpDisplayLayerChromium::update):
+        * platform/graphics/chromium/ImageLayerChromium.cpp:
+        (WebCore::ImageLayerChromium::createTextureUpdaterIfNeeded):
+        * platform/graphics/chromium/LayerTextureSubImage.cpp:
+        * platform/graphics/chromium/ProgramBinding.cpp:
+        * platform/graphics/chromium/RenderSurfaceChromium.h:
+        (WebCore):
+        * platform/graphics/chromium/ScrollbarLayerChromium.cpp:
+        (WebCore::ScrollbarLayerChromium::createTextureUpdaterIfNeeded):
+        * platform/graphics/chromium/TextureCopier.cpp:
+        * platform/graphics/chromium/TiledLayerChromium.cpp:
+        (WebCore::TiledLayerChromium::updateTileSizeAndTilingOption):
+        * platform/graphics/chromium/cc/CCHeadsUpDisplayLayerImpl.cpp:
+        * platform/graphics/chromium/cc/CCIOSurfaceLayerImpl.cpp:
+        * platform/graphics/chromium/cc/CCLayerImpl.cpp:
+        (WebCore::sortLayers):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::CCLayerTreeHost):
+        (WebCore::CCLayerTreeHost::initializeRenderer):
+        (WebCore::CCLayerTreeHost::deleteContentsTexturesOnImplThread):
+        (WebCore::CCLayerTreeHost::finishAllRendering):
+        (WebCore::CCLayerTreeHost::rendererCapabilities):
+        (WebCore::CCLayerTreeHost::initializeRendererIfNeeded):
+        (WebCore::CCLayerTreeHost::updateLayers):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (WebCore::RendererCapabilities::RendererCapabilities):
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::canDraw):
+        (WebCore::CCLayerTreeHostImpl::calculateRenderSurfaceLayerList):
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        (WebCore::CCLayerTreeHostImpl::drawLayers):
+        (WebCore::CCLayerTreeHostImpl::finishAllRendering):
+        (WebCore::CCLayerTreeHostImpl::isContextLost):
+        (WebCore::CCLayerTreeHostImpl::rendererCapabilities):
+        (WebCore::CCLayerTreeHostImpl::swapBuffers):
+        (WebCore::CCLayerTreeHostImpl::readback):
+        (WebCore::CCLayerTreeHostImpl::setVisible):
+        (WebCore::CCLayerTreeHostImpl::initializeRenderer):
+        (WebCore::CCLayerTreeHostImpl::setViewportSize):
+        (WebCore::CCLayerTreeHostImpl::ensureRenderSurfaceLayerList):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (WebCore):
+        (WebCore::CCLayerTreeHostImpl::renderer):
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCPrioritizedTexture.cpp:
+        * platform/graphics/chromium/cc/CCPrioritizedTextureManager.cpp:
+        * platform/graphics/chromium/cc/CCPriorityCalculator.cpp:
+        * platform/graphics/chromium/cc/CCProxy.h:
+        (WebCore):
+        (CCProxy):
+        * platform/graphics/chromium/cc/CCRenderSurface.cpp:
+        * platform/graphics/chromium/cc/CCRenderSurface.h:
+        (WebCore):
+        * platform/graphics/chromium/cc/CCRenderer.h:
+        (CCRenderer):
+        * platform/graphics/chromium/cc/CCRendererGL.cpp: Renamed from Source/WebCore/platform/graphics/chromium/LayerRendererChromium.cpp.
+        (WebCore::CCRendererGL::create):
+        (WebCore):
+        (WebCore::CCRendererGL::CCRendererGL):
+        (WebCore::CCRendererGL::initialize):
+        (WebCore::CCRendererGL::~CCRendererGL):
+        (WebCore::CCRendererGL::context):
+        (WebCore::CCRendererGL::debugGLCall):
+        (WebCore::CCRendererGL::setVisible):
+        (WebCore::CCRendererGL::releaseRenderPassTextures):
+        (WebCore::CCRendererGL::viewportChanged):
+        (WebCore::CCRendererGL::clearFramebuffer):
+        (WebCore::CCRendererGL::beginDrawingFrame):
+        (WebCore::CCRendererGL::doNoOp):
+        (WebCore::CCRendererGL::drawQuad):
+        (WebCore::CCRendererGL::drawCheckerboardQuad):
+        (WebCore::CCRendererGL::drawDebugBorderQuad):
+        (WebCore::applyFilters):
+        (WebCore::CCRendererGL::drawBackgroundFilters):
+        (WebCore::CCRendererGL::drawRenderPassQuad):
+        (WebCore::CCRendererGL::drawSolidColorQuad):
+        (TileProgramUniforms):
+        (WebCore::tileUniformLocation):
+        (WebCore::CCRendererGL::drawTileQuad):
+        (WebCore::CCRendererGL::drawYUVVideoQuad):
+        (WebCore::CCRendererGL::drawStreamVideoQuad):
+        (WebCore::TextureProgramBinding::set):
+        (TextureProgramBinding):
+        (WebCore::TexTransformTextureProgramBinding::set):
+        (TexTransformTextureProgramBinding):
+        (WebCore::CCRendererGL::drawTextureQuad):
+        (WebCore::CCRendererGL::drawIOSurfaceQuad):
+        (WebCore::CCRendererGL::finishDrawingFrame):
+        (WebCore::CCRendererGL::toGLMatrix):
+        (WebCore::CCRendererGL::setShaderFloatQuad):
+        (WebCore::CCRendererGL::setShaderOpacity):
+        (WebCore::CCRendererGL::drawQuadGeometry):
+        (WebCore::CCRendererGL::copyTextureToFramebuffer):
+        (WebCore::CCRendererGL::finish):
+        (WebCore::CCRendererGL::swapBuffers):
+        (WebCore::CCRendererGL::onSwapBuffersComplete):
+        (WebCore::CCRendererGL::onMemoryAllocationChanged):
+        (WebCore::CCRendererGL::onMemoryAllocationChangedOnImplThread):
+        (WebCore::CCRendererGL::discardFramebuffer):
+        (WebCore::CCRendererGL::ensureFramebuffer):
+        (WebCore::CCRendererGL::onContextLost):
+        (WebCore::CCRendererGL::getFramebufferPixels):
+        (WebCore::CCRendererGL::getFramebufferTexture):
+        (WebCore::CCRendererGL::useScopedTexture):
+        (WebCore::CCRendererGL::bindFramebufferToOutputSurface):
+        (WebCore::CCRendererGL::bindFramebufferToTexture):
+        (WebCore::CCRendererGL::enableScissorTestRect):
+        (WebCore::CCRendererGL::disableScissorTest):
+        (WebCore::CCRendererGL::setDrawViewportSize):
+        (WebCore::CCRendererGL::makeContextCurrent):
+        (WebCore::CCRendererGL::initializeSharedObjects):
+        (WebCore::CCRendererGL::tileCheckerboardProgram):
+        (WebCore::CCRendererGL::solidColorProgram):
+        (WebCore::CCRendererGL::renderPassProgram):
+        (WebCore::CCRendererGL::renderPassProgramAA):
+        (WebCore::CCRendererGL::renderPassMaskProgram):
+        (WebCore::CCRendererGL::renderPassMaskProgramAA):
+        (WebCore::CCRendererGL::tileProgram):
+        (WebCore::CCRendererGL::tileProgramOpaque):
+        (WebCore::CCRendererGL::tileProgramAA):
+        (WebCore::CCRendererGL::tileProgramSwizzle):
+        (WebCore::CCRendererGL::tileProgramSwizzleOpaque):
+        (WebCore::CCRendererGL::tileProgramSwizzleAA):
+        (WebCore::CCRendererGL::textureProgram):
+        (WebCore::CCRendererGL::textureProgramFlip):
+        (WebCore::CCRendererGL::textureIOSurfaceProgram):
+        (WebCore::CCRendererGL::videoYUVProgram):
+        (WebCore::CCRendererGL::videoStreamTextureProgram):
+        (WebCore::CCRendererGL::cleanupSharedObjects):
+        (WebCore::CCRendererGL::isContextLost):
+        * platform/graphics/chromium/cc/CCRendererGL.h: Renamed from Source/WebCore/platform/graphics/chromium/LayerRendererChromium.h.
+        (WebKit):
+        (WebCore):
+        (CCRendererGL):
+        (WebCore::CCRendererGL::sharedGeometryQuad):
+        (WebCore::CCRendererGL::sharedGeometry):
+        (WebCore::CCRendererGL::isFramebufferDiscarded):
+        * platform/graphics/chromium/cc/CCResourceProvider.cpp:
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::CCSingleThreadProxy):
+        (WebCore::CCSingleThreadProxy::initializeRenderer):
+        (WebCore::CCSingleThreadProxy::recreateContext):
+        (WebCore::CCSingleThreadProxy::rendererCapabilities):
+        (WebCore::CCSingleThreadProxy::doCommit):
+        (WebCore::CCSingleThreadProxy::forceSerializeOnSwapBuffers):
+        (WebCore::CCSingleThreadProxy::commitAndComposite):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        (CCSingleThreadProxy):
+        * platform/graphics/chromium/cc/CCSolidColorLayerImpl.h:
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::CCThreadProxy):
+        (WebCore::CCThreadProxy::compositeAndReadback):
+        (WebCore::CCThreadProxy::initializeRenderer):
+        (WebCore::CCThreadProxy::recreateContext):
+        (WebCore::CCThreadProxy::rendererCapabilities):
+        (WebCore::CCThreadProxy::forceSerializeOnSwapBuffersOnImplThread):
+        (WebCore::CCThreadProxy::beginFrame):
+        (WebCore::CCThreadProxy::beginFrameCompleteOnImplThread):
+        (WebCore::CCThreadProxy::scheduledActionDrawAndSwapInternal):
+        (WebCore::CCThreadProxy::initializeRendererOnImplThread):
+        (WebCore::CCThreadProxy::recreateContextOnImplThread):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (CCThreadProxy):
+
 2012-08-23  Shezan Baig  <shezbaig.wk@gmail.com>
 
         Flexbox doesn't need to compute logical height for stretched items in row flow
