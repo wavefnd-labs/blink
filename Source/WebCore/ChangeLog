@@ -1,3 +1,30 @@
+2012-08-22  Dominic Mazzoni  <dmazzoni@google.com>
+
+        AX: Focusable elements without a role should not be ignored
+        https://bugs.webkit.org/show_bug.cgi?id=94302
+
+        Reviewed by Chris Fleizach.
+
+        Changes the accessibility logic so that a generic element that's focusable is
+        not ignored for accessibility, and returns its inner text as its title. That way
+        if you Tab to the element, a reasonable accessibility notification is generated.
+
+        One exception is the body element, because focusing the body is equivalent to
+        blurring the current focused element and does not result in a "focus" accessibility
+        notification.
+
+        Also fixes logic that determined if an element was contentEditable by making
+        sure it catches the case with no attribute value (e.g. <div contentEditable>),
+        which also implies contentEditable=true according to the spec.
+
+        Test: accessibility/focusable-div.html
+
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore):
+        (WebCore::nodeHasContentEditableAttributeSet):
+        (WebCore::AccessibilityRenderObject::title):
+        (WebCore::AccessibilityRenderObject::accessibilityIsIgnored):
+
 2012-08-22  Kentaro Hara  <haraken@chromium.org>
 
         Unreviewed, rolling out r126383.
