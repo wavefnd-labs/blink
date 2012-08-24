@@ -1,3 +1,30 @@
+2012-08-24  Benjamin Poulain  <bpoulain@apple.com>
+
+        Populate DatabaseTracker's origins lazily on demand
+        https://bugs.webkit.org/show_bug.cgi?id=94649
+
+        Reviewed by Brady Eidson.
+
+        Previously, we would populate m_quotaMap on startup when initialializing DatabaseTracker.
+        This takes a significant amount of time and memory and it is not needed in many cases.
+
+        This patch change DatabaseTracker to invoke populateOrigins() only when needed.
+        This saves:
+        -7-15ms on startup.
+        -96Kbytes of SQLite page cache
+        -the size of m_quotaMap on that particular system.
+
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::DatabaseTracker):
+        (WebCore::DatabaseTracker::hasEntryForOriginNoLock):
+        (WebCore::DatabaseTracker::populateOriginsIfNeeded):
+        (WebCore::DatabaseTracker::origins):
+        (WebCore::DatabaseTracker::quotaForOriginNoLock):
+        (WebCore::DatabaseTracker::addDatabase):
+        (WebCore::DatabaseTracker::deleteOrigin):
+        * Modules/webdatabase/DatabaseTracker.h:
+        (DatabaseTracker):
+
 2012-08-24  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Remove visitedLinkHash from PlatformSupport
