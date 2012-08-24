@@ -1,3 +1,55 @@
+2012-08-23  Emil A Eklund  <eae@chromium.org>
+
+        Add saturation arithmetic support to FractionalLayoutUnit
+        https://bugs.webkit.org/show_bug.cgi?id=94364
+
+        Reviewed by Benjamin Poulain.
+
+        Add experimental saturation arithmetic support to FractionalLayoutUnit,
+        guarded by a flag.
+        The idea here is to saturate (or clamp) rather than overflow when
+        computing positions and sizes.
+
+        No new tests for WebCore, not enabled by default.
+
+        * platform/FractionalLayoutUnit.h:
+        (WebCore::FractionalLayoutUnit::intMinForLayoutUnit):
+        Use INT_MIN instead of -INT_MAX to compute minimum value as the two are
+        not the same.
+        
+        (WebCore::FractionalLayoutUnit::FractionalLayoutUnit):
+        (WebCore::FractionalLayoutUnit::fromFloatCeil):
+        (WebCore::FractionalLayoutUnit::fromFloatFloor):
+        (WebCore::FractionalLayoutUnit::fromFloatRound):
+        (WebCore::FractionalLayoutUnit::setValue):
+        Add range checks.
+
+        (WebCore::operator*):
+        (WebCore::operator+):
+        (WebCore::operator-):
+        (WebCore::operator+=):
+        (WebCore::operator-=):
+        Use the saturatedAddition and saturatedSubtraction functions, which have
+        been optimized to reduce branching, instead of range checks for the most
+        common operators.
+
+2012-08-23  Kenneth Russell  <kbr@google.com>
+
+        Unreviewed, rolling out r126483.
+        http://trac.webkit.org/changeset/126483
+        https://bugs.webkit.org/show_bug.cgi?id=92272
+
+        Caused two Chromium browser_tests to time out 100% reliably.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::init):
+        (WebCore::FrameLoader::prepareForLoadStart):
+        (WebCore::FrameLoader::clearProvisionalLoad):
+        (WebCore::FrameLoader::checkLoadCompleteForThisFrame):
+        (WebCore::FrameLoader::detachFromParent):
+        * loader/FrameLoader.h:
+        (FrameLoader):
+
 2012-08-23  Kentaro Hara  <haraken@chromium.org>
 
         Unreviewed. Just added comments I forgot to add in r126506.
