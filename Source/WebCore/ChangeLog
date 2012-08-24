@@ -1,3 +1,43 @@
+2012-08-24  Grzegorz Czajkowski  <g.czajkowski@samsung.com>
+
+        Share WebKit-Gtk's Enchant implementation with others WebKit ports.
+        https://bugs.webkit.org/show_bug.cgi?id=94320
+
+        Reviewed by Carlos Garcia Campos.
+
+        The main reason of this change is to share WebKit-Gtk implementation of spelling
+        with others ports that use the Enchant library.
+        This is the first step to enable spelling for WebKit-Efl (https://bugs.webkit.org/show_bug.cgi?id=91854)
+
+        Files that implement spelling were moved to platform/text/enchant directory.
+
+        This patch stops using Pango backend to find the beginning/end of the word.
+        Those information are delivered through ICU interface by using TextBreakIterator.
+
+        * GNUmakefile.am: Added newly created 'enchant' directory to WebKit-Gtk's sources.
+        * GNUmakefile.list.am: Updated location of TextCheckerEnchant.{h,cpp} files.
+
+        * editing/visible_units.cpp: Removed 'static' modifier for 'isLogicalStartOfWord' and 'islogicalEndOfWord' functions.
+        (WebCore::isLogicalStartOfWord):
+        (WebCore::islogicalEndOfWord):
+        * editing/visible_units.h: Added isLogicalStartOfWord' and 'islogicalEndOfWord' functions to header as they are used by TextCheckerEnchant.cpp
+
+        * platform/text/enchant/TextCheckerEnchant.cpp: Renamed from Source/WebCore/platform/text/gtk/TextCheckerEnchant.cpp.
+        (enchantDictDescribeCallback): Added comments.
+        (TextCheckerEnchant::TextCheckerEnchant):
+        (TextCheckerEnchant::~TextCheckerEnchant):
+        (TextCheckerEnchant::ignoreWord):
+        (TextCheckerEnchant::learnWord):
+        (TextCheckerEnchant::checkSpellingOfString): Using ICU instead of Pango to find out the beginning/end of the word.
+        (TextCheckerEnchant::getGuessesForWord): Replaced gchar type to char.
+        (TextCheckerEnchant::updateSpellCheckingLanguages): Using WebCore::defaulLanguage() instead of Pango backend.
+        (TextCheckerEnchant::getSpellCheckingLanguages):
+        (TextCheckerEnchant::freeEnchantBrokerDictionaries):
+        * platform/text/enchant/TextCheckerEnchant.h: Renamed from Source/WebCore/platform/text/gtk/TextCheckerEnchant.h.
+        (WebCore):
+        (TextCheckerEnchant):
+        (WebCore::TextCheckerEnchant::create):
+
 2012-08-24  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: do not send profile headers to the front-end until explicitly requested.
