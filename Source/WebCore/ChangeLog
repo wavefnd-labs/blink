@@ -1,3 +1,33 @@
+2012-08-24  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Remove RenderTableSection::removeChild
+        https://bugs.webkit.org/show_bug.cgi?id=94883
+
+        Reviewed by Abhishek Arya.
+
+        This change removed removeChild, replaced by willBeRemoved calls in the children
+        class. This is done to ensure that post-removal invalidations are properly done
+        in table rows and table cells.
+
+        Refactoring covered by existing tests.
+
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::removeChild):
+        * rendering/RenderTableSection.h:
+        Removed this function...
+
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::willBeRemovedFromTree):
+        * rendering/RenderTableCell.h:
+        (RenderTableCell):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::willBeRemovedFromTree):
+        * rendering/RenderTableRow.h:
+        ... and moved the invalidation into the willBeRemovedFromTree functions.
+        The willBeRemovedFromTree replaced the willBeDestroyed functions in the
+        2 classes as the invalidation really represented tree removal updates,
+        not death updates.
+
 2012-08-24  Joshua Netterfield  <jnetterfield@rim.com>
 
         [BlackBerry] Extend LayerFilterRenderer in preparation for CSS Shaders
