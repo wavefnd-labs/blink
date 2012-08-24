@@ -1,3 +1,65 @@
+2012-08-24  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Plumbing to prepare for contents painting and hit testing implementation.
+        https://bugs.webkit.org/show_bug.cgi?id=94945
+
+        Reviewed by Dan Bernstein.
+
+        Make some improvements to how column sets interact with flow threads. Make sure the last column set
+        always expands to hold all of the remaining flow thread contents (including overflow). Rename the
+        column height, count and width variables to have "computed" in front of them to indicate that they
+        just represent what the multi-column algorithm computed so that there is no confusion between the
+        computed column count and the actual number of columns in the set.
+        
+        Implement the ability to get the actual column count based off the logical height of the flow thread
+        portion contained within the column set.
+        
+        Fix gap painting to use the actual column count rather than the computed column count.
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::layout):
+        After a flow thread is done laying out, have it tell the last region to expand to
+        encompass all the remaining contents if it wants to do so. Column and page sets will always do this.
+
+        * rendering/RenderMultiColumnFlowThread.h:
+        (RenderMultiColumnFlowThread):
+        Override computeLogicalHeight() to do nothing. We want the flow thread to just keep its intrinsic
+        height, since the last column set is always going to expand to encompass the flow thread's contents
+        anyway. Unlike CSS Regions, we don't ever "run out of room."
+        
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::RenderMultiColumnSet):
+        (WebCore::RenderMultiColumnSet::computeLogicalWidth):
+        (WebCore::RenderMultiColumnSet::computeLogicalHeight):
+        (WebCore::RenderMultiColumnSet::columnCount):
+        (WebCore::RenderMultiColumnSet::columnRectAt):
+        (WebCore::RenderMultiColumnSet::paintColumnRules):
+        (WebCore::RenderMultiColumnSet::paintColumnContents):
+        Rename count, width and height for columns to have "computed" in front of the members and functions.
+        In particular, this lets us distinguish the computed column count from the actual column count.
+
+        * rendering/RenderMultiColumnSet.h:
+        (WebCore::RenderMultiColumnSet::computedColumnCount):
+        (WebCore::RenderMultiColumnSet::computedColumnWidth):
+        (WebCore::RenderMultiColumnSet::computedColumnHeight):
+        (WebCore::RenderMultiColumnSet::setComputedColumnWidthAndCount):
+        (WebCore::RenderMultiColumnSet::setComputedColumnHeight):
+        Rename count, width and height for columns to have "computed" in front of the members and functions.
+        In particular, this lets us distinguish the computed column count from the actual column count.
+        
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        (WebCore::RenderRegion::expandToEncompassFlowThreadContentsIfNeeded):
+        * rendering/RenderRegionSet.cpp:
+        (WebCore::RenderRegionSet::expandToEncompassFlowThreadContentsIfNeeded):
+        (WebCore):
+        * rendering/RenderRegionSet.h:
+        (RenderRegionSet):
+        Make sure region sets expand to encompass all the remaining flow thread contents. We are always
+        able to generate more columns or pages, so in effect the amount of the flow thread we can
+        consume is unlimited.
+
+
 2012-08-24  Thiago Marcos P. Santos  <thiago.santos@intel.com>
 
         [Qt] Range input progress indicator is upside down when vertical and RTL is set
