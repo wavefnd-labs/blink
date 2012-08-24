@@ -1,3 +1,56 @@
+2012-08-24  Dan Carney  <dcarney@google.com>
+
+        [V8] Refactor away IsolatedWorld
+        https://bugs.webkit.org/show_bug.cgi?id=93971
+
+        Reviewed by Kentaro Hara.
+
+        Remove IsolatedWorld class as it was 1:1 with DOMWrapperWorld.
+        This paves the way towards a JSC-like use of DOMWrapperWorld.
+
+        No new tests. No change in functionality.
+
+        * UseV8.cmake:
+        * WebCore.gypi:
+        * bindings/v8/DOMWrapperWorld.cpp:
+        (WebCore):
+        (WebCore::DOMWrapperWorld::createUninitializedWorld):
+        (WebCore::DOMWrapperWorld::createMainWorld):
+        (WebCore::mainThreadNormalWorld):
+        (WebCore::isolatedWorldMap):
+        (WebCore::DOMWrapperWorld::deallocate):
+        (WebCore::DOMWrapperWorld::getOrCreateIsolatedWorld):
+        * bindings/v8/DOMWrapperWorld.h:
+        (DOMWrapperWorld):
+        (WebCore::DOMWrapperWorld::isolatedWorldsExist):
+        (WebCore::DOMWrapperWorld::isMainWorld):
+        (WebCore::DOMWrapperWorld::worldId):
+        (WebCore::DOMWrapperWorld::extensionGroup):
+        (WebCore::DOMWrapperWorld::domDataStore):
+        (WebCore::DOMWrapperWorld::deref):
+        (WebCore::DOMWrapperWorld::DOMWrapperWorld):
+        * bindings/v8/IsolatedWorld.cpp: Removed.
+        * bindings/v8/IsolatedWorld.h: Removed.
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::evaluateInIsolatedWorld):
+        * bindings/v8/V8DOMMap.cpp:
+        (WebCore::DOMDataStoreHandle::DOMDataStoreHandle):
+        (WebCore::DOMDataStoreHandle::~DOMDataStoreHandle):
+        * bindings/v8/V8DOMMap.h:
+        (DOMDataStoreHandle):
+        * bindings/v8/V8DOMWrapper.h:
+        (WebCore::V8DOMWrapper::getCachedWrapper):
+        * bindings/v8/V8IsolatedContext.cpp:
+        (WebCore::V8IsolatedContext::V8IsolatedContext):
+        (WebCore::V8IsolatedContext::destroy):
+        * bindings/v8/V8IsolatedContext.h:
+        (V8IsolatedContext):
+        (WebCore::V8IsolatedContext::getEntered):
+        (WebCore::V8IsolatedContext::world):
+        * bindings/v8/V8PerIsolateData.h:
+        (WebCore::V8PerIsolateData::registerDOMDataStore):
+        (WebCore::V8PerIsolateData::unregisterDOMDataStore):
+
 2012-08-24  Adam Barth  <abarth@webkit.org>
 
         [V8] Improve the developer ergonomics of ScopedPersistent
