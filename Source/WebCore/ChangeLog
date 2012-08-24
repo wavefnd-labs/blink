@@ -1,3 +1,90 @@
+2012-08-24  Bear Travis  <betravis@adobe.com>
+
+        [CSS Exclusions] Enable shape-inside for simple rectangles
+        https://bugs.webkit.org/show_bug.cgi?id=89259
+
+        Reviewed by Levi Weintraub.
+
+        This patch is the first in a series enabling shape-inside. It adds
+        support for inline layout within a single render block with a
+        rectangular shape-inside.
+        Each RenderBlock with a valid shape-inside maintains a WrapShapeInfo,
+        which can calculate the areas, or LineSegments, where inline content
+        can flow on a line. The WrapShapeInfo class maintains a static map of
+        RenderBlocks to WrapShapeInfos. The basic algorithm involves three stages:
+        1. Determine if the RenderBlock has a valid shape-inside, and store it
+        in a WrapShapeInfo if necessary.
+        2. If the inline content is affected by a shape-inside, use the
+        corresponding WrapShapeInfo to break the content into line segments.
+        3. Lay out the line segments.
+
+        Tests: fast/exclusions/shape-inside/shape-inside-floats-simple.html
+               fast/exclusions/shape-inside/shape-inside-inline-elements.html
+               fast/exclusions/shape-inside/shape-inside-overflow.html
+               fast/exclusions/shape-inside/shape-inside-percentage-auto.html
+               fast/exclusions/shape-inside/shape-inside-text.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::willBeDestroyed): Remove WrapShapeInfo when destroyed.
+        (WebCore::RenderBlock::styleDidChange): Detect modifications to style()->wrapShapeInside.
+        (WebCore):
+        (WebCore::RenderBlock::updateWrapShapeInfoAfterStyleChange): Update WrapShapeInfo
+        when style()->wrapShapeInside changes.
+        (WebCore::RenderBlock::layoutBlock): Notify WrapShapeInfo of changes in logicalWidth
+        and logicalHeight before laying out inline content.
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        (WebCore::RenderBlock::wrapShapeInfo): Return the wrapShapeInfo associated with a
+        RenderBlock.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::LineWidth::LineWidth): Determine the WrapShapeInfo::LineSegment this LineWidth
+        corresponds to, if any.
+        (LineWidth):
+        (WebCore::LineWidth::updateAvailableWidth): The width's LineSegment boundaries affect
+        the available width.
+        (WebCore::RenderBlock::computeInlineDirectionPositionsForLine): The current LineSegment
+        affects the left & right positioning of inline boxes.
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange): Move to the top of the inside wrap
+        shape before beginning inline layout, and update the line segments for each line.
+        * rendering/WrapShapeInfo.cpp: Added.
+        (WebCore):
+        (WebCore::WrapShapeInfo::WrapShapeInfo): Create an empty WrapShapeInfo.
+        (WebCore::WrapShapeInfo::~WrapShapeInfo): No additional cleanup.
+        (WebCore::WrapShapeInfo::create): Create a WrapShapeInfo reference.
+        (WebCore::WrapShapeInfo::ensureWrapShapeInfoForRenderBlock): Create a WrapShapeInfo
+        for a RenderBlock with an inside WrapShape and place it in the WrapShapeInfo map.
+        (WebCore::WrapShapeInfo::wrapShapeInfoForRenderBlock): Lookup the WrapShapeInfo for
+        a RenderBlock in the WrapShapeInfo map.
+        (WebCore::WrapShapeInfo::isWrapShapeInfoEnabledForBlock): Determine if a RenderBlock
+        has an inside wrap shape that we can use for inline layout.
+        (WebCore::WrapShapeInfo::removeWrapShapeInfoForRenderBlock): Remove a RenderBlock's
+        WrapShapeInfo from the WrapShapeInfo map.
+        (WebCore::WrapShapeInfo::hasSegments): Returns true if there are any line segments
+        for the current line.
+        (WebCore::WrapShapeInfo::computeShapeSize): Compute the dimensions of the wrap shape
+        based on a block's logical width & height.
+        (WebCore::WrapShapeInfo::computeSegmentsForLine): Sets the current line and computes
+        its line segments.
+        * rendering/WrapShapeInfo.h: Added.
+        (WebCore):
+        (LineSegment):
+        (WrapShapeInfo):
+        (WebCore::WrapShapeInfo::shapeTop): The top of a wrap shape, where the inline content
+        area begins.
+        (WebCore::WrapShapeInfo::segments): The list of line segments for the current line.
+        (WebCore::WrapShapeInfo::wrapShapeSizeNeedsRecomputing): Mark a WrapShapeInfo as
+        needing to recompute its WrapShape dimensions.
+        (WebCore::WrapShapeInfo::lineState): The current line state: above, inside, or below
+        the wrap shape.
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::diff): Changes to shape inside require relayout.
+
 2012-08-24  David Hyatt  <hyatt@apple.com>
 
         [New Multicolumn] Plumbing to prepare for contents painting and hit testing implementation.
