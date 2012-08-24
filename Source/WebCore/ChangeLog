@@ -1,3 +1,40 @@
+2012-08-23  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Step mismatched value should be editable in multiple field time UI.
+        https://bugs.webkit.org/show_bug.cgi?id=94664
+
+        Reviewed by Kent Tamura.
+
+        This patch changes layout method of multiple field time input UI to
+        check value of the "input" element in addition to step and range to
+        allow users to change step mismatched value from UI.
+
+        Tests: fast/forms/time-multiple-fields/time-multiple-fields-change-layout-by-value.html: for changing layout by value change.
+        This patch also adds new test case into fast/forms/time-multiple-fields/time-multiple-fields-appearance-basic.html.
+
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::createShadowSubtree): Changed for DateTimeEditElement::create signature change.
+        (WebCore::TimeInputType::minOrMaxAttributeChanged): Changed to call updateInnerTextValue instead of removed updateEditElementLayout()
+        (WebCore::TimeInputType::stepAttributeChanged): ditto.
+        (WebCore::TimeInputType::updateInnerTextValue): Changed for DateTimeEditElement::setValueAsDate() and setEmptyValue() signature change.
+        * html/TimeInputType.h:
+        (TimeInputType): Removed updateEditElementLayout() declaration.
+        * html/shadow/DateTimeEditElement.cpp:
+        (DateTimeEditBuilder):
+        (WebCore::DateTimeEditBuilder::DateTimeEditBuilder): Added a new parameter date value to constructor to use it for layout decision.
+        (WebCore::DateTimeEditBuilder::needMillisecondField): Changed to check date value too.
+        (WebCore::DateTimeEditBuilder::needMinuteField): ditto
+        (WebCore::DateTimeEditBuilder::needSecondField): ditto
+        (WebCore::DateTimeEditBuilder::shouldMillisecondFieldReadOnly): ditto
+        (WebCore::DateTimeEditBuilder::shouldMinuteFieldReadOnly): ditto
+        (WebCore::DateTimeEditBuilder::shouldSecondFieldReadOnly): ditto
+        (WebCore::DateTimeEditElement::create): Changed for removing stepRange parameter.
+        (WebCore::DateTimeEditElement::layout): Changed to keep focus field for new layout.
+        (WebCore::DateTimeEditElement::setValueAsDate): Changed to call layout() with StepRange and date value.
+        (WebCore::DateTimeEditElement::setEmptyValue): ditto
+        * html/shadow/DateTimeEditElement.h:
+        (DateTimeEditElement):
+
 2012-08-23  Andreas Kling  <kling@webkit.org>
 
         Use immutable StylePropertySets for element inline style declarations.
