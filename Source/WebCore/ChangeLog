@@ -1,3 +1,31 @@
+2012-08-23  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Expose mechanism for database to force a connection to close
+        https://bugs.webkit.org/show_bug.cgi?id=91010
+
+        Reviewed by Tony Chang.
+
+        In response to user action (e.g. "delete my browsing data") a connection may
+        need to be forcibly terminated. This allows an event to be sent to a connection
+        from the back end via IDBDatabaseCallbacks to initiate closing the connection.
+
+        Test: [chromium] webkit_unit_test --gtest_filter='IDBDatabaseBackendTest.ForcedClose'
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::forceClose): Abort all transactions and close.
+        (WebCore):
+        * Modules/indexeddb/IDBDatabase.h:
+        (IDBDatabase): Entry point.
+        * Modules/indexeddb/IDBDatabaseCallbacks.h:
+        (IDBDatabaseCallbacks): Event plumbing from back end.
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.cpp:
+        (WebCore::IDBDatabaseCallbacksImpl::onForcedClose): Ditto.
+        (WebCore):
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.h:
+        (IDBDatabaseCallbacksImpl): Ditto.
+        * inspector/InspectorIndexedDBAgent.cpp:
+        (WebCore): Method stub.
+
 2012-08-23  James Robinson  <jamesr@chromium.org>
 
         [chromium] Convert WebAnimationCurve subtypes into pure virtual
