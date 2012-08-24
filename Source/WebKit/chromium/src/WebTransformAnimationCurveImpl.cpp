@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-#include <public/WebTransformAnimationCurve.h>
+#include "WebTransformAnimationCurveImpl.h"
 
 #include "CCKeyframedAnimationCurve.h"
 #include "CCTimingFunction.h"
@@ -34,39 +34,48 @@
 
 namespace WebKit {
 
-void WebTransformAnimationCurve::add(const WebTransformKeyframe& keyframe)
+WebTransformAnimationCurve* WebTransformAnimationCurve::create()
+{
+    return new WebTransformAnimationCurveImpl(WebCore::CCKeyframedTransformAnimationCurve::create());
+}
+
+WebTransformAnimationCurveImpl::WebTransformAnimationCurveImpl(PassOwnPtr<WebCore::CCKeyframedTransformAnimationCurve> curve)
+    : m_curve(curve)
+{
+}
+
+WebTransformAnimationCurveImpl::~WebTransformAnimationCurveImpl()
+{
+}
+
+WebAnimationCurve::AnimationCurveType WebTransformAnimationCurveImpl::type() const
+{
+    return WebAnimationCurve::AnimationCurveTypeTransform;
+}
+
+void WebTransformAnimationCurveImpl::add(const WebTransformKeyframe& keyframe)
 {
     add(keyframe, TimingFunctionTypeEase);
 }
 
-void WebTransformAnimationCurve::add(const WebTransformKeyframe& keyframe, TimingFunctionType type)
+void WebTransformAnimationCurveImpl::add(const WebTransformKeyframe& keyframe, TimingFunctionType type)
 {
-    m_private->addKeyframe(WebCore::CCTransformKeyframe::create(keyframe.time, keyframe.value, createTimingFunction(type)));
+    m_curve->addKeyframe(WebCore::CCTransformKeyframe::create(keyframe.time, keyframe.value, createTimingFunction(type)));
 }
 
-void WebTransformAnimationCurve::add(const WebTransformKeyframe& keyframe, double x1, double y1, double x2, double y2)
+void WebTransformAnimationCurveImpl::add(const WebTransformKeyframe& keyframe, double x1, double y1, double x2, double y2)
 {
-    m_private->addKeyframe(WebCore::CCTransformKeyframe::create(keyframe.time, keyframe.value, WebCore::CCCubicBezierTimingFunction::create(x1, y1, x2, y2)));
+    m_curve->addKeyframe(WebCore::CCTransformKeyframe::create(keyframe.time, keyframe.value, WebCore::CCCubicBezierTimingFunction::create(x1, y1, x2, y2)));
 }
 
-WebTransformationMatrix WebTransformAnimationCurve::getValue(double time) const
+WebTransformationMatrix WebTransformAnimationCurveImpl::getValue(double time) const
 {
-    return m_private->getValue(time);
+    return m_curve->getValue(time);
 }
 
-WebTransformAnimationCurve::operator PassOwnPtr<WebCore::CCAnimationCurve>() const
+PassOwnPtr<WebCore::CCAnimationCurve> WebTransformAnimationCurveImpl::cloneToCCAnimationCurve() const
 {
-    return m_private->clone();
-}
-
-void WebTransformAnimationCurve::initialize()
-{
-    m_private.reset(WebCore::CCKeyframedTransformAnimationCurve::create().leakPtr());
-}
-
-void WebTransformAnimationCurve::destroy()
-{
-    m_private.reset(0);
+    return m_curve->clone();
 }
 
 } // namespace WebKit

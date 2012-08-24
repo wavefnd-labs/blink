@@ -22,51 +22,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#ifndef WebTransformAnimationCurveImpl_h
+#define WebTransformAnimationCurveImpl_h
 
-#include <public/WebFloatAnimationCurve.h>
-
-#include "CCKeyframedAnimationCurve.h"
-#include "CCTimingFunction.h"
-#include "WebAnimationCurveCommon.h"
+#include <public/WebTransformAnimationCurve.h>
 #include <wtf/OwnPtr.h>
 #include <wtf/PassOwnPtr.h>
 
+namespace WebCore {
+class CCAnimationCurve;
+class CCKeyframedTransformAnimationCurve;
+}
+
 namespace WebKit {
 
-void WebFloatAnimationCurve::add(const WebFloatKeyframe& keyframe)
-{
-    add(keyframe, TimingFunctionTypeEase);
+class WebTransformAnimationCurveImpl : public WebTransformAnimationCurve {
+public:
+    explicit WebTransformAnimationCurveImpl(PassOwnPtr<WebCore::CCKeyframedTransformAnimationCurve>);
+    virtual ~WebTransformAnimationCurveImpl();
+
+    // WebAnimationCurve implementation.
+    virtual AnimationCurveType type() const OVERRIDE;
+
+    // WebTransformAnimationCurve implementation.
+    virtual void add(const WebTransformKeyframe&) OVERRIDE;
+    virtual void add(const WebTransformKeyframe&, TimingFunctionType) OVERRIDE;
+    virtual void add(const WebTransformKeyframe&, double x1, double y1, double x2, double y2) OVERRIDE;
+
+    virtual WebTransformationMatrix getValue(double time) const OVERRIDE;
+
+    PassOwnPtr<WebCore::CCAnimationCurve> cloneToCCAnimationCurve() const;
+
+private:
+    OwnPtr<WebCore::CCKeyframedTransformAnimationCurve> m_curve;
+};
+
 }
 
-void WebFloatAnimationCurve::add(const WebFloatKeyframe& keyframe, TimingFunctionType type)
-{
-    m_private->addKeyframe(WebCore::CCFloatKeyframe::create(keyframe.time, keyframe.value, createTimingFunction(type)));
-}
-
-void WebFloatAnimationCurve::add(const WebFloatKeyframe& keyframe, double x1, double y1, double x2, double y2)
-{
-    m_private->addKeyframe(WebCore::CCFloatKeyframe::create(keyframe.time, keyframe.value, WebCore::CCCubicBezierTimingFunction::create(x1, y1, x2, y2)));
-}
-
-float WebFloatAnimationCurve::getValue(double time) const
-{
-    return m_private->getValue(time);
-}
-
-WebFloatAnimationCurve::operator PassOwnPtr<WebCore::CCAnimationCurve>() const
-{
-    return m_private->clone();
-}
-
-void WebFloatAnimationCurve::initialize()
-{
-    m_private.reset(WebCore::CCKeyframedFloatAnimationCurve::create().leakPtr());
-}
-
-void WebFloatAnimationCurve::destroy()
-{
-    m_private.reset(0);
-}
-
-} // namespace WebKit
+#endif // WebTransformAnimationCurveImpl_h
