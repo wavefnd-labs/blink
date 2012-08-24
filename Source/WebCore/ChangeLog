@@ -1,5 +1,28 @@
 2012-08-24  Julien Chaffraix  <jchaffraix@webkit.org>
 
+        Crash in RenderTableCell::borderTop() due to custom scrollbars after r124168
+        https://bugs.webkit.org/show_bug.cgi?id=93903
+
+        Reviewed by Tony Chang.
+
+        r124168 changed when we create scrollbars so that it happens (rightly) at style change time.
+        However the RenderScrollbar code assumes that any overflow: scroll RenderScrollbar would be
+        created at layout time as it directly tries to layout to scrollbar parts. The big issues with
+        the move is that the first style change operates on a detached renderer which means that we
+        could crash in some situation.
+
+        Test: scrollbars/custom-scrollbar-table-cell.html
+
+        * rendering/RenderScrollbarPart.cpp:
+        (WebCore::RenderScrollbarPart::computeScrollbarWidth):
+        (WebCore::RenderScrollbarPart::computeScrollbarHeight):
+        Fixed the crash by using style information instead of calling the renderer. This is guaranteed
+        to be safe but it also means that custom scrollbars sizing is not right on table cells with
+        collapsing borders. The existing logic was querying layout information at style change so I
+        wouldn't bet on it working properly anyway.
+
+2012-08-24  Julien Chaffraix  <jchaffraix@webkit.org>
+
         Remove RenderTableSection::removeChild
         https://bugs.webkit.org/show_bug.cgi?id=94883
 
