@@ -1,3 +1,28 @@
+2012-08-24  Kentaro Hara  <haraken@chromium.org>
+
+        Remove RefPtr from HTMLTextAreaElement::m_placeholder
+        https://bugs.webkit.org/show_bug.cgi?id=94338
+
+        Reviewed by Kent Tamura.
+
+        To avoid reference cycles of RefPtr<Node>s, we want to remove
+        unnecessary RefPtr<Node>s. The rationale is described in bug 94324.
+
+        HTMLTextAreaElement::m_placeholder does not need to be a RefPtr<Node>,
+        because it is guaranteed to point to a shadow DOM tree of the
+        HTMLTextAreaElement node, which is guaranteed to exist in the subtree
+        of the HTMLTextAreaElement node.
+
+        No tests. No change in behavior.
+
+        * html/HTMLTextAreaElement.cpp:
+        (WebCore::HTMLTextAreaElement::HTMLTextAreaElement):
+        (WebCore::HTMLTextAreaElement::placeholderElement):
+        (WebCore::HTMLTextAreaElement::attach):
+        (WebCore::HTMLTextAreaElement::updatePlaceholderText):
+        * html/HTMLTextAreaElement.h:
+        (HTMLTextAreaElement):
+
 2012-08-24  Dan Carney  <dcarney@google.com>
 
         [V8] Refactor away IsolatedWorld
