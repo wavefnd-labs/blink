@@ -1,3 +1,81 @@
+2012-08-24  Joshua Netterfield  <jnetterfield@rim.com>
+
+        [BlackBerry] Extend LayerFilterRenderer in preparation for CSS Shaders
+        https://bugs.webkit.org/show_bug.cgi?id=94724
+
+        Reviewed by George Staikos.
+
+        LayerFilterRenderer defines a CSS Filter in terms of one or more `Action`s.
+        A LayerFilterRendererAction holds a vertex shader, a fragment shader, and
+        zero or more `Parameter`s. A Parameter is a uniform, varying, or other
+        information which is needed to render a filter.
+
+        This patch implements certain new Parameter types, including vertex/element
+        buffers and vertex attributes which are needed to implement composited
+        CSS Shaders on BB10. In addition, a new drawing mode is required in order
+        to draw CSS Shaders meshes from vertex/element buffers.
+
+        No new tests, because this patch introduces no new functionality. When
+        the patch which enables CSS Shaders on BB10 in upstreamed, tests for
+        CSS Shaders will prove this code to be correct.
+
+        * platform/graphics/blackberry/LayerFilterRenderer.cpp:
+        (WebCore::operationTypeToProgramID):
+        (WebCore::Uniform::Uniform):
+        (WebCore::Uniform1f::create):
+        (WebCore::Uniform1f::Uniform1f):
+        (WebCore):
+        (WebCore::Uniform1i::apply):
+        (WebCore::Uniform1i::create):
+        (WebCore::Uniform1i::Uniform1i):
+        (WebCore::Uniform2f::create):
+        (WebCore::Uniform2f::Uniform2f):
+        (WebCore::Uniform3f::create):
+        (WebCore::Uniform3f::Uniform3f):
+        (WebCore::Uniform4f::apply):
+        (WebCore::Uniform4f::create):
+        (WebCore::Uniform4f::Uniform4f):
+        (WebCore::Matrix4fv::apply):
+        (WebCore::Matrix4fv::create):
+        (WebCore::Matrix4fv::Matrix4fv):
+        (WebCore::Matrix4fv::~Matrix4fv):
+        (WebCore::Buffer::apply):
+        (WebCore::Buffer::restoreState):
+        (WebCore::Buffer::create):
+        (WebCore::Buffer::Buffer):
+        (WebCore::VertexAttribf::apply):
+        (WebCore::VertexAttribf::restoreState):
+        (WebCore::VertexAttribf::create):
+        (WebCore::VertexAttribf::VertexAttribf):
+        (WebCore::LayerFilterRendererAction::LayerFilterRendererAction):
+        (WebCore::LayerFilterRendererAction::useActionOn):
+        (WebCore::LayerFilterRendererAction::restoreState):
+        (WebCore::LayerFilterRenderer::LayerFilterRenderer):
+        (WebCore::LayerFilterRenderer::actionsForOperations):
+        (WebCore::LayerFilterRenderer::applyActions):
+        * platform/graphics/blackberry/LayerFilterRenderer.h:
+        (Parameter):
+        (WebCore::Parameter::restoreState):
+        (WebCore::Parameter::~Parameter):
+        (WebCore::Parameter::Parameter):
+        (WebCore):
+        (Uniform):
+        (WebCore::Uniform::~Uniform):
+        (Uniform1f):
+        (Uniform1i):
+        (Uniform2f):
+        (Uniform3f):
+        (Uniform4f):
+        (Matrix4fv):
+        (Buffer):
+        (VertexAttribf):
+        (WebCore::LayerFilterRendererAction::appendParameter):
+        (LayerFilterRendererAction):
+        (WebCore::LayerFilterRendererAction::drawingMode):
+        (WebCore::LayerFilterRendererAction::setDrawingMode):
+        (WebCore::LayerFilterRendererAction::drawingModeParameter):
+        (WebCore::LayerFilterRendererAction::setDrawingModeParameter):
+
 2012-08-24  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Add readyState functionality to RTCPeerConnection
