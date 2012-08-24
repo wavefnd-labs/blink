@@ -28,8 +28,9 @@
  */
 
 #include "config.h"
-#include "WebKitNamedFlowCollection.h"
+#include "NamedFlowCollection.h"
 
+#include "DOMNamedFlowCollection.h"
 #include "Document.h"
 #include "InspectorInstrumentation.h"
 #include "WebKitNamedFlow.h"
@@ -39,12 +40,12 @@
 
 namespace WebCore {
 
-WebKitNamedFlowCollection::WebKitNamedFlowCollection(Document* doc)
+NamedFlowCollection::NamedFlowCollection(Document* doc)
     : m_document(doc)
 {
 }
 
-Vector<RefPtr<WebKitNamedFlow> > WebKitNamedFlowCollection::namedFlows()
+Vector<RefPtr<WebKitNamedFlow> > NamedFlowCollection::namedFlows()
 {
     Vector<RefPtr<WebKitNamedFlow> > namedFlows;
 
@@ -58,7 +59,7 @@ Vector<RefPtr<WebKitNamedFlow> > WebKitNamedFlowCollection::namedFlows()
     return namedFlows;
 }
 
-WebKitNamedFlow* WebKitNamedFlowCollection::flowByName(const String& flowName)
+WebKitNamedFlow* NamedFlowCollection::flowByName(const String& flowName)
 {
     NamedFlowSet::iterator it = m_namedFlows.find<String, NamedFlowHashTranslator>(flowName);
     if (it == m_namedFlows.end() || (*it)->flowState() == WebKitNamedFlow::FlowStateNull)
@@ -67,7 +68,7 @@ WebKitNamedFlow* WebKitNamedFlowCollection::flowByName(const String& flowName)
     return *it;
 }
 
-PassRefPtr<WebKitNamedFlow> WebKitNamedFlowCollection::ensureFlowWithName(const String& flowName)
+PassRefPtr<WebKitNamedFlow> NamedFlowCollection::ensureFlowWithName(const String& flowName)
 {
     NamedFlowSet::iterator it = m_namedFlows.find<String, NamedFlowHashTranslator>(flowName);
     if (it != m_namedFlows.end()) {
@@ -85,7 +86,7 @@ PassRefPtr<WebKitNamedFlow> WebKitNamedFlowCollection::ensureFlowWithName(const 
     return newFlow.release();
 }
 
-void WebKitNamedFlowCollection::discardNamedFlow(WebKitNamedFlow* namedFlow)
+void NamedFlowCollection::discardNamedFlow(WebKitNamedFlow* namedFlow)
 {
     // The document is not valid anymore so the collection will be destroyed anyway.
     if (!m_document)
@@ -99,23 +100,17 @@ void WebKitNamedFlowCollection::discardNamedFlow(WebKitNamedFlow* namedFlow)
     InspectorInstrumentation::didRemoveNamedFlow(m_document, namedFlow->name());
 }
 
-void WebKitNamedFlowCollection::documentDestroyed()
+void NamedFlowCollection::documentDestroyed()
 {
     m_document = 0;
 }
-
-// The HashFunctions object used by the HashSet to compare between NamedFlows.
-// It is safe to set safeToCompareToEmptyOrDeleted because the HashSet will never contain null pointers or deleted values.
-struct WebKitNamedFlowCollection::NamedFlowHashFunctions {
-    static unsigned hash(WebKitNamedFlow* key) { return DefaultHash<String>::Hash::hash(key->name()); }
-    static bool equal(WebKitNamedFlow* a, WebKitNamedFlow* b) { return a->name() == b->name(); }
-    static const bool safeToCompareToEmptyOrDeleted = true;
-};
-
-// The HashTranslator is used to lookup a NamedFlow in the set using a name.
-struct WebKitNamedFlowCollection::NamedFlowHashTranslator {
-    static unsigned hash(const String& key) { return DefaultHash<String>::Hash::hash(key); }
-    static bool equal(WebKitNamedFlow* a, const String& b) { return a->name() == b; }
-};
+PassRefPtr<DOMNamedFlowCollection> NamedFlowCollection::createCSSOMSnapshot()
+{
+    NamedFlowSet createdFlows;
+    for (NamedFlowSet::iterator it = m_namedFlows.begin(); it != m_namedFlows.end(); ++it)
+        if ((*it)->flowState() == WebKitNamedFlow::FlowStateCreated)
+            createdFlows.add(*it);
+    return DOMNamedFlowCollection::create(createdFlows);
+}
 
 } // namespace WebCore

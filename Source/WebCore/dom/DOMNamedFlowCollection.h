@@ -26,48 +26,36 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#ifndef DOMNamedFlowCollection_h
+#define DOMNamedFlowCollection_h
 
-#ifndef WebKitNamedFlowCollection_h
-#define WebKitNamedFlowCollection_h
-
-#include <wtf/Forward.h>
-#include <wtf/ListHashSet.h>
+#include "NamedFlowCollection.h"
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
-#include <wtf/Vector.h>
 
 namespace WebCore {
 
 class Document;
 class WebKitNamedFlow;
 
-class WebKitNamedFlowCollection : public RefCounted<WebKitNamedFlowCollection> {
+class DOMNamedFlowCollection : public RefCounted<DOMNamedFlowCollection> {
 public:
-    static PassRefPtr<WebKitNamedFlowCollection> create(Document* doc) { return adoptRef(new WebKitNamedFlowCollection(doc)); }
+    static PassRefPtr<DOMNamedFlowCollection> create(NamedFlowCollection::NamedFlowSet& set)
+    {
+        return adoptRef(new DOMNamedFlowCollection(set));
+    }
 
-    Vector<RefPtr<WebKitNamedFlow> > namedFlows();
-    WebKitNamedFlow* flowByName(const String&);
-    PassRefPtr<WebKitNamedFlow> ensureFlowWithName(const String&);
+    unsigned long length() const;
+    PassRefPtr<WebKitNamedFlow> item(unsigned long index) const;
+    PassRefPtr<WebKitNamedFlow> namedItem(const AtomicString& name) const;
 
-    void discardNamedFlow(WebKitNamedFlow*);
-
-    void documentDestroyed();
-
-    Document* document() const { return m_document; }
+    bool hasNamedItem(const AtomicString& name) const;
 
 private:
-    explicit WebKitNamedFlowCollection(Document*);
-
-    Document* m_document;
-
-    struct NamedFlowHashFunctions;
-    struct NamedFlowHashTranslator;
-
-    typedef ListHashSet<WebKitNamedFlow*, 1, NamedFlowHashFunctions> NamedFlowSet;
-
-    NamedFlowSet m_namedFlows;
+    explicit DOMNamedFlowCollection(NamedFlowCollection::NamedFlowSet&);
+    NamedFlowCollection::NamedFlowSet m_namedFlows;
 };
 
 } // namespace WebCore
+#endif
 
-#endif // WebKitNamedFlowCollection_h

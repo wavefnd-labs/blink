@@ -1,3 +1,89 @@
+2012-08-24  Andrei Onea  <onea@adobe.com>
+
+        [CSSRegions]Expose WebKitNamedFlowCollection interface through document.getNamedFlows()
+        https://bugs.webkit.org/show_bug.cgi?id=93368
+
+        Reviewed by Ryosuke Niwa.
+
+        The WebKitNamedFlowCollection already implemented was being used by Document to store all
+        the named flows - regardless of state - so we need to use another class to expose to JS.
+        WebKitNamedFlowCollection was renamed to NamedFlowCollection since it is used only internally,
+        and the C++ class used to expose to JS is DOMNamedFlowCollection (with the interface name
+        WebKitNamedFlowCollection). DOMNamedFlowCollection is exposed via Document::webKitGetFlows(),
+        and it itself exposes the length property, the indexed getter, and the named getter.
+        http://dev.w3.org/csswg/css3-regions/#document-getnamedflows
+
+        Test: fast/regions/webkit-named-flow-collection.html
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/gobject/GNUmakefile.am:
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateImplementation):
+        We need to use same trick as with HTMLPropertiesCollection, to make NamedGetter generate required code.
+        * dom/DOMAllInOne.cpp:
+        * dom/DOMNamedFlowCollection.cpp:
+        (WebCore):
+        (WebCore::DOMNamedFlowCollection::DOMNamedFlowCollection):
+        (WebCore::DOMNamedFlowCollection::length):
+        (WebCore::DOMNamedFlowCollection::item):
+        (WebCore::DOMNamedFlowCollection::namedItem):
+        (WebCore::DOMNamedFlowCollection::hasNamedItem):
+        * dom/DOMNamedFlowCollection.h:
+        (WebCore):
+        (DOMNamedFlowCollection):
+        (WebCore::DOMNamedFlowCollection::create):
+        * dom/DOMNamedFlowCollection.idl:
+        * dom/Document.cpp:
+        (WebCore):
+        (WebCore::Document::webkitGetNamedFlows):
+        (WebCore::Document::namedFlows):
+        * dom/Document.h:
+        (WebCore):
+        (Document):
+        * dom/Document.idl:
+        * dom/NamedFlowCollection.cpp:
+        Renamed from Source/WebCore/dom/WebKitNamedFlowCollection.cpp.
+        (WebCore):
+        (WebCore::NamedFlowCollection::NamedFlowCollection):
+        (WebCore::NamedFlowCollection::namedFlows):
+        (WebCore::NamedFlowCollection::flowByName):
+        (WebCore::NamedFlowCollection::ensureFlowWithName):
+        (WebCore::NamedFlowCollection::discardNamedFlow):
+        (WebCore::NamedFlowCollection::documentDestroyed):
+        (WebCore::NamedFlowCollection::createCSSOMSnapshot):
+        Used to create a snapshot of current named flows in CREATED state.
+        * dom/NamedFlowCollection.h:
+        Renamed from Source/WebCore/dom/WebKitNamedFlowCollection.h.
+        (WebCore):
+        (NamedFlowCollection):
+        (WebCore::NamedFlowCollection::create):
+        (WebCore::NamedFlowCollection::document):
+        (WebCore::NamedFlowCollection::~NamedFlowCollection):
+        (WebCore::NamedFlowCollection::NamedFlowHashFunctions::hash):
+        (WebCore::NamedFlowCollection::NamedFlowHashFunctions::equal):
+        (NamedFlowCollection::NamedFlowHashFunctions):
+        (WebCore::NamedFlowCollection::NamedFlowHashTranslator::hash):
+        (WebCore::NamedFlowCollection::NamedFlowHashTranslator::equal):
+        Moved NamedFlowHashFunctions and NamedFlowHashTranslator definitions to .h
+        and made them public, so they can be used in DOMNamedFlow as well.
+        * dom/WebKitNamedFlow.cpp:
+        (WebCore::WebKitNamedFlow::WebKitNamedFlow):
+        (WebCore::WebKitNamedFlow::create):
+        * dom/WebKitNamedFlow.h:
+        (WebCore):
+        (WebKitNamedFlow):
+        * inspector/InspectorCSSAgent.cpp:
+        * rendering/FlowThreadController.cpp:
+        (WebCore::FlowThreadController::ensureRenderFlowThreadWithName):
+
 2012-08-24  Chris Evans  <cevans@google.com>
 
         Update comment regarding root node handling in XPath for detached trees.
