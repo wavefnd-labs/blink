@@ -1,3 +1,54 @@
+2012-08-23  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] StringCache should not return already disposed strings
+        https://bugs.webkit.org/show_bug.cgi?id=94899
+
+        Reviewed by Adam Barth.
+
+        See this Chromium bug (http://code.google.com/p/chromium/issues/detail?id=143937)
+        for details.
+
+        I investigated the crash and found that v8ExternalString() can return
+        already disposed strings:
+
+          class StringCache {
+            v8::Local<v8::String> v8ExternalString(StringImpl* stringImpl, ...)
+            {
+                if (m_lastStringImpl.get() == stringImpl) {
+                    ASSERT(!m_lastV8String.IsNearDeath());
+                    ASSERT(!m_lastV8String.IsEmpty());
+                    return v8::Local<v8::String>::New(m_lastV8String); // m_lastV8String might be already disposed.
+                }
+                return v8ExternalStringSlow(stringImpl, ...);
+            }
+          }
+
+        I couldn't find why m_lastV8String can be prematurely disposed, but the
+        following fix solves the crash:
+
+          class StringCache {
+            v8::Local<v8::String> v8ExternalString(StringImpl* stringImpl, ...)
+            {
+                if (m_lastStringImpl.get() == stringImpl && m_lastV8String.IsWeak())
+                    return v8::Local<v8::String>::New(m_lastV8String);
+                return v8ExternalStringSlow(stringImpl, ...);
+            }
+          }
+
+        Although the ideal fix might be to fix the root cause of the premature disposal,
+        I think that the proposed fix is reasonable for safety. In fact, we've so far
+        encountered crashes caused by premature disposals (e.g. r123500). The proposed fix
+        will prevent future crashes caused by premature disposals.
+
+        No tests. The crash depends on GC behavior and I couldn't write a test that
+        reproduces the crash. Open http://lore.com/testdrive/Navigating-the-Universe
+        and confirm that Chromium doesn't crash.
+
+        * bindings/v8/V8ValueCache.cpp:
+        (WebCore::StringCache::v8ExternalStringSlow):
+        * bindings/v8/V8ValueCache.h:
+        (WebCore::StringCache::v8ExternalString):
+
 2012-08-23  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: move ResourceViews to "components" module - it is used from the Resources as well.
