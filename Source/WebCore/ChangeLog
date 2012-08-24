@@ -1,3 +1,86 @@
+2012-08-23  Simon Fraser  <simon.fraser@apple.com>
+
+        Prep work for: Implement sticky positioning
+        https://bugs.webkit.org/show_bug.cgi?id=90046
+
+        Reviewed by Dave Hyatt.
+        
+        Do some method renaming in preparation for adding a new kind
+        of in-flow positioning: sticky positioning.
+        
+        Rename RenderStyle::isOutOfFlowPositioned() to hasOutOfFlowPosition().
+        Add RenderStyle::hasInFlowPosition().
+        
+        Use RenderObject::isInFlowPositioned() in places where it will apply
+        for both relative and sticky positioning.
+        
+        Add RenderBoxModelObject::offsetForInFlowPosition(), which currently
+        applies just to relative positioning, but will also apply to sticky.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::getPositionOffsetValue):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * editing/TextIterator.cpp:
+        (WebCore::ignoresContainerClip):
+        * rendering/LayoutState.cpp:
+        (WebCore::LayoutState::LayoutState):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::styleWillChange):
+        (WebCore::RenderBlock::isSelectionRoot):
+        (WebCore::RenderBlock::blockSelectionGaps):
+        (WebCore::positionForPointRespectingEditingBoundaries):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleWillChange):
+        (WebCore::RenderBox::updateBoxModelInfoFromStyle):
+        (WebCore::RenderBox::mapLocalToContainer):
+        (WebCore::RenderBox::offsetFromContainer):
+        (WebCore::RenderBox::computeRectForRepaint):
+        (WebCore::RenderBox::containingBlockLogicalWidthForPositioned):
+        (WebCore::RenderBox::containingBlockLogicalHeightForPositioned):
+        (WebCore::RenderBox::layoutOverflowRectForPropagation):
+        * rendering/RenderBox.h:
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::accumulateInFlowPositionOffsets):
+        (WebCore::RenderBoxModelObject::relativePositionOffset):
+        (WebCore::RenderBoxModelObject::offsetForInFlowPosition):
+        (WebCore::RenderBoxModelObject::mapAbsoluteToLocalPoint):
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        (WebCore::RenderBoxModelObject::stickyPositionLogicalOffset):
+        (WebCore::RenderBoxModelObject::requiresLayer):
+        * rendering/RenderInline.cpp:
+        (WebCore::inFlowPositionedInlineAncestor): We need to actually return
+        the ancestor, since we will need to copy its position type once there
+        is more than one kind of in-flow position.
+        (WebCore::updateStyleOfAnonymousBlockContinuations):
+        (WebCore::RenderInline::styleDidChange):
+        (WebCore::RenderInline::addChildIgnoringContinuation):
+        (WebCore::RenderInline::clippedOverflowRectForRepaint):
+        (WebCore::RenderInline::computeRectForRepaint):
+        (WebCore::RenderInline::offsetFromContainer):
+        (WebCore::RenderInline::mapLocalToContainer):
+        (WebCore::RenderInline::offsetForInFlowPositionedInline):
+        * rendering/RenderInline.h:
+        (WebCore::RenderInline::requiresLayer):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPosition):
+        (WebCore::isPositionedContainer):
+        (WebCore::RenderLayer::calculateClipRects):
+        (WebCore::RenderLayer::shouldBeNormalFlowOnly):
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::offsetForInFlowPosition):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::markContainingBlocksForLayout):
+        (WebCore::RenderObject::setPreferredLogicalWidthsDirty):
+        (WebCore::RenderObject::invalidateContainerPreferredLogicalWidths):
+        (WebCore::RenderObject::containingBlock):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isRelPositioned):
+        * rendering/RenderObjectChildList.cpp:
+        (WebCore::RenderObjectChildList::updateBeforeAfterContent):
+        * rendering/style/RenderStyle.h:
+
 2012-08-23  Ryosuke Niwa  <rniwa@webkit.org>
 
         EFL build fix attempt after r126494. Try touching the IDL file.
