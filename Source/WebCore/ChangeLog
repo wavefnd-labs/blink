@@ -1,3 +1,95 @@
+2012-08-24  Sami Kyostila  <skyostil@chromium.org>
+
+        Add support for compositing the contents of overflow:scroll areas
+        https://bugs.webkit.org/show_bug.cgi?id=91117
+
+        Reviewed by Simon Fraser.
+
+        Patch by Simon Fraser with modifications by Sami Kyostila and Ian Vollick.
+
+        Allow a RenderLayer which exists for overflow scrolling
+        to use a composited layer for the scrolled contents, which
+        allows for compositing-accelerated overflow scrolling.
+
+        Tests:
+            compositing/overflow/clipping-ancestor-with-accelerated-scrolling-ancestor.html
+            compositing/overflow/iframe-inside-overflow-clipping.html
+            compositing/overflow/nested-scrolling.html
+            compositing/overflow/overflow-auto-with-touch-no-overflow.html
+            compositing/overflow/overflow-auto-with-touch.html
+            compositing/overflow/overflow-clip-with-accelerated-scrolling-ancestor.html
+            compositing/overflow/overflow-hidden-with-touch.html
+            compositing/overflow/overflow-overlay-with-touch-no-overflow.html
+            compositing/overflow/overflow-overlay-with-touch.html
+            compositing/overflow/overflow-scroll-with-touch-no-overflow.html
+            compositing/overflow/overflow-visible-with-touch.html
+            compositing/overflow/remove-overflow-crash.html
+            compositing/overflow/remove-overflow-crash2.html
+            compositing/overflow/scrolling-content-clip-to-viewport.html
+            compositing/overflow/textarea-scroll-touch.html
+
+        * platform/graphics/GraphicsLayerClient.h: New paint phase flag
+        used for scrolled contents. Provide a typedef for the flags
+        so that they can be ORed together.
+
+        * rendering/RenderLayer.h:
+        (WebCore::ClipRectsCache::ClipRectsCache):
+        (ClipRectsCache): In debug builds, store a m_respectingOverflowClip
+        flag so we can ASSERT later that we're fetching clip rects with the
+        same setting the rects were generated with.
+        Add new PaintLayerPaintingOverflowContents painting flag.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::usesCompositedScrolling): New method returns
+        true if this layer is using composited overflow scrolling.
+        (WebCore::RenderLayer::scrollTo): Don't repaint if we're doing
+        a composited scroll.
+        (WebCore::RenderLayer::paintLayer): Pass the right flags to backgroundClipRect();
+        if we're painting scrolled contents, we don't want to take the overflow clip rect
+        into account.
+        (WebCore::RenderLayer::paintLayerContents): Ditto. Also don't do the intersectsDamageRect()
+        check if we're painting scrolled contents.
+        (WebCore::RenderLayer::updateClipRects): New parameter to tell whether to respect overflow clipping.
+        Assert if we're fetching cached rects with a different 'respect clip' flag to the one they were generated
+        with.
+        (WebCore::RenderLayer::calculateClipRects): Take the 'respectOverflowClip' flag into account
+        when computing clip rects.
+        (WebCore::RenderLayer::parentClipRects): Ditto
+        (WebCore::RenderLayer::backgroundClipRect): Ditto
+        (WebCore::RenderLayer::calculateRects): Ditto
+        (WebCore::RenderLayer::childrenClipRect): This function is called from widget code, so may use a different
+        'respect clip rects' setting than that used for painting, so it has to compute clip rects on the fly.
+        (WebCore::RenderLayer::shouldBeNormalFlowOnly): Composited scrolling makes a layer not normal-flow only.
+
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking): New member variables for the layers for scrolled contents, and the scrolling
+        layer which handles the scroll offset.
+        (WebCore::RenderLayerBacking::hasScrollingLayer):
+        (WebCore::RenderLayerBacking::scrollingLayer):
+        (WebCore::RenderLayerBacking::scrollingContentsLayer):
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::~RenderLayerBacking):
+        (WebCore::RenderLayerBacking::destroyGraphicsLayers): Tear down the scrolling layers, if any.
+        (WebCore::layerOrAncestorIsTransformedOrUsingCompositedScrolling): Renamed from layerOrAncestorIsTransformed,
+        since it has to look for composited scrolling layers too.
+        (WebCore::RenderLayerBacking::shouldClipCompositedBounds): We don't want the contents of scrolling layers
+        to get clipped to the viewport.
+        (WebCore::RenderLayerBacking::updateGraphicsLayerConfiguration): Create scrolling layers if necessary.
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry): Set scrolling layer geometry.
+        (WebCore::RenderLayerBacking::updateInternalHierarchy): Hook up scrolling layers.
+        (WebCore::RenderLayerBacking::updateDrawsContent): Scrolling layers affect whether the main graphics layer
+        needs to draw content.
+        (WebCore::RenderLayerBacking::updateScrollingLayers): Create or destroy scrolling layers.
+        (WebCore::RenderLayerBacking::paintingPhaseForPrimaryLayer): If we have a scrolled contents layer,
+        the main layer should not paint the foreground.
+        (WebCore::RenderLayerBacking::parentForSublayers): Sublayers are parented in the scrolling contents
+        layer if one exists.
+        (WebCore::RenderLayerBacking::setContentsNeedDisplay): Need to dirty the scrolling contents layer.
+        (WebCore::RenderLayerBacking::setContentsNeedDisplayInRect): Ditto.
+        (WebCore::RenderLayerBacking::paintIntoLayer): Set the right painting flags.
+        (WebCore::RenderLayerBacking::paintContents): Only clip to the bounds if we're not painting overflow contents.
+
 2012-08-24  Florin Malita  <fmalita@chromium.org>
 
         ASSERTION FAILED: !attached() in WebCore::Node::attach()
