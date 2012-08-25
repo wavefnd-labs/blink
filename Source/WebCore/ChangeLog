@@ -1,3 +1,22 @@
+2012-07-18  Robert Hogan  <robert@webkit.org>
+
+        Tables with just border-style set on the cells do not get a grid
+        https://bugs.webkit.org/show_bug.cgi?id=84286
+
+        Reviewed by Julien Chaffraix.
+
+        This is happening because every cell gets a zero-width border in createSharedCellStyle() if the table border is not explictly set. 
+        FF and Opera don't do this, so leave the cell's border alone if there is no table border explicitly set.
+
+        Test: fast/css/table-rules-attribute-none-with-cell-borders.html
+
+        * html/HTMLTableElement.cpp:
+        (WebCore::HTMLTableElement::createSharedCellStyle):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::RenderTreeAsText::writeRenderObject): Without this we would end up rebaselining a bunch of tests to report 'border: []'
+         rather than 'border: [none]'. The problem here was that writeRenderObject would only report the first border if it differed from
+         BorderValue(). What we want is for it to report the first border always and then any borders after that if they differ.
+
 2012-08-25  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: missing time ruler in Timeline and Network panels
