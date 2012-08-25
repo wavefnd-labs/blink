@@ -1,3 +1,20 @@
+2012-08-24  Roger Fong  <roger_fong@apple.com>
+
+        -webkit-font-smoothing: antialiased should use CG font rendering code path, not GDI
+        https://bugs.webkit.org/show_bug.cgi?id=54004
+        <rdar://problem/8971429>
+
+        Reviewed by Dan Bernstein.
+
+        When specifying -webkit-font-smoothing: antialised; the code path ends up using GDI to draw the text. 
+        GDI ends up drawing subpixel antialiased text, not aliased text anyways.
+        The CG code path also has the capability of drawing antialiased text. The reason that the GDI path was 
+        used in the first place is no longer a concern here so we can stop using the GDI code path.
+
+        * platform/graphics/win/FontCGWin.cpp: Removing GDI font drawing code path.
+        (WebCore):
+        (WebCore::Font::drawGlyphs):
+
 2012-08-24  Sami Kyostila  <skyostil@chromium.org>
 
         Add support for compositing the contents of overflow:scroll areas
