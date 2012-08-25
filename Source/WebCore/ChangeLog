@@ -1,3 +1,29 @@
+2012-08-24  Helder Correia  <helder.correia@nokia.com>
+
+        [Texmap] Move TextureMapperGL to use GraphicsContext3D
+        https://bugs.webkit.org/show_bug.cgi?id=78672
+
+        Reviewed by Noam Rosenthal.
+
+        Introducing a new GraphicsContext3D::texImage2DDirect() to allow
+        initialization of textures without allocation. The existing
+        textImage2D() refuses a null pixel buffer, and
+        texImage2DResourceSafe() allows it but performs memory
+        allocation and zeroes the bits. This was not fast enough for
+        BitmapTextureGL frequent setting up.
+
+        No new tests, refactoring.
+
+        * platform/graphics/GraphicsContext3D.h:
+        (GraphicsContext3D):
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::texImage2D):
+        * platform/graphics/opengl/GraphicsContext3DOpenGLCommon.cpp:
+        (WebCore::GraphicsContext3D::texImage2DDirect):
+        (WebCore):
+        * platform/graphics/opengl/GraphicsContext3DOpenGLES.cpp:
+        (WebCore::GraphicsContext3D::texImage2D):
+
 2012-08-24  Roger Fong  <roger_fong@apple.com>
 
         -webkit-font-smoothing: antialiased should use CG font rendering code path, not GDI
