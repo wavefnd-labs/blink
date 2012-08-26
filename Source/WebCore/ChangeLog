@@ -1,3 +1,24 @@
+2012-08-26  Gavin Peters  <gavinp@chromium.org>
+
+        Prerenderering should gracefully handle no PrerendererClient or PrerenderingPlatform being provided.
+        https://bugs.webkit.org/show_bug.cgi?id=95036
+
+        Reviewed by Adam Barth.
+
+        Some assertions made sure there was a prerendering platform and client, and this change should make prerendering just be a NOP when no platform is provided, and just continue without a client when there is no client provided. These assertions were causing crashes in chromium's content_shell target, and really for no good reason.
+
+        No new tests, because DumpRenderTree provides both a PrerenderingPlatform and a PrerendererClient. But there is a new layout test in chromium's WebKitBrowserTest for this behaviour, see http://codereview.chromium.org/10869068/
+
+        * loader/Prerenderer.cpp:
+        (WebCore::Prerenderer::Prerenderer):
+        (WebCore::Prerenderer::render):
+        (WebCore::Prerenderer::client):
+        * loader/Prerenderer.h:
+        * loader/PrerendererClient.cpp:
+        (WebCore::PrerendererClient::from):
+        * platform/chromium/Prerender.cpp:
+        (WebCore::Prerender::cancel):
+
 2012-08-26  David Barton  <dbarton@mathscribe.com>
 
         Streamline mathml.css
