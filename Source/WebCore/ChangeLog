@@ -1,3 +1,76 @@
+2012-08-26  Antti Koivisto  <antti@apple.com>
+
+        Remove parent pointer from StyleSheetContents and StyleRuleImport
+        https://bugs.webkit.org/show_bug.cgi?id=94926
+
+        Reviewed by Andreas Kling.
+
+        To be able to cache and share @imported stylesheets in the future there must not be any parent
+        pointers in the stylesheet tree.
+
+        Parent pointers are used during loading to invoke load completion callbacks and for
+        accessing document context information (like the security origin). They are not used after
+        the sheet load is complete. Instead of keeping the parent pointers around indefinitely as part of the 
+        stylesheet data structure we just keep a pointer to the root CSSStyleSheet for the duration of the load.
+        
+        This patch doesn't enable any new caching or generally change the behavior.
+
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::insertRule):
+        (WebCore::CSSStyleSheet::rootStyleSheet):
+        (WebCore):
+        (WebCore::CSSStyleSheet::ownerDocument):
+        * css/CSSStyleSheet.h:
+        (CSSStyleSheet):
+        * css/StyleRuleImport.cpp:
+        (WebCore::StyleRuleImport::LoadContext::LoadContext):
+        
+            Simplify by making StyleRuleImport CachedStyleSheetClient directly. LoadContext contains
+            fields that can be thrown away after load completes.
+
+        (WebCore):
+        (WebCore::StyleRuleImport::StyleRuleImport):
+        (WebCore::StyleRuleImport::~StyleRuleImport):
+        (WebCore::StyleRuleImport::setCSSStyleSheet):
+        (WebCore::StyleRuleImport::isLoading):
+        (WebCore::StyleRuleImport::hadLoadError):
+        (WebCore::StyleRuleImport::requestStyleSheet):
+        * css/StyleRuleImport.h:
+        (StyleRuleImport):
+        (LoadContext):
+        * css/StyleSheetContents.cpp:
+        (WebCore::StyleSheetContents::StyleSheetContents):
+        
+            Remove now unnecessary constructor. 
+
+        (WebCore::StyleSheetContents::isCacheable):
+        (WebCore::StyleSheetContents::parserAppendRule):
+        (WebCore::StyleSheetContents::clearRules):
+        (WebCore::StyleSheetContents::wrapperInsertRule):
+        (WebCore::StyleSheetContents::wrapperDeleteRule):
+        (WebCore::StyleSheetContents::requestImportedStyleSheets):
+        (WebCore):
+        (WebCore::StyleSheetContents::parseAuthorStyleSheet):
+        (WebCore::StyleSheetContents::parseStringAtLine):
+        (WebCore::StyleSheetContents::checkImportedSheetLoadCompleted):
+        (WebCore::StyleSheetContents::checkLoadCompleted):
+        (WebCore::StyleSheetContents::getAncestors):
+        (WebCore::StyleSheetContents::hasImportCycle):
+        
+            Move the cycle checking to the root stylesheet so we don't need to pass the entire chain around.
+            The extra work here is unlikely to cause problems, massive import trees don't really occur in
+            practice.
+
+        * css/StyleSheetContents.h:
+        (WebCore::StyleSheetContents::create):
+        (StyleSheetContents):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::parseStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+
 2012-08-26  Andreas Kling  <kling@webkit.org>
 
         Avoid pointless string/number round-trip in applyRelativeFontStyleChange().
