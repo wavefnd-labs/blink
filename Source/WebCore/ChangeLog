@@ -1,3 +1,129 @@
+2012-08-25  Roland Takacs  <rtakacs@inf.u-szeged.hu>, Helder Correia  <helder.correia@nokia.com>
+
+        [Texmap] Move TextureMapperGL to use GraphicsContext3D
+        https://bugs.webkit.org/show_bug.cgi?id=78672
+
+        Reviewed by Noam Rosenthal.
+
+        It is based on a previous patch by Helder Correia.
+
+        TextureMapperGL (TMGL) includes direct GL calls and
+        GraphicsContext3D (GC3D) offers many conveniences over the
+        former approach: using existing CSS shader code, ANGLE for
+        shader compilation, reusing WebCore::Texture, having shaders and
+        textures that can delete themselves.
+
+        A GC3D object is created by TMGL with the newly introduced
+        builder createForCurrentGLContext(), which in turn uses
+        the new RenderToCurrentGLContext flag underneath.
+
+        TMGL's dependency on OpenGLShims.h was completely removed.
+        However, GC3D does not map every single GL constant. Thus, it's
+        important to document the following:
+            - GL_FALSE was mapped to false.
+            - GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_PIXELS,
+            GL_UNPACK_SKIP_ROWS, GL_TEXTURE_RECTANGLE_ARB, and
+            GL_UNSIGNED_INT_8_8_8_8_REV were locally defined in TMGL.
+
+        The patch was originally developed by Helder Correia and finished
+        by Roland Takacs.
+
+        No new tests, refactoring.
+
+        * platform/graphics/GraphicsContext3D.h:
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (SharedGLData):
+        (WebCore::TextureMapperGLData::SharedGLData::currentSharedGLData):
+        (WebCore::TextureMapperGLData::SharedGLData::SharedGLData):
+        (WebCore::TextureMapperGLData::sharedGLData):
+        (WebCore::TextureMapperGLData::TextureMapperGLData):
+        (TextureMapperGLData):
+        (WebCore::scissorClip):
+        (WebCore::TextureMapperGL::ClipStack::apply):
+        (WebCore::TextureMapperGLData::initializeStencil):
+        (WebCore::TextureMapperGL::TextureMapperGL):
+        (WebCore::TextureMapperGL::beginPainting):
+        (WebCore::TextureMapperGL::endPainting):
+        (WebCore::TextureMapperGL::drawQuad):
+        (WebCore::TextureMapperGL::drawBorder):
+        (WebCore):
+        (WebCore::TextureMapperGL::drawTextureRectangleARB):
+        (WebCore::TextureMapperGL::drawTexture):
+        (WebCore::viewportMatrix):
+        (WebCore::TextureMapperGL::drawTextureWithAntialiasing):
+        (WebCore::TextureMapperGL::drawTexturedQuadWithProgram):
+        (WebCore::BitmapTextureGL::didReset):
+        (WebCore::BitmapTextureGL::updateContents):
+        (WebCore::TextureMapperGL::drawFiltered):
+        (WebCore::BitmapTextureGL::initializeStencil):
+        (WebCore::BitmapTextureGL::clearIfNeeded):
+        (WebCore::BitmapTextureGL::createFboIfNeeded):
+        (WebCore::BitmapTextureGL::bind):
+        (WebCore::BitmapTextureGL::~BitmapTextureGL):
+        (WebCore::TextureMapperGL::bindDefaultSurface):
+        (WebCore::TextureMapperGL::beginScissorClip):
+        (WebCore::TextureMapperGL::beginClip):
+        (WebCore::TextureMapperGL::endClip):
+        (WebCore::TextureMapperGL::createTexture):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (WebCore::TextureMapperGL::graphicsContext3D):
+        (TextureMapperGL):
+        (ClipStack):
+        (WebCore::BitmapTextureGL::textureTarget):
+        (BitmapTextureGL):
+        (WebCore::BitmapTextureGL::BitmapTextureGL):
+        * platform/graphics/texmap/TextureMapperShaderManager.cpp:
+        (WebCore):
+        (WebCore::TextureMapperShaderManager::getShaderProgram):
+        (WebCore::TextureMapperShaderProgram::TextureMapperShaderProgram):
+        (WebCore::TextureMapperShaderProgram::initializeProgram):
+        (WebCore::TextureMapperShaderProgram::getUniformLocation):
+        (WebCore::TextureMapperShaderProgram::~TextureMapperShaderProgram):
+        (WebCore::TextureMapperShaderProgramSimple::TextureMapperShaderProgramSimple):
+        (WebCore::TextureMapperShaderProgramSolidColor::TextureMapperShaderProgramSolidColor):
+        (WebCore::TextureMapperShaderProgramRectSimple::TextureMapperShaderProgramRectSimple):
+        (WebCore::TextureMapperShaderProgramOpacityAndMask::TextureMapperShaderProgramOpacityAndMask):
+        (WebCore::TextureMapperShaderProgramRectOpacityAndMask::TextureMapperShaderProgramRectOpacityAndMask):
+        (WebCore::TextureMapperShaderProgramAntialiasingNoMask::TextureMapperShaderProgramAntialiasingNoMask):
+        (WebCore::TextureMapperShaderManager::TextureMapperShaderManager):
+        (WebCore::StandardFilterProgram::~StandardFilterProgram):
+        (WebCore::StandardFilterProgram::StandardFilterProgram):
+        (WebCore::StandardFilterProgram::create):
+        (WebCore::StandardFilterProgram::prepare):
+        (WebCore::TextureMapperShaderManager::getShaderForFilter):
+        * platform/graphics/texmap/TextureMapperShaderManager.h:
+        (WebCore::TextureMapperShaderProgram::id):
+        (WebCore::TextureMapperShaderProgram::vertexAttrib):
+        (TextureMapperShaderProgram):
+        (WebCore::TextureMapperShaderProgram::matrixLocation):
+        (WebCore::TextureMapperShaderProgram::flipLocation):
+        (WebCore::TextureMapperShaderProgram::textureSizeLocation):
+        (WebCore::TextureMapperShaderProgram::sourceTextureLocation):
+        (WebCore::TextureMapperShaderProgram::maskTextureLocation):
+        (WebCore::TextureMapperShaderProgram::opacityLocation):
+        (WebCore::TextureMapperShaderProgram::isValidUniformLocation):
+        (StandardFilterProgram):
+        (WebCore::StandardFilterProgram::vertexAttrib):
+        (WebCore::StandardFilterProgram::texCoordAttrib):
+        (WebCore::StandardFilterProgram::textureUniform):
+        (WebCore::TextureMapperShaderProgramSimple::create):
+        (TextureMapperShaderProgramSimple):
+        (WebCore::TextureMapperShaderProgramRectSimple::create):
+        (TextureMapperShaderProgramRectSimple):
+        (WebCore::TextureMapperShaderProgramOpacityAndMask::create):
+        (TextureMapperShaderProgramOpacityAndMask):
+        (WebCore::TextureMapperShaderProgramRectOpacityAndMask::create):
+        (TextureMapperShaderProgramRectOpacityAndMask):
+        (WebCore::TextureMapperShaderProgramSolidColor::create):
+        (WebCore::TextureMapperShaderProgramSolidColor::colorLocation):
+        (TextureMapperShaderProgramSolidColor):
+        (WebCore::TextureMapperShaderProgramAntialiasingNoMask::create):
+        (WebCore::TextureMapperShaderProgramAntialiasingNoMask::expandedQuadVerticesInTextureCoordinatesLocation):
+        (WebCore::TextureMapperShaderProgramAntialiasingNoMask::expandedQuadEdgesInScreenSpaceLocation):
+        (TextureMapperShaderProgramAntialiasingNoMask):
+        (WebCore::TextureMapperShaderManager::TextureMapperShaderManager):
+        (TextureMapperShaderManager):
+
 2012-08-25  Philip Rogers  <pdr@google.com>
 
         Roll out r126056 and r126626
