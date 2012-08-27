@@ -1,3 +1,31 @@
+2012-08-27  Tony Chang  <tony@chromium.org>
+
+        Make RenderBox::computePositionedLogicalHeight const
+        https://bugs.webkit.org/show_bug.cgi?id=94984
+
+        Reviewed by Ojan Vafai.
+
+        This is step 1 in making computeLogical{Height,Width} const.
+        computeLogicalHeight calls computePositionedLogicalHeight, so this patch
+        makes that const first.
+
+        No new tests, just refactoring.  Covered by fast/block/positioning/differing-writing-modes-replaced.html
+        and others.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeLogicalHeight): Call const version of computePositionedLogicalHeight.
+        (WebCore::RenderBox::computePositionedLogicalHeight): Make const, fills in struct instead.
+        (WebCore::RenderBox::computePositionedLogicalHeightUsing): Make const
+        and pass in a LogicalExtentComputedValues struct instead of 4 separate args for the results.
+        (WebCore::RenderBox::computePositionedLogicalHeightReplaced): Make const, fills in struct instead.
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::MarginsComputedValues::MarginsComputedValues):
+        (MarginsComputedValues): Struct of just margins.  Not used yet, but will be for
+        computeInlineDirectionMargins and computeBlockDirectionMargins.
+        (WebCore::RenderBox::LogicalExtentComputedValues::LogicalExtentComputedValues):
+        (LogicalExtentComputedValues): Struct to be used by computeLogical{Width,Height}. Only used by
+        computeLogicalHeight so far.
+
 2012-08-27  Rob Buis  <rbuis@rim.com>
 
         Fix compiler warnings in TextureMapperLayer.cpp
