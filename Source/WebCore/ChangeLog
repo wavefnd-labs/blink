@@ -1,3 +1,25 @@
+2012-08-27  Roger Fong  <roger_fong@apple.com>
+
+        Hook procedure should check to see if hook has already been removed before attempting removal.
+        https://bugs.webkit.org/show_bug.cgi?id=95118
+
+        Reviewed by Simon Fraser.
+
+        When the hookFired method in LayerChangesFlusher.cpp gets called in response to a message posted to the message queue
+        it calls CallNextHook to pass the message to the next hook procedure in the hook chain.
+        
+        Sometimes, the message can get passed to another hook procedure that can dispatch another message. 
+        This message gets passed back through the hook chain and we eventually re-enter the hookFired method.
+
+        When that hookFired call completes, it may remove the hook. 
+        When CallNextHook returns, the original call to hookFired may try to remove the hook as well. 
+        However, there is no need as the hook as already been removed.
+        This results in an assertion failure, assert(m_hook), when we call removeHook.
+
+        * platform/graphics/ca/win/LayerChangesFlusher.cpp:
+        (WebCore::LayerChangesFlusher::hookFired):
+        Simply check to see if the hook has already been removed before actually trying to remove it.
+
 2012-08-24  James Robinson  <jamesr@chromium.org>
 
         [chromium] Clean up dependencies of WebScrollbar and WebScrollbarLayer
