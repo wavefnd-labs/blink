@@ -1,3 +1,63 @@
+2012-08-27  Anna Cavender  <annacc@chromium.org>
+
+        TextTrack modes are strings
+        https://bugs.webkit.org/show_bug.cgi?id=85050
+
+        Reviewed by Eric Carlson.
+
+        The spec recently changed away from enumeration to string for the type
+        of TextTrack mode.
+        http://dev.w3.org/html5/spec/media-elements.html#texttrackmode
+
+        No new tests. Updates to existing tests.
+
+        * html/HTMLMediaElement.cpp:
+
+        Use the new string mode rather than the old enum.  Also, TextTrack::setMode()
+        no longer requires an ExceptionCode:
+        (WebCore::HTMLMediaElement::loadInternal):
+        (WebCore::HTMLMediaElement::textTrackModeChanged):
+        (WebCore::HTMLMediaElement::textTrackKindChanged):
+        (WebCore::HTMLMediaElement::addTextTrack):
+        (WebCore::HTMLMediaElement::showingTrackWithSameKind):
+        (WebCore::HTMLMediaElement::configureTextTrackGroup):
+        (WebCore::HTMLMediaElement::configureNewTextTracks):
+        (WebCore::HTMLMediaElement::configureTextTrackDisplay):
+
+        * html/track/TextTrack.cpp:
+
+        Update these methods to use ConstructFromLiteral for efficiency:
+        (WebCore::TextTrack::subtitlesKeyword):
+        (WebCore::TextTrack::captionsKeyword):
+        (WebCore::TextTrack::descriptionsKeyword):
+        (WebCore::TextTrack::chaptersKeyword):
+        (WebCore::TextTrack::metadataKeyword):
+
+        New methods to use for the mode string (replacing the enum):
+        (WebCore::TextTrack::disabledKeyword):
+        (WebCore::TextTrack::hiddenKeyword):
+        (WebCore::TextTrack::showingKeyword):
+
+        (WebCore::TextTrack::TextTrack): Initialize mode to disabled.
+        (WebCore::TextTrack::setMode): Remove ExceptionCode and no longer throw an
+        INVALID_ACCESS_ERR.
+        (WebCore::TextTrack::mode): Return a keyword string instead of an enum.
+
+        Use the new string mode rather than the old enum:
+        (WebCore::TextTrack::cues):
+        (WebCore::TextTrack::activeCues):
+        (WebCore::TextTrack::isRendered):
+
+        * html/track/TextTrack.h: Remove old enum, add new string keyword methods,
+        and update mode() and setMode() accordingly.
+
+        * html/track/TextTrack.idl: Remove old enum and make mode attribute be a string.
+
+        Use the new string mode rather than the old enum:
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::dispatchEvent):
+        (WebCore::TextTrackCue::isActive):
+
 2012-08-27  Mike West  <mkwst@chromium.org>
 
         'self' in a CSP directive should match blob: and filesystem: URLs.
