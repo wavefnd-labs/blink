@@ -1,3 +1,36 @@
+2012-08-27  Mike West  <mkwst@chromium.org>
+
+        'self' in a CSP directive should match blob: and filesystem: URLs.
+        https://bugs.webkit.org/show_bug.cgi?id=94918
+
+        Reviewed by Adam Barth.
+
+        'blob:' and 'filesystem:' URLs are same-origin with the page on which
+        they were created. Currently, we're using the wrong URL for comparison
+        when matching against CSP directive source lists. This patch adjusts the
+        matching logic to compare against the blob's inner URL, rather than
+        directly against the blob itself.
+
+        Tests: http/tests/security/contentSecurityPolicy/blob-urls-match-self.html
+               http/tests/security/contentSecurityPolicy/filesystem-urls-match-self.html
+               http/tests/security/contentSecurityPolicy/source-list-parsing-08.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPSourceList::matches):
+            If we should use the inner URL of a given resource, extract it into
+            a local variable, and pass that into CSPSource for comparison.
+        * page/SecurityOrigin.cpp:
+        (WebCore::SecurityOrigin::shouldUseInnerURL):
+        (WebCore::SecurityOrigin::extractInnerURL):
+            Move shouldUseInnerURL and extractInnerURL to SecurityOrigin's
+            public signature.
+        (WebCore::shouldTreatAsUniqueOrigin):
+        (WebCore::SecurityOrigin::create):
+        (WebCore::SecurityOrigin::isSecure):
+            shouldUseInnerURL and extractInnerURL are now static methods of
+            SecurityOrigin: updating calls to mathc.
+        * page/SecurityOrigin.h:
+
 2012-08-27  Kevin Funk  <kevin.funk@kdab.com>
 
         Fix compilation when both OS(WINCE) and PLATFORM(QT) are true
