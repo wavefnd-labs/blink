@@ -1,3 +1,27 @@
+2012-08-24  James Robinson  <jamesr@chromium.org>
+
+        WebGL should not flip textures on presentation if contents are unchanged
+        https://bugs.webkit.org/show_bug.cgi?id=94961
+
+        Reviewed by Kenneth Russell.
+
+        For WebGL contexts where antialias and preserveDrawingBuffer are false, chromium implements DrawingBuffer using
+        two textures and flips them on presentation. If the page hasn't actually rendered anything into the WebGL
+        context since the last presentation, this makes an old frame available. This fixes the bug by marking the
+        DrawingBuffer when its contents change.
+
+        Test: compositing/webgl/webgl-repaint.html
+
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore):
+        (WebCore::WebGLRenderingContext::markContextChanged):
+        * platform/graphics/chromium/DrawingBufferChromium.cpp:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore::DrawingBuffer::prepareBackBuffer):
+        * platform/graphics/gpu/DrawingBuffer.h:
+        (WebCore::DrawingBuffer::markContentsChanged):
+        (DrawingBuffer):
+
 2012-08-27  Adam Barth  <abarth@webkit.org>
 
         [V8] Clean up V8DOMWindowShell's findFrame
