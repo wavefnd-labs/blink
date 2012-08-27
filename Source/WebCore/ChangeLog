@@ -1,3 +1,90 @@
+2012-08-24  Simon Fraser  <simon.fraser@apple.com>
+
+        Implement sticky positioning
+        https://bugs.webkit.org/show_bug.cgi?id=90046
+
+        Reviewed by Ojan Vafai.
+
+        Initial implementation of position: -webkit-sticky, which 
+        constrains an element to be positioned inside the intersection
+        of its container box, and the viewport. Sticky elements create
+        stacking context.
+        
+        A stickily positioned element behaves like position:relative
+        (space is reserved for it in-flow), but with an offset that is
+        determined by the sticky position. Changed isInFlowPositioned()
+        to cover relative and sticky.
+        
+        Added a convenience isPositioned() to RenderObject(), which
+        is true for an object with any non-static position value.
+        
+        Tests: fast/css/sticky/inflow-sticky.html
+               fast/css/sticky/inline-sticky-abspos-child.html
+               fast/css/sticky/inline-sticky.html
+               fast/css/sticky/replaced-sticky.html
+               fast/css/sticky/sticky-as-positioning-container.html
+               fast/css/sticky/sticky-left-percentage.html
+               fast/css/sticky/sticky-left.html
+               fast/css/sticky/sticky-margins.html
+               fast/css/sticky/sticky-side-margins.html
+               fast/css/sticky/sticky-stacking-context.html
+               fast/css/sticky/sticky-top-margins.html
+               fast/css/sticky/sticky-top.html
+               fast/css/sticky/sticky-writing-mode-horizontal-bt.html
+               fast/css/sticky/sticky-writing-mode-vertical-lr.html
+               fast/css/sticky/sticky-writing-mode-vertical-rl.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::adjustRenderStyle): Have position:sticky
+        create stacking context from the get-go, to make scrolling optimizations easier later.
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scrollContentsFastPath): Use hasViewportConstrainedPosition().
+        * page/FrameView.h: FrameView's "fixed" objects contains both fixed and sticky objects now.
+        * rendering/RenderBlock.cpp: Use isPositioned().
+        (WebCore::RenderBlock::isSelectionRoot):
+        (WebCore::RenderBlock::renderName):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleWillChange): Need to look for both stick and fixed positioning to
+        determine whether to add something to FrameView's fixed object set.
+        (WebCore::RenderBox::computeRectForRepaint): Need to take the sticky offset into account
+        when computing repaint rects.
+        * rendering/RenderBox.h: Implement frameRectForStickyPositioning() for boxes.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::updateBoxModelInfoFromStyle):
+        (WebCore::RenderBoxModelObject::adjustedPositionRelativeToOffsetParent):
+        (WebCore::RenderBoxModelObject::stickyPositionOffset): Compute the sticky position
+        offset by taking into account the viewport rect, and the conteriner's contentRect
+        inset by its margins.
+        (WebCore::RenderBoxModelObject::offsetForInFlowPosition): Convenience wrapper
+        for getting relative or sticky offset.
+        * rendering/RenderBoxModelObject.h: Have requiresLayer() use isPositioned().
+        (WebCore::RenderBoxModelObject::stickyPositionLogicalOffset):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::styleWillChange): Need to implement this to 
+        add/remove objects from FrameView's fixed object list, since, prior to sticky,
+        only boxes could be fixed.
+        (WebCore::RenderInline::renderName):
+        (WebCore::RenderInline::positionForPoint):
+        (WebCore::RenderInline::computeRectForRepaint):
+        * rendering/RenderInline.h:
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPositionsAfterScroll): Have to look for fixed or sticky.
+        (WebCore::RenderLayer::calculateClipRects): Use isPositioned().
+        (WebCore::RenderLayer::shouldBeNormalFlowOnly): Ditto.
+        * rendering/RenderLayer.h:
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::styleWillChange):
+        (WebCore::RenderObject::propagateStyleToAnonymousChildren): Should use isInFlowPositioned(),
+        not just isRelPositioned().
+        (WebCore::RenderObject::offsetParent): Use isPositioned().
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isInFlowPositioned):
+        (WebCore::RenderObject::isStickyPositioned):
+        (WebCore::RenderObject::setStickyPositioned):
+        (WebCore::RenderObject::RenderObjectBitfields::RenderObjectBitfields):
+        (RenderObjectBitfields):
+        * rendering/RenderStyle.h: add hasViewportConstrainedPosition() for fixed or sticky position.
+
 2012-08-27  Julien Chaffraix  <jchaffraix@webkit.org>
 
         Unreviewed Mac Chromium build fix after r126763.
