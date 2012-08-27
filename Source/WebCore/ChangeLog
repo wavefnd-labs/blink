@@ -1,3 +1,82 @@
+2012-08-27  Justin Novosad  <junov@chromium.org>
+
+        [Chromium] Implementing a global limit on memory consumed by deferred 2D canvases
+        https://bugs.webkit.org/show_bug.cgi?id=94386
+
+        Reviewed by Stephen White.
+
+        Before this change, there was no global bound on memory that could be
+        consumed for the purpose of recording 2d canvas deferred draw commands.
+        There was only a per canvas limit. It is possible for canvases to get
+        dereferenced without flushing pending draw commands, which may lock
+        resources until the canvas element is garbage collected. This makes
+        it possible to grow memory consumption indefinitely by hitting reload
+        successively on some canvas-intensive web pages.
+
+        The solution implemented in this change consists in maintaining a
+        global registry of deferred canvas layers and tracking the sum of
+        memory allocated by all canvases for the purpose of storing deferred
+        draw commands. When memory consumption reaches the allowed limit,
+        caches are cleared and draw operations are flushed on one or several
+        canvases, starting with the least recently used, until memory
+        consumption is below a target level.
+
+        New tests: webkit_unit_tests DeferredLayerManagerTest*
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/Canvas2DLayerBridge.cpp:
+        (WebCore::Canvas2DLayerBridge::Canvas2DLayerBridge):
+        (WebCore::Canvas2DLayerBridge::~Canvas2DLayerBridge):
+        (WebCore::Canvas2DLayerBridge::storageAllocatedForRecordingChanged):
+        Overloaded from SkDeferredCanvas::NotificationClient. Called when
+        there is a change in the number of bytes allocated by the deferred
+        canvas.
+        (WebCore):
+        (WebCore::Canvas2DLayerBridge::flushedDrawCommands):
+        Overloaded from SkDeferredCanvas::NotificationClient. Called when
+        pending draw commands are flush by the deferred canvas.
+        (WebCore::Canvas2DLayerBridge::freeMemoryIfPossible):
+        Called by the Canvas2DLayerManager to request the release of unlocked
+        memory resources (caches). Request is relayed to SkDeferredCanvas.
+        returns number of bytes freed.
+        (WebCore::Canvas2DLayerBridge::flush):
+        Requests that pending draw commands be flushed immediately from the
+        deferred canvas queue. Request is relayed to SkDeferredCanvas.
+        (WebCore::Canvas2DLayerBridge::contextAcquired):
+        * platform/graphics/chromium/Canvas2DLayerBridge.h:
+        (Canvas2DLayerBridge):
+        (WebCore::Canvas2DLayerBridge::bytesAllocated):
+        (WebCore::Canvas2DLayerBridge::updateBytesAllocated):
+        * platform/graphics/chromium/Canvas2DLayerManager.cpp: Added.
+        (WebCore):
+        (WebCore::Canvas2DLayerManager::Canvas2DLayerManager):
+        (WebCore::Canvas2DLayerManager::~Canvas2DLayerManager):
+        (WebCore::Canvas2DLayerManager::init):
+        Sets the global limit for the maximum total number of bytes allocated
+        by deferred layers.
+        (WebCore::Canvas2DLayerManager::get):
+        Singleton accessor
+        (WebCore::Canvas2DLayerManager::layerDidDraw):
+        Called by Canvas2DLayerBridge to indicate that the layer was drawn to.
+        (WebCore::Canvas2DLayerManager::addLayerToList):
+        (WebCore::Canvas2DLayerManager::layerAllocatedStorageChanged):
+        Called by Canvas2DLayerBridge to indicate thet the memory consumed by
+        the layer has changed.
+        (WebCore::Canvas2DLayerManager::layerDidFlush):
+        Called by Canvas2DLayerBridge to indicated that the pending draw
+        commands of the layer were flushed.
+        (WebCore::Canvas2DLayerManager::layerToBeDestroyed):
+        Called by Canvas2DLayerBridge upon destruction.
+        (WebCore::Canvas2DLayerManager::freeMemoryIfNecessary):
+        Called internally. Check that current memory consumption is below
+        the tolerated limit.  If check fails, intiates resource releases.
+        (WebCore::Canvas2DLayerManager::removeLayerFromList):
+        (WebCore::Canvas2DLayerManager::isInList):
+        (WebCore::Canvas2DLayerManager::updateBytesAllocated):
+        * platform/graphics/chromium/Canvas2DLayerManager.h: Added.
+        (WebCore):
+        (Canvas2DLayerManager):
+
 2012-08-27  Zeno Albisser  <zeno@webkit.org>
 
         Implement GraphicsSurface::paintToTextureMapper.
