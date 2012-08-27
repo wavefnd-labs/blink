@@ -1,3 +1,36 @@
+2012-08-27  Takashi Sakamoto  <tasak@google.com>
+
+        ShadowRoot insertion point change aborts css transition
+        https://bugs.webkit.org/show_bug.cgi?id=93755
+
+        Reviewed by Hajime Morita.
+
+        ElementShadow always detaches shadow hosts when distribution is
+        changed, i.e. select attribute's value is changed. However it clears
+        the style of the shadow host. So when distribution is changed,
+        no css transition can be started at the same time. To avoid this
+        problem, invalidateDistribution, i.e. a method for invalidating current
+        distribution, should not make shadow host reattach. Instead, it should
+        make distribute nodes reattached and set needsRecalcStyle flag of
+        shadow host.
+
+        Test: transitions/transition-on-shadow-host-with-distributed-node.html
+
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::addShadowRoot):
+        To support replaced elements, i.e. IMG, and so on, shadow host's
+        renderer must be updated when author shadow roots are addded.
+        So invoke shadow host's reattach instead of shadowRoot's attach.
+        (WebCore::ElementShadow::invalidateDistribution):
+        Remove shadow host's lazy reattach (detach and lazyAttach). Instead, do
+        distributed nodes' lazy reattach and set shadow host's needsRecalcStyle
+        flag.
+        * dom/Node.h:
+        (WebCore::Node::lazyReattach):
+        Newly added. The method works like Node::reattach, but use
+        lazyAttach instead of attach.
+        (WebCore):
+
 2012-08-27  Justin Novosad  <junov@chromium.org>
 
         [Chromium] Fixing infinite recursion in Canvas2DLayerManager
