@@ -1,3 +1,29 @@
+2012-08-26  Christopher Cameron  <ccameron@chromium.org>
+
+        [chromium] Fix a bug where CCThreadProxy::canDraw() gets stuck at false on tab switch
+        https://bugs.webkit.org/show_bug.cgi?id=94903
+
+        Reviewed by James Robinson.
+
+        Suppose the impl thread deletes all textures via
+        releaseContentsTextures().  The impl thread will not be able to draw
+        again until resetContentsTexturesPurged() is called in
+        scheduledActionCommit().  When deleting the textures, the function
+        releaseContentsTextures() calls setNeedsCommitOnImplThread() to ensure
+        that a commit will come along to allow drawing again.  If this commit
+        is aborted, then the page will not draw until a commit is scheduled,
+        which may be never.
+
+        Make beginFrameAborted() call setNeedsCommit(), so that the requested
+        commit will eventually occur.
+
+        No new tests, update to CCSchedulerStateMachineTest's 
+        TestGoesInvisibleBeforeBeginFrameCompletes to require new
+        functionality (new test fails with old behavior).
+
+        * platform/graphics/chromium/cc/CCSchedulerStateMachine.cpp:
+        (WebCore::CCSchedulerStateMachine::beginFrameAborted):
+
 2012-08-26  Antti Koivisto  <antti@apple.com>
 
         Remove parent pointer from StyleSheetContents and StyleRuleImport
