@@ -1,3 +1,75 @@
+2012-08-27  Ned Holbrook  <nholbrook@apple.com>
+
+        Improve line breaking performance for complex text
+        https://bugs.webkit.org/show_bug.cgi?id=83045
+
+        Reviewed by Darin Adler.
+
+        Currently RenderBlock::LineBreaker::nextLineBreak assumes that measuring individual words is as cheap
+        as free. This is not the case when dealing with complex text, which benefits from laying out as much
+        text as possible and by reusing that layout when feasible: by doing so this patch improves line
+        breaking by 25% as measured with a simple test app.
+
+        The bulk of this change is modifying ComplexTextController::advance, which previously required the
+        text offset to be strictly increasing and assumed unidirectional text; now it supports random seeking
+        in a naive fashion (by restarting to the beginning) and traverses glyphs in logical order. In the
+        latter case, the presence of any non-LTR runs triggers the population of a mapping from logical to
+        visual run indices. Finally, a new flag has been added which inhibits glyph advances from being split
+        across ligatures (thus causing spurious line breaks).
+
+        A ComplexTextController and its associated TextRun and Font are encapsulated in a TextLayout object,
+        which is instantiated as an opaque object via functions that are no-ops unless building for Mac. A
+        static member function (isNeeded) checks to see whether a TextRun is complex, in order to avoid
+        needless instantiation. It also bails if tabs would be enabled since positional effects are not yet
+        handled in this mode.
+
+        No behavioral changes are expected due to this change, so no new tests.
+
+        * platform/graphics/Font.cpp:
+        (WTF): Define deleteOwnedPtr for TextLayout as calling through destroyLayout; relying on operator delete is not workable as the class does not exist on all platforms.
+        (WTF::WebCore::TextLayout):
+        (WebCore): Implement no-op TextLayout wrappers for non-Mac platforms.
+        (WebCore::Font::createLayout):
+        (WebCore::Font::deleteLayout):
+        (WebCore::Font::width):
+        * platform/graphics/Font.h:
+        (WebCore): Add forward declarations for RenderText and TextLayout.
+        (Font): Add functions for dealing with pointer to TextLayout implementation.
+        (WTF): Declare deleteOwnedPtr for TextLayout.
+        * platform/graphics/mac/ComplexTextController.cpp:
+        (TextLayout): An instance of this class corresponds to a ComplexTextController for a particular TextRun.
+        (WebCore::TextLayout::isNeeded): Used by wrapper to avoid instantiation when complex layout is not required.
+        (WebCore::TextLayout::TextLayout):
+        (WebCore::TextLayout::width):
+        (WebCore::TextLayout::fontWithNoWordSpacing): Helper function to allow initialization of member variable.
+        (WebCore::TextLayout::constructTextRun): Ditto.
+        (WebCore): Implement real TextLayout wrappers for Mac.
+        (WebCore::Font::createLayout):
+        (WebCore::Font::deleteLayout):
+        (WebCore::Font::width):
+        (WebCore::ComplexTextController::ComplexTextController): Initialize m_ltrOnly and reserve initial capacity for m_runIndices.
+        (WebCore::ComplexTextController::indexOfCurrentRun): Return (visual) m_complexTextRuns index corresponding to (logical) m_currentRun, lazily constructing m_runIndices if needed.
+        (WebCore::ComplexTextController::incrementCurrentRun): Return next m_complexTextRuns index in logical order.
+        (WebCore::ComplexTextController::advance): Allow restarting, support for bidi reordering, and option to measure only whole glyphs rather than dividing advances.
+        (WebCore::ComplexTextController::adjustGlyphsAndAdvances): Clear m_ltrOnly on detecting a RTL run.
+        * platform/graphics/mac/ComplexTextController.h:
+        (ComplexTextController): Add m_ltrOnly indicating no bidi reordering, and m_runIndices mapping from runs (logical order) to m_complexTextRuns (visual order).
+        (WebCore::ComplexTextController::ComplexTextRun::indexBegin):
+        (WebCore::ComplexTextController::ComplexTextRun::isLTR):
+        (ComplexTextRun): Add helper functions returning values pertinent to individual runs as opposed to the entire containing line.
+        (WebCore::ComplexTextController::stringBegin): Return first string index.
+        (WebCore::ComplexTextController::stringEnd): Return one past last string index.
+        * platform/graphics/mac/ComplexTextControllerCoreText.mm: Initialize m_indexBegin and m_ltr.
+        (WebCore::ComplexTextController::ComplexTextRun::ComplexTextRun): Initialize m_indexBegin and m_ltr.
+        * rendering/RenderBlock.h:
+        (RenderTextInfo): Add single mapping from RenderText to LazyLineBreakIterator and (possibly null) TextLayout since they are recreated under the same circumstances.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::RenderTextInfo::RenderTextInfo): Make non-inline to avoid compilation errors.
+        (WebCore::RenderBlock::RenderTextInfo::~RenderTextInfo): Ditto.
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange): Allow RenderTextInfo to be reused across calls to nextLineBreak.
+        (WebCore::textWidth): Use TextLayout when supplied for measuring.
+        (WebCore::RenderBlock::LineBreaker::nextLineBreak):
+
 2012-08-27  Nico Weber  <thakis@chromium.org>
 
         Add two missing variable initializers to RenderFlowThread
