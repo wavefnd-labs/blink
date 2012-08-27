@@ -1,3 +1,31 @@
+2012-08-26  Nico Weber  <thakis@chromium.org>
+
+        Initialized m_hasNonEmptyList to fix a valgrind uninitialized read
+        https://bugs.webkit.org/show_bug.cgi?id=95045
+
+        Reviewed by Kent Tamura.
+
+        Conditional jump or move depends on uninitialised value(s)
+        WebCore::HTMLInputElement::dataList() const (third_party/WebKit/Source/WebCore/html/HTMLInputElement.cpp:1523)
+        WebCore::RangeInputType::updateTickMarkValues() (third_party/WebKit/Source/WebCore/html/RangeInputType.cpp:351)
+        WebCore::RangeInputType::findClosestTickMarkValue(WebCore::Decimal const&) (third_party/WebKit/Source/WebCore/html/RangeInputType.cpp:370)
+        WebCore::HTMLInputElement::findClosestTickMarkValue(WebCore::Decimal const&) (third_party/WebKit/Source/WebCore/html/HTMLInputElement.cpp:324)
+        WebCore::SliderThumbElement::setPositionFromPoint(WebCore::FractionalLayoutPoint const&) (third_party/WebKit/Source/WebCore/html/shadow/SliderThumbElement.cpp:296)
+        WebCore::SliderThumbElement::dragFrom(WebCore::FractionalLayoutPoint const&) (third_party/WebKit/Source/WebCore/html/shadow/SliderThumbElement.cpp:246)
+        WebCore::RangeInputType::handleMouseDownEvent(WebCore::MouseEvent*) (third_party/WebKit/Source/WebCore/html/RangeInputType.cpp:159)
+        WebCore::HTMLInputElement::defaultEventHandler(WebCore::Event*) (third_party/WebKit/Source/WebCore/html/HTMLInputElement.cpp:1163)
+        WebCore::MediaControlTimelineElement::defaultEventHandler(WebCore::Event*) (third_party/WebKit/Source/WebCore/html/shadow/MediaControlElements.cpp:916)
+        WebCore::EventDispatcher::dispatchEventPostProcess(WTF::PassRefPtr<WebCore::Event>, void*) (third_party/WebKit/Source/WebCore/dom/EventDispatcher.cpp:357)
+        WebCore::EventDispatcher::dispatchEvent(WTF::PassRefPtr<WebCore::Event>) (third_party/WebKit/Source/WebCore/dom/EventDispatcher.cpp:263)
+        WebCore::MouseEventDispatchMediator::dispatchEvent(WebCore::EventDispatcher*) const (third_party/WebKit/Source/WebCore/dom/MouseEvent.cpp:238)
+        WebCore::EventDispatcher::dispatchEvent(WebCore::Node*, WTF::PassRefPtr<WebCore::EventDispatchMediator>) (third_party/WebKit/Source/WebCore/dom/EventDispatcher.cpp:129)
+        ...
+        The report came from the `media/audio-delete-while-slider-thumb-clicked.html'--pixel-test` test.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::HTMLInputElement):
+        (WebCore::HTMLInputElement::dataList):
+
 2012-08-26  Geoffrey Garen  <ggaren@apple.com>
 
         Removed the NULL checks from visitChildren functions
