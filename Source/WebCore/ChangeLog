@@ -1,3 +1,47 @@
+2012-08-25  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: display cause for style recalculation and layout on Timeline
+        https://bugs.webkit.org/show_bug.cgi?id=95000
+
+        Reviewed by Pavel Feldman.
+
+        Added instrumentation for didInvalidateLayout and didScheduleStyleRecalculation;
+        Dispaly stacks of the above records in Layout and Recalculate Style as "call site" stacks (need a better wording?);
+        Display synchronous Layout records in red, provide a warning that these may affect performance;
+
+        * English.lproj/localizedStrings.js: +"Note" and a warning test for sync layout;
+        * inspector/InspectorInstrumentation.cpp: Plumbing new instrumentation methods through to timeline;
+        (WebCore):
+        (WebCore::InspectorInstrumentation::didInvalidateLayoutImpl):
+        (WebCore::InspectorInstrumentation::didScheduleStyleRecalculationImpl):
+        * inspector/InspectorInstrumentation.h: ditto.
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::didInvalidateLayout):
+        (WebCore):
+        * inspector/InspectorTimelineAgent.cpp: ditto.
+        (TimelineRecordType):
+        (WebCore::InspectorTimelineAgent::didInvalidateLayout):
+        (WebCore):
+        (WebCore::InspectorTimelineAgent::didScheduleStyleRecalculation):
+        * inspector/InspectorTimelineAgent.h: ditto.
+        (InspectorTimelineAgent):
+        * inspector/front-end/TimelineModel.js:
+        * inspector/front-end/TimelinePanel.js:
+        (WebInspector.TimelineRecordListRow.prototype.update): Display records with warnings in their own style;
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel._initRecordStyles): Renamed, added new records;
+        (WebInspector.TimelinePresentationModel.recordStyle): Added new records;
+        (WebInspector.TimelinePresentationModel.prototype.reset):
+        (WebInspector.TimelinePresentationModel.prototype._innerAddRecord): Add support for new records, make 'em hidden;
+        (WebInspector.TimelinePresentationModel.Record): Add support for hidden records;
+        (WebInspector.TimelinePresentationModel.Record.prototype._generatePopupContentWithImagePreview):
+        (WebInspector.TimelinePresentationModel.Record.prototype._linkifyTopCallFrame): Linkify originator's top frame if no own stack is present;
+        * inspector/front-end/timelinePanel.css:
+        (.timeline-tree-item.warning): Reddish text for records with warnings;
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scheduleRelayout): Added call to InspectorInstrumentation::didInvalidateLayout()
+        (WebCore::FrameView::scheduleRelayoutOfSubtree): Ditto.
+
 2012-08-27  KyungTae Kim  <ktf.kim@samsung.com>
 
         [EFL] Wrong button height on CSS tests
