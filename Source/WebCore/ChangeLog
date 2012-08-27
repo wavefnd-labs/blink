@@ -1,3 +1,34 @@
+2012-08-27  Nico Weber  <thakis@chromium.org>
+
+        Add two missing variable initializers to RenderFlowThread
+        https://bugs.webkit.org/show_bug.cgi?id=95048
+
+        Reviewed by Julien Chaffraix.
+
+        The m_dispatchRegionLayoutUpdateEvent change is needed to fix this
+        valgrind warning:
+        Conditional jump or move depends on uninitialised value(s)
+          WebCore::RenderFlowThread::layout() (third_party/WebKit/Source/WebCore/rendering/RenderFlowThread.cpp:189)
+          WebCore::RenderObject::layoutIfNeeded() (third_party/WebKit/Source/WebCore/rendering/RenderObject.h:647)
+          WebCore::FlowThreadController::layoutRenderNamedFlowThreads() (third_party/WebKit/Source/WebCore/rendering/FlowThreadController.cpp:124)
+          WebCore::RenderView::layout() (third_party/WebKit/Source/WebCore/rendering/RenderView.cpp:159)
+          WebCore::FrameView::layout(bool) (third_party/WebKit/Source/WebCore/page/FrameView.cpp:1154)
+          WebCore::FrameView::layoutTimerFired(WebCore::Timer<WebCore::FrameView>*) (third_party/WebKit/Source/WebCore/page/FrameView.cpp:2074)
+          WebCore::Timer<WebCore::FrameView>::fired() (third_party/WebKit/Source/WebCore/platform/Timer.h:100)
+          WebCore::ThreadTimers::sharedTimerFiredInternal() (third_party/WebKit/Source/WebCore/platform/ThreadTimers.cpp:115)
+          WebCore::ThreadTimers::sharedTimerFired() (third_party/WebKit/Source/WebCore/platform/ThreadTimers.cpp:93)
+          webkit_glue::WebKitPlatformSupportImpl::DoTimeout() (./webkit/glue/webkitplatformsupport_impl.h:163)
+        The report came from the `fast/regions/absolute-pos-elem-in-named-flow.html'--pixel-test` test.
+
+        m_dispatchRegionLayoutUpdateEvent was added in https://bugs.webkit.org/show_bug.cgi?id=88778
+        by abucur, reviewed by abarth.
+
+        While here, also initialize m_hasRegionsWithStyling, added in https://bugs.webkit.org/show_bug.cgi?id=85633
+        by mihnea, reviewed by hyatt.
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+
 2012-08-27  Justin Novosad  <junov@chromium.org>
 
         [Chromium] Implementing a global limit on memory consumed by deferred 2D canvases
