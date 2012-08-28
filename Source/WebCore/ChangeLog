@@ -1,3 +1,36 @@
+2012-08-27  Kent Tamura  <tkent@chromium.org>
+
+        REGRESSION(r109480): Form state for iframe content is not restored
+        https://bugs.webkit.org/show_bug.cgi?id=90870
+
+        Reviewed by Jochen Eisinger.
+
+        Since r109480, we have restored form state only for documents
+        loaded by FrameLoader::loadItem(). However we should restore form
+        state for documents in sub-frames of documents loaded by
+        FrameLoader::loadItem().
+
+        Test: fast/loader/form-state-restore-with-frames.html
+
+        * history/HistoryItem.cpp:
+        (WebCore::HistoryItem::isAncestorOf):
+        Added. A function to search descendants for the specified
+        HistoryItem. This is used by isAssociatedToRequestedHistoryItem().
+        * history/HistoryItem.h:
+        (HistoryItem): Declare isAncestorOf().
+        * loader/HistoryController.cpp:
+        (WebCore::HistoryController::saveDocumentState):
+        Don't save form state for detached document.
+        This is needed because saveDocumentState() is called twice; before
+        document detach and after document detach. We need to avoid the
+        latter call because formElementsState() for a detached document
+        produces an empty state.
+        (WebCore::isAssociatedToRequestedHistoryItem):
+        Added. This function checks the current HistoryItem is associated
+        to the HistoryItem specified to FrameLoader::loadItem().
+        (WebCore::HistoryController::restoreDocumentState):
+        Uses isAssociatedToRequestedHistoryItem().
+
 2012-08-27  Ian Vollick  <vollick@chromium.org>
 
         [chromium] Should accelerate rotations of >= 180 degrees
