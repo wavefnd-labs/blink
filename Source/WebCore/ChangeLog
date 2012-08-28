@@ -1,3 +1,160 @@
+2012-08-28  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
+        Rename HitTestPoint and pointInContainer
+        https://bugs.webkit.org/show_bug.cgi?id=90992
+
+        Reviewed by Eric Seidel.
+
+        The former hitTestPoint is not just a point. It can be either a point or an area being
+        hit tested. This patches renames 'point' to 'location' to make it more obvious that the
+        code does not only handle points.
+
+        * rendering/EllipsisBox.cpp:
+        (WebCore::EllipsisBox::nodeAtPoint):
+        * rendering/EllipsisBox.h:
+        (EllipsisBox):
+        * rendering/HitTestResult.cpp:
+        (WebCore::HitTestLocation::HitTestLocation):
+        (WebCore::HitTestLocation::~HitTestLocation):
+        (WebCore::HitTestLocation::operator=):
+        (WebCore::HitTestLocation::move):
+        (WebCore::HitTestLocation::intersectsRect):
+        (WebCore::HitTestLocation::intersects):
+        (WebCore::HitTestLocation::rectForPoint):
+        (WebCore::HitTestResult::HitTestResult):
+        (WebCore::HitTestResult::operator=):
+        (WebCore::HitTestResult::addNodeToRectBasedTestResult):
+        (WebCore::HitTestResult::dictationAlternatives):
+        * rendering/HitTestResult.h:
+        (HitTestLocation):
+        (HitTestResult):
+        (WebCore::HitTestResult::hitTestLocation):
+        * rendering/InlineBox.cpp:
+        (WebCore::InlineBox::nodeAtPoint):
+        * rendering/InlineBox.h:
+        (InlineBox):
+        * rendering/InlineFlowBox.cpp:
+        (WebCore::InlineFlowBox::nodeAtPoint):
+        * rendering/InlineFlowBox.h:
+        (InlineFlowBox):
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::nodeAtPoint):
+        * rendering/InlineTextBox.h:
+        (InlineTextBox):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::isPointInOverflowControl):
+        (WebCore::RenderBlock::nodeAtPoint):
+        (WebCore::RenderBlock::hitTestFloats):
+        (WebCore::RenderBlock::hitTestColumns):
+        (WebCore::RenderBlock::adjustForColumnRect):
+        (WebCore::RenderBlock::hitTestContents):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::nodeAtPoint):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderEmbeddedObject.cpp:
+        (WebCore::RenderEmbeddedObject::nodeAtPoint):
+        * rendering/RenderEmbeddedObject.h:
+        (RenderEmbeddedObject):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::hitTestRegion):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderFrameSet.cpp:
+        (WebCore::RenderFrameSet::nodeAtPoint):
+        * rendering/RenderFrameSet.h:
+        (RenderFrameSet):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::nodeAtPoint):
+        * rendering/RenderImage.h:
+        (RenderImage):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::nodeAtPoint):
+        * rendering/RenderInline.h:
+        (RenderInline):
+        * rendering/RenderLayer.cpp:
+        (WebCore::ClipRect::intersects):
+        (WebCore::RenderLayer::hitTest):
+        (WebCore::RenderLayer::createLocalTransformState):
+        (WebCore::RenderLayer::hitTestLayer):
+        (WebCore::RenderLayer::hitTestContents):
+        (WebCore::RenderLayer::hitTestList):
+        (WebCore::RenderLayer::hitTestPaginatedChildLayer):
+        (WebCore::RenderLayer::hitTestChildLayerColumns):
+        * rendering/RenderLayer.h:
+        (ClipRect):
+        (RenderLayer):
+        * rendering/RenderLineBoxList.cpp:
+        (WebCore::RenderLineBoxList::hitTest):
+        * rendering/RenderLineBoxList.h:
+        (RenderLineBoxList):
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::isPointInOverflowControl):
+        (WebCore::RenderListBox::nodeAtPoint):
+        * rendering/RenderListBox.h:
+        (RenderListBox):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::hitTest):
+        (WebCore::RenderObject::nodeAtPoint):
+        * rendering/RenderObject.h:
+        (RenderObject):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::nodeAtPoint):
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::nodeAtPoint):
+        * rendering/RenderTable.h:
+        (RenderTable):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::nodeAtPoint):
+        * rendering/RenderTableRow.h:
+        (RenderTableRow):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::nodeAtPoint):
+        * rendering/RenderTableSection.h:
+        (RenderTableSection):
+        * rendering/RenderText.h:
+        * rendering/RenderTextControlMultiLine.cpp:
+        (WebCore::RenderTextControlMultiLine::nodeAtPoint):
+        * rendering/RenderTextControlMultiLine.h:
+        (RenderTextControlMultiLine):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::nodeAtPoint):
+        * rendering/RenderTextControlSingleLine.h:
+        (RenderTextControlSingleLine):
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::nodeAtPoint):
+        * rendering/RenderWidget.h:
+        (RenderWidget):
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::nodeAtPoint):
+        * rendering/RootInlineBox.h:
+        (RootInlineBox):
+        * rendering/svg/RenderSVGForeignObject.cpp:
+        (WebCore::RenderSVGForeignObject::nodeAtFloatPoint):
+        (WebCore::RenderSVGForeignObject::nodeAtPoint):
+        * rendering/svg/RenderSVGForeignObject.h:
+        (RenderSVGForeignObject):
+        * rendering/svg/RenderSVGModelObject.cpp:
+        (WebCore::RenderSVGModelObject::nodeAtPoint):
+        * rendering/svg/RenderSVGModelObject.h:
+        (RenderSVGModelObject):
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::nodeAtPoint):
+        * rendering/svg/RenderSVGRoot.h:
+        (RenderSVGRoot):
+        * rendering/svg/RenderSVGText.cpp:
+        (WebCore::RenderSVGText::nodeAtFloatPoint):
+        (WebCore::RenderSVGText::nodeAtPoint):
+        * rendering/svg/RenderSVGText.h:
+        (RenderSVGText):
+        * rendering/svg/SVGInlineTextBox.cpp:
+        (WebCore::SVGInlineTextBox::nodeAtPoint):
+        * rendering/svg/SVGInlineTextBox.h:
+        (SVGInlineTextBox):
+
 2012-08-28  Simon Hausmann  <simon.hausmann@nokia.com>
 
         [Qt] New test introduced in r126611 fails: fast/css/image-set-setting.html
