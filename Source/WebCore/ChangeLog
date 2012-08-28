@@ -1,3 +1,39 @@
+2012-08-28  Sukolsak Sakshuwong  <sukolsak@gmail.com>
+
+        Crash in EditingStyle::mergeStyle
+        https://bugs.webkit.org/show_bug.cgi?id=94740
+
+        Reviewed by Ryosuke Niwa.
+
+        This bug happened when we selected "1<progress><a style>2</a></progress>"
+        and executed a create link command because
+
+        1. The selection ended at <progress>, not the text node inside it, because
+           <progress> is an atomic node.
+        2. We called removeInlineStyle() to remove conflicting styles.
+           Since the selection started at the text node "1" and ended at <progress>,
+           we did not get to remove <a>.
+        3. We called fixRangeAndApplyInlineStyle(), which in turn called
+           applyInlineStyleToNodeRange(). This method split the node range
+           into smaller runs. In this case, the run was the whole
+           "1<progress><a style>2</a></progress>".
+        4. We called removeStyleFromRunBeforeApplyingStyle(). This method tried
+           to remove <a> by calling removeInlineStyleFromElement() on <a> with
+           extractedStyle = 0. But the method expected that extractedStyle was not null.
+           So, it crashed.
+
+        This bug doesn't happen with non-atomic nodes because if <a> is inside a non-atomic
+        node, <a> will be covered by the selection. Therefore, it will be removed in
+        step #2 and we will never call removeInlineStyleFromElement() on <a>
+        again. Thus, the assertion that extractedStyle is not null is reasonable.
+        Hence, this patch fixes this bug by skipping over atomic nodes when we apply style.
+
+        Test: editing/style/apply-style-atomic.html
+
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::ApplyStyleCommand::removeStyleFromRunBeforeApplyingStyle):
+        (WebCore::ApplyStyleCommand::removeInlineStyle):
+
 2012-08-28  Thiago Marcos P. Santos  <thiago.santos@intel.com>
 
         [EFL] Range input ignores padding
