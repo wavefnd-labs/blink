@@ -1,3 +1,29 @@
+2012-07-10  Robert Hogan  <robert@webkit.org>
+
+        REGRESSION (r94492): Unstable layout of static block inside text-align: center div
+        https://bugs.webkit.org/show_bug.cgi?id=77754
+
+        Reviewed by David Hyatt.
+
+        Text-align of 'center' on an out-of-flow element determines its x-position in the line - it 
+        doesn't mean that the element should be centred in the line as though it were a block of text.
+        
+        This is a partial revert of http://trac.webkit.org/changeset/113584 and a correction to 
+        http://trac.webkit.org/changeset/94492.
+
+        Tests: fast/css/center-align-absolute-position-inline-block.html
+               fast/css/center-align-absolute-position.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutPositionedObjects): Remove an update to the static position when
+          it depended on the child's width. Reverts code added in r113584.
+        * rendering/RenderBlock.h:
+        (RenderBlock): Remove child parameter from startAlignedOffsetForLine()
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::setStaticPositions): ditto
+        (WebCore::RenderBlock::startAlignedOffsetForLine): No need to account for the child's width when calculating
+          the offset for the line.
+
 2012-08-27  Jon Lee  <jonlee@apple.com>
 
         [Mac] Add SPI to WK1 to retrieve internal IDs for web notifications
