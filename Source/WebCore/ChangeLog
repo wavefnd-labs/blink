@@ -1,3 +1,58 @@
+2012-08-28  Mike West  <mkwst@chromium.org>
+
+        Add call stacks to Content Security Policy checks when relevant.
+        https://bugs.webkit.org/show_bug.cgi?id=94433
+
+        Reviewed by Adam Barth.
+
+        Previously, we generated stack traces only for eval-related CSP
+        violations. As it turns out, we can call createScriptCallStack from
+        practically anywhere. This patch takes advantage of that to generate
+        stack traces whenever a warning is logged to the console. If we're in
+        a JavaScript stack, brilliant: we get a detailed warning. If not, the
+        stack trace is empty, and we don't pass it into the console logging
+        method.
+
+        This has the advantage of giving us good developer-facing logging for
+        any and all violations that result from script-based injection of
+        resources. Yay!
+
+        Tests: http/tests/inspector/csp-injected-content-warning-contains-stacktrace.html
+               http/tests/inspector/csp-inline-warning-contains-stacktrace.html
+
+        * bindings/js/ScriptController.cpp:
+        (WebCore::ScriptController::initScript):
+        * bindings/js/ScheduledAction.cpp:
+        (WebCore::ScheduledAction::create):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::initContextIfNeeded):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::WindowSetTimeoutImpl):
+            Dropping stack trace from call to ContentSecurityPolicy::allowEval.
+        * page/ContentSecurityPolicy.cpp:
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::reportViolation):
+        (WebCore::CSPDirectiveList::checkEvalAndReportViolation):
+        (WebCore::CSPDirectiveList::allowEval):
+            No longer piping a stack trace through CSPDirectiveList::allowEval
+            to reportViolation.
+        (WebCore::ContentSecurityPolicy::didReceiveHeader):
+            Dropping stack trace from call to ContentSecurityPolicy::allowEval.
+        (WebCore):
+        (WebCore::isAllowedByAll):
+        (WebCore::ContentSecurityPolicy::allowEval):
+        (WebCore::ContentSecurityPolicy::reportViolation):
+        (WebCore::ContentSecurityPolicy::logToConsole):
+            No longer piping a stack trace through ContentSecurityPolicy down to
+            the point where it would be logged. Instead, we simply generate the
+            stack trace just before logging it, and only pass it to
+            addConsoleMessage if it's non-empty.
+        * page/ContentSecurityPolicy.h:
+        (WebCore):
+        * page/DOMSecurityPolicy.cpp:
+        (WebCore::DOMSecurityPolicy::allowsEval):
+            Dropping stack trace from call to ContentSecurityPolicy::allowEval.
+
 2012-08-27  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: persist the state of glue records to parents button of Timeline panel
