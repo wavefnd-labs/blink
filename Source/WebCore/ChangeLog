@@ -1,3 +1,31 @@
+2012-08-28  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Checkerboard observed after pinch zooming page with AC layers
+        https://bugs.webkit.org/show_bug.cgi?id=95192
+
+        PR 199177
+        The LayerTiler was passing transformed ("pixel") coordinates to
+        GraphicsLayerClient::contentsVisible(), and that method expects
+        untransformed ("document") coordinates. When the scale was not 1.0,
+        this was comparing apples and oranges.
+
+        Fixed by packaging up the transformation code into a reusable method
+        and mapping the "pixel" tile rect to "document" coordinates before the
+        visibility testing.
+
+        Reviewed by Antonio Gomes.
+
+        Not currently testable by the BlackBerry testing infrastructure.
+
+        * platform/graphics/blackberry/LayerTiler.cpp:
+        (WebCore::LayerTiler::shouldPerformRenderJob):
+        * platform/graphics/blackberry/LayerWebKitThread.cpp:
+        (WebCore::LayerWebKitThread::paintContents):
+        (WebCore::LayerWebKitThread::mapFromTransformed):
+        (WebCore):
+        * platform/graphics/blackberry/LayerWebKitThread.h:
+        (LayerWebKitThread):
+
 2012-08-28  Parth Patel  <parpatel@rim.com>
 
         [BlackBerry] Removing unnecessary include of Class BlackBerryPlatformClient
