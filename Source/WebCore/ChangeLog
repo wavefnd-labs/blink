@@ -1,3 +1,44 @@
+2012-08-28  Alpha Lam  <hclam@chromium.org>
+
+        Report frame bytes by platform ImageDecoder
+        https://bugs.webkit.org/show_bug.cgi?id=94241
+
+        Reviewed by James Robinson.
+
+        Decoded frame bytes should be reported by the platform ImageSource and
+        ImageDecoder. BitmapImage used to guess system memory used by a frame
+        but this is no longer true if a frame is backed by an accelerated
+        surface or defer-decoded.
+
+        Adds ImageSource::frameBytesAtIndex and ImageDecoder::frameBytesAtIndex
+        such that platform can report memory usage correctly.
+
+        No new tests. Refactoring without change of behavior.
+        Tested on Chromium port with pixel tests without any crash or failure.
+
+        * platform/graphics/BitmapImage.cpp:
+        (WebCore::BitmapImage::destroyDecodedData):
+        (WebCore::BitmapImage::destroyDecodedDataIfNecessary):
+        (WebCore::BitmapImage::destroyMetadataAndNotify):
+        (WebCore::BitmapImage::cacheFrame):
+        (WebCore::BitmapImage::dataChanged):
+        * platform/graphics/BitmapImage.h:
+        (WebCore::FrameData::FrameData):
+        (FrameData):
+        (BitmapImage):
+        * platform/graphics/ImageSource.cpp:
+        (WebCore::ImageSource::frameBytesAtIndex):
+        (WebCore):
+        * platform/graphics/ImageSource.h:
+        * platform/graphics/cg/ImageSourceCG.cpp:
+        (WebCore::ImageSource::frameBytesAtIndex):
+        (WebCore):
+        * platform/image-decoders/ImageDecoder.cpp:
+        (WebCore::ImageDecoder::frameBytesAtIndex):
+        (WebCore):
+        * platform/image-decoders/ImageDecoder.h:
+        (ImageDecoder):
+
 2012-08-28  Gustavo Noronha Silva  <gns@gnome.org>
 
         [GTK] Does not regenerate CSS-related sources when configuration changes
