@@ -1,3 +1,40 @@
+2012-08-27  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [ShadowDOM] Shadow elements in the input element should be focusable.
+        https://bugs.webkit.org/show_bug.cgi?id=95169
+
+        Reviewed by Kent Tamura.
+
+        This patch introduces new virtual function HTMLElement::hasCustomFocusLogic()
+        to allow input type implementations to use shadow element with focus
+        navigation.
+
+        No new tests. This patch doesn't change behavior.
+
+        (WebCore::HTMLElement::hasCustomFocusLogic): Added to return false as
+        default value.
+        * html/HTMLElement.h:
+        (HTMLElement): Added a declaration of hasCustomFocusLogic().
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::hasCustomFocusLogic): Added to call InputType::hasCustomFocusLogic(),
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Added a declaration of hasCustomFocusLogic().
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::hasCustomFocusLogic): Added to return true for "audio" and "video" elements.
+        * html/HTMLMediaElement.h:
+        (HTMLMediaElement): Add a declaration of hasCustomFocusLogic()
+        * html/HTMLTextAreaElement.cpp:
+        (WebCore::HTMLTextAreaElement::hasCustomFocusLogic): Added to return true.
+        * html/HTMLTextAreaElement.h:
+        (HTMLTextAreaElement): Add a declaration of hasCustomFocusLogic().
+        * page/FocusController.cpp:
+        (WebCore::hasCustomFocusLogic): Changed to call HTMLElement::hasCustomFocusLogic()
+        rather than checking tag names.
+        * html/InputType.cpp:
+        (WebCore::InputType::hasCustomFocusLogic): Added to return true as default value.
+        * html/InputType.h:
+        (InputType): Added a declaration of hasCustomFocusLogic().
+
 2012-08-27  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=94848
