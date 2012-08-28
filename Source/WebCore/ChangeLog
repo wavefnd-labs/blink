@@ -1,3 +1,51 @@
+2012-08-28  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Rename some flow thread methods and region methods/members to make them
+        more accurate and also change some function signatures so they can be used by RenderMultiColumnSet.
+        https://bugs.webkit.org/show_bug.cgi?id=95213
+        
+        Reviewed by Simon Fraser.
+
+        Rename regionRect()/setRegionRect()/m_regionRect on RenderRegion to be flowThreadPortionRect instead.
+        The term regionRect() makes it sound like you're painting a rect in the region's coordinate space,
+        but regionRect() actually represents the portion of the flow thread in the flow thread's coordinate space
+        that this region "owns."
+        
+        Also fix paintIntoRegion and hitTestRegion to take specific flow thread portion rects to paint. This
+        allows a region set to paint a portion of a portion, i.e., if a multicolumn set owns part of the flow thread
+        it has to be able to further break up that part into individual columns and issue multiple paint calls, one
+        for each column.
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::layout):
+        (WebCore::RenderFlowThread::paintFlowThreadPortionInRegion):
+        (WebCore::RenderFlowThread::hitTestFlowThreadPortionInRegion):
+        (WebCore::RenderFlowThread::repaintRectangleInRegions):
+        (WebCore::RenderFlowThread::renderRegionForLine):
+        (WebCore::RenderFlowThread::regionLogicalTopForLine):
+        (WebCore::RenderFlowThread::regionLogicalWidthForLine):
+        (WebCore::RenderFlowThread::regionLogicalHeightForLine):
+        (WebCore::RenderFlowThread::regionRemainingLogicalHeightForLine):
+        (WebCore::RenderFlowThread::mapFromFlowToRegion):
+        (WebCore::RenderFlowThread::contentLogicalLeftOfFirstRegion):
+        (WebCore::RenderFlowThread::computeOverflowStateForRegions):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::columnCount):
+        (WebCore::RenderMultiColumnSet::paintColumnContents):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::flowThreadPortionOverflowRect):
+        (WebCore::RenderRegion::paintReplaced):
+        (WebCore::RenderRegion::nodeAtPoint):
+        (WebCore::RenderRegion::layout):
+        (WebCore::RenderRegion::offsetFromLogicalTopOfFirstPage):
+        * rendering/RenderRegion.h:
+        (WebCore::RenderRegion::setFlowThreadPortionRect):
+        (WebCore::RenderRegion::flowThreadPortionRect):
+        (RenderRegion):
+        * rendering/RenderRegionSet.cpp:
+        (WebCore::RenderRegionSet::expandToEncompassFlowThreadContentsIfNeeded):
+
 2012-08-28  Alpha Lam  <hclam@chromium.org>
 
         Report frame bytes by platform ImageDecoder
