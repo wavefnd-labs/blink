@@ -1,3 +1,23 @@
+2012-08-27  Jeffrey Pfau  <jpfau@apple.com>
+
+        Make shared workers respect third-party storage blocking setting
+        https://bugs.webkit.org/show_bug.cgi?id=94559
+
+        Reviewed by Adam Barth.
+
+        Shared workers can fundamentally leak information between pages in
+        different contexts if the workers can be accessed from a third-party
+        context. Thus, if third-party storage blocking is enabled, shared
+        workers should be disallowed in third-party contexts.
+
+        Tests: http/tests/security/cross-origin-shared-worker-allowed.html
+               http/tests/security/cross-origin-shared-worker.html
+
+        * page/SecurityOrigin.h: Add canAccessSharedWorkers function
+        (WebCore::SecurityOrigin::canAccessSharedWorkers):
+        * workers/SharedWorker.cpp:
+        (WebCore::SharedWorker::create): Ensure that we can access shared workers before creating the worker.
+
 2012-07-10  Robert Hogan  <robert@webkit.org>
 
         REGRESSION (r94492): Unstable layout of static block inside text-align: center div
