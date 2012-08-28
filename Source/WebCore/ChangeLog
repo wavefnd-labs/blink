@@ -1,3 +1,40 @@
+2012-08-28  Koji Ishii  <kojiishi@gmail.com>
+
+        OPENTYPE_VERTICAL support for Chromium Win
+        https://bugs.webkit.org/show_bug.cgi?id=94822
+
+        Reviewed by Tony Chang.
+
+        To fix bug 51450 - Glyphs in vertical text tests are rotated 90 degrees clockwise on Chromium Windows,
+        this patch adds support of OPENTYPE_VERTICAL feature for Chromium Windows.
+        Since enabling OPENTYPE_VERTICAL feature would require rather a big number of tests to rebaseline,
+        the actual fix is separated into this patch, and the feature will be enabled in bug 51450,
+        so that it is easier to revert on any perf regressions, as suggested by Tony in comment #50 of bug 51450.
+
+        All changes in this patch are behind #if ENABLE(OPENTYPE_VERTICAL) and therefore no tests are included in this patch.
+        All tests in fast/writing-modes currently skipped will be enabled in bug 51450.
+
+        * WebCore.gyp/WebCore.gyp: Added platform/graphics/opentype/OpenType*.
+        * WebCore.gypi: Ditto.
+        * platform/graphics/FontCache.h: SKia uses uint32_t as FontFileKey.
+        * platform/graphics/GlyphPageTreeNode.cpp:
+        (WebCore::fill): Replace vertical alternate glyphs if vertical flow.
+        * platform/graphics/SimpleFontData.cpp: Added m_verticalData.
+        (WebCore::SimpleFontData::SimpleFontData):
+        * platform/graphics/SimpleFontData.h:
+        (WebCore::SimpleFontData::verticalData):
+        (SimpleFontData):
+        (WebCore::SimpleFontData::widthForGlyph):
+        * platform/graphics/chromium/FontChromiumWin.cpp:
+        (WebCore::Font::drawGlyphs): Draw glyphs verticaly if font->verticalData().
+        * platform/graphics/chromium/FontPlatformDataChromiumWin.cpp:
+        (WebCore::FontPlatformData::verticalData): Added.
+        (WebCore):
+        (WebCore::FontPlatformData::openTypeTable): Added.
+        * platform/graphics/chromium/FontPlatformDataChromiumWin.h:
+        (WebCore):
+        (FontPlatformData): Added verticalData() and openTypeTable().
+
 2012-08-28  Andy Estes  <aestes@apple.com>
 
         Add header guards to WebTileCacheLayer.h.
