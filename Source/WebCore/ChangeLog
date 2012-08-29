@@ -1,3 +1,69 @@
+2012-08-29  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Rename methods to prepare for proper pagination of columns
+        https://bugs.webkit.org/show_bug.cgi?id=95375
+
+        Reviewed by Simon Fraser.
+
+        This patch is doing some renaming and refactoring to prepare for proper pagination of columns. Most of the renames
+        involve changing RenderFlowThread functions to exactly match the names of their RenderBlock callers. These names
+        end up being more accurate once the top of a page and remaining height on a page no longer have a 1:1 mapping to
+        the RenderRegion's dimensions.
+        
+        The renames/additions include:
+            renderRegionForLine -> regionAtBlockOffset
+            Justification: The block method is already called regionAtBlockOffset. No lines are involved, so line was
+            never the correct term to be passing in.
+            
+            regionLogicalXXXForLine -> pageLogicalXXXForOffset
+            Justification: Matches the RenderBlock callers, and it's more accurate to talk in terms of "pages" now that
+            we have RenderRegionSets that can contain multiple "pages" in a single region.
+            
+            logicalWidthForFlowThreadContent/logicalHeightForFlowThreadContent -> pageLogicalWidth/Height.
+            Justification: Makes it more clear we're talking about the width and height of a single page/column rather
+            than the width and height of the region itself.
+            
+            logicalHeightOfAllFlowThreadContent
+            This method is new and represents the total flow thread logical height that is consumed by the region.
+            It has to be distinguished from the pageLogicalHeight for a region since sets can have multiple pages/columns.
+
+        Note with this patch we're essentially adopting the convention used by all of the pagination code besides regions
+        of referring to anything we paginate as a "page." I continue to believe this is the simplest way to talk about
+        these objects in code that is generically dealing with all three (like the breaking code in RenderBlock).
+ 
+        Eventually we might adopt the fragment terminology in the latest CSS draft, in which case 
+        RenderRegion would become RenderFragment, RenderFlowThread would become RenderFragmentedBlock, and uses of
+        the generic "page" would become "fragment" instead, but we'll wait for that draft's terminology to stabilize first
+        before switching away from the current names.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::hasNextPage):
+        (WebCore::RenderBlock::pageLogicalTopForOffset):
+        (WebCore::RenderBlock::pageLogicalHeightForOffset):
+        (WebCore::RenderBlock::pageRemainingLogicalHeightForOffset):
+        (WebCore::RenderBlock::regionAtBlockOffset):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::layout):
+        (WebCore::RenderFlowThread::computeLogicalWidth):
+        (WebCore::RenderFlowThread::computeLogicalHeight):
+        (WebCore::RenderFlowThread::regionAtBlockOffset):
+        (WebCore::RenderFlowThread::pageLogicalTopForOffset):
+        (WebCore::RenderFlowThread::pageLogicalWidthForOffset):
+        (WebCore::RenderFlowThread::pageLogicalHeightForOffset):
+        (WebCore::RenderFlowThread::pageRemainingLogicalHeightForOffset):
+        (WebCore::RenderFlowThread::mapFromFlowToRegion):
+        (WebCore::RenderFlowThread::setRegionRangeForBox):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderMultiColumnSet.h:
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::pageLogicalWidth):
+        (WebCore::RenderRegion::pageLogicalHeight):
+        (WebCore):
+        (WebCore::RenderRegion::logicalHeightOfAllFlowThreadContent):
+        (WebCore::RenderRegion::layout):
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+
 2012-08-29  David Grogan  <dgrogan@chromium.org>
 
         IndexedDB: Throw TypeError for invalid version parameters
