@@ -1,3 +1,50 @@
+2012-08-28  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Implement column contents painting.
+        https://bugs.webkit.org/show_bug.cgi?id=95251
+
+        Reviewed by Simon Fraser.
+
+        This patch implements paintColumnContents for the new multicolumn blocks. There are a number of
+        improvements made over the current multi-column implementation. They include the fact that left
+        and right columns will now be unclipped, so contents of columns can actually spill out of the block now.
+        Outlines now also work properly. The contents of the first column and last column can also now overflow
+        visually out of the top and bottom of those columns respectively.
+
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::flowThreadPortionRectAt):
+        This method returns the exact portion of the flow thread that matches the column dimensions.
+        The width and height are the column width and height. It is equivalent to RenderRegion::flowThreadPortionRect,
+        but is applied only for a specific column in the set.
+
+        (WebCore::RenderMultiColumnSet::flowThreadPortionOverflowRect):
+        This method expands the flowThreadPortionRect to unclip the edges of left and right columns, the top and
+        bottom edges of first and last columns, and it also expands the painting to go into half of the column
+        gap. It is analogous to RenderRegion::flowThreadPortionOverflowRect, but it's doing the right thing
+        for each individual column.
+
+        (WebCore::RenderMultiColumnSet::paintColumnContents):
+        The implementation of column contents painting. Each column is iterated over, and the two rects above
+        are computed and passed in to RenderFlowThread::paintFlowThreadPortionInRegion. This code does the right
+        thing with offsets and clipping when handed these two rects and handles all of the rest.
+
+        * rendering/RenderMultiColumnSet.h:
+        Declare the new functions that return the flow thread portion rects.
+
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::flowThreadPortionOverflowRect):
+        (WebCore):
+        (WebCore::RenderRegion::overflowRectForFlowThreadPortion):
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        * rendering/RenderRegionSet.cpp:
+        Refactor this so that it can be invoked by column sets and operate on the first and last columns instead
+        of only being tied to the first and last regions.
+
+        (WebCore::RenderRegionSet::expandToEncompassFlowThreadContentsIfNeeded):
+        Fix a bug here where the flowThread.y() should not have been subtracted. We're in local flow thread
+        coordinates.
+
 2012-08-29  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r126972.
