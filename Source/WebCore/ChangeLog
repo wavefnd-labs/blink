@@ -1,3 +1,63 @@
+2012-08-29  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Shaders] Use CSS transform parsing code within CSS Shader
+        https://bugs.webkit.org/show_bug.cgi?id=71401
+
+        Reviewed by Dean Jackson.
+
+        Added computed style for the transform parameters of the custom() filter function.
+        Implemented the FECustomFilter bindings needed to push the value to an actual matrix for the CSS Shader.
+        
+        Note that transform parameters animations support will come in a different patch: 
+        https://bugs.webkit.org/show_bug.cgi?id=94980.
+
+        Test: css3/filters/custom/effect-custom-transform-parameters.html
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::matrixTransformValue): Extracted code from computedTransform into a function, so that we
+        can reuse it.
+        (WebCore):
+        (WebCore::computedTransform):
+        (WebCore::valueForCustomFilterNumberParameter): Made all the custom filter related functions static to match
+        most of the other functions in this file.
+        (WebCore::valueForCustomFilterTransformParameter):
+        (WebCore::valueForCustomFilterParameter): 
+        (WebCore::CSSComputedStyleDeclaration::valueForFilter): Needed the object size to compute the transform.
+        (WebCore::CSSComputedStyleDeclaration::valueForShadow): Added the const keyword.
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue): Passed in the object to the valueForFilter.
+        * css/CSSComputedStyleDeclaration.h:
+        (WebCore):
+        (CSSComputedStyleDeclaration):
+        * css/StyleResolver.cpp:
+        (StyleResolver::parseCustomFilterTransformParameter):
+        (StyleResolver::parseCustomFilterParameter):
+        (StyleResolver::parseCustomFilterParameterList): 
+        * css/StyleResolver.h:
+        (StyleResolver):
+        * platform/graphics/filters/CustomFilterParameter.h:
+        * platform/graphics/filters/CustomFilterTransformParameter.h: Filter parameter wrapper for the FilterOperations.
+        (WebCore):
+        (CustomFilterTransformParameter):
+        (WebCore::CustomFilterTransformParameter::create):
+        (WebCore::CustomFilterTransformParameter::blend): Animations will come in future patch.
+        (WebCore::CustomFilterTransformParameter::operator==):
+        (WebCore::CustomFilterTransformParameter::applyTransform):
+        (WebCore::CustomFilterTransformParameter::operations):
+        (WebCore::CustomFilterTransformParameter::setOperations):
+        (WebCore::CustomFilterTransformParameter::CustomFilterTransformParameter):
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::bindProgramTransformParameter):
+        (WebCore):
+        (WebCore::FECustomFilter::bindProgramParameters):
+        * platform/graphics/filters/FECustomFilter.h:
+        (WebCore):
+        (FECustomFilter):
+
 2012-08-29  Rafael Brandao  <rafael.lobo@openbossa.org>
 
         Use Animation::IterationCountInfinite instead of -1 when setting iteration count
