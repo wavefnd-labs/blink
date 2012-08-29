@@ -1,3 +1,31 @@
+2012-08-29  Jessie Berlin  <jberlin@apple.com>
+
+        run-bindings-tests failing on Apple Mountain Lion Testers.
+        https://bugs.webkit.org/show_bug.cgi?id=95354
+
+        Reviewed by Eric Seidel.
+
+        The binding tests were expecting incorrect results on Mac. The versions using the @property
+        syntax are correct for Leopard and above. CodeGeneratorObjC.pm was determining which syntax
+        to use based on the value of MACOSX_DEPLOYMENT_TARGET, which might not be set in the
+        environment the tests get run in but is correctly set by xcodebuild.
+
+        * bindings/scripts/CodeGeneratorObjC.pm:
+        (GenerateHeader):
+        Remove the code to support Tiger and earlier and the reliance on MACOSX_DEPLOYMENT_TARGET.
+        * bindings/scripts/test/ObjC/DOMTestActiveDOMObject.h:
+        Update the expectations to expect the @property syntax (done with --reset-results).
+        * bindings/scripts/test/ObjC/DOMTestEventConstructor.h:
+        Ditto.
+        * bindings/scripts/test/ObjC/DOMTestException.h:
+        Ditto.
+        * bindings/scripts/test/ObjC/DOMTestInterface.h:
+        Ditto.
+        * bindings/scripts/test/ObjC/DOMTestObj.h:
+        Ditto.
+        * bindings/scripts/test/ObjC/DOMTestSerializedScriptValueInterface.h:
+        Ditto.
+
 2012-08-29  Vivek Galatage  <vivekgalatage@gmail.com>
 
         Web Inspector: Refactor InspectorFrontendClientLocal to remove ScriptState as member
