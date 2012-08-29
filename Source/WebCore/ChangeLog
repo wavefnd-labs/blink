@@ -1,3 +1,31 @@
+2012-08-28  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Make HTMLInputElement::blur()/focus() override-able by input type
+        https://bugs.webkit.org/show_bug.cgi?id=95279
+
+        Reviewed by Hajime Morrita.
+
+        This patch allows HTMLInputElement::focus() and blur() functions to be
+        override-able.
+
+        This patch is part of Shift+Tab focus navigation change for multiple
+        field time input UI, bug 95168.
+
+        No new tests. This patch doesn't change behavior.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::blur): Added to call InputType::blur().
+        (WebCore::HTMLInputElement::defaultBlur): Added for default implementation of blur().
+        (WebCore::HTMLInputElement::defaultFocus): Added for default implementation of focus().
+        (WebCore::HTMLInputElement::focus): Added to call InputType::focus()
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Added declarations of blur(), defaultBlur(), defaultFocus() and focus().
+        * html/InputType.cpp:
+        (WebCore::InputType::blur): Added to call HTMLInputElement::defaultBlur() as default implementation.
+        (WebCore::InputType::focus):  Added to call HTMLInputElement::defaultFocus() as default implementation.
+        * html/InputType.h:
+        (InputType): Added declarations of blur(), and focus().
+
 2012-08-28  Geoffrey Garen  <ggaren@apple.com>
 
         Added JSScope::objectInScope(), and refactored callers to use it
