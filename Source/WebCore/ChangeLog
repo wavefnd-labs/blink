@@ -1,3 +1,36 @@
+2012-08-28  Tom Sepez  <tsepez@chromium.org>
+
+        CSP doesn't turn off eval, etc. in Web Workers
+        https://bugs.webkit.org/show_bug.cgi?id=93392
+
+        Reviewed by Adam Barth.
+
+        On the JSC side, the blocking of eval() in workers was handled correctly, so it is
+        a matter of adding calls check the policy for setTimeout and SetInterval.  On the v8
+        side, it is a matter of handling the above, plus eval().
+
+        On the v8 side, the v8 context isn't available when the callers want to disable eval.
+        Rather than creating it earlier, which is problematic, remember the setting in the
+        WorkerContextExecutionProxy and apply before the next call to its evaluate() method.
+
+        Tests: http/tests/security/contentSecurityPolicy/worker-eval-blocked.html
+               http/tests/security/contentSecurityPolicy/worker-function-function-blocked.html
+
+        * bindings/js/JSWorkerContextCustom.cpp:
+        (WebCore::JSWorkerContext::setTimeout):
+        (WebCore::JSWorkerContext::setInterval):
+        * bindings/v8/WorkerContextExecutionProxy.cpp:
+        (WebCore::WorkerContextExecutionProxy::WorkerContextExecutionProxy):
+        (WebCore::WorkerContextExecutionProxy::evaluate):
+        (WebCore::WorkerContextExecutionProxy::setEvalAllowed):
+        (WebCore):
+        * bindings/v8/WorkerContextExecutionProxy.h:
+        (WorkerContextExecutionProxy):
+        * bindings/v8/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::disableEval):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::SetTimeoutOrInterval):
+
 2012-08-28  Aaron Colwell  <acolwell@chromium.org>
 
         Make MediaSource event dispatch asynchronous.
