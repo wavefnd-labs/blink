@@ -1,3 +1,77 @@
+2012-08-29  Anna Cavender  <annacc@chromium.org>
+
+        Create a toggle button for closed captions.
+        https://bugs.webkit.org/show_bug.cgi?id=94395
+
+        Reviewed by Eric Carlson.
+
+        This patch will create a button that toggles any captions or subtitles on or off.
+
+        Test: media/video-controls-captions.html
+
+        * css/mediaControlsChromium.css:
+        (audio::-webkit-media-controls-toggle-closed-captions-button, video::-webkit-media-controls-toggle-closed-captions-button):
+        New style for new button.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement):
+        Initialize new variable for keeping track of user (button) disabled captions.
+
+        (WebCore::HTMLMediaElement::loadTimerFired):
+        Rename configureNewTextTracks() to configureTextTracks().
+
+        (WebCore::HTMLMediaElement::prepareForLoad):
+        Do not set closedCaptionsVisible to false, we should instead honor the
+        checks for default out-of-band tracks.
+
+        (WebCore::HTMLMediaElement::textTrackModeChanged):
+        Rename configureNewTextTracks() to configureTextTracks().
+
+        (WebCore::HTMLMediaElement::userIsInterestedInThisTrackKind):
+        Add checks for when user has requested to see or not see captions.
+
+        (WebCore::HTMLMediaElement::configureTextTracks):
+        Rename configureNewTextTracks() to configureTextTracks().
+
+        (WebCore::HTMLMediaElement::hasClosedCaptions):
+        Return true if we have any caption or subtitle text tracks.
+
+        (WebCore::HTMLMediaElement::setClosedCaptionsVisible):
+        Update the text track display and the closed captions button when the
+        closed captions button is toggled.
+
+        (WebCore::HTMLMediaElement::configureTextTrackDisplay):
+        If the visibility of any text tracks has changed, update the display and
+        the controls.
+
+        (WebCore::HTMLMediaElement::updateClosedCaptionsControls):
+        New function that updates both the text track display and the closed
+        captions button.
+
+        * html/HTMLMediaElement.h:
+        (HTMLMediaElement):
+        New function updateClosedCaptionsControls()
+
+        Adding the button:
+        * html/shadow/MediaControlRootElementChromium.cpp:
+        (WebCore::MediaControlRootElementChromium::MediaControlRootElementChromium):
+        (WebCore::MediaControlRootElementChromium::initializeControls):
+        (WebCore::MediaControlRootElementChromium::setMediaController):
+        (WebCore::MediaControlRootElementChromium::reset):
+        (WebCore::MediaControlRootElementChromium::reportedError):
+        (WebCore::MediaControlRootElementChromium::changedClosedCaptionsVisibility):
+        (WebCore::MediaControlRootElementChromium::createTextTrackDisplay):
+        * html/shadow/MediaControlRootElementChromium.h:
+        (WebCore):
+        (MediaControlRootElementChromium):
+
+        Ensure that Linux and Windows render themes will support closed captions:
+        * rendering/RenderThemeChromiumSkia.cpp:
+        (WebCore):
+        (WebCore::supportsClosedCaptioning):
+        * rendering/RenderThemeChromiumSkia.h:
+        (RenderThemeChromiumSkia):
+
 2012-08-29  Jessie Berlin  <jberlin@apple.com>
 
         run-bindings-tests failing on Apple Mountain Lion Testers.
