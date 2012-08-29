@@ -1,3 +1,33 @@
+2012-08-29  Martin Robinson  <mrobinson@igalia.com>
+
+        [TexMap][cairo] Add GC3D::RenderToCurrentGLContext support
+        https://bugs.webkit.org/show_bug.cgi?id=92441
+
+        Reviewed by Noam Rosenthal.
+
+        Add a RenderToCurrentGLContext for the Cairo GraphicsContext3D. This will allow
+        TextureMapperGL to be rewritten on top of GraphicsContext3D by exposing the GC3D
+        interface for the widget's GL context.
+
+        No new tests. This will be covered by the existing AC tests after the patch on
+        bug 78672 lands.
+
+        * platform/graphics/cairo/GraphicsContext3DCairo.cpp:
+        (WebCore::GraphicsContext3D::GraphicsContext3D): Only create the offscreen
+        rendering buffers if we are rendering offscreen. Pass the rendering style to
+        the private data factory.
+        (WebCore::GraphicsContext3D::~GraphicsContext3D): Only destroy the offscreen
+        rendering buffers if we are rendering offscreen.
+        * platform/graphics/cairo/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::create): Pass the rendering style through.
+        (WebCore::GraphicsContext3DPrivate::GraphicsContext3DPrivate): If we are using
+        a "current GL context" rendering style, we don't need to create a GL context.
+        We'll always just use the one that's currently active.
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper): Assert that we only
+        do this with the offscreen rendering style.
+        * platform/graphics/cairo/GraphicsContext3DPrivate.h: Update method definitions
+        and expose the rendering style member GraphicsContext3D.
+
 2012-08-29  Martin Leutelt  <martin.leutelt@basyskom.com>
 
         [Qt] Implement CompositeDifference
