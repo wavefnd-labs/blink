@@ -1,3 +1,27 @@
+2012-08-29  Eugene Klyuchnikov  <eustas.bug@gmail.com>
+
+        Web Inspector: Timeline: avoid "IPC message too big" on save/load
+        https://bugs.webkit.org/show_bug.cgi?id=91991
+
+        Reviewed by Alexander Pavlov.
+
+        Motivation: Now timeline tries to save all data with one chunk.
+        Sometimes this causes "IPC message too big" error.
+
+        Solution: Reuse Profiles/Heap save/load code.
+
+        * inspector/front-end/FileUtils.js:
+        (WebInspector.OutputStream): Moved from HeapSnapshotView.js
+        (WebInspector.findBalancedCurlyBrackets): Moved from HeapSnapshotLoader.js
+        (WebInspector.ChunkedXHRReader): Added.
+        (WebInspector.ChunkedFileWriter): Moved from HeapSnapshotView.js
+        * inspector/front-end/HeapSnapshotLoader.js: Utility method moved to FileUtils.js
+        * inspector/front-end/HeapSnapshotView.js: IO specific classes moved to FileUtils.js
+        * inspector/front-end/HeapSnapshotWorker.js: Added dependency to FileUtils.js
+        * inspector/front-end/TimelineModel.js: Adopted chunked IO API.
+        (WebInspector.TimelineModelLoader): Class for chunked deserialization.
+        (WebInspector.TimelineModelWriteToFileDelegate): Chunked serializer.
+
 2012-08-29  David Hyatt  <hyatt@apple.com>
 
         [New Multicolumn] Implement hit testing for columns.
