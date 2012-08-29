@@ -1,3 +1,49 @@
+2012-08-28  David Reveman  <reveman@chromium.org>
+
+        [Chromium] Scheduler will never process a commit until it receives a vsync tick.
+        https://bugs.webkit.org/show_bug.cgi?id=94721
+
+        Reviewed by James Robinson.
+
+        Add updateResourcesComplete callback to CCScheduler and use this to
+        indicate completion of texture updates instead of calling
+        CCSchedulerClient::hasMoreResourceUpdates when receiving a vsync tick.
+
+        Unit tests: CCTextureUpdateControllerTest.UpdateMoreTextures
+                    CCTextureUpdateControllerTest.HasMoreUpdates
+                    CCTextureUpdateControllerTest.UpdatesCompleteInFiniteTime
+
+        * platform/graphics/chromium/cc/CCScheduler.cpp:
+        (WebCore::CCScheduler::CCScheduler):
+        (WebCore::CCScheduler::beginFrameComplete):
+        (WebCore::CCScheduler::vsyncTick):
+        (WebCore::CCScheduler::updateResourcesComplete):
+        (WebCore):
+        (WebCore::CCScheduler::processScheduledActions):
+        * platform/graphics/chromium/cc/CCScheduler.h:
+        (CCSchedulerClient):
+        (CCScheduler):
+        * platform/graphics/chromium/cc/CCTextureUpdateController.cpp:
+        (WebCore::CCTextureUpdateController::CCTextureUpdateController):
+        (WebCore::CCTextureUpdateController::updateMoreTextures):
+        (WebCore::CCTextureUpdateController::discardUploads):
+        (WebCore::CCTextureUpdateController::onTimerFired):
+        (WebCore::CCTextureUpdateController::updateMoreTexturesIfEnoughTimeRemaining):
+        * platform/graphics/chromium/cc/CCTextureUpdateController.h:
+        (CCTextureUpdateControllerClient):
+        (WebCore::CCTextureUpdateControllerClient::~CCTextureUpdateControllerClient):
+        (WebCore):
+        (WebCore::CCTextureUpdateController::create):
+        (CCTextureUpdateController):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::didLoseContextOnImplThread):
+        (WebCore::CCThreadProxy::beginFrameCompleteOnImplThread):
+        (WebCore::CCThreadProxy::scheduledActionCommit):
+        (WebCore::CCThreadProxy::updateTexturesCompleted):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (WebCore):
+
 2012-08-28  John Bates  <jbates@google.com>
 
         [Chromium] Update some compositor trace events
