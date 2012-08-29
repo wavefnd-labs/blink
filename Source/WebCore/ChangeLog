@@ -1,3 +1,55 @@
+2012-08-28  Andrei Bucur  <abucur@adobe.com>
+
+        Layout Test fast/repaint/japanese-rl-selection-repaint-in-regions.html is failing after r126304
+        https://bugs.webkit.org/show_bug.cgi?id=94730
+
+        Reviewed by Adam Barth.
+
+        Having an intermediary node between the named flow renderers and the view may introduce subtle bugs that are hard to track. Also it doesn't fix
+        the pointless destruction of a RenderNamedFlowThread in some special cases (e.g. region->detach, destroy flow thread, region->attach, recreate flow
+        thread).
+        This patch proposes a new way of lazily destroying the renderers for NULL named flows, at layout time. When a renderer has no content nodes or regions
+        attached, its named flow is considered to be in the NULL state. When starting a layout process it is a good time to go through the renderers of the
+        NULL named flows and destroy them.
+
+        Tests: No functional change, the old tests should pass without issues.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/WebKitNamedFlow.cpp:
+        (WebCore::WebKitNamedFlow::getRegionsByContent):
+        (WebCore::WebKitNamedFlow::getRegions):
+        (WebCore::WebKitNamedFlow::setRenderer):
+        * rendering/FlowThreadController.cpp:
+        (WebCore::FlowThreadController::FlowThreadController):
+        (WebCore::FlowThreadController::ensureRenderFlowThreadWithName):
+        (WebCore::FlowThreadController::layoutRenderNamedFlowThreads):
+        * rendering/FlowThreadController.h:
+        (WebCore):
+        (FlowThreadController):
+        * rendering/RenderFlowThreadContainer.cpp: Removed.
+        * rendering/RenderFlowThreadContainer.h: Removed.
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::RenderNamedFlowThread):
+        (WebCore::RenderNamedFlowThread::~RenderNamedFlowThread):
+        (WebCore::RenderNamedFlowThread::addRegionToThread):
+        (WebCore::RenderNamedFlowThread::removeRegionFromThread):
+        (WebCore::RenderNamedFlowThread::registerNamedFlowContentNode):
+        (WebCore::RenderNamedFlowThread::unregisterNamedFlowContentNode):
+        (WebCore::RenderNamedFlowThread::setMarkForDestruction):
+        (WebCore):
+        (WebCore::RenderNamedFlowThread::resetMarkForDestruction):
+        (WebCore::RenderNamedFlowThread::isMarkedForDestruction):
+        * rendering/RenderNamedFlowThread.h:
+        (RenderNamedFlowThread):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::markContainingBlocksForLayout):
+        * rendering/RenderObject.h:
+
 2012-08-28  Kenichi Ishibashi  <bashi@chromium.org>
 
         style->fontMetrics() should be available when setting line-height
