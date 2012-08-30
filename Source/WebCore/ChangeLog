@@ -1,3 +1,150 @@
+2012-08-29  Dirk Schulze  <krit@webkit.org>
+
+        Refactor WrapShape to Shape/BasicShape
+        https://bugs.webkit.org/show_bug.cgi?id=95411
+
+        Reviewed by Andreas Kling.
+
+        The wrap shapes are currently specified by CSS3 Exclusions but are useful for other
+        CSS related proposals like CSS Masking as well. This is the first patch on a chain
+        of patches to refactor WrapShape to BasicShape. With this patch all relevant files
+        get renamend and the build systems updated. The classes will be renamend in a second
+        step.
+
+        Just renaming of files. No new tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/BasicShapeFunctions.cpp: Renamed from Source/WebCore/css/WrapShapeFunctions.cpp.
+        (WebCore):
+        (WebCore::valueForWrapShape):
+        (WebCore::convertToLength):
+        (WebCore::wrapShapeForValue):
+        * css/BasicShapeFunctions.h: Renamed from Source/WebCore/css/WrapShapeFunctions.h.
+        (WebCore):
+        * css/CSSAllInOne.cpp:
+        * css/CSSBasicShapes.cpp: Renamed from Source/WebCore/css/CSSWrapShapes.cpp.
+        (WebCore):
+        (WebCore::CSSWrapShapeRectangle::cssText):
+        (WebCore::CSSWrapShapeCircle::cssText):
+        (WebCore::CSSWrapShapeEllipse::cssText):
+        (WebCore::CSSWrapShapePolygon::cssText):
+        * css/CSSBasicShapes.h: Renamed from Source/WebCore/css/CSSWrapShapes.h.
+        (WebCore):
+        (CSSWrapShape):
+        (WebCore::CSSWrapShape::~CSSWrapShape):
+        (WebCore::CSSWrapShape::CSSWrapShape):
+        (CSSWrapShapeRectangle):
+        (WebCore::CSSWrapShapeRectangle::create):
+        (WebCore::CSSWrapShapeRectangle::x):
+        (WebCore::CSSWrapShapeRectangle::y):
+        (WebCore::CSSWrapShapeRectangle::width):
+        (WebCore::CSSWrapShapeRectangle::height):
+        (WebCore::CSSWrapShapeRectangle::radiusX):
+        (WebCore::CSSWrapShapeRectangle::radiusY):
+        (WebCore::CSSWrapShapeRectangle::setX):
+        (WebCore::CSSWrapShapeRectangle::setY):
+        (WebCore::CSSWrapShapeRectangle::setWidth):
+        (WebCore::CSSWrapShapeRectangle::setHeight):
+        (WebCore::CSSWrapShapeRectangle::setRadiusX):
+        (WebCore::CSSWrapShapeRectangle::setRadiusY):
+        (WebCore::CSSWrapShapeRectangle::type):
+        (WebCore::CSSWrapShapeRectangle::CSSWrapShapeRectangle):
+        (CSSWrapShapeCircle):
+        (WebCore::CSSWrapShapeCircle::create):
+        (WebCore::CSSWrapShapeCircle::centerX):
+        (WebCore::CSSWrapShapeCircle::centerY):
+        (WebCore::CSSWrapShapeCircle::radius):
+        (WebCore::CSSWrapShapeCircle::setCenterX):
+        (WebCore::CSSWrapShapeCircle::setCenterY):
+        (WebCore::CSSWrapShapeCircle::setRadius):
+        (WebCore::CSSWrapShapeCircle::type):
+        (WebCore::CSSWrapShapeCircle::CSSWrapShapeCircle):
+        (CSSWrapShapeEllipse):
+        (WebCore::CSSWrapShapeEllipse::create):
+        (WebCore::CSSWrapShapeEllipse::centerX):
+        (WebCore::CSSWrapShapeEllipse::centerY):
+        (WebCore::CSSWrapShapeEllipse::radiusX):
+        (WebCore::CSSWrapShapeEllipse::radiusY):
+        (WebCore::CSSWrapShapeEllipse::setCenterX):
+        (WebCore::CSSWrapShapeEllipse::setCenterY):
+        (WebCore::CSSWrapShapeEllipse::setRadiusX):
+        (WebCore::CSSWrapShapeEllipse::setRadiusY):
+        (WebCore::CSSWrapShapeEllipse::type):
+        (WebCore::CSSWrapShapeEllipse::CSSWrapShapeEllipse):
+        (CSSWrapShapePolygon):
+        (WebCore::CSSWrapShapePolygon::create):
+        (WebCore::CSSWrapShapePolygon::appendPoint):
+        (WebCore::CSSWrapShapePolygon::getXAt):
+        (WebCore::CSSWrapShapePolygon::getYAt):
+        (WebCore::CSSWrapShapePolygon::values):
+        (WebCore::CSSWrapShapePolygon::setWindRule):
+        (WebCore::CSSWrapShapePolygon::windRule):
+        (WebCore::CSSWrapShapePolygon::type):
+        (WebCore::CSSWrapShapePolygon::CSSWrapShapePolygon):
+        * css/CSSComputedStyleDeclaration.cpp:
+        * css/CSSParser.cpp:
+        * css/CSSPrimitiveValue.cpp:
+        * css/StyleBuilder.cpp:
+        * rendering/style/BasicShapes.cpp: Renamed from Source/WebCore/rendering/style/WrapShapes.cpp.
+        (WebCore):
+        (WebCore::WrapShape::destroy):
+        * rendering/style/BasicShapes.h: Renamed from Source/WebCore/rendering/style/WrapShapes.h.
+        (WebCore):
+        (WrapShape):
+        (WebCore::WrapShape::deref):
+        (WebCore::WrapShape::type):
+        (WebCore::WrapShape::WrapShape):
+        (WrapShapeRectangle):
+        (WebCore::WrapShapeRectangle::create):
+        (WebCore::WrapShapeRectangle::x):
+        (WebCore::WrapShapeRectangle::y):
+        (WebCore::WrapShapeRectangle::width):
+        (WebCore::WrapShapeRectangle::height):
+        (WebCore::WrapShapeRectangle::cornerRadiusX):
+        (WebCore::WrapShapeRectangle::cornerRadiusY):
+        (WebCore::WrapShapeRectangle::setX):
+        (WebCore::WrapShapeRectangle::setY):
+        (WebCore::WrapShapeRectangle::setWidth):
+        (WebCore::WrapShapeRectangle::setHeight):
+        (WebCore::WrapShapeRectangle::setCornerRadiusX):
+        (WebCore::WrapShapeRectangle::setCornerRadiusY):
+        (WebCore::WrapShapeRectangle::WrapShapeRectangle):
+        (WrapShapeCircle):
+        (WebCore::WrapShapeCircle::create):
+        (WebCore::WrapShapeCircle::centerX):
+        (WebCore::WrapShapeCircle::centerY):
+        (WebCore::WrapShapeCircle::radius):
+        (WebCore::WrapShapeCircle::setCenterX):
+        (WebCore::WrapShapeCircle::setCenterY):
+        (WebCore::WrapShapeCircle::setRadius):
+        (WebCore::WrapShapeCircle::WrapShapeCircle):
+        (WrapShapeEllipse):
+        (WebCore::WrapShapeEllipse::create):
+        (WebCore::WrapShapeEllipse::centerX):
+        (WebCore::WrapShapeEllipse::centerY):
+        (WebCore::WrapShapeEllipse::radiusX):
+        (WebCore::WrapShapeEllipse::radiusY):
+        (WebCore::WrapShapeEllipse::setCenterX):
+        (WebCore::WrapShapeEllipse::setCenterY):
+        (WebCore::WrapShapeEllipse::setRadiusX):
+        (WebCore::WrapShapeEllipse::setRadiusY):
+        (WebCore::WrapShapeEllipse::WrapShapeEllipse):
+        (WrapShapePolygon):
+        (WebCore::WrapShapePolygon::create):
+        (WebCore::WrapShapePolygon::windRule):
+        (WebCore::WrapShapePolygon::values):
+        (WebCore::WrapShapePolygon::getXAt):
+        (WebCore::WrapShapePolygon::getYAt):
+        (WebCore::WrapShapePolygon::setWindRule):
+        (WebCore::WrapShapePolygon::appendPoint):
+        (WebCore::WrapShapePolygon::WrapShapePolygon):
+        * rendering/style/StyleRareNonInheritedData.h:
+
 2012-08-30  Andrei Onea  <onea@adobe.com>
 
         [CSSRegions]Add support for text-shadow in region styling
