@@ -1,3 +1,25 @@
+2012-08-30  Kangil Han  <kangil.han@samsung.com>
+
+        Fix compile warning when enable tiled backing store
+        https://bugs.webkit.org/show_bug.cgi?id=95422
+
+        Reviewed by Kentaro Hara.
+
+        Fixed compile warning messages when enabled tiled backing store.
+        In case of TiledBackingStore, it was first thought about static_cast<unsigned>.
+        However, if minus value is assigned to the comparison, it would be critical.
+        So, it was modified as using int value in tiled coordinate calculation.
+
+        * page/Frame.cpp:
+        (WebCore::Frame::tiledBackingStorePaintEnd): comparison between signed and unsigned integer expressions [-Wsign-compare]
+        * platform/graphics/TiledBackingStore.cpp:
+        (WebCore::TiledBackingStore::invalidate): comparison between signed and unsigned integer expressions [-Wsign-compare]
+        (WebCore::TiledBackingStore::paint): comparison between signed and unsigned integer expressions [-Wsign-compare]
+        (WebCore::TiledBackingStore::coverageRatio): comparison between signed and unsigned integer expressions [-Wsign-compare]
+        (WebCore::TiledBackingStore::createTiles): comparison between signed and unsigned integer expressions [-Wsign-compare]
+        * platform/graphics/cairo/GLContext.cpp:
+        (WebCore::GLContext::createOffscreenContext): no return statement in function returning non-void [-Wreturn-type]
+
 2012-08-30  Anton Muhin  <antonm@chromium.org>
 
         Heap-use-after-free in WebCore::ElementV8Internal::onclickAttrGetter
