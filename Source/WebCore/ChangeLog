@@ -1,3 +1,38 @@
+2012-08-24  Robert Hogan  <robert@webkit.org>
+
+        CSS 2.1 failure: margin-collapse-clear-012 fails
+        https://bugs.webkit.org/show_bug.cgi?id=80394
+
+        Reviewed by David Hyatt.
+
+        CSS2.1 states: "If the top and bottom margins of an element with clearance are adjoining, its margins collapse with 
+        the adjoining margins of following siblings but that resulting margin does not collapse with the bottom margin of the parent block."
+        This is a change in the spec since http://trac.webkit.org/changeset/47678, so prevent the margins of collapsed blocks from collapsing
+        with parent margins.
+
+        Also, in the case of self-collapsing blocks adjust the clearance so that it is equal to [height of float to clear] - margin-top of the 
+        self-collapsing block. (See the 'Explanation' section near the end of http://www.w3.org/TR/CSS21/visuren.html#clearance). This allows
+        the correct value of any margins collapsed with subsequent siblings to contribute to the height of the parent. For example if a block
+        with margin-top of 40px has to clear a float of 100px, the clearance is now 60px so set that as the height of the parent. If a subsequent 
+        sibling has a collapsed margin value of 140px (e.g. from a margin-top of 80px and a margin-bottom of 140px) then the height of the parent
+        becomes 200px by adding on that collapsed margin. 
+
+        Tests: css2.1/20110323/margin-collapse-clear-012.htm
+               css2.1/20110323/margin-collapse-clear-013.htm
+               css2.1/20110323/margin-collapse-027.htm
+               fast/css/margin-collapse-013-reduction.html
+               fast/css/margin-collapse-top-margin-clearance.html
+               fast/css/margin-collapse-top-margin-clearance-with-sibling.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::clearFloatsIfNeeded):
+        (WebCore::RenderBlock::handleAfterSideOfBlock): Without this margin-collapse/block-inside-inline/025.html adds in the margin to
+          an anonymous block containing a block child. FF does this, Opera does not. The spec is not crystal-clear but Opera's behaviour
+          seems correct - it's totally unintuitive to think the margins of an anonymous block and its block-flow child should be considered adjoining.
+          Maybe this is a FIXME pending clarification in the spec?
+        * rendering/RenderBlock.h:
+        (WebCore::RenderBlock::MarginInfo::setCanCollapseMarginAfterWithChildren):
+
 2012-08-30  Rik Cabanier  <cabanier@adobe.com>
 
         Add support for blendmode to webkit rendering engine
