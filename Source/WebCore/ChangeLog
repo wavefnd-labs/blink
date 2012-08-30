@@ -1,3 +1,20 @@
+2012-08-30  Benjamin Poulain  <bpoulain@apple.com>
+
+        Replace JSC::UString by WTF::String
+        https://bugs.webkit.org/show_bug.cgi?id=95271
+
+        Reviewed by Geoffrey Garen.
+
+        Update the code to use String instead of UString.
+
+        On x86_64, this reduces the binary size by 22kb.
+
+        Since it is no longer possible to differenciate JSC::jsString() and WebCore::jsString() by the input
+        types, WebCore::jsString() is renated to WebCore::jsStringWithCache().
+
+        Since the cache is using a PtrHash, JSC::jsString() is used in place of the old WebCore::jsString() when
+        the string is generated locally. This is because the cache can never match in those cases.
+
 2012-08-30  Rob Buis  <rbuis@rim.com>
 
         [CMake] Suppress ANGLE compilation warnings
