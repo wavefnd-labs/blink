@@ -1,3 +1,30 @@
+2012-08-29  Nat Duca  <nduca@chromium.org>
+
+        [chromium] setNeedsAnimate should not cause commitRequested to become true
+        https://bugs.webkit.org/show_bug.cgi?id=95393
+
+        Reviewed by James Robinson.
+
+        We use the commitRequested state to determine if the page has been damaged, which
+        then is used by the input flow control logic to coalesce input events. However, we
+        actually have two notions of commitRequested. At the CCLayerTreeHost level, commit
+        being requested means "we've changed the tree in some way." At the proxy level, it
+        means "we've sent a commit request to the impl thread." Without this patch,
+        we use the latter state to answer ::commitRequested. That causes setNeedsAnimate
+        to incorrectly cause the commitRequested bit to be set.
+
+        This change separates the setNeedsCommit state from commitRequestSentToImplThread.
+        This allows us to correctly answer commitRequested in face of mixed animation and
+        invalidation requests.
+
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::CCThreadProxy):
+        (WebCore::CCThreadProxy::setNeedsAnimate):
+        (WebCore::CCThreadProxy::setNeedsCommit):
+        (WebCore::CCThreadProxy::beginFrame):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (CCThreadProxy):
+
 2012-08-29  Simon Hausmann  <simon.hausmann@nokia.com>
 
         [Qt] REGRESSION(r126694): It broke the debug build
