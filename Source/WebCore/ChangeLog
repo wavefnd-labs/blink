@@ -1,3 +1,35 @@
+2012-08-29  Antti Koivisto  <antti@apple.com>
+
+        Cache and share parsed imported stylesheets
+        https://bugs.webkit.org/show_bug.cgi?id=95219
+
+        Reviewed by Andreas Kling.
+
+        We currently cache and share parsed data structures of stylesheets loaded with <link>. We should do
+        the same with stylesheets loaded using @import rules as they are also fairly common.
+        
+        This patch adds support for caching and sharing stylesheets loaded using @import rules. Only leaf
+        stylesheets (that don't have @import rules themselves) can be cached for now.
+
+        * css/CSSImportRule.cpp:
+        (WebCore::CSSImportRule::reattachStyleSheetContents):
+        (WebCore):
+        * css/CSSImportRule.h:
+        (CSSImportRule):
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::willMutateRules):
+        (WebCore::CSSStyleSheet::reattachCSSOMWrappers):
+        * css/CSSStyleSheet.h:
+        (CSSStyleSheet):
+        * css/StyleRuleImport.cpp:
+        (WebCore::StyleRuleImport::setCSSStyleSheet):
+        (WebCore::StyleRuleImport::reattachStyleSheetContents):
+        (WebCore):
+        * css/StyleRuleImport.h:
+        (StyleRuleImport):
+        * loader/cache/CachedCSSStyleSheet.cpp:
+        (WebCore::CachedCSSStyleSheet::saveParsedStyleSheet):
+
 2012-08-30  Kangil Han  <kangil.han@samsung.com>
 
         Fix compile warning when enable tiled backing store
