@@ -1,3 +1,32 @@
+2012-08-30  Shinya Kawanaka  <shinyak@chromium.org>
+
+        AuthorShadowDOM support for textarea element.
+        https://bugs.webkit.org/show_bug.cgi?id=91485
+
+        Reviewed by Dimitri Glazkov.
+
+        We add AuthorShadowDOM support for textarea element.
+
+        Unlike other replaced elements (e.g. meter, progress, img), we do not need to add
+        extra RenderBlock when we add AuthorShadowDOM. However, since inner element will not have
+        renderer when AuthorShadowDOM does not have any shadow insertion point, we have to check
+        the existence of the renderer of inner element.
+
+        Tests: fast/dom/shadow/shadowdom-for-textarea-with-attribute.html
+               fast/dom/shadow/shadowdom-for-textarea-with-placeholder.html
+               fast/dom/shadow/shadowdom-for-textarea-with-style.html
+               fast/dom/shadow/shadowdom-for-textarea.html
+
+        * dom/ShadowRoot.cpp:
+        (WebCore::allowsAuthorShadowRoot): Needs allow textarea to have AuthorShadowRoot.
+        * rendering/RenderTextControl.cpp: When AuthorShadowDOM does not have any insertion point,
+        innerTextElement() will not have any renderer. We have to tweak these renderers not to be crashed.
+        (WebCore::RenderTextControl::textBlockWidth):
+        (WebCore::RenderTextControl::updateFromElement):
+        (WebCore::RenderTextControl::computeLogicalHeight):
+        (WebCore::RenderTextControl::hitInnerTextElement):
+        (WebCore::RenderTextControl::computePreferredLogicalWidths):
+
 2012-08-29  Adam Barth  <abarth@webkit.org>
 
         [V8] ScriptController::matchesCurrentContext duplicates code from ScriptController::currentWorldContext
