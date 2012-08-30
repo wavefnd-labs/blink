@@ -1,3 +1,33 @@
+2012-08-30  Tony Chang  <tony@chromium.org>
+
+        Make RenderBox::computeInlineDirectionMargins const
+        https://bugs.webkit.org/show_bug.cgi?id=95255
+
+        Reviewed by Ojan Vafai.
+
+        This is part of making computeLogical{Height,Width} return computed values rather than
+        mutating the RenderBox directly. This makes a submethod const.
+
+        This change is just a refactor, but I've added some tests to cover code that wasn't
+        previously covered by layout tests.
+
+        Tests: fast/block/margins-perpendicular-containing-block.html
+               fast/table/margins-flipped-text-direction.html
+               fast/table/margins-perpendicular-containing-block.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeLogicalWidthInRegion): Handle flipped text direction manually.
+        (WebCore::RenderBox::computeInlineDirectionMargins): Make const with out parameters.
+        No longer need to call setMargin{Start,End}ForChild.
+        (WebCore::shouldFlipBeforeAfterMargins): Helper function to figure out how to map a logical
+        writing mode direction to another logical writing mode direction.
+        (WebCore::RenderBox::computeLogicalHeight): Use const method. This also makes it more
+        obvious that when computing the height, we only modify the before/after margins.
+        * rendering/RenderBox.h:
+        (RenderBox): Make computeInlineDirectionMargins const with out parameters.
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::computeLogicalWidth): Same as RenderBox::comptueLogicalWidthInregion.
+
 2012-08-30  Dirk Schulze  <krit@webkit.org>
 
         Refactor WrapShape classes to BasicShape
