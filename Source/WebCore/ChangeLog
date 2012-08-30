@@ -1,3 +1,55 @@
+2012-08-29  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Register/unregister contents layers with GraphicsLayerChromium
+        https://bugs.webkit.org/show_bug.cgi?id=95379
+
+        Reviewed by Adrienne Walker.
+
+        Several composited layer types in WebCore are represented by a painted layer and a child "contents layer" that
+        represents some non-painted specific content type. For example, a composited video has a WebCore-painted layer
+        for CSS background and border effects and a child platform video layer backed by a WebVideoLayer with the output
+        of the video decoding pipeline. Cross-platform code associates the PlatformLayer from the various composited
+        systems with the right GraphicsLayer, but the object owning the layer and the GraphicsLayer holding the pointer
+        otherwise have no relationship. This makes shutdown a bit tricky since the object destroying the contents layer
+        has no direct way to notify the GraphicsLayer holding the contents layer pointer that it is going away. The
+        GraphicsLayer will be notified after the next style recalc that its contents layer is gone, but may need to do
+        any number of bookkeeping operations before that happens.
+
+        On most platforms the PlatformLayer is refcounted, so the GraphicsLayer simply holds a ref to its contents layer
+        from the time it is orphaned until the next style recalc and compositing tree rebuild. In Chromium, however,
+        PlatformLayer is not refcounted. This adds an explicit registration mechanism for layers that may be contents
+        layers.  A layer has to be registered with GraphicsLayerChromium before it can be used as a contents layer -
+        typically this is just done at creation - and unregistered before it is destroyed.
+
+        Tests: fast/canvas/transformed-canvas-reset.html
+               platform/chromium/virtual/gpu/fast/canvas/transformed-canvas-reset.html
+
+        * page/scrolling/chromium/ScrollingCoordinatorChromium.cpp:
+        (WebCore::ScrollingCoordinatorPrivate::~ScrollingCoordinatorPrivate):
+        (WebCore::createScrollbarLayer):
+        * platform/graphics/chromium/Canvas2DLayerBridge.cpp:
+        (WebCore::Canvas2DLayerBridge::Canvas2DLayerBridge):
+        (WebCore::Canvas2DLayerBridge::~Canvas2DLayerBridge):
+        * platform/graphics/chromium/DrawingBufferChromium.cpp:
+        (WebCore::DrawingBufferPrivate::DrawingBufferPrivate):
+        (WebCore::DrawingBufferPrivate::~DrawingBufferPrivate):
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        (WebCore::GraphicsLayerChromium::updateNames):
+        (WebCore::GraphicsLayerChromium::clearBackgroundColor):
+        (WebCore::GraphicsLayerChromium::setContentsNeedsDisplay):
+        (WebCore::GraphicsLayerChromium::setContentsToImage):
+        (WebCore):
+        (WebCore::GraphicsLayerChromium::registerContentsLayer):
+        (WebCore::GraphicsLayerChromium::unregisterContentsLayer):
+        (WebCore::GraphicsLayerChromium::clearContentsLayerIfUnregistered):
+        (WebCore::GraphicsLayerChromium::setContentsTo):
+        (WebCore::GraphicsLayerChromium::updateChildList):
+        (WebCore::GraphicsLayerChromium::updateLayerIsDrawable):
+        (WebCore::GraphicsLayerChromium::updateLayerBackgroundColor):
+        (WebCore::GraphicsLayerChromium::updateContentsRect):
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        (GraphicsLayerChromium):
+
 2012-08-29  Rafael Brandao  <rafael.lobo@openbossa.org>
 
         [Texmap] CSS Transform flicks at the end of animation
