@@ -1,3 +1,46 @@
+2012-08-30  Dirk Schulze  <krit@webkit.org>
+
+        Introduce new CSS property for clip-path
+        https://bugs.webkit.org/show_bug.cgi?id=95474
+
+        Reviewed by Tim Horton.
+
+        This path introduces the new, prefixed CSS property 'clip-path' from the
+        CSS Masking specification. In a first step the property just accepts
+        'none' and the the basic shapes from CSS Exclusion. Later it will also be
+        possible to reference SVG 'clipPath' elements - like Firefox already does.
+        To enable the parsing of the shapes, the exclusion compiler flags
+        around the shape parser were removed.
+
+        http://dvcs.w3.org/hg/FXTF/raw-file/tip/masking/index.html
+
+        Test: fast/masking/parsing-clip-path-shape.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue): Return CSSValue for CSSPropertyWebkitClipPath.
+        * css/CSSParser.cpp: 
+        (WebCore::CSSParser::parseValue): Add CSSPropertyWebkitClipPath.
+        (WebCore::CSSParser::parseBasicShape): Modify parser function to accept CSSPropertyWebkitClipPath as well.
+        * css/CSSParser.h:
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/CSSPropertyNames.in: Added property name -webkit-clip-path.
+        * css/StyleBuilder.cpp:
+        (ApplyPropertyClipPath): New property applier just for -webkit-clip-path.
+        (WebCore::ApplyPropertyClipPath::setValue):
+        (WebCore::ApplyPropertyClipPath::applyValue):
+        (WebCore::ApplyPropertyClipPath::createHandler):
+        (WebCore::StyleBuilder::StyleBuilder):
+        * rendering/style/RenderStyle.cpp: Repaint if there is a difference between two BasicShapes.
+        (WebCore::RenderStyle::diff):
+        * rendering/style/RenderStyle.h:
+        * rendering/style/StyleRareNonInheritedData.cpp: 
+        (WebCore::StyleRareNonInheritedData::StyleRareNonInheritedData):
+        (WebCore::StyleRareNonInheritedData::operator==):
+        (WebCore::StyleRareNonInheritedData::reportMemoryUsage):
+        * rendering/style/StyleRareNonInheritedData.h: Add new member variable for clip shape.
+        (StyleRareNonInheritedData):
+
 2012-08-31  Joshua Netterfield  <jnetterfield@rim.com>
 
         [BlackBerry] Eliminate WebGL IT policy
