@@ -1,3 +1,90 @@
+2012-08-30  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Shift+Tab should focus the last field of multiple fields time input UI
+        https://bugs.webkit.org/show_bug.cgi?id=95168
+
+        Reviewed by Kent Tamura.
+
+        This patch changes focus handling in DateTimeEditElement class for
+        multiple fields time input UI.
+
+        Current implementation controls focus in fields by DateTimeEditElement
+        and a focus field is tracked m_focusFieldIndex member variable. In
+        current implementation, it is hard to set focus to the last field when
+        it gets focus by Shift+Tab, because we don't know how DateTimeEditElement
+        gets focus.
+
+        In this new implementation, DateTimeEditElement doesn't control focus
+        rather FocusController class controls focus:
+         - We set focus to DateTimeFieldElement instead of HTMLInputElement
+           which is shadow host of DateTimeEditElement for controlling focus
+           by FocusController.
+         - Focus/blur events in DateTimeFieldElement are routed to HTMLInputElement
+           by shadow DOM mechanism.
+         - TimeInputType class overrides HTMLINputElement::blur() and focus()
+           functions for delegating blur/focus behavior to DateTimeEditElement
+           by calling DateTimeEditElement::blurByOwner()/focusByOwner().
+
+        This patch affects only ports which enable both ENABLE_INPUT_TYPE_TIME
+        and ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        Tests: fast/forms/time-multiple-fields/time-multiple-fields-blur-and-focus-events.html
+        This patch also adds a new test case for Shift+Tab into fast/forms/time-multiple-fields/time-multiple-fields-keyboard-events.html.
+
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::didFieldBlur): Added for the input element not to be matched "focus" pseudo class for removing focus ring.
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::didFieldFocus):  Added for the input element to be matched "focus" pseudo class for adding focus ring.
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::editControlMouseFocus): Removed. DateTimeEditElement no longer set focus to HTMLInputElement.
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::focusAndSelectEditControlOwner): Removed. In this patch, settting focus to field is handled by DateTimeEditElement. We don't need to call HTMLInputElement::select() which has no effect for "time" input type.
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::isEditControlOwnerFocused): Revmoed. FocusController manages focus navigation in fields rather than DateTimeEditElement.
+        (WebCore::TimeInputType::blur): Added for delegating blur() action to DateTimeEditElement.
+        (WebCore::TimeInputType::focus): Added for delegating focus() action to DateTimeEditElement.
+        (WebCore::TimeInputType::handleDOMActivateEvent): Removed. HTMLInputElement for "time" input type no longer get focus.
+        (WebCore::TimeInputType::hasCustomFocusLogic): Added for asking FocusController to walk into shadow DOM tree on input type "time".
+        (WebCore::TimeInputType::isKeyboardFocusable): Changed for "input" element not to have focus.
+        (WebCore::TimeInputType::isMouseFocusable):  Changed for "input" element not to have focus.
+        * html/TimeInputType.h:
+        (DateTimeEditControlOwnerImpl): Changed for new definition of DateTimeEditControlOwner.
+        (TimeInputType): Changed for new definition of DateTimeEditElement.
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditElement::DateTimeEditElement): Removed dropped member variable m_focusFieldIndex.
+        (WebCore::DateTimeEditElement::blurByOwner): Added for blur() action asekd by owner.
+        (WebCore::DateTimeEditElement::didBlurFromField): Added for calling DateTimeEditControlOwner::didBlurFromControl().
+        (WebCore::DateTimeEditElement::didFocusOnField): Added for calling DateTimeEditControlOwner::didFocusOnControl().
+        (WebCore::DateTimeEditElement::fieldIndexOf): Added for mapping DateTimeFieldElement to field index.
+        (WebCore::DateTimeEditElement::focusByOwner): Added for focus() action asekd by owner.
+        (WebCore::DateTimeEditElement::focusFieldAt):  Removed.
+        (WebCore::DateTimeEditElement::focusedFieldIndex): Added as helper function.
+        (WebCore::DateTimeEditElement::focusedField): Added.
+        (WebCore::DateTimeEditElement::focusOnNextField): Changed to pass a field to focusOnNext().
+        (WebCore::DateTimeEditElement::focusOnPreviousField): ditto.
+        (WebCore::DateTimeEditElement::focusAndSelectSpinButtonOwner): Changed for setting focus to the first field.
+        (WebCore::DateTimeEditElement::handleKeyboardEvent): Removed. Moved handling of Left/Right keys to DateTimeFieldElement. Removed Tab-key handling.
+        (WebCore::DateTimeEditElement::handleMouseEvent): Removed. DateTimeEdit doesn't handle mouse click since this patch.
+        (WebCore::DateTimeEditElement::layout): Changed to use focusFieldIndex() and DateTimeFieldElement::focus().
+        (WebCore::DateTimeEditElement::nextFieldIndex): Removed. focusOnNextField does samething and sets focus.
+        (WebCore::DateTimeEditElement::previousFieldIndex): Removed. focusOnPreviousField does samething and sets focus.
+        (WebCore::DateTimeEditElement::resetLayout): Changed to remove m_focusFieldIndex variable reference.
+        (WebCore::DateTimeEditElement::defaultEventHandler): Changed to remove focus navigation related events, blue/focus/mouse, handling.
+        (WebCore::DateTimeEditElement::shouldSpinButtonRespondToWheelEvents): Changed to check focus field instead of asking owner.
+        (WebCore::DateTimeEditElement::spinButtonStepDown): Changed to use focusField() instead of m_focusFieldIndex.
+        (WebCore::DateTimeEditElement::spinButtonStepUp): ditto.
+        (WebCore::DateTimeEditElement::updateUIState): ditto.
+        * html/shadow/DateTimeEditElement.h:
+        (EditControlOwner): Added didBlurFromField() and didFocusOnField() function declarations. Removed focusAndSelectEditControlOwner, it was used for set focus to HTMLInputElement, and isEditControlOwnerFocused.
+        (DateTimeEditElement):
+        * html/shadow/DateTimeFieldElement.cpp:
+        (WebCore::DateTimeFieldElement::defaultEventHandler): Changed to handle blur and focus events.
+        (WebCore::DateTimeFieldElement::defaultKeyboardEventHandler): Changed to handle Left/Right keys.
+        (WebCore::DateTimeFieldElement::didBlur): Added to call FieldOwner::didBlurFromField() to remove focus ring from owner element.
+        (WebCore::DateTimeFieldElement::didFocus): Added to call FieldOwner::didFocusOnField()  to add focus ring to owner element.
+        (WebCore::DateTimeFieldElement::focusOnNextField): Added for moving focus to next field for DateTimeNumbericFieldElment
+        (WebCore::DateTimeFieldElement::isFocusable): Added to make DateTimeFieldElement focusable.
+        (WebCore::DateTimeFieldElement::supportsFocus):  Added to make DateTimeFieldElement focusable.
+        * html/shadow/DateTimeFieldElement.h:
+        (FieldOwner): Added declarations for focusable handling.
+        (DateTimeFieldElement): ditto.
+
 2012-08-30  James Robinson  <jamesr@chromium.org>
 
         [chromium] Revert WebCompositorSupport to raw ptrs, make dtor protected
