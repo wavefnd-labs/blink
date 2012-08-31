@@ -1,3 +1,23 @@
+2012-08-30  Adam Barth  <abarth@webkit.org>
+
+        Loading a worker script should not be O(n^2)
+        https://bugs.webkit.org/show_bug.cgi?id=95518
+
+        Reviewed by Benjamin Poulain.
+
+        Previously, we would malloc a new buffer and memcpy the entire worker
+        script every time we got another packet of data from the network. This
+        patch uses StringBuilder to accumulate the buffer more efficiently.
+
+        * workers/WorkerScriptLoader.cpp:
+        (WebCore::WorkerScriptLoader::WorkerScriptLoader):
+        (WebCore::WorkerScriptLoader::didReceiveData):
+        (WebCore::WorkerScriptLoader::didFinishLoading):
+        (WebCore):
+        (WebCore::WorkerScriptLoader::script):
+        * workers/WorkerScriptLoader.h:
+        (WorkerScriptLoader):
+
 2012-08-30  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Shift+Tab should focus the last field of multiple fields time input UI
