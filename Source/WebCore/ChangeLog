@@ -1,3 +1,44 @@
+2012-08-31  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Refactor flow thread repainting.
+        https://bugs.webkit.org/show_bug.cgi?id=95586
+
+        Reviewed by Simon Fraser.
+
+        Refactor flow thread repainting in regions to delegate the work to the region. This allows subclasses
+        to customize how the repainting happens so that individual repaints can be issued for columns and pages
+        inside sets.
+        
+        repaintFlowThreadContent is the new virtual function that can be subclassed by sets to customize
+        the repaint process.
+        
+        repaintFlowThreadContentRectangle is a parameterized helper that will be called for each individual
+        column and page in a set.
+
+        * WebCore.exp.in:
+        Change repaintRectangle's signature to be const.
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::repaintRectangleInRegions):
+        Now delegates the work for each region to RenderRegion::repaintFlowThreadContent.
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::repaintUsingContainer):
+        (WebCore::RenderObject::repaint):
+        (WebCore::RenderObject::repaintRectangle):
+        (WebCore::RenderObject::isRooted):
+        * rendering/RenderObject.h:
+        Change a bunch of functions to be const.
+
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::repaintFlowThreadContent):
+        (WebCore):
+        (WebCore::RenderRegion::repaintFlowThreadContentRectangle):
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        Add the two new functions (the virtual repaintFlowThreadContent and the helper it
+        uses, repaintFlowThreadContentRectangle).
+
 2012-08-31  Yong Li  <yoli@rim.com>
 
         [BlackBerry] Disable GCController timer for PLATFORM(BLACKBERRY)
