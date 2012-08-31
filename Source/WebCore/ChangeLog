@@ -1,3 +1,119 @@
+2012-08-30  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Implement normal blend mode and source-atop compositing mode
+        https://bugs.webkit.org/show_bug.cgi?id=93869
+
+        Reviewed by Dean Jackson.
+
+        Instead of allowing direct texture access in an author's shader via u_texture, CSS
+        Shaders blends special symbols in the author's shader (css_MixColor and
+        css_ColorMatrix) with the DOM element texture.
+
+        The author specifies the blend mode and composite operator via the CSS mix
+        function like this:
+        -webkit-filter: custom(none mix(shader.fs normal source-atop));
+
+        This patch implements the normal blend mode and the source-atop composite
+        operator. The other blend modes and composite operators will come in later
+        patches.
+
+        This patch introduces a new class, CustomFilterValidatedProgram, which validates
+        the shader using ANGLE. If the shader uses blending and compositing,
+        CustomFilterValidatedProgram uses ANGLE's SH_CSS_SHADERS_SPEC flag. This allows
+        the author's shader to compile successfully with special symbols like
+        "css_MixColor". ANGLE also reserves the "css_" prefix. If the shader doesn't use
+        blending and compositing, CustomFilterValidatedProgram validates the shader using
+        ANGLE's SH_WEBGL_SPEC flag.
+
+        After validation, CustomFilterValidatedProgram adds blending, compositing, and
+        texture access shader code to the author's original shaders. The definitions for
+        css_MixColor and css_ColorMatrix are added before the author's fragment shader
+        code so that the author code can access them. The blending, compositing, and
+        texture access code is added after the author code and is thus inaccessible to the
+        author code. Since ANGLE reserves the "css_" prefix during the validation phase,
+        no collisions are possible between the author's code and the code that WebKit adds.
+
+        The CustomFilterGlobalContext now caches CustomFilterValidatedProgram instead
+        of CustomFilterCompiledProgram. CustomFilterValidatedProgram owns a
+        CustomFilterCompiledProgram. This way, we can use the platform-independent
+        CustomFilterValidatedProgram to validate and rewrite the shaders, regardless of
+        the platform representation of the program (e.g. CustomFilterCompiledProgram).
+
+        Tests: css3/filters/custom/custom-filter-color-matrix.html
+               css3/filters/custom/custom-filter-composite-source-atop.html
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/ANGLEWebKitBridge.cpp:
+        (WebCore::ANGLEWebKitBridge::ANGLEWebKitBridge):
+            Add a shader spec parameter, since sometimes we want to validate the shader
+            against the CSS Shaders spec and other times we want to validate the shader
+            against the WebGL spec. Note that the CSS Shaders spec is treated as a subset
+            of the WebGL spec in ANGLE.
+        (WebCore::ANGLEWebKitBridge::validateShaderSource):
+        * platform/graphics/ANGLEWebKitBridge.h:
+        (ANGLEWebKitBridge):
+        * platform/graphics/filters/CustomFilterCompiledProgram.cpp:
+        (WebCore::CustomFilterCompiledProgram::CustomFilterCompiledProgram):
+        (WebCore::CustomFilterCompiledProgram::compileShader):
+        (WebCore::CustomFilterCompiledProgram::initializeParameterLocations):
+        (WebCore::CustomFilterCompiledProgram::~CustomFilterCompiledProgram):
+        * platform/graphics/filters/CustomFilterCompiledProgram.h:
+        (WebCore):
+        * platform/graphics/filters/CustomFilterGlobalContext.cpp:
+        (WebCore::CustomFilterGlobalContext::~CustomFilterGlobalContext):
+        (WebCore::CustomFilterGlobalContext::webglShaderValidator):
+        (WebCore):
+        (WebCore::CustomFilterGlobalContext::mixShaderValidator):
+        (WebCore::CustomFilterGlobalContext::createShaderValidator):
+        (WebCore::CustomFilterGlobalContext::getValidatedProgram):
+        (WebCore::CustomFilterGlobalContext::removeValidatedProgram):
+        * platform/graphics/filters/CustomFilterGlobalContext.h:
+        (WebCore):
+        (CustomFilterGlobalContext):
+        * platform/graphics/filters/CustomFilterProgramInfo.h:
+        (WebCore::CustomFilterProgramInfo::mixSettings):
+        * platform/graphics/filters/CustomFilterValidatedProgram.cpp: Added.
+        (WebCore):
+        (WebCore::CustomFilterValidatedProgram::defaultVertexShaderString):
+        (WebCore::CustomFilterValidatedProgram::defaultFragmentShaderString):
+        (WebCore::CustomFilterValidatedProgram::CustomFilterValidatedProgram):
+        (WebCore::CustomFilterValidatedProgram::compiledProgram):
+        (WebCore::CustomFilterValidatedProgram::rewriteMixVertexShader):
+        (WebCore::CustomFilterValidatedProgram::rewriteMixFragmentShader):
+        (WebCore::CustomFilterValidatedProgram::blendFunctionString):
+        (WebCore::CustomFilterValidatedProgram::compositeFunctionString):
+        (WebCore::CustomFilterValidatedProgram::~CustomFilterValidatedProgram):
+        * platform/graphics/filters/CustomFilterValidatedProgram.h: Added.
+        (WebCore):
+        (CustomFilterValidatedProgram):
+        (WebCore::CustomFilterValidatedProgram::create):
+        (WebCore::CustomFilterValidatedProgram::programInfo):
+        (WebCore::CustomFilterValidatedProgram::isInitialized):
+        (WebCore::CustomFilterValidatedProgram::detachFromGlobalContext):
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::FECustomFilter):
+            Accept a CustomFilterValidatedProgram instead of CustomFilterProgram.
+        (WebCore::FECustomFilter::create):
+        (WebCore::FECustomFilter::initializeContext):
+        (WebCore::FECustomFilter::bindVertexAttribute):
+        (WebCore::FECustomFilter::bindProgramAndBuffers):
+        * platform/graphics/filters/FECustomFilter.h:
+        (WebCore):
+        (FECustomFilter):
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore):
+        (WebCore::createCustomFilterEffect):
+        (WebCore::FilterEffectRenderer::build):
+            Only create an FECustomFilter if the program validates.
+        * rendering/FilterEffectRenderer.h:
+        (WebCore):
+        (FilterEffectRenderer):
+
 2012-08-30  Julien Chaffraix  <jchaffraix@webkit.org>
 
         Crash in RenderTable::calcBorderEnd
