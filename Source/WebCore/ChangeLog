@@ -1,3 +1,26 @@
+2012-08-31  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Left/Right keys in multiple fields time input UI should move focus physical left/right instead of logical left/right regardless text direction.
+        https://bugs.webkit.org/show_bug.cgi?id=95434
+
+        Reviewed by Kent Tamura.
+
+        This patch also changes handling of Left/Right keys to aware text
+        direction ("dir" attribute"). Left/Right keys should move focus
+        physical right/left instead of logical right/left.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. This patch adds a test case into fast/forms/time-multiple-fields/time-multiple-fields-keyboard-events.html
+
+        * html/shadow/DateTimeFieldElement.cpp:
+        (WebCore::DateTimeFieldElement::defaultKeyboardEventHandler): Changed to check isRTL() for Left/Right keys then we call
+        appropriate focus motion function.
+        (WebCore::DateTimeFieldElement::isRTL): Added for checking text direction is right-to-left or not.
+        * html/shadow/DateTimeFieldElement.h:
+        (DateTimeFieldElement): Added declaration of isRTL().
+
 2012-08-30  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Blur from field should reset typeahead buffer in multiple fields time input UI
