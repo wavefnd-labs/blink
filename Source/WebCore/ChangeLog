@@ -1,3 +1,97 @@
+2012-08-30  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Implement unforced breaking in the new column layout.
+        https://bugs.webkit.org/show_bug.cgi?id=95498
+
+        Reviewed by Dan Bernstein.
+
+        This patch implements unforced breaking for lines and objects inside columns. Forced breaks are
+        not yet handled properly and will be covered in a separate patch.
+
+        * rendering/LayoutState.cpp:
+        (WebCore::LayoutState::LayoutState):
+        Eliminate the flow thread constructor for LayoutState. Flow threads were doing a double push of
+        layout states, once in RenderFlowThread::layout() and then again in RenderBlock::layout(). This
+        double push was unnecessary, so I refactored the code to ensure the RenderBlock push does the
+        right thing for RenderFlowThreads.
+
+        (WebCore):
+        * rendering/LayoutState.h:
+        (LayoutState):
+        Eliminate the flow thread constructor for LayoutState.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::checkForPaginationLogicalHeightChange):
+        This function now handles RenderFlowThreads and properly sets a non-zero page height as well
+        as querying the flow thread to ask if the pagination logical height has changed. The flow thread
+        has a new member that it sets in layout() so that it can answer this question.
+
+        (WebCore::RenderBlock::hasNextPage):
+        Make sure RenderRegionSets always claim to have a next page when they are the last region, since
+        we know columns/pages can always generate additional boxes as needed.
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        Add the m_pageLogicalHeightChanged member variable for tracking whether regions changed dimensions,
+        thus forcing us to repaginate everything.
+
+        (WebCore::RenderFlowThread::layout):
+        Remove the redundant push of layout state now that RenderBlock's covers it.
+
+        (WebCore::RenderFlowThread::regionAtBlockOffset):
+        Always return the last region if it's a set, regardless of the extendLastRegion boolean.
+        This reflects the fact that the last region set can always generate new page/column boxes.
+
+        (WebCore::RenderFlowThread::pageLogicalTopForOffset):
+        Refactored to call into the region it finds for a given offset, so that the region itself
+        can answer the question of where the top of the page is. This enables sets to return the top of
+        specific columns/pages within the set.
+
+        (WebCore::RenderFlowThread::pageRemainingLogicalHeightForOffset):
+        Changed to be written in terms of pageLogicalTop and pageLogicalHeight so that it correctly uses
+        only the current column/page when determining remaining height.
+
+        * rendering/RenderFlowThread.h:
+        Added pageLogicalHeightChanged() so that RenderBlock can ask the flow thread if its regions changed
+        dimensions.
+
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::RenderMultiColumnBlock::checkForPaginationLogicalHeightChange):
+        Tweaked to no longer turn on pagination, since the RenderMultiColumnFlowThread does that and we
+        want to avoid a double push of paginated states. Instead it now just sets the column height ahead
+        of time so that the RenderMultiColumnSets know how big their columns are.
+
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::pageLogicalTopForOffset):
+        Subclassed to return the top of a specific column.
+
+        (WebCore):
+        * rendering/RenderMultiColumnSet.h:
+        Add the subclassed method for pageLogicalTopForOffset.
+        
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::pageLogicalTopForOffset):
+        The code from RenderFlow::pageLogicalTopForOffset moved here. Just returns the top of the flow
+        thread portion rect in the region (same as before).
+
+        (WebCore::RenderRegion::layout):
+        Changed to check only the page logical width and height, since we only consider a region as
+        invalidating how you break if there is an actual page height change.
+
+        * rendering/RenderRegion.h:
+        (WebCore::RenderRegion::isRenderRegionSet):
+        Added an isRenderRegionSet() virtual function so that we can test for sets.
+
+        * rendering/RenderRegionSet.h:
+        (WebCore::RenderRegionSet::isRenderRegionSet):
+        Subclassed isRenderRegionSet() to return true.
+
+        * rendering/RenderView.cpp:
+        * rendering/RenderView.h:
+        (LayoutStateMaintainer):
+        (WebCore::LayoutStateMaintainer::push):
+        Remove the pushes of LayoutState that were specific to RenderFlowThreads.
+
 2012-08-31  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: Update $ to alias to querySelector rather than getElementById
