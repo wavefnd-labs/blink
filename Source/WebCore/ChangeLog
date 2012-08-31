@@ -1,3 +1,47 @@
+2012-08-30  Luke Macpherson   <macpherson@chromium.org>
+
+        Make it possible to use CSS Variables inside Calc expressions.
+        https://bugs.webkit.org/show_bug.cgi?id=95284
+
+        Reviewed by Tony Chang.
+
+        Allows calc expressions to contain unevaluated variables, which are then resolved in StyleResolver.cpp when building the RenderStyle tree.
+
+        Tests:
+        fast/css/variables/calc.html
+
+        * css/CSSCalculationValue.cpp:
+        (WebCore::unitCategory):
+        (WebCore):
+        (WebCore::CSSCalcValue::customSerializeResolvingVariables):
+        Generates a CSS expression with variables resolved into their corresponding values.
+        (WebCore::CSSCalcValue::hasVariableReference):
+        Returns true if the calculation's expression tree refers to a variable (that needs to be resolved).
+        (CSSCalcPrimitiveValue):
+        (WebCore::CSSCalcPrimitiveValue::serializeResolvingVariables):
+        Resolves the variable using the underlying CSSPrimitiveValue's serializeResolvingVariables function.
+        (WebCore::CSSCalcPrimitiveValue::hasVariableReference):
+        (WebCore::CSSCalcPrimitiveValue::toCalcValue):
+        (WebCore::CSSCalcPrimitiveValue::doubleValue):
+        (WebCore::CSSCalcPrimitiveValue::computeLengthPx):
+        (WebCore::CSSCalcBinaryOperation::create):
+        (CSSCalcBinaryOperation):
+        (WebCore::CSSCalcBinaryOperation::serializeResolvingVariables):
+        Builds a CSS expression for contained subtrees.
+        (WebCore::CSSCalcBinaryOperation::hasVariableReference):
+        Returns true if either subtree contains a variable.
+        * css/CSSCalculationValue.h:
+        (CSSCalcExpressionNode):
+        (CSSCalcValue):
+        * css/CSSGrammar.y:
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::validCalculationUnit):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::primitiveType):
+        (WebCore::CSSPrimitiveValue::customSerializeResolvingVariables):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+
 2012-08-30  Max Vujovic  <mvujovic@adobe.com>
 
         [CSS Shaders] Implement normal blend mode and source-atop compositing mode
