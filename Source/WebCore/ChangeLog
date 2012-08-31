@@ -1,3 +1,60 @@
+2012-08-30  Adam Barth  <abarth@webkit.org>
+
+        Replace more instances of += with StringBuilder
+        https://bugs.webkit.org/show_bug.cgi?id=95502
+
+        Reviewed by Darin Adler.
+
+        This patch removes many uses of WTF::String::operator+= in WebCore.
+        Many of these uses are inefficient because they cause us to allocate
+        and memcpy strings more times than necessary. In most cases, I've
+        replaced these inefficient patterns with StringBuilder.
+
+        This patch makes progress towards removing WTF::String::operator+= from
+        the project.
+
+        We can make cssText() more efficient by passing a single StringBuilder
+        instance along to the recursive calls, but I've left that for a later
+        patch.
+
+        * css/CSSBorderImageSliceValue.cpp:
+        (WebCore::CSSBorderImageSliceValue::customCssText):
+        * css/CSSFontFaceSrcValue.cpp:
+        (WebCore::CSSFontFaceSrcValue::customCssText):
+        * css/CSSFunctionValue.cpp:
+        (WebCore::CSSFunctionValue::customCssText):
+        * css/CSSGradientValue.cpp:
+        (WebCore::CSSLinearGradientValue::customCssText):
+        (WebCore::CSSRadialGradientValue::customCssText):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::createKeyframe):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::customCssText):
+        * css/CSSReflectValue.cpp:
+        (WebCore::CSSReflectValue::customCssText):
+        * css/CSSTimingFunctionValue.cpp:
+        (WebCore::CSSCubicBezierTimingFunctionValue::customCssText):
+        (WebCore::CSSStepsTimingFunctionValue::customCssText):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::get4Values):
+        (WebCore::StylePropertySet::getLayeredShorthandValue):
+        (WebCore::StylePropertySet::getShorthandValue):
+        * fileapi/BlobURL.cpp:
+        (WebCore::BlobURL::createBlobURL):
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::SetPropertyTextAction::redo):
+        * inspector/InspectorClient.cpp:
+        (WebCore::InspectorClient::doDispatchMessageOnFrontendPage):
+        * inspector/InspectorConsoleAgent.cpp:
+        (WebCore::InspectorConsoleAgent::didFailLoading):
+        * inspector/InspectorFileSystemAgent.cpp:
+        (WebCore):
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::InspectorPageAgent::cachedResourceContent):
+        (WebCore::InspectorPageAgent::getCookies):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::addRule):
+
 2012-08-30  Luke Macpherson   <macpherson@chromium.org>
 
         Make it possible to use CSS Variables inside Calc expressions.
