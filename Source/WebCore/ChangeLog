@@ -1,3 +1,28 @@
+2012-08-31  Simon Fraser  <simon.fraser@apple.com>
+
+        (Regression: r126774): Fix crash when scrolling after removing inline sticky element
+        https://bugs.webkit.org/show_bug.cgi?id=95584
+
+        Reviewed by Dave Hyatt.
+
+        Move fixed/sticky registration and unregistration with the FrameView from
+        RenderBox and RenderInline into RenderBoxModelObject, which also
+        fixes the issue that inlines didn't unregister themselves on destruction.
+
+        Test: fast/css/sticky/remove-inline-sticky-crash.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::willBeDestroyed): Code moved to RenderBoxModelObject. No need
+        to null-check style.
+        (WebCore::RenderBox::styleWillChange): Code moved to RenderBoxModelObject.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::willBeDestroyed): Remove fixed objects. Check
+        isPositioned() to avoid this work for most non-positioned renderers.
+        (WebCore::RenderBoxModelObject::styleWillChange): Register and unregister fixed
+        and sticky objects with the FrameView.
+        * rendering/RenderInline.cpp: styleWillChange() is no longer needed.
+        * rendering/RenderInline.h: Ditto.
+
 2012-08-31  Nikhil Bhargava  <nbhargava@google.com>
 
         Remove extraneous includes (Node.h, Document.h, Element.h, RenderObject.h)
