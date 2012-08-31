@@ -1,3 +1,25 @@
+2012-08-30  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Blur from field should reset typeahead buffer in multiple fields time input UI
+        https://bugs.webkit.org/show_bug.cgi?id=95525
+
+        Reviewed by Kent Tamura.
+
+        This patch changes to reset typeahead timer used in DateTimeNumericFieldElement
+        on blur from field. It is intuitive that not merging keyboard inputs
+        with interleaving focus motion, e.g. sequence type "1", type Tab, type
+        Shift+Tab, type "2" should set field to "2" instead of "12".
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. This patch adds a test case into fast/forms/time-multiple-fields/time-multiple-fields-keyboard-events.html
+
+        * html/shadow/DateTimeNumericFieldElement.cpp:
+        (WebCore::DateTimeNumericFieldElement::didBlur): Added to reset typeahead timer, m_lastDigitCharTime.
+        * html/shadow/DateTimeNumericFieldElement.h:
+        (DateTimeNumericFieldElement): Added a declaration of didBlur().
+
 2012-08-30 MORITA Hajime  <morrita@google.com>
 
         Unreviewed, followup build fix against r127228.
