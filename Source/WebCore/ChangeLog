@@ -1,3 +1,157 @@
+2012-08-31  Michael Saboff  <msaboff@apple.com>
+
+        CSS Parser should directly parse 8 bit source strings
+        https://bugs.webkit.org/show_bug.cgi?id=95207
+
+        Reviewed by Geoffrey Garen.
+
+        Changed CSSParser to handle 8 bit strings directly. Templatized most private parsing methods
+        and helper methods by character type. Introduced several templatized helper methods for
+        parsing methods. Some of these helper methods have independent source and destination template
+        types to handle that an 8 bit source string when parsed produces a 16 bit result. This is due
+        to unicode escapes. Renamed the lex method "realLex" and made it a templated method. The lex
+        method that is called by cssyylex(), which is now inlined, invokes the correct instance of realLex
+        via a member function pointer.
+
+        Split out the encoding part of parseEscape() into a new templated UnicodeToChars() method.
+
+        Added 8/16 bit switching to CSSParserString as well as added initialization, setters and getters.
+        Note that CSSParserString must have a default constructor as it is part of the YYLVAL union.
+        Therefore created init() methods instead of constructors. Many of the parser function now directly
+        modify the instance in yylval. Made supporting changes in other webcore classes that are used
+        directly by CSSParser.
+
+        Test: fast/css/unicode-escape-in-8bit-string.html
+
+        * css/CSSGrammar.y: Removed cssyylex() and changed manipulation of CSSParserString objects to
+        use newly written methods instead of direct manipulation of attributes.
+
+        * css/CSSParser.cpp:
+        Templatized new or existing helper methods
+        (WebCore::makeLower):
+        (WebCore::isCSSLetter):
+        (WebCore::isCSSEscape):
+        (WebCore::isURILetter):
+        (WebCore::isIdentifierStartAfterDash):
+        (WebCore::isEqualToCSSIdentifier):
+        (WebCore::checkAndSkipEscape):
+        (WebCore::checkForValidDouble):
+        (WebCore::parseDouble):
+        (WebCore::parseColorIntOrPercentage):
+        (WebCore::isTenthAlpha):
+        (WebCore::parseAlphaValue):
+        (WebCore::mightBeRGBA):
+        (WebCore::mightBeRGB):
+        (WebCore::fastParseColorInternal):
+        (WebCore::CSSParser::fastParseColor):
+        (WebCore::CSSParser::parseImageSet):
+        (WebCore::skipWhiteSpace):
+        (WebCore::CSSParser::currentCharacter16):
+        (WebCore::CSSParser::isIdentifierStart):
+        (WebCore::CSSParser::checkAndSkipString):
+        (WebCore::CSSParser::parseUnicodeRange):
+        (WebCore::CSSParser::parseNthChild):
+        (WebCore::CSSParser::parseNthChildExtra):
+        (WebCore::CSSParser::detectFunctionTypeToken):
+        (WebCore::CSSParser::detectMediaQueryToken):
+        (WebCore::CSSParser::detectNumberToken):
+        (WebCore::CSSParser::detectDashToken):
+        (WebCore::CSSParser::detectAtToken):
+        (WebCore::CSSParser::setRuleHeaderEnd):
+        (WebCore::cssPropertyID):
+        (WebCore::isCSSTokenizerIdentifier):
+        (WebCore::isCSSTokenizerURL):
+
+        (WebCore::CSSParser::CSSParser): Updated constructor for initializing new attributes.
+
+        (WebCore::CSSParserString::lower): Calls new makeLower() template helper.
+
+        (WebCore::CSSParser::setupParser): Added 8 bit path and set up parser appropriate to
+        string type.
+
+        (WebCore::equal): Updated to use CSSParserString getters and StringImpl::equal
+        (WebCore::equalIgnoringCase): Updated to use CSSParserString getters and
+        StringImpl::equalIgnoringCase
+        (WebCore::parseColorValue): Updated to use new CSSParserString::init()
+        (WebCore::parseSimpleLength):
+        (WebCore::parseKeywordValue): Updated to use new CSSParserString::init()
+        (WebCore::parseTransformArguments):
+        (WebCore::CSSParser::parseSystemColor): Updated to use new CSSParserString::init()
+        (WebCore::CSSParser::storeVariableDeclaration): Create right character sized AtomicString.
+        (WebCore::FontFamilyValueBuilder::add):
+        (WebCore::TransformOperationInfo::TransformOperationInfo):
+        (WebCore::CSSParser::parseFontFeatureTag):
+
+        (WebCore::CSSParser::parseEscape): Now only parses an escape and returns the resulting
+        Unicode value as an unsigned.
+        (WebCore::CSSParser::UnicodeToChars): New method to write out unicode character(s)
+        based on character type.
+        (WebCore::CSSParser::parseIdentifierInternal): Templated helper.
+        (WebCore::CSSParser::parseIdentifier): Parses identifiers, possibly upconverting
+        the result when a unicode escape is found in an 8 bit source.
+        (WebCore::CSSParser::parseStringInternal): Templated helper.
+        (WebCore::CSSParser::parseString): Parses strings, possibly upconverting
+        the result when a unicode escape is found in an 8 bit source.
+        (WebCore::CSSParser::parseURIInternal): Templated helper.
+        (WebCore::CSSParser::parseURI): Templated and split logic out to parseURIInternal.
+        Reparses a parsed identifier to see if it is a URI.  This method doesn't need to up
+        convert from 8 to 16 bits since that would have been done in parseIdentfier().
+        (WebCore::CSSParser::realLex): Lot of template related changes.  Removed yylval->string
+        ASSERT checks at the end, since they are too naive to handle upconverted identifier,
+        string and URIs.  They compared source pointers (m_tokenStart) with resulting strings.
+        (WebCore::fixUnparsedProperties):
+        (WebCore::CSSParser::fixUnparsedPropertyRanges): Added new template helper with same name.
+        (WebCore::CSSParser::markRuleHeaderStart):
+        (WebCore::CSSParser::markRuleHeaderEnd):
+        (WebCore::CSSParser::markRuleBodyStart):
+        (WebCore::CSSParser::markRuleBodyEnd):
+        (WebCore::CSSParser::markPropertyStart):
+        (WebCore::CSSParser::markPropertyEnd):
+        (WebCore::cssValueKeywordID):
+
+        * css/CSSParser.h:
+        (CSSParser):
+        (WebCore::CSSParser::lex): Made this inline helper that calls correct realLex().
+        (WebCore::CSSParser::is8BitSource):
+        (WebCore::CSSParser::tokenStartOffset): Templated method returning offset in source
+        of the current token start.
+        (WebCore::CSSParser::tokenStartChar): Templated access to m_tokenStart.
+        (WebCore::cssyylex): Made this inline to avoid call.
+        * css/CSSParserValues.h:
+        (WebCore::CSSParserString::init): Added three new initialization methods.
+
+        New setters, getters and helper methods.
+        (WebCore::CSSParserString::clear):
+        (WebCore::CSSParserString::is8Bit):
+        (WebCore::CSSParserString::characters8):
+        (WebCore::CSSParserString::characters16):
+        (WebCore::CSSParserString::length):
+        (WebCore::CSSParserString::setLength):
+        (WebCore::CSSParserString::operator[]):
+        (WebCore::CSSParserString::equalIgnoringCase):
+        (WebCore::CSSParserString::operator String):
+        (WebCore::CSSParserString::operator AtomicString):
+
+        Other methods templatized to support changes in CSSParser.
+        * platform/graphics/Color.cpp:
+        (WebCore::parseHexColorInternal):
+        (WebCore::Color::parseHexColor): New LChar flavor
+        (WebCore::Color::Color):
+        * platform/graphics/Color.h:
+        (Color):
+        * platform/text/TextEncoding.cpp:
+        (WebCore::TextEncoding::TextEncoding):
+        * platform/text/TextEncodingRegistry.cpp:
+        (WebCore::atomicCanonicalTextEncodingName):
+        * platform/text/TextEncodingRegistry.h:
+        * svg/SVGParserUtilities.cpp:
+        (WebCore::genericParseNumber):
+        (WebCore::parseSVGNumber):
+        * svg/SVGParserUtilities.h:
+        (WebCore::isSVGSpace):
+        (WebCore::skipOptionalSVGSpaces):
+        (WebCore::skipOptionalSVGSpacesOrDelimiter):
+
 2012-08-31  David Hyatt  <hyatt@apple.com>
 
         [New Multicolumn] Make RenderFlowThreads into selection roots.
