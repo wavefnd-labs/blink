@@ -1,3 +1,22 @@
+2012-09-01  Andreas Kling  <kling@webkit.org>
+
+        Share inline style between cloned Nodes (copy on write.)
+        <http://webkit.org/b/95451>
+
+        Reviewed by Antti Koivisto.
+
+        When cloning a Node, use an immutable StylePropertySet for the new Node's inline style.
+        If the old Node already had an immutable inline style, we now reuse that, avoiding a copy.
+        Copying is deferred until mutation (either via CSSOM or setting of the style attribute.)
+
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::cloneDataFrom):
+        * css/StylePropertySet.h:
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::immutableCopyIfNeeded):
+
+            Added. Simply returns 'this' if the object is already immutable, otherwise creates a new one.
+
 2012-09-01  Dirk Schulze  <krit@webkit.org>
 
         [Qt] Fix the --minimal build after r127327
