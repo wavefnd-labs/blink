@@ -1,3 +1,34 @@
+2012-08-31  Tony Chang  <tony@chromium.org>
+
+        Make computeBlockDirectionMargins const
+        https://bugs.webkit.org/show_bug.cgi?id=95595
+
+        Reviewed by Ojan Vafai.
+
+        This is a step in making computeLogicalHeight const.
+        Refactor RenderBox::computeBlockDirectionMargins and make it const.
+        Add a helper method computeAndSetBlockDirectionMargins for the callers outside of
+        computeLogicalHeight that are calling this.
+
+        No new tests, this is already covered by tests in fast/writing-mode and fast/multicol.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::marginBeforeEstimateForChild): Switch to computeAndSetBlockDirectionMargins
+        (WebCore::RenderBlock::layoutBlockChild): Switch to computeAndSetBlockDirectionMargins
+        (WebCore::RenderBlock::insertFloatingObject): Switch to computeAndSetBlockDirectionMargins
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeLogicalHeight): Use const version and fill in a MarginValues struct (to be merged in the next patch).
+        (WebCore::RenderBox::computeBlockDirectionMargins): Pass in out params.
+        (WebCore):
+        (WebCore::RenderBox::computeAndSetBlockDirectionMargins): Does the same as the old computeBlockDirectionMargins.
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutHorizontalBox): Switch to computeAndSetBlockDirectionMargins
+        (WebCore::RenderDeprecatedFlexibleBox::layoutVerticalBox): Switch to computeAndSetBlockDirectionMargins
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::layout): Switch to computeAndSetBlockDirectionMargins
+
 2012-08-30  Dirk Schulze  <krit@webkit.org>
 
         Introduce new CSS property for clip-path
