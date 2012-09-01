@@ -1,3 +1,23 @@
+2012-09-01  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        [Gtk] Incorrect/unexpected characters in the text of certain accessibles
+        https://bugs.webkit.org/show_bug.cgi?id=95180
+
+        Reviewed by Chris Fleizach.
+
+        The bug was caused by failing to properly handle anonymous block text
+        which had object replacement characters (multibyte) in it. Calculating
+        the string length based on the UTF-8 string meant that we were returning
+        more characters than were there and in danger of splitting a multibyte
+        character.
+
+        Tests: platform/gtk/accessibility/entry-and-password.html
+               platform/gtk/accessibility/replaced-objects-in-anonymous-blocks.html
+
+        * accessibility/gtk/WebKitAccessibleInterfaceText.cpp:
+        (webkitAccessibleTextGetText): Convert the text returned by textForObject()
+        to Unicode before calculating its length.
+
 2012-09-01  Adam Barth  <abarth@webkit.org>
 
         Remove all-but-one use of WTF::String::operator+= from WebCore
