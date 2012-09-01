@@ -1,3 +1,36 @@
+2012-09-01  Ned Holbrook  <nholbrook@apple.com>
+
+        Regression(r126763): Heap-use-after-free in WebCore::nextBreakablePosition
+        https://bugs.webkit.org/show_bug.cgi?id=95229
+
+        Reviewed by Dan Bernstein.
+
+        TextLayout and LazyLineBreakIterator cache a RenderText's string during line breaking but RenderCounter
+        and RenderQuote can replace that string during preferred width calculation. This patch adds a non-virtual member
+        function to RenderText named updateTextIfNeeded() that triggers immediate string replacement by calling
+        the new virtual updateText() if necessary, which in turn calls computePreferredLogicalWidths(). In this way
+        RenderBlock::LineBreaker::nextLineBreak() can ensure a RenderText's string is current before caching it.
+
+        Test: fast/css/content/content-quotes-crash.html
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::dirtyLineBoxesForRenderer): Drive-by: replace existing code with the equivalent updateTextIfNeeded().
+        (WebCore::RenderBlock::LineBreaker::nextLineBreak): Use updateTextIfNeeded() prior to caching RenderText string.
+        * rendering/RenderCounter.cpp:
+        (WebCore::RenderCounter::updateText): Call computePreferredLogicalWidths().
+        (WebCore):
+        * rendering/RenderCounter.h:
+        (RenderCounter):
+        * rendering/RenderQuote.cpp:
+        (WebCore::RenderQuote::updateText): Call computePreferredLogicalWidths().
+        (WebCore):
+        * rendering/RenderQuote.h:
+        (RenderQuote):
+        * rendering/RenderText.h:
+        (WebCore::RenderText::updateTextIfNeeded): Only call virtual updateText() if necessary.
+        (RenderText):
+        (WebCore::RenderText::updateText): Add no-op default implementation for new virtual member function.
+
 2012-09-01  Li Yin  <li.yin@intel.com>
 
         fast/events/message-port-clone.html hits ASSERT in Debug (usually in later tests)
