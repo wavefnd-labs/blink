@@ -1,3 +1,71 @@
+2012-09-01  Adam Barth  <abarth@webkit.org>
+
+        Remove all-but-one use of WTF::String::operator+= from WebCore
+        https://bugs.webkit.org/show_bug.cgi?id=95508
+
+        Reviewed by Benjamin Poulain.
+
+        This patch removes all the uses of WTF::String::operator+= from
+        WebCore, except those in WorkerScriptLoader (which need a more delicate
+        patch). There were actually a handful of legitimate use cases for += in
+        this group. I've replaced them with calls to String::append rather than
+        += so that we can remove += and encourage most contributors to use
+        more efficient string idioms.
+
+        (There are likely some more uses in WebCore hiding in port-specific
+        code---this patch covers only those call sites found when compiling the
+        chromium-mac port.)
+
+        * inspector/InspectorStyleTextEditor.cpp:
+        (WebCore::InspectorStyleTextEditor::insertProperty):
+            - This complicated function looks really inefficient, but I didn't
+              have the heart to rewrite it.
+        * inspector/NetworkResourcesData.cpp:
+        (WebCore::NetworkResourcesData::ResourceData::decodeDataToContent):
+        * loader/cache/CachedCSSStyleSheet.cpp:
+        (WebCore::CachedCSSStyleSheet::sheetText):
+        (WebCore::CachedCSSStyleSheet::data):
+        * loader/cache/CachedFont.cpp:
+        (WebCore::CachedFont::ensureSVGFontData):
+        * loader/cache/CachedScript.cpp:
+        (WebCore::CachedScript::script):
+        * loader/cache/CachedXSLStyleSheet.cpp:
+        (WebCore::CachedXSLStyleSheet::data):
+            - This decoder/flush pattern can probably be improved by combining
+              the decode and flush operations, but I didn't do that in this
+              patch.
+        * page/FrameTree.cpp:
+        (WebCore::FrameTree::uniqueChildName):
+            - I found this code very amusing. It's worried enough about
+              efficiency to give a big speech about why snprintf is safe, but
+              then it implicitly performs a large number of mallocs and memcpy
+              operations.
+        * page/Page.cpp:
+        (WebCore::Page::userStyleSheet):
+        * platform/chromium/support/WebHTTPLoadInfo.cpp:
+        (WebKit::addHeader):
+        * platform/chromium/support/WebURLResponse.cpp:
+        (WebKit::WebURLResponse::addHTTPHeaderField):
+            - This header-appending idiom looks like a reasonable use case for
+              String::append.
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::send):
+        (WebCore::XMLHttpRequest::setRequestHeaderInternal):
+        * xml/XPathFunctions.cpp:
+        (WebCore::XPath::FunTranslate::evaluate):
+            - Fixes 6 year old FIXME.
+        * xml/parser/XMLDocumentParser.cpp:
+        (WebCore::XMLDocumentParser::append):
+        * xml/parser/XMLDocumentParser.h:
+        (XMLDocumentParser):
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::doEnd):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::XMLDocumentParser::doEnd):
+            - Changed m_originalSourceForTransform to a SegmentedString so that
+              we don't need to malloc and copy the entire document every time
+              we get more data from the network.
+
 2012-09-01  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Add MediaStream management to RTCPeerConnection
