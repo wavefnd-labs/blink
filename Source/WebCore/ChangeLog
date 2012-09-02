@@ -1,3 +1,48 @@
+2012-08-31  Antti Koivisto  <antti@apple.com>
+
+        Repaints should not be deferred after initial page load is complete
+        https://bugs.webkit.org/show_bug.cgi?id=95480
+
+        Reviewed by Simon Fraser
+
+        Any dynamically triggered resource loading currently sends us back to deferred paint mode, making animation choppy. 
+        This is not the intention of this code.
+
+        This patch adds an additional condition that prevents page from re-entering deferred repaint mode after the initial
+        load has completed. It also cleans up the code slightly.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::checkCompleted):
+        
+            Add additional call to checkStopDelayingDeferredRepaints() after a frame load completes as the
+            new condition in shouldUseLoadTimeDeferredRepaintDelay() looks for this change too.
+
+        * page/FrameView.cpp:
+        (WebCore):
+        
+            Reduced the normal delay from 25ms to 16ms to not interfere with full framerate animation.
+
+        (WebCore::FrameView::syncCompositingStateForThisFrame):
+        (WebCore::FrameView::checkFlushDeferredRepaintsAfterLoadComplete):
+        
+            Ensure the repaint delay is reset after load completes even if we don't currently need a repaint.
+
+        (WebCore::FrameView::flushDeferredRepaints):
+        
+            We had to identical functions, flushDeferredRepaints() and stopDelayingDeferredRepaints(). Remove
+            the latter.
+
+        (WebCore::FrameView::shouldUseLoadTimeDeferredRepaintDelay):
+        
+            Factor the test for using load time repaint timings to a functions. The test for
+            initial page load having completed is new.
+
+        (WebCore::FrameView::updateDeferredRepaintDelay):
+        (WebCore::FrameView::updateLayoutAndStyleIfNeededRecursive):
+        (WebCore::FrameView::setRepaintThrottlingDeferredRepaintDelay):
+        * page/FrameView.h:
+        (FrameView):
+
 2012-09-02  Filip Pizlo  <fpizlo@apple.com>
 
         Don't create access error strings if there is no access error
