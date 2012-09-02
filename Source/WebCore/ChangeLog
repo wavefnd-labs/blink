@@ -1,3 +1,60 @@
+2012-08-31  Dirk Schulze  <krit@webkit.org>
+
+        Use -webkit-clip-path shapes to clip SVG elements
+        https://bugs.webkit.org/show_bug.cgi?id=95620
+
+        Reviewed by Rob Buis.
+
+        This patch adds a path segment for a BasicShape to a given Path object. This
+        path and it's wind rule are used to clip the context of the SVG element.
+
+        Tests: svg/clip-path/clip-path-shape-circle-1-expected.svg
+               svg/clip-path/clip-path-shape-circle-1.svg
+               svg/clip-path/clip-path-shape-circle-2-expected.svg
+               svg/clip-path/clip-path-shape-circle-2.svg
+               svg/clip-path/clip-path-shape-ellipse-1-expected.svg
+               svg/clip-path/clip-path-shape-ellipse-1.svg
+               svg/clip-path/clip-path-shape-ellipse-2-expected.svg
+               svg/clip-path/clip-path-shape-ellipse-2.svg
+               svg/clip-path/clip-path-shape-polygon-1-expected.svg
+               svg/clip-path/clip-path-shape-polygon-1.svg
+               svg/clip-path/clip-path-shape-polygon-2-expected.svg
+               svg/clip-path/clip-path-shape-polygon-2.svg
+               svg/clip-path/clip-path-shape-polygon-3-expected.svg
+               svg/clip-path/clip-path-shape-polygon-3.svg
+               svg/clip-path/clip-path-shape-rounded-rect-1-expected.svg
+               svg/clip-path/clip-path-shape-rounded-rect-1.svg
+               svg/clip-path/clip-path-shape-rounded-rect-2-expected.svg
+               svg/clip-path/clip-path-shape-rounded-rect-2.svg
+
+        * rendering/style/BasicShapes.cpp: Added helper functions that apply path segments to a given path.
+        (WebCore::BasicShapeRectangle::path):
+        (WebCore::BasicShapeCircle::path):
+        (WebCore::BasicShapeEllipse::path):
+        (WebCore::BasicShapePolygon::path):
+        * rendering/style/BasicShapes.h: Make BasicShape virtualized again, since new virtual functions were added.
+        (WebCore::BasicShape::~BasicShape):
+        (BasicShape):
+        (WebCore::BasicShape::windRule): Will return the wind rule of the shape - nonzero by default.
+        (WebCore::BasicShape::BasicShape):
+        (BasicShapeRectangle):
+        (WebCore::BasicShapeRectangle::type): Removed member variable and return type per inheriting class directly.
+        (WebCore::BasicShapeRectangle::BasicShapeRectangle):
+        (BasicShapeCircle):
+        (WebCore::BasicShapeCircle::type): Ditto.
+        (WebCore::BasicShapeCircle::BasicShapeCircle):
+        (BasicShapeEllipse):
+        (WebCore::BasicShapeEllipse::type): Ditto.
+        (WebCore::BasicShapeEllipse::BasicShapeEllipse):
+        (BasicShapePolygon):
+        (WebCore::BasicShapePolygon::windRule):
+        (WebCore::BasicShapePolygon::type): Ditto.
+        (WebCore::BasicShapePolygon::BasicShapePolygon):
+        * rendering/svg/SVGRenderingContext.cpp: If -webkit-clip-path was defined, clip the context to the shape.
+        Right now -webkit-clip-path overrides clip-path, so that people don't use both at the same time. Current
+        clip-path property will be replaced, once -webkit-clip-path gets unprefixed.
+        (WebCore::SVGRenderingContext::prepareToRenderSVGContent):
+
 2012-09-01  Ned Holbrook  <nholbrook@apple.com>
 
         Regression(r126763): Heap-use-after-free in WebCore::nextBreakablePosition
