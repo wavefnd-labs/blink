@@ -1,5 +1,33 @@
 2012-09-02  Yoshifumi Inoue  <yosin@chromium.org>
 
+        [Forms] Empty visible value of AM/PM field of multiple fields time input UI should display variable number of "-" based on maximum number of labels
+        https://bugs.webkit.org/show_bug.cgi?id=95660
+
+        Reviewed by Kent Tamura.
+
+        This patch changes visible empty value of AM/PM field in multiple
+        fields time input UI to "-", "--", "---", and so on based on maximum
+        length of AM/PM labels. In current implementation, it is always "--"
+        regardless locale, although on Arabic, AM/PM are represented in one
+        character.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. Once multiple field time input UI uses "lang" HTML
+        attribute to take time format, we can write a test for this patch.
+
+        * html/shadow/DateTimeSymbolicFieldElement.cpp:
+        (makeVisibleEmptyValue): Build visible empty value from maximum length
+        of labels.
+        (WebCore::DateTimeSymbolicFieldElement::visibleEmptyValue): Changed to
+        use m_visibleEmptyValue.
+        * html/shadow/DateTimeSymbolicFieldElement.h:
+        (WebCore::DateTimeSymbolicFieldElement): Added new member variable
+        m_visibleEmptyValue to hold visible empty value.
+
+2012-09-02  Yoshifumi Inoue  <yosin@chromium.org>
+
         [Forms] AM/PM field of multiple fields time input UI should be fixed width
         https://bugs.webkit.org/show_bug.cgi?id=95542
 
