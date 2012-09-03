@@ -1,3 +1,30 @@
+2012-09-02  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] AM/PM field of multiple fields time input UI should be fixed width
+        https://bugs.webkit.org/show_bug.cgi?id=95542
+
+        Reviewed by Kent Tamura.
+
+        This patch changes width of AM/PM field of multiple field time input
+        UI fixed as maximum width of labels or "--".
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. Once multiple field time input UI uses "lang" HTML
+        attribute to take time format, we can write a test for this patch.
+
+        * css/html.css:
+        (input::-webkit-datetime-edit-ampm-field): Added "display" property to "inline-block" for setting width.
+        Added "text-align" property to "center".
+        * html/shadow/DateTimeSymbolicFieldElement.cpp:
+        (WebCore::DateTimeSymbolicFieldElement::DateTimeSymbolicFieldElement): Changed to call setHasCustomCallback().
+        (WebCore::DateTimeSymbolicFieldElement::customStyleForRenderer): Added for setting field with from maximum width of labels.
+        * html/shadow/DateTimeSymbolicFieldElement.h:
+        (WebCore::DateTimeSymbolicFieldElement::visibleEmptyValue): Added for using visible empty value in customStyleForRenderer() and visibleValue().
+        (WebCore::DateTimeSymbolicFieldElement::visibleValue): Changed to call visibleEmptyValue() instead of using literal "--".
+        (DateTimeSymbolicFieldElement): Added a declaration of customStyleForRenderer().
+
 2012-09-02  Benjamin Poulain  <bpoulain@apple.com>
 
         Improve the way we use convertedSpaceString() in convertHTMLTextToInterchangeFormat()
