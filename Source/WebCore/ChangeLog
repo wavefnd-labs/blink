@@ -1,3 +1,27 @@
+2012-09-04  Otto Derek Cheung  <otcheung@rim.com>
+
+        [BlackBerry] Browser is not sending secured Cookie back to server over HTTPS connection
+        https://bugs.webkit.org/show_bug.cgi?id=95747
+
+        PR199729
+
+        Reviewed by Rob Buis.
+        Internally Reviewed by Joe Mason.
+
+        If the browser has never saved a secure protocol cookie in its mapping before,
+        and it tries to set and retreive a secure cookie over a non-secure
+        protocol, it will not show up because the link between the secure and
+        non-secure mapping isn't created until a cookie (sent through secure) is set.
+
+        The fix is to also check for the linkage in getRawCookies. Note that we cannot
+        map the secure CookieMap to the non-secure one because getRawCookies is a const
+        function.
+
+        Manually tested using our Browser Test suite.
+
+        * platform/blackberry/CookieManager.cpp:
+        (WebCore::CookieManager::getRawCookies):
+
 2012-09-04  Philippe Normand  <pnormand@igalia.com>
 
         [GStreamer] 0.11 build breaks due to rename of gst_message_new_duration
