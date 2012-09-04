@@ -1,3 +1,28 @@
+2012-09-04  Simon Fraser  <simon.fraser@apple.com>
+
+        Regression: Heap-use-after-free in WebCore::FrameView::scrollContentsFastPath
+        https://bugs.webkit.org/show_bug.cgi?id=95754
+
+        Reviewed by Dave Hyatt.
+
+        It's possible to have a renderer with position:fixed or sticky style,
+        but no layer, for example a RenderScrollBarPart. Don't register such
+        renderers with the FrameView.
+        
+        Moved the code that registers/unregisters with the FrameView from
+        styleWillChange() to styleDidChange(), since in the latter case
+        we can check if we have a RenderLayer. Only register renderers with layers.
+        We always unregister, which required removing an assertion in
+        FrameView::removeFixedObject(), and replacing it with a null check of m_fixedObjects.
+
+        Test: fast/css/remove-fixed-resizer-crash.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::removeFixedObject):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::styleWillChange):
+        (WebCore::RenderBoxModelObject::styleDidChange):
+
 2012-09-04  Dominik Röttsches  <dominik.rottsches@intel.com>
 
         ResourceErrorBase needs to identify timeouts
