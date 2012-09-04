@@ -1,3 +1,59 @@
+2012-09-04  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: Create JavaScriptSources based on network resources.
+        https://bugs.webkit.org/show_bug.cgi?id=95352
+
+        Reviewed by Pavel Feldman.
+
+        Introduced NetworkUISourceCodeProvider that is listening for ResourceTreeModel and creates UISourceCodes for them.
+        RawSourceCode does not create uiSourceCodes based on resource anymore (this is done by NetworkUISourceCodeProvider instead).
+        Moved script <-> uiSourceCode binding logic from RawSourceCode to ResourceScriptMapping.
+        Removed rawSourceCode as it was not needed anymore.
+
+        Tests: inspector/debugger/network-uisourcecode-provider.html
+               inspector/debugger/resource-script-mapping.html
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/CompilerScriptMapping.js:
+        * inspector/front-end/DebuggerModel.js:
+        (WebInspector.DebuggerDispatcher.prototype.scriptFailedToParse):
+        * inspector/front-end/JavaScriptSource.js:
+        (WebInspector.JavaScriptSource):
+        * inspector/front-end/NetworkUISourceCodeProvider.js: Renamed from Source/WebCore/inspector/front-end/StylesUISourceCodeProvider.js.
+        (WebInspector.NetworkUISourceCodeProvider):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._populate):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._styleResourceAdded):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._scriptResourceAdded.resourceFinished):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._scriptResourceAdded):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._addJavaScriptSource):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._addUISourceCode):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._resourceAdded):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._reset):
+        * inspector/front-end/RawSourceCode.js:
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping):
+        (WebInspector.ResourceScriptMapping.prototype.rawLocationToUILocation):
+        (WebInspector.ResourceScriptMapping.prototype._bindUISourceCodeToScripts):
+        (WebInspector.ResourceScriptMapping.prototype._scriptsForSourceURL):
+        (WebInspector.ResourceScriptMapping.prototype._addOrReplaceTemporaryUISourceCode.get var):
+        (WebInspector.ResourceScriptMapping.prototype._addOrReplaceTemporaryUISourceCode):
+        (WebInspector.ResourceScriptMapping.prototype.get _uiSourceCodeReplaced):
+        (WebInspector.ResourceScriptMapping.prototype._reset):
+        * inspector/front-end/ScriptSnippetModel.js:
+        (WebInspector.ScriptSnippetModel.prototype._addScriptSnippet):
+        (WebInspector.ScriptSnippetModel.prototype._createUISourceCodeForScript):
+        (WebInspector.SnippetJavaScriptSource):
+        * inspector/front-end/UISourceCode.js:
+        (WebInspector.UISourceCode):
+        (WebInspector.UISourceCode.prototype.uiLocationToRawLocation):
+        (WebInspector.UISourceCode.prototype.setSourceMapping):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/Workspace.js: Drive-by: fixed duplicating uiSourceCodes in workspace.
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/inspector.js:
+
 2012-09-04  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [WebGL] Save gl.getError() status before taking a WebGL state snapshot and restore it afterwards
