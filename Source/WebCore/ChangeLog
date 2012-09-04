@@ -1,3 +1,50 @@
+2012-09-04  Sami Kyostila  <skyostil@google.com>
+
+        Register scrolling layers with ScrollingCoordinator
+        https://bugs.webkit.org/show_bug.cgi?id=78862
+
+        Reviewed by James Robinson.
+
+        In order to allow scrollable child layers to be scrolled off the main
+        thread, register them with the ScrollingCoordinator. These layers are
+        also removed from the non-fast scrollable region.
+
+        Whenever the scroll offset or other scroll geometry related attribute of
+        a compositor scrolled layer changes, the ScrollingCoordinator is
+        informed to allow it to update its internal representation of the
+        scrollable layer.
+
+        No tests because the ScrollingCoordinator is currently not testable.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::computeNonFastScrollableRegion): Composited scrolling layers
+        can be scrolled off the main thread.
+        (WebCore):
+        (WebCore::ScrollingCoordinator::scrollableAreaScrollLayerDidChange):
+        Callback to ScrollingCoordinator about changes the composited scrolling layers.
+        * page/scrolling/ScrollingCoordinator.h:
+        (WebCore):
+        (ScrollingCoordinator):
+        * page/scrolling/ScrollingCoordinatorNone.cpp:
+        (WebCore):
+        (WebCore::ScrollingCoordinator::scrollableAreaScrollLayerDidChange):
+        * platform/ScrollableArea.h:
+        (WebCore::ScrollableArea::usesCompositedScrolling):
+        * rendering/RenderLayer.cpp:
+        (WebCore):
+        (WebCore::RenderLayer::usesCompositedScrolling):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        (WebCore::RenderLayer::usesCompositedScrolling):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+        (WebCore::RenderLayerBacking::updateScrollingLayers):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::scrollingLayerDidChange):
+        (WebCore):
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+
 2012-09-04  Brian Anderson  <brianderson@chromium.org>
 
         [chromium] Do not allow infinite pending frames in CCFrameRateController
