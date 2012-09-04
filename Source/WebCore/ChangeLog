@@ -1,3 +1,29 @@
+2012-09-04  Christophe Dumez  <christophe.dumez@intel.com>
+
+        Automatic features should work in sandboxed iframes if "allow-scripts" flag is set
+        https://bugs.webkit.org/show_bug.cgi?id=93961
+
+        Reviewed by Adam Barth.
+
+        Allow automatic features (video autoplay and form control
+        autofocus) in a sandboxed iframe that has "allow-scripts"
+        flag set. This behavior is according to the latest
+        specification at:
+        http://dev.w3.org/html5/spec/browsers.html#attr-iframe-sandbox-allow-same-origin
+
+        This sandboxed automatic features browsing context flag is
+        relaxed by the same keyword as scripts, because when
+        scripts are enabled these features are trivially possible
+        anyway, and it would be unfortunate to force authors to
+        use script to do them when sandboxed rather than allowing
+        them to use the declarative features.
+
+        Tests: fast/forms/autofocus-in-sandbox-with-allow-scripts.html
+               media/auto-play-in-sandbox-with-allow-scripts.html
+
+        * dom/SecurityContext.cpp:
+        (WebCore::SecurityContext::parseSandboxPolicy):
+
 2012-09-04  Sami Kyostila  <skyostil@google.com>
 
         Register scrolling layers with ScrollingCoordinator
