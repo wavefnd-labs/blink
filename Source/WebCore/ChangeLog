@@ -1,3 +1,23 @@
+2012-09-04  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: IDBRequest leaks if IDBCursor closes and no further events fired
+        https://bugs.webkit.org/show_bug.cgi?id=95777
+
+        Reviewed by Tony Chang.
+
+        IDBRequests are kept alive as long as they may fire events, which includes
+        if the associated IDBCursor object can be advanced. When the transaction
+        is finished the IDBCursor is notified which in turn tells the IDBRequest
+        that the cursor won't be the source of more events. However, if this occurs
+        and no further events fire the IDBRequest doesn't clear it's "has pending
+        activity flag". Clear the flag on the notification if the request is
+        otherwise complete.
+
+        No new tests - ActiveDOMObjects and leaks are persnickety.
+
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::finishCursor):
+
 2012-09-04  Max Vujovic  <mvujovic@adobe.com>
 
         [CSS Shaders] Implement multiply, screen, darken, lighten, difference, exclusion blend modes.
