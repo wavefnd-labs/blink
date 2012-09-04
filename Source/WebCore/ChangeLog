@@ -1,3 +1,31 @@
+2012-09-04  Tim Horton  <timothy_horton@apple.com>
+
+        ASSERTion failure when SVG element is removed from document and readded
+        https://bugs.webkit.org/show_bug.cgi?id=95517
+        <rdar://problem/12175583>
+
+        Reviewed by Brady Eidson.
+
+        Previously, SVG animations would cease to animate when their parent
+        <svg> element was removed and re-added to the document.
+
+        Instead, to match Firefox and Opera, we should continue the animation
+        with the same beginTime (i.e. the animation continues as if it had never
+        been removed from the document).
+
+        Test: svg/animations/reinserting-svg-into-document.html
+
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::insertedInto): Don't call begin() on an already-started SMILTimeContainer().
+        * svg/animation/SMILTimeContainer.cpp: 
+        (WebCore::SMILTimeContainer::isStarted): Added.
+        * svg/animation/SMILTimeContainer.h: Add isStarted().
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::insertedInto): Always reschedule SVGSMILElements with
+        their parent SMILTimeContainer when they are inserted into the document, otherwise
+        they are lost (and never again update) when their subtree is removed and then
+        readded to the document.
+
 2012-09-04  Andrei Bucur  <abucur@adobe.com>
 
         [CSS Regions] Destroying a render named flow thread without unregistering left-over content nodes triggered an assertion.
