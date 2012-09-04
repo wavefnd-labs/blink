@@ -1,3 +1,41 @@
+2012-09-03  Andreas Kling  <kling@webkit.org>
+
+        Share immutable ElementAttributeData between elements with identical attributes.
+        <http://webkit.org/b/94990>
+
+        Reviewed by Antti Koivisto.
+
+        Keep a cache of ElementAttributeData objects for a given set of attributes and reuse
+        them in elements with identical attribute maps. ElementAttributeData is made ref-counted
+        to facilitate this. A copy-on-write mechanism is already in place, since mutating call
+        sites have to go via Element::mutableAttributeData().
+
+        The cache is held by Document and cleared in Document::finishedParsing() since the vast
+        majority of immutable ElementAttributeData will be constructed during parsing.
+
+        On the HTML5 spec at <http://whatwg.org/c/>, we get a cache hit rate of nearly 80%,
+        translating into a 3.5MB reduction in memory use.
+
+        * dom/Document.cpp:
+        (WebCore::Document::finishedParsing):
+        (ImmutableAttributeDataCacheKey):
+        (WebCore::ImmutableAttributeDataCacheKey::ImmutableAttributeDataCacheKey):
+        (WebCore::ImmutableAttributeDataCacheKey::operator!=):
+        (WebCore::ImmutableAttributeDataCacheKey::hash):
+        (ImmutableAttributeDataCacheEntry):
+        (WebCore::Document::cachedImmutableAttributeData):
+        * dom/Document.h:
+        * dom/Element.cpp:
+        (WebCore::Element::parserSetAttributes):
+        * dom/Element.h:
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::createImmutable):
+        (WebCore::ElementAttributeData::ElementAttributeData):
+        * dom/ElementAttributeData.h:
+        (WebCore::ElementAttributeData::create):
+        (ElementAttributeData):
+        (WebCore::ElementAttributeData::makeMutable):
+
 2012-09-03  Peter Wang  <peter.wang@torchmobile.com.cn>
 
         Web Inspector: the URL of worker inspector window sometimes is invalid
