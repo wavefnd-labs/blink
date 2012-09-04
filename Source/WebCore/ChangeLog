@@ -1,3 +1,40 @@
+2012-08-31  Simon Hausmann  <simon.hausmann@nokia.com>
+
+        [Qt] Port the Qt pixmap JS bindings to use the JSC C API
+        https://bugs.webkit.org/show_bug.cgi?id=94702
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Based on patch by Noam Rosenthal.
+
+        The conversion uses a simple JSClassRef based binding and only a few
+        uses of private JSC API for the HTML element DOM bindings remain.
+
+        This is essentially used for wrapping QPixmap and QImage types in
+        JavaScript and the other way around, for retrieving the image data
+        out of a HTML image element when converting from JS/DOM to Qt.
+
+        * bridge/qt/qt_pixmapruntime.cpp:
+        (JSC::Bindings::copyPixels):
+        (JSC::Bindings::toPixmap):
+        (JSC::Bindings::toImage):
+        (JSC::Bindings::imageSizeForVariant):
+        (JSC::Bindings::getPixmapWidth):
+        (JSC::Bindings::getPixmapHeight):
+        (JSC::Bindings::assignToHTMLImageElement):
+        (JSC::Bindings::pixmapToImageData):
+        (JSC::Bindings::pixmapToDataUrl):
+        (JSC::Bindings::pixmapToString):
+        (JSC::Bindings::QtPixmapRuntime::toJS):
+        (JSC::Bindings::QtPixmapRuntime::toQt):
+        (JSC::Bindings::QtPixmapRuntime::canHandle):
+        (JSC::Bindings::QtPixmapRuntime::getClassRef):
+        * bridge/qt/qt_pixmapruntime.h:
+        (QtPixmapRuntime):
+        * bridge/qt/qt_runtime.cpp:
+        (JSC::Bindings::convertValueToQVariant):
+        (JSC::Bindings::convertQVariantToValue):
+
 2012-09-03  Andreas Kling  <kling@webkit.org>
 
         Share immutable ElementAttributeData between elements with identical attributes.
