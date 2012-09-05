@@ -1,3 +1,42 @@
+2012-09-04  Sergey Glazunov  <serg.glazunov@gmail.com>
+
+        Frame element doesn't always unload its child frame.
+        https://bugs.webkit.org/show_bug.cgi?id=94717
+
+        Reviewed by Hajime Morita.
+
+        It's possible for a frame element that has been removed from the document
+        to retain an active child frame. This inconsistent state may become a source
+        of security vulnerabilities.
+
+        The patch adds a global HashSet to store the nodes currently processed by
+        ChildFrameDisconnector. Insertion into these nodes' subtrees is not allowed until
+        the processing is complete.
+
+        Also, the ChildFrameDisconnector call in removeChild(ren) is now immediately
+        followed by the actual removal.
+
+        Test: fast/frames/out-of-document-iframe-has-child-frame.html
+
+        * dom/ContainerNode.cpp:
+        (WebCore::willRemoveChildren): Move the ChildFrameDisconnector call out of a loop.
+        (WebCore::ContainerNode::removeChild): Rearrange some event firing code.
+        (WebCore::ContainerNode::removeChildren): Ditto.
+        * dom/ContainerNodeAlgorithms.cpp:
+        (WebCore::ChildFrameDisconnector::collectDescendant): Pass a new parameter to collectDescendant(Node*).
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore::ChildFrameDisconnector::ChildFrameDisconnector):
+        (ChildFrameDisconnector): Maintain a list of nodes that have an active ChildFrameDisconnector.
+        (WebCore::ChildFrameDisconnector::~ChildFrameDisconnector):
+        (WebCore::ChildFrameDisconnector::rootNodes):
+        (WebCore::ChildFrameDisconnector::collectDescendant): Add ShouldIncludeRoot parameter.
+        (WebCore::ChildFrameDisconnector::nodeHasDisconnector):
+        (WebCore):
+        * dom/Node.cpp:
+        (WebCore::checkAcceptChild): Reject a parent node if it or one of its parents has an active ChildFrameDisconnector.
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::didNotifySubtreeInsertions): Check if an element is still in the document.
+
 2012-09-03  Sam Weinig  <sam@webkit.org>
 
         Part 1 of removing PlatformString.h, move remaining functions to new homes
