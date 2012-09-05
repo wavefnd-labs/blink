@@ -1,3 +1,46 @@
+2012-09-04  Keishi Hattori  <keishi@webkit.org>
+
+        Move PagePopupClient implementation for input[type=date] to Chromium WebKit layer
+        https://bugs.webkit.org/show_bug.cgi?id=95681
+
+        Reviewed by Kent Tamura.
+
+        We are moving calendar picker PagePopupClient to WebKit layer so ports
+        can use their platform native chooser UI if they have one.
+        DateTimeChooser, DateTimeChooserClient etc. will be reused when we
+        implement the week picker and month picker.
+
+        No new tests. No behavior change. Covered by existing calendar picker tests.
+
+        * WebCore.gypi:
+        * html/shadow/CalendarPickerElement.cpp:
+        (WebCore::CalendarPickerElement::CalendarPickerElement):
+        (WebCore::CalendarPickerElement::~CalendarPickerElement):
+        (WebCore::CalendarPickerElement::didChooseValue): Called when user chose a value.
+        (WebCore):
+        (WebCore::CalendarPickerElement::didEndChooser): Called when chooser has ended.
+        (WebCore::CalendarPickerElement::openPopup):
+        (WebCore::CalendarPickerElement::closePopup):
+        * html/shadow/CalendarPickerElement.h:
+        (CalendarPickerElement):
+        * loader/EmptyClients.cpp:
+        (WebCore):
+        (WebCore::EmptyChromeClient::openDateTimeChooser):
+        * loader/EmptyClients.h:
+        (EmptyChromeClient):
+        * page/ChromeClient.h:
+        (WebCore):
+        (ChromeClient):
+        * platform/DateTimeChooser.h:
+        (WebCore):
+        (DateTimeChooserParameters): Contains information needed to open the DateTimeChooser.
+        (DateTimeChooser):
+        (WebCore::DateTimeChooser::~DateTimeChooser):
+        * platform/DateTimeChooserClient.h:
+        (WebCore):
+        (DateTimeChooserClient):
+        (WebCore::DateTimeChooserClient::~DateTimeChooserClient):
+
 2012-09-04  Mike Lawther  <mikelawther@chromium.org>
 
         CSS3 calc: expressions with 'em' units do not zoom correctly.
