@@ -1,3 +1,31 @@
+2012-09-05  Sami Kyostila  <skyostil@google.com>
+
+        Enable/disable composited scrolling based on overflow
+        https://bugs.webkit.org/show_bug.cgi?id=95323
+
+        Reviewed by Simon Fraser.
+
+        When an overflow:{auto,overlay} and -webkit-overflow-scrolling:touch
+        element gains or loses overflow, we should correspondingly enable and
+        disable composited scrolling depending on whether the element can be
+        scrolled or not.
+
+        The previous logic in RenderLayer::usesCompositedScrolling() already
+        checked for actual overflow, but we also need to recompute the
+        compositing requirements when the amount of overflow changes during
+        layout. Additionally, layers using composited scrolling are marked as
+        self-painting to ensure they are always promoted to composited layers
+        when needed.
+
+        Test: compositing/overflow/overflow-auto-with-touch-toggle.html
+
+        Note that the behavior for maintaining a stacking context even without
+        the presense of overflow is covered by platform/chromium/compositing/overflow/overflow-scrolling-touch-stacking-context.html.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateScrollInfoAfterLayout):
+        (WebCore::RenderLayer::shouldBeSelfPaintingLayer):
+
 2012-09-05  Mike Fenton  <mifenton@rim.com>
 
         [BlackBerry] PlatformKeyboardEvent::getCurrentModifierState should initialize values.
