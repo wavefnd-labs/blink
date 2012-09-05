@@ -1,3 +1,53 @@
+2012-09-05  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: NMI: extract overloaded instrumentation members for WebCore classes from core NMI code.
+        https://bugs.webkit.org/show_bug.cgi?id=95834
+
+        Reviewed by Yury Semikhatsky.
+
+        I'd like to remove custom instrumentation methods from MemoryInstrumentation class
+        before upstreaming it to WTF. I've done it with help of MemoryInstrumentationTraits template helper.
+
+        Unfortunately it is not possible to use template class because mac-ews bot reports warning: redundant redeclaration of 'something' in same scope.
+        I've found that it is an old problem in gcc that is forced by -Wredundant-decls flag on the bot. See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=15867
+
+        * dom/MemoryInstrumentation.cpp:
+        (WebCore::::addInstrumentedObject):
+        (WebCore):
+        * dom/MemoryInstrumentation.h:
+        (WebCore):
+        (MemoryInstrumentationTraits):
+        (MemoryInstrumentation):
+        (WebCore::MemoryInstrumentation::InstrumentedPointer::InstrumentedPointer):
+        (InstrumentedPointer):
+        (WebCore::MemoryInstrumentation::addObject):
+        (WebCore::MemoryInstrumentation::addInstrumentedObject):
+        (WebCore::MemoryInstrumentation::addRawBuffer):
+        (WebCore::MemoryInstrumentation::OwningTraits::addInstrumentedObject):
+        (WebCore::MemoryInstrumentation::OwningTraits::addObject):
+        (WebCore::::addInstrumentedObject):
+        (WebCore::::addObject):
+        (WebCore::MemoryObjectInfo::MemoryObjectInfo):
+        (WebCore::MemoryObjectInfo::objectType):
+        (WebCore::MemoryObjectInfo::reportObjectInfo):
+        (MemoryObjectInfo):
+        (WebCore::MemoryClassInfo::MemoryClassInfo):
+        (MemoryClassInfo):
+        (WebCore::MemoryInstrumentation::addInstrumentedObjectImpl):
+        (WebCore::MemoryInstrumentation::addObjectImpl):
+        (WebCore::MemoryInstrumentation::addHashMap):
+        (WebCore::MemoryInstrumentation::addHashSet):
+        (WebCore::MemoryInstrumentation::addInstrumentedCollection):
+        (WebCore::MemoryInstrumentation::addInstrumentedMapEntries):
+        (WebCore::MemoryInstrumentation::addInstrumentedMapValues):
+        (WebCore::MemoryInstrumentation::addListHashSet):
+        (WebCore::MemoryInstrumentation::addVector):
+        * inspector/MemoryInstrumentationImpl.cpp:
+        (WebCore::MemoryInstrumentationImpl::countObjectSize):
+        * inspector/MemoryInstrumentationImpl.h:
+        (WebCore::MemoryInstrumentationImpl::totalSize):
+        (MemoryInstrumentationImpl):
+
 2012-09-05  Tor Arne Vestbø  <tor.arne.vestbo@nokia.com>
 
         [Qt] Build fix on OS X
