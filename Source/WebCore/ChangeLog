@@ -1,3 +1,26 @@
+2012-09-04  Tony Chang  <tony@chromium.org>
+
+        Add a const version of RenderBox::computeLogicalHeight
+        https://bugs.webkit.org/show_bug.cgi?id=95787
+
+        Reviewed by Ojan Vafai.
+
+        After this, we can rename the old computeLogicalHeight to computeAndSetLogicalHeight
+        to make it clear that it is modifying values.
+
+        No new tests, this should just be a refactor.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::constrainLogicalHeightByMinMax): Make const.
+        (WebCore::RenderBox::computeLogicalHeight): Add a const version that takes a LogicalExtentComputedValues struct for out values.
+        (WebCore::RenderBox::computeLogicalHeightUsing): Make const.
+        (WebCore::RenderBox::computeContentLogicalHeightUsing): Make const.
+        (WebCore::RenderBox::computePercentageLogicalHeight): Add a const cast. I tried to
+        convert everything below to const, but that's not a simple task. Also, computeReplacedLogicalHeightUsing
+        is already using a const_cast.
+        * rendering/RenderBox.h:
+        (RenderBox): Add const to method signatures.
+
 2012-09-04  Dirk Schulze  <krit@webkit.org>
 
         -webkit-clip-path does not apply origin for polygon()
