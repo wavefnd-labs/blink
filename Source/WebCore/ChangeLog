@@ -1,3 +1,52 @@
+2012-09-04  Brian Anderson  <brianderson@chromium.org>
+
+        [chromium] Prevent compositor ticking if it can't draw
+        https://bugs.webkit.org/show_bug.cgi?id=95399
+
+        Reviewed by James Robinson.
+
+        Background extensions had an always ticking compositor even though
+        they couldn't draw. This patch disables the ticks when canDraw is false
+        and adds a notification mechanism for when canDraw changes states so
+        we can recover properly.
+
+        Tests updated for new interfaces.
+        Regression test added to make sure ticking stops when canDraw is false.
+        notifyIfCanDrawChanged test added to make sure notifications are sent
+        for any changes that might affect canDraw.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::CCLayerTreeHostImpl):
+        (WebCore::CCLayerTreeHostImpl::notifyIfCanDrawChanged):
+        (WebCore):
+        (WebCore::CCLayerTreeHostImpl::releaseContentsTextures):
+        (WebCore::CCLayerTreeHostImpl::setRootLayer):
+        (WebCore::CCLayerTreeHostImpl::initializeRenderer):
+        (WebCore::CCLayerTreeHostImpl::setViewportSize):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImplClient):
+        (WebCore::CCLayerTreeHostImpl::resetContentsTexturesPurged):
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCScheduler.cpp:
+        (WebCore::CCScheduler::setCanDraw):
+        (WebCore):
+        (WebCore::CCScheduler::processScheduledActions):
+        * platform/graphics/chromium/cc/CCScheduler.h:
+        (CCScheduler):
+        * platform/graphics/chromium/cc/CCSchedulerStateMachine.cpp:
+        (WebCore::CCSchedulerStateMachine::toString):
+        (WebCore):
+        (WebCore::CCSchedulerStateMachine::vsyncCallbackNeeded):
+        * platform/graphics/chromium/cc/CCSchedulerStateMachine.h:
+        (CCSchedulerStateMachine):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::onCanDrawStateChanged):
+        (WebCore):
+        (WebCore::CCThreadProxy::beginFrame):
+        (WebCore::CCThreadProxy::beginFrameCompleteOnImplThread):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+
 2012-09-04  Adam Barth  <abarth@chromium.org>
 
         Remove WTF_DEPRECATED_STRING_OPERATORS from StylePropertySet.cpp
