@@ -1,3 +1,19 @@
+2012-09-05  Nate Chapin  <japhet@chromium.org>
+
+        [chromium] Some SubstituteData loads broken after r121912
+        https://bugs.webkit.org/show_bug.cgi?id=91685
+
+        Reviewed by Adam Barth.
+
+        Test: WebFrameTest.ReplaceNavigationAfterHistoryNavigation in chromium's webkit_unit_tests.
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::commitData): receivedFirstData() should be called exactly once per load,
+            on the first commit. I had mistakely assumed in r121912 that isReplacing() was true only for multipart
+            loads, and only after the first commit (chromium uses it for some SubstituteData loads to ensure the error page
+            replaces the failed load). We need to check whether we are loading multipart content before assuming isReplacing()
+            will tell us what we need to know.
+
 2012-09-05  James Robinson  <jamesr@chromium.org>
 
         [chromium] Put webcore_platform_files in separate gyp target instead of relying on exclusion patterns
