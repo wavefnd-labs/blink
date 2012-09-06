@@ -1,3 +1,48 @@
+2012-09-05  Matt Falkenhagen  <falken@chromium.org>
+
+        Vertically center non-anchored <dialog> elements
+        https://bugs.webkit.org/show_bug.cgi?id=90670
+
+        Reviewed by Ojan Vafai.
+
+        This adjusts the static default position of non-anchored
+        dialog elements so they are vertically centered in or at the top of
+        the viewport, as per the spec.
+
+        The approach is to add a RenderDialog class whose layout()
+        function adjusts the position after normal RenderBlock::layout runs.
+
+        Test: fast/dom/HTMLDialogElement/non-anchored-dialog-positioning.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * html/HTMLDialogElement.cpp:
+        (WebCore::HTMLDialogElement::createRenderer):
+        (WebCore):
+        * html/HTMLDialogElement.h:
+        (HTMLDialogElement):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::mapAbsoluteToLocalPoint): Remove assertion since now absoluteToLocal is called during layout.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::mapAbsoluteToLocalPoint): Ditto.
+        * rendering/RenderDialog.cpp: Added.
+        (WebCore):
+        (WebCore::RenderDialog::layout): Compute the desired top position in the absolute coordinate system, and then set top to the
+        corresponding local coordinate.
+        * rendering/RenderDialog.h: Added.
+        (WebCore):
+        (RenderDialog):
+        (WebCore::RenderDialog::RenderDialog):
+        (WebCore::RenderDialog::~RenderDialog):
+        (WebCore::RenderDialog::renderName):
+        * rendering/RenderObject.h:
+        (RenderObject):
+        (WebCore::RenderObject::isDialog):
+        * rendering/RenderingAllInOne.cpp:
+
 2012-09-05  Kenichi Ishibashi  <bashi@chromium.org>
 
         Unreviewed, rolling out r127612, r127660, and r127664.
