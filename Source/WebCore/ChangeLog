@@ -1,3 +1,41 @@
+2012-09-06  Simon Fraser  <simon.fraser@apple.com>
+
+        Move RenderView::setFixedPositionedObjectsNeedLayout to FrameView
+        https://bugs.webkit.org/show_bug.cgi?id=96017
+
+        Reviewed by James Robinson.
+
+        FrameView already has a HashSet of RenderObjects whose position
+        is affected by the viewport rect; this contains fixed and sticky-postion
+        objects. RenderView::setFixedPositionedObjectsNeedLayout() was using
+        the RenderView's list of postioned objects, but this omitted sticky-position
+        objects whose container was not the RenderView. So it's simpler to use
+        FrameView's set of fixed/sticky objects.
+        
+        Changed the terminology from "fixed" to "viewport-constrained" for this set
+        of objects.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::useSlowRepaints):
+        (WebCore::FrameView::addViewportConstrainedObject):
+        (WebCore::FrameView::removeViewportConstrainedObject):
+        (WebCore::FrameView::scrollContentsFastPath):
+        (WebCore::FrameView::setFixedVisibleContentRect):
+        (WebCore::FrameView::setViewportConstrainedObjectsNeedLayout):
+        (WebCore::FrameView::repaintFixedElementsAfterScrolling):
+        (WebCore::FrameView::updateFixedElementsAfterScrolling):
+        * page/FrameView.h:
+        (WebCore::FrameView::viewportConstrainedObjects):
+        (WebCore::FrameView::hasViewportConstrainedObjects):
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::hasNonLayerFixedObjects):
+        (WebCore::ScrollingCoordinator::updateShouldUpdateScrollLayerPositionOnMainThread):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::willBeDestroyed):
+        (WebCore::RenderBoxModelObject::styleDidChange):
+        * rendering/RenderView.cpp:
+        * rendering/RenderView.h:
+
 2012-09-06  Andrei Poenaru  <poenaru@adobe.com>
 
         Web Inspector: Protocol Extension: Add "regionLayoutUpdate" event
