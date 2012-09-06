@@ -1,3 +1,39 @@
+2012-09-06  Elliott Sprehn  <esprehn@chromium.org>
+
+        Add new V8DependentRetained that allows keeping a v8::Object alive as long as another v8::Object is alive
+        https://bugs.webkit.org/show_bug.cgi?id=95519
+
+        Reviewed by Adam Barth.
+
+        Add new V8DependentRetained that allows keeping a v8::Object alive as long as another
+        v8::Object is alive. This is useful for keeping callbacks attached to wrappers without
+        keeping strong references to v8::Objects in the C++ side which can result in leaks
+        when cycles are created.
+
+        No new tests needed, this will be used to fix MutationObservers which will have tests.
+
+        * WebCore.gypi:
+        * bindings/v8/V8DependentRetained.h: Added.
+        (WebCore):
+        (V8DependentRetained):
+        (WebCore::V8DependentRetained::V8DependentRetained):
+        (WebCore::V8DependentRetained::~V8DependentRetained):
+        (WebCore::V8DependentRetained::get): Gets the v8::Object value.
+        (WebCore::V8DependentRetained::isEmpty): Checks if the value is still alive.
+        (WebCore::V8DependentRetained::createPropertyName):
+        (WebCore::V8DependentRetained::ownerWeakCallback): Clear the value when the owner is released.
+        (WebCore::V8DependentRetained::valueWeakCallback):
+        (WebCore::V8DependentRetained::release):
+        * bindings/v8/V8HiddenPropertyName.cpp:
+        (WebCore::V8HiddenPropertyName::hiddenReferenceName): Modified to allow creating hidden String or Symbol names.
+        * bindings/v8/V8HiddenPropertyName.h:
+        (V8HiddenPropertyName):
+        * bindings/v8/V8PerIsolateData.cpp:
+        (WebCore::V8PerIsolateData::V8PerIsolateData):
+        * bindings/v8/V8PerIsolateData.h:
+        (WebCore::V8PerIsolateData::nextDependentRetainedId): Returns the next available hidden property index.
+        (V8PerIsolateData):
+
 2012-09-06  Otto Derek Cheung  <otcheung@rim.com>
 
         [BlackBerry] Removing String operator += uses in Cookie Files
