@@ -1,3 +1,77 @@
+2012-09-06  Michael Saboff  <msaboff@apple.com>
+
+        Add 8 bit string data path to TextRun
+        https://bugs.webkit.org/show_bug.cgi?id=95812
+
+        Reviewed by Dan Bernstein.
+
+        Added 8 bit string path to TextRun.  Refactored TextRun::data() and ::characters into
+        8 and 16 bit versions.  Made corresponding changes to users of TextRun.
+        For efl, gtk, qt and win platform specific code using TextRun, only the methods have
+        been renamed and the creation of 8 bit TextRuns has been disabled via compilation
+        flags.  Someone knowledgeable in those platforms will need to make corresponding changes
+        to enable 8 bit processing of TextRuns.
+
+        No changes to functionality - behavior covered by existing tests.
+
+        * platform/graphics/Font.cpp:
+        (WebCore::normalizeSpacesInternal):
+        (WebCore::Font::normalizeSpaces):
+        (WebCore::Font:normalizeSpaces):
+        (WebCore::Font::codePath):
+        (WebCore::Font::expansionOpportunityCount):
+        * platform/graphics/Font.h:
+        (WebCore::Font::characterRangeCodePath):
+        (WebCore::Font::normalizeSpaces):
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::drawBidiText):
+        * platform/graphics/TextRun.cpp:
+        (ExpectedTextRunSize):
+        * platform/graphics/TextRun.h:
+        (WebCore::TextRun::TextRun):
+        (WebCore::TextRun::subRun):
+        (WebCore::TextRun::operator[]):
+        (WebCore::TextRun::data8):
+        (WebCore::TextRun::data16):
+        (WebCore::TextRun::characters8):
+        (WebCore::TextRun::characters16):
+        (WebCore::TextRun::is8Bit):
+        (WebCore::TextRun::setText):
+        (WebCore::TextRun::setCharactersLength):
+        * platform/graphics/WidthIterator.cpp:
+        (WebCore::WidthIterator::WidthIterator):
+        (WebCore::WidthIterator::advance):
+        * platform/graphics/harfbuzz/HarfBuzzShaperBase.cpp:
+        (WebCore::HarfBuzzShaperBase::setNormalizedBuffer):
+        * platform/graphics/harfbuzz/ng/HarfBuzzShaper.cpp:
+        (WebCore::HarfBuzzShaper::HarfBuzzShaper):
+        * platform/graphics/mac/ComplexTextController.cpp:
+        (WebCore::ComplexTextController::ComplexTextController):
+        (WebCore::ComplexTextController::collectComplexTextRuns):
+        (WebCore::ComplexTextController::adjustGlyphsAndAdvances):
+        * platform/graphics/pango/FontPango.cpp:
+        (WebCore::Font::drawComplexText):
+        (WebCore::Font::floatWidthForComplexText):
+        (WebCore::Font::offsetForPositionForComplexText):
+        (WebCore::Font::selectionRectForComplexText):
+        * platform/graphics/qt/FontQt.cpp:
+        (WebCore::Font::drawComplexText):
+        (WebCore::Font::floatWidthForComplexText):
+        (WebCore::Font::offsetForPositionForComplexText):
+        (WebCore::Font::selectionRectForComplexText):
+        * platform/graphics/win/UniscribeController.cpp:
+        (WebCore::UniscribeController::advance):
+        (WebCore::UniscribeController::shapeAndPlaceItem):
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::computeCanUseSimpleFontCodePath):
+        * rendering/svg/SVGTextMetrics.cpp:
+        (WebCore::SVGTextMetrics::SVGTextMetrics):
+        * rendering/svg/SVGTextMetricsBuilder.cpp:
+        (WebCore::SVGTextMetricsBuilder::SVGTextMetricsBuilder):
+        (WebCore::SVGTextMetricsBuilder::measureTextRenderer):
+        * svg/SVGFontData.cpp:
+        (WebCore::SVGFontData::applySVGGlyphSelection):
+
 2012-09-06  James Robinson  <jamesr@chromium.org>
 
         [chromium] Don't link cc in to WebKit.dll when use_libcc_for_compositor=1
@@ -2066,7 +2140,6 @@
         (WebCore::RTCPeerConnectionHandlerDummy::RTCPeerConnectionHandlerDummy):
         Use ASSERT_UNUSED() to suppress -Wunused-private-field warning
 
->>>>>>> .r127747
 2012-09-05  Patrick Gansterer  <paroga@webkit.org>
 
         Build fix for Windows.
@@ -2118,6 +2191,7 @@
         * WebCore.gyp/WebCore.gyp:
         * WebCore.gypi:
 
+>>>>>>> .r127797
 2012-09-05  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
 
         Make RenderStyle::colorIncludingFallback use private getters
