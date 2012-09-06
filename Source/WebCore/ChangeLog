@@ -1,3 +1,38 @@
+2012-09-06  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Vertex attributes should be unbound after a custom filter is applied
+        https://bugs.webkit.org/show_bug.cgi?id=95891
+
+        Reviewed by Dean Jackson.
+
+        Now we unbind the vertex attributes after a custom filter is applied.
+
+        Before this patch, Chromium's GPU process would sometimes print the following error message:
+        "ERROR:gles2_cmd_decoder.cc(5142)] 002CA47B: GL ERROR :GL_INVALID_OPERATION : 
+        glDrawElements: attempt to render with no buffer attached to enabled attribute 2"
+
+        This would happen in the following situation: 
+        1) There are two FECustomFilters on the page.
+        2) One FECustomFilter has a detached mesh. One FECustomFilter has an attached mesh. The 
+           detached FECustomFilter has one more vertex attribute (a_triangleCoord) than the attached
+           FECustomFilter.
+        3) The detached FECustomFilter is destroyed, but a_triangleCoord remains bound.
+        4) The attached FECustomFilter tries to render, but Chromium notices that there is no buffer
+           attached to the a_triangleCoord attribute.
+
+        No new tests. We can't create an automated test for this because it only reproduces using
+        Chromium's GPU process. DRT does not use Chromium's GPU process.
+
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::applyShader):
+            Unbind the vertex attributes after the drawElements call.
+        (WebCore::FECustomFilter::unbindVertexAttribute):
+        (WebCore):
+        (WebCore::FECustomFilter::unbindVertexAttributes):
+            Unbind all of the attributes that we bound earlier.
+        * platform/graphics/filters/FECustomFilter.h:
+        (FECustomFilter):
+
 2012-09-05  Sam Weinig  <sam@webkit.org>
 
         Part 2 of removing PlatformString.h, remove PlatformString.h
