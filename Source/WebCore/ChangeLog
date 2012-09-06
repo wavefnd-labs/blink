@@ -1,3 +1,26 @@
+2012-09-06  Eugene Klyuchnikov  <eustas.bug@gmail.com>
+
+        Web Inspector: Timeline: cache "filteredRecords" for better scrolling performance.
+        https://bugs.webkit.org/show_bug.cgi?id=95731
+
+        Reviewed by Yury Semikhatsky.
+
+        Now scrolling is sluggish on large datasets.
+        Performance degrades, because each refresh causes DFS on all recorded items.
+        Solution: caching/invalidation of DFS (filtering) results.
+
+        Also fixed "truncate selected record range on mode change" glitch.
+
+        * inspector/front-end/TimelinePanel.js:
+        (WebInspector.TimelinePanel):
+        (WebInspector.TimelinePanel.prototype._scheduleRefresh):
+        Add flag for cache invalidation.
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel.prototype.invalidateFilteredRecords):
+        Added.
+        (WebInspector.TimelinePresentationModel.prototype.filteredRecords):
+        Caching/using cached results.
+
 2012-09-06  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: NMI: switch to hierarchical identifiers of MemoryBlockTypes and use these identifiers in protocol.
