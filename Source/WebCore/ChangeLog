@@ -1,3 +1,30 @@
+2012-09-06  Adam Barth  <abarth@chromium.org>
+
+        Three XSLTProcessor functions don't need to be [Custom]
+        https://bugs.webkit.org/show_bug.cgi?id=95899
+
+        Reviewed by Kentaro Hara.
+
+        These functions are marked [Custom] because they predate our
+        improvements to [Optional]. Now that we have
+        [Optional=DefaultIsUndefined], we can autogenerate these functions.
+
+        There is a (slight!) difference in behavior. Now, in the case of a type
+        error, we return null instead of undefined. This change is unlikely to
+        cause compatibility problems because the vast majority of folks will
+        pass the correct arguments, and, in the few cases where folks pass the
+        wrong argument types, null and undefined will likely work similarly
+        (e.g., they're both falsy and throw when you try to access properties).
+
+        * bindings/js/JSXSLTProcessorCustom.cpp:
+        * bindings/v8/custom/V8XSLTProcessorCustom.cpp:
+        * xml/XSLTProcessor.cpp:
+        (WebCore::XSLTProcessor::transformToDocument):
+        (WebCore::XSLTProcessor::transformToFragment):
+        * xml/XSLTProcessor.h:
+        (WebCore::XSLTProcessor::importStylesheet):
+        * xml/XSLTProcessor.idl:
+
 2012-09-06  Patrick Gansterer  <paroga@webkit.org>
 
         Remove String::operator+=() from plugin code
