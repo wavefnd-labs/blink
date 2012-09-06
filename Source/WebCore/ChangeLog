@@ -1,3 +1,66 @@
+2012-09-06  Simon Fraser  <simon.fraser@apple.com>
+
+        Parcel up logic related to sticky positioning into a Constraints class that will later be used for threaded scrolling
+        https://bugs.webkit.org/show_bug.cgi?id=96026
+
+        Reviewed by James Robinson.
+
+        Lay some groundwork for threaded scrolling with fixed position and sticky
+        position objects, by packaging up logic related to how to reposition
+        fixed and sticky things on viewport changes into "constraints" classes.
+        
+        ScrollingConstraints contains a 'ViewportConstraints' base class
+        that is subclassed for sticky position. These classes store
+        data about the constraints that govern the position of an object outside
+        of the render tree, and know how to compute a new position when the
+        viewport changes using only data in the class.
+        
+        This patch changes RenderBoxModelObject to use the StickyPositionViewportConstraints
+        class for computing stick offsets at layout time. In the future, we'll have
+        the scrolling tree store copies of the constraint data for threaded scrolling.
+        
+        * CMakeLists.txt: Add ScrollingConstraints.* to the build.
+        * GNUmakefile.list.am: Ditto
+        * Target.pri: Ditto
+        * WebCore.gypi: Ditto
+        * WebCore.vcproj/WebCore.vcproj: Ditto
+        * WebCore.xcodeproj/project.pbxproj: Ditto
+        * page/scrolling/ScrollingConstraints.cpp: Added.
+        (WebCore::StickyPositionViewportConstraints::computeStickyOffset):
+        (WebCore::StickyPositionViewportConstraints::layerPositionForViewportRect):
+        * page/scrolling/ScrollingConstraints.h: Added.
+        (WebCore::ViewportConstraints::ViewportConstraints):
+        (WebCore::ViewportConstraints::~ViewportConstraints):
+        (WebCore::ViewportConstraints::anchorEdges):
+        (WebCore::ViewportConstraints::hasAnchorEdge):
+        (WebCore::ViewportConstraints::addAnchorEdge):
+        (WebCore::ViewportConstraints::alignmentOffset):
+        (WebCore::ViewportConstraints::setAlignmentOffset):
+        (StickyPositionViewportConstraints):
+        (WebCore::StickyPositionViewportConstraints::StickyPositionViewportConstraints):
+        (WebCore::StickyPositionViewportConstraints::stickyOffsetAtLastLayout):
+        (WebCore::StickyPositionViewportConstraints::setStickyOffsetAtLastLayout):
+        (WebCore::StickyPositionViewportConstraints::layerPositionAtLastLayout):
+        (WebCore::StickyPositionViewportConstraints::setLayerPositionAtLastLayout):
+        (WebCore::StickyPositionViewportConstraints::leftOffset):
+        (WebCore::StickyPositionViewportConstraints::rightOffset):
+        (WebCore::StickyPositionViewportConstraints::topOffset):
+        (WebCore::StickyPositionViewportConstraints::bottomOffset):
+        (WebCore::StickyPositionViewportConstraints::setLeftOffset):
+        (WebCore::StickyPositionViewportConstraints::setRightOffset):
+        (WebCore::StickyPositionViewportConstraints::setTopOffset):
+        (WebCore::StickyPositionViewportConstraints::setBottomOffset):
+        (WebCore::StickyPositionViewportConstraints::setAbsoluteContainingBlockRect):
+        (WebCore::StickyPositionViewportConstraints::setAbsoluteStickyBoxRect):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::computeStickyPositionConstraints): Fill out
+        data in the supplied StickyPositionViewportConstraints instance.
+        (WebCore::RenderBoxModelObject::stickyPositionOffset): Create a
+        StickyPositionViewportConstraints object on the stack and use it to
+        compute the sticky offset.
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+
 2012-09-06  James Robinson  <jamesr@chromium.org>
 
         [chromium] Use WebCompositorSupport functions instead of WebCompositor statics
