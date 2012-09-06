@@ -1,3 +1,49 @@
+2012-09-06  Jeff Timanus  <twiz@chromium.org>
+
+        [Chromium] Remove contentsScale and related logic from GraphicsLayerChromium.
+        https://bugs.webkit.org/show_bug.cgi?id=95094
+
+        Reviewed by Adrienne Walker.
+
+        In the short term, the page-scale logic is to be unified in the CCLayerTreeHost class.  This is a first pass to
+        try to remove the page-scale logic from GraphicsLayerChromium.  This change should be a no-op in terms of
+        contentsScale behaviour.
+
+        Testing covered by existing compositor layout and unit tests.
+
+        * platform/graphics/GraphicsLayer.h:
+        (WebCore::GraphicsLayer::setAppliesPageScale):
+        (WebCore::GraphicsLayer::appliesPageScale):
+            These routines are now virtual, so that they can push the notification to setDisregardsContentsScale in
+            LayerChromium.
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+        (WebCore::GraphicsLayerChromium::GraphicsLayerChromium):
+        (WebCore::GraphicsLayerChromium::setSize):
+        (WebCore::GraphicsLayerChromium::setTransform):
+        (WebCore::GraphicsLayerChromium::updateLayerPreserves3D):
+        (WebCore):
+        (WebCore::GraphicsLayerChromium::setAppliesPageScale):
+        (WebCore::GraphicsLayerChromium::appliesPageScale):
+            Now forwards the appliesPageScaleStatus to the owned layer.
+        * platform/graphics/chromium/GraphicsLayerChromium.h:
+        (GraphicsLayerChromium):
+        (WebCore::GraphicsLayerChromium::contentsLayer):
+        * platform/graphics/chromium/LayerChromium.cpp:
+        (WebCore::LayerChromium::LayerChromium):
+        (WebCore::LayerChromium::setContentsScale):
+        (WebCore):
+        (WebCore::LayerChromium::setBoundsContainPageScale):
+            setAppliesPageScale is renamed to setBoundsContainPageScale in LayerChromium.
+        * platform/graphics/chromium/LayerChromium.h:
+        (LayerChromium):
+        (WebCore::LayerChromium::boundsContainPageScale):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore):
+        (WebCore::setScale):
+        (WebCore::updateLayerScale):
+        (WebCore::CCLayerTreeHost::updateLayers):
+            The contents scale of a layer is now applied in this routine.
+
 2012-09-06  James Robinson  <jamesr@chromium.org>
 
         [chromium] Split platform geometry types into separate static target
@@ -1917,6 +1963,7 @@
         (WebCore::RTCPeerConnectionHandlerDummy::RTCPeerConnectionHandlerDummy):
         Use ASSERT_UNUSED() to suppress -Wunused-private-field warning
 
+>>>>>>> .r127747
 2012-09-05  Patrick Gansterer  <paroga@webkit.org>
 
         Build fix for Windows.
