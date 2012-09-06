@@ -1,3 +1,53 @@
+2012-09-06  Mikhail Pozdnyakov  <mikhail.pozdnyakov@intel.com>
+
+        CSS 3 'overflow-wrap' property implementation
+        https://bugs.webkit.org/show_bug.cgi?id=94475
+
+        Reviewed by Ojan Vafai.
+
+        Added 'overflow-wrap' property implementation according to
+        http://www.w3.org/TR/2012/WD-css3-text-20120814/#overflow-wrap.
+        The specification declares that 'word-wrap' as a shorthand
+        for the 'overflow-wrap' property. So what was basically done
+        is declaring of new 'overflow-wrap' property and renaming
+        of the internal data structures from 'WordWrap' to 'OverflowWrap'.
+        Both 'overflow-wrap' and 'word-wrap' properties share the same
+        handlers and thus have the same behaviour.
+
+        Test: fast/text/overflow-wrap.html
+
+        * WebCore.order: Rename exported setWordWrap to setOverflowWrap.
+        * css/CSSComputedStyleDeclaration.cpp:  Add CSSPropertyOverflowWrap to computedProperties.
+        (WebCore):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp: Validation for the 'overflow-wrap' property.
+        (WebCore::isValidKeywordPropertyAndValue):
+        (WebCore::isKeywordPropertyID):
+        (WebCore::CSSParser::parseValue):
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore::CSSPrimitiveValue::operator EOverflowWrap):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty): CSSPropertyOverflowWrap is inherited.
+        * css/CSSPropertyNames.in: Declare new 'overflow-wrap' property.
+        * css/StyleBuilder.cpp: Assign property handler (same as for 'word-wrap').
+        (WebCore::StyleBuilder::StyleBuilder):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList): Renaming.
+        * rendering/RenderTextControl.cpp: Ditto.
+        (WebCore::RenderTextControl::computeLogicalHeight):
+        * rendering/RenderTextControlSingleLine.cpp: Ditto.
+        (WebCore::RenderTextControlSingleLine::createInnerTextStyle):
+        * rendering/style/RenderStyle.cpp: Ditto.
+        (WebCore::RenderStyle::diff):
+        * rendering/style/RenderStyle.h: Ditto.
+        * rendering/style/RenderStyleConstants.h: Ditto.
+        * rendering/style/StyleRareInheritedData.cpp: Ditto.
+        (WebCore::StyleRareInheritedData::StyleRareInheritedData):
+        (WebCore::StyleRareInheritedData::operator==):
+        * rendering/style/StyleRareInheritedData.h: Ditto.
+        (StyleRareInheritedData):
+
 2012-09-06  Arvid Nilsson  <anilsson@rim.com>
 
         [BlackBerry] Always log shader compilation failure
