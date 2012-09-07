@@ -1,3 +1,26 @@
+2012-09-07  Ojan Vafai  <ojan@chromium.org>
+
+        Fix RenderBox::availableHeight to subtract scrollbars in the right places
+        https://bugs.webkit.org/show_bug.cgi?id=96031
+
+        Reviewed by Tony Chang.
+
+        This matches Firefox 15 and IE9 rendering for the two new tests.
+
+        Tests: fast/block/positioning/percent-top-left-on-relative-position.html
+               fast/css/nested-percent-height-on-replaced.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computePercentageLogicalHeight):
+        Subtract scrollbars when recurring on percentage heights.
+        (WebCore::RenderBox::computeReplacedLogicalHeightUsing):
+        This is the wrong place to subtract scrollbars. availableLogicalHeight
+        should return a value that doesn't include scrollbars.
+        (WebCore::RenderBox::availableLogicalHeightUsing):
+        Subtract scrollbars from specified heights. Also, consolidate the code to
+        use computeContentLogicalHeightUsing. This makes percentage heights use
+        the right containingBlock in quirks mode and makes viewport percentage heights work.
+
 2012-09-07  Tony Chang  <tony@chromium.org>
 
         Make RenderBox::computeLogicalWidthInRegion const
