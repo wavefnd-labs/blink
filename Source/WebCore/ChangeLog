@@ -1,3 +1,70 @@
+2012-09-07  Tim Horton  <timothy_horton@apple.com>
+
+        Add optional debug logging when we fall into/out of threaded scrolling
+        https://bugs.webkit.org/show_bug.cgi?id=93898
+        <rdar://problem/12089098>
+
+        Reviewed by Simon Fraser.
+
+        Add logging when we enter and exit the threaded scrolling mode, and logs the reasons we
+        fall into main-thread scrolling.
+
+        The logging output looks like this:
+            SCROLLING: Switching to main-thread scrolling mode. Time: 15843.554718 Reason(s): viewport-constrained objects
+            SCROLLING: Switching to threaded scrolling mode. Time: 15844.550866
+            SCROLLING: Switching to main-thread scrolling mode. Time: 15845.551214 Reason(s): viewport-constrained objects
+            SCROLLING: Switching to threaded scrolling mode. Time: 15846.552619
+            SCROLLING: Switching to main-thread scrolling mode. Time: 15847.553587 Reason(s): viewport-constrained objects
+            SCROLLING: Switching to threaded scrolling mode. Time: 15848.554084
+
+        No new tests, as this is just debugging logging.
+
+        * WebCore.xcodeproj/project.pbxproj:
+        Expose ScrollingTreeState.h as a private header.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::frameViewHasSlowRepaintObjectsDidChange):
+        (WebCore::ScrollingCoordinator::frameViewFixedObjectsDidChange):
+        (WebCore::ScrollingCoordinator::frameViewRootLayerDidChange):
+        (WebCore::ScrollingCoordinator::setForceMainThreadScrollLayerPositionUpdates):
+        (WebCore::ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThreadReason):
+        * page/scrolling/ScrollingCoordinator.h:
+        (ScrollingCoordinator):
+        * page/scrolling/ScrollingCoordinatorNone.cpp:
+        (WebCore::ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThreadReason):
+        * page/scrolling/ScrollingTreeNode.cpp:
+        (WebCore::ScrollingTreeNode::ScrollingTreeNode):
+        (WebCore::ScrollingTreeNode::update):
+        * page/scrolling/ScrollingTreeNode.h:
+        (WebCore::ScrollingTreeNode::shouldUpdateScrollLayerPositionOnMainThreadReason):
+        (ScrollingTreeNode):
+        * page/scrolling/ScrollingTreeState.cpp:
+        (WebCore::ScrollingTreeState::ScrollingTreeState):
+        (WebCore::ScrollingTreeState::setShouldUpdateScrollLayerPositionOnMainThreadReason):
+        * page/scrolling/ScrollingTreeState.h:
+        (WebCore::ScrollingTreeState::shouldUpdateScrollLayerPositionOnMainThreadReason):
+        * page/scrolling/chromium/ScrollingCoordinatorChromium.cpp:
+        (WebCore::ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThreadReason):
+        Rename updateShouldUpdateScrollLayerPositionOnMainThread to updateShouldUpdateScrollLayerPositionOnMainThreadReason (and related).
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::hasNonLayerViewportConstrainedObjects):
+        Renamed from hasNonLayerFixedObjects to match the rest of the renames going on.
+        (WebCore::ScrollingCoordinator::updateShouldUpdateScrollLayerPositionOnMainThreadReason):
+        Construct a bitfield describing the reasons we fall into main-thread scrolling mode.
+
+        * page/scrolling/ScrollingTreeState.h:
+        (ScrollingTreeState):
+        Add ReasonsForUpdatingScrollLayerPositionOnMainThread enum, with the current reasons that we might fallback to main-thread scrolling.
+
+        * page/scrolling/mac/ScrollingTreeNodeMac.mm:
+        (WebCore):
+        (WebCore::ScrollingTreeNodeMac::update): Log every time scrolling mode changes.
+        (WebCore::ScrollingTreeNodeMac::scrollPosition):
+        (WebCore::ScrollingTreeNodeMac::setScrollPositionWithoutContentEdgeConstraints):
+        (WebCore::ScrollingTreeNodeMac::setScrollLayerPosition):
+        (WebCore::logThreadedScrollingMode): Pretty-print the scrolling mode and shouldUpdateScrollLayerPositionOnMainThreadReason.
+
 2012-09-06  Patrick Gansterer  <paroga@webkit.org>
 
         Build fix for WinCE after r127801.
