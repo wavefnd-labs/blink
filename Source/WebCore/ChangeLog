@@ -1,3 +1,45 @@
+2012-09-07  Lianghui Chen  <liachen@rim.com>
+
+        [BlackBerry] when one of multiple tabs uses authentication, user can get the auth dialog while the other tab has focus.
+        https://bugs.webkit.org/show_bug.cgi?id=95488
+        PR: 186597.
+
+        Internally reviewed by Joe Mason.
+        Reviewed by Yong Li.
+
+        The fix for this PR will come as 2 patches. This is the first patch which
+        will make the authentication challenge asynchronous inside WebKit. The
+        bext patch will add an AuthenticationChallengeManager that manages these
+        authentication requests asynchronously.
+
+        This patch add AuthenticationChallengeClient interface to define asynchronous
+        authentication challenge callback. And MediaPlayerPrivateBlackBerry and
+        NetworkJob are changed to inherit from AuthenticationChallengeClient to
+        support asynchronous authentication challenge.
+
+        Note: there is also an accompanying platform patch to make our PlatformPlayer
+        to support asychronous authentication, see PR 186597 for details.
+
+        No new tests as this is platform specific change.
+
+        * platform/blackberry/AuthenticationChallengeManager.h: Added.
+        (WebCore):
+        (AuthenticationChallengeClient):
+        * platform/blackberry/PageClientBlackBerry.h:
+        (WebCore):
+        * platform/graphics/blackberry/MediaPlayerPrivateBlackBerry.cpp:
+        (WebCore::MediaPlayerPrivate::onAuthenticationNeeded):
+        (WebCore::MediaPlayerPrivate::notifyChallengeResult):
+        * platform/graphics/blackberry/MediaPlayerPrivateBlackBerry.h:
+        (MediaPlayerPrivate):
+        * platform/network/blackberry/NetworkJob.cpp:
+        (WebCore::NetworkJob::sendRequestWithCredentials):
+        (WebCore::NetworkJob::notifyChallengeResult):
+        (WebCore):
+        * platform/network/blackberry/NetworkJob.h:
+        (WebCore):
+        (NetworkJob):
+
 2012-09-07  Dominic Mazzoni  <dmazzoni@google.com>
 
         AX: ARIA spin button should support range value attributes
