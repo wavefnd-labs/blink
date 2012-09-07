@@ -1,3 +1,19 @@
+2012-09-07  Luke Macpherson   <macpherson@chromium.org>
+
+        Make CSSPrimitiveValue::cleanup() handle all UnitTypes, fixing memory leak in the process.
+        https://bugs.webkit.org/show_bug.cgi?id=95938
+
+        Reviewed by Andreas Kling.
+
+        Several unit types have been added without updating the cleanup function, including CSS_VARIABLE_NAME.
+        I've added all the existing unit types back in and cast m_primitiveUnitType (a bitfield in CSSValue)
+        to the enum type to ensure the compiler catches any future errors.
+
+        No test added, but switch made to use enum type so we can't accidentally fail to update this function again.
+
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::cleanup):
+
 2012-09-07  Tim Horton  <timothy_horton@apple.com>
 
         Add optional debug logging when we fall into/out of threaded scrolling
