@@ -1,3 +1,193 @@
+2012-09-06  Adam Barth  <abarth@chromium.org>
+
+        [V8] Weave creationContext through toV8 and related functions
+        https://bugs.webkit.org/show_bug.cgi?id=96039
+
+        Reviewed by Eric Seidel.
+
+        In order to give DOM wrappers the correct prototype chain, we need to
+        know what the creationContext ought to be for each wrapper. This patch
+        weaves that information through toV8 and related functions.
+
+        This patch doesn't yet use the information. That will take place in a
+        separate patch. For that reason, this patch should not have any
+        behavior change.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        (GenerateNormalAttrGetter):
+        (GenerateNamedConstructorCallback):
+        (GenerateImplementation):
+        (GenerateToV8Converters):
+        (GenerateFunctionCallString):
+        (NativeToJSValue):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore::Float64ArrayV8Internal::fooCallback):
+        * bindings/v8/DOMTransaction.cpp:
+        (WebCore::DOMTransaction::callFunction):
+        * bindings/v8/IDBCustomBindings.cpp:
+        (WebCore::V8IDBCursorWithValue::valueAccessorGetter):
+        * bindings/v8/SerializedScriptValue.cpp:
+        * bindings/v8/V8Binding.h:
+        (WebCore::V8ValueTraits::arrayV8Value):
+        * bindings/v8/V8Collection.h:
+        (WebCore::getV8Object):
+        (WebCore::getNamedPropertyOfCollection):
+        (WebCore::collectionNamedPropertyGetter):
+        (WebCore::getIndexedPropertyOfCollection):
+        (WebCore::collectionIndexedPropertyGetter):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::getter):
+        * bindings/v8/V8DOMWrapper.cpp:
+        (WebCore):
+        (WebCore::V8DOMWrapper::convertEventTargetToV8Object):
+        * bindings/v8/V8DOMWrapper.h:
+        (WebCore::V8DOMWrapper::convertEventTargetToV8Object):
+        (V8DOMWrapper):
+        * bindings/v8/V8ThrowException.cpp:
+        (WebCore):
+        * bindings/v8/custom/V8BlobCustom.cpp:
+        (WebCore::toV8):
+        (WebCore::V8Blob::constructorCallback):
+        * bindings/v8/custom/V8CSSRuleCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8CSSValueCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8CanvasRenderingContext2DCustom.cpp:
+        (WebCore::toV8Object):
+        (WebCore::V8CanvasRenderingContext2D::strokeStyleAccessorGetter):
+        (WebCore::V8CanvasRenderingContext2D::fillStyleAccessorGetter):
+        * bindings/v8/custom/V8ConsoleCustom.cpp:
+        (WebCore::V8Console::memoryAccessorGetter):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::V8DOMWindow::openCallback):
+        (WebCore::V8DOMWindow::indexedPropertyGetter):
+        (WebCore::V8DOMWindow::namedPropertyGetter):
+        (WebCore::toV8):
+        * bindings/v8/custom/V8DataViewCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8DocumentCustom.cpp:
+        (WebCore::V8Document::evaluateCallback):
+        (WebCore::V8Document::getCSSCanvasContextCallback):
+        (WebCore::toV8):
+        (WebCore::V8Document::createTouchListCallback):
+        * bindings/v8/custom/V8DocumentLocationCustom.cpp:
+        (WebCore::V8Document::locationAccessorGetter):
+        * bindings/v8/custom/V8EntryCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8EntrySyncCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8EventCustom.cpp:
+        (WebCore::V8Event::dataTransferAccessorGetter):
+        (WebCore::V8Event::clipboardDataAccessorGetter):
+        (WebCore):
+        (WebCore::toV8):
+        * bindings/v8/custom/V8FileReaderCustom.cpp:
+        (WebCore::V8FileReader::resultAccessorGetter):
+        * bindings/v8/custom/V8HTMLAllCollectionCustom.cpp:
+        (WebCore::getNamedItems):
+        (WebCore::getItem):
+        (WebCore::V8HTMLAllCollection::namedPropertyGetter):
+        (WebCore::V8HTMLAllCollection::itemCallback):
+        (WebCore::V8HTMLAllCollection::namedItemCallback):
+        (WebCore::V8HTMLAllCollection::callAsFunctionCallback):
+        * bindings/v8/custom/V8HTMLCanvasElementCustom.cpp:
+        (WebCore::V8HTMLCanvasElement::getContextCallback):
+        * bindings/v8/custom/V8HTMLCollectionCustom.cpp:
+        (WebCore::getNamedItems):
+        (WebCore::V8HTMLCollection::namedPropertyGetter):
+        (WebCore::V8HTMLCollection::namedItemCallback):
+        (WebCore::toV8):
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::V8HTMLDocument::getNamedProperty):
+        (WebCore::V8HTMLDocument::allAccessorGetter):
+        (WebCore::toV8):
+        * bindings/v8/custom/V8HTMLElementCustom.cpp:
+        (WebCore::toV8):
+        (WebCore::V8HTMLElement::itemValueAccessorGetter):
+        * bindings/v8/custom/V8HTMLFormElementCustom.cpp:
+        (WebCore::V8HTMLFormElement::indexedPropertyGetter):
+        (WebCore::V8HTMLFormElement::namedPropertyGetter):
+        * bindings/v8/custom/V8HTMLFrameSetElementCustom.cpp:
+        (WebCore::V8HTMLFrameSetElement::namedPropertyGetter):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.cpp:
+        (WebCore::v8HTMLImageElementConstructorCallback):
+        * bindings/v8/custom/V8HTMLLinkElementCustom.cpp:
+        (WebCore::V8HTMLLinkElement::sizesAccessorGetter):
+        * bindings/v8/custom/V8HTMLOptionsCollectionCustom.cpp:
+        (WebCore::V8HTMLOptionsCollection::indexedPropertyGetter):
+        * bindings/v8/custom/V8HTMLOutputElementCustom.cpp:
+        (WebCore::V8HTMLOutputElement::htmlForAccessorGetter):
+        * bindings/v8/custom/V8HTMLSelectElementCustom.cpp:
+        (WebCore::V8HTMLSelectElement::indexedPropertyGetter):
+        * bindings/v8/custom/V8IDBAnyCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8IDBKeyCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8ImageDataCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8LocationCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8MessageChannelConstructor.cpp:
+        (WebCore::V8MessageChannel::constructorCallback):
+        * bindings/v8/custom/V8MessageEventCustom.cpp:
+        (WebCore::V8MessageEvent::dataAccessorGetter):
+        (WebCore::V8MessageEvent::portsAccessorGetter):
+        * bindings/v8/custom/V8MicroDataItemValueCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8NamedNodeMapCustom.cpp:
+        (WebCore::V8NamedNodeMap::indexedPropertyGetter):
+        (WebCore::V8NamedNodeMap::namedPropertyGetter):
+        * bindings/v8/custom/V8NodeCustom.cpp:
+        (WebCore::toV8Slow):
+        * bindings/v8/custom/V8NodeListCustom.cpp:
+        (WebCore::V8NodeList::namedPropertyGetter):
+        * bindings/v8/custom/V8NotificationCenterCustom.cpp:
+        (WebCore::V8NotificationCenter::createHTMLNotificationCallback):
+        (WebCore::V8NotificationCenter::createNotificationCallback):
+        * bindings/v8/custom/V8PerformanceCustom.cpp:
+        (WebCore):
+        (WebCore::V8Performance::memoryAccessorGetter):
+        * bindings/v8/custom/V8PerformanceEntryCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8PopStateEventCustom.cpp:
+        (WebCore::V8PopStateEvent::stateAccessorGetter):
+        * bindings/v8/custom/V8SQLTransactionSyncCustom.cpp:
+        (WebCore::V8SQLTransactionSync::executeSqlCallback):
+        * bindings/v8/custom/V8SVGDocumentCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8SVGElementCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8SVGPathSegCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8ScriptProfileCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8ScriptProfileNodeCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8StyleSheetCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8StyleSheetListCustom.cpp:
+        (WebCore::V8StyleSheetList::namedPropertyGetter):
+        * bindings/v8/custom/V8TrackEventCustom.cpp:
+        (WebCore::V8TrackEvent::trackAccessorGetter):
+        * bindings/v8/custom/V8WebGLRenderingContextCustom.cpp:
+        (WebCore::toV8Object):
+        (WebCore::getObjectParameter):
+        (WebCore::V8WebGLRenderingContext::getAttachedShadersCallback):
+        (WebCore::V8WebGLRenderingContext::getFramebufferAttachmentParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getProgramParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getShaderParameterCallback):
+        (WebCore::V8WebGLRenderingContext::getUniformCallback):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8XMLHttpRequestCustom.cpp:
+        (WebCore::V8XMLHttpRequest::responseAccessorGetter):
+        * dom/make_names.pl:
+        (printWrapperFunctions):
+        (printWrapperFactoryCppFile):
+        (printWrapperFactoryHeaderFile):
+
 2012-09-06  Lauro Neto  <lauro.neto@openbossa.org>
 
         [Qt] Deprecate String += operator
