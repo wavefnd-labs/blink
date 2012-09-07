@@ -1,3 +1,41 @@
+2012-09-06  Christopher Cameron  <ccameron@chromium.org>
+
+        [chromium] Do not delete texture backing structures on the main thread
+        https://bugs.webkit.org/show_bug.cgi?id=96018
+
+        Reviewed by James Robinson.
+
+        Do not delete CCPrioritizedTexture::Backing structures on the main
+        thread.  Instead, unlink them from their owning CCPrioritizedTexture
+        in the main thread, and have the impl thread then delete all unlinked
+        textures.
+
+        This is towards having the main thread not access the m_backings set,
+        which will allow the impl thread to traverse that set when deleting
+        resources in response to GPU memory management events.
+
+        Tested by existing eviction tests (CCLayerTreeHostTest's
+        TestEvictTextures, LostContextAfterEvictTextures)
+
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::unlinkAllContentTextures):
+        (WebCore):
+        (WebCore::CCLayerTreeHost::deleteUnlinkedTextures):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCPrioritizedTextureManager.cpp:
+        (WebCore::CCPrioritizedTextureManager::clearAllMemory):
+        (WebCore::CCPrioritizedTextureManager::unlinkAllBackings):
+        (WebCore):
+        (WebCore::CCPrioritizedTextureManager::deleteAllUnlinkedBackings):
+        * platform/graphics/chromium/cc/CCPrioritizedTextureManager.h:
+        (CCPrioritizedTextureManager):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::commitAndComposite):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::beginFrame):
+        (WebCore::CCThreadProxy::beginFrameCompleteOnImplThread):
+
 2012-09-06  Simon Hausmann  <simon.hausmann@nokia.com>
 
         [Qt] Fix debug Windows build
