@@ -1,3 +1,63 @@
+2012-09-07  Stephen Chenney  <schenney@chromium.org>
+
+        Font data is purged while fonts are still using it
+        https://bugs.webkit.org/show_bug.cgi?id=93640
+
+        Reviewed by Eric Seidel.
+
+        Move the handling of custom font pruning from Document to FontFallbackList.
+        The previous inplementation allowed fonts to be removed before all their
+        clients were done. This change moves handling of custom font purging to the
+        FontFallbackList class, which is the shared object that is only removed
+        when all clients of a font are done with it. This fixes a crash in Angry
+        Birds due to a seamless iframe and some failing tests in fast/frames/seamless.
+
+        The specific element that causes problems is:
+        <iframe id="ingame_frame0" name="ingame_frame0" frameborder="0" seamless="true"
+          src="http://chrome.angrybirds.com/ingame_graphic.html"
+          onload="this.style.opacity = 1; parent.adLoaded();" scrolling="no"
+          style="opacity: 1; -webkit-transition: opacity 1s ease-in-out 0s;
+          position: absolute; border: 0px; width: 312px; height: 320px; z-index:
+          300; overflow: hidden; visibility: visible;"></iframe>
+        The source document uses the same font as the embedding document.
+
+        Tests: fast/frames/seamless/seamless-custom-font-pruning-crash.html
+               fast/frames/seamless/seamless-nested-crash.html
+
+        * css/CSSFontFaceSource.cpp:
+        (WebCore::CSSFontFaceSource::getFontData): Remove code to register the
+        font with the document.
+        * css/CSSSegmentedFontFace.cpp:
+        (WebCore::CSSSegmentedFontFace::getFontData): Remove code to register
+        the font with the document.
+        * dom/Document.cpp:
+        (WebCore::Document::~Document): Remove code that records and purges
+        custom fonts.
+        (WebCore):
+        (WebCore::Document::reportMemoryUsage): Remove reference to removed
+        object.
+        * dom/Document.h:
+        (Document): Remove method declarations for custom font handling.
+        * platform/graphics/FontData.h: Add RefCounted to FontData. Previously, FontData
+        for custom fonts was owned by a Vector<OwnPtr<FontData>> in Document. Now it
+        is owned by FontFallbackList, and ref counting is required. A future patch will
+        add RefPtr code for all FontData use cases.
+        * platform/graphics/FontFallbackList.cpp:
+        (WebCore): Add global custom font data cache, which owns the FontData pointers
+        used as keys.
+        (WebCore::FontFallbackList::appendFontData): Helper method increments
+        the ref count on custom FontData.
+        (WebCore::FontFallbackList::releaseFontData): Helper method decrements
+        the ref count on custom FontData.
+        (WebCore::FontFallbackList::fontDataAt): Add calls to register the
+        FontFallbackList as a client of custom fonts.
+        * platform/graphics/FontFallbackList.h:
+        (WebCore::FontFallbackList::setGlyphPageZero): Moved this declaration.
+        (WebCore::FontFallbackList::setGlyphPages): Moved this declaration.
+        (FontFallbackList):
+        * platform/graphics/GlyphPageTreeNode.cpp:
+        (WebCore::GlyphPageTreeNode::pruneFontData): Removed unnecessary null check.
+
 2012-09-07  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r127911.
