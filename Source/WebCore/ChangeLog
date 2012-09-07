@@ -1,3 +1,41 @@
+2012-09-07  Adam Barth  <abarth@chromium.org>
+
+        Enter the creationContext before creating DOM wrappers
+        https://bugs.webkit.org/show_bug.cgi?id=96044
+
+        Reviewed by Eric Seidel.
+
+        Now that we have the creationContext available when instantiating DOM
+        wrappers, we should use it! After this patch, we enter the creation
+        context so that the DOM wrapper is created in the right context (and
+        therefore has the right prototype chain).
+
+        This patch would have been tested by
+        fast/dom/prototype-inheritance.html, but that test was removed because
+        it was too much work to maintain. I'll post what the diff would have
+        been to the results for that test as an attachment to this bug.
+
+        Note: After this patch there are a number of cleanup patches to write,
+        but I'll do those separately.
+
+        * bindings/js/JSGeolocationCustom.cpp:
+        (WebCore::JSGeolocation::getCurrentPosition):
+        (WebCore::JSGeolocation::watchPosition):
+          - This patch also includes a minor bug fix to the JSC implementations
+            of Geolocation and Notifications. Previously, JSC was using the
+            current lexical context for the callback object, which makes very
+            little sense as it neither cooresponds to the Geolocation (or
+            Notification) object or the functions being used for the callback.
+
+            To be consistent with how we do callbacks elsewhere in WebKit, we
+            should use the context that corresponds to the Geolocation (or
+            Notification) object. This change happened automatically for V8
+            when this patch fixed the Geolocation (and Notifications) wrapper
+            to use the right context, but for JSC we need to change these lines
+            of code explicitly.
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateToV8Converters):
+
 2012-09-07  Leo Yang  <leoyang@rim.com>
 
         Appcache fallback URL match should use the longest candidate
