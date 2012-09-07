@@ -1,3 +1,45 @@
+2012-09-07  Emil A Eklund  <eae@chromium.org>
+
+        Prevent overflows in FractionalLayoutUnit
+        https://bugs.webkit.org/show_bug.cgi?id=95883
+
+        Reviewed by Eric Seidel.
+
+        Avoid overflow in snapSizeToPixel by using the fraction of the
+        location instead of the full value.
+        
+        Add safe versions of min/max, adjusted by half a pixel to allow
+        round to allow rounding without overflowing.
+        
+        Avoid overflow when snapping a FractionalLayoutRect by using the
+        safe versions of min/max in infiniteRect.
+        
+        Avoid overflow when converting from a Length to a LayoutUnit by
+        limiting the value to FractionalLayoutUnit min/max. This matches
+        the behavior of the non-subpixel code path where the values are
+        similarly limited.
+
+        Test: fast/sub-pixel/large-sizes.html
+
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::computeLength):
+        Limit to FractionalLayoutUnit min/max.
+        
+        * platform/FractionalLayoutUnit.h:
+        (FractionalLayoutUnit):
+        (WebCore::FractionalLayoutUnit::nearlyMax):
+        (WebCore::FractionalLayoutUnit::nearlyMin):
+        Reduce max/increase min by 1/2 to allow round to operate
+        without overflowing.
+
+        (WebCore::snapSizeToPixel):
+        * platform/graphics/FractionalLayoutRect.h:
+        (WebCore::FractionalLayoutRect::infiniteRect):
+        Use nearlyMin/nearlyMax.
+        
+        (WebCore::pixelSnappedIntRect):
+        Change pixelSnappedIntRect to use snapSizeToPixel.
+
 2012-09-07  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r127920 and r127926.
