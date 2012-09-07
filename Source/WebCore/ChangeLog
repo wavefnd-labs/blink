@@ -1,3 +1,32 @@
+2012-09-07  Simon Hausmann  <simon.hausmann@nokia.com>
+
+        Build of OpenGLShims.cpp against EGL/GLES2 platforms is broken
+        https://bugs.webkit.org/show_bug.cgi?id=95556
+
+        Reviewed by Jocelyn Turcotte.
+
+        There were a few problems:
+
+        1) GL_ANGLE_framebuffer_blit is the name of the macro indicating the
+        availability of the _declaration_ of that ANGLE extension. It is not the
+        name of the actual function, which is glBlitFramebufferANGLE.
+
+        2) The presence of the preprocessor macros indicating the availability
+        of the declaration of the extension does not imply presence of the extension
+        prototypes at link time. Instead extensions need to be looked up dynamically
+        at run-time.
+
+        3) dlfcn.h was unconditionally included. We do not need it when building against
+        Qt (and there it breaks the Windows build)
+
+        This patch implements the dynamic lookup of glBlitFramebufferANGLE
+        (used in GraphicsContext3DOpenGLES.cpp) as well as the dynamic lookup of the
+        Angle and Apple renderbuffer multisampling extensions.
+
+        * platform/graphics/OpenGLShims.cpp:
+        (WebCore):
+        (WebCore::initializeOpenGLShims):
+
 2012-09-07  Zan Dobersek  <zandobersek@gmail.com>
 
         [GTK] Multiple feature defines in webcore_cppflags can occur
