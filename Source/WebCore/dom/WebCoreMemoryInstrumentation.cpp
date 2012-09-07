@@ -29,7 +29,7 @@
  */
 
 #include "config.h"
-#include "MemoryInstrumentation.h"
+#include "WebCoreMemoryInstrumentation.h"
 
 #include "KURL.h"
 #include <wtf/text/StringImpl.h>
