@@ -1,3 +1,57 @@
+2012-09-06  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Make RenderPass ids hold both generating layer id and an index
+        https://bugs.webkit.org/show_bug.cgi?id=95500
+
+        Reviewed by Adrienne Walker.
+
+        This change allows us to avoid complex renderPassId mappings between
+        compositors for ubercomp. The ubercomp layer needs to add a number
+        of RenderPasses to the frame, and these must not conflict with other
+        RenderPasses in the frame. By using its layer id along with an extra
+        value it determines, the layer can create a unique id without needing
+        access to any global state or id generator.
+
+        Covered by existing tests.
+
+        * platform/graphics/chromium/cc/CCDirectRenderer.cpp:
+        (WebCore::CCDirectRenderer::decideRenderPassAllocationsForFrame):
+        (WebCore::CCDirectRenderer::haveCachedResourcesForRenderPassId):
+        * platform/graphics/chromium/cc/CCDirectRenderer.h:
+        (CCDirectRenderer):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::calculateRenderPasses):
+        (WebCore::findRenderPassById):
+        (WebCore::removeRenderPassesRecursive):
+        * platform/graphics/chromium/cc/CCRenderPass.cpp:
+        (WebCore::CCRenderPass::create):
+        (WebCore::CCRenderPass::CCRenderPass):
+        * platform/graphics/chromium/cc/CCRenderPass.h:
+        (Id):
+        (WebCore::CCRenderPass::Id::Id):
+        (WebCore::CCRenderPass::Id::operator==):
+        (WebCore::CCRenderPass::Id::operator!=):
+        (WebCore::CCRenderPass::Id::operator<):
+        (CCRenderPass):
+        (WebCore::CCRenderPass::id):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCRenderPassDrawQuad.cpp:
+        (WebCore::CCRenderPassDrawQuad::create):
+        (WebCore::CCRenderPassDrawQuad::CCRenderPassDrawQuad):
+        * platform/graphics/chromium/cc/CCRenderPassDrawQuad.h:
+        (CCRenderPassDrawQuad):
+        (WebCore::CCRenderPassDrawQuad::renderPassId):
+        * platform/graphics/chromium/cc/CCRenderSurface.cpp:
+        (WebCore::CCRenderSurface::renderPassId):
+        (WebCore):
+        (WebCore::CCRenderSurface::appendRenderPasses):
+        (WebCore::CCRenderSurface::appendQuads):
+        * platform/graphics/chromium/cc/CCRenderSurface.h:
+        (WebCore):
+        (CCRenderSurface):
+        * platform/graphics/chromium/cc/CCRenderer.h:
+        (WebCore::CCRenderer::haveCachedResourcesForRenderPassId):
+
 2012-09-06  Christopher Cameron  <ccameron@chromium.org>
 
         [chromium] Do not delete texture backing structures on the main thread
