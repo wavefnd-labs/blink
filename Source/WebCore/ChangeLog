@@ -1,3 +1,26 @@
+2012-09-07  Zan Dobersek  <zandobersek@gmail.com>
+
+        [GTK] Multiple feature defines in webcore_cppflags can occur
+        https://bugs.webkit.org/show_bug.cgi?id=95942
+
+        Reviewed by Martin Robinson.
+
+        Any feature define that guards a feature deemed currently unstable (is intended
+        to be enabled in developer builds but not in release builds) should be added to the
+        newly-added feature_defines_unstable variable.
+
+        This moves away from adding such feature defines to the feature_defines_overrides variable
+        as this can cause duplicates in the later-generated feature_defines and webcore_cppflags
+        variables and further warnings of duplicate macros when generating bindings.
+
+        The feature_defines generation is now done by first checking if the bare feature define
+        is present in feature_defines_unstable, if not then feature_defines_overrides is also
+        checked before using the value from feature_defines_defaults.
+
+        No new tests - no new functionality.
+
+        * GNUmakefile.am:
+
 2012-09-07  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: NMI: move WebCore specific code to separate header
