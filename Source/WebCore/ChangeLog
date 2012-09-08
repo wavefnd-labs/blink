@@ -1,3 +1,42 @@
+2012-09-07  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Implement WebCompositorInputHandlerImpl on top of exposed API instead of CC internals
+        https://bugs.webkit.org/show_bug.cgi?id=96151
+
+        Reviewed by Adrienne Walker.
+
+        Reworks the CC hookup for input handling to be more similar to the OutputSurface handling. If on compositor
+        startup we want to initialize threaded input handling, we ask the embedder for a CCInputHandler implementation
+        via CCLayerTreeHostClient. If the client provides one, we later bind this to a CCInputHandlerClient (actually
+        CCLayerTreeHostImpl) from the compositor thread.
+
+        * platform/graphics/chromium/cc/CCInputHandler.h:
+        (WebCore):
+        (CCInputHandler):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::CCLayerTreeHost):
+        (WebCore::CCLayerTreeHost::initialize):
+        (WebCore::CCLayerTreeHost::createInputHandler):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCLayerTreeHostClient.h:
+        (WebCore):
+        (CCLayerTreeHostClient):
+        * platform/graphics/chromium/cc/CCProxy.h:
+        (CCProxy):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::CCSingleThreadProxy):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        (CCSingleThreadProxy):
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::CCThreadProxy):
+        (WebCore::CCThreadProxy::start):
+        (WebCore::CCThreadProxy::scheduledActionDrawAndSwapInternal):
+        (WebCore::CCThreadProxy::initializeImplOnImplThread):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (CCThreadProxy):
+
 2012-09-07  Adam Barth  <abarth@chromium.org>
 
         [V8] Use a v8::Object rather than a v8::Context to represent the creationContext
