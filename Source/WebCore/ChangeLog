@@ -1,3 +1,83 @@
+2012-09-08  Arvid Nilsson  <anilsson@rim.com>
+
+        [CSS Shaders] [BlackBerry] Refactor CustomFilterMesh and CustomFilter*Program
+        https://bugs.webkit.org/show_bug.cgi?id=94725
+
+        Reviewed by George Staikos.
+
+        Separate the MeshGenerator from the CustomFilterMesh into
+        CustomFilterMeshGenerator.h/cpp. This allows the BlackBerry port to
+        reuse the mesh generator in its accelerated compositing implementation.
+
+        Also add support for creating a "PlatformCompiledProgram" from a
+        CustomFilterValidatedProgram, so the BlackBerry port can reuse the
+        shader validation code in its accelerated compositing implementation.
+
+        It turns out the GraphicsContext3D is not needed for ANGLE to function,
+        so this patch removes an ASSERT that required a context before
+        validating the shaders using ANGLE. This allows the BlackBerry port to
+        reuse the validation code without triggering the assert. In the future,
+        the validation code could be moved to a separate class to make it more
+        obvious that it isn't really related to GraphicsContext3D.
+
+        In general, this refactoring can be useful for any port that uses
+        OpenGL to implement accelerated compositing.
+
+        Inspired by an original patch by Joshua Netterfield.
+
+        No new tests, because this patch implements no new functionality.
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/filters/CustomFilterGlobalContext.cpp:
+        (WebCore::CustomFilterGlobalContext::getValidatedProgram):
+        * platform/graphics/filters/CustomFilterMesh.cpp:
+        (WebCore::CustomFilterMesh::CustomFilterMesh):
+        * platform/graphics/filters/CustomFilterMeshGenerator.cpp: Added.
+        (WebCore):
+        (WebCore::CustomFilterMeshGenerator::CustomFilterMeshGenerator):
+        (WebCore::CustomFilterMeshGenerator::addAttachedMeshIndex):
+        (WebCore::CustomFilterMeshGenerator::generateAttachedMesh):
+        (WebCore::CustomFilterMeshGenerator::addDetachedMeshVertexAndIndex):
+        (WebCore::CustomFilterMeshGenerator::generateDetachedMesh):
+        (WebCore::CustomFilterMeshGenerator::addPositionAttribute):
+        (WebCore::CustomFilterMeshGenerator::addTexCoordAttribute):
+        (WebCore::CustomFilterMeshGenerator::addMeshCoordAttribute):
+        (WebCore::CustomFilterMeshGenerator::addTriangleCoordAttribute):
+        (WebCore::CustomFilterMeshGenerator::addAttachedMeshVertexAttributes):
+        (WebCore::CustomFilterMeshGenerator::addDetachedMeshVertexAttributes):
+        (WebCore::CustomFilterMeshGenerator::dumpBuffers):
+        * platform/graphics/filters/CustomFilterMeshGenerator.h: Added.
+        (WebCore):
+        (CustomFilterMeshGenerator):
+        (WebCore::CustomFilterMeshGenerator::vertices):
+        (WebCore::CustomFilterMeshGenerator::indices):
+        (WebCore::CustomFilterMeshGenerator::points):
+        (WebCore::CustomFilterMeshGenerator::pointsCount):
+        (WebCore::CustomFilterMeshGenerator::tiles):
+        (WebCore::CustomFilterMeshGenerator::tilesCount):
+        (WebCore::CustomFilterMeshGenerator::indicesCount):
+        (WebCore::CustomFilterMeshGenerator::floatsPerVertex):
+        (WebCore::CustomFilterMeshGenerator::verticesCount):
+        (WebCore::CustomFilterMeshGenerator::addTile):
+        * platform/graphics/filters/CustomFilterValidatedProgram.cpp:
+        (WebCore::CustomFilterValidatedProgram::CustomFilterValidatedProgram):
+        (WebCore::CustomFilterValidatedProgram::compiledProgram):
+        (WebCore::CustomFilterValidatedProgram::~CustomFilterValidatedProgram):
+        (WebCore):
+        (WebCore::CustomFilterValidatedProgram::platformCompiledProgram):
+        (WebCore::CustomFilterValidatedProgram::platformDestroy):
+        * platform/graphics/filters/CustomFilterValidatedProgram.h:
+        (WebCore):
+        (CustomFilterValidatedProgram):
+        * platform/graphics/filters/blackberry/CustomFilterValidatedProgramBlackBerry.cpp: Added.
+        (WebCore):
+        (WebCore::CustomFilterValidatedProgram::platformCompiledProgram):
+        (WebCore::CustomFilterValidatedProgram::platformDestroy):
+
 2012-09-07  Simon Hausmann  <simon.hausmann@nokia.com>
 
         Fix the build of OpenGLShims on Windows
