@@ -1,3 +1,23 @@
+2012-09-07  Simon Hausmann  <simon.hausmann@nokia.com>
+
+        Fix the build of OpenGLShims on Windows
+        https://bugs.webkit.org/show_bug.cgi?id=96123
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        OpenGL functions on Windows are generally defined as __stdcall, so we need to make sure
+        that we declare our own "copies" of those functions with the same calling convention.
+
+        This is also required for the situation where we build against ANGLE, because then we
+        initialize the function table entries with a direct assignment (entry = ::glMyFunction())
+        and the assignment does not compile if the types don't match, i.e. if RHS has a different
+        calling convention than LHS.
+
+        The approach chosen is basically the same as in the Khronos headers,
+        using a GLAPIENTRY macro.
+
+        * platform/graphics/OpenGLShims.h:
+
 2012-09-07  Benjamin Poulain  <bpoulain@apple.com>
 
         Rename the ustring() accessor to string()
