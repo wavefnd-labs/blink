@@ -1,3 +1,30 @@
+2012-09-07  Simon Fraser  <simon.fraser@apple.com>
+
+        box-shadow causes overlay scrollbars to be in the wrong position when element is composited
+        https://bugs.webkit.org/show_bug.cgi?id=85647
+
+        Reviewed by James Robinson.
+
+        The code that positioned the GraphicsLayers for scrollbars failed to take
+        into account any offset between the origin of the compositing layer,
+        and the renderer. This caused scrollbar layers to be misplaced or hidden
+        on layers with, for example, box-shadows.
+        
+        Also moved the code that positions the scrollbar layers into RendderLayerBacking,
+        since this is where all the rest of the GraphicsLayer-positioning code lives.
+        
+        Renamed an "offsetFromLayer" param to "offsetFromRoot" which is more accurate.
+
+        Manual test, since overlay scrollbars are not enabled in DRT/WTR:
+            ManualTests/scrollbars/scrollbars-in-composited-layers.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::positionOverflowControls):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::positionOverflowControlsLayers):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+
 2012-09-07  David Reveman  <reveman@chromium.org>
 
         [Chromium] Multiple commits without invalidation allowed per redraw.
