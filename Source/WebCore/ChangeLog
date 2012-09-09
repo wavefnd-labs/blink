@@ -1,3 +1,26 @@
+2012-09-09  Adam Barth  <abarth@webkit.org>
+
+        [V8] V8DOMWindowShell does not need to be RefCounted
+        https://bugs.webkit.org/show_bug.cgi?id=96192
+
+        Reviewed by Kentaro Hara.
+
+        V8DOMWindowShell holds a raw Frame pointer, which would point to
+        unallocated memory if any object that wasn't owned by the frame took a
+        reference to a V8DOMWindowShell. Thankfully, the only object that takes
+        a reference to the V8DOMWindowShell is ScriptController, which is owned
+        by the Frame.
+
+        This patch stops V8DOMWindowShell from being RefCounted so that no
+        other objects are tempted to take a reference to it in the future.
+
+        * bindings/v8/ScriptController.h:
+        (ScriptController):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::create):
+        * bindings/v8/V8DOMWindowShell.h:
+        (V8DOMWindowShell):
+
 2012-09-08  Adam Barth  <abarth@webkit.org>
 
         [V8] unsafeHandleToCurrentWorldContext doesn't need to exist
