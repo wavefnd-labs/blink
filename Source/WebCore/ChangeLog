@@ -1,3 +1,33 @@
+2012-09-08  Benjamin Poulain  <bpoulain@apple.com>
+
+        Specialize nextBreakablePosition depending on breakNBSP
+        https://bugs.webkit.org/show_bug.cgi?id=96042
+
+        Reviewed by Eric Seidel.
+
+        The speed of isBreakableSpace() is limited by the speed of the inner loop of nextBreakablePosition().
+        The branches done to handle noBreakSpace can be simplified outside the loop
+        to reduce the number of tests inside the loop.
+
+        This patch split the code of nextBreakablePosition() in two function, depending if breakNBSP is true
+        or false.
+
+        If breakNBSP is true, isBreakableSpace() would return true on noBreakSpace.
+        ->There is no need to test that value again for needsLineBreakIterator().
+        ->There is no need to special case the switch() of isBreakableSpace() for noBreakSpace.
+
+        If breakNBSP is false:
+        ->isBreakableSpace() does not need to test for noBreakSpace.
+
+        On x86_64, this improves PerformanceTests/Layout/line-layout.html by 2.8%.
+
+        * rendering/break_lines.cpp:
+        (WebCore::isBreakableSpace):
+        (WebCore::nextBreakablePositionIgnoringNBSP):
+        (WebCore::nextBreakablePosition):
+        * rendering/break_lines.h:
+        (WebCore::isBreakable): Remove the default value for breakNBSP, no caller is using it.
+
 2012-09-08  Adam Barth  <abarth@chromium.org>
 
         [V8] DOM wrapper creation involves a bunch of sketchy code related to finding the Frame
