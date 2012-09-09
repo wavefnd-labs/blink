@@ -1,3 +1,40 @@
+2012-09-09  Andreas Kling  <kling@webkit.org>
+
+        EventListenerMap: Use Vector instead of HashMap as backend.
+        <http://webkit.org/b/77982>
+
+        Reviewed by Geoff Garen.
+
+        Refactor EventListenerMap to store pair<AtomicString, EventListenerVector> in a Vector
+        instead of using key/value HashMap stores. This is much more space efficient and actually
+        faster since we were spending more time/effort managing the hash map than it costs us
+        to iterate over and compare a couple of pointers. (It's very rare to have more than
+        4 different event types registered in a single EventListenerMap.)
+
+        This gets rid of the slightly hacky optimization for nodes with listeners of a single type,
+        reducing the complexity of EventListenerMap greatly.
+
+        ~1.1MB progression on Membuster. Also strong (20+ MB on larger patches) savings on WebKit
+        bugzilla review pages, though they don't necessarily represent a common usecase.
+
+        * dom/EventListenerMap.cpp:
+        (WebCore::EventListenerMap::contains):
+        (WebCore::EventListenerMap::clear):
+        (WebCore::EventListenerMap::eventTypes):
+        (WebCore::EventListenerMap::add):
+        (WebCore::EventListenerMap::remove):
+        (WebCore::EventListenerMap::find):
+        (WebCore::EventListenerMap::removeFirstEventListenerCreatedFromMarkup):
+        (WebCore::EventListenerMap::copyEventListenersNotCreatedFromMarkupToTarget):
+        (WebCore::EventListenerIterator::EventListenerIterator):
+        (WebCore::EventListenerIterator::nextListener):
+        * dom/EventListenerMap.h:
+        (WebCore::EventListenerMap::isEmpty):
+        (WebCore::EventListenerMapEntry::EventListenerMapEntry):
+        (EventListenerMapEntry):
+        (EventListenerMap):
+        (EventListenerIterator):
+
 2012-09-09  Lucas Forschler  <lforschler@apple.com>
 
         Build Fix.  <rdar://problem/12260893>
