@@ -1,5 +1,32 @@
 2012-09-09  Adam Barth  <abarth@webkit.org>
 
+        [V8] V8PerContextData holds m_context using a v8::Handle rather than a v8::Persistent
+        https://bugs.webkit.org/show_bug.cgi?id=96193
+
+        Reviewed by Kentaro Hara.
+
+        There are two types of handles in V8: Local and Persistent. We are now
+        permitted to keep Local handles in the heap because they get
+        deallocated when the C++ stack unwinds and v8::HandleScope objects are
+        destructed.
+
+        V8PerContextData holds its m_context using the non-specific v8::Handle
+        type. If we used a Local handle here, we'd have a memory safety
+        problem. Thankfully, we use a Persistent handle, which need to be
+        allocated and freed manually.
+
+        This patch makes the type of V8PerContextData::m_context more specific
+        to ensure that we never try to store a local handle in this variable.
+        This patch should not have any behavior change because we were already
+        storing a Persistent handle.
+
+        * bindings/v8/V8PerContextData.h:
+        (WebCore::V8PerContextData::create):
+        (WebCore::V8PerContextData::V8PerContextData):
+        (V8PerContextData):
+
+2012-09-09  Adam Barth  <abarth@webkit.org>
+
         [V8] V8DOMWindowShell does not need to be RefCounted
         https://bugs.webkit.org/show_bug.cgi?id=96192
 
