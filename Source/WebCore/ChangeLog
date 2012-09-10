@@ -1,3 +1,18 @@
+2012-09-10  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Reduce the number of treeScope queries when matching rules.
+        https://bugs.webkit.org/show_bug.cgi?id=96315
+
+        Reviewed by Eric Seidel.
+
+        In the worst case, treeScope() requires a HashMap lookup, which could be slow. Since the value is always the same for the element,
+        we can just ask for it once.
+
+        No new tests, no change in behavior.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList): Moved the call to treeScope out of the loop.
+
 2012-09-10  Adam Barth  <abarth@chromium.org>
 
         [V8] V8PerIsolateData::m_toStringTemplate leaks memory
