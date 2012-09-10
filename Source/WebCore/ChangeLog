@@ -1,3 +1,30 @@
+2012-09-10  Mike West  <mkwst@chromium.org>
+
+        Warn authors about CSP directives ignored due to non-ASCII values.
+        https://bugs.webkit.org/show_bug.cgi?id=96061
+
+        Reviewed by Adam Barth.
+
+        CSP defines directive values as VCHAR minus ';' and ','. Currently, we
+        ignore these directives completely in CSPDirectiveList::parseDirective,
+        but we don't warn authors. We ought to set their expectations correctly,
+        and help them fix issues in their policy.
+
+        This patch adds a console warning for directives that are ignored, and
+        points authors to the wonderful world of percent-encoding for situations
+        where high-ASCII or Unicode (or whatever) characters are required.
+
+        Test: http/tests/security/contentSecurityPolicy/source-list-parsing-nonascii.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPDirectiveList::parseDirective):
+            Call ContentSecurityPolicy::reportInvalidDirectiveValueCharacter in
+            order to report ignored directives.
+        (WebCore::ContentSecurityPolicy::reportInvalidDirectiveValueCharacter):
+        (WebCore):
+        * page/ContentSecurityPolicy.h:
+            Add new error message.
+
 2012-09-10  Carlos Garcia Campos  <cgarcia@igalia.com>
 
         Unreviewed. Fix make distcheck.
