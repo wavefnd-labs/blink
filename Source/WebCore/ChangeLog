@@ -1,3 +1,31 @@
+2012-09-10  Adam Barth  <abarth@webkit.org>
+
+        [V8] setNamedHiddenWindowReference doesn't need to be a special case
+        https://bugs.webkit.org/show_bug.cgi?id=96198
+
+        Reviewed by Nate Chapin.
+
+        Prior to this patch, the DOMWindow cached its properties on the outter
+        global object rather than on the Holder of the properties. (We cache
+        properties to prevent their DOM wrappers from being garbage collected
+        too early.) There doesn't seem to be any reason why DOMWindow need to
+        be special-cased in this regard. We can just cache the properities on
+        their Holders, as usual.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNormalAttrGetter):
+        * bindings/v8/V8DOMWrapper.cpp:
+        * bindings/v8/V8DOMWrapper.h:
+        (V8DOMWrapper):
+        * bindings/v8/custom/V8LocationCustom.cpp:
+        * page/Location.idl:
+            - Previously, Location had a custom toV8 function so that
+              document.location would cache its wrapper in the same place as
+              window.location. However, that's no longer necessary as the
+              DOMWindow now holds its Document in a hidden property, which
+              means the DOMWindow keeps the cached location property on
+              Document alive anyway.
+
 2012-09-10  Anders Carlsson  <andersca@apple.com>
 
         Silence a warning when running update-webkit-localizable-strings
