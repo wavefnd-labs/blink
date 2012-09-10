@@ -1,3 +1,55 @@
+2012-09-10  Justin Novosad  <junov@chromium.org>
+
+        Implement canvas v5 line dash feature
+        https://bugs.webkit.org/show_bug.cgi?id=82560
+
+        Reviewed by Darin Adler.
+
+        Adding new canvas 2d context API methods getLineDash and setLineDash,
+        and new attribute lineDashOffset. Implementation mostly based on
+        the existing webkitLineDash feature, with changes that reflect the
+        canvas v5 specification. This change is visible to all JS ports,
+        unlike webkitLineDash which is not exposed to V8. The new lineDash 
+        and the legacy webkitLineDash features access the same rendering
+        context state. The JavasScriptCore binding layer was augmented to
+        support the sequence<float> IDL type.
+
+        Tests: fast/canvas/canvas-lineDash-invalid.html
+               fast/canvas/canvas-lineDash.html
+
+        * bindings/js/JSCanvasRenderingContext2DCustom.cpp:
+        (WebCore::JSCanvasRenderingContext2D::webkitLineDash):
+        (WebCore::JSCanvasRenderingContext2D::setWebkitLineDash):
+        * bindings/js/JSDOMBinding.h:
+        Added template specialization on float to NativeValueTraits in order to
+        add support for the sequence<double> IDL type to JavaScriptCore.
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::getLineDash):
+        New 2D canvas API method, returns the current line dash array
+        (WebCore::lineDashSequenceIsValid):
+        Returns true if the line dash array contains only non-negative finite
+        numbers.
+        (WebCore::CanvasRenderingContext2D::setLineDash):
+        New 2D canvas API method, set the line dash array.
+        (WebCore::CanvasRenderingContext2D::setWebkitLineDash):
+        Legacy implementation, does not double the new line dash array if
+        it contains an odd number of elements.  Just accepts it as is.
+        (WebCore::CanvasRenderingContext2D::lineDashOffset):
+        Attribute getter
+        (WebCore::CanvasRenderingContext2D::setLineDashOffset):
+        Attribute setter
+        (WebCore::CanvasRenderingContext2D::webkitLineDashOffset):
+        Alias for lineDashOffset
+        (WebCore::CanvasRenderingContext2D::setWebkitLineDashOffset):
+        Alias for setLineDashOffset
+        (WebCore::CanvasRenderingContext2D::applyLineDash):
+        Sends the line dash state to the GraphicsContext
+        * html/canvas/CanvasRenderingContext2D.h:
+        (CanvasRenderingContext2D):
+        (State):
+        * html/canvas/CanvasRenderingContext2D.idl:
+        * platform/graphics/DashArray.h:
+
 2012-09-10  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r128109.
