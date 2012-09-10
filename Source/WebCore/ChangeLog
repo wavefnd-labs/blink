@@ -1,3 +1,30 @@
+2012-09-07  Jer Noble  <jer.noble@apple.com>
+
+        <audio> and <video> should send Do Not Track when appropriate
+        https://bugs.webkit.org/show_bug.cgi?id=96134
+
+        Reviewed by Eric Carlson.
+
+        Add a FrameLoaderClient function to determine whether the DNT header should be sent,
+        and plumb that new function down into the MediaPlayerPrivateAVFoundationObjC class.
+
+        Test: http/tests/media/video-donottrack.html
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::mediaPlayerShouldSendDoNotTrackHTTPHeader):
+            Pass the question on through to the FrameLoaderClient.
+        * html/HTMLMediaElement.h:
+        * loader/FrameLoaderClient.h:
+        (WebCore::FrameLoaderClient::shouldSendDoNotTrackHTTPHeader):
+            Call through to the implementation in WebKit or WebKit2.
+        * platform/graphics/MediaPlayer.h:
+        (WebCore::MediaPlayerClient::mediaPlayerShouldSendDoNotTrackHTTPHeader):
+            Pass the question on to the HTMLMediaElement.
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm:
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::createAVAssetForURL):
+            If we should send the DNT header, add it to the header options array
+            when creating the AVAsset.
+
 2012-08-31  Jon Lee  <jonlee@apple.com>
 
         The options dictionary in Notification constructor should not accept event listeners
