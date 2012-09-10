@@ -1,5 +1,25 @@
 2012-09-10  Adam Barth  <abarth@chromium.org>
 
+        [V8] V8HTMLDocument::write and friends should not indirect through Frame
+        https://bugs.webkit.org/show_bug.cgi?id=96289
+
+        Reviewed by Eric Seidel.
+
+        There is no reason why document.write and friends need to indirect
+        through the Frame to find the active document. This patch makes these
+        functions work the same as the JSC versions.
+
+        * bindings/v8/BindingState.cpp:
+        * bindings/v8/BindingState.h:
+            - This patch removes the last callers of activeFrame, so we can
+              remove the function entirely.
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::V8HTMLDocument::writeCallback):
+        (WebCore::V8HTMLDocument::writelnCallback):
+        (WebCore::V8HTMLDocument::openCallback):
+
+2012-09-10  Adam Barth  <abarth@chromium.org>
+
         [V8] Constructors try to handle errors that cannot occur
         https://bugs.webkit.org/show_bug.cgi?id=96304
 
