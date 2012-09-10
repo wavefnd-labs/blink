@@ -1,5 +1,22 @@
 2012-09-10  Adam Barth  <abarth@chromium.org>
 
+        [V8] V8PerIsolateData::m_toStringTemplate leaks memory
+        https://bugs.webkit.org/show_bug.cgi?id=96322
+
+        Reviewed by Kentaro Hara.
+
+        We never call Dispose to balance the call to v8::Persistent::New. This
+        patch uses ScopedPersistent to call Dispose automatically.
+
+        * bindings/v8/V8PerIsolateData.cpp:
+        (WebCore::V8PerIsolateData::toStringTemplate):
+            - I've changed this function to return a new local handle in case
+              anyone is trying to hold on to these handles during shutdown.
+        * bindings/v8/V8PerIsolateData.h:
+        (V8PerIsolateData):
+
+2012-09-10  Adam Barth  <abarth@chromium.org>
+
         [V8] V8LazyEventListener::prepareListenerObject uses inefficient string operations
         https://bugs.webkit.org/show_bug.cgi?id=96324
 
