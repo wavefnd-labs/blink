@@ -1,5 +1,20 @@
 2012-09-10  Adam Barth  <abarth@chromium.org>
 
+        [V8] V8LazyEventListener::prepareListenerObject uses inefficient string operations
+        https://bugs.webkit.org/show_bug.cgi?id=96324
+
+        Reviewed by Kentaro Hara.
+
+        Previously, this code called String::append several times, which
+        mallocs a new string buffer each time. This patch switches this code to
+        use operator+, which uses StringAppend to optimize these operations
+        down to a single malloc.
+
+        * bindings/v8/V8LazyEventListener.cpp:
+        (WebCore::V8LazyEventListener::prepareListenerObject):
+
+2012-09-10  Adam Barth  <abarth@chromium.org>
+
         [V8] V8AuxiliaryContext used by IDB leaks memory
         https://bugs.webkit.org/show_bug.cgi?id=96317
 
