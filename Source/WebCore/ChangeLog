@@ -1,3 +1,74 @@
+2012-09-10  Silvia Pfeiffer  <silviapf@chromium.org>
+
+        [Chromium] Handle smaller sizes of media elements in media controls.
+        https://bugs.webkit.org/show_bug.cgi?id=89344
+
+        Reviewed by Eric Carlson.
+
+        The redesign of the Chrome video controls calls for successive removal of individual
+        elements in the Chrome video and audio controls as the element becomes smaller in width.
+        It also requires decreasing padding on the enclosure element of videos.
+
+        This patch introduces a layout() function into the MediaControlRootElementChromium to
+        react to any changes of the media controls width and appropriately hide/show the
+        interactive elements and apply the correct padding on video elements.
+
+        Tests: platform/chromium/media/controls-audio-sizes.html
+               platform/chromium/media/controls-video-sizes-padding.html
+               platform/chromium/media/controls-video-sizes.html
+
+        * html/shadow/MediaControlRootElementChromium.cpp:
+        (WebCore):
+        (RenderMediaControlPanelEnclosureElement):
+        Introduce a renderer for the MediaControlPanelEnclosureElement in which to deal with the layout changes.
+        Following the pattern in MediaControlElements.cpp .
+        (WebCore::RenderMediaControlPanelEnclosureElement::RenderMediaControlPanelEnclosureElement):
+        Definition of the new RenderMediaControlPanelEnclosureElement class.
+        (WebCore::RenderMediaControlPanelEnclosureElement::layout):
+        Definition of the layout() function for the renderer. This does most of the actual work.
+        (WebCore::MediaControlPanelEnclosureElement::createRenderer):
+        Create the renderer for the MediaControlPanelEnclosureElement.
+        (WebCore::MediaControlPanelEnclosureElement::updatePadding):
+        Update padding as part of the MediaControlPanelEnclosureElement functions.
+        (WebCore::MediaControlRootElementChromium::MediaControlRootElementChromium):
+        Add a class property to store whether the duration and current time display are hidden.
+        (WebCore::MediaControlRootElementChromium::reset):
+        Include the hiding/showing of the timeline into the updateTimeDisplay() function to reduce code duplication.
+        (WebCore::MediaControlRootElementChromium::playbackStarted):
+        Include the hiding/showing of the timeline and time display into the updateTimeDisplay() function
+        to reduce code duplication.
+        (WebCore::MediaControlRootElementChromium::playbackProgressed):
+        Include the hiding/showing of the timeline into the updateTimeDisplay() function to reduce code duplication.
+        (WebCore::MediaControlRootElementChromium::playbackStopped):
+        Include the hiding/showing of the timeline into the updateTimeDisplay() function to reduce code duplication.
+        (WebCore::MediaControlRootElementChromium::updateTimeDisplay):
+        Only show time display if not hidden. Add timeline update here to reduce code duplication/
+        (WebCore::MediaControlRootElementChromium::hideVolumeSlider):
+        New function to allow layout() function to hide the volume slider.
+        (WebCore::MediaControlRootElementChromium::showTimeDisplay):
+        New function to allow layout() function to show the time display.
+        (WebCore::MediaControlRootElementChromium::hideTimeDisplay):
+        New function to allow layout() function to hide the time display.
+        (WebCore::MediaControlRootElementChromium::showMuteButton):
+        New function to allow layout() function to show the mute button.
+        (WebCore::MediaControlRootElementChromium::hideMuteButton):
+        New function to allow layout() function to hide the mute button.
+        (WebCore::MediaControlRootElementChromium::showFullscreenButton):
+        New function to allow layout() function to show the fullscreen button.
+        (WebCore::MediaControlRootElementChromium::hideFullscreenButton):
+        New function to allow layout() function to hide the fullscreen button.
+        (WebCore::MediaControlRootElementChromium::showTimeline):
+        New function to allow layout() function to show the timeline.
+        (WebCore::MediaControlRootElementChromium::hideTimeline):
+        New function to allow layout() function to hide the timeline.
+
+        * html/shadow/MediaControlRootElementChromium.h:
+        (MediaControlPanelEnclosureElement):
+        Add a createRender() and a updatePadding() function to the MediaControlPanelEnclosureElement class.
+        (MediaControlRootElementChromium):
+        Add hide/show functions for volume slider, time display, mute button, fullscreen button and timeline.
+        Add a class property to store whether the duration and current time display are hidden.
+
 2012-09-10  Joanmarie Diggs  <jdiggs@igalia.com>
 
         [GTK][a11y] editing/pasteboard/paste-blockquote-into-blockquote-4.html crashes
