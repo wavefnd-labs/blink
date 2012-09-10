@@ -1,3 +1,47 @@
+2012-09-07  Jon Lee  <jonlee@apple.com>
+
+        Update notifications to latest spec
+        https://bugs.webkit.org/show_bug.cgi?id=91726
+        <rdar://problem/11910451>
+
+        Reviewed by Alexey Proskuryakov.
+
+        Among the changes:
+
+        Addition of lang attribute
+        http://lists.w3.org/Archives/Public/public-web-notification/2012Jul/0025.html
+
+        Specification of icon URL is icon instead of iconURL
+        http://lists.w3.org/Archives/Public/public-web-notification/2012Jul/0012.html
+
+        Tests are not possible since at best they only verify exposure of the attributes, which isn't
+        terribly useful, and use of the attributes depend on the platform.
+
+        * Modules/notifications/Notification.cpp:
+        (WebCore::Notification::create): Add support for reading lang, dir, and icon from option dictionary.
+        * Modules/notifications/Notification.h:
+        (Notification): Make url() and setURL(), which are used for HTML notifications, only available with
+        ENABLE(LEGACY_NOTIFICATIONS).
+        (WebCore::Notification::setIconURL): Added so that it can be set from the option dictionary.
+        (WebCore::Notification::lang):
+        (WebCore::Notification::setLang):
+        * Modules/notifications/Notification.idl: According to specification, dir is not exposed.
+
+2012-08-31  Jon Lee  <jonlee@apple.com>
+
+        The options dictionary in Notification constructor should not accept event listeners
+        https://bugs.webkit.org/show_bug.cgi?id=95538
+        <rdar://problem/12213901>
+
+        Reviewed by Alexey Proskuryakov.
+
+        The latest spec only allows setting the event listeners after the notification has been created.
+
+        Test: http/tests/notifications/events-in-dictionary.html
+
+        * Modules/notifications/Notification.cpp:
+        (WebCore::Notification::create): Do not look for the event handlers in the options dictionary.
+
 2012-09-10  Tony Chang  <tony@chromium.org>
 
         Rename computeLogicalWidth to updateLogicalWidth
