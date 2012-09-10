@@ -1,3 +1,106 @@
+2012-09-10  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exlusions] add support for the basic shapes
+        https://bugs.webkit.org/show_bug.cgi?id=95490
+
+        Reviewed by David Hyatt.
+
+        Initial commit of a subset of the ExclusionShape classes.
+
+        This set of classes enables the exclusions layout code to determine how to break up a line into segments
+        that will fit within or around a shape, given the Y coordinates of the line's top edge and bottom edges.
+        The ExclusionShape class represents BasicShapes whose coordinates have been resolved to actual values. It
+        provides a pair of methods, getInsideIntervals() and getOutsideIntervals(), that return the line segments'
+        start and end X coordinates, and a method that computes the shape's bounding box. The line segments'
+        coordinates are represented by a Vector of ExclusionIntervals. ExclusionInterval is just a pair
+        of X coordinates.
+
+        The other classes, ExclusionRectangle (and TBD ExclusionPolygon et al), are internal to the
+        ExclusionShape implementation.
+
+        This is the initial version of the ExclusionShapes code and it's only being used to the limited extent WebKit
+        currently supports shape-inside exclusions. It will be extended to support computing a minimal
+        line segment's "first layout location" and other improvements, in tandem with the exclusions layout code.
+
+        No new tests have been added since this code just replaces a provisional implementation stub.
+
+        More information about the algorithms used by the ExclusionShapes classes can be found here: http://hansmuller-webkit.blogspot.com.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * rendering/ExclusionInterval.cpp: Added.
+        (WebCore):
+        (WebCore::IntervalX1Comparator::operator()):
+        Compare x1 ExclusionInterval fields.
+        (WebCore::ExclusionInterval::intersect):
+        Compute the intersection of this interval with another interval. Unlike merge/subtract,
+        the result is always a single interval.
+        (WebCore::sortExclusionIntervals):
+        Sort a vector of intervals by their x1 (start) field.
+        (WebCore::mergeExclusionIntervals):
+        Union of two vectors of intervals.
+        (WebCore::intersectExclusionIntervals):
+        Intersecion of two vectors of intervals.
+        (WebCore::subtractExclusionIntervals):
+        Difference of two vectors of intervals.
+
+        * rendering/ExclusionInterval.h: Added.
+        Represents the actual start and end coordinates of a horizontal line segment.
+        (WebCore):
+        (ExclusionInterval):
+        (WebCore::ExclusionInterval::ExclusionInterval):
+
+        * rendering/ExclusionRectangle.cpp: Added.
+        (WebCore):
+        (WebCore::ellipseXIntercept):
+        (WebCore::ExclusionRectangle::getOutsideIntervals):
+        (WebCore::ExclusionRectangle::getInsideIntervals):
+
+        * rendering/ExclusionRectangle.h: Added.
+        A subclass of ExclusionShape used to represent rounded rectangles, circles, and ellipses.
+        (WebCore):
+        (ExclusionRectangle)
+        (WebCore::ExclusionRectangle::ExclusionRectangle):
+        (WebCore::ExclusionRectangle::shapeBoundingBox):
+
+        * rendering/ExclusionShape.cpp: Added.
+        (WebCore):
+        (WebCore::createExclusionRectangle):
+        (WebCore::createExclusionCircle):
+        (WebCore::createExclusionEllipse):
+        (WebCore::Exclusionhape::createExclusionShape):
+        Creates an ExclusionShape given a BasicShape and the width/height of a border box.  Currently rounded
+        rectangles, circles, and ellipses are supported.  Support for polygons will be included in the
+        next patch.
+
+        * rendering/ExclusionShape.h: Added.
+        The rest of the exclusions implementation will only depend on the definitions included by this file: ExclusionShape,
+        and ExclusionInterval. ExclusionShape subclasses define shape-specific implementations of the methods that compute the
+        horizontal intervals that fit within or around a specific shape, a shape's bounding box, and - in future
+        revisions - other operations required by the exclusions implementation, like computing the first possible
+        layout location within a shape. ExclusionShapes are created for BasicShape objects as needed, using the
+        createExclusionShape() method.
+        (WebCore):
+        (ExclusionShape):
+        (WebCore::ExclusionShape::~ExclusionShape):
+
+        * rendering/WrapShapeInfo.cpp:
+        (WebCore::WrapShapeInfo::computeShapeSize):
+        Create an ExclusionShape for the RenderBlock's BasicShape.
+        (WebCore::WrapShapeInfo::computeSegmentsForLine):
+        Use ExclusionShape::getInsideIntervals() to compute the shape-inside intervals within which a line will fit.
+
+        * rendering/WrapShapeInfo.h:
+        (WebCore::WrapShapeInfo::shapeTop):
+        Removed - no longer used.
+        (WrapShapeInfo):
+        (WebCore::WrapShapeInfo::lineState):
+        Use the ExclusionShape's bounding box to compute lineState.
+
 2012-09-07  Jer Noble  <jer.noble@apple.com>
 
         <audio> and <video> should send Do Not Track when appropriate
