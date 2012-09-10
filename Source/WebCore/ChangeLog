@@ -1,3 +1,58 @@
+2012-09-09  Emil A Eklund  <eae@chromium.org>
+
+        Rename Node::getRect/getPixelSnappedRect and remove ContainerNode::getRect
+        https://bugs.webkit.org/show_bug.cgi?id=81413
+
+        Reviewed by David Hyatt.
+
+        Rename Node::getRect and getPixelSnappedRect to boundingBox and
+        pixelSnappedBoundingBox respectively.
+
+        Remove overridden getRect method from ContainerNode as it calculates the
+        same rect as the Node implementation but in a more complicated and
+        error-prone way. Also remove the getUpperLeftCorner/getLowerRightCorner
+        support functions as they are no longer needed.
+
+        No new tests, no change in functionality.
+
+        * accessibility/AccessibilitySlider.cpp:
+        (WebCore::AccessibilitySliderThumb::elementRect):
+        Update to call boundingBox.
+
+        * dom/ContainerNode.cpp:
+        * dom/ContainerNode.h:
+        Remove overridden getRect method and the getUpperLeftCorner/
+        getLowerRightCorner support methods .
+
+        * dom/Element.cpp:
+        (WebCore::Element::scrollIntoView):
+        (WebCore::Element::scrollIntoViewIfNeeded):
+        (WebCore::Element::updateFocusAppearance):
+        Update to call boundingBox.
+        
+        * dom/Node.h:
+        * dom/Node.cpp:
+        (WebCore::Node::boundingBox):
+        Rename getRect to boundingBox.
+
+        (WebCore::Node::pixelSnappedBoundingBox):
+        Rename getPixelSnappedRect to pixelSnappedBoundingBox.
+        
+        * html/ColorInputType.cpp:
+        (WebCore::ColorInputType::elementRectRelativeToRootView):
+        * html/ValidationMessage.cpp:
+        (WebCore::ValidationMessage::buildBubbleTree):
+        * html/shadow/CalendarPickerElement.cpp:
+        (WebCore::CalendarPickerElement::openPopup):
+        * html/shadow/TextControlInnerElements.cpp:
+        (WebCore::InputFieldSpeechButtonElement::startSpeechInput):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scrollElementToRect):
+        (WebCore::FrameView::scrollToAnchor):
+        * page/SpatialNavigation.cpp:
+        (WebCore::nodeRectInAbsoluteCoordinates):
+        Update to call boundingBox/pixelSnappedBoundingBox.
+
 2012-09-09  Christopher Cameron  <ccameron@chromium.org>
 
         [chromium] Do not delete texture backing structures on the main thread
