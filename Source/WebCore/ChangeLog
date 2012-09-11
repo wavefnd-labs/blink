@@ -1,3 +1,45 @@
+2012-09-11  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSS Regions] Auto width is not working for Regions
+        https://bugs.webkit.org/show_bug.cgi?id=74135
+
+        Reviewed by Julien Chaffraix.
+
+        It was not possible to flow content into a region having { width: auto; } since in such case, the region width was computed to 0.
+        Now, a region having auto width, will have its width computed following the rules for calculation of widths and margins
+        (http://www.w3.org/TR/CSS2/visudet.html#Computing_widths_and_margins).
+        For those cases in which resolving the width requires measuring of content's min/max-content values, we use the associated named flow min/max-content
+        values (the same for all regions with width auto in a region chain).
+        When a region has width:auto, the computation of width should be done using normal block/box sizing code, instead of replaced element code.
+        Contains code contributed by Alexandru Chiculita(achicu@adobe.com).
+
+        Tests: fast/regions/autowidth-abspos-regionchain.html
+               fast/regions/autowidth-abspos.html
+               fast/regions/autowidth-attachedinvalidregion.html
+               fast/regions/autowidth-float.html
+               fast/regions/autowidth-inlineblock.html
+               fast/regions/autowidth-nonreplaced-abspos.html
+               fast/regions/autowidth-nonreplacedblock-normalflow.html
+               fast/regions/autowidth-normalflow-maxwidth.html
+               fast/regions/autowidth-normalflow-minmaxwidth.html
+               fast/regions/autowidth-normalflow-minwidth.html
+               fast/regions/autowidth-normalflow-vertrl.html
+               fast/regions/autowidth-normalflow.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computePositionedLogicalWidth): For positioned auto-width regions, skip the code path for replaced elements.
+        * rendering/RenderRegion.cpp:
+        (WebCore): Override min/maxPreferredLogicalWidth as they are used in the process of computing width for regions with auto width.
+        As this moment, a region is still a RenderReplaced element, so this code needs to be revisited when the region will become a RenderBlock.
+        Also, for min/max-width, we support only <length> values. We will extend support for other values in a following patch.
+        We only attempt to use the flowThread min/maxPreferredLogicalWidth if the region is valid (there are no circular dependencies).
+        (WebCore::RenderRegion::minPreferredLogicalWidth):
+        (WebCore::RenderRegion::maxPreferredLogicalWidth):
+        * rendering/RenderRegion.h:
+        (RenderRegion): Override isInlineBlockOrInlineTable() and shouldComputeSizeAsReplaced() to ensure that computation for width auto follows the normal
+        block/box sizing code.
+        (WebCore::RenderRegion::expandToEncompassFlowThreadContentsIfNeeded):
+
 2012-09-10  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: NMI: move MemoryInstrumentation.h to wtf
