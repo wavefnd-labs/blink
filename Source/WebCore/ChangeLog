@@ -1,3 +1,32 @@
+2012-09-11  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: IDBObjectStore.count() is slow
+        https://bugs.webkit.org/show_bug.cgi?id=96033
+
+        Reviewed by Tony Chang.
+
+        Avoid decoding record values when performing count() iteration, and factor out common code
+        used for initializing object store and index cursors. Also, remove unused indexDataId()
+        methods (which date back to the SQLite backing store), and rename some p's and q's.
+
+        No new tests - no functional changes. Covered by existing test:
+            LayoutTests/storage/indexeddb/objectstore-count.html
+
+        * Modules/indexeddb/IDBBackingStore.h: Expose new (internal) ObjectStoreKeyCursor
+        (IDBBackingStore):
+        * Modules/indexeddb/IDBLevelDBBackingStore.cpp:
+        (WebCore): Factor out common CursorOptions initialization code. The objectStoreCursorOptions()
+        function is needed for this patch. The indexCursorOptions() function is not, but eliminates
+        duplicated code and is a nearly identical refactor.
+        (WebCore::IDBLevelDBBackingStore::openObjectStoreCursor): Refactor.
+        (WebCore::IDBLevelDBBackingStore::openObjectStoreKeyCursor): Implement.
+        (WebCore::IDBLevelDBBackingStore::openIndexKeyCursor): Refactor.
+        (WebCore::IDBLevelDBBackingStore::openIndexCursor): Ditto.
+        * Modules/indexeddb/IDBLevelDBBackingStore.h:
+        (IDBLevelDBBackingStore):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::countInternal): Use ObjectStoreKeyCursor for iteration.
+
 2012-09-11  Ojan Vafai  <ojan@chromium.org>
 
         Refactor computePercentageLogicalHeight to simplify the logic a bit
