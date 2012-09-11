@@ -1,3 +1,98 @@
+2012-09-10  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=96158
+        Need API to suppress scrollbar animations
+        -and corresponding-
+        <rdar://problem/12210972>
+
+        Reviewed by Sam Weinig.
+
+        This patch re-names ScrollableAre::isOnActivePage() to 
+        ScrollableArea::scrollbarsCanBeActive(). The new name better reflects 
+        how the function is actually used, and it allows us to use the same 
+        function for the new API that has been added to WebKit2. Now when a 
+        client has used that API to indicate that scrollbars should be 
+        suppressed, ScrollableArea::scrollbarsCanBeActive() will return 
+        false.
+
+        Page has a new member variable which indicated whether scrollbar 
+        animations for all scrollbars associated with that page should be 
+        suppressed. Whenever it is set to true (meaning the animations 
+        should be suppressed), Page iterates through all of the 
+        ScrollableAreas to tell each one to finishCurrentScrollAnimations().
+        * WebCore.exp.in:
+        * page/Page.cpp:
+        (WebCore::Page::Page):
+        (WebCore::Page::setShouldSuppressScrollbarAnimations):
+        (WebCore):
+        * page/Page.h:
+        (WebCore::Page::shouldSuppressScrollbarAnimations):
+        (Page):
+
+        FrameView::isOnActivePage() is renamed to scrollbarsCanBeActive () 
+        and it will now return false if the Page says that scrollbar 
+        animations should be suppressed. 
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scrollbarsCanBeActive):
+
+        scrollbarsCanBeActive() must now be a public member of FrameView so  
+        that it can be called from RenderLayer and RenderListBox.
+        * page/FrameView.h:
+        (FrameView):
+
+        New ScrollAnimator function calls hideOverlayScrollers.
+        * platform/ScrollAnimator.h:
+        (WebCore::ScrollAnimator::finishCurrentScrollAnimations):
+        (ScrollAnimator):
+        * platform/ScrollableArea.cpp:
+        (WebCore::ScrollableArea::finishCurrentScrollAnimations):
+        (WebCore):
+        * platform/ScrollableArea.h:
+        (ScrollableArea):
+        * platform/mac/ScrollAnimatorMac.h:
+        (ScrollAnimatorMac):
+        (WebCore::ScrollAnimatorMac::finishCurrentScrollAnimations):
+
+        Re-name. isOnActivePage() -> scrollbarsCanBeActive()
+        (WebCore::FrameView::setAnimatorsAreActive):
+        (WebCore::FrameView::notifyPageThatContentAreaWillPaint):
+        * platform/mac/ScrollAnimatorMac.mm:
+        (-[WebScrollbarPainterControllerDelegate scrollerImpPair:setContentAreaNeedsDisplayInRect:]):
+        (WebCore::ScrollAnimatorMac::contentAreaWillPaint):
+        (WebCore::ScrollAnimatorMac::mouseEnteredContentArea):
+        (WebCore::ScrollAnimatorMac::mouseExitedContentArea):
+        (WebCore::ScrollAnimatorMac::mouseMovedInContentArea):
+        (WebCore::ScrollAnimatorMac::mouseEnteredScrollbar):
+        (WebCore::ScrollAnimatorMac::mouseExitedScrollbar):
+        (WebCore::ScrollAnimatorMac::willStartLiveResize):
+        (WebCore::ScrollAnimatorMac::contentsResized):
+        (WebCore::ScrollAnimatorMac::willEndLiveResize):
+        (WebCore::ScrollAnimatorMac::contentAreaDidShow):
+        (WebCore::ScrollAnimatorMac::contentAreaDidHide):
+        (WebCore::ScrollAnimatorMac::didBeginScrollGesture):
+        (WebCore::ScrollAnimatorMac::didEndScrollGesture):
+        (WebCore::ScrollAnimatorMac::mayBeginScrollGesture):
+        (WebCore):
+        (WebCore::ScrollAnimatorMac::notifyContentAreaScrolled):
+        (WebCore::ScrollAnimatorMac::updateScrollerStyle):
+        * rendering/RenderLayer.cpp:
+
+        RenderLayer and RenderListBox should call into FrameView's 
+        scrollbarsCanBeActive() so that they also return false when Page:: 
+        shouldSuppressScrollbarAnimations() is true.
+        (WebCore::RenderLayer::scrollbarsCanBeActive):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::scrollbarsCanBeActive):
+        * rendering/RenderListBox.h:
+
+        This is the one caller of ScrollableArea:: scrollbarsCanBeActive() 
+        that needs to distinguish between the scrollbar-suppressing scenario 
+        and the in-the-page-cache scenario.
+        * page/FocusController.cpp:
+        (WebCore::FocusController::setContainingWindowIsVisible):
+
 2012-09-10  James Robinson  <jamesr@chromium.org>
 
         Unreviewed, rolling out r127837.
