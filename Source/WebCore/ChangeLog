@@ -1,3 +1,52 @@
+2012-09-11  Andreas Kling  <kling@webkit.org>
+
+        ElementAttributeData: Use subclasses to manage varying object layouts.
+        <http://webkit.org/b/94465>
+
+        Reviewed by Antti Koivisto.
+
+        Add two ElementAttributeData subclasses:
+
+            - MutableElementAttributeData
+            - ImmutableElementAttributeData
+
+        The ElementAttributeData::m_isMutable bit determines which subclass to cast to when accessing
+        the attribute storage. Added mutableAttributeVector() and immutableAttributeArray() helpers
+        to ElementAttributeData (with appropriate assertions.)
+
+        This patch removes one step of indirection in the mutable case, since the Vector<Attribute> is no
+        longer heap-allocated, but part of MutableElementAttributeData.
+
+        Added a WTF::deleteOwnedPtr(ElementAttributeData*) specialization so that the appropriate subclass
+        destructor is called for these objects.
+
+        * WebCore.exp.in:
+        * dom/Element.cpp:
+        (WebCore::Element::createMutableAttributeData):
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::createImmutable):
+        (WebCore::ElementAttributeData::create):
+        (WebCore::ElementAttributeData::ElementAttributeData):
+        (WebCore::MutableElementAttributeData::MutableElementAttributeData):
+        (WebCore::ImmutableElementAttributeData::ImmutableElementAttributeData):
+        (WebCore::ImmutableElementAttributeData::~ImmutableElementAttributeData):
+        (WebCore::ElementAttributeData::makeMutableCopy):
+        (WebCore::ElementAttributeData::addAttribute):
+        (WebCore::ElementAttributeData::removeAttribute):
+        (WebCore::ElementAttributeData::reportMemoryUsage):
+        (WebCore::ElementAttributeData::cloneDataFrom):
+        (WebCore::ElementAttributeData::clearAttributes):
+        * dom/ElementAttributeData.h:
+        (ElementAttributeData):
+        (WebCore::ElementAttributeData::isMutable):
+        (ImmutableElementAttributeData):
+        (MutableElementAttributeData):
+        (WebCore::MutableElementAttributeData::MutableElementAttributeData):
+        (WebCore::ElementAttributeData::immutableAttributeArray):
+        (WebCore::ElementAttributeData::mutableAttributeVector):
+        (WebCore::ElementAttributeData::length):
+        (WebCore::ElementAttributeData::attributeItem):
+
 2012-09-11  Tony Chang  <tony@chromium.org>
 
         Pass the logical height and logical top into RenderBox::computeLogicalHeight
