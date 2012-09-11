@@ -1,3 +1,26 @@
+2012-09-10  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        Properly expose <legend> elements to ATs
+        https://bugs.webkit.org/show_bug.cgi?id=84137
+
+        Reviewed by Chris Fleizach.
+
+        Created a new WebCore Accessibility Role, LegendRole. Used it to map to
+        the expected platform role, ATK_ROLE_LABEL. Also established the needed
+        AtkRelation pair, label-for/labelled-by between the legend and fieldset.
+
+        No new test needed - Existing legend.html test is now unskipped for Gtk.
+
+        * accessibility/AccessibilityObject.h: Added LegendRole
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::determineAccessibilityRole): Map legendTag to LegendRole
+        * accessibility/gtk/WebKitAccessibleWrapperAtk.cpp:
+        (webkitAccessibleGetName): Fieldset accessible should take its name from the associated LegendRole/label
+        (setAtkRelationSetFromCoreObject): Set label-for/labelled-by AtkRelation pair between fieldset and legend
+        (atkRole): Map LegendRole to ATK_ROLE_LABEL
+        * accessibility/mac/WebAccessibilityObjectWrapper.mm:
+        (createAccessibilityRoleMap):  Map LegendRole to NSAccessibilityGroupRole
+
 2012-09-10  Adam Barth  <abarth@chromium.org>
 
         [V8] Code assumes that getScriptExecutionContext can return 0
