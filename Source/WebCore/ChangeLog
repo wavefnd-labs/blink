@@ -1,3 +1,37 @@
+2012-09-10  Philip Rogers  <pdr@google.com>
+
+        Remove unnecessary codepaths in SMILTimeContainer::updateAnimations
+        https://bugs.webkit.org/show_bug.cgi?id=96224
+
+        Reviewed by Nikolas Zimmermann.
+
+        This change removes two sources of unnecessary code in
+        SMILTimeContainer::updateAnimations:
+            1) After r117711 we now accumulate the result of multiple
+               animations into the first _contributing_ animation
+               element. As a result it is no longer necessary to
+               track both which elements are contributing AND which elements
+               we are storing results into. Both cases are now handled
+               together with resultsElements.
+
+            2) r32044 added a second sort of the animation elements
+               in order to process animateTransform last. This change
+               was added 4 years ago, before we correctly handled <use>
+               and the instance tree, and I think the extra sort is no
+               longer necessary. A test has been added to ensure this
+               is the case.
+
+        This change also does a minor cleanup of resultsElements. Previously,
+        we added animation elements to resultsElements and then removed them
+        if the animation element did not contribute. After this change, we
+        only add to resultsElements (no more add-then-remove).
+
+        Test: svg/animations/use-animate-transform-and-position.html
+
+        * svg/animation/SMILTimeContainer.cpp:
+        (WebCore::SMILTimeContainer::sortByPriority):
+        (WebCore::SMILTimeContainer::updateAnimations):
+
 2012-09-10  Ojan Vafai  <ojan@chromium.org>
 
         Rename box-sizing applying methods to be more clear about just applying box-sizing.
