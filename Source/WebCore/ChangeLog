@@ -1,3 +1,22 @@
+2012-09-11  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Optimize key decode and comparison operations
+        https://bugs.webkit.org/show_bug.cgi?id=96037
+
+        Reviewed by Tony Chang.
+
+        Eliminate memory allocations in code identified as CPU bottlenecks in IDB profiling.
+
+        No new tests - just performance work.
+
+        * Modules/indexeddb/IDBLevelDBCoding.cpp:
+        (WebCore::IDBLevelDBCoding::extractEncodedIDBKey): Avoid incremental allocations.
+        (WebCore::IDBLevelDBCoding::compareEncodedIDBKeys): Rename confusing variables p and q.
+        (IDBLevelDBCoding):
+        (WebCore::IDBLevelDBCoding::compare): Rename from decodeAndCompare, and add specializations
+        for frequently encountered types (e.g. object/index data) that can be compared without a
+        full decode.
+
 2012-09-11  Marcelo Lira  <marcelo.lira@openbossa.org>
 
         Restore original value of mock scrollbars enabled in InternalSettings
