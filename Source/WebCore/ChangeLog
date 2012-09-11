@@ -1,5 +1,53 @@
 2012-09-10  Adam Barth  <abarth@chromium.org>
 
+        [V8] Code assumes that getScriptExecutionContext can return 0
+        https://bugs.webkit.org/show_bug.cgi?id=96340
+
+        Reviewed by Eric Seidel.
+
+        This function can never return 0 (as long as V8 is on the stack).
+        There's no reason to try to handle a 0 return as an error.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateCallWith):
+        (GenerateConstructorCallback):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalMethod2Callback):
+        (WebCore::V8TestInterface::constructorCallback):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrSetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrGetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrSetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrSetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrGetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrSetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrSetter):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateObjExceptionCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesCallback):
+        * bindings/v8/custom/V8BlobCustom.cpp:
+        (WebCore::V8Blob::constructorCallback):
+        * bindings/v8/custom/V8CustomXPathNSResolver.cpp:
+        (WebCore::V8CustomXPathNSResolver::lookupNamespaceURI):
+        * bindings/v8/custom/V8MessageChannelConstructor.cpp:
+        (WebCore::V8MessageChannel::constructorCallback):
+        * bindings/v8/custom/V8MutationObserverCustom.cpp:
+        (WebCore::V8MutationObserver::constructorCallback):
+        * bindings/v8/custom/V8SQLTransactionCustom.cpp:
+        (WebCore::V8SQLTransaction::executeSqlCallback):
+        * bindings/v8/custom/V8WebSocketCustom.cpp:
+        (WebCore::V8WebSocket::constructorCallback):
+        * bindings/v8/custom/V8XMLHttpRequestConstructor.cpp:
+        (WebCore::V8XMLHttpRequest::constructorCallback):
+        * bindings/v8/custom/V8XMLHttpRequestCustom.cpp:
+        (WebCore::V8XMLHttpRequest::openCallback):
+
+2012-09-10  Adam Barth  <abarth@chromium.org>
+
         [V8] We don't us the global handle map for anything useful---let's remove it
         https://bugs.webkit.org/show_bug.cgi?id=96343
 
