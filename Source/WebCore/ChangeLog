@@ -1,3 +1,33 @@
+2012-09-10  Yoshifumi Inoue  <yosin@chromium.org>
+
+        REGRESSION (r127226): Calling DateTimeEditElement::layout() in focus handler should not dispatch blur event
+        https://bugs.webkit.org/show_bug.cgi?id=96232
+
+        Reviewed by Kent Tamura.
+
+        This patch makes DateTimeEditElement::layout() not to dispatch blur
+        event by removing existing fields, one of them can be focused, after
+        moving focus to newly created field.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        Test: fast/forms/time-multiple-fields/time-multiple-fields-state-change-on-focus-or-blur.html
+
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditBuilder::build): Changed to call resetFields().
+        (WebCore::DateTimeEditElement::focusedFieldIndex): Changed to use
+        Document::focusedNode(). When this function is called during handling
+        focus event, Element::focused() isn't true.
+        (WebCore::DateTimeEditElement::layout): Changed to remove existing
+        child nodes after moving focus to newly created field.
+        (WebCore::DateTimeEditElement::resetFields): Renamed from resetLayout().
+        This function makes m_fields vector empty.
+        (WebCore::DateTimeEditElement::resetLayout): Renamed to resetFields().
+        We moved removing field elements and spin button to layout().
+        * html/shadow/DateTimeEditElement.h:
+        (DateTimeEditElement): Renamed resetLayout() to resetFields().
+
 2012-09-10  Keishi Hattori  <keishi@webkit.org>
 
         Rename NumberLocalizer to Localizer
