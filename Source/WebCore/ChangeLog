@@ -1,3 +1,106 @@
+2012-09-11  Dan Carney  <dcarney@google.com>
+
+        Removed V8IsolatedContext
+        https://bugs.webkit.org/show_bug.cgi?id=95735
+
+        Reviewed by Adam Barth.
+
+        Remove V8IsolatedContext and merge functionality into V8DOMWindowShell.
+        This brings the V8 isolated world model into closer alignment with
+        that of JSC.
+
+        No new tests.  No change in functionality.
+
+        * UseV8.cmake:
+        * WebCore.gypi:
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp:
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        * bindings/scripts/test/V8/V8TestException.cpp:
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        * bindings/scripts/test/V8/V8TestNode.cpp:
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        * bindings/v8/DOMData.cpp:
+        (WebCore::DOMData::getCurrentStore):
+        * bindings/v8/DOMWrapperWorld.cpp:
+        (WebCore::DOMWrapperWorld::ensureIsolatedWorld):
+        * bindings/v8/DOMWrapperWorld.h:
+        (DOMWrapperWorld):
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::ScriptController):
+        (WebCore::ScriptController::resetIsolatedWorlds):
+        (WebCore::ScriptController::ensureIsolatedWorldContext):
+        (WebCore::ScriptController::existingWindowShellInternal):
+        (WebCore):
+        (WebCore::ScriptController::windowShell):
+        (WebCore::ScriptController::evaluateInIsolatedWorld):
+        (WebCore::ScriptController::setIsolatedWorldSecurityOrigin):
+        (WebCore::ScriptController::currentWorldContext):
+        (WebCore::ScriptController::evaluateInWorld):
+        (WebCore::ScriptController::collectIsolatedContexts):
+        * bindings/v8/ScriptController.h:
+        (WebCore):
+        (ScriptController):
+        (WebCore::ScriptController::existingWindowShell):
+        * bindings/v8/SharedPersistent.h:
+        (WebCore):
+        (WebCore::SharedPersistent::create):
+        (WebCore::SharedPersistent::get):
+        (WebCore::SharedPersistent::SharedPersistent):
+        (SharedPersistent):
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::perContextDataForCurrentWorld):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::setIsolatedWorldField):
+        (WebCore::V8DOMWindowShell::enteredIsolatedWorldContext):
+        (WebCore):
+        (WebCore::setInjectedScriptContextDebugId):
+        (WebCore::V8DOMWindowShell::create):
+        (WebCore::V8DOMWindowShell::V8DOMWindowShell):
+        (WebCore::V8DOMWindowShell::destroyIsolatedShell):
+        (WebCore::isolatedContextWeakCallback):
+        (WebCore::V8DOMWindowShell::disposeContext):
+        (WebCore::V8DOMWindowShell::initializeIfNeeded):
+        (WebCore::V8DOMWindowShell::createContext):
+        (WebCore::V8DOMWindowShell::installDOMWindow):
+        (WebCore::V8DOMWindowShell::updateDocumentWrapper):
+        (WebCore::V8DOMWindowShell::updateDocumentProperty):
+        (WebCore::V8DOMWindowShell::clearDocumentProperty):
+        (WebCore::V8DOMWindowShell::setSecurityToken):
+        (WebCore::V8DOMWindowShell::updateDocument):
+        (WebCore::V8DOMWindowShell::namedItemAdded):
+        (WebCore::V8DOMWindowShell::namedItemRemoved):
+        (WebCore::V8DOMWindowShell::updateSecurityOrigin):
+        (WebCore::V8DOMWindowShell::setIsolatedWorldSecurityOrigin):
+        * bindings/v8/V8DOMWindowShell.h:
+        (V8DOMWindowShell):
+        (WebCore::V8DOMWindowShell::world):
+        (WebCore::V8DOMWindowShell::isolatedWorldSecurityOrigin):
+        (WebCore::V8DOMWindowShell::getEntered):
+        * bindings/v8/V8DOMWrapper.h:
+        (WebCore::V8DOMWrapper::getCachedWrapper):
+        * bindings/v8/V8IsolatedContext.cpp: Removed.
+        * bindings/v8/V8IsolatedContext.h: Removed.
+        * bindings/v8/V8LazyEventListener.cpp:
+        * bindings/v8/WorldContextHandle.cpp:
+        (WebCore::WorldContextHandle::WorldContextHandle):
+        (WebCore::WorldContextHandle::adjustedContext):
+        * bindings/v8/custom/V8DocumentCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8SVGDocumentCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8XMLHttpRequestConstructor.cpp:
+        (WebCore::V8XMLHttpRequest::constructorCallback):
+
 2012-09-11  Keishi Hattori  <keishi@webkit.org>
 
         Create Localizer factory method for LocaleMac
