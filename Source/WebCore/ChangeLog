@@ -1,3 +1,26 @@
+2012-09-11  Mike West  <mkwst@chromium.org>
+
+        Improve console error messages when 'document.domain' blocks cross-origin script access.
+        https://bugs.webkit.org/show_bug.cgi?id=96247
+
+        Reviewed by Adam Barth.
+
+        Setting 'document.domain' can produce counterintuitive "cross-origin"
+        error messages for script access in cases where the property isn't set
+        to the same value in both the accessor and accessee. This patch adds a
+        bit more context to the error message to make it clear that both sides
+        must set the property, and that the values must match.
+
+        This shouldn't change any externally visible behavior other than the
+        error warnings. It's covered by changes to existing tests.
+
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::crossDomainAccessErrorMessage):
+            Adding checks for 'document.domain'-related errors, and adding an
+            ASSERT that crossDomainAccessErrorMessage is called in cases where
+            the accessing frame is actually denied access to the frame being
+            accessed.
+
 2012-09-11  Jinwoo Song  <jinwoo7.song@samsung.com>
 
         Deploy StringBuilder::appendNumber() and StringBuilder::appendLiteral() in more places
