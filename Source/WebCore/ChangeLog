@@ -1,3 +1,49 @@
+2012-09-12  Alec Flett  <alecflett@chromium.org>
+
+        IndexedDB: Use ScriptValue instead of SerializedScriptValue when possible
+        https://bugs.webkit.org/show_bug.cgi?id=94023
+
+        Reviewed by Kentaro Hara.
+
+        Transition the put/add/update methods to accept direct ScriptValue
+        objects rather than SerializedScriptValues, to eliminate lots of
+        redundant deserialization/serialization steps while storing
+        values.
+
+        Also see https://bugs.webkit.org/show_bug.cgi?id=95409 for
+        followup get/openCursor work, following this.
+
+        No new tests, this is a performance refactor of core IDB
+        functionality. Most existing tests cover correctness. Tests that
+        might fail include:
+
+        storage/indexeddb/objectstore-basics.html
+        storage/indexeddb/keypath-basics.html
+        storage/indexeddb/index-basics.html
+
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::update):
+        * Modules/indexeddb/IDBCursor.h:
+        (IDBCursor):
+        * Modules/indexeddb/IDBCursor.idl:
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore::generateIndexKeysForValue):
+        (WebCore::IDBObjectStore::add):
+        (WebCore::IDBObjectStore::put):
+        (WebCore):
+        * Modules/indexeddb/IDBObjectStore.h:
+        (WebCore::IDBObjectStore::add):
+        (WebCore::IDBObjectStore::put):
+        (IDBObjectStore):
+        * Modules/indexeddb/IDBObjectStore.idl:
+        * bindings/v8/IDBBindingUtilities.cpp:
+        (WebCore):
+        (WebCore::createIDBKeyFromScriptValueAndKeyPath):
+        (WebCore::deserializeIDBValue):
+        (WebCore::canInjectIDBKeyIntoScriptValue):
+        * bindings/v8/IDBBindingUtilities.h:
+        (WebCore):
+
 2012-09-12  Chris Fleizach  <cfleizach@apple.com>
 
         AX: svg:image not accessible
