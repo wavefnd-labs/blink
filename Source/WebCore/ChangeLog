@@ -1,3 +1,45 @@
+2012-09-12  Andrei Onea  <onea@adobe.com>
+
+        [CSSRegions]Use RefPtr's instead of weak references on DOMNamedFlowCollection
+        https://bugs.webkit.org/show_bug.cgi?id=95311
+
+        Reviewed by Andreas Kling.
+
+        Currently, DOMNamedFlowCollection holds a collection of raw pointers to WebKitNamedFlow.
+        This causes a crash when there is a JS instance of a NamedFlowCollection snapshot taken
+        before the NamedFlow is deleted, since the memory previously occupied by the NamedFlow
+        can be accessed. Because of this, we need to use RefPtr's for the snapshot, so that such
+        dangling references extend the lifetime of the NamedFlow objects.
+
+        Test: fast/regions/webkit-named-flow-collection-crash.html
+
+        * dom/DOMNamedFlowCollection.cpp:
+        (WebCore::DOMNamedFlowCollection::DOMNamedFlowCollection):
+        (WebCore::DOMNamedFlowCollection::item):
+        (WebCore::DOMNamedFlowCollection::namedItem):
+        (WebCore):
+        (WebCore::DOMNamedFlowCollection::DOMNamedFlowHashFunctions::hash):
+        (WebCore::DOMNamedFlowCollection::DOMNamedFlowHashFunctions::equal):
+        (DOMNamedFlowCollection::DOMNamedFlowHashFunctions):
+        (WebCore::DOMNamedFlowCollection::DOMNamedFlowHashTranslator::hash):
+        (WebCore::DOMNamedFlowCollection::DOMNamedFlowHashTranslator::equal):
+        Create new internal ListHashSet for RefPtr<WebKitNamedFlow>.
+        * dom/DOMNamedFlowCollection.h:
+        (WebCore::DOMNamedFlowCollection::create):
+        (DOMNamedFlowCollection):
+        * dom/NamedFlowCollection.cpp:
+        (WebCore::NamedFlowCollection::createCSSOMSnapshot):
+        (WebCore):
+        (WebCore::NamedFlowCollection::NamedFlowHashFunctions::hash):
+        (WebCore::NamedFlowCollection::NamedFlowHashFunctions::equal):
+        (NamedFlowCollection::NamedFlowHashFunctions):
+        (WebCore::NamedFlowCollection::NamedFlowHashTranslator::hash):
+        (WebCore::NamedFlowCollection::NamedFlowHashTranslator::equal):
+        Move back the definitions for NamedFlowHashFunctions and NamedFlowHashTranslator
+        to the .cpp file.
+        * dom/NamedFlowCollection.h:
+        (NamedFlowCollection):
+
 2012-09-12  MORITA Hajime  <morrita@google.com>
 
         [Shadow DOM] Unpolished elements should reject author shadows
