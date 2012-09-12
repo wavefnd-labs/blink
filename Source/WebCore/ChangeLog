@@ -1,3 +1,29 @@
+2012-09-12  Adam Barth  <abarth@chromium.org>
+
+        [V8] V8DOMWrapper::constructorForType is unnecessary now that we can get V8PerContextData from the v8::Context
+        https://bugs.webkit.org/show_bug.cgi?id=96556
+
+        Reviewed by Eric Seidel.
+
+        These functions no longer serve a purpose now that we can get the
+        V8PerContextData directly from the context. Previously we had to find
+        the Frame in order to find the per-context data.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateConstructorGetter):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::installDOMWindow):
+        * bindings/v8/V8DOMWrapper.cpp:
+        (WebCore::V8DOMWrapper::instantiateV8Object):
+        * bindings/v8/V8DOMWrapper.h:
+        (V8DOMWrapper):
+        * bindings/v8/V8PerContextData.cpp:
+        (WebCore::V8PerContextData::from):
+        * bindings/v8/V8PerContextData.h:
+        (V8PerContextData):
+            - Changed this function to accept an arbitrary context rather than
+              requiring the caller to use the current context.
+
 2012-09-12  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r128318 and r128332.
