@@ -1,3 +1,121 @@
+2012-09-12  Dominic Mazzoni  <dmazzoni@google.com>
+
+        AX: Refactor most AccessibilityRenderObject code into AccessibilityNodeObject
+        https://bugs.webkit.org/show_bug.cgi?id=96323
+
+        Reviewed by Chris Fleizach.
+
+        This patch is large, but it's at least 75% cut-and-paste.
+
+        All it does is move the implementation of a large chunk of
+        AccessibilityRenderObject methods to AccessibilityNodeObject
+        instead. This allows them to operate on elements without
+        renderers, such as those in canvas fallback content. It also
+        moves us towards the goal where AccessibilityRenderObject
+        only has code that's specific to renderers and not just nodes.
+
+        Half of the methods cut and paste with essentially no changes.
+        Some required just tiny changes to access an attribute via the
+        element (e.g. HTMLSelectElement) rather than its associated
+        renderer (e.g. RenderMenuList). A few were a little trickier,
+        as the behavior needs to be slightly different when there's a
+        renderer. In those last cases, as much of the code as possible is
+        in AccessibilityNodeObject and AccessibilityRenderObject overrides
+        it as necessary.
+
+        Test: accessibility/canvas-fallback-content-2.html
+
+        * accessibility/AccessibilityNodeObject.cpp:
+        (WebCore::AccessibilityNodeObject::determineAccessibilityRole):
+        (WebCore::AccessibilityNodeObject::canHaveChildren):
+        (WebCore):
+        (WebCore::AccessibilityNodeObject::accessibilityIsIgnored):
+        (WebCore::AccessibilityNodeObject::isWebArea):
+        (WebCore::AccessibilityNodeObject::isImageButton):
+        (WebCore::AccessibilityNodeObject::isAnchor):
+        (WebCore::AccessibilityNodeObject::isNativeTextControl):
+        (WebCore::AccessibilityNodeObject::isSearchField):
+        (WebCore::AccessibilityNodeObject::isNativeImage):
+        (WebCore::AccessibilityNodeObject::isImage):
+        (WebCore::AccessibilityNodeObject::isPasswordField):
+        (WebCore::AccessibilityNodeObject::isInputImage):
+        (WebCore::AccessibilityNodeObject::isProgressIndicator):
+        (WebCore::AccessibilityNodeObject::isSlider):
+        (WebCore::AccessibilityNodeObject::isMenuRelated):
+        (WebCore::AccessibilityNodeObject::isMenu):
+        (WebCore::AccessibilityNodeObject::isMenuBar):
+        (WebCore::AccessibilityNodeObject::isMenuButton):
+        (WebCore::AccessibilityNodeObject::isMenuItem):
+        (WebCore::AccessibilityNodeObject::isNativeCheckboxOrRadio):
+        (WebCore::AccessibilityNodeObject::isEnabled):
+        (WebCore::AccessibilityNodeObject::isIndeterminate):
+        (WebCore::AccessibilityNodeObject::isPressed):
+        (WebCore::AccessibilityNodeObject::isChecked):
+        (WebCore::AccessibilityNodeObject::isHovered):
+        (WebCore::AccessibilityNodeObject::isMultiSelectable):
+        (WebCore::AccessibilityNodeObject::isReadOnly):
+        (WebCore::AccessibilityNodeObject::isRequired):
+        (WebCore::AccessibilityNodeObject::headingLevel):
+        (WebCore::AccessibilityNodeObject::valueDescription):
+        (WebCore::AccessibilityNodeObject::isARIARange):
+        (WebCore::AccessibilityNodeObject::valueForRange):
+        (WebCore::AccessibilityNodeObject::maxValueForRange):
+        (WebCore::AccessibilityNodeObject::minValueForRange):
+        (WebCore::AccessibilityNodeObject::stepValueForRange):
+        (WebCore::AccessibilityNodeObject::isHeading):
+        (WebCore::AccessibilityNodeObject::isLink):
+        (WebCore::AccessibilityNodeObject::isControl):
+        (WebCore::AccessibilityNodeObject::isFieldset):
+        (WebCore::AccessibilityNodeObject::isGroup):
+        (WebCore::AccessibilityNodeObject::selectedRadioButton):
+        (WebCore::AccessibilityNodeObject::selectedTabItem):
+        (WebCore::AccessibilityNodeObject::checkboxOrRadioValue):
+        (WebCore::AccessibilityNodeObject::anchorElement):
+        (WebCore::AccessibilityNodeObject::actionElement):
+        (WebCore::AccessibilityNodeObject::mouseButtonListener):
+        (WebCore::AccessibilityNodeObject::isDescendantOfBarrenParent):
+        (WebCore::AccessibilityNodeObject::alterSliderValue):
+        (WebCore::AccessibilityNodeObject::increment):
+        (WebCore::AccessibilityNodeObject::decrement):
+        (WebCore::AccessibilityNodeObject::changeValueByStep):
+        (WebCore::AccessibilityNodeObject::changeValueByPercent):
+        (WebCore::AccessibilityNodeObject::isGenericFocusableElement):
+        (WebCore::AccessibilityNodeObject::labelForElement):
+        (WebCore::AccessibilityNodeObject::ariaAccessibilityDescription):
+        (WebCore::siblingWithAriaRole):
+        (WebCore::AccessibilityNodeObject::menuElementForMenuButton):
+        (WebCore::AccessibilityNodeObject::menuForMenuButton):
+        (WebCore::AccessibilityNodeObject::menuItemElementForMenu):
+        (WebCore::AccessibilityNodeObject::menuButtonForMenu):
+        (WebCore::AccessibilityNodeObject::accessibilityDescription):
+        (WebCore::AccessibilityNodeObject::helpText):
+        (WebCore::AccessibilityNodeObject::hierarchicalLevel):
+        (WebCore::AccessibilityNodeObject::textUnderElement):
+        (WebCore::AccessibilityNodeObject::title):
+        (WebCore::AccessibilityNodeObject::text):
+        (WebCore::AccessibilityNodeObject::stringValue):
+        (WebCore::accessibleNameForNode):
+        (WebCore::AccessibilityNodeObject::accessibilityDescriptionForElements):
+        (WebCore::AccessibilityNodeObject::elementsFromAttribute):
+        (WebCore::AccessibilityNodeObject::ariaLabeledByElements):
+        (WebCore::AccessibilityNodeObject::ariaLabeledByAttribute):
+        (WebCore::AccessibilityNodeObject::canSetFocusAttribute):
+        * accessibility/AccessibilityNodeObject.h:
+        (AccessibilityNodeObject):
+        (WebCore::AccessibilityNodeObject::node):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::parentObject):
+        (WebCore):
+        (WebCore::AccessibilityRenderObject::isReadOnly):
+        (WebCore::AccessibilityRenderObject::helpText):
+        (WebCore::AccessibilityRenderObject::accessibilityDescription):
+        (WebCore::AccessibilityRenderObject::text):
+        (WebCore::AccessibilityRenderObject::contentChanged):
+        (WebCore::AccessibilityRenderObject::canHaveChildren):
+        * accessibility/AccessibilityRenderObject.h:
+        (AccessibilityRenderObject):
+        (WebCore::AccessibilityRenderObject::setRenderObject):
+
 2012-09-12  John Mellor  <johnme@chromium.org>
 
         Text Autosizing: Don't autosize text in constrained height elements.
