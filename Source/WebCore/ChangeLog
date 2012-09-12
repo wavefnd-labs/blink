@@ -1,3 +1,41 @@
+2012-09-11  Kent Tamura  <tkent@chromium.org>
+
+        Refactor ValidationMessage class
+        https://bugs.webkit.org/show_bug.cgi?id=96365
+
+        Reviewed by Hajime Morita.
+
+        - Move some code from HTMLFormControlElement to ValidationMessage
+        - ValidationMessage class holds an element pointer as
+        HTMLFormControlElement, not FormAssociatedElement.
+
+        No new tests because of no behavior changes.
+
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::updateVisibleValidationMessage):
+        Moved some code to ValidationMessage::updateValidationMessage().
+        (WebCore::HTMLFormControlElement::setNeedsValidityCheck):
+        Ask ValidationMessage whether it is visible or not.
+        * html/HTMLFormControlElement.h:
+        (HTMLFormControlElement): Removed visibleValidationMessage().
+
+        * html/ValidationMessage.cpp:
+        (WebCore::ValidationMessage::ValidationMessage):
+        Change the argument type: FormAssociatedElement -> HTMLFormControlElement
+        (WebCore::ValidationMessage::create): ditto.
+        (WebCore::ValidationMessage::updateValidationMessage):
+        Added. Moved some code from
+        HTMLFormControlElement::updateVisibleValidationMessage().
+        (WebCore::ValidationMessage::buildBubbleTree): toHTMLElement() is not needed.
+        (WebCore::ValidationMessage::deleteBubbleTree): ditto.
+        (WebCore::ValidationMessage::isVisible): Added.
+        * html/ValidationMessage.h:
+        (ValidationMessage):
+         - Change some instance of FormAssociatedElement to HTMLFormControlElement
+         - Remove message().
+         - Added updateValidationMessage() and isVisible()
+         - Made setMessage() private.
+
 2012-09-11  Christopher Cameron  <ccameron@chromium.org>
 
         [chromium] Make prioritized texture manager not touch backings array on the main thread
