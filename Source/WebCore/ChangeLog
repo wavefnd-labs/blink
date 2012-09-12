@@ -1,3 +1,33 @@
+2012-09-11  Elliott Sprehn  <esprehn@chromium.org>
+
+        Add new JSDependentRetained that allows keeping a JSObject alive as long as another is alive
+        https://bugs.webkit.org/show_bug.cgi?id=96034
+
+        Reviewed by Geoffrey Garen.
+
+        Add new JSDependentRetained (with the same API as V8DependentRetained) that allows keeping
+        a JSObject alive as long as another is alive. This is useful for keeping callbacks on
+        wrappers without keeping strong references into the JS heap in C++ which can result in
+        cycles that create memory leaks.
+
+        No new tests needed, this will be used to fix MutationObservers and UndoManager which will have tests.
+
+        * GNUmakefile.list.am:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/JSDependentRetained.h: Added.
+        (WebCore):
+        (JSDependentRetained):
+        (WebCore::JSDependentRetained::JSDependentRetained):
+        (WebCore::JSDependentRetained::~JSDependentRetained):
+        (WebCore::JSDependentRetained::get): Get the JSObject value.
+        (WebCore::JSDependentRetained::isEmpty): Check if the value is still alive.
+        (WebCore::JSDependentRetained::retain): Sets the owner of the object, should only be used once.
+        (WebCore::JSDependentRetained::release):
+        * bindings/v8/V8DependentRetained.h:
+        (WebCore::V8DependentRetained::V8DependentRetained):
+        (WebCore::V8DependentRetained::retain): Added this method so the API for JSC and V8 are identical.
+
 2012-09-11  Alec Flett  <alecflett@chromium.org>
 
         Add 'any' type to V8 bindings as a synonym for DOMObject                
