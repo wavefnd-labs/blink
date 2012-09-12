@@ -1,3 +1,20 @@
+2012-09-12  Simon Hausmann  <simon.hausmann@nokia.com>
+
+        [Qt] Build on X11 with GraphicsSurface but without NPAPI is broken
+        https://bugs.webkit.org/show_bug.cgi?id=96495
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        When enabling NPAPI we link against XRender on X11. The other component that needs Xrender
+        is GraphicsSurface. So when building without NPAPI we need to make sure that we link in Xrender.
+
+        This patch cleans up the GraphicsSurface related linkage required on Mac OS X and X11 by wrapping
+        it in use?(graphics_surface) instead of 3D_GRAPHICS. It is not neccesary to perform the have?(XCOMPOSITE)
+        check anymore because it's already done in features.prf before enabling use_graphics_surface in the
+        first place.
+
+        * WebCore.pri:
+
 2012-09-12  Andrei Poenaru  <poenaru@adobe.com>
 
         Web Inspector: Protocol Extension: Add "regionLayoutUpdate" event
