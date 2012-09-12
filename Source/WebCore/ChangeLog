@@ -1,3 +1,79 @@
+2012-09-12  Christopher Cameron  <ccameron@chromium.org>
+
+        [chromium] Evict textures through the texture manager instead of the resource provider
+        https://bugs.webkit.org/show_bug.cgi?id=96463
+
+        Reviewed by James Robinson.
+
+        When deleting contents textures' resources on the impl thread, do the
+        deletion through the CCPrioritizedTextureManager instead of the
+        CCResourceProvider.
+
+        This requires traversing the backings list on the impl thread while
+        the main thread is running, so remove the one remaining traversal of
+        the backings list by the main thread. This traversal happens when
+        unlinking textures that were evicted by the impl thread, so explicitly
+        send the list of evicted backings from the impl thread to the main thread.
+
+        Unify all resource deletion paths in the CCPrioritizedTextureManager.
+        Always perform the sequence of eviction (deleting the GL resource) and
+        then destruction of evicted backings (deleting the objects).  Also,
+        use the same function (evictBackingsToReduceMemory) to reduce memory
+        consumption both during commit and when done by the impl thread in response
+        to a request by the GPU memory manager.
+
+        Note that destroying only some of the resources at a time during texture
+        eviction (as opposed all resources) is still not supported because the
+        texture upload queues cannot be only-partially invalidated yet.
+
+        Updated tests to take this behavior into account.
+
+        * platform/graphics/chromium/cc/CCLayerTreeHost.cpp:
+        (WebCore::CCLayerTreeHost::reduceContentsTexturesMemoryOnImplThread):
+        (WebCore):
+        (WebCore::CCLayerTreeHost::getEvictedContentTexturesBackings):
+        (WebCore::CCLayerTreeHost::unlinkEvictedContentTexturesBackings):
+        (WebCore::CCLayerTreeHost::deleteEvictedContentTexturesBackings):
+        * platform/graphics/chromium/cc/CCLayerTreeHost.h:
+        (CCLayerTreeHost):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.cpp:
+        (WebCore::CCLayerTreeHostImpl::releaseContentsTextures):
+        (WebCore::CCLayerTreeHostImpl::setContentsTexturesPurged):
+        (WebCore):
+        * platform/graphics/chromium/cc/CCLayerTreeHostImpl.h:
+        (CCLayerTreeHostImplClient):
+        (CCLayerTreeHostImpl):
+        * platform/graphics/chromium/cc/CCPrioritizedTextureManager.cpp:
+        (WebCore::CCPrioritizedTextureManager::~CCPrioritizedTextureManager):
+        (WebCore::CCPrioritizedTextureManager::acquireBackingTextureIfNeeded):
+        (WebCore::CCPrioritizedTextureManager::evictBackingsToReduceMemory):
+        (WebCore::CCPrioritizedTextureManager::reduceMemory):
+        (WebCore::CCPrioritizedTextureManager::clearAllMemory):
+        (WebCore::CCPrioritizedTextureManager::reduceMemoryOnImplThread):
+        (WebCore::CCPrioritizedTextureManager::getEvictedBackings):
+        (WebCore::CCPrioritizedTextureManager::unlinkEvictedBackings):
+        (WebCore):
+        (WebCore::CCPrioritizedTextureManager::deleteEvictedBackings):
+        (WebCore::CCPrioritizedTextureManager::evictBackingResource):
+        * platform/graphics/chromium/cc/CCPrioritizedTextureManager.h:
+        (CCPrioritizedTextureManager):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.cpp:
+        (WebCore::CCSingleThreadProxy::releaseContentsTexturesOnImplThread):
+        (WebCore):
+        (WebCore::CCSingleThreadProxy::commitAndComposite):
+        * platform/graphics/chromium/cc/CCSingleThreadProxy.h:
+        * platform/graphics/chromium/cc/CCThreadProxy.cpp:
+        (WebCore::CCThreadProxy::releaseContentsTexturesOnImplThread):
+        (WebCore):
+        (WebCore::CCThreadProxy::scheduledActionBeginFrame):
+        (WebCore::CCThreadProxy::beginFrame):
+        (WebCore::CCThreadProxy::beginFrameCompleteOnImplThread):
+        (WebCore::CCThreadProxy::layerTreeHostClosedOnImplThread):
+        (WebCore::CCThreadProxy::recreateContextOnImplThread):
+        * platform/graphics/chromium/cc/CCThreadProxy.h:
+        (BeginFrameAndCommitState):
+        (CCThreadProxy):
+
 2012-09-12  Mike Fenton  <mifenton@rim.com>
 
         [BlackBerry] Add custom messages for input type validation.
