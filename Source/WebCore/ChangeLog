@@ -1,3 +1,46 @@
+2012-09-12  Levi Weintraub  <leviw@chromium.org>
+
+        Inline repainting can be off-by-one with sub-pixel enabled
+        https://bugs.webkit.org/show_bug.cgi?id=95882
+
+        Reviewed by Eric Seidel.
+
+        With sub-pixel layout enabled, context accumulated from containing renderers is used to properly
+        pixel snap. Selection repaint rects are stored outside the affected renderers, and are handed to
+        the embedder without the context to correctly determine the snapped values. This can result in
+        repaint areas smaller than what's needed.
+
+        This could be fixed three ways:
+        - by changing selection repaint rects to an IntRect and pixel snapping the values before storing
+          them outside the render tree. This is the narrowest solution.
+        - by adapting layout to store pixel snapping hints along with the size/location of the renderer.
+          This is the best possible solution, as it would help solve a lot of pixel snapping issues and
+          reduce complexity of handling. I eventually intend on implementing this.
+        - by reverting repaintUsingContainer to IntRects and using pixel snapping when possible, and
+          enclosingIntRect where we lack context.
+
+        This implements the last solution, as it's the least invasive, but can potentially fix numerous
+        sub-pixel repaint issues.
+
+        Test: fast/sub-pixel/selection/selection-rect-in-sub-pixel-table.html
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutRunsAndFloats):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPositions):
+        (WebCore::RenderLayer::scrollTo):
+        (WebCore::RenderLayer::repaintIncludingNonCompositingDescendants):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::repaintUsingContainer):
+        (WebCore::RenderObject::repaint):
+        (WebCore::RenderObject::repaintRectangle):
+        (WebCore::RenderObject::repaintAfterLayoutIfNeeded):
+        * rendering/RenderObject.h:
+        (RenderObject):
+        * rendering/RenderSelectionInfo.h:
+        (WebCore::RenderSelectionInfo::repaint):
+        (WebCore::RenderBlockSelectionInfo::repaint):
+
 2012-09-12  Michael Saboff  <msaboff@apple.com>
 
         Build fixed for http://trac.webkit.org/changeset/128243
