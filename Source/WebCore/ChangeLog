@@ -1,3 +1,43 @@
+2012-08-20  Philippe Normand  <pnormand@igalia.com>
+
+        [GStreamer] Audio device not closed after playing sound
+        https://bugs.webkit.org/show_bug.cgi?id=89122
+
+        Reviewed by Martin Robinson.
+
+        Set the GStreamer pipeline to NULL instead of PAUSED on EOS. This
+        allows the audio-sink to release its connection to the audio
+        device. This is done only if the Media element is not
+        looping. To make the MediaPlayerPrivate layer aware of that
+        information the MediaPlayerClient interface was updated with a new
+        method mediaPlayerIsLooping, implemented by the HTMLMediaElement.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::mediaPlayerIsLooping): Implementation of
+        MediaPlayerClient::mediaPlayerLoop, proxies to ::loop();
+        * html/HTMLMediaElement.h:
+        (HTMLMediaElement):
+        * platform/graphics/MediaPlayer.h:
+        (WebCore::MediaPlayerClient::mediaPlayerIsLooping): New method allowing
+        the MediaPlayer and its backend to know if a playback loop is
+        requested by the client.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::playbackPosition): Report
+        seek time or media duration if EOS was reached. These early
+        returns are needed because the position query doesn't work on a
+        NULL pipeline.
+        (WebCore::MediaPlayerPrivateGStreamer::changePipelineState):
+        Refactored to use an early return.
+        (WebCore::MediaPlayerPrivateGStreamer::prepareToPlay): Reset the
+        seeking flag.
+        (WebCore::MediaPlayerPrivateGStreamer::play): reset m_isEndReached.
+        (WebCore::MediaPlayerPrivateGStreamer::pause): Don't pause on EOS.
+        (WebCore::MediaPlayerPrivateGStreamer::seek): Refactor, call
+        currentTime() after we're sure playbin is valid and no error occured.
+        (WebCore::MediaPlayerPrivateGStreamer::paused): Fake paused state
+        on EOS.
+
 2012-09-12  Simon Hausmann  <simon.hausmann@nokia.com>
 
         [Qt] Build on X11 with GraphicsSurface but without NPAPI is broken
