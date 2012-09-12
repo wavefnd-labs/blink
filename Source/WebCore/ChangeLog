@@ -1,3 +1,50 @@
+2012-09-12  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Shaders] Implement transform parameter animations for CSS Custom Filters
+        https://bugs.webkit.org/show_bug.cgi?id=94980
+
+        Reviewed by Dean Jackson.
+
+        Based on patch from Joshua Netterfield <jnetterfield@rim.com>.
+
+        According to Section 39.2 of Filter Effects 1.0 Editor's draft
+        (https://dvcs.w3.org/hg/FXTF/raw-file/tip/filters/index.html), animations
+        of transforms should be handled following the CSS3 transform interpolation
+        rules. This patch implements this functionality.
+
+        Test: css3/filters/custom/custom-filter-transforms-animation.html
+
+        * page/animation/CSSPropertyAnimation.cpp:
+        (WebCore::blendFunc):
+        (WebCore):
+        * platform/graphics/filters/CustomFilterNumberParameter.h:
+        (WebCore::CustomFilterNumberParameter::blend):
+        * platform/graphics/filters/CustomFilterOperation.cpp:
+        (WebCore::blendCustomFilterParameters):
+        (WebCore::CustomFilterOperation::blend):
+        * platform/graphics/filters/CustomFilterOperation.h:
+        (WebCore):
+        (WebCore::CustomFilterOperation::blendingNeedsRendererSize): Some filters need the box size, so that they could compute
+        Transforms. Right now only the CustomFilterOperation needs that, but I've implemented using this generic function.
+        (CustomFilterOperation):
+        * platform/graphics/filters/CustomFilterParameter.h:
+        (CustomFilterParameter):
+        * platform/graphics/filters/CustomFilterTransformParameter.h:
+        (CustomFilterTransformParameter):
+        (WebCore::CustomFilterTransformParameter::blend):
+        * platform/graphics/filters/FilterOperation.h:
+        (WebCore::FilterOperation::FilterOperation::blend):
+        (FilterOperation):
+        (WebCore::FilterOperation::FilterOperation::blendingNeedsRendererSize):
+        * platform/graphics/transforms/TransformOperations.cpp: Extracted the blending functions from CSSPropertyAnimation.cpp
+        so that they could be reused from other classes.
+        (WebCore::TransformOperations::blendByMatchingOperations):
+        (WebCore):
+        (WebCore::TransformOperations::blendByUsingMatrixInterpolation): Used when the TransformOperations do not match.
+        (WebCore::TransformOperations::blend): Uses when the caller doesn't know whether the TransformOperations match or not.
+        * platform/graphics/transforms/TransformOperations.h:
+        (TransformOperations):
+
 2012-09-12  Alec Flett  <alecflett@chromium.org>
 
         IndexedDB: Use ScriptValue instead of SerializedScriptValue when possible
