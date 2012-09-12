@@ -1,3 +1,60 @@
+2012-09-12  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Remove direct texture access via u_texture
+        https://bugs.webkit.org/show_bug.cgi?id=93871
+
+        Reviewed by Dean Jackson.
+
+        Remove the author-accessible "u_texture" sampler, which referenced the DOM element texture.
+
+        Additionally, reject shaders with author-defined sampler uniforms. When we implement texture 
+        parameters, we will allow shaders whose samplers are bound to valid textures. We must not
+        allow OpenGL to give unbound samplers a default value of 0 because that references the DOM
+        element texture, which should be inaccessible to the author's shader code.
+
+        Test: css3/filters/custom/custom-filter-no-element-texture-access.html
+
+        * platform/graphics/ANGLEWebKitBridge.cpp:
+        (WebCore::getValidationResultValue):
+            Add a file-static function to easily query the integer values that ANGLE exposes about
+            the last validation result. The new getUniforms method and the existing
+            validateShaderSource method now both use getValidationResultValue.
+        (WebCore):
+        (WebCore::ANGLEWebKitBridge::validateShaderSource):
+            Use the new getValidationResultValue function instead of ANGLE's ShGetInfo function.
+        (WebCore::ANGLEWebKitBridge::getUniforms):
+            Add a new public method to ANGLEWebKitBridge which gets the info about all of the
+            uniforms in the last validated vertex shader or fragment shader. Uniform info includes
+            name, type, and size.
+        * platform/graphics/ANGLEWebKitBridge.h:
+        (ANGLEShaderSymbol):
+        (WebCore::ANGLEShaderSymbol::isSampler):
+            Returns true if the symbol's data type is a GLSL sampler (e.g. sampler2D, samplerCube).
+        (WebCore):
+        (ANGLEWebKitBridge):
+        * platform/graphics/filters/CustomFilterCompiledProgram.cpp:
+        (WebCore::CustomFilterCompiledProgram::CustomFilterCompiledProgram):
+            Take in an additional programType constructor parameter.
+        (WebCore::CustomFilterCompiledProgram::initializeParameterLocations):
+            Remove the author-accessible DOM element texture sampler "u_texture". Only find the
+            location of the internal DOM element texture sampler "css_u_texture" if the author is
+            using the CSS mix function.
+        * platform/graphics/filters/CustomFilterCompiledProgram.h:
+        * platform/graphics/filters/CustomFilterProgramInfo.h:
+        (CustomFilterProgramInfo):
+        (WebCore::CustomFilterProgramInfo::programType):
+            Add the new CustomFilterProgramType enum. In CustomFilterProgramInfo, we plan to replace
+            mixSettings.enabled with a programType. See:
+            https://bugs.webkit.org/show_bug.cgi?id=96448
+        * platform/graphics/filters/CustomFilterValidatedProgram.cpp:
+            Reject all shaders that have sampler uniforms defined.
+        (WebCore::CustomFilterValidatedProgram::CustomFilterValidatedProgram):
+        (WebCore::CustomFilterValidatedProgram::compiledProgram):
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::bindProgramAndBuffers):
+            Add an assert to verify that the DOM element texture is bound only if the author is
+            using the CSS mix function.
+
 2012-09-12  Dominic Mazzoni  <dmazzoni@google.com>
 
         Assert hit in is multiSelectable()
