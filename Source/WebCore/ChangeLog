@@ -1,3 +1,58 @@
+2012-09-12  Kenneth Rohde Christiansen  <kenneth@webkit.org>
+
+        [EFL] Clean up the RenderTheme Edje caching
+        https://bugs.webkit.org/show_bug.cgi?id=96016
+
+        Reviewed by Gyuyoung Kim.
+
+        Refactor the Edje parts caching to be easier to understand and use
+        proper C++ constructs.
+
+        * platform/efl/RenderThemeEfl.cpp:
+        (WebCore):
+        (WebCore::toEdjeGroup):
+
+            Converts the enum to the given edje group name.
+
+        (WebCore::setSourceGroupForEdjeObject):
+
+            Basically a wrapper around evas_object_file_set, but handles
+            errors, which was done slightly differently all over.
+
+        (WebCore::RenderThemeEfl::ThemePartCacheEntry::ThemePartCacheEntry):
+        (WebCore::RenderThemeEfl::ThemePartCacheEntry::~ThemePartCacheEntry):
+
+        (WebCore::createCairoSurfaceFor):
+        (WebCore::isFormElementTooLargeToDisplay):
+
+            Methods used when creating ThemePartCacheEntry'es.
+
+        (WebCore::RenderThemeEfl::ThemePartCacheEntry::create):
+        (WebCore::RenderThemeEfl::ThemePartCacheEntry::reuse):
+
+            New methods for creating and reusing an cache entry. If you do
+            not supply a new size, the original size will be used, and it is
+            thus more effective.
+
+        (WebCore::RenderThemeEfl::getThemePartFromCache):
+
+            New method for requesting a theme part. If it doesn't exist
+            it will additinally be loaded and added to the cache.
+
+        (WebCore::RenderThemeEfl::flushThemePartCache):
+
+            Remove the entire cache and free the assets.
+
+        (WebCore::RenderThemeEfl::paintThemePart):
+        (WebCore::RenderThemeEfl::themePath):
+        (WebCore::RenderThemeEfl::loadTheme):
+        (WebCore::RenderThemeEfl::applyPartDescriptionsFrom):
+        (WebCore::RenderThemeEfl::~RenderThemeEfl):
+        (WebCore::RenderThemeEfl::emitMediaButtonSignal):
+        * platform/efl/RenderThemeEfl.h:
+        (RenderThemeEfl):
+        (ThemePartCacheEntry):
+
 2012-09-12  Alexandre Elias  <aelias@chromium.org>
 
         [chromium] Flip Y and swizzle inside compositeAndReadback implementation
