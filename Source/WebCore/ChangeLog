@@ -1,3 +1,26 @@
+2012-09-12  Tony Chang  <tony@chromium.org>
+
+        flex item sized incorrectly in a column flexbox with height set via top/bottom
+        https://bugs.webkit.org/show_bug.cgi?id=94855
+
+        Reviewed by Ojan Vafai.
+
+        Stop using computeContentLogicalHeight() to get the height of the flexbox and
+        use computeLogicalHeight directly.  This properly takes into account out of flow
+        positioning.
+
+        We can actually refactor some of this into common code, but I want to do that as
+        a separate pass.
+
+        Test: css3/flexbox/columns-height-set-via-top-bottom.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::repositionLogicalHeightDependentFlexItems): Fix out of date comment.
+        (WebCore::RenderFlexibleBox::mainAxisContentExtent): Use computeLogicalHeight instead of computeContentLogicalHeight.
+        This code actually never gets used-- I'll try to remove in a follow up.
+        (WebCore::RenderFlexibleBox::computeAvailableFreeSpace): Use computeLogicalHeight instead of computeContentLogicalHeight.
+        (WebCore::RenderFlexibleBox::lineBreakLength): Use computeLogicalHeight instead of computeContentLogicalHeight.
+
 2012-09-12  Adam Barth  <abarth@webkit.org>
 
         [V8] V8DOMWrapper::perContextData has no callers and can be removed
