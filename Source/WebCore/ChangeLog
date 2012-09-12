@@ -1,3 +1,29 @@
+2012-09-12  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Remove transient state regarding uknown pseudoelements from SelectorChecker.
+        https://bugs.webkit.org/show_bug.cgi?id=96425
+
+        Reviewed by Eric Seidel.
+
+        The fact that an unknown pseudoelement was found when checking selector was stored as extra state on SelectorChecker. That's bad,
+        because this state is at odds with the lifecycle of the instance and had to be explicitly reset prior to each checking. To address
+        this, I made checkSelector report the value as its result (by-ref parameter, actually).
+
+        No new tests, refactoring only. Covered by existing tests.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::SelectorChecker): Removed the now-unneded state initialization.
+        (WebCore::SelectorChecker::checkSelector): Changed to take extra parameter.
+        (WebCore):
+        (WebCore::SelectorChecker::checkOneSelector): Ditto.
+        * css/SelectorChecker.h:
+        (SelectorChecker): Changed decls accordingly.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver): Added state to StyleResolver.
+        (WebCore::StyleResolver::collectMatchingRulesForList): Changed to use own state, rather than StyleChecker's state.
+        * css/StyleResolver.h:
+        (StyleResolver): Moved state here from StyleChecker.
+
 2012-09-12  Andrei Onea  <onea@adobe.com>
 
         [CSSRegions]Use RefPtr's instead of weak references on DOMNamedFlowCollection
