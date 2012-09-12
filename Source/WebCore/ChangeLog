@@ -1,3 +1,40 @@
+2012-09-11 MORITA Hajime  <morrita@google.com>
+
+        [Scoped Style] NodeRareData::m_numberOfScopedHTMLStyleChildren could be replaced with a node flag.
+        https://bugs.webkit.org/show_bug.cgi?id=96450
+
+        Reviewed by Dimitri Glazkov.
+
+        This change gets rid of NodeRareData::m_numberOfScopedHTMLStyleChildren
+        by replacing it with a Node flag called HasScopedHTMLStyleChildFlag.
+        Instead of tracking the number of certain node, this chagne compute the number
+        when necessary.
+
+        Now we no longer need to hit rareData() for each hasScopedHTMLStyleChild() call.
+        Note that because such a re-counting occurs only when the scoped <style> elements
+        leave the tree, the performance impact is negligible.
+
+        No new tests. Covered by existing tests.
+
+        * dom/Node.cpp:
+        (WebCore):
+        * dom/Node.h:
+        (WebCore::Node::hasScopedHTMLStyleChild):
+        (WebCore::Node::setHasScopedHTMLStyleChild):
+        (Node):
+        * dom/NodeRareData.h:
+        (WebCore::NodeRareData::NodeRareData):
+        (NodeRareData):
+        * html/HTMLStyleElement.cpp:
+        (WebCore::HTMLStyleElement::isRegisteredAsScoped):
+        (WebCore):
+        (WebCore::Node::registerScopedHTMLStyleChild):
+        (WebCore::Node::unregisterScopedHTMLStyleChild):
+        (WebCore::Node::numberOfScopedHTMLStyleChildren):
+        (WebCore::HTMLStyleElement::unregisterWithScopingNode):
+        * html/HTMLStyleElement.h:
+        (HTMLStyleElement):
+
 2012-09-12  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Remove transient state regarding uknown pseudoelements from SelectorChecker.
