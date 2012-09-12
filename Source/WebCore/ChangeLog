@@ -1,3 +1,44 @@
+2012-09-12  John Mellor  <johnme@chromium.org>
+
+        Text Autosizing: Don't autosize text in constrained height elements.
+        https://bugs.webkit.org/show_bug.cgi?id=96143
+
+        Reviewed by Julien Chaffraix.
+
+        Autosizing text within constained height elements usually goes badly,
+        as the autosized text will wrap onto more lines, hence it will become
+        taller and often overflow its container, breaking the page's layout.
+
+        This patch disables autosizing for blocks with a fixed height ancestor
+        (or which are fixed height themselves), unless the lowest such ancestor
+        (or one of the ancestors in between it and the text block) has
+        overflow-y:auto/scroll, in which case the height isn't really fixed.
+
+        Tests: fast/text-autosizing/constrained-and-overflow-auto-ancestor.html
+               fast/text-autosizing/constrained-and-overflow-hidden-ancestor.html
+               fast/text-autosizing/constrained-and-overflow-paged-x-ancestor.html
+               fast/text-autosizing/constrained-and-overflow-scroll-ancestor.html
+               fast/text-autosizing/constrained-height-ancestor.html
+               fast/text-autosizing/constrained-maxheight-ancestor.html
+               fast/text-autosizing/constrained-maxheight.html
+               fast/text-autosizing/constrained-percent-maxheight.html
+               fast/text-autosizing/constrained-percent-of-viewport-maxheight.html
+               fast/text-autosizing/constrained-then-overflow-ancestors.html
+               fast/text-autosizing/constrained-then-overflow-then-positioned-ancestors.html
+               fast/text-autosizing/constrained-then-position-absolute-ancestors.html
+               fast/text-autosizing/constrained-then-position-fixed-ancestors.html
+               fast/text-autosizing/constrained-within-overflow-ancestor.html
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::processBox):
+
+            Skips boxes for which contentHeightIsConstrained returns true.
+
+        (WebCore::TextAutosizer::contentHeightIsConstrained):
+
+            Walks up the render tree until it finds either a constrained height
+            or overflow-y:auto/scroll ancestor.
+
 2012-09-12  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Remove unused getProcessMemorySize from PlatformSupport
