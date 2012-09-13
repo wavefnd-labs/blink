@@ -1,3 +1,27 @@
+2012-09-13  Adam Barth  <abarth@webkit.org>
+
+        REGRESSION(r125126): It made fast/events/keyevent-iframe-removed-crash.html assert
+        https://bugs.webkit.org/show_bug.cgi?id=93654
+
+        Reviewed by Eric Seidel.
+
+        When wrapping a Document, we need to ensure that the global object for
+        the wrapper actually exists before trying to create the wrapper. In
+        other cases in the DOM, we always touch the global object before trying
+        to wrap a given DOM object. For Document, however,
+        HTMLFrameElement.contentDocument is a rare way to get at a DOM object
+        for a global object without first touching the Window object.
+
+        Rather than writing custom bindings for
+        HTMLFrameElement.contentDocument, this patch just makes toJS for
+        Document ensure that toJS for DOMWindow has been called first. The V8
+        bindings have some similar code.
+
+        Test: fast/dom/content-document-prototype.html
+
+        * bindings/js/JSDocumentCustom.cpp:
+        (WebCore::toJS):
+
 2012-09-13  Anders Carlsson  <andersca@apple.com>
 
         Fix build.
