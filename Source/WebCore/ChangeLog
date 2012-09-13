@@ -1,3 +1,47 @@
+2012-09-12  Yoshifumi Inoue  <yosin@chromium.org>
+
+        New time input needs accessibility
+        https://bugs.webkit.org/show_bug.cgi?id=96032
+
+        Reviewed by Chris Fleizach.
+
+        This patch adds accessibility support into multiple fields time input
+        UI by setting "role" HTML attribute of DateTimeFieldElement to "spinbutton"
+        and changing ARIA attributes to post value change notification.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        Tests: fast/forms/time-multiple-fields/time-multiple-fields-ax-aria-attributes.html
+               fast/forms/time-multiple-fields/time-multiple-fields-ax-value-changed-notification.html
+
+        * html/shadow/DateTimeFieldElement.cpp:
+        (WebCore::DateTimeFieldElement::DateTimeFieldElement): Changed to set
+        "role" HTML attribute to "spinbutton".
+        (WebCore::DateTimeFieldElement::initialize): Changed to set new
+        parameter axHelpText to aria-help attribute and set aria-valuemax and
+        aria-valuemin attributes.
+        (WebCore::DateTimeFieldElement::updateVisibleValue): Changed to set
+        aria-valuetext and aria-valuenow attributes.
+        * html/shadow/DateTimeFieldElement.h:
+        (DateTimeFieldElement): Changed to add new parameter axHelpText to initialize().
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeAMPMFieldElement::create): Changed to add new argument.
+        (WebCore::DateTimeHourFieldElement::create): ditto.
+        (WebCore::DateTimeMillisecondFieldElement::create): ditto.
+        (WebCore::DateTimeMinuteFieldElement::create): ditto.
+        (WebCore::DateTimeSecondFieldElement::create): ditto.
+        * html/shadow/DateTimeNumericFieldElement.cpp:
+        (WebCore::DateTimeNumericFieldElement::maximum): Added for DateTimeFieldElement::initialize().
+        (WebCore::DateTimeNumericFieldElement::minimum): ditto.
+        * html/shadow/DateTimeNumericFieldElement.h:
+        (DateTimeNumericFieldElement): Added maximum() and minimum() declarations.
+        * html/shadow/DateTimeSymbolicFieldElement.cpp:
+        (WebCore::DateTimeSymbolicFieldElement::maximum): Added for DateTimeFieldElement::initialize().
+        (WebCore::DateTimeSymbolicFieldElement::minimum): ditto.
+        * html/shadow/DateTimeSymbolicFieldElement.h:
+        (DateTimeSymbolicFieldElement): Added maximum() and minimum() declarations.
+
 2012-09-12  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r127876.
