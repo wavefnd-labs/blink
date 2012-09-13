@@ -1,3 +1,23 @@
+2012-09-13  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Properties of IDBKeyRange should default to undefined
+        https://bugs.webkit.org/show_bug.cgi?id=96401
+
+        Reviewed by Adam Barth.
+
+        Per the IndexedDB spec, properties of IDBKeyRange should be |undefined| if
+        not set (i.e. range.upper if created with lowerBound(), and vice versa), rather
+        than null.
+
+        Test: storage/indexeddb/keyrange.html
+
+        * bindings/v8/custom/V8IDBKeyCustom.cpp:
+        (WebCore::toV8): Since IDBKeyRange is the only place where possibly-null
+        keys are returned to script, change the JS value from null to undefined.
+        And call v8Undefined(). It's faster.
+        * bindings/js/custom/JSIDBKeyCustom.cpp:
+        (WebCore::toJS): Ditto.
+
 2012-09-13  Sami Kyostila  <skyostil@chromium.org>
 
         Refactor paint overflow clipping
