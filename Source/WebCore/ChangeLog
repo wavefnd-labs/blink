@@ -1,3 +1,27 @@
+2012-09-12  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Cached validated programs are destroyed and recreated when there is only one custom filter animating
+        https://bugs.webkit.org/show_bug.cgi?id=96563
+
+        Reviewed by Dean Jackson.
+
+        Before this patch, in FilterEffectRenderer::build, we would first clear the old effects and
+        then create the new effects.
+
+        Suppose we have one FECustomFilter animating on the page. This FECustomFilter holds the last
+        reference to the cached validated program. Before this patch, we would first destroy the old
+        FECustomFilter, which would destroy its cached validated program. Then, we would create the
+        new FECustomFilter and have to recreate the validated program.
+
+        This patch makes FilterEffectRenderer::build keep the old effects around until we're
+        done creating the new effects. This way, we won't recreate validated programs.
+
+        No new tests. We can't test this because the validated program cache is not exposed to web
+        pages.
+
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::build):
+
 2012-09-12  Tony Chang  <tony@chromium.org>
 
         flex item sized incorrectly in a column flexbox with height set via top/bottom
