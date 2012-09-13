@@ -1,3 +1,59 @@
+2012-09-13  Tim Horton  <timothy_horton@apple.com>
+
+        Add optional debug logging when we fall into/out of threaded scrolling
+        https://bugs.webkit.org/show_bug.cgi?id=93898
+        <rdar://problem/12089098>
+
+        Reviewed by Simon Fraser.
+
+        Add logging when we enter and exit the threaded scrolling mode, and logs the reasons we
+        fall into main-thread scrolling.
+
+        The logging output looks like this:
+            SCROLLING: Switching to main-thread scrolling mode. Time: 15843.554718 Reason(s): viewport-constrained objects
+            SCROLLING: Switching to threaded scrolling mode. Time: 15844.550866
+            SCROLLING: Switching to main-thread scrolling mode. Time: 15845.551214 Reason(s): viewport-constrained objects
+            SCROLLING: Switching to threaded scrolling mode. Time: 15846.552619
+            SCROLLING: Switching to main-thread scrolling mode. Time: 15847.553587 Reason(s): viewport-constrained objects
+            SCROLLING: Switching to threaded scrolling mode. Time: 15848.554084
+
+        No new tests, as this is just debugging logging.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::updateShouldUpdateScrollLayerPositionOnMainThread):
+        Construct a bitfield describing the reasons we fall into main-thread scrolling mode.
+
+        * page/scrolling/ScrollingCoordinatorNone.cpp:
+        (WebCore::ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThread):
+        * page/scrolling/ScrollingTreeNode.cpp:
+        (WebCore::ScrollingTreeNode::ScrollingTreeNode):
+        * page/scrolling/ScrollingTreeNode.h:
+        (WebCore::ScrollingTreeNode::shouldUpdateScrollLayerPositionOnMainThread):
+        * page/scrolling/ScrollingTreeState.cpp:
+        (WebCore::ScrollingTreeState::ScrollingTreeState):
+        (WebCore::ScrollingTreeState::setShouldUpdateScrollLayerPositionOnMainThread):
+        * page/scrolling/ScrollingTreeState.h:
+        (WebCore::ScrollingTreeState::shouldUpdateScrollLayerPositionOnMainThread):
+        * page/scrolling/chromium/ScrollingCoordinatorChromium.cpp:
+        (WebCore::ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThread):
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThread):
+        Use the reasons bitfield instead of a boolean.
+
+        * page/scrolling/ScrollingCoordinator.h:
+        (ScrollingCoordinator):
+        Add MainThreadScrollingReasons enum, with the current reasons that we might fallback to main-thread scrolling.
+        
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::scrollingPerformanceLoggingEnabled):
+        Fix a typo (scrollingPeformanceLoggingEnabled -> scrollingPerformanceLoggingEnabled).
+
+        * page/scrolling/mac/ScrollingTreeNodeMac.mm:
+        (WebCore::ScrollingTreeNodeMac::update):
+        (WebCore::ScrollingTreeNodeMac::setScrollPosition):
+        (WebCore::logThreadedScrollingMode):
+        Pretty-print the scrolling mode and shouldUpdateScrollLayerPositionOnMainThreadReason.
+
 2012-09-13  Joshua Bell  <jsbell@chromium.org>
 
         [V8] Binding: Generate batched attribute/const/callback struct names can collide
