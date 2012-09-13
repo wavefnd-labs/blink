@@ -1,5 +1,36 @@
 2012-09-13  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
 
+        Move updateHoverActiveState to Document.
+        https://bugs.webkit.org/show_bug.cgi?id=95858
+
+        Reviewed by Antonio Gomes.
+
+        RenderLayer::updateHoverActiveState contains the logic that updates hover and active states based on
+        hit-tests, but hover and active states are document states, and does have any relation to layers other
+        than documents having atleast one layer.
+
+        By moving the function it will be in the same place as other active/hover state maintainace, and we avoid
+        excessive updates of the state from hit-testing flow threads.
+
+        * dom/Document.cpp:
+        (WebCore::commonAncestor):
+        (WebCore::Document::updateHoverActiveState):
+        * dom/Document.h:
+        (Document):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::sendContextMenuEventForKey):
+        * rendering/RenderFrameBase.cpp:
+        (WebCore::RenderFrameBase::nodeAtPoint):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::hitTest):
+        * rendering/RenderLayer.h:
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::hitTest):
+        * rendering/RenderView.h:
+        (RenderView):
+
+2012-09-13  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
         REGRESSION: hit test doesn't take iframe scroll position into account
         https://bugs.webkit.org/show_bug.cgi?id=96541
 
