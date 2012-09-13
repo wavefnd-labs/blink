@@ -1,3 +1,63 @@
+2012-09-12  Kent Tamura  <tkent@chromium.org>
+
+        Introduce ValidationMessageClient
+        https://bugs.webkit.org/show_bug.cgi?id=96238
+
+        Reviewed by Hajime Morita.
+
+        ValidationMessageClient interface is responsible to operate validation
+        message UI for interactive form validation. If a Page object has a
+        ValidtionMessageClient, ValidationMessae class uses
+        ValidtionMessageClient instead of Shadow DOM.
+
+        No new tests because of no behavior changes.
+
+        * GNUmakefile.list.am: Add ValidtionMessageClient.h.
+        * Target.pri: ditto.
+        * WebCore.gypi: ditto.
+        * WebCore.xcodeproj/project.pbxproj: ditto.
+
+        * html/ValidationMessage.cpp:
+        (WebCore::ValidationMessage::~ValidationMessage):
+        Hide a validation message via ValidationMessageClient if it is available.
+        (WebCore::ValidationMessage::validationMessageClient):
+        A helper function to get Page::validationMessageClient.
+        (WebCore::ValidationMessage::updateValidationMessage):
+        Adding title attribute is not neeeded if ValidationMessageClient is
+        used. It shoudl be handled in a ValidtionMessageClient implementation.
+        (WebCore::ValidationMessage::setMessage):
+        Show a validation message via ValidationMessageClient if it is available.
+        (WebCore::ValidationMessage::setMessageDOMAndStartTimer):
+        Add an assertion that ValidationMessageClient should not be available.
+        (WebCore::ValidationMessage::buildBubbleTree): ditto.
+        (WebCore::ValidationMessage::requestToHideMessage):
+        Hide a validation message via ValidationMessageClient if it is available.
+        (WebCore::ValidationMessage::shadowTreeContains):
+        Always returns false if ValidationMessageClient is available, it means no Shadow DOM.
+        (WebCore::ValidationMessage::deleteBubbleTree):
+        Add an assertion that ValidationMessageClient should not be available.
+        (WebCore::ValidationMessage::isVisible):
+        Ask ValidationMessageClient for visibility if it is available.
+        * html/ValidationMessage.h:
+        (WebCore): Add a comment.
+        (ValidationMessage): Add validtionMessageClient member function.
+
+        * page/Page.cpp:
+        (WebCore::Page::Page): Initialize m_validationMessageClient.
+        (WebCore::Page::PageClients::PageClients):
+        Initialize validationMessageClient member with 0.
+        So, existing code makes Page::m_validationMessageClient 0.
+        * page/Page.h:
+        (PageClients): Add validationMessageClient member.
+        (WebCore::Page::validationMessageClient):
+        Added. Accessor for m_validationMessageClient.
+        (Page): Add m_validationMessageClient.
+
+        * page/Settings.h:
+        (Settings): Updated the comment for setInteractiveFormValidationEnabled.
+
+        * page/ValidationMessageClient.h: Added.
+
 2012-09-12  Dmitry Titov  <dimich@chromium.org>
 
         [V8] OOM in Workers due to external memory retention.
