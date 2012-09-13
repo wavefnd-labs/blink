@@ -31,20 +31,19 @@
 #ifndef WebCoreMemoryInstrumentation_h
 #define WebCoreMemoryInstrumentation_h
 
-#include <wtf/MemoryInstrumentation.h>
+#include "PlatformMemoryInstrumentation.h"
 
 namespace WebCore {
 
 using WTF::MemoryClassInfo;
 using WTF::MemoryObjectType;
 
-class WebCoreMemoryTypes {
+class WebCoreMemoryTypes : public PlatformMemoryTypes {
 public:
     static MemoryObjectType Page;
     static MemoryObjectType DOM;
     static MemoryObjectType CSS;
     static MemoryObjectType Binding;
-    static MemoryObjectType Loader;
 
     static MemoryObjectType MemoryCache;
     static MemoryObjectType MemoryCacheStructures;
