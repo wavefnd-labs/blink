@@ -1,3 +1,25 @@
+2012-09-13  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Stop shuttling PseudoId from StyleResolver to SelectorChecker.
+        https://bugs.webkit.org/show_bug.cgi?id=96431
+
+        Reviewed by Eric Seidel.
+
+        SelectorChecker retained extra state to store the PseudoId value of the element. It was sad, because we needed to explicitly maintain its integrity. Instead, we now just make it part of StyleResolver and feed to SelectorChecker as part of SelectorCheckingContext.
+
+        No new tests, refactoring only. Covered by existing tests.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::SelectorChecker): Removed state initializer.
+        (WebCore::SelectorChecker::checkSelector): Changed to look into context, rather than own member.
+        * css/SelectorChecker.h:
+        (WebCore::SelectorChecker::SelectorCheckingContext::SelectorCheckingContext): Added pseudoStyle as parameter.
+        (SelectorCheckingContext): Added pseudoStyle as member.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList): Changed to look at own member, rather than m_checker.
+        * css/StyleResolver.h:
+        (StyleResolver): Added new member.
+
 2012-09-13  Simon Hausmann  <simon.hausmann@nokia.com>
 
         Unreviewed prospective Qt/MSVC build fix.
