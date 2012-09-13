@@ -1,3 +1,24 @@
+2012-09-13  Ojan Vafai  <ojan@chromium.org>
+
+        percentage heights in quirks mode with auto-sized body are computed incorrectly
+        https://bugs.webkit.org/show_bug.cgi?id=96426
+
+        Reviewed by Tony Chang.
+
+        In quirks mode, for the body element, we need to keep walking up to the html element
+        if the body's height is auto. Also, we need to subtract the body/html elements
+        margin/border/padding so that we properly get the body's content height.
+
+        This behavior matches IE9, FF and Opera.
+
+        None of this applies to standards mode since we don't walk up the
+        containingBlock chain for auto-sized elements.
+
+        Test: fast/css/percentage-height-auto-sized-body-quirks.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computePercentageLogicalHeight):
+
 2012-09-13  Adrienne Walker  <enne@google.com>
 
         Hide all ancestors of the full screen element when going full screen
