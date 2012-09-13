@@ -1,3 +1,60 @@
+2012-09-13  Raul Hudea  <rhudea@adobe.com>
+
+        [CSSRegions][CSSOM] Implement Element.getRegionFlowRanges
+        https://bugs.webkit.org/show_bug.cgi?id=78493
+
+        Reviewed by David Hyatt.
+
+        Implement the getRegionFlowRanges function from the CSS Regions spec. It is implemented by iterating over 
+        the content nodes and figuring out which nodes have boundingBox intersecting the region box and figuring out
+        the start and end positions.
+
+        Tests: fast/regions/get-region-flow-ranges-absolute-pos.html
+               fast/regions/get-region-flow-ranges-content-nodes.html
+               fast/regions/get-region-flow-ranges-display-none.html
+               fast/regions/get-region-flow-ranges-empty-regions.html
+               fast/regions/get-region-flow-ranges-fixed-pos.html
+               fast/regions/get-region-flow-ranges-horiz-bt.html
+               fast/regions/get-region-flow-ranges-inline-only.html
+               fast/regions/get-region-flow-ranges-text-vert-lr.html
+               fast/regions/get-region-flow-ranges-text.html
+               fast/regions/get-region-flow-ranges-vert-lr.html
+               fast/regions/get-region-flow-ranges-vert-rl.html
+               fast/regions/get-region-flow-ranges-writing-modes-rl-rb-lr.html
+               fast/regions/get-region-flow-ranges-writing-modes-tb-rl-lr.html
+               fast/regions/get-region-flow-ranges.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::webkitGetRegionFlowRanges):
+        (WebCore):
+        * dom/Element.h:
+        * dom/Element.idl: added the webkitGetRegionFlowRanges method
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computeStartPositionDeltaForChildAvoidingFloats): Use the logicalTopOfFlowThreadContentRect instead of offsetFromLogicalTopOfFirstPage (renamed)
+        (WebCore::RenderBlock::hasNextPage): Use the logicalTopOfFlowThreadContentRect instead of offsetFromLogicalTopOfFirstPage (renamed)
+        (WebCore::RenderBlock::offsetFromLogicalTopOfFirstPage): Added a slower path which works without LayoutState
+        (WebCore::RenderBlock::clampToStartAndEndRegions): Use the logicalTopOfFlowThreadContentRect instead of offsetFromLogicalTopOfFirstPage (renamed)
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::shrinkLogicalWidthToAvoidFloats): Use the logicalTopOfFlowThreadContentRect instead of offsetFromLogicalTopOfFirstPage (renamed)
+        (WebCore::RenderBox::containingBlockAvailableLineWidthInRegion): Use the logicalTopOfFlowThreadContentRect instead of offsetFromLogicalTopOfFirstPage (renamed)
+        (WebCore::computeInlineStaticDistance): Use the logicalTopOfFlowThreadContentRect instead of offsetFromLogicalTopOfFirstPage (renamed)
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::isContainedInNodes):
+        (WebCore):
+        (WebCore::boxIntersectsRegion):
+        (WebCore::RenderNamedFlowThread::getRanges): returns a vector of Ranges that contains Node that are part of a region
+        * rendering/RenderNamedFlowThread.h:
+        (RenderNamedFlowThread):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::logicalTopOfFlowThreadContentRect): Returns the logical top of a rectangle inside the flow thread content
+        (WebCore):
+        (WebCore::RenderRegion::logicalBottomOfFlowThreadContentRect): Returns the logical bottom of a rectangle inside the flow thread content
+        (WebCore::RenderRegion::getRanges): proxy the getRanges call to its named flow thread
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        (WebCore::RenderRegion::logicalTopForFlowThreadContent): Renamed from offsetFromLogicalTopOfFirstPage
+        (WebCore::RenderRegion::logicalBottomForFlowThreadContent): Returns the logical bottom of the FlowThreadContent rect
+
 2012-09-13  Adam Barth  <abarth@webkit.org>
 
         new test fast/canvas/canvas-css-crazy.html fails on Mac
