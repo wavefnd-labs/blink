@@ -1,3 +1,26 @@
+2012-09-13  Tony Chang  <tony@chromium.org>
+
+        Flexitem margins should be based on content width, not width
+        https://bugs.webkit.org/show_bug.cgi?id=96674
+
+        Reviewed by Ojan Vafai.
+
+        Margins should be based on content width. Also remove some calls to
+        mainAxisContentExtent() when we can use contentLogicalWidth instead.
+
+        Tests: css3/flexbox/percent-margins.html has a new testcase.
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::computeMainAxisExtentForChild): Use contentLogicalWidth instead of
+        passing in the maximum value (only used in the width case).
+        (WebCore::RenderFlexibleBox::preferredMainAxisContentExtentForChild): Don't pass in mainAxisContentExtent.
+        (WebCore::RenderFlexibleBox::computeChildMarginValue): Use contentLogicalWidth and simplify the code.
+        (WebCore::RenderFlexibleBox::computeMainAxisPreferredSizes): Remove unnecessary mainAxisContentExtent() call.
+        (WebCore::RenderFlexibleBox::adjustChildSizeForMinAndMax): Remove unnecessary flexboxAvailableContentExtent.
+        (WebCore::RenderFlexibleBox::computeNextFlexLine): Remove unnecessary mainAxisContentExtent() call.
+        (WebCore::RenderFlexibleBox::resolveFlexibleLengths): Remove unnecessary mainAxisContentExtent() call.
+        * rendering/RenderFlexibleBox.h: Remove unnecessary params.
+
 2012-09-13  Thiago Marcos P. Santos  <thiago.santos@intel.com>
 
         [EFL] Assertion reached on RenderThemeEFL when setting a theme to an invalid path
