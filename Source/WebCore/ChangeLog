@@ -1,3 +1,21 @@
+2012-09-13  Tom Sepez  <tsepez@chromium.org>
+
+        ASSERT(!eventDispatchForbidden()) fires when removed plugin re-inserted as part of readyStateChange.
+        https://bugs.webkit.org/show_bug.cgi?id=93639
+
+        Reviewed by Ryosuke Niwa.
+
+        Removing a plugin causes a detach which can cancel the last remaining load on a page,
+        resulting in a readyStateChange event during a time when things are inconsisent. Defer
+        the detach which triggers this chain of events until after the node is fully removed
+        from the document's elementsById map.
+
+        Test: plugins/plugin-remove-readystatechange.html
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::removeChild):
+        (WebCore::ContainerNode::removeChildren):
+
 2012-09-13  Tim Horton  <timothy_horton@apple.com>
 
         Add optional debug logging when we fall into/out of threaded scrolling
