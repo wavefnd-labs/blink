@@ -1,3 +1,60 @@
+2012-09-14  Dan Carney  <dcarney@google.com>
+
+        Remove V8DOMWindowShell::getEntered
+        https://bugs.webkit.org/show_bug.cgi?id=96637
+
+        Reviewed by Adam Barth.
+
+        V8DOMWindowShell::getEntered was refactored so that the window shell
+        no longer has to be kept alive by a v8 context but rather a smaller
+        object.
+
+        No new tests. No change in functionality.
+
+        * bindings/v8/DOMData.cpp:
+        (WebCore::DOMData::getCurrentStore):
+        * bindings/v8/ScopedPersistent.h:
+        (WebCore::ScopedPersistent::leakHandle):
+        (ScopedPersistent):
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::resetIsolatedWorlds):
+        (WebCore::ScriptController::evaluateInIsolatedWorld):
+        (WebCore::ScriptController::currentWorldContext):
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::perContextDataForCurrentWorld):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::setIsolatedWorldField):
+        (WebCore::V8DOMWindowShell::toIsolatedContextData):
+        (WebCore::isolatedContextWeakCallback):
+        (WebCore::V8DOMWindowShell::disposeContext):
+        (WebCore::V8DOMWindowShell::clearIsolatedShell):
+        (WebCore):
+        (WebCore::V8DOMWindowShell::initializeIfNeeded):
+        (WebCore::V8DOMWindowShell::setIsolatedWorldSecurityOrigin):
+        * bindings/v8/V8DOMWindowShell.h:
+        (V8DOMWindowShell):
+        (IsolatedContextData):
+        (WebCore::V8DOMWindowShell::IsolatedContextData::create):
+        (WebCore::V8DOMWindowShell::IsolatedContextData::world):
+        (WebCore::V8DOMWindowShell::IsolatedContextData::perContextData):
+        (WebCore::V8DOMWindowShell::IsolatedContextData::setSecurityOrigin):
+        (WebCore::V8DOMWindowShell::IsolatedContextData::securityOrigin):
+        (WebCore::V8DOMWindowShell::IsolatedContextData::IsolatedContextData):
+        (WebCore::V8DOMWindowShell::enteredIsolatedContext):
+        (WebCore::V8DOMWindowShell::enteredIsolatedContextData):
+        * bindings/v8/V8DOMWrapper.h:
+        (WebCore::V8DOMWrapper::getCachedWrapper):
+        * bindings/v8/WorldContextHandle.cpp:
+        (WebCore::WorldContextHandle::WorldContextHandle):
+        * bindings/v8/custom/V8DocumentCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8SVGDocumentCustom.cpp:
+        (WebCore::toV8):
+        * bindings/v8/custom/V8XMLHttpRequestConstructor.cpp:
+        (WebCore::V8XMLHttpRequest::constructorCallback):
+
 2012-09-14  Michelangelo De Simone  <michelangelo@webkit.org>
 
         [CSS Shaders] u_textureSize uniform should be set to the size of the texture.
