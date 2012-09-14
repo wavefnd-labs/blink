@@ -1,3 +1,28 @@
+2012-09-14  Tom Sepez  <tsepez@chromium.org>
+
+        ImageLoader can't be cleared when video element poster attribute removed.
+        https://bugs.webkit.org/show_bug.cgi?id=96301
+
+        Reviewed by Abhishek Arya.
+
+        Same problem as in https://bugs.webkit.org/show_bug.cgi?id=90801. We can't
+        clear the image loader when the src attribute is cleared, because we might be
+        inside a handler called on top of an image loader event dispatch. Instead we
+        will rely on the OwnPtr relationship between the Element and the Image Loader
+        to limit the lifetime of the loader to that of the element.
+
+        Test: fast/dom/beforeload/clear-video-poster-in-beforeload-listener.html
+
+        * html/HTMLVideoElement.cpp:
+        (WebCore::HTMLVideoElement::parseAttribute):
+        Remove permature clearing of m_imageLoader.
+        * html/HTMLEmbedElement.cpp:
+        (WebCore::HTMLEmbedElement::parseAttribute):
+        Remove permature clearing of m_imageLoader.
+        * html/HTMLObjectElement.cpp:
+        (WebCore::HTMLObjectElement::parseAttribute):
+        Remove permature clearing of m_imageLoader.
+
 2012-09-14  Jeffrey Pfau  <jpfau@apple.com>
 
         Allow third-party storage blocking setting to change while a page is loaded
