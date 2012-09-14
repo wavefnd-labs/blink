@@ -1,3 +1,114 @@
+2012-09-14  Simon Fraser  <simon.fraser@apple.com>
+
+        REGRESSION: transition doesn’t always override transition-property
+        https://bugs.webkit.org/show_bug.cgi?id=96658
+
+        Reviewed by Dean Jackson.
+
+        Setting the animation property on an Animation in CSSToStyleMap::mapAnimationProperty()
+        is special because we have to call setAnimationMode(Animation::AnimateAll) as well
+        as setting the property to CSSPropertyInvalid if it's for the initial state
+        of the transition-property property.
+        
+        In order to fix this via StyleBuilder PropertyHandlers, we have to know,
+        in ApplyPropertyAnimation::applyInitialValue(), which property is getting applied.
+        This requires passing the CSSPropertyID down through all of the "apply" methods.
+        
+        Do some unrelated cleanup in CSSParser::parseTransitionShorthand(); the existing code
+        was not safe with respect to adding new properties to the shorthand.
+
+        Test: transitions/longhand-vs-shorthand-initial.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseTransitionShorthand):
+        * css/StyleBuilder.cpp:
+        (WebCore::ApplyPropertyExpanding::applyInheritValue):
+        (WebCore::ApplyPropertyExpanding::applyInitialValue):
+        (WebCore::ApplyPropertyExpanding::applyValue):
+        (WebCore::ApplyPropertyDefaultBase::applyInheritValue):
+        (WebCore::ApplyPropertyDefaultBase::applyInitialValue):
+        (WebCore::ApplyPropertyDefaultBase::applyValue):
+        (WebCore::ApplyPropertyDefault::applyValue):
+        (WebCore::ApplyPropertyNumber::applyValue):
+        (WebCore::ApplyPropertyStyleImage::applyValue):
+        (WebCore::ApplyPropertyAuto::applyInheritValue):
+        (WebCore::ApplyPropertyAuto::applyInitialValue):
+        (WebCore::ApplyPropertyAuto::applyValue):
+        (WebCore::ApplyPropertyClip::applyInheritValue):
+        (WebCore::ApplyPropertyClip::applyInitialValue):
+        (WebCore::ApplyPropertyClip::applyValue):
+        (WebCore::ApplyPropertyColor::applyInheritValue):
+        (WebCore::ApplyPropertyColor::applyInitialValue):
+        (WebCore::ApplyPropertyColor::applyValue):
+        (WebCore::ApplyPropertyDirection::applyValue):
+        (WebCore::ApplyPropertyLength::applyValue):
+        (WebCore::ApplyPropertyString::applyValue):
+        (WebCore::ApplyPropertyBorderRadius::applyValue):
+        (WebCore::ApplyPropertyFillLayer::applyInheritValue):
+        (WebCore::ApplyPropertyFillLayer::applyInitialValue):
+        (WebCore::ApplyPropertyFillLayer::applyValue):
+        (WebCore::ApplyPropertyComputeLength::applyValue):
+        (WebCore::ApplyPropertyFont::applyInheritValue):
+        (WebCore::ApplyPropertyFont::applyInitialValue):
+        (WebCore::ApplyPropertyFont::applyValue):
+        (WebCore::ApplyPropertyFontSize::applyInheritValue):
+        (WebCore::ApplyPropertyFontSize::applyInitialValue):
+        (WebCore::ApplyPropertyFontSize::applyValue):
+        (WebCore::ApplyPropertyFontWeight::applyValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyInheritValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyInitialValue):
+        (WebCore::ApplyPropertyFontVariantLigatures::applyValue):
+        (WebCore::ApplyPropertyBorderImage::applyValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyInheritValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyInitialValue):
+        (WebCore::ApplyPropertyBorderImageModifier::applyValue):
+        (WebCore::ApplyPropertyBorderImageSource::applyValue):
+        (WebCore::ApplyPropertyCounter::emptyFunction):
+        (WebCore::ApplyPropertyCounter::applyInheritValue):
+        (WebCore::ApplyPropertyCounter::applyValue):
+        (WebCore::ApplyPropertyCursor::applyInheritValue):
+        (WebCore::ApplyPropertyCursor::applyInitialValue):
+        (WebCore::ApplyPropertyCursor::applyValue):
+        (WebCore::ApplyPropertyTextAlign::applyValue):
+        (WebCore::ApplyPropertyTextDecoration::applyValue):
+        (WebCore::ApplyPropertyLineHeight::applyValue):
+        (WebCore::ApplyPropertyPageSize::applyInheritValue):
+        (WebCore::ApplyPropertyPageSize::applyInitialValue):
+        (WebCore::ApplyPropertyPageSize::applyValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyInheritValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyInitialValue):
+        (WebCore::ApplyPropertyTextEmphasisStyle::applyValue):
+        (WebCore::ApplyPropertyAnimation::applyInheritValue):
+        (WebCore::ApplyPropertyAnimation::applyInitialValue): If the property is
+        CSSPropertyWebkitTransitionProperty, call setAnimationMode(Animation::AnimateAll).
+        (WebCore::ApplyPropertyAnimation::applyValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyInheritValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyInitialValue):
+        (WebCore::ApplyPropertyOutlineStyle::applyValue):
+        (WebCore::ApplyPropertyResize::applyValue):
+        (WebCore::ApplyPropertyVerticalAlign::applyValue):
+        (WebCore::ApplyPropertyAspectRatio::applyInheritValue):
+        (WebCore::ApplyPropertyAspectRatio::applyInitialValue):
+        (WebCore::ApplyPropertyAspectRatio::applyValue):
+        (WebCore::ApplyPropertyZoom::applyInheritValue):
+        (WebCore::ApplyPropertyZoom::applyInitialValue):
+        (WebCore::ApplyPropertyZoom::applyValue):
+        (WebCore::ApplyPropertyDisplay::applyInheritValue):
+        (WebCore::ApplyPropertyDisplay::applyInitialValue):
+        (WebCore::ApplyPropertyDisplay::applyValue):
+        (WebCore::ApplyPropertyClipPath::applyValue):
+        (WebCore::ApplyPropertyWrapShape::applyValue):
+        (WebCore::ApplyPropertyImageResolution::applyInheritValue):
+        (WebCore::ApplyPropertyImageResolution::applyInitialValue):
+        (WebCore::ApplyPropertyImageResolution::applyValue):
+        * css/StyleBuilder.h:
+        (PropertyHandler):
+        (WebCore::PropertyHandler::applyInheritValue):
+        (WebCore::PropertyHandler::applyInitialValue):
+        (WebCore::PropertyHandler::applyValue):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList): Pass in the property ID.
+
 2012-09-14  Chang Shu  <cshu@webkit.org>
 
         Support constructor-type attribute in idls other than DOMWindow.
