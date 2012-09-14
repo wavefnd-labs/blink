@@ -1,3 +1,65 @@
+2012-09-14  Alexey Proskuryakov  <ap@apple.com>
+
+        REGRESSION(r126717): It made inspector/styles/media-queries.html fail/flakey
+        https://bugs.webkit.org/show_bug.cgi?id=95070
+
+        Roll out r126717, and another change that depends on it.
+        r126717: Remove parent pointer from StyleSheetContents and StyleRuleImport
+        r127123: Cache and share parsed imported stylesheets
+
+        * css/CSSImportRule.cpp:
+        * css/CSSImportRule.h:
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::willMutateRules):
+        (WebCore::CSSStyleSheet::reattachChildRuleCSSOMWrappers):
+        (WebCore::CSSStyleSheet::insertRule):
+        (WebCore::CSSStyleSheet::ownerDocument):
+        * css/CSSStyleSheet.h:
+        (WebCore::CSSStyleSheet::clearOwnerRule):
+        * css/StyleRuleImport.cpp:
+        (WebCore::StyleRuleImport::StyleRuleImport):
+        (WebCore::StyleRuleImport::~StyleRuleImport):
+        (WebCore::StyleRuleImport::setCSSStyleSheet):
+        (WebCore::StyleRuleImport::isLoading):
+        (WebCore::StyleRuleImport::requestStyleSheet):
+        * css/StyleRuleImport.h:
+        (WebCore::StyleRuleImport::parentStyleSheet):
+        (WebCore::StyleRuleImport::setParentStyleSheet):
+        (WebCore::StyleRuleImport::clearParentStyleSheet):
+        (ImportedStyleSheetClient):
+        (WebCore::StyleRuleImport::ImportedStyleSheetClient::ImportedStyleSheetClient):
+        (WebCore::StyleRuleImport::ImportedStyleSheetClient::~ImportedStyleSheetClient):
+        (WebCore::StyleRuleImport::ImportedStyleSheetClient::setCSSStyleSheet):
+        * css/StyleSheetContents.cpp:
+        (WebCore::StyleSheetContents::StyleSheetContents):
+        (WebCore::StyleSheetContents::isCacheable):
+        (WebCore::StyleSheetContents::parserAppendRule):
+        (WebCore::StyleSheetContents::clearRules):
+        (WebCore::StyleSheetContents::wrapperInsertRule):
+        (WebCore::StyleSheetContents::wrapperDeleteRule):
+        (WebCore::StyleSheetContents::parseAuthorStyleSheet):
+        (WebCore::StyleSheetContents::parseStringAtLine):
+        (WebCore::StyleSheetContents::checkLoaded):
+        (WebCore::StyleSheetContents::notifyLoadedSheet):
+        (WebCore::StyleSheetContents::startLoadingDynamicSheet):
+        (WebCore::StyleSheetContents::rootStyleSheet):
+        (WebCore::StyleSheetContents::singleOwnerNode):
+        (WebCore::StyleSheetContents::singleOwnerDocument):
+        (WebCore::StyleSheetContents::parentStyleSheet):
+        * css/StyleSheetContents.h:
+        (WebCore::StyleSheetContents::create):
+        (StyleSheetContents):
+        (WebCore::StyleSheetContents::ownerRule):
+        (WebCore::StyleSheetContents::clearOwnerRule):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::parseStyleSheet):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::createSheet):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+        * loader/cache/CachedCSSStyleSheet.cpp:
+        (WebCore::CachedCSSStyleSheet::saveParsedStyleSheet):
+
 2012-09-14  Ojan Vafai  <ojan@chromium.org>
 
         Simplify some code in RenderBox::computePercentageLogicalHeight
