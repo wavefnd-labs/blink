@@ -1,3 +1,79 @@
+2012-09-14  Mike West  <mkwst@chromium.org>
+
+        JSC should throw a more descriptive exception when blocking 'eval' via CSP.
+        https://bugs.webkit.org/show_bug.cgi?id=94331
+
+        Reviewed by Geoffrey Garen.
+
+        Unless explicitly whitelisted, the 'script-src' Content Security Policy
+        directive blocks 'eval' and 'eval'-like constructs such as
+        'new Function()'. When 'eval' is encountered in code, an 'EvalError' is
+        thrown, but the associated message is poor: "Eval is disabled" doesn't
+        give developers enough information about why their code isn't behaving
+        as expected.
+
+        This patch adds an 'errorMessage' parameter to the JavaScriptCore method
+        used to disable 'eval'; ContentSecurityPolicy has the opportunity to
+        pass in a more detailed and descriptive error that contains more context
+        for the developer.
+
+        The new error message is tested by adjusting existing tests; nothing new
+        is required.
+
+        * bindings/js/ScriptController.cpp:
+        (WebCore::ScriptController::initScript):
+            Read the error message off the document's ContentSecurityPolicy.
+        (WebCore::ScriptController::disableEval):
+        * bindings/js/ScriptController.h:
+        (ScriptController):
+            Pipe the error message through to JSGlobalObject when disabling eval
+        * bindings/js/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::disableEval):
+        * bindings/js/WorkerScriptController.h:
+        (WorkerScriptController):
+            Pipe the error message through to JSGlobalObject when disabling eval
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::disableEval):
+        * bindings/v8/ScriptController.h:
+        (ScriptController):
+        * bindings/v8/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::disableEval):
+        * bindings/v8/WorkerScriptController.h:
+        (WorkerScriptController):
+            Placeholder for V8 piping to be built in webk.it/94332.
+        * dom/Document.cpp:
+        (WebCore::Document::disableEval):
+        * dom/Document.h:
+        (Document):
+        * dom/ScriptExecutionContext.h:
+        (ScriptExecutionContext):
+            Pipe the error message through to the ScriptController when
+            disabling eval.
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPDirectiveList::evalDisabledErrorMessage):
+            Accessor for the error message that ought be displayed to developers
+            when 'eval' used while disabled for a specific directive list.
+        (WebCore::CSPDirectiveList::setEvalDisabledErrorMessage):
+            Mutator for the error message that ought be displayed to developers
+            when 'eval' used while disabled for a specific directive list.
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::create):
+            Upon creation of a CSPDirectiveList, set the error message if the
+            directive list disables 'eval'.
+        (WebCore::ContentSecurityPolicy::didReceiveHeader):
+            Pass the error message into ScriptExecutionContext::disableEval.
+        (WebCore::ContentSecurityPolicy::evalDisabledErrorMessage):
+            Public accessor for the policy's error message; walks the list of
+            directive lists and returns the first error message found.
+        (WebCore):
+        * page/ContentSecurityPolicy.h:
+        * workers/WorkerContext.cpp:
+        (WebCore::WorkerContext::disableEval):
+        * workers/WorkerContext.h:
+        (WorkerContext):
+            Pipe the error message through to the ScriptController when
+            disabling eval.
+
 2012-09-14  Dan Carney  <dcarney@google.com>
 
         Remove V8DOMWindowShell::getEntered
