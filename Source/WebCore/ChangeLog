@@ -1,5 +1,54 @@
 2012-09-14  Keishi Hattori  <keishi@webkit.org>
 
+        Refactor time format related methods on LocaleWin/Mac/ICU so that they override Localizer methods
+        https://bugs.webkit.org/show_bug.cgi?id=96726
+
+        Reviewed by Kent Tamura.
+
+        Refactoring time format related methods on LocaleWin/Mac/ICU so that
+        they override Localizer methods. We can call them from the Localizer
+        from now on.
+
+        No new tests. No behavior change. Covered by existing tests.
+
+        * platform/text/LocaleICU.cpp:
+        (WebCore::LocaleICU::initializeDateTimeFormat): m_timeAMPMLabels is no longer a OwnPtr so we account for that.
+        (WebCore::LocaleICU::timeFormat): Removing Text from end of function
+        name because *FormatText() shoud return human readable text like "Day/Month/Year".
+        (WebCore::LocaleICU::shortTimeFormat):
+        (WebCore::LocaleICU::timeAMPMLabels):
+        * platform/text/LocaleICU.h:
+        (LocaleICU):
+        * platform/text/LocaleWin.cpp:
+        (WebCore::LocaleWin::timeFormat):
+        (WebCore::LocaleWin::shortTimeFormat):
+        (WebCore::LocaleWin::timeAMPMLabels):
+        * platform/text/LocaleWin.h:
+        (LocaleWin):
+        * platform/text/LocalizedDateICU.cpp:
+        (WebCore::localizedTimeFormatText):
+        (WebCore::localizedShortTimeFormatText):
+        * platform/text/LocalizedDateWin.cpp:
+        (WebCore::localizedTimeFormatText):
+        (WebCore::localizedShortTimeFormatText):
+        * platform/text/Localizer.cpp:
+        (WebCore):
+        (WebCore::Localizer::timeFormat):
+        (WebCore::Localizer::shortTimeFormat):
+        (WebCore::Localizer::timeAMPMLabels):
+        * platform/text/Localizer.h:
+        (Localizer): We unified some of the member variables like m_timeAMPMLabels into this class.
+        * platform/text/mac/LocaleMac.h:
+        (LocaleMac):
+        * platform/text/mac/LocaleMac.mm:
+        (WebCore::LocaleMac::timeFormat):
+        (WebCore::LocaleMac::shortTimeFormat):
+        * platform/text/mac/LocalizedDateMac.cpp:
+        (WebCore::localizedTimeFormatText):
+        (WebCore::localizedShortTimeFormatText):
+
+2012-09-14  Keishi Hattori  <keishi@webkit.org>
+
         Add runtime flag that enables lang attribute for form controls in LayoutTests
         https://bugs.webkit.org/show_bug.cgi?id=96636
 
