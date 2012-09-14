@@ -1,3 +1,47 @@
+2012-09-14  Jeffrey Pfau  <jpfau@apple.com>
+
+        Allow third-party storage blocking setting to change while a page is loaded
+        https://bugs.webkit.org/show_bug.cgi?id=95790
+
+        Reviewed by Brady Eidson.
+
+        Pipe through changes to the storage blocking policy to each document and plugin.
+
+        Tests: http/tests/security/storage-blocking-loosened-local-storage.html
+               http/tests/security/storage-blocking-loosened-plugin.html
+               http/tests/security/storage-blocking-loosened-private-browsing-plugin.html
+               http/tests/security/storage-blocking-loosened-shared-worker.html
+               http/tests/security/storage-blocking-loosened-websql.html
+               http/tests/security/storage-blocking-strengthened-local-storage.html
+               http/tests/security/storage-blocking-strengthened-plugin.html
+               http/tests/security/storage-blocking-strengthened-private-browsing-plugin.html
+               http/tests/security/storage-blocking-strengthened-shared-worker.html
+               http/tests/security/storage-blocking-strengthened-websql.html
+
+        * WebCore.exp.in:
+        * dom/Document.cpp: Pipe changes through to the Document's SecurityOrigin.
+        (WebCore::Document::storageBlockingStateDidChange):
+        (WebCore):
+        * dom/Document.h:
+        (Document):
+        * page/DOMWindow.cpp: Check to make sure access is allowed before returning a cached storage area.
+        (WebCore::DOMWindow::sessionStorage):
+        (WebCore::DOMWindow::localStorage):
+        * page/Page.cpp:
+        (WebCore::Page::collectPluginViews): Refactored out into a function.
+        (WebCore):
+        (WebCore::Page::storageBlockingStateChanged): Pipe changes through to each PluginView.
+        (WebCore::Page::privateBrowsingStateChanged):
+        * page/Page.h:
+        (Page):
+        * page/Settings.cpp:
+        (WebCore::Settings::setStorageBlockingPolicy): Tell Pages about changes to the storage blocking policy.
+        (WebCore):
+        * page/Settings.h:
+        (Settings):
+        * plugins/PluginViewBase.h:
+        (WebCore::PluginViewBase::storageBlockingStateChanged):
+
 2012-09-14  Dan Carney  <dcarney@google.com>
 
         Prevent workers from calling back into other worlds
