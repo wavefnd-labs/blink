@@ -1,3 +1,81 @@
+2012-09-13  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Consolidate two-phase connection to avoid race conditions
+        https://bugs.webkit.org/show_bug.cgi?id=90411
+
+        Reviewed by Tony Chang.
+
+        Previously, IDB connections were opened by having the front-end (1) call through to
+        a back-end open() method, eventually receive a success message with a back-end object
+        handle, and (2) call into the back-end object to register front-end callbacks. This left
+        the back-end's notion of an open connection in a limbo state between these two calls.
+        In multi-process ports, a crash of the front-end process could leave the back-end wedged
+        waiting for this second call (e.g. can't delete until all connections are closed).
+
+        Simplify this by having the front-end pass through the callbacks into the back-end
+        during the initial open() call, which eliminates the limbo state.
+
+        No new tests - no functional changes. Chromium port's webkit_unit_tests updated.
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::create):
+        (WebCore::IDBDatabase::IDBDatabase): Db-callbacks is available at creation time.
+        (WebCore::IDBDatabase::~IDBDatabase):
+        * Modules/indexeddb/IDBDatabase.h:
+        (IDBDatabase):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenCall::create): Need to track db-callbacks as well.
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenCall::databaseCallbacks):
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenCall::PendingOpenCall):
+        (IDBDatabaseBackendImpl::PendingOpenCall):
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenWithVersionCall::create): Ditto.
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenWithVersionCall::databaseCallbacks):
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenWithVersionCall::PendingOpenWithVersionCall):
+        (IDBDatabaseBackendImpl::PendingOpenWithVersionCall):
+        (WebCore::IDBDatabaseBackendImpl::IDBDatabaseBackendImpl):
+        (WebCore::IDBDatabaseBackendImpl::setVersion):
+        (WebCore::IDBDatabaseBackendImpl::connectionCount): Don't need to count limbo connections any more.
+        (WebCore::IDBDatabaseBackendImpl::processPendingCalls): Pass through db-callbacks.
+        (WebCore::IDBDatabaseBackendImpl::openConnection): No more limbo connections (yay!).
+        (WebCore::IDBDatabaseBackendImpl::runIntVersionChangeTransaction): Pass through db-callbacks.
+        (WebCore::IDBDatabaseBackendImpl::openConnectionWithVersion): Ditto.
+        (WebCore::IDBDatabaseBackendImpl::deleteDatabase): Style.
+        (WebCore::IDBDatabaseBackendImpl::close): Resolve FIXME about connectionCount.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h:
+        (IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBDatabaseBackendInterface.h:
+        (IDBDatabaseBackendInterface):
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.cpp:
+        (WebCore::IDBDatabaseCallbacksImpl::create):
+        (WebCore::IDBDatabaseCallbacksImpl::IDBDatabaseCallbacksImpl):
+        (WebCore::IDBDatabaseCallbacksImpl::connect):
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.h:
+        (IDBDatabaseCallbacksImpl):
+        * Modules/indexeddb/IDBFactory.cpp:
+        (WebCore::IDBFactory::open): Mint the db-callbacks here...
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp:
+        (WebCore::IDBFactoryBackendImpl::open): ...passed through to here...
+        * Modules/indexeddb/IDBFactoryBackendImpl.h:
+        (IDBFactoryBackendImpl):
+        * Modules/indexeddb/IDBFactoryBackendInterface.h:
+        (IDBFactoryBackendInterface):
+        * Modules/indexeddb/IDBOpenDBRequest.cpp:
+        (WebCore::IDBOpenDBRequest::create): ...all the way to here...
+        (WebCore::IDBOpenDBRequest::IDBOpenDBRequest):
+        (WebCore::IDBOpenDBRequest::onUpgradeNeeded): ...and finally hooked up here.
+        (WebCore::IDBOpenDBRequest::onSuccess): (or here, if no upgrade needed).
+        * Modules/indexeddb/IDBOpenDBRequest.h:
+        (WebCore):
+        (IDBOpenDBRequest):
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::onAbort): Tweak event/notification ordering; the
+        notifying the database that the transaction is finished may unblock closing,
+        which fires more events, and the delivery matters. Previously the close would
+        be blocked by the transaction which gave the desired order.
+        (WebCore::IDBTransaction::onComplete): Ditto.
+        * inspector/InspectorIndexedDBAgent.cpp: New hookup logic.
+        (WebCore):
+
 2012-09-13  Ryosuke Niwa  <rniwa@webkit.org>
 
         suspend/resumeWidgetHierarchyUpdates should be a RAII object
