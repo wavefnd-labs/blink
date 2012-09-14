@@ -1,3 +1,102 @@
+2012-09-14  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] multiple fields time input UI should save/restore its value even if it has an empty field.
+        https://bugs.webkit.org/show_bug.cgi?id=96714
+
+        Reviewed by Kent Tamura.
+
+        This patch changes multiple fields time input UI to save/restore value
+        of fields rather than time value. For this change, storage format of
+        input type "time" is also changed.
+
+        Before this patch, if user populates time fiels partially, all fields
+        are reset to initial value after back/forward navigation.
+
+        After this patch, partially populated fields are preserved after
+        back/forward navigation.
+
+        Fields of DateTimeEditElement are represented as 9 elements of
+        string vector in FormControlState regardless actual fields in
+        DateTimeEditElement for ease of restoring/saving.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. Existing test fast/forms/time-multiple-fields/time-multiple-fields-preserve-value-after-history-back.html
+        convers this change.
+
+        * WebCore.gypi: Chagned to add DateTimeFieldsState.{cpp.h}
+        * html/DateTimeFieldsState.cpp: Added.
+        (WebCore::getNumberFromFormControlState): Extracts unsigned integer or empty value from FormControlState.
+        (WebCore::getAMPMFromFormControlState): Extracts AM/PM value or empty value from FormControlState.
+        (WebCore::DateTimeFieldsState::DateTimeFieldsState): Initializes fields with empty value.
+        (WebCore::DateTimeFieldsState::restoreFormControlState): Makes DateTimeFieldsState instance from FormControlState.
+        (WebCore::DateTimeFieldsState::saveFormControlState): Makes FormControlState from DateTimeFieldsState.
+        * html/DateTimeFieldsState.h: Added.
+        (DateTimeFieldsState):
+        (WebCore::DateTimeFieldsState::ampm): Returns AM/PM field value.
+        (WebCore::DateTimeFieldsState::dayOfMonth): Returns day of month field value.
+        (WebCore::DateTimeFieldsState::hour): Reutrns hour field value.
+        (WebCore::DateTimeFieldsState::millisecond): Returns millisecond field value.
+        (WebCore::DateTimeFieldsState::minute): Returns minute field value.
+        (WebCore::DateTimeFieldsState::month): Returns month field value.
+        (WebCore::DateTimeFieldsState::second): Returns second field value.
+        (WebCore::DateTimeFieldsState::weekOfYear): Returns week of year field.
+        (WebCore::DateTimeFieldsState::year): Returns year field value.
+        (WebCore::DateTimeFieldsState::hasAMPM): Returns true if AM/PM field has value.
+        (WebCore::DateTimeFieldsState::hasDayOfMonth): Returns true if day of month field has value.
+        (WebCore::DateTimeFieldsState::hasHour): Returns true if hour field has value.
+        (WebCore::DateTimeFieldsState::hasMillisecond): Returns true if millisecond field has value.
+        (WebCore::DateTimeFieldsState::hasMinute): Returns true if minute field has value.
+        (WebCore::DateTimeFieldsState::hasMonth): Returns true if month field has value.
+        (WebCore::DateTimeFieldsState::hasSecond): Returns true if second field has value.
+        (WebCore::DateTimeFieldsState::hasWeekOfYear): Returns true if week of year field has value.
+        (WebCore::DateTimeFieldsState::hasYear): Returns true if year field has value.
+        (WebCore::DateTimeFieldsState::setAMPM): Sets AM/PM field.
+        (WebCore::DateTimeFieldsState::setDayOfMonth): Sets day of month field.
+        (WebCore::DateTimeFieldsState::setHour): Sets hour field.
+        (WebCore::DateTimeFieldsState::setMillisecond): Sets millisecond field.
+        (WebCore::DateTimeFieldsState::setMinute): Sets minute field.
+        (WebCore::DateTimeFieldsState::setMonth): Sets month field.
+        (WebCore::DateTimeFieldsState::setSecond): Set second field.
+        (WebCore::DateTimeFieldsState::setWeekOfYear): Sets week of year field.
+        (WebCore::DateTimeFieldsState::setYear): Sets year field.
+        * html/FormController.cpp:
+        (WebCore::formStateSignature): Increment version number to 8 for incompatible change of FormControlState.
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::restoreFormControlState): Added to call DateTimeFieldsState::restoreFormControlState().
+        (WebCore::TimeInputType::saveFormControlState): Added to call DateTimeFieldsState::saveFormControlState().
+        * html/TimeInputType.h:
+        (TimeInputType): Added declarations for restoreFormControlState() and saveFormControlState().
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditElement::setValueAsDateTimeFieldsState): Added to set fields from DateTimeFieldsState.
+        (WebCore::DateTimeEditElement::valueAsDateTimeFieldsState): Added to make DateTimeFieldsState from fields.
+        * html/shadow/DateTimeEditElement.h:
+        (DateTimeEditElement): Added declarations for setValueAsDateTimeFieldsState() and valueAsDateTimeFieldsState().
+        * html/shadow/DateTimeFieldElement.h:
+        (DateTimeFieldElement): Added declarations for populateDateTimeFieldsState() and setValueAsDateTimeFieldsState().
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeAMPMFieldElement::populateDateTimeFieldsState): Added to set AM/PM value to DateTimeFieldsState.
+        (WebCore::DateTimeAMPMFieldElement::setValueAsDateTimeFieldsState): Added to set field value from DateTimeFieldsState.
+        (WebCore::DateTimeHourFieldElement::populateDateTimeFieldsState): Added to set hour value to DateTimeFieldsState.
+        (WebCore::DateTimeHourFieldElement::setValueAsDateTimeFieldsState): Added to set field value from DateTimeFieldsState.
+        (WebCore::DateTimeMillisecondFieldElement::populateDateTimeFieldsState): Added to set millisecond value to DateTimeFieldsState.
+        (WebCore::DateTimeMillisecondFieldElement::setValueAsDateTimeFieldsState): Added to set field value from DateTimeFieldsState.
+        (WebCore::DateTimeMinuteFieldElement::populateDateTimeFieldsState): Added to set minute value to DateTimeFieldsState.
+        (WebCore::DateTimeMinuteFieldElement::setValueAsDateTimeFieldsState): Added to set field value from DateTimeFieldsState.
+        (WebCore::DateTimeSecondFieldElement::populateDateTimeFieldsState): Added to set second value to DateTimeFieldsState.
+        (WebCore::DateTimeSecondFieldElement::setValueAsDateTimeFieldsState): Added to set field value from DateTimeFieldsState.
+        * html/shadow/DateTimeFieldElements.h:
+        (DateTimeAMPMFieldElement): Added declarations of populateDateTimeFieldsState() and setValueAsDateTimeFieldsState().
+        (DateTimeHourFieldElement): ditto.
+        (DateTimeMillisecondFieldElement): ditto.
+        (DateTimeMinuteFieldElement): ditto.
+        (DateTimeSecondFieldElement): ditto.
+        * html/shadow/DateTimeNumericFieldElement.h:
+        (DateTimeNumericFieldElement): Extend accessibility of maximum() and setEmptyValue() to protected.
+        * html/shadow/DateTimeSymbolicFieldElement.h:
+        (DateTimeSymbolicFieldElement): Extend accessibility of hasValue(), setEmptyValue() and valueAsInteger() to protected.
+
 2012-09-14  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r128568.
