@@ -1,3 +1,145 @@
+2012-09-14  Kangil Han  <kangil.han@samsung.com>
+
+        Fix unused parameter compile warnings in WebCore.
+        https://bugs.webkit.org/show_bug.cgi?id=96712
+
+        Reviewed by Ryosuke Niwa.
+
+        Fixed unused parameter compile warning messages(-Wunused-parameter) during EFL build.
+        There are two kinds of stuff related to this warnings.
+        First one is that the parameter value has not been used anywhere inside the function.
+        Other one is that usability of parameter value is depended on option, i.e. ACCESSIBILITY.
+
+        * accessibility/AXObjectCache.h:
+        (WebCore::AXObjectCache::setEnhancedUserInterfaceAccessibility):
+        (WebCore::AXObjectCache::postNotification):
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::InspectorPageAgent::setGeolocationOverride):
+        * loader/FrameLoaderClient.h:
+        (WebCore::FrameLoaderClient::registerIntentService):
+        * page/Frame.cpp:
+        (WebCore::Frame::layerTreeAsText):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::setScrollingPerformanceLoggingEnabled):
+        * page/efl/EventHandlerEfl.cpp:
+        (WebCore::EventHandler::tabsToAllFormControls):
+        (WebCore::EventHandler::passMouseDownEventToWidget):
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::scrollLayerForFrameView):
+        * platform/RuntimeApplicationChecks.cpp:
+        (WebCore::mainBundleIsEqualTo):
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::platformSetScrollOrigin):
+        * platform/cairo/WidgetBackingStoreCairo.cpp:
+        (WebCore::createSurfaceForBackingStore):
+        * platform/efl/ContextMenuEfl.cpp:
+        (WebCore::platformMenuDescription):
+        * platform/efl/ContextMenuItemEfl.cpp:
+        (WebCore::ContextMenuItem::ContextMenuItem):
+        * platform/efl/DragDataEfl.cpp:
+        (WebCore::DragData::asFilenames):
+        (WebCore::DragData::containsURL):
+        (WebCore::DragData::asURL):
+        * platform/efl/GamepadsEfl.cpp:
+        (WebCore::GamepadsEfl::onGamePadChange):
+        * platform/efl/LocalizedStringsEfl.cpp:
+        (WebCore::imageTitle):
+        (WebCore::localizedMediaControlElementString):
+        (WebCore::localizedMediaControlElementHelpText):
+        (WebCore::localizedMediaTimeDescription):
+        * platform/efl/PasteboardEfl.cpp:
+        (WebCore::Pasteboard::writeSelection):
+        (WebCore::Pasteboard::writeImage):
+        (WebCore::Pasteboard::documentFragment):
+        * platform/efl/PlatformScreenEfl.cpp:
+        (WebCore::screenRect):
+        * platform/efl/RenderThemeEfl.cpp:
+        (WebCore::RenderThemeEfl::adjustSliderTrackStyle):
+        (WebCore::RenderThemeEfl::systemFont):
+        (WebCore::RenderThemeEfl::paintMediaSliderThumb):
+        (WebCore::RenderThemeEfl::paintMediaVolumeSliderContainer):
+        (WebCore::RenderThemeEfl::paintMediaVolumeSliderTrack):
+        (WebCore::RenderThemeEfl::paintMediaVolumeSliderThumb):
+        (WebCore::RenderThemeEfl::paintMediaCurrentTime):
+        * platform/efl/ScrollbarEfl.cpp:
+        (scrollbarEflEdjeMessage):
+        * platform/efl/ScrollbarThemeEfl.cpp:
+        (WebCore::ScrollbarThemeEfl::scrollbarThickness):
+        (WebCore::ScrollbarThemeEfl::registerScrollbar):
+        (WebCore::ScrollbarThemeEfl::unregisterScrollbar):
+        * platform/efl/TemporaryLinkStubs.cpp:
+        (WebCore::signedPublicKeyAndChallengeString):
+        * platform/efl/WidgetEfl.cpp:
+        (WebCore::Widget::setFocus):
+        (WebCore::Widget::paint):
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::setPlatformTextDrawingMode):
+        * platform/graphics/ImageSource.cpp:
+        (WebCore::ImageSource::orientationAtIndex):
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::MediaPlayer::supportsType):
+        * platform/graphics/cairo/FontCairoHarfbuzzNG.cpp:
+        (WebCore::Font::drawComplexText):
+        * platform/graphics/cairo/GraphicsContextCairo.cpp:
+        (WebCore::adjustFocusRingLineWidth):
+        (WebCore::GraphicsContext::drawLineForText):
+        (WebCore::GraphicsContext::setPlatformFillColor):
+        (WebCore::GraphicsContext::setPlatformStrokeColor):
+        (WebCore::GraphicsContext::setURLForRect):
+        (WebCore::GraphicsContext::setPlatformShadow):
+        (WebCore::GraphicsContext::fillRoundedRect):
+        * platform/graphics/cairo/GraphicsContextPlatformPrivateCairo.h:
+        (WebCore::GraphicsContextPlatformPrivate::syncContext):
+        * platform/graphics/cairo/ImageBufferCairo.cpp:
+        (WebCore::ImageBufferData::ImageBufferData):
+        * platform/graphics/cairo/ImageCairo.cpp:
+        (WebCore::Image::drawPattern):
+        * platform/graphics/efl/IconEfl.cpp:
+        (WebCore::Icon::createIconForFiles):
+        (WebCore::Icon::paint):
+        * platform/graphics/freetype/FontCacheFreeType.cpp:
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getTraitsInFamily):
+        * platform/graphics/gstreamer/GStreamerGWorld.cpp:
+        (WebCore::gstGWorldSyncMessageCallback):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        * platform/graphics/gstreamer/VideoSinkGStreamer.cpp:
+        (webkitVideoSinkMarshalVoidAndMiniObject):
+        * platform/graphics/gstreamer/WebKitWebSourceGStreamer.cpp:
+        (webKitWebSrcUriHandlerInit):
+        (webKitWebSrcNeedDataCb):
+        (webKitWebSrcEnoughDataCb):
+        (webKitWebSrcSeekDataCb):
+        (StreamingClient::didReceiveData):
+        * platform/graphics/harfbuzz/ng/HarfBuzzNGFaceCairo.cpp:
+        (WebCore::harfbuzzGetGlyph):
+        (WebCore::harfbuzzGetGlyphHorizontalAdvance):
+        (WebCore::harfbuzzGetGlyphHorizontalOrigin):
+        (WebCore::harfbuzzGetGlyphExtents):
+        (WebCore::harfbuzzCairoGetTable):
+        * platform/image-decoders/jpeg/JPEGImageDecoder.cpp:
+        (WebCore::readColorProfile):
+        (WebCore::init_source):
+        (WebCore::fill_input_buffer):
+        * platform/image-decoders/png/PNGImageDecoder.cpp:
+        (WebCore::PNGImageDecoder::rowAvailable):
+        * platform/network/soup/CookieStorageSoup.cpp:
+        (WebCore::setCookieStoragePrivateBrowsingEnabled):
+        * platform/network/soup/DNSSoup.cpp:
+        (WebCore::resolvedCallback):
+        * platform/network/soup/ProxyResolverSoup.cpp:
+        (soup_proxy_resolver_wk_init):
+        (soupProxyResolverWkGetProxyURIAsync):
+        (soupProxyResolverWkGetProxyURISync):
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::sendRequestCallback):
+        (WebCore::addFormElementsToSoupMessage):
+        (WebCore::requestStartedCallback):
+        (WebCore::closeCallback):
+        (WebCore::readCallback):
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::adjustRepaintRect):
+
 2012-09-14  Charles Wei  <charles.wei@torchmobile.com.cn>
 
         Need to clear exception in JSDictionary for operations that might have.
