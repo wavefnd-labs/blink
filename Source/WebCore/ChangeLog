@@ -1,3 +1,40 @@
+2012-09-14  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Shaders] Refactor FECustomFilter to make it usable from platform dependent implementations
+        https://bugs.webkit.org/show_bug.cgi?id=96801
+
+        Reviewed by Dean Jackson.
+
+        I've refactored the FECustomFilter to allow FECustomFilterSkia.cpp to use the rendering part
+        from outside.
+
+        Also removed the Texture class as it is not available on some platforms.
+
+        The changes for Skia will land in a different patch:
+        https://bugs.webkit.org/show_bug.cgi?id=96579
+
+        No new tests, the existing custom filters tests should already cover this.
+
+        * platform/graphics/filters/CustomFilterGlobalContext.cpp:
+        (WebCore::CustomFilterGlobalContext::prepareContextIfNeeded):
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::FECustomFilter):
+        (WebCore::FECustomFilter::deleteRenderBuffers):
+        (WebCore::FECustomFilter::drawFilterMesh):
+        (WebCore):
+        (WebCore::FECustomFilter::prepareForDrawing):
+        (WebCore::FECustomFilter::programNeedsInputTexture):
+        (WebCore::FECustomFilter::applyShader):
+        (WebCore::FECustomFilter::initializeContext):
+        (WebCore::FECustomFilter::ensureInputTexture):
+        (WebCore::FECustomFilter::uploadInputTexture):
+        (WebCore::FECustomFilter::ensureFrameBuffer):
+        (WebCore::FECustomFilter::resizeContextIfNeeded):
+        (WebCore::FECustomFilter::resizeContext):
+        (WebCore::FECustomFilter::bindProgramAndBuffers):
+        * platform/graphics/filters/FECustomFilter.h:
+        (FECustomFilter):
+
 2012-09-14  Alexey Proskuryakov  <ap@apple.com>
 
         REGRESSION(r126717): It made inspector/styles/media-queries.html fail/flakey
