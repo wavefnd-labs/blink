@@ -1,3 +1,63 @@
+2012-09-14  Bo Liu  <boliu@chromium.org>
+
+        Add in-place reload behavior to ImagesEnabled setting
+        https://bugs.webkit.org/show_bug.cgi?id=95478
+
+        Reviewed by Adam Barth.
+
+        Store ImagesEnabled setting in CachedResourceLoader similar to
+        AutoLoadImages. Move FrameLoaderClient::allowImage to after a
+        CachedImage has been created and store the cache for reload if it is
+        blocked.
+
+        Make sure when image loads are deferred by either ImagesEnabled or
+        LoadImagesAutomatically, onload is not called.
+
+        Added ImagesEnabled to InternalSettings for layout tests.
+
+        Tests: fast/loader/display-image-unset-can-block-image-and-can-reload-in-place.html
+               fast/loader/images-enabled-unset-can-block-image-and-can-reload-in-place.html
+
+        * WebCore.exp.in:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didBeginDocument):
+        * loader/SubresourceLoader.cpp:
+        (WebCore::SubresourceLoader::willSendRequest):
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::load):
+        * loader/cache/CachedImage.h:
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::didAddClient):
+        * loader/cache/CachedResource.h:
+        (WebCore::CachedResource::stillNeedsLoad):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::CachedResourceLoader):
+        (WebCore::CachedResourceLoader::requestImage):
+        (WebCore::CachedResourceLoader::canRequest):
+        (WebCore::CachedResourceLoader::determineRevalidationPolicy):
+        (WebCore::CachedResourceLoader::setAutoLoadImages):
+        (WebCore):
+        (WebCore::CachedResourceLoader::setImagesEnabled):
+        (WebCore::CachedResourceLoader::shouldDeferImageLoad):
+        (WebCore::CachedResourceLoader::reloadImagesIfNotDeferred):
+        * loader/cache/CachedResourceLoader.h:
+        (CachedResourceLoader):
+        (WebCore::CachedResourceLoader::imagesEnabled):
+        * page/Settings.cpp:
+        (WebCore::setImageLoadingSettings):
+        (WebCore::Settings::Settings):
+        (WebCore::Settings::setLoadsImagesAutomatically):
+        (WebCore::Settings::imageLoadingSettingsTimerFired):
+        (WebCore::Settings::setImagesEnabled):
+        * page/Settings.h:
+        (Settings):
+        * testing/InternalSettings.cpp:
+        (WebCore::InternalSettings::setImagesEnabled):
+        (WebCore):
+        * testing/InternalSettings.h:
+        (InternalSettings):
+        * testing/InternalSettings.idl:
+
 2012-09-14  Emil A Eklund  <eae@chromium.org>
 
         https://bugs.webkit.org/show_bug.cgi?id=96226
