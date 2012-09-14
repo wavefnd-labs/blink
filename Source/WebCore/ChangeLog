@@ -1,3 +1,36 @@
+2012-09-14  Grzegorz Czajkowski  <g.czajkowski@samsung.com>
+
+        Add method to get the list of all available dictionaries
+        https://bugs.webkit.org/show_bug.cgi?id=96518
+
+        Reviewed by Carlos Garcia Campos.
+
+        There is lack of the method in the TextCheckerEnchant class to get
+        the list of all available/installed dictionaries. To set the
+        dictionaries the client has to 'guess/hard code' the names of
+        dictionaries that are not obvious and depend on OS configuration
+        and installed packages. The list can be used by WebKit's GTK and
+        EFL API for instance:
+        webkit_web_context_set_spell_checking_languages(),
+        ewk_text_checker_setting_spell_checking_languages_set()
+        to set dictionaries used by Enchant.
+
+        To avoid names conflict a new one has been introduced for former
+        getSpellCheckingLanguages. It has been changed to loadedSpellCheckingLanguages
+        as it gets the current (in use) dictionaries. Additionally the 'get' prefix
+        has been removed according to WebKit coding style.
+
+        * platform/text/enchant/TextCheckerEnchant.cpp:
+        (TextCheckerEnchant::loadedSpellCheckingLanguages):
+        Changed name from getSpellCheckingLanguages and added const modifier.
+
+        (TextCheckerEnchant::availableSpellCheckingLanguages):
+        A newly added method to get available/installed dictionaries.
+        Its output can be used as input for updateSpellCheckingLanguages().
+
+        * platform/text/enchant/TextCheckerEnchant.h:
+        (TextCheckerEnchant):
+
 2012-09-14  Dan Carney  <dcarney@google.com>
 
         Remove V8DOMWindowShell::getEntered
