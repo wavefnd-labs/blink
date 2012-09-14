@@ -1,3 +1,53 @@
+2012-09-14  Adam Barth  <abarth@webkit.org>
+
+        Remove webkitPostMessage
+        https://bugs.webkit.org/show_bug.cgi?id=96577
+
+        Reviewed by Ojan Vafai.
+
+        webkitPostMessage works the same as postMessage. The spec and the
+        implementation have been stable for a while. We should no longer be
+        exposing this vendor-prefixed API.
+
+        This patch places the webkitPostMessage API behind an ENABLE flag.
+        We're going to try removing this API in the Chromium port. If we don't
+        run into trouble, we'll remove it in all the other ports as well.
+
+        This topic has been discussed on webkit-dev in
+        http://lists.webkit.org/pipermail/webkit-dev/2012-April/020237.html and
+        http://lists.webkit.org/pipermail/webkit-dev/2012-September/022189.html
+
+        This patch introduces the ENABLE(LEGACY_VENDOR_PREFIXES) flag. Rather
+        than having a flag for each vendor-prefixed API we're experimenting
+        with removing, we'll add vendor prefixed APIs to this ENABLE when we
+        want to try removing them. If we succeed, we'll just delete the APIs.
+        If we fail, we'll remove them from the ENABLE. That way we avoid the
+        churn of adding and removing many ENABLE macros.
+
+        * Configurations/FeatureDefines.xcconfig:
+        * GNUmakefile.am:
+        * GNUmakefile.features.am:
+        * bindings/js/JSDOMWindowCustom.cpp:
+        (WebCore):
+        * bindings/js/JSDedicatedWorkerContextCustom.cpp:
+        (WebCore):
+        * bindings/js/JSMessagePortCustom.cpp:
+        (WebCore):
+        * bindings/js/JSWorkerCustom.cpp:
+        (WebCore):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore):
+        * bindings/v8/custom/V8DedicatedWorkerContextCustom.cpp:
+        (WebCore):
+        * bindings/v8/custom/V8MessagePortCustom.cpp:
+        (WebCore):
+        * bindings/v8/custom/V8WorkerCustom.cpp:
+        (WebCore):
+        * dom/MessagePort.idl:
+        * page/DOMWindow.idl:
+        * workers/DedicatedWorkerContext.idl:
+        * workers/Worker.idl:
+
 2012-09-14  Simon Fraser  <simon.fraser@apple.com>
 
         REGRESSION: transition doesn’t always override transition-property
