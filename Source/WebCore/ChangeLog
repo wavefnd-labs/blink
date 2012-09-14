@@ -1,3 +1,32 @@
+2012-09-14  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Shaders] Enable anti-aliasing on the FECustomFilter
+        https://bugs.webkit.org/show_bug.cgi?id=96668
+
+        Reviewed by Dean Jackson.
+
+        Added multisample frame buffer for the FECustomFilter. It will try to allocate a multisample framebuffer
+        with a maximum sample count of 4. At the end it will blit the samples back to the original frame buffer,
+        so that we can read the pixels back.
+
+        This patch uses extensions GL_ANGLE_framebuffer_multisample, GL_ANGLE_framebuffer_blit
+        and GL_OES_rgb8_rgba8.
+
+        No new tests, multisampling is not working in Chromium DRT and has not pixel effect on WebKit Mac.
+
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::FECustomFilter):
+        (WebCore::FECustomFilter::deleteRenderBuffers):
+        (WebCore):
+        (WebCore::FECustomFilter::deleteMultisampleRenderBuffers):
+        (WebCore::FECustomFilter::drawFilterMesh):
+        (WebCore::FECustomFilter::createMultisampleBuffer):
+        (WebCore::FECustomFilter::resolveMultisampleBuffer):
+        (WebCore::FECustomFilter::canUseMultisampleBuffers):
+        (WebCore::FECustomFilter::resizeMultisampleBuffers):
+        (WebCore::FECustomFilter::resizeContext):
+        * platform/graphics/filters/FECustomFilter.h:
+
 2012-09-14  Bo Liu  <boliu@chromium.org>
 
         Add in-place reload behavior to ImagesEnabled setting
