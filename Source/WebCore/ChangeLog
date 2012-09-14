@@ -1,3 +1,22 @@
+2012-09-13  Simon Fraser  <simon.fraser@apple.com>
+
+        Lots of repaints in the top left tile on this site
+        https://bugs.webkit.org/show_bug.cgi?id=96698
+
+        Reviewed by Anders Carlsson.
+
+        When given a rect outside of the current tile coverage rect,
+        TileCache::setNeedsDisplayInRect() would try to invalidate the
+        top left tile. This would normally be a no-op, except when repaint
+        counters are visible, in which case it would invalidate the counter
+        area.
+        
+        Fix by doing an early return if the intersection between the repaint
+        rect and the tile coverage rect is empty.
+
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::setNeedsDisplayInRect):
+
 2012-09-13  Mark Rowe  <mrowe@apple.com>
 
         <rdar://problem/12283706> WebKit looks for some files on the system even when building against an SDK.
