@@ -1,3 +1,88 @@
+2012-09-14  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: Add ability to replay XHR in network panel.
+        https://bugs.webkit.org/show_bug.cgi?id=95187
+
+        Reviewed by Yury Semikhatsky.
+
+        Patch based on Pavel Chadnov's patch.
+        This patch implements Replay XHR feature in web inspector.
+        XMLHttpRequest's ThreadableLoaderClient is now used to map XMLHttpRequest object to ResourceLoader request identifiers.
+        Before initiating load all XHR parameters are now sent to inspector.
+        XMLHttpRequest parameters are stored in inspector's network request cache in XHRReplayData class.
+        When XHR replay is requested, a new XMLHttpRequest is created based on stored data.
+
+        Test: http/tests/inspector/network/network-xhr-replay.html
+
+        * inspector/Inspector.json:
+        * inspector/InspectorConsoleAgent.cpp:
+        (WebCore::InspectorConsoleAgent::didFinishXHRLoading):
+        * inspector/InspectorConsoleAgent.h:
+        (InspectorConsoleAgent):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::documentThreadableLoaderStartedLoadingForClientImpl):
+        (WebCore::InspectorInstrumentation::willLoadXHRImpl):
+        (WebCore::InspectorInstrumentation::didFailXHRLoadingImpl):
+        (WebCore::InspectorInstrumentation::didFinishXHRLoadingImpl):
+        * inspector/InspectorInstrumentation.h:
+        (WebCore):
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::documentThreadableLoaderStartedLoadingForClient):
+        (WebCore::InspectorInstrumentation::willLoadXHR):
+        (WebCore::InspectorInstrumentation::didFailXHRLoading):
+        (WebCore::InspectorInstrumentation::didFinishXHRLoading):
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::InspectorResourceAgent::didLoadResourceFromMemoryCache):
+        (WebCore::InspectorResourceAgent::documentThreadableLoaderStartedLoadingForClient):
+        (WebCore):
+        (WebCore::InspectorResourceAgent::willLoadXHR):
+        (WebCore::InspectorResourceAgent::didFailXHRLoading):
+        (WebCore::InspectorResourceAgent::didFinishXHRLoading):
+        (WebCore::InspectorResourceAgent::replayXHR):
+        * inspector/InspectorResourceAgent.h:
+        (WebCore):
+        (InspectorResourceAgent):
+        * inspector/NetworkResourcesData.cpp:
+        (WebCore::XHRReplayData::create):
+        (WebCore):
+        (WebCore::XHRReplayData::addHeader):
+        (WebCore::XHRReplayData::XHRReplayData):
+        (WebCore::NetworkResourcesData::xhrReplayData):
+        (WebCore::NetworkResourcesData::setXHRReplayData):
+        (WebCore::NetworkResourcesData::reuseXHRReplayData):
+        (WebCore::NetworkResourcesData::clear):
+        * inspector/NetworkResourcesData.h:
+        (XHRReplayData):
+        (WebCore::XHRReplayData::method):
+        (WebCore::XHRReplayData::url):
+        (WebCore::XHRReplayData::async):
+        (WebCore::XHRReplayData::formData):
+        (WebCore::XHRReplayData::headers):
+        (WebCore::XHRReplayData::includeCredentials):
+        (WebCore):
+        (WebCore::NetworkResourcesData::ResourceData::xhrReplayData):
+        (WebCore::NetworkResourcesData::ResourceData::setXHRReplayData):
+        (ResourceData):
+        (NetworkResourcesData):
+        * inspector/front-end/NetworkPanel.js:
+        (WebInspector.NetworkLogView.prototype._contextMenu):
+        (WebInspector.NetworkLogView.prototype._replayXHR):
+        * loader/DocumentThreadableLoader.cpp:
+        (WebCore::DocumentThreadableLoader::loadRequest): added documentThreadableLoaderStartedLoadingForClient instrumentation
+        so that inspector could map XMLHttpRequest to ResourceLoader's identifiers.
+        * loader/cache/CachedResource.h:
+        (WebCore::CachedResource::loader): DocumentThreadableLoader uses CachedResource::loader() to get ResourceLoader identifier.
+        (CachedResource):
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::sendFromInspector): Added a method for sending XMLHttpRequests based on request body stored in inspector.
+        (WebCore):
+        (WebCore::XMLHttpRequest::createRequest): Replaced will/didLoadXHRSynchonously instrumentations with willLoadXHR instrumentation.
+        (WebCore::XMLHttpRequest::internalAbort): Added didFailXHRLoadingInstrumentation
+        (WebCore::XMLHttpRequest::didFinishLoading): Added didFinishXHRLoading instrumentation
+        * xml/XMLHttpRequest.h:
+        (XMLHttpRequest):
+
 2012-09-14  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] multiple fields time input UI should save/restore its value even if it has an empty field.
