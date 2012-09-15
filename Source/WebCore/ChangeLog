@@ -1,3 +1,32 @@
+2012-09-15  Andreas Kling  <kling@webkit.org>
+
+        REGRESSION(r127438): Google Docs to renders text too small.
+        <http://webkit.org/b/96554>
+
+        Reviewed by Antti Koivisto.
+
+        Don't remove the inline StylePropertySet from ElementAttributeData in ~StyledElement.
+        This behavior broke sharing of ElementAttributeData between elements with inline style,
+        since destroying one element would effectively disable the inline style from all other
+        elements that shared the same attribute data.
+
+        What we actually want in ~StyledElement is to detach from any CSSOM wrapper that may
+        have been instantiated. Added ElementAttributeData::detachCSSOMWrapperIfNeeded for this
+        purpose and call that instead.
+
+        Test: fast/dom/shared-inline-style-after-node-removal.html
+
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::detachCSSOMWrapperIfNeeded):
+        (WebCore::ElementAttributeData::destroyInlineStyle):
+        * dom/ElementAttributeData.h:
+        (ElementAttributeData):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::~StyledElement):
+        (WebCore::StyledElement::styleAttributeChanged):
+        * dom/StyledElement.h:
+        (StyledElement):
+
 2012-09-15  Kalev Lember  <kalevlember@gmail.com>
 
         [GTK] Include missing header files in the tarball
