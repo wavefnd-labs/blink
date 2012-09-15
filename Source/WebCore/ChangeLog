@@ -1,3 +1,52 @@
+2012-09-14  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Turn forbidEventDispatch and allowEventDispatch into a RAII object
+        https://bugs.webkit.org/show_bug.cgi?id=96717
+
+        Reviewed by Abhishek Arya.
+
+        Replaced forbidEventDispatch and allowEventDispatch by AssertNoEventDispatch.
+
+        * dom/ContainerNode.cpp:
+        (WebCore):
+        (WebCore::ContainerNode::insertBeforeCommon):
+        (WebCore::ContainerNode::replaceChild):
+        (WebCore::ContainerNode::removeBetween):
+        (WebCore::ContainerNode::removeChildren):
+        (WebCore::ContainerNode::appendChild):
+        (WebCore::ContainerNode::parserAddChild):
+        (WebCore::dispatchChildInsertionEvents):
+        (WebCore::dispatchChildRemovalEvents):
+        * dom/ContainerNode.h:
+        (AssertNoEventDispatch):
+        (WebCore::AssertNoEventDispatch::AssertNoEventDispatch):
+        (WebCore::AssertNoEventDispatch::~AssertNoEventDispatch):
+        (WebCore::AssertNoEventDispatch::isEventDispatchForbidden):
+        (WebCore):
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore::ChildNodeInsertionNotifier::notifyNodeInsertedIntoTree):
+        (WebCore::ChildNodeInsertionNotifier::notify):
+        (WebCore::ChildNodeRemovalNotifier::notifyNodeRemovedFromTree):
+        * dom/Document.cpp:
+        (WebCore::Document::dispatchWindowEvent):
+        (WebCore::Document::dispatchWindowLoadEvent):
+        * dom/EventDispatcher.cpp:
+        (WebCore::EventDispatcher::dispatchEvent):
+        * dom/EventTarget.cpp:
+        (WebCore):
+        (WebCore::EventTarget::fireEventListeners):
+        * dom/EventTarget.h:
+        (WebCore):
+        * dom/Node.cpp:
+        (WebCore::Node::dispatchSubtreeModifiedEvent):
+        (WebCore::Node::dispatchFocusInEvent):
+        (WebCore::Node::dispatchFocusOutEvent):
+        (WebCore::Node::dispatchDOMActivateEvent):
+        * dom/WebKitNamedFlow.cpp:
+        (WebCore::WebKitNamedFlow::dispatchRegionLayoutUpdateEvent):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::loadInternal):
+
 2012-09-14  Mike West  <mkwst@chromium.org>
 
         JSC should throw a more descriptive exception when blocking 'eval' via CSP.
