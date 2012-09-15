@@ -1,3 +1,23 @@
+2012-09-14  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Calling close() during upgradeneeded handler should fire error at open request
+        https://bugs.webkit.org/show_bug.cgi?id=96807
+
+        Reviewed by Tony Chang.
+
+        Per spec, if the database connection is closed before the success event fires, the request
+        should have an error event of type AbortError fired at it.
+
+        Test: storage/indexeddb/intversion-close-in-upgradeneeded.html
+
+        * Modules/indexeddb/IDBDatabase.h:
+        (WebCore::IDBDatabase::isClosePending): Expose this state so an in-flight success can be morphed.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::close): Fire the appropriate error at connections that are mid-opening.
+        * Modules/indexeddb/IDBOpenDBRequest.cpp:
+        (WebCore::IDBOpenDBRequest::onSuccess): If the connection was closed before the success is enqueued - 
+        which can happen in multi-process ports with asynchronous messaging - convert the success to an error.
+
 2012-09-14  Ryosuke Niwa  <rniwa@webkit.org>
 
         Turn forbidEventDispatch and allowEventDispatch into a RAII object
