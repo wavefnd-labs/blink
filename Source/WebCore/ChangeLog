@@ -1,3 +1,22 @@
+2012-09-16  Dan Bernstein  <mitz@apple.com>
+
+        REGRESSION (r126763): css1/pseudo/firstline.html fails when using the complex text code path
+        https://bugs.webkit.org/show_bug.cgi?id=96890
+
+        Reviewed by Sam Weinig.
+
+        Test: fast/text/stale-TextLayout-from-first-line.html
+
+        When a first-line style specifies a font, different pieces of the same RednerText can be
+        laid out using different fonts, requiring a differet TextLayout for each piece.
+
+        * rendering/RenderBlock.h:
+        (RenderTextInfo): Added m_font data member.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::RenderTextInfo::RenderTextInfo): Added initializer for new data member.
+        (WebCore::RenderBlock::LineBreaker::nextLineBreak): Added code to update the text layout in
+        renderTextInfo if the font has changed.
+
 2012-09-16  Kalev Lember  <kalevlember@gmail.com>
 
         [GTK] Missing dllexport causing linking errors on Windows platform
