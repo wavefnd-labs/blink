@@ -1,3 +1,54 @@
+2012-09-11  Dirk Schulze  <krit@webkit.org>
+
+        Add ClipPathOperation for -webkit-clip-path organization
+        https://bugs.webkit.org/show_bug.cgi?id=95619
+
+        Reviewed by Dean Jackson.
+
+        This patch adds a new class ClipPathOperation to manage the values of the
+        -webkit-clip-path property. ClipPathOperation stores a Path object for clipping and is
+        a preparation for IRI references of the SVG 'clipPath' element.
+
+        The structure of ClipPathOperation is simular to FilterOperation.
+
+        ClipPathOperation will be extended to support IRI references directly in a second patch.
+
+        No new tests. The changes just affect the backend.
+
+        * GNUmakefile.list.am: Added new ClipPathOperation class.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * css/CSSComputedStyleDeclaration.cpp: Use ClipPathOperation instead of BasicShape.
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue): Ditto.
+        * css/StyleBuilder.cpp: Ditto.
+        (WebCore):
+        (WebCore::ApplyPropertyClipPath::setValue):
+        (WebCore::ApplyPropertyClipPath::applyValue):
+        (WebCore::ApplyPropertyClipPath::createHandler):
+        * rendering/ClipPathOperation.h: Added. New handler for property values (BasicShape, references).
+        (WebCore):
+        (ClipPathOperation):
+        (WebCore::ClipPathOperation::~ClipPathOperation):
+        (WebCore::ClipPathOperation::operator!=):
+        (WebCore::ClipPathOperation::getOperationType): Return the operation type.
+        (WebCore::ClipPathOperation::isSameType): Helper function for =operator.
+        (WebCore::ClipPathOperation::ClipPathOperation):
+        (ShapeClipPathOperation): Inheriting class for managing BasicShapes.
+        (WebCore::ShapeClipPathOperation::create):
+        (WebCore::ShapeClipPathOperation::basicShape):
+        (WebCore::ShapeClipPathOperation::windRule):
+        (WebCore::ShapeClipPathOperation::path):
+        (WebCore::ShapeClipPathOperation::operator==):
+        (WebCore::ShapeClipPathOperation::ShapeClipPathOperation):
+        * rendering/RenderLayer.cpp: Use ClipPathOperation to apply clipping.
+        (WebCore::RenderLayer::paintLayerContents):
+        * rendering/style/RenderStyle.h:
+        * rendering/style/StyleRareNonInheritedData.h:
+        (StyleRareNonInheritedData):
+        * rendering/svg/SVGRenderingContext.cpp: Ditto.
+        (WebCore::SVGRenderingContext::prepareToRenderSVGContent):
+
 2012-09-15  Andreas Kling  <kling@webkit.org>
 
         REGRESSION(r127438): Google Docs to renders text too small.
