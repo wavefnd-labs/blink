@@ -1,3 +1,73 @@
+2012-09-15  Mike West  <mkwst@chromium.org>
+
+        Pause inspector when inline scripts are blocked by Content Security Policy.
+        https://bugs.webkit.org/show_bug.cgi?id=93865
+
+        Reviewed by Pavel Feldman.
+
+        When Content Security Policy blocks an inline script that's been
+        injected after the document is parsed, a fairly unhelpful console
+        warning is generated; it points at line 1, regardless of where the error
+        occurred. This patch adjusts CSP to not only warn on the console, but
+        also to notify the inspector that it should pause execution if the
+        developer has toggled "Break on Exceptions". Developers will have a
+        better chance of tracking down the error, as they'll have a complete
+        call stack to work with.
+
+        Tests: inspector/debugger/debugger-pause-on-blocked-event-handler.html
+               inspector/debugger/debugger-pause-on-blocked-script-injection.html
+               inspector/debugger/debugger-pause-on-blocked-script-url.html
+
+        * English.lproj/localizedStrings.js:
+            Adding localizable string for the new friendly pause message.
+        * inspector/Inspector.json:
+            Add CSPViolation as a recognized reason for pausing execution.
+        * inspector/InspectorDebuggerAgent.cpp:
+        (WebCore::InspectorDebuggerAgent::scriptExecutionBlockedByCSP):
+            Teach the InspectorDebuggerAgent about script blocking. If pause on
+            exceptions is enabled, call 'InspectorDebuggerAgent::breakProgram',
+            and pass in an error object with a description that points to CSP
+            as the culprit.
+        (WebCore):
+        * inspector/InspectorDebuggerAgent.h:
+        (InspectorDebuggerAgent):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::scriptExecutionBlockedByCSPImpl):
+            Wire 'InspectorInstrumentation::scriptExecutionBlockedByCSP' to
+            the InspectorDebuggerAgent backend.
+        * inspector/InspectorInstrumentation.h:
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::scriptExecutionBlockedByCSP):
+            The public interface that should be kicked whenever CSP blocks
+            script execution.
+        (WebCore):
+        * inspector/front-end/DebuggerModel.js:
+            Add CSPViolation as a recognized reason for pausing execution.
+        * inspector/front-end/ScriptsPanel.js:
+            Add a friendly call stack status message for CSP violations.
+        * page/ContentSecurityPolicy.cpp:
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::checkNonceAndReportViolation):
+            If script is blocked because the nonce doesn't match, report the
+            blocked script to the inspector.
+        (WebCore::CSPDirectiveList::checkInlineAndReportViolation):
+            If inline script is blocked, report the blocked script to the
+            inspector. This requires adding a bool parameter to differentiate
+            blocking inline script from inline style.
+        (WebCore::CSPDirectiveList::allowJavaScriptURLs):
+            Tell 'checkInlineAndReportViolation' that we're dealing with script.
+        (WebCore::CSPDirectiveList::allowInlineEventHandlers):
+            Tell 'checkInlineAndReportViolation' that we're dealing with script.
+        (WebCore::CSPDirectiveList::allowInlineScript):
+            Tell 'checkInlineAndReportViolation' that we're dealing with script.
+        (WebCore::CSPDirectiveList::allowInlineStyle):
+            Tell 'checkInlineAndReportViolation' that we're not dealing with script.
+        (WebCore::ContentSecurityPolicy::reportBlockedScriptExecutionToInspector):
+            Public interface for the various CSP* classes to poke the inspector.
+        (WebCore):
+        * page/ContentSecurityPolicy.h:
+
 2012-09-15  Florin Malita  <fmalita@chromium.org>
 
         <use> not working when the SVG doc is embedded as <object> data
