@@ -1,3 +1,56 @@
+2012-09-17  Alec Flett  <alecflett@chromium.org>
+
+        IndexedDB: Use ScriptValue instead of SerializedScriptValue for get/openCursor
+        https://bugs.webkit.org/show_bug.cgi?id=95409
+
+        Reviewed by Kentaro Hara.
+
+        This reduces a bunch of serialization/deserialization when writing
+        to objectstores with indexes.
+
+        No new tests, as this covers core functionality of IndexedDB, and
+        almost every test would fail. Some likely tests that would fail
+        fundamentally include:
+
+        storage/indexeddb/objectstore-basics.html
+        storage/indexeddb/cursor-basics.html
+        storage/indexeddb/index-basics.html
+
+        * Modules/indexeddb/IDBAny.cpp:
+        (WebCore::IDBAny::scriptValue):
+        (WebCore::IDBAny::integer):
+        (WebCore):
+        (WebCore::IDBAny::set):
+        * Modules/indexeddb/IDBAny.h:
+        (WebCore):
+        (IDBAny):
+        (WebCore::IDBAny::create):
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::setValueReady):
+        * Modules/indexeddb/IDBCursor.h:
+        (WebCore):
+        (IDBCursor):
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::version):
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore):
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::setResultCursor):
+        (WebCore::IDBRequest::onSuccess):
+        (WebCore):
+        (WebCore::IDBRequest::onSuccessInternal):
+        (WebCore::IDBRequest::dispatchEvent):
+        * Modules/indexeddb/IDBRequest.h:
+        (IDBRequest):
+        * Modules/indexeddb/IDBTransactionCallbacks.h:
+        * bindings/v8/IDBBindingUtilities.cpp:
+        (WebCore::deserializeIDBValue):
+        (WebCore::injectIDBKeyIntoScriptValue):
+        * bindings/v8/IDBBindingUtilities.h:
+        (WebCore):
+        * bindings/v8/custom/V8IDBAnyCustom.cpp:
+        (WebCore::toV8):
+
 2012-09-17  Adam Barth  <abarth@webkit.org>
 
         We should make collecting metrics easier by adding an IDL attribute
