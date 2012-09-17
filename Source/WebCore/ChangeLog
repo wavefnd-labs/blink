@@ -1,3 +1,95 @@
+2012-09-17  Philip Rogers  <pdr@google.com>
+
+        Make SVGPathSegList.appendItem O(1) instead of O(n)
+        https://bugs.webkit.org/show_bug.cgi?id=94048
+
+        Reviewed by Nikolas Zimmermann.
+
+        Paths in SVG can be specified with a String (with the d attribute) or
+        with an SVGPathSegList. In SVGPathElement a single representation is
+        maintained: an SVGPathByteStream. To keep the byte stream synchronized with
+        the d attribute and the PathSegList, this byte stream is
+        rebuilt on every operation. As a result, any modification to the
+        path is an O(n) operation.
+
+        This patch takes advantage of the stream aspect of SVGPathByteStream
+        to make SVGPathSegList.append an O(1) operation instead of O(n).
+        When an SVGPathSeg is appended to an SVGPathSegList, this patch parses
+        the SVGPathSeg and directly appends the resulting bytes to the
+        byte stream.
+
+        To achieve this some plumbing has been added to pass more information
+        about the actual path changes from the SVGPathSegListTearOff to the
+        SVGPathElement: instead of the generic commitChange() this patch adds
+        commitChange(ListModification type). If we decide to change our
+        internal path data structure in the future, this additional commitChange
+        function can be used to pass the information needed to make
+        SVGPathSegList synchronization faster.
+
+        SVG Path Benchmark (http://bl.ocks.org/1296930) showing just the
+        appendItem() time used in building a 5000 segment path (avg of 3 runs):
+        WebKit without patch: 562 ms
+        Firefox 18.01a:       55 ms
+        Opera 12.50 internal: 27 ms
+        WebKit with patch:    7 ms
+
+        Test: perf/svg-path-appenditem.html
+
+            This test proves the claim: SVGPathSegList.appendItem is now O(1).
+            Additional tests that appendItem works are covered with existing tests.
+
+        * svg/SVGPathByteStream.h:
+        (WebCore::SVGPathByteStream::append):
+
+            This additional append method allows an SVGPathByteStream to be
+            appended to another.
+
+        * svg/SVGPathElement.cpp:
+        (WebCore::SVGPathElement::pathSegListChanged):
+
+            By passing the extra ListModification type to pathSegListChanged,
+            SVGPathElement is now able to only synchronize the parts of the byte stream
+            that actually changed. In this patch only append is treated
+            differently but one can imagine other performance improvements this
+            additional information allows.
+
+        * svg/SVGPathElement.h:
+        (SVGPathElement):
+        * svg/SVGPathParser.cpp:
+        (WebCore::SVGPathParser::parsePathDataFromSource):
+
+            During normal SVGPathSegList parsing we enforce that the path start with a moveto
+            command. This function has been expanded to make that optional so that parsing
+            can be performed elsewhere in the path (e.g., in the middle).
+
+        * svg/SVGPathParser.h:
+        (SVGPathParser):
+        * svg/SVGPathSegList.cpp:
+        (WebCore::SVGPathSegList::commitChange):
+        * svg/SVGPathSegList.h:
+        (SVGPathSegList):
+        * svg/SVGPathSegWithContext.h:
+        (WebCore::SVGPathSegWithContext::commitChange):
+        * svg/SVGPathUtilities.cpp:
+        (WebCore::appendSVGPathByteStreamFromSVGPathSeg):
+
+            This function reuses the SVGPathSegList parsing infrastructure
+            to parse an SVGPathSegList with just the single SVGPathSeg that
+            is being appended. The resulting byte stream can then be appended
+            to the result path byte stream.
+
+        (WebCore):
+        * svg/SVGPathUtilities.h:
+        (WebCore):
+        * svg/properties/SVGListProperty.h:
+        (WebCore::SVGListProperty::appendItemValues):
+        (WebCore::SVGListProperty::appendItemValuesAndWrappers):
+        (WebCore::SVGListProperty::commitChange):
+        (SVGListProperty):
+        * svg/properties/SVGPathSegListPropertyTearOff.h:
+        (WebCore::SVGPathSegListPropertyTearOff::commitChange):
+        (SVGPathSegListPropertyTearOff):
+
 2012-09-16  James Robinson  <jamesr@chromium.org>
 
         Chromium win build fix - listing a file that doesn't exist is a fatal errors in the msvs gyp generator.
