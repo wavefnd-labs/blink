@@ -1,3 +1,48 @@
+2012-09-17  Bear Travis  <betravis@adobe.com>
+
+        [CSS Exclusions] Enable shape-inside for percentage lengths based on logical height
+        https://bugs.webkit.org/show_bug.cgi?id=93547
+
+        Reviewed by Levi Weintraub.
+
+        Shape-inside needs to be passed the logical size to use when computing percentage
+        based coordinates. The CSS Regions-specific method computeInitialRegionRangeForBlock
+        has been generalized to updateRegionsAndExclusionsLogicalSize. This method takes
+        the pre-child-layout logical width and height, and uses them to compute the logical
+        width and height that regions and exclusions should use for layout. Regions use a
+        block's maximum possible logical height to compute a region's maximum extent.
+        Exclusions use a block's fixed logical width and height, or 0 if one does not exist,
+        to resolve percentage-based shape lengths. The default logical size used for resolving
+        percentage based coordinates is tested in shape-inside-percentage-auto.html.
+
+        Test: fast/exclusions/shape-inside/shape-inside-percentage.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::updateRegionsAndExclusionsLogicalSize): Calculates the logical
+        height regions and exclusions should use, and updates their layout sizes through
+        computeExclusionShapeSize and computeRegionRangeForBlock.
+        (WebCore):
+        (WebCore::RenderBlock::computeExclusionShapeSize): Pass the appropriate logical size
+        to exclusion shapes so they can resolve percentage based coordinates.
+        (WebCore::RenderBlock::layoutBlock): Call the new updateRegionsAndExclusionsLogicalSize
+        method.
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBox.cpp:
+        (WebCore::percentageLogicalHeightIsResolvable): Determine if percentage lengths
+        based on logical height can be resolved.
+        (WebCore):
+        (WebCore::RenderBox::percentageLogicalHeightIsResolvableFromBlock): Added declaration.
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutBlock): Calling
+        updateRegionsAndExclusionsLogicalSize rather than computeInitialRegionRangeForBlock.
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock): Ditto.
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::layoutBlock): Ditto.
+
 2012-09-17  Vangelis Kokkevis  <vangelis@chromium.org>
 
         [chromium] Add gpu_test trace events tracking the creation of a DrawingBuffer
