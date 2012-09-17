@@ -1,3 +1,43 @@
+2012-09-17  Mike West  <mkwst@chromium.org>
+
+        Don't GC img elements blocked by CSP until error events fire.
+        https://bugs.webkit.org/show_bug.cgi?id=94677
+
+        Reviewed by Jochen Eisinger.
+
+        Currently, the GC checks that no load events are pending for an image
+        element before reclaiming its memory. It's not, however, checking that
+        error events are taken care of. This leads to the potential of firing an
+        event on a DOM element that we've already collected. That's a Bad Thing.
+
+        This patch adjusts the check to catch error events as well as load
+        events, which should ensure that the element isn't collected until it's
+        really ready. As a drive-by, it also changes the name of the check to
+        'hasPendingActivity' from 'hasPendingLoadEvent' for clarity.
+
+        http/tests/security/contentSecurityPolicy/register-bypassing-scheme.html
+        should no longer crash, and the new
+        http/tests/security/contentSecurityPolicy/img-blocked-no-gc-crash.html
+        and fast/events/onerror-img-after-gc.html shouldn't crash either.
+
+        Tests: fast/events/onerror-img-after-gc.html
+               http/tests/security/contentSecurityPolicy/img-blocked-no-gc-crash.html
+
+        * bindings/v8/V8GCController.cpp:
+        (WebCore::calculateGroupId):
+            Switch to using ImageLoader::hasPendingActivity().
+        * html/HTMLImageElement.h:
+        (WebCore::HTMLImageElement::hasPendingActivity):
+            Switch to using ImageLoader::hasPendingActivity().
+        * loader/ImageLoader.h:
+        (WebCore::ImageLoader::hasPendingActivity):
+            Added a check against pending error events in order to ensure that
+            elements aren't garbage collected prematurely. Aslo renamed from
+            ImageLoader::hasPendingLoadEvent for clarity.
+        * svg/SVGImageElement.cpp:
+        (WebCore::SVGImageElement::haveLoadedRequiredResources):
+            Switch to using ImageLoader::hasPendingActivity().
+
 2012-09-17  Philip Rogers  <pdr@google.com>
 
         Make SVGPathSegList.appendItem O(1) instead of O(n)
