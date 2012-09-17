@@ -1,3 +1,208 @@
+2012-09-17  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: NMI: now when we can detect instrumented classes we can
+        remove addInstrumentedMember and use addMember for everything.
+        https://bugs.webkit.org/show_bug.cgi?id=96913
+
+        Reviewed by Yury Semikhatsky.
+
+        * bindings/v8/DOMDataStore.cpp:
+        (WebCore::DOMDataStore::reportMemoryUsage):
+        * bindings/v8/IntrusiveDOMWrapperMap.h:
+        * bindings/v8/V8PerIsolateData.cpp:
+        (WebCore::V8PerIsolateData::reportMemoryUsage):
+        * css/CSSBorderImageSliceValue.cpp:
+        (WebCore::CSSBorderImageSliceValue::reportDescendantMemoryUsage):
+        * css/CSSCalculationValue.cpp:
+        * css/CSSCanvasValue.cpp:
+        (WebCore::CSSCanvasValue::reportDescendantMemoryUsage):
+        * css/CSSCharsetRule.cpp:
+        (WebCore::CSSCharsetRule::reportDescendantMemoryUsage):
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::reportMemoryUsage):
+        * css/CSSCrossfadeValue.cpp:
+        (WebCore::CSSCrossfadeValue::reportDescendantMemoryUsage):
+        * css/CSSFontFaceRule.cpp:
+        (WebCore::CSSFontFaceRule::reportDescendantMemoryUsage):
+        * css/CSSFontFaceSrcValue.cpp:
+        (WebCore::CSSFontFaceSrcValue::reportDescendantMemoryUsage):
+        * css/CSSFunctionValue.cpp:
+        (WebCore::CSSFunctionValue::reportDescendantMemoryUsage):
+        * css/CSSGradientValue.cpp:
+        (WebCore::CSSGradientColorStop::reportMemoryUsage):
+        (WebCore::CSSGradientValue::reportBaseClassMemoryUsage):
+        (WebCore::CSSLinearGradientValue::reportDescendantMemoryUsage):
+        (WebCore::CSSRadialGradientValue::reportDescendantMemoryUsage):
+        * css/CSSImageSetValue.cpp:
+        (WebCore::CSSImageSetValue::ImageWithScale::reportMemoryUsage):
+        * css/CSSImageValue.cpp:
+        (WebCore::CSSImageValue::reportDescendantMemoryUsage):
+        * css/CSSImportRule.cpp:
+        (WebCore::CSSImportRule::reportDescendantMemoryUsage):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::reportDescendantMemoryUsage):
+        * css/CSSPageRule.cpp:
+        (WebCore::CSSPageRule::reportDescendantMemoryUsage):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::reportDescendantMemoryUsage):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::reportMemoryUsage):
+        * css/CSSReflectValue.cpp:
+        (WebCore::CSSReflectValue::reportDescendantMemoryUsage):
+        * css/CSSRule.cpp:
+        (WebCore::CSSRule::reportBaseClassMemoryUsage):
+        * css/CSSRuleList.h:
+        * css/CSSStyleRule.cpp:
+        (WebCore::CSSStyleRule::reportDescendantMemoryUsage):
+        * css/CSSStyleSheet.cpp:
+        (WebCore::CSSStyleSheet::reportMemoryUsage):
+        * css/CSSValue.cpp:
+        (WebCore::TextCloneCSSValue::reportDescendantMemoryUsage):
+        * css/CSSVariableValue.h:
+        (WebCore::CSSVariableValue::reportDescendantMemoryUsage):
+        * css/FontFeatureValue.cpp:
+        (WebCore::FontFeatureValue::reportDescendantMemoryUsage):
+        * css/FontValue.cpp:
+        (WebCore::FontValue::reportDescendantMemoryUsage):
+        * css/MediaList.cpp:
+        (WebCore::MediaList::reportMemoryUsage):
+        * css/MediaQuery.cpp:
+        (WebCore::MediaQuery::reportMemoryUsage):
+        * css/MediaQueryExp.cpp:
+        (WebCore::MediaQueryExp::reportMemoryUsage):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::reportMemoryUsage):
+        (WebCore::StyleRuleCSSStyleDeclaration::reportMemoryUsage):
+        (WebCore::InlineCSSStyleDeclaration::reportMemoryUsage):
+        * css/ShadowValue.cpp:
+        (WebCore::ShadowValue::reportDescendantMemoryUsage):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::reportMemoryUsage):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * css/StyleRule.cpp:
+        (WebCore::StyleRule::reportDescendantMemoryUsage):
+        (WebCore::StyleRulePage::reportDescendantMemoryUsage):
+        (WebCore::StyleRuleFontFace::reportDescendantMemoryUsage):
+        (WebCore::StyleRuleMedia::reportDescendantMemoryUsage):
+        (WebCore::StyleRuleRegion::reportDescendantMemoryUsage):
+        * css/StyleRuleImport.cpp:
+        (WebCore::StyleRuleImport::reportDescendantMemoryUsage):
+        * css/StyleSheetContents.cpp:
+        (WebCore::StyleSheetContents::reportMemoryUsage):
+        * css/WebKitCSSKeyframeRule.cpp:
+        (WebCore::StyleKeyframe::reportMemoryUsage):
+        (WebCore::WebKitCSSKeyframeRule::reportDescendantMemoryUsage):
+        * css/WebKitCSSKeyframesRule.cpp:
+        (WebCore::StyleRuleKeyframes::reportDescendantMemoryUsage):
+        (WebCore::WebKitCSSKeyframesRule::reportDescendantMemoryUsage):
+        * css/WebKitCSSRegionRule.cpp:
+        (WebCore::WebKitCSSRegionRule::reportDescendantMemoryUsage):
+        * css/WebKitCSSSVGDocumentValue.cpp:
+        (WebCore::WebKitCSSSVGDocumentValue::reportDescendantMemoryUsage):
+        * css/WebKitCSSShaderValue.cpp:
+        (WebCore::WebKitCSSShaderValue::reportDescendantMemoryUsage):
+        * dom/Attribute.h:
+        (WebCore::Attribute::reportMemoryUsage):
+        * dom/CharacterData.cpp:
+        (WebCore::CharacterData::reportMemoryUsage):
+        * dom/ContainerNode.h:
+        (WebCore::ContainerNode::reportMemoryUsage):
+        * dom/Document.cpp:
+        (WebCore::Document::reportMemoryUsage):
+        * dom/Element.h:
+        (WebCore::Element::reportMemoryUsage):
+        * dom/ElementAttributeData.cpp:
+        (WebCore::ElementAttributeData::reportMemoryUsage):
+        * dom/Event.cpp:
+        (WebCore::Event::reportMemoryUsage):
+        * dom/Node.cpp:
+        (WebCore::Node::reportMemoryUsage):
+        * dom/QualifiedName.cpp:
+        (WebCore::QualifiedName::reportMemoryUsage):
+        (WebCore::QualifiedName::QualifiedNameImpl::reportMemoryUsage):
+        * html/HTMLImageElement.cpp:
+        (WebCore::HTMLImageElement::reportMemoryUsage):
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::reportMemoryUsage):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::reportMemoryUsage):
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::reportMemoryUsage):
+        * loader/ResourceLoader.cpp:
+        (WebCore::ResourceLoader::reportMemoryUsage):
+        * loader/SubresourceLoader.cpp:
+        (WebCore::SubresourceLoader::reportMemoryUsage):
+        * loader/SubstituteData.cpp:
+        (WebCore::SubstituteData::reportMemoryUsage):
+        * loader/cache/CachedCSSStyleSheet.cpp:
+        (WebCore::CachedCSSStyleSheet::reportMemoryUsage):
+        * loader/cache/CachedFont.cpp:
+        (WebCore::CachedFont::reportMemoryUsage):
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::reportMemoryUsage):
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::reportMemoryUsage):
+        * loader/cache/CachedResourceHandle.cpp:
+        (WebCore::CachedResourceHandleBase::reportMemoryUsage):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::reportMemoryUsage):
+        * loader/cache/CachedSVGDocument.cpp:
+        (WebCore::CachedSVGDocument::reportMemoryUsage):
+        * loader/cache/CachedScript.cpp:
+        (WebCore::CachedScript::reportMemoryUsage):
+        * loader/cache/CachedShader.cpp:
+        (WebCore::CachedShader::reportMemoryUsage):
+        * loader/cache/CachedXSLStyleSheet.cpp:
+        (WebCore::CachedXSLStyleSheet::reportMemoryUsage):
+        * loader/cache/MemoryCache.cpp:
+        (WebCore::MemoryCache::reportMemoryUsage):
+        * page/Frame.cpp:
+        (WebCore::Frame::reportMemoryUsage):
+        * platform/KURL.cpp:
+        (WebCore::KURL::reportMemoryUsage):
+        * platform/KURLGoogle.cpp:
+        (WebCore::KURLGooglePrivate::reportMemoryUsage):
+        * platform/KURLWTFURLImpl.h:
+        (WebCore::KURLWTFURLImpl::reportMemoryUsage):
+        * platform/TreeShared.h:
+        (WebCore::TreeShared::reportMemoryUsage):
+        * platform/graphics/CrossfadeGeneratedImage.cpp:
+        (WebCore::CrossfadeGeneratedImage::reportMemoryUsage):
+        * platform/graphics/Image.cpp:
+        (WebCore::Image::reportMemoryUsage):
+        * platform/network/ResourceRequestBase.cpp:
+        (WebCore::ResourceRequestBase::reportMemoryUsage):
+        * platform/network/ResourceResponseBase.cpp:
+        (WebCore::ResourceResponseBase::reportMemoryUsage):
+        * rendering/style/DataRef.h:
+        (WebCore::DataRef::reportMemoryUsage):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::reportMemoryUsage):
+        * rendering/style/StyleRareInheritedData.cpp:
+        (WebCore::StyleRareInheritedData::reportMemoryUsage):
+        * rendering/style/StyleRareNonInheritedData.cpp:
+        (WebCore::StyleRareNonInheritedData::reportMemoryUsage):
+        * svg/SVGPaint.cpp:
+        (WebCore::SVGPaint::reportDescendantMemoryUsage):
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::reportMemoryUsage):
+
+2012-09-17  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
+
+        [TouchAdjustment] Adjusted point outside bounds for non-rectilinear targets
+        https://bugs.webkit.org/show_bug.cgi?id=96098
+
+        Reviewed by Antonio Gomes.
+
+        Simplifies how snapTo tries to restrict the adjustment to the touch-area, and 
+        at the same fix it to give better guarantees.
+
+        Test: touchadjustment/rotated-node.html
+
+        * page/TouchAdjustment.cpp:
+        (WebCore::TouchAdjustment::snapTo):
+
 2012-09-17  Filip Spacek  <fspacek@rim.com>
 
         [BlackBerry] Use glDeleteProgram to delete OpenGL shader programs.
