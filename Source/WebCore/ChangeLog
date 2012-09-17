@@ -1,3 +1,34 @@
+2012-09-17  Rick Byers  <rbyers@chromium.org>
+
+        Allow gesture events to set active/hover state.
+        https://bugs.webkit.org/show_bug.cgi?id=96060
+
+        Reviewed by Antonio Gomes.
+
+        Adds GestureTapDownCancel as a new PlatformGestureEvent type.  On ports
+        that support gesture events, use GestureTapDown to trigger active/hover
+        states, and GestureTap/GestureTapDownCancel to clear them.  This is
+        superior to using touch events for a number of reasons:
+          1) some ports (chromium) avoid sending touch events unless absolutely
+          necessary, since they hurt scroll performance by blocking threaded
+          scrolling.
+          2) with touch, and element really shouldn't be 'active' when the user
+          happens to be touching it while scrolling.  In that case they aren't
+          'manipulating the element', they're manipulating the page or div that
+          is scrolling.
+          3) similarly, there may be other gestures that involve touching the
+          element which aren't really about manipulating that element (eg.
+          pinch to zoom).
+
+        Test: fast/events/touch/gesture/gesture-tap-active-state.html
+        Test: fast/events/touch/gesture/gesture-tap-active-state-iframe.html
+        * dom/GestureEvent.cpp:
+        (WebCore::GestureEvent::create):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleGestureEvent):
+        (WebCore::EventHandler::handleTouchEvent):
+        * platform/PlatformEvent.h:
+
 2012-09-17  Alec Flett  <alecflett@chromium.org>
 
         IndexedDB: Use ScriptValue instead of SerializedScriptValue for get/openCursor
