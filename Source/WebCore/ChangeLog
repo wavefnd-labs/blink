@@ -1,3 +1,106 @@
+2012-09-17  David Barton  <dbarton@mathscribe.com>
+
+        Convert MathML to use flexboxes
+        https://bugs.webkit.org/show_bug.cgi?id=96843
+
+        Reviewed by Eric Seidel.
+
+        Using the CSS Flexible Box Model simplifies MathML in many ways. Control over alignment, row vs.
+        column layout, and child layout order are all much easier. Complexities involving floats,
+        continuations, and most anonymous boxes are eliminated, as are their potential for crashes and
+        security vulnerabilities.
+
+        In a flexbox, column alignment is done with align-items or align-self, instead of text-align.
+        vertical-align and baselinePosition() are replaced by the firstLineBoxBaseline() virtual
+        function.
+
+        Tested by existing tests.
+
+        * css/mathml.css:
+        (math):
+        (math[display="block"]):
+        (mo, mrow, mfenced, mfrac, msub, msup, msubsup, munder, mover, munderover, msqrt, mroot):
+        (math, mrow, mfenced, msqrt, mroot):
+        (msqrt > *):
+        (mo, mfrac, munder, mover, munderover):
+        (munder, mover, munderover):
+        (mfrac > *):
+        (mfrac[numalign="left"] > :first-child):
+        (mfrac[numalign="right"] > :first-child):
+        (mfrac[denomalign="left"] > :last-child):
+        (mfrac[denomalign="right"] > :last-child):
+        (msubsup > :last-child, mover > :last-child, munderover > :last-child):
+        (msub > * + *, msup > * + *, msubsup > * + *, munder > * + *, mover > * + *, munderover > * + *):
+        (mroot):
+        (mroot > * + *):
+        (mtable):
+        
+        * mathml/MathMLInlineContainerElement.cpp:
+        (WebCore::MathMLInlineContainerElement::createRenderer):
+        * mathml/mathtags.in:
+        
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::RenderMathMLBlock):
+        (WebCore::RenderMathMLBlock::computePreferredLogicalWidths):
+        (WebCore::RenderMathMLBlock::baselinePosition):
+        (WebCore::RenderMathMLBlock::renderName):
+        (WebCore::RenderMathMLBlock::paint):
+        (WebCore::RenderMathMLTable::firstLineBoxBaseline):
+        * rendering/mathml/RenderMathMLBlock.h:
+        (RenderMathMLBlock):
+        (RenderMathMLTable):
+        (WebCore::RenderMathMLTable::RenderMathMLTable):
+            - Change RenderMathMLBlock's base class to RenderFlexibleBox, and its display to FLEX or INLINE_FLEX.
+            - Add RenderMathMLTable for its firstLineBoxBaseline() function, like { vertical-align: middle }.
+        
+        * rendering/mathml/RenderMathMLFenced.cpp:
+        (WebCore::RenderMathMLFenced::createMathMLOperator):
+        (WebCore::RenderMathMLFenced::makeFences):
+            - Use RenderMathMLRow::addChild as a more robust name for RenderBlock::addChild.
+        (WebCore::RenderMathMLFenced::addChild):
+            - All inline children of a flexbox are treated as blocks automatically.
+        
+        * rendering/mathml/RenderMathMLFraction.cpp:
+        (WebCore::RenderMathMLFraction::fixChildStyle):
+        (WebCore::RenderMathMLFraction::updateFromElement):
+            - numalign and denomalign attributes are now handled by mathml.css.
+        (WebCore::RenderMathMLFraction::addChild):
+        (WebCore::RenderMathMLFraction::layout):
+        (WebCore::RenderMathMLFraction::firstLineBoxBaseline):
+        * rendering/mathml/RenderMathMLFraction.h:
+        (RenderMathMLFraction):
+        
+        * rendering/mathml/RenderMathMLOperator.cpp:
+        (WebCore::RenderMathMLOperator::updateFromElement):
+        (WebCore::RenderMathMLOperator::createStackableStyle):
+        (WebCore::RenderMathMLOperator::firstLineBoxBaseline):
+        * rendering/mathml/RenderMathMLOperator.h:
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::createAnonymousWithParentRenderer):
+        
+        * rendering/mathml/RenderMathMLSubSup.cpp:
+        (WebCore::RenderMathMLSubSup::RenderMathMLSubSup):
+        (WebCore::RenderMathMLSubSup::fixScriptsStyle):
+        (WebCore::RenderMathMLSubSup::addChild):
+        (WebCore::RenderMathMLSubSup::styleDidChange):
+        (WebCore::RenderMathMLSubSup::layout):
+        * rendering/mathml/RenderMathMLSubSup.h:
+            - Rename Sup to Super, to make it more readable vs. Sub.
+            - Instead of vertical-align, msub and msup now use the m_scripts anonymous box like msubsup does.
+            - Individual anonymous block wrappers are no longer needed around the superscript and subscript to
+              lay them out in a column.
+            - Handle msub and msup layout, and improve msubsup layout, by requiring a superscript's baseline
+              to be at least (int) fontSize / 3 + 1 above the main baseline, and a subscript's baseline to be
+              at least (int) fontSize / 5 + 1 below it.
+        
+        * rendering/mathml/RenderMathMLUnderOver.cpp:
+        (WebCore::RenderMathMLUnderOver::unembellishedOperator):
+        (WebCore::RenderMathMLUnderOver::firstLineBoxBaseline):
+        * rendering/mathml/RenderMathMLUnderOver.h:
+        (RenderMathMLUnderOver):
+            - RenderMathMLUnderOver no longer needs to use anonymous wrappers for column layout. Centering and
+              child layout order (overscript first) are also handled by mathml.css.
+
 2012-09-17  Ryuan Choi  <ryuan.choi@samsung.com>
 
         [EFL] Several key codes are not mapped with evas key name.
