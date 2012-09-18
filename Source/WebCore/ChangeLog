@@ -1,3 +1,48 @@
+2012-09-18  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSSRegions]Flag auto-height regions
+        https://bugs.webkit.org/show_bug.cgi?id=96267
+
+        Reviewed by Julien Chaffraix.
+
+        The regions having auto logical height should be flagged so that their height will computed as part of a 2 pass-layout mechanism.
+        A valid region is flagged as having auto logical height if:
+        - has auto logical height and is part of the normal flow
+        - has auto logical height, is not part of normal flow and does not have logical top/bottom specified
+
+        An invalid region (part of circular dependency) will not be marked even if its style matches the above situations.
+
+        Test: fast/regions/autoheight-regions-mark.html
+
+        * rendering/FlowThreadController.cpp: Keep a counter of auto logical height valid regions.
+        (WebCore::FlowThreadController::FlowThreadController):
+        (WebCore::FlowThreadController::layoutRenderNamedFlowThreads): Verify that the current number of auto logical height regions is correct by iterating over all the regions attached to the flow threads
+        and compute the number of auto logical height regions on the spot.
+        (WebCore):
+        (WebCore::FlowThreadController::isAutoLogicalHeightRegionsFlagConsistent): Helper function that is used to verify the number of auto logical height regions.
+        * rendering/FlowThreadController.h:
+        (WebCore::FlowThreadController::hasAutoLogicalHeightRegions):
+        (WebCore::FlowThreadController::incrementAutoLogicalHeightRegions):
+        (WebCore::FlowThreadController::decrementAutoLogicalHeightRegions):
+        (FlowThreadController):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore):
+        (WebCore::RenderFlowThread::autoLogicalHeightRegionsCount): Helper function that is used to count the number of regions marked as having auto logical height.
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::RenderRegion):
+        (WebCore::RenderRegion::updateRegionHasAutoLogicalHeightFlag):
+        (WebCore):
+        (WebCore::RenderRegion::styleDidChange): For a region that is attached to a flow thread, verify whether the style change modified its auto logical height appearance.
+        (WebCore::RenderRegion::attachRegion): Handle the case of attaching region to a flow thread and the detach/attach sequence when the region is moved in the render tree.
+        (WebCore::RenderRegion::detachRegion):
+        * rendering/RenderRegion.h:
+        (WebCore::RenderRegion::shouldHaveAutoLogicalHeight):
+        (WebCore::RenderRegion::hasAutoLogicalHeight):
+        (RenderRegion):
+        * rendering/RenderTreeAsText.cpp: For the regions that use auto logical height, modify the output to reflect that.
+        (WebCore::writeRenderNamedFlowThreads):
+
 2012-09-18  Shinya Kawanaka  <shinyak@chromium.org>
 
         Disable adding an AuthorShadowRoot to replaced elements.
