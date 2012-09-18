@@ -1,3 +1,29 @@
+2012-09-18  John Mellor  <johnme@chromium.org>
+
+        Text Autosizing: Ignore constrained heights in certain circumstances.
+        https://bugs.webkit.org/show_bug.cgi?id=96848
+
+        Reviewed by Julien Chaffraix.
+
+        Ignore constrained heights on html and body elements, as some sites
+        (e.g. wikipedia) set height:100% on these, without intending to
+        constrain the height of descendants.
+
+        Also ignore constrained heights on ancestors of floats and out-of-flow
+        positioned elements with no height set, since the height of these is
+        determined independently from their ancestors.
+
+        Test: fast/text-autosizing/constrained-height-body.html
+              fast/text-autosizing/constrained-out-of-flow.html
+              fast/text-autosizing/constrained-then-float-ancestors.html
+              fast/text-autosizing/constrained-then-position-absolute-ancestors.html
+              fast/text-autosizing/constrained-then-position-fixed-ancestors.html
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::contentHeightIsConstrained):
+
+            Adjusted constrainedness algorithm.
+
 2012-09-18  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Create a flag to enable PeerConnection00
