@@ -1,3 +1,38 @@
+2012-09-14  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: [Extensions API] explicitly manage extension audit progress
+        https://bugs.webkit.org/show_bug.cgi?id=96803
+
+        Reviewed by Alexander Pavlov.
+
+        - create a sub-progress per audit category;
+        - manage audit category progress within the category, not in the panel logic;
+        - consider audit is done when all categories are done;
+        - expose AuditResults.updateProgress(worked, totalWork) in the extensions API;
+        - retain old magic for computing audit progress if extension specifies extension results count.
+
+        * inspector/front-end/AuditsPanel.js:
+        (WebInspector.AuditsPanel.prototype._executeAudit.ruleResultReadyCallback):
+        (WebInspector.AuditsPanel.prototype._executeAudit):
+        (WebInspector.AuditCategory.prototype.run.callbackWrapper):
+        (WebInspector.AuditCategory.prototype.run):
+        * inspector/front-end/ExtensionAPI.js:
+        (defineCommonExtensionSymbols):
+        (injectedExtensionAPI.Audits.prototype.addCategory):
+        (injectedExtensionAPI.AuditResultImpl.prototype.updateProgress):
+        * inspector/front-end/ExtensionAuditCategory.js:
+        (WebInspector.ExtensionAuditCategory.prototype.run):
+        (WebInspector.ExtensionAuditCategoryResults):
+        (WebInspector.ExtensionAuditCategoryResults.prototype.done):
+        (WebInspector.ExtensionAuditCategoryResults.prototype._addResult):
+        (WebInspector.ExtensionAuditCategoryResults.prototype.updateProgress):
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer):
+        (WebInspector.ExtensionServer.prototype._onUpdateAuditProgress):
+        (WebInspector.ExtensionServer.prototype._onStopAuditCategoryRun):
+        * inspector/front-end/ProgressBar.js:
+        (WebInspector.ProgressIndicator.prototype.done): Assure only first call to done() has effect.
+
 2012-09-19  Allan Sandfeld Jensen  <allan.jensen@nokia.com>
 
         Revert r127457 and following fixes due to several hit-testing regressions
