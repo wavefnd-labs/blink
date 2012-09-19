@@ -1,3 +1,27 @@
+2012-09-19  Jonathan Dong  <jonathan.dong@torchmobile.com.cn>
+
+        [BlackBerry] remove static_cast which will cause video crash
+        https://bugs.webkit.org/show_bug.cgi?id=97070
+
+        Reviewed by Antonio Gomes.
+
+        Removed the static_cast to avoid layering violation which
+        will cause a runtime crash.
+        We won't create a real MediaPlayerPrivate object before we call
+        MediaPlayer::load(), so if we use player()->implementation()
+        before calling load() in some cases, it points to a
+        NullMediaPlayerPrivate object. Here we should not use static_cast,
+        instead we should use HTMLMediaElement::percentLoaded() to
+        avoid layering violation as we don't have the buffering bug which
+        the deleted comment refers to.
+
+        Internally reviewed by Max Feil.
+
+        Test case: media/video-size.html
+
+        * platform/blackberry/RenderThemeBlackBerry.cpp:
+        (WebCore::RenderThemeBlackBerry::paintMediaSliderTrack):
+
 2012-09-19  Rick Byers  <rbyers@chromium.org>
 
         Do touch adjustment on GestureTapDown
