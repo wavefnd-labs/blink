@@ -1,3 +1,28 @@
+2012-09-19  Terry Anderson  <tdanderson@chromium.org>
+
+        [chromium] Store the contents scale factor in PlatformContextSkia on initialization
+        https://bugs.webkit.org/show_bug.cgi?id=96137
+
+        Reviewed by Stephen White.
+
+        When the compositor creates a PlatformContextSkia, the scale on |canvas| will 
+        be equal to the content scale factor (which, without pinch-to-zoom, will be
+        the same as the device scale factor). Set this value as a member on PlatformContextSkia, 
+        which will be used to correctly render glyphs when hinting is used and the device
+        scale factor is not 1.
+
+        Tests: added two new unit tests.
+
+        * platform/graphics/chromium/OpaqueRectTrackingContentLayerDelegate.cpp:
+        (WebCore::OpaqueRectTrackingContentLayerDelegate::paintContents):
+        * platform/graphics/skia/PlatformContextSkia.cpp:
+        (WebCore::PlatformContextSkia::PlatformContextSkia):
+        (WebCore::PlatformContextSkia::setupPaintCommon):
+        * platform/graphics/skia/PlatformContextSkia.h:
+        (PlatformContextSkia):
+        (WebCore::PlatformContextSkia::setHintingScaleFactor):
+        (WebCore::PlatformContextSkia::hintingScaleFactor):
+
 2012-09-19  Kenichi Ishibashi  <bashi@chromium.org>
 
         [Chromium] HarfBuzzShaper should take into account combining characters
