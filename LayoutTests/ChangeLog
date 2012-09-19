@@ -1,3 +1,76 @@
+2012-09-19  David Grogan  <dgrogan@chromium.org>
+
+        IndexedDB: fire upgradeneeded even without an explicit integer version
+        https://bugs.webkit.org/show_bug.cgi?id=96444
+
+        Reviewed by Tony Chang.
+
+        Mostly updating expectations about getting an upgradeneeded on a new
+        database and the default version being 1 instead of "".
+
+        * http/tests/inspector/indexeddb/database-structure-expected.txt:
+        * storage/indexeddb/cursor-overloads-expected.txt:
+        * storage/indexeddb/cursor-overloads.html:
+        * storage/indexeddb/dont-commit-on-blocked-expected.txt:
+        * storage/indexeddb/dont-commit-on-blocked.html:
+        * storage/indexeddb/factory-deletedatabase-interactions-expected.txt:
+        * storage/indexeddb/intversion-and-setversion-expected.txt:
+        Remove test that setVersion fires an error if an int version is set.
+        Change it to testing that an int version can replace a string version
+        that replaced an int version.
+
+        * storage/indexeddb/intversion-bad-parameters-expected.txt:
+        * storage/indexeddb/intversion-invalid-setversion-has-no-side-effects-expected.txt: Removed.
+        setVersion is no longer invalid so this test can be deleted.
+
+        * storage/indexeddb/intversion-omit-parameter-expected.txt:
+        We now fully pass this test.
+
+        * storage/indexeddb/intversion-two-opens-no-versions-expected.txt: Added.
+        * storage/indexeddb/intversion-two-opens-no-versions.html: Renamed from LayoutTests/storage/indexeddb/intversion-invalid-setversion-has-no-side-effects.html.
+        * storage/indexeddb/list-ordering-expected.txt:
+        * storage/indexeddb/noblobs-expected.txt:
+        * storage/indexeddb/noblobs.html:
+        * storage/indexeddb/open-during-transaction-expected.txt:
+        This test had a bug in it AND its behavior is changed. It was trying
+        to open one database twice and another once but was actually opening
+        three different databases. The behavior change is that now the
+        transaction finishes while the last call to open is firing
+        upgradeneeded.
+
+        * storage/indexeddb/pending-activity-expected.txt:
+        * storage/indexeddb/pending-activity-workers-expected.txt:
+        * storage/indexeddb/resources/intversion-and-setversion.js:
+        (deleteSuccess):
+        (initialUpgradeNeeded):
+        (openSuccess):
+        (firstUpgradeNeeded):
+        (transactionCompleted):
+        (firstOpenWithVersion):
+        (secondSetVersionCallback):
+        (setIntVersion2):
+        (versionChangeGoingFromStringToInt):
+        (version2ConnectionBlocked):
+        (version2ConnectionSuccess):
+        (errorWhenTryingLowVersion):
+        * storage/indexeddb/resources/intversion-invalid-setversion-has-no-side-effects.js: Removed.
+        * storage/indexeddb/resources/intversion-two-opens-no-versions.js: Added.
+        (test):
+        (deleteSuccess):
+        (connection1UpgradeNeeded):
+        (connection1OpenSuccess):
+        (connection2UpgradeNeeded):
+        (connection2OpenSuccess):
+        * storage/indexeddb/resources/list-ordering.js:
+        * storage/indexeddb/resources/open-during-transaction.js:
+        (startTransaction.trans.oncomplete):
+        (startTransaction):
+        (tryOpens.openreq3.onsuccess):
+        (tryOpens):
+        * storage/indexeddb/resources/pending-activity.js:
+        * storage/indexeddb/structured-clone-expected.txt:
+        * storage/indexeddb/structured-clone.html:
+
 2012-09-19  Dominic Mazzoni  <dmazzoni@google.com>
 
         AX: A few control types are returning the wrong answer for isReadOnly

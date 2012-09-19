@@ -1,3 +1,51 @@
+2012-09-19  David Grogan  <dgrogan@chromium.org>
+
+        IndexedDB: fire upgradeneeded even without an explicit integer version
+        https://bugs.webkit.org/show_bug.cgi?id=96444
+
+        Reviewed by Tony Chang.
+
+        Also of note:
+        - New databases now get a default version of 1 instead of
+        the empty string when they are opened.
+        - We now allow databases with an integer version to revert to a string
+        version by calling setVersion.
+
+        Implementation detail: we store both an integer version and string
+        version for a particular database. If both are set we give preference
+        to the integer version and assume the db is on the integer track.
+
+        Test: storage/indexeddb/intversion-two-opens-no-versions.html
+
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore):
+        (WebCore::IDBDatabaseBackendImpl::IDBDatabaseBackendImpl):
+        (WebCore::IDBDatabaseBackendImpl::setVersion):
+        (WebCore::IDBDatabaseBackendImpl::setVersionInternal):
+        Now that this can be called even after an int version is set we have
+        to make it revoke the int version.
+
+        (WebCore::IDBDatabaseBackendImpl::openConnection):
+        Nested ifs were getting deep, so refactor to return early instead.
+
+        (WebCore::IDBDatabaseBackendImpl::deleteDatabase):
+        (WebCore::IDBDatabaseBackendImpl::resetVersion):
+        Now that an int version could have been set before setVersion was
+        called we have to reset the int version on abort.
+
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h:
+        (IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBLevelDBBackingStore.cpp:
+        (WebCore::IDBLevelDBBackingStore::updateIDBDatabaseIntVersion):
+        * Modules/indexeddb/IDBOpenDBRequest.cpp:
+        0 is now a valid integer version to store to leveldb if an idb
+        database is reverting to a string version.
+
+        (WebCore::IDBOpenDBRequest::onUpgradeNeeded):
+        If the open request did not specify an integer version but
+        upgradeneeded is called, it means the database was given the default
+        version of 1.
+
 2012-09-19  Dominic Mazzoni  <dmazzoni@google.com>
 
         AX: A few control types are returning the wrong answer for isReadOnly
