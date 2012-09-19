@@ -1,3 +1,66 @@
+2012-09-18  Dirk Schulze  <krit@webkit.org>
+
+        Implement 'mask-type' for <mask>
+        https://bugs.webkit.org/show_bug.cgi?id=97011
+
+        Reviewed by Andreas Kling.
+
+        The CSS Masking specification defines the presentation attribute 'mask-type' to
+        switch between luminance and alpha masking. 'mask-type' just affects the SVG
+        mask element. The luminance masking is the current behavior of of SVG masking.
+        Alpha masking is simular to '-webkit-mask-image'.
+
+        This patch implements this property and make it possible to switch between both
+        masking modes. Since the default value is 'luminance', this does not break
+        exisiting content which is tested with exisiting tests.
+
+        http://dvcs.w3.org/hg/FXTF/raw-file/tip/masking/index.html#the-mask-type
+
+        Tests: svg/css/mask-type.html
+               svg/masking/mask-type-alpha-expected.svg
+               svg/masking/mask-type-alpha.svg
+               svg/masking/mask-type-luminance-expected.svg
+               svg/masking/mask-type-luminance.svg
+               svg/masking/mask-type-not-set-expected.svg
+               svg/masking/mask-type-not-set.svg
+
+        * css/CSSComputedStyleDeclaration.cpp: Add mask-type property.
+        (WebCore):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore):
+        (WebCore::CSSPrimitiveValue::operator EMaskType):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/SVGCSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getSVGPropertyCSSValue):
+        * css/SVGCSSParser.cpp:
+        (WebCore::CSSParser::parseSVGValue):
+        * css/SVGCSSPropertyNames.in: Add mask-type.
+        * css/SVGCSSStyleSelector.cpp:
+        (WebCore::StyleResolver::applySVGProperty):
+        * css/SVGCSSValueKeywords.in:
+        * rendering/style/SVGRenderStyle.cpp:
+        (WebCore::SVGRenderStyle::diff):
+        * rendering/style/SVGRenderStyle.h:
+        (WebCore::SVGRenderStyle::initialMaskType):
+        (WebCore::SVGRenderStyle::setMaskType):
+        (SVGRenderStyle):
+        (WebCore::SVGRenderStyle::maskType):
+        (WebCore::SVGRenderStyle::setBitDefaults):
+        * rendering/style/SVGRenderStyleDefs.h:
+        * rendering/svg/RenderSVGResourceMasker.cpp:
+
+            Switch between the two masking modes according to the
+            computed value of mask-type.
+
+        (WebCore::RenderSVGResourceMasker::drawContentIntoMaskImage):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::cssPropertyIdForSVGAttributeName):
+        (WebCore::cssPropertyToTypeMap):
+        * svg/svgattrs.in: Add the new attribute to the attribute list.
+
 2012-09-19  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Remove unused popupsAllowed function from PlatformSupport
