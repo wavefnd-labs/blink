@@ -1,3 +1,62 @@
+2012-09-18  Sailesh Agrawal  <sail@chromium.org>
+
+        Chromium: Scrollbar with tickmarks doesn't respond to clicks
+        https://bugs.webkit.org/show_bug.cgi?id=96049
+
+        Reviewed by Beth Dakin.
+
+        Currently when a scrollbar has tickmarks its forced to be visible by setting its alpha to 1.0. The alpha value is reset to its old value at the end of the drawing routine. This approach doesn't work with the hit testing code which relies on the scrollbar's alpha value
+
+        Unfortunately there doesn't seem to be anyway to force a scrollbar to be visible. The closest API is -[NSScrollerImpPair lockOverlayScrollerState:]. Unfortunately this locks both the horizontal and vertical scrollbar. It also doesn't expand the knob width.
+
+        My fix simply adds a new alphaLocked attribute to the scrollbar. If this attribute is set to true then hit testing will return true.
+
+        Test: fast/scrolling/scrollbar-tickmarks-hittest.html
+
+        * WebCore.exp.in:
+        * WebCore.order:
+        * page/Settings.cpp:
+        (WebCore):
+        (WebCore::Settings::setUsesOverlayScrollbars): Sets the usesOverlayScrollbars flag.
+        (WebCore::Settings::usesOverlayScrollbars): Gets the usesOverlayScrollbars flag.
+        * page/Settings.h:
+        (Settings):
+        * platform/Scrollbar.cpp:
+        (WebCore::Scrollbar::Scrollbar):
+        * platform/Scrollbar.h:
+        (WebCore::Scrollbar::isAlphaLocked):
+        (WebCore::Scrollbar::setIsAlphaLocked):
+        (Scrollbar):
+        * platform/ScrollbarThemeClient.h:
+        (ScrollbarThemeClient):
+        * platform/chromium/ScrollbarThemeChromiumMac.mm:
+        (WebCore::ScrollbarThemeChromiumMac::paint): Updated to set and unset the alphaLocked attribute.
+        * platform/chromium/support/WebScrollbarImpl.cpp:
+        (WebKit::WebScrollbarImpl::isAlphaLocked):
+        (WebKit):
+        (WebKit::WebScrollbarImpl::setIsAlphaLocked):
+        * platform/chromium/support/WebScrollbarImpl.h:
+        (WebScrollbarImpl):
+        * platform/graphics/chromium/cc/CCScrollbarLayerImpl.cpp:
+        (WebCore::CCScrollbarLayerImpl::CCScrollbarLayerImpl):
+        (WebCore::CCScrollbarLayerImpl::CCScrollbar::isAlphaLocked):
+        (WebCore):
+        (WebCore::CCScrollbarLayerImpl::CCScrollbar::setIsAlphaLocked):
+        * platform/graphics/chromium/cc/CCScrollbarLayerImpl.h:
+        (CCScrollbar):
+        (CCScrollbarLayerImpl):
+        * platform/mac/NSScrollerImpDetails.mm:
+        (WebCore::recommendedScrollerStyle): Check the usesOverlayScrollbars setting to see if overlay scrollbars should be forced on.
+        * platform/mac/ScrollAnimatorMac.mm:
+        (WebCore::ScrollAnimatorMac::shouldScrollbarParticipateInHitTesting): Updated to check the alphaLocked attribute.
+        * testing/InternalSettings.cpp:
+        (WebCore::InternalSettings::reset): Resets the usesOverlayScrollbars setting.
+        (WebCore::InternalSettings::setUsesOverlayScrollbars): Sets the usesOverlayScrollbars setting.
+        (WebCore):
+        * testing/InternalSettings.h:
+        (InternalSettings):
+        * testing/InternalSettings.idl: Add a new setUsesOverlayScrollbars function.
+
 2012-09-18  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Notification.requestPermission(function() {alert();}) crashes
