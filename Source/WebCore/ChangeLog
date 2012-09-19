@@ -1,3 +1,24 @@
+2012-09-19  Patrick Gansterer  <paroga@webkit.org>
+
+        [WIN] Use BString in favour of BSTR to improve memory management
+        https://bugs.webkit.org/show_bug.cgi?id=93128
+
+        Reviewed by Anders Carlsson.
+
+        BString automatically calls SysFreeString() in its destructor which helps
+        avoiding memory leaks. So it should be used instead of BSTR directly.
+        Add operator& to BString to allow its usage for out parameters too (like COMPtr).
+        This fixes already a few memory leaks in the existing code.
+
+        * platform/win/BString.cpp:
+        (WebCore::BString::~BString):
+        (WebCore::BString::adoptBSTR):
+        (WebCore::BString::clear):
+        (WebCore):
+        * platform/win/BString.h:
+        (BString):
+        (WebCore::BString::operator&):
+
 2012-09-19  Simon Hausmann  <simon.hausmann@digia.com>
 
         [Qt] Link failure with bfd linker on --minimal build
