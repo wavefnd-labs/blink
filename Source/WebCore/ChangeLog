@@ -1,3 +1,35 @@
+2012-09-19  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Free up resources used by completed cursors earlier
+        https://bugs.webkit.org/show_bug.cgi?id=97023
+
+        Reviewed by Tony Chang.
+
+        Prior to this patch, IDBCursor objects are kept around by their parent
+        IDBTransaction until the transaction finishes. It's possible to release
+        references to them earlier, when the cursor has been "run to the end",
+        as no further events will fire and all calls to continue() etc should fail.
+
+        This change tells the cursor it's done when "null" finally comes through in
+        the IDBRequest, and the cursor then lets transaction know it can be
+        forgotten.
+
+        The added test doesn't distinguish the new behavior, but does exercise
+        "finished" cursors and apparently we didn't have tests for these before.
+
+        Test: storage/indexeddb/cursor-finished.html
+
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::close): Make idempotent; notify transaction.
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::onSuccess): Tell cursor it's finished before releasing.
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::OpenCursorNotifier::~OpenCursorNotifier):
+        (WebCore):
+        (WebCore::IDBTransaction::OpenCursorNotifier::cursorFinished): New method for explicit notification.
+        * Modules/indexeddb/IDBTransaction.h:
+        (OpenCursorNotifier):
+
 2012-09-19  David Grogan  <dgrogan@chromium.org>
 
         IndexedDB: fire upgradeneeded even without an explicit integer version
