@@ -1,3 +1,27 @@
+2012-09-19  Tony Chang  <tony@chromium.org>
+
+        Remove RenderIFrame::updateLogicalHeight and RenderIFrame::updateLogicalWidth
+        https://bugs.webkit.org/show_bug.cgi?id=97049
+
+        Reviewed by Ojan Vafai.
+
+        This is an incremental step in making updateLogicalHeight non-virtual so it's
+        possible to call computeLogicalHeight on any RenderBox and get the right
+        version of the function.
+
+        The code in RenderIFrame::layout was calling flattenFrame(), which would
+        query it's bounding box size.  Since we hadn't done a layout yet, the size
+        is unknown.  The fix is to only call flattenFrame() after calling
+        updateLogicalWidth and updateLogicalHeight. We can then fixup the size of
+        the iframe.
+
+        No new tests, existing tests in fast/frames/flattening should continue to pass.
+
+        * rendering/RenderIFrame.cpp:
+        (WebCore::RenderIFrame::layout):
+        * rendering/RenderIFrame.h:
+        (RenderIFrame):
+
 2012-09-19  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Free up resources used by completed cursors earlier
