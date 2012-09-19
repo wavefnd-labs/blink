@@ -1,3 +1,91 @@
+2012-09-19  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Remove "current transaction" concept from backing store
+        https://bugs.webkit.org/show_bug.cgi?id=96663
+
+        Reviewed by Tony Chang.
+
+        IndexedDB should allow multiple transactions to run in parallel within and
+        across databases within an origin. As an initial step to enabling this, the
+        backing store should not hold a "current transaction" - instead, operations
+        should be done relative to a transaction managed by the database.
+
+        No new tests - no functional changes.
+
+        * Modules/indexeddb/IDBBackingStore.h:
+        (IDBBackingStore):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::createObjectStoreInternal):
+        (WebCore::IDBDatabaseBackendImpl::deleteObjectStoreInternal):
+        (WebCore::IDBDatabaseBackendImpl::setVersionInternal):
+        (WebCore::IDBDatabaseBackendImpl::setIntVersionInternal):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h:
+        (IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp:
+        (WebCore::IDBIndexBackendImpl::openCursorInternal):
+        (WebCore::IDBIndexBackendImpl::countInternal):
+        (WebCore::IDBIndexBackendImpl::count):
+        (WebCore::IDBIndexBackendImpl::getInternal):
+        (WebCore::IDBIndexBackendImpl::getKeyInternal):
+        (WebCore::IDBIndexBackendImpl::get):
+        (WebCore::IDBIndexBackendImpl::getKey):
+        * Modules/indexeddb/IDBIndexBackendImpl.h:
+        (IDBIndexBackendImpl):
+        * Modules/indexeddb/IDBLevelDBBackingStore.cpp:
+        (WebCore::IDBLevelDBBackingStore::updateIDBDatabaseIntVersion):
+        (WebCore::IDBLevelDBBackingStore::updateIDBDatabaseMetaData):
+        (WebCore::IDBLevelDBBackingStore::createObjectStore):
+        (WebCore::IDBLevelDBBackingStore::deleteObjectStore):
+        (WebCore::IDBLevelDBBackingStore::getObjectStoreRecord):
+        (WebCore):
+        (WebCore::IDBLevelDBBackingStore::putObjectStoreRecord):
+        (WebCore::IDBLevelDBBackingStore::clearObjectStore):
+        (WebCore::IDBLevelDBBackingStore::deleteObjectStoreRecord):
+        (WebCore::IDBLevelDBBackingStore::getKeyGeneratorCurrentNumber):
+        (WebCore::IDBLevelDBBackingStore::maybeUpdateKeyGeneratorCurrentNumber):
+        (WebCore::IDBLevelDBBackingStore::keyExistsInObjectStore):
+        (WebCore::IDBLevelDBBackingStore::forEachObjectStoreRecord):
+        (WebCore::IDBLevelDBBackingStore::createIndex):
+        (WebCore::IDBLevelDBBackingStore::deleteIndex):
+        (WebCore::IDBLevelDBBackingStore::putIndexDataForRecord):
+        (WebCore::IDBLevelDBBackingStore::deleteIndexDataForRecord):
+        (WebCore::IDBLevelDBBackingStore::findKeyInIndex):
+        (WebCore::IDBLevelDBBackingStore::getPrimaryKeyViaIndex):
+        (WebCore::IDBLevelDBBackingStore::keyExistsInIndex):
+        (WebCore::IDBLevelDBBackingStore::openObjectStoreCursor):
+        (WebCore::IDBLevelDBBackingStore::openObjectStoreKeyCursor):
+        (WebCore::IDBLevelDBBackingStore::openIndexKeyCursor):
+        (WebCore::IDBLevelDBBackingStore::openIndexCursor):
+        (WebCore::IDBLevelDBBackingStore::Transaction::Transaction):
+        (WebCore::IDBLevelDBBackingStore::Transaction::begin):
+        (WebCore::IDBLevelDBBackingStore::Transaction::commit):
+        (WebCore::IDBLevelDBBackingStore::Transaction::rollback):
+        * Modules/indexeddb/IDBLevelDBBackingStore.h:
+        (IDBLevelDBBackingStore):
+        (WebCore::IDBLevelDBBackingStore::Transaction::levelDBTransaction):
+        (Transaction):
+        (WebCore::IDBLevelDBBackingStore::Transaction::levelDBTransactionFrom):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::get):
+        (WebCore::IDBObjectStoreBackendImpl::getInternal):
+        (WebCore):
+        (WebCore::makeIndexWriters):
+        (WebCore::IDBObjectStoreBackendImpl::setIndexKeys):
+        (WebCore::IDBObjectStoreBackendImpl::putInternal):
+        (WebCore::IDBObjectStoreBackendImpl::deleteFunction):
+        (WebCore::IDBObjectStoreBackendImpl::deleteInternal):
+        (WebCore::IDBObjectStoreBackendImpl::clear):
+        (WebCore::IDBObjectStoreBackendImpl::clearInternal):
+        (WebCore::IDBObjectStoreBackendImpl::createIndexInternal):
+        (WebCore::IDBObjectStoreBackendImpl::deleteIndexInternal):
+        (WebCore::IDBObjectStoreBackendImpl::openCursorInternal):
+        (WebCore::IDBObjectStoreBackendImpl::count):
+        (WebCore::IDBObjectStoreBackendImpl::countInternal):
+        (WebCore::IDBObjectStoreBackendImpl::generateKey):
+        (WebCore::IDBObjectStoreBackendImpl::updateKeyGenerator):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.h:
+        (IDBObjectStoreBackendImpl):
+
 2012-09-19  Terry Anderson  <tdanderson@chromium.org>
 
         [chromium] Store the contents scale factor in PlatformContextSkia on initialization
