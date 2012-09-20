@@ -1,3 +1,30 @@
+2012-09-20  Levi Weintraub  <leviw@chromium.org>
+
+        Prevent reading stale data from InlineTextBoxes
+        https://bugs.webkit.org/show_bug.cgi?id=94750
+
+        Reviewed by Eric Seidel.
+
+        Text from dirty InlineTextBoxes should never be read or used. This change enforces this
+        design goal by forcefully zero-ing out the start and length of InlineTextBoxes when 
+        they're being marked dirty. It also adds asserts to accessors for those members.
+
+        This change involves making markDirty virtual. Running the line-layout performance test
+        as well as profiling resizing the html5 spec showed negligable impact with this change.
+
+        No new tests as this doesn't change any proper behavior.
+
+        * rendering/InlineBox.h:
+        (WebCore::InlineBox::markDirty): Making virtual to allow InlineTextBox to overload and
+        zero out its start and length.
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::markDirty): Zeroing out start and length when we mark the box dirty.
+        * rendering/InlineTextBox.h:
+        (WebCore::InlineTextBox::start): Adding an assert when we hit this case.
+        (WebCore::InlineTextBox::end): Ditto.
+        (WebCore::InlineTextBox::len): Ditto.
+        (WebCore::InlineTextBox::offsetRun): Ditto.
+
 2012-09-20  Mike West  <mkwst@chromium.org>
 
         Support paths in Content Security Policy directives.
