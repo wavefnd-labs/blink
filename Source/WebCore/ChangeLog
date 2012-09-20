@@ -1,3 +1,32 @@
+2012-09-20  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] HTMLSelectElement should call formStateDidChange on both menulist and lisbox mode
+        https://bugs.webkit.org/show_bug.cgi?id=97177
+
+        Reviewed by Kent Tamura.
+
+        This patch makes listbox mode select element to call formStateDidChange()
+        when selected options are changed.
+
+        For this change, this patch moves notifyFormStateChanged() to
+        HTMLFormControlElementWithState class from HTMLTextFormControlElement
+        for sharing code HTMLSelectElement class and HTMLInputElement/HTMLTextAreaElement
+        derived from HTMLTextFormControlElement.
+
+        No new tests. We can't test this change in WebKit test tools. Test script
+        will be implemented in Chromium side.
+
+        * html/HTMLFormControlElementWithState.cpp:
+        (WebCore::HTMLFormControlElementWithState::notifyFormStateChanged):
+        (WebCore):
+        * html/HTMLFormControlElementWithState.h: Moved a declaration of notifyFormStateChanged() from HTMLTextFormControlElement.
+        (HTMLFormControlElementWithState): Moved an implemented of notifyFormStateChanged() from HTMLTextFormControlElement.
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::selectOption): Changed to call notifyFormStateChanged() instead of formStateDidChange().
+        (WebCore::HTMLSelectElement::updateListBoxSelection): Changed to call notifyFormStateChanged().
+        * html/HTMLTextFormControlElement.cpp: Moved an implemented of notifyFormStateChanged() to HTMLFormControlElementWithState class.
+        * html/HTMLTextFormControlElement.h: Moved a declaration of notifyFormStateChanged() to HTMLFormControlElementWithState class.
+
 2012-09-20  Keishi Hattori  <keishi@webkit.org>
 
         REGRESSION(r127727): Can't navigate between months with arrow keys in calendar picker
