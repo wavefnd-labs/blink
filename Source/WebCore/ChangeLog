@@ -1,3 +1,53 @@
+2012-09-20  Mike West  <mkwst@chromium.org>
+
+        Support paths in Content Security Policy directives.
+        https://bugs.webkit.org/show_bug.cgi?id=89750
+
+        Reviewed by Adam Barth.
+
+        In CSP 1.0, paths are simply ignored: 'script-src
+        http://example.com/path/to/a/file' would allow script to be loaded from
+        http://example.com/path/to/a/file/javascript.js, but also from
+        http://example.com/javascript.js.
+
+        This patch is an experimental implementation of more granular path
+        support in CSP source lists as proposed in the current editor's draft of
+        CSP 1.1. Paths are treated as specifying directories in which resources
+        can be found, and are implicitly terminated with a '/': in other words,
+        'script-src http://a.com/path' is the same as
+        'script-src http://a.com/path/'. Moreover, paths cannot contain either
+        '?' or '#' characters.
+
+        This is implemented outside the CSP_NEXT flag. All ports will be
+        effected.
+
+        Spec: https://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-specification.dev.html#matching
+
+        Tests: http/tests/security/contentSecurityPolicy/source-list-parsing-paths-01.html
+               http/tests/security/contentSecurityPolicy/source-list-parsing-paths-02.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPSource::CSPSource):
+            Store a path along with each CSP source.
+        (WebCore::CSPSource::matches):
+            Check the path when comparing a URL to the source.
+        (WebCore::CSPSource::pathMatches):
+            Compare the URL-decoded version of the resource to validate against
+            the source's stored path. If the resource's path begins with the
+            stored path, then it matches! If not, it doesn't.
+        (CSPSource):
+            Store a path along with each CSP source.
+        (WebCore::CSPSourceList::parse):
+            Pass a 'path' in when creating CSPSource objects.
+        (WebCore::CSPSourceList::parsePath):
+            Actually parse the path, flagging errors if '?' or '#' are present,
+            URL-decoding the result, and ensuring that a terminal '/' is
+            added if necessary.
+        (WebCore::CSPSourceList::addSourceSelf):
+            Ensure that 'self' sources have an empty path.
+        * page/ContentSecurityPolicy.h:
+            Dropping the "ignored path component" console warning.
+
 2012-09-20  Joanmarie Diggs  <jdiggs@igalia.com>
 
         [GTK] ControlsPanel string is not localized in LocalizedStringsGtk
