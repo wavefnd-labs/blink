@@ -1,3 +1,47 @@
+2012-09-20  David Barton  <dbarton@mathscribe.com>
+
+        [MathML] Increase visual space around fraction parts, italic variables, and operators
+        https://bugs.webkit.org/show_bug.cgi?id=97228
+
+        Reviewed by Eric Seidel.
+
+        This makes MathML more readable, and more in agreement with Firefox and TeX.
+
+        Tested by existing tests.
+
+        * css/mathml.css:
+        (mfrac > :first-child):
+        (mfrac > :last-child):
+        (mfrac):
+        (mi):
+        (msub > mi:first-child, msubsup > mi:first-child):
+            - Subscripts don't need to move right after an italic <mi>.
+        (msubsup > mi:first-child + * + *):
+            - Superscripts do need to move right after an italic <mi>.
+        (math > mo, mrow > mo, msqrt > mo, mtd > mo):
+            - These are ok values for now. It will be better to use different values for different operators, as the FIXME says.
+        (math > mo:last-child, mrow > mo:last-child, msqrt > mo:last-child, mtd > mo:last-child):
+            - Prefix and postfix operators, including fences, generally get less spacing than infix operators.
+        
+        * rendering/mathml/RenderMathMLFenced.cpp:
+        (WebCore::RenderMathMLFenced::createMathMLOperator):
+            - Usually the separator is a comma or semicolon, so we only put space after it for now.
+        (WebCore::RenderMathMLFenced::makeFences):
+        (WebCore::RenderMathMLFenced::addChild):
+        (WebCore::RenderMathMLFenced::styleDidChange):
+        * rendering/mathml/RenderMathMLFenced.h:
+        (RenderMathMLFenced):
+        
+        * rendering/mathml/RenderMathMLFraction.cpp:
+        (WebCore):
+        (WebCore::RenderMathMLFraction::updateFromElement):
+            - gDenominatorPad is now handled by mathml.css.
+        
+        * rendering/mathml/RenderMathMLSubSup.cpp:
+        (WebCore):
+        (WebCore::RenderMathMLSubSup::fixScriptsStyle):
+            - gSubsupScriptMargin is now handled by mathml.css.
+
 2012-09-20  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Extend UserMediaRequest with a ownerDocument method
