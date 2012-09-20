@@ -1,3 +1,29 @@
+2012-09-20  Tony Chang  <tony@chromium.org>
+
+        Implement absolutely positioned flex items
+        https://bugs.webkit.org/show_bug.cgi?id=93798
+
+        Reviewed by Ojan Vafai.
+
+        Previously, we treated absolutely positioned flex items as a 0x0 placeholder element.
+        Now we position the 0x0 placeholder where the next item would go. This causes the
+        following changes:
+        - justify-content: space-{around,between} no longer change due to the existence of absolutely positioned flex items.
+        - alignment doesn't change the placement of absolutely positioned flex items.
+        - auto margins in the alignment direction don't do anything on absolutely positioned flex items.
+
+        Test: css3/flexbox/position-absolute-children.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::availableAlignmentSpaceForChild): Absolutely positioned flex items should not use this.
+        (WebCore::RenderFlexibleBox::updateAutoMarginsInCrossAxis): Absolutely positioned flex items should not use this.
+        (WebCore::initialJustifyContentOffset): If there are no flex items, space-around should center an absolutely positioned flex item.
+        (WebCore::RenderFlexibleBox::numberOfInFlowPositionedChildren): Helper method for helping to compute space-between and space-around.
+        (WebCore::RenderFlexibleBox::layoutAndPlaceChildren): Fix spacing when space-between or space-around.
+        (WebCore::RenderFlexibleBox::layoutColumnReverse): Fix spacing when space-between or space-around.
+        (WebCore::RenderFlexibleBox::alignChildren): Treat absolutely positioned children like flex-start.
+        * rendering/RenderFlexibleBox.h: numberOfInFlowPositionedChildren method.
+
 2012-09-20  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r129144.
