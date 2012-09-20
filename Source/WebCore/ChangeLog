@@ -1,3 +1,63 @@
+2012-09-19  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        The collapsing border code needs direction-aware border getters
+        https://bugs.webkit.org/show_bug.cgi?id=96710
+
+        Reviewed by Ojan Vafai.
+
+        This refactoring is needed to extend our collapsing border support for mixed directionality
+        at the table cell level (we currently wrongly ignore any direction below the row-group). For
+        now, the new helpers are dumb and return exactly the old result but they will be made
+        direction-aware in a follow-up change.
+
+        Refactoring covered by existing tests.
+
+        * rendering/RenderBox.h:
+        (WebCore::RenderBox::hasSameDirectionAs):
+        Added this helper function. For now, it's only used to compare against
+        the table direction but we will reuse it to compare the current cell
+        direction against the other table parts.
+
+        * rendering/RenderTableCell.h:
+        (WebCore::RenderTableCell::computeCollapsedStartBorder):
+        (WebCore::RenderTableCell::computeCollapsedEndBorder):
+        Transitioned those 2 functions to using the new direction-aware functions.
+
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::tableStartBorderAdjoiningCell):
+        (WebCore::RenderTable::tableEndBorderAdjoiningCell):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::firstRowCellAdjoiningTableStart):
+        (WebCore::RenderTableSection::firstRowCellAdjoiningTableEnd):
+        * rendering/RenderTableCell.h:
+        (WebCore::RenderTableCell::borderAdjoiningTableStart):
+        (WebCore::RenderTableCell::borderAdjoiningTableEnd):
+        * rendering/RenderTableSection.h:
+        (WebCore::RenderTableSection::borderAdjoiningTableStart):
+        (WebCore::RenderTableSection::borderAdjoiningTableEnd):
+        Updated those call sites to use RenderBox::hasSameDirectionAs.
+
+        * rendering/RenderTableCell.h:
+        (WebCore::RenderTableCell::borderAdjoiningNextCell):
+        (WebCore::RenderTableCell::borderAdjoiningPreviousCell):
+        * rendering/RenderTableCol.cpp:
+        (WebCore::RenderTableCol::borderAdjoiningCellStartBorder):
+        (WebCore::RenderTableCol::borderAdjoiningCellEndBorder):
+        (WebCore::RenderTableCol::borderAdjoiningCellBefore):
+        (WebCore::RenderTableCol::borderAdjoiningCellAfter):
+        * rendering/RenderTableCol.h:
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::borderAdjoiningStartCell):
+        (WebCore::RenderTableRow::borderAdjoiningEndCell):
+        * rendering/RenderTableRow.h:
+        (WebCore::RenderTableRow::borderAdjoiningTableStart):
+        (WebCore::RenderTableRow::borderAdjoiningTableEnd):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::borderAdjoiningStartCell):
+        (WebCore::RenderTableSection::borderAdjoiningEndCell):
+        New direction-aware functions. Added some ASSERT to ensure
+        we don't call them with the wrong parameters.
+
 2012-09-19  Kentaro Hara  <haraken@chromium.org>
 
         [V8] ScriptController::compileAndRunScript() can crash
