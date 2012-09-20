@@ -1,3 +1,30 @@
+2012-09-20  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [Chromium] Improve glyph selection of HarfBuzzShaper
+        https://bugs.webkit.org/show_bug.cgi?id=97164
+
+        Reviewed by Tony Chang.
+
+        Take into account clusters for selection.
+
+        Test: fast/text/international/hebrew-selection.html
+
+        * platform/graphics/harfbuzz/ng/HarfBuzzShaper.cpp:
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::applyShapeResult): Removed m_logClusters.
+        m_logCluster is no longer used.
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::characterIndexForXPosition):
+        - If targetX is in the left side of the first cluster, return the leftmost character index.
+        - If targetX is in the right side of the last cluster, return the rightmost character index.
+        - If targetX is between the right side of the cluster N and the left side of the cluster N+1, then:
+          - return N+1 for LTR.
+          - return N for RTL.
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::xPositionForOffset):
+        Find the cluster of index in question, then:
+        - return the left side boundary of the cluster for LTR.
+        - return the right side boundary of the cluster for RTL.
+        * platform/graphics/harfbuzz/ng/HarfBuzzShaper.h:
+        (HarfBuzzRun):
+
 2012-09-20  Tony Chang  <tony@chromium.org>
 
         Replace RenderListBox::updateLogicalHeight with RenderListBox::computeLogicalHeight
