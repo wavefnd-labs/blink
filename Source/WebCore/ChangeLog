@@ -1,3 +1,34 @@
+2012-09-19  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [Chromium] Improve glyph positioning of HarfBuzzShaper
+        https://bugs.webkit.org/show_bug.cgi?id=97093
+
+        Reviewed by Tony Chang.
+
+        For proper positioning, HarfBuzzShaper requires the positions(offsets and advance)
+        of the previous glyph. This mean we need to shape all HarfBuzzRuns before glyph positioning.
+        Collect and shape HarfBuzzRuns, then set positions of glyphs.
+
+        No new tests. Tests that uses spacing for complex text (e.g. fast/text/atsui-negative-spacing-features.html)
+        should close in the expectations. (not the identical, maybe there are subtle differences between
+        harfbuzz old and harfbuzz ng)
+
+        * platform/graphics/harfbuzz/ng/HarfBuzzShaper.cpp:
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::applyShapeResult): Allocate m_offsets.
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::setGlyphAndPositions): Renamed and set offset too.
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::characterIndexForXPosition):
+        (WebCore::HarfBuzzShaper::shape): Call fillGlyphBuffer() if we need to fill glyphBuffer.
+        (WebCore::HarfBuzzShaper::shapeHarfBuzzRuns): Removed glyph positioning code.
+        (WebCore::HarfBuzzShaper::setGlyphPositionsForHarfBuzzRun): Ditto.
+        (WebCore::HarfBuzzShaper::fillGlyphBufferFromHarfBuzzRun): Added.
+        (WebCore):
+        (WebCore::HarfBuzzShaper::fillGlyphBuffer): Added.
+        * platform/graphics/harfbuzz/ng/HarfBuzzShaper.h:
+        (HarfBuzzRun):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::offsets): Added.
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::glyphToCharacterIndexes): Added.
+        (HarfBuzzShaper):
+
 2012-09-19  James Simonsen  <simonjam@chromium.org>
 
         [Chromium] Disable resource load scheduling
