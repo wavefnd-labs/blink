@@ -1,3 +1,50 @@
+2012-09-19  Shinya Kawanaka  <shinyak@chromium.org>
+
+        [Refactoring] ButtonInputType of <input> element should have innerElement to make <input> AuthorShadowDOM-ready
+        https://bugs.webkit.org/show_bug.cgi?id=95939
+
+        Reviewed by Dimitri Glazkov.
+
+        We had 2 ways to show text in RenderButton. One is to use RenderButton::setText() and the other is to add renderer
+        as a child of RenderButton. <input type="button"> used the former one, and <button> used the latter one.
+        The former makes RenderButton a bit messy, and also prevents from making <input> AuthorShadowDOM ready.
+
+        So we remove RenderButton::setText() and refactor <input type="button"> to use a Shadow DOM to show text.
+
+        Since the text in <input type="button"> should create RenderTextFragment, we introduce TextForButtonInputType
+        class. RenderText will allow us to select the inner text of <input>, but it should not.
+
+        No new tests, existing tests should cover the change.
+
+        * html/BaseButtonInputType.cpp:
+        (TextForButtonInputType): Special Text node which creates RenderTextFragment.
+        (WebCore):
+        (WebCore::TextForButtonInputType::create):
+        (WebCore::TextForButtonInputType::TextForButtonInputType):
+        (WebCore::TextForButtonInputType::createRenderer):
+        (WebCore::BaseButtonInputType::BaseButtonInputType):
+        (WebCore::BaseButtonInputType::createShadowSubtree):
+        (WebCore::BaseButtonInputType::destroyShadowSubtree):
+        (WebCore::BaseButtonInputType::valueAttributeChanged): When a button value is changed, we reflect the value to
+        the text node in ShadowDOM.
+        * html/BaseButtonInputType.h:
+        (BaseButtonInputType):
+        * html/FileInputType.cpp:
+        (WebCore::UploadButtonElement::create): Creates Shadow DOM subtree.
+        (WebCore::UploadButtonElement::createForMultiple): Creates Shadow DOM subtree.
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::parseAttribute):
+        * html/InputType.cpp:
+        (WebCore::InputType::valueAttributeChanged):
+        (WebCore):
+        * html/InputType.h:
+        (InputType):
+        * rendering/RenderButton.cpp:
+        (WebCore::RenderButton::RenderButton):
+        (WebCore::RenderButton::styleDidChange): Removed unnecessary text related code.
+        * rendering/RenderButton.h:
+        (RenderButton):
+
 2012-09-19  Jason Liu  <jason.liu@torchmobile.com.cn>
 
         [BlackBerry] Get infinite amount of requests after attempting re-authentication basic.
