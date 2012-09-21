@@ -1,3 +1,23 @@
+2012-09-21  Dan Bernstein  <mitz@apple.com>
+
+        REGRESSION (r126763): Incorrect line breaking when both kerning and word spacing are enabled
+        https://bugs.webkit.org/show_bug.cgi?id=97280
+
+        Reviewed by Adele Peterson.
+
+        Font::width() never applies word spacing to the first character in the TextRun. The
+        TextLayout optimization tried to achieve this behavior by not applying word spacing to
+        any character, which led to this bug.
+
+        Test: fast/text/word-space-with-kerning-2.html
+
+        * platform/graphics/mac/ComplexTextController.cpp:
+        (WebCore::TextLayout::TextLayout): Changed to use the given font rather than a version
+        without word spacing.
+        (WebCore::TextLayout::width): Added a check if the run starts with a space at a non-zero
+        offset. If that is the case, then the ComplexTextController has added word spacing to that
+        space, so subtract it here in order to maintain the behavior described above.
+
 2012-09-21  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r129219.
