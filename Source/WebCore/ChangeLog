@@ -1,3 +1,26 @@
+2012-09-20  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Platform] There are memory leak in LocaleICU
+        https://bugs.webkit.org/show_bug.cgi?id=97289
+
+        Reviewed by Kent Tamura.
+
+        This patch adds udt_close() calls for medium time format and short
+        time format data used in LocaleICU class to avoid memory leak.
+
+        This memory leak is found by external tool Valgrind and reported in
+        Chromium bug repositry(http://crbug.com/151006) with stack trace of
+        call path of leaked memory.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. External tool such as Valgrind will check this memory leak.
+
+        * platform/text/LocaleICU.cpp:
+        (WebCore::LocaleICU::~LocaleICU): Added to call udt_close() for m_mediumTimeFormat
+        and m_shortTimeFormat which have UDateFormat objects.
+
 2012-09-20  Kenichi Ishibashi  <bashi@chromium.org>
 
         Chromium mac cannot display AppleColorEmoji
