@@ -1,3 +1,76 @@
+2012-09-21  Lianghui Chen  <liachen@rim.com>
+
+        [BlackBerry] Really fix bug 95488 that user can get the authentication challenge dialog while the other tab has focus.
+        https://bugs.webkit.org/show_bug.cgi?id=97348
+        Internal PR: 186597.
+
+        Internally reviewed by Yong Li, Joe Mason.
+        Reviewed by Yong Li.
+
+        Add a singleton AuthenticationChallengeManager to manage authentication
+        challenge dialog. It does following things:
+        Record page creation/deletion, so it knows what page is present or not.
+        Record page visibility change so it knows when to display a dialog or not.
+        Accept authentication challenge, and decide whether to postpone the
+            challenge dialog based on whether there is active authentication challenge
+            dialog already and whether its page is visible or not.
+        When a challenge result comes back, notify the result to all clients
+            authenticating for the same protection space, and then start the next
+            authentication challenge from the same page, if there is one.
+        When a page becomes visible, start the first authentication challenge
+            dialog that has been blocked before.
+
+        And to support this new AuthenticationChallengeManager, and making the
+            challenge really asynchronous, NetworkJob has been updated to support
+            the concept of "freeze", which means buffering all network loading status
+            change but don't send them to NetworkJob clients.
+        This is necessary when authentication challenge is asynchronous, as the
+            previous network loading status will likely come before user make any
+            decision.
+
+        No new tests for platform specific internal change.
+
+        * PlatformBlackBerry.cmake:
+        * platform/blackberry/AuthenticationChallengeManager.cpp: Added.
+        (WebCore):
+        (ChallengeInfo):
+        (WebCore::ChallengeInfo::ChallengeInfo):
+        (AuthenticationChallengeManagerPrivate):
+        (WebCore::AuthenticationChallengeManagerPrivate::AuthenticationChallengeManagerPrivate):
+        (WebCore::AuthenticationChallengeManagerPrivate::resumeAuthenticationChallenge):
+        (WebCore::AuthenticationChallengeManagerPrivate::startAuthenticationChallenge):
+        (WebCore::AuthenticationChallengeManagerPrivate::pageExists):
+        (WebCore::AuthenticationChallengeManager::AuthenticationChallengeManager):
+        (WebCore::AuthenticationChallengeManager::pageCreated):
+        (WebCore::AuthenticationChallengeManager::pageDeleted):
+        (WebCore::AuthenticationChallengeManager::pageVisibilityChanged):
+        (WebCore::AuthenticationChallengeManager::authenticationChallenge):
+        (WebCore::AuthenticationChallengeManager::cancelAuthenticationChallenge):
+        (WebCore::AuthenticationChallengeManager::notifyChallengeResult):
+        (WebCore::AuthenticationChallengeManager::instance):
+        (WebCore::AuthenticationChallengeManager::init):
+        * platform/blackberry/AuthenticationChallengeManager.h:
+        (WebCore):
+        (AuthenticationChallengeManager):
+        * platform/blackberry/PageClientBlackBerry.h:
+        * platform/graphics/blackberry/MediaPlayerPrivateBlackBerry.cpp:
+        (WebCore::MediaPlayerPrivate::MediaPlayerPrivate):
+        (WebCore::MediaPlayerPrivate::~MediaPlayerPrivate):
+        (WebCore::MediaPlayerPrivate::onAuthenticationNeeded):
+        (WebCore::MediaPlayerPrivate::notifyChallengeResult):
+        * platform/graphics/blackberry/MediaPlayerPrivateBlackBerry.h:
+        (MediaPlayerPrivate):
+        * platform/network/blackberry/NetworkJob.cpp:
+        (WebCore::NetworkJob::NetworkJob):
+        (WebCore::NetworkJob::~NetworkJob):
+        (WebCore):
+        (WebCore::NetworkJob::handleNotifyStatusReceived):
+        (WebCore::NetworkJob::handleNotifyClose):
+        (WebCore::NetworkJob::sendRequestWithCredentials):
+        (WebCore::NetworkJob::notifyChallengeResult):
+        * platform/network/blackberry/NetworkJob.h:
+        (NetworkJob):
+
 2012-09-21  Simon Hausmann  <simon.hausmann@digia.com>
 
         Unreviewed, rolling out r129248.
