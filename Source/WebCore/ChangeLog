@@ -1,3 +1,21 @@
+2012-09-20  Luke Macpherson   <macpherson@chromium.org>
+
+        Fix use-after free when using a variable to specify a -webkit-filter.
+        https://bugs.webkit.org/show_bug.cgi?id=97153
+
+        Reviewed by Abhishek Arya.
+
+        Make StyleResolver's m_pendingSVGDocuments a hashmap of RefPtr instead of raw pointers such that the document values cannot be freed prematurely.
+        Present assumption is that storing raw pointers is ok because CSSValues will live as long as the StyleResolver instance, however that it no longer
+        true when variables are used, so we must ensure we increment the reference counter to ensure the CSSValues are not freed prematurely.
+
+        Test: fast/css/variables/var-filter.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * css/StyleResolver.h:
+        (StyleResolver):
+
 2012-09-20  Levi Weintraub  <leviw@chromium.org>
 
         Prevent reading stale data from InlineTextBoxes
