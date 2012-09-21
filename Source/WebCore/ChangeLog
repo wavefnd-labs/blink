@@ -1,3 +1,35 @@
+2012-09-20  Levi Weintraub  <leviw@chromium.org>
+
+        Prevent reading stale data from InlineTextBoxes
+        https://bugs.webkit.org/show_bug.cgi?id=94750
+
+        Reviewed by Abhishek Arya.
+
+        Text from dirty InlineTextBoxes should never be read or used. This change
+        enforces this design goal by forcefully zero-ing out the start and length
+        of InlineTextBoxes when they're being marked dirty. Ideally, we'd also
+        add asserts to the accessors for this data, but there are still several
+        places in editing that cause this. https://bugs.webkit.org/show_bug.cgi?id=97264
+        tracks these cases.
+
+        This change involves making markDirty virtual. Running the line-layout
+        performance test as well as profiling resizing the html5 spec showed
+        negligable impact with this change.
+
+        No new tests as this doesn't change any proper behavior.
+
+        * dom/Position.cpp:
+        (WebCore::Position::downstream): Adding a FIXME.
+        * rendering/InlineBox.h:
+        (WebCore::InlineBox::markDirty): Marking virtual to allow InlineTextBox to
+        overload and zero out its start and length.
+        * rendering/InlineTextBox.cpp:
+        (WebCore::InlineTextBox::markDirty): Zeroing out the start and length when
+        we mark the box dirty.
+        * rendering/InlineTextBox.h:
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::setTextWithOffset): Adding a FIXME.
+
 2012-09-20  Adam Barth  <abarth@webkit.org>
 
         Measure how often web pages use Worker and SharedWorker
