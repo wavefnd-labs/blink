@@ -1,3 +1,36 @@
+2012-09-21  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] DateTimeEditElement::layout() should take date time format as a parameter
+        https://bugs.webkit.org/show_bug.cgi?id=97300
+
+        Reviewed by Kent Tamura.
+
+        This patch introduces DateTimeEditElement::LayoutParameters struct for
+        passing four parameters to DateTimeEditElement::layout() for passing
+        date time format from client of DateTimeEditElement instead of
+        DateTimeEditElement::layout() takes time or short time format.
+
+        This patch is a part of preparation of introducing multiple fields
+        date/datetime/month/week input UI.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. This patch doesn't change behavior.
+
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::updateInnerTextValue): Changed to use LayoutParmeters.
+        * html/shadow/DateTimeEditElement.cpp:  Removed unused include files, LocalizedDate.h and LocalizedNumber.h.
+        (DateTimeEditBuilder):
+        (WebCore::DateTimeEditBuilder::DateTimeEditBuilder): Changed parameters to LayoutParmeters.
+        (WebCore::DateTimeEditElement::LayoutParameters::shouldHaveSecondField): Moved from DateTimeEditBuilder::needSecondField().
+        (WebCore::DateTimeEditElement::layout): Changed to take LayoutParameters.
+        (WebCore::DateTimeEditElement::setValueAsDate): ditto
+        (WebCore::DateTimeEditElement::setEmptyValue): ditto
+        * html/shadow/DateTimeEditElement.h: Removed unused classe declarations DateComponents and DateTimeEditLayouter.
+        (LayoutParameters):  Added to bundle parameters for layout().
+        (WebCore::DateTimeEditElement::LayoutParameters::LayoutParameters): Added.
+
 2012-09-20  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: render grid scale to the right / at bottom in case box is close to 0 on that axis.
