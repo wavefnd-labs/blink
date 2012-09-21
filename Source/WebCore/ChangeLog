@@ -1,3 +1,23 @@
+2012-09-21  Alexandru Chiculita  <achicu@adobe.com>
+
+        -webkit-clip-path is applied on elements that are not descendant of the container
+        https://bugs.webkit.org/show_bug.cgi?id=97217
+
+        Reviewed by Dirk Schulze.
+
+        The clip-path was set on the GraphicsContext, but was never restored, thus making all the layers
+        rendered in the same "group" of save/restore state use the same clip-path.
+
+        Test: css3/masking/clip-path-restore.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        clip-path property should create a stacking-context, otherwise the RenderLayers will not be nested,
+        meaning that the clip-path of the parent is not going to apply correctly.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayerContents):
+
 2012-09-21  Kent Tamura  <tkent@chromium.org>
 
         Remove unused functions of LocalizedDate.h
