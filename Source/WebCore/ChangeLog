@@ -1,3 +1,112 @@
+2012-09-20  John Mellor  <johnme@chromium.org>
+
+        Text Autosizing: Cluster text at flow roots, for consistency and to avoid autosizing headers/footers.
+        https://bugs.webkit.org/show_bug.cgi?id=97025
+
+        Reviewed by Julien Chaffraix.
+
+        This patch has 3 main changes:
+
+        1. All text within a "cluster" (roughly equivalent to a CSS flow root /
+           block formatting context) must have a uniform textAutosizingMultiplier,
+           except for subtrees which are themselves clusters. This improves the
+           consistency of the final output, since sibling blocks are now more
+           likely to have the same multiplier (hence grow in proportion).
+
+        2. Clusters must contain a minimum amount of text in order to be
+           autosized (4 lines of text, assuming each char is 1em wide, so about
+           2 lines of text in practice). This is to reduce the likelihood of
+           autosizing things like headers and footers, which can be quite
+           visually distracting. The rationale is that if a cluster contains
+           very few lines of text then it's ok to have to zoom in and pan from
+           side to side to read each line, since if there are very few lines of
+           text you'll only need to pan across once or twice.
+
+        3. To avoid adding a 3rd tree traversal, processSubtree/processBox were
+           refactored such that all of Text Autosizing now happens as a single
+           tree traversal (hence halving the number of tree traversals done).
+
+        Tests: fast/text-autosizing/cluster-narrow-in-wide.html
+               fast/text-autosizing/cluster-wide-in-narrow.html
+               fast/text-autosizing/clusters-insufficient-text.html
+               fast/text-autosizing/clusters-insufficient-width.html
+               fast/text-autosizing/clusters-sufficient-text-except-in-root.html
+               fast/text-autosizing/clusters-sufficient-width.html
+
+        * rendering/TextAutosizer.cpp:
+        (TextAutosizingWindowInfo):
+
+            Added this struct to bundle together the various sizes that
+            processSubtree needs to pass to every recursive call to
+            processCluster and processContainer.
+
+        (WebCore::TextAutosizer::processSubtree):
+
+            - Bundle windowSize and minLayoutSize together as a single struct,
+              TextAutosizingWindowInfo, rather than passing them separately.
+            - Walk up the tree to find the current cluster and container, rather
+              than (incorrectly) assuming that the layoutRoot is always a
+              container.
+            - Call processCluster instead of traversing the tree.
+
+        (WebCore::TextAutosizer::processCluster):
+
+            Calculates the multiplier based on the width of the cluster (moved
+            the calculation here from processBox, since now the multiplier is
+            fixed per cluster), and delegates to processContainer for the actual
+            tree traversal (since clusters are also containers).
+
+        (WebCore::contentHeightIsConstrained):
+
+            Changed parameter to RenderBlock.
+
+        (WebCore::TextAutosizer::processContainer):
+
+            This now takes care of the whole tree traversal, recursively calling
+            processCluster/processContainer when it encounters such an object,
+            and setMultiplier on RenderText objects (as processBox used to).
+            Also added a check that the RenderText's multiplier is not already
+            equal to the target multiplier (to save needlessly setting it).
+
+        (WebCore::TextAutosizer::isContainer):
+
+            - Changed to be a positive (is) instead of negative (isNot) check.
+            - Require objects to be RenderBlocks so it's easier to find them
+              using containingBlock, and there don't seem to be many interesting
+              RenderBoxes that aren't RenderBlocks.
+
+        (WebCore::TextAutosizer::isAutosizingCluster):
+
+            A container that is also a flow root / block formatting context
+            (approximately), hence demarcates an independent region of the page,
+            within which we want consistent autosizing.
+
+        (WebCore::TextAutosizer::clusterShouldBeAutosized):
+
+            Uses measureDescendantTextWidth and to check whether the cluster
+            contains enough text to be worth autosizing.
+
+        (WebCore::TextAutosizer::measureDescendantTextWidth):
+
+            Recursively traverse the cluster, skipping constrained height
+            containers as processContainer does, to measure how much autosizable
+            text it contains. Early out as soon as the minimum text width is
+            reached.
+
+        (WebCore::TextAutosizer::nextInPreOrderSkippingDescendantsOfContainers):
+
+            Replaces nextInPreOrderMatchingFilter. The filter is now fixed to
+            isContainer (we no longer need an isAutosizingCluster filter, since
+            I consolidated the tree traversal), and filtered objects are
+            actually returned (so they can in turn be recursively traversed),
+            it's just their descendants that get skipped.
+
+        * rendering/TextAutosizer.h:
+        (TextAutosizer):
+
+            - Deleted RenderObjectFilterFunctor, since the filter of
+              nextInPreOrderSkippingDescendantsOfContainers is now fixed.
+
 2012-09-20  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Platform] There are memory leak in LocaleICU
