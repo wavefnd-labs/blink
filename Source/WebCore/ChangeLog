@@ -1,3 +1,23 @@
+2012-09-21  Chris Rogers  <crogers@google.com>
+
+        BiquadFilterNode must take audio-rate parameter changes into account
+        https://bugs.webkit.org/show_bug.cgi?id=97369
+
+        Reviewed by Kenneth Russell.
+
+        BiquadFilterNode is currently ignoring any timeline or audio-rate changes to its parameters.
+        We now check if any of its parameters have timeline or audio-rate changes and, if so, take
+        them into account.  Otherwise, we use ordinary parameter smoothing/de-zippering which is
+        the case when the parameters are adjusted, for example, from a knob or slider in the UI.
+
+        * Modules/webaudio/BiquadDSPKernel.cpp:
+        (WebCore::BiquadDSPKernel::updateCoefficientsIfNecessary):
+        * Modules/webaudio/BiquadProcessor.cpp:
+        (WebCore::BiquadProcessor::checkForDirtyCoefficients):
+        * Modules/webaudio/BiquadProcessor.h:
+        (WebCore::BiquadProcessor::hasSampleAccurateValues):
+        (BiquadProcessor):
+
 2012-09-21  Brandon Jones  <bajones@google.com>
 
         Add support for OES_vertex_array_object in chromium
