@@ -1,3 +1,32 @@
+2012-09-21  Evan Wallace  <evan.exe@gmail.com>
+
+        [WebSocket] Receiving a large message is really slow
+        https://bugs.webkit.org/show_bug.cgi?id=97237
+
+        Reviewed by Alexey Proskuryakov.
+
+        WebSocketChannel always reallocates its internal buffer when it receives
+        and appends new data which causes dramatic slowdowns for messages over
+        2 MB in size. This patch changes the internal buffer of WebSocketChannel
+        from a raw char array to a Vector<char> and uses its amortized append()
+        method. This brings the time to receive a 5 MB message from 5.2 seconds
+        to 0.25 seconds.
+
+        This patch is only for optimization. No new tests are needed.
+
+        * Modules/websockets/WebSocketChannel.cpp:
+        (WebCore::WebSocketChannel::WebSocketChannel):
+        (WebCore::WebSocketChannel::~WebSocketChannel):
+        (WebCore::WebSocketChannel::fail):
+        (WebCore::WebSocketChannel::resume):
+        (WebCore::WebSocketChannel::didReceiveSocketStreamData):
+        (WebCore::WebSocketChannel::appendToBuffer):
+        (WebCore::WebSocketChannel::skipBuffer):
+        (WebCore::WebSocketChannel::processBuffer):
+        (WebCore::WebSocketChannel::resumeTimerFired):
+        (WebCore::WebSocketChannel::processFrame):
+        * Modules/websockets/WebSocketChannel.h:
+
 2012-09-21  Andrey Adaikin  <aandrey@chromium.org>
 
         Fix build with ENABLE_WEBGL=false
