@@ -1,3 +1,29 @@
+2012-09-21  Simon Fraser  <simon.fraser@apple.com>
+
+        RenderMarquee causes ASSERTION FAILED: enclosingIntRect(rendererMappedResult) == enclosingIntRect(FloatQuad(result).boundingBox()) : WebCore::FloatRect WebCore::RenderGeometryMap::absoluteRect(const WebCore::FloatRect &) const
+        https://bugs.webkit.org/show_bug.cgi?id=92464
+
+        Reviewed by Sam Weinig.
+
+        Marquees could cause an updateCompositingLayersAfterScroll() to be called when
+        we're in the middle of updating layer positions. updateCompositingLayersAfterScroll()
+        does a full RenderLayer tree walk, but its use of RenderGeomeryMap reveals that
+        it's using layers whose positions haven't been updated yet.
+        
+        Fix by avoiding the updateCompositingLayersAfterScroll() if we're in the process
+        of updating a marquee when updating layer positions. We'll do a compositing update
+        soon anyway.
+
+        Tested by fast/events/tabindex-focus-blur-all.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::RenderLayer):
+        (WebCore::RenderLayer::updateLayerPositions):
+        (WebCore::RenderLayer::updateLayerPositionsAfterScroll):
+        (WebCore::RenderLayer::scrollTo):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+
 2012-09-21  Adam Klein  <adamk@chromium.org>
 
         Remove bogus assertions from ChildListMutationScope
