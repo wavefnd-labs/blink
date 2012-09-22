@@ -1,3 +1,26 @@
+2012-09-22  Thierry Reding  <thierry.reding@avionic-design.de>
+
+        [GTK] Build is broken with GLib Unicode backend
+        https://bugs.webkit.org/show_bug.cgi?id=97308.
+
+        Reviewed by Carlos Garcia Campos.
+
+        The TextBreakIteratorGtk implementation uses ubrk_close() to delete
+        the iterator. However that function is ICU specific and not declared
+        when using the GLib backend. Instead the iterator can simply be freed
+        using the delete operator.
+
+        This commit is based on work by Martin Schlemmer who posted a fix for
+        this here:
+
+            http://permalink.gmane.org/gmane.os.opendarwin.webkit.gtk/1210
+
+        No new tests.
+
+        * platform/text/gtk/TextBreakIteratorGtk.cpp:
+        (WebCore::NonSharedCharacterBreakIterator::~NonSharedCharacterBreakIterator):
+        Free iterator using delete instead of ubrk_close().
+
 2012-09-21  Ami Fischman  <fischman@chromium.org>
 
         HTMLMediaElement isn't garbage collected between document reloads
