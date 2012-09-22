@@ -1,3 +1,28 @@
+2012-09-21  Adam Klein  <adamk@chromium.org>
+
+        Remove bogus assertions from ChildListMutationScope
+        https://bugs.webkit.org/show_bug.cgi?id=97372
+
+        Reviewed by Ryosuke Niwa.
+
+        Some asserts (and their accompanying comment) were trying to enforce
+        proper usage of ChildListMutationScope from WebCore, but in the
+        presence of MutationEvents they could fail due to arbitrary script
+        execution.
+
+        This change gets rid of those asserts and adds tests exercising
+        the (pre-existing) codepaths for handling these out-of-order cases.
+        Without this patch, these tests ASSERT in debug builds.
+
+        Tests: fast/mutation/added-out-of-order.html
+               fast/mutation/removed-out-of-order.html
+
+        * dom/ChildListMutationScope.cpp:
+        (WebCore::ChildListMutationAccumulator::childAdded):
+        (WebCore::ChildListMutationAccumulator::willRemoveChild):
+        * dom/ChildListMutationScope.h:
+        (WebCore):
+
 2012-09-21  Dan Bernstein  <mitz@apple.com>
 
         REGRESSION (r129176): Incorrect line breaking when kerning occurs between a space and the following character
