@@ -1,3 +1,18 @@
+2012-09-21  Ami Fischman  <fischman@chromium.org>
+
+        HTMLMediaElement isn't garbage collected between document reloads
+        https://bugs.webkit.org/show_bug.cgi?id=97020
+
+        Reviewed by Eric Carlson.
+
+        JS-created (as opposed to DOM-created) Audio nodes never got collected, because they
+        appear to always hasPendingActivity(), because m_playing is never set to false.
+
+        Manual test added: ManualTests/audio-freed-during-reload.html
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::stop): set m_playing = false; explicitly.
+
 2012-09-21  Simon Fraser  <simon.fraser@apple.com>
 
         RenderMarquee causes ASSERTION FAILED: enclosingIntRect(rendererMappedResult) == enclosingIntRect(FloatQuad(result).boundingBox()) : WebCore::FloatRect WebCore::RenderGeometryMap::absoluteRect(const WebCore::FloatRect &) const
