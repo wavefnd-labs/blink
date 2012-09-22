@@ -1,3 +1,59 @@
+2012-09-21  Adam Klein  <adamk@chromium.org>
+
+        Simplify and optimize ChildListMutationScope
+        https://bugs.webkit.org/show_bug.cgi?id=97352
+
+        Reviewed by Ryosuke Niwa.
+
+        ChildListMutationScope is one of the most complicated bits of
+        MutationObserver implementation. This patch aims to simplify it for
+        clarity and improve its performance (mostly by just doing less).
+
+        The big change is to remove the MutationAccumulatorRouter class,
+        replacing it with lifetime-management logic in ChildListMutationAccumulator
+        ChildListMutationScope is expected to call getOrCreate() in
+        its constructor, and each scope holds a RefPtr to the accumulator.
+        When the last scope holding such a RefPtr is destroyed,
+        ChildListMutationAccumulator's destructor enqueues the accumulated record.
+
+        This greatly reduces the number of lines of code, and condenses
+        two HashMaps into one. It also reduces hash lookups, which now
+        occur only on scope creation and when the refcount for a given
+        accumulator reaches 0 (previously, each childAdded and willRemoveChild
+        call could result in two hash lookups each).
+
+        There are some minor changes as well: the ChildListMutationAccumulator::clear()
+        method is gone, as it was doing more work than necessary;
+        DEFINE_STATIC_LOCAL is now used instead of hand-rolled static-management
+        code; ChildListMutationAccumulator::m_lastAdded is no longer a RefPtr, since it
+        always points at a Node that's already being ref'd by the accumulator.
+        Also various minor syntactic cleanups.
+
+        No new tests, no change in behavior.
+
+        * dom/ChildListMutationScope.cpp:
+        (WebCore::accumulatorMap): Reduced two maps to one, and manage its lifetime with DEFINE_STATIC_LOCAL.
+        (WebCore::ChildListMutationAccumulator::ChildListMutationAccumulator): Remove unnecessary call to clear() (which itself has been removed).
+        (WebCore::ChildListMutationAccumulator::~ChildListMutationAccumulator): Enqueue record if not empty at destruction, and have the accumulator
+        remove itself from the map.
+        (WebCore::ChildListMutationAccumulator::getOrCreate): Replaces half of MutationAccumulatorRouter's job.
+        (WebCore::ChildListMutationAccumulator::childAdded): Minor RefPtr usage improvements.
+        (WebCore::ChildListMutationAccumulator::isRemovedNodeInOrder): Simplify RefPtr syntax.
+        (WebCore::ChildListMutationAccumulator::willRemoveChild): Minor RefPtr usage improvements.
+        (WebCore::ChildListMutationAccumulator::enqueueMutationRecord): Replace call to clear() with clearing m_lastAdded,
+        since it's the only bit not cleared by the MutationRecord creation call. Also remove
+        isEmpty check and replace with asserts now that it's a private method.
+        (WebCore::ChildListMutationAccumulator::isEmpty): Added more assertions about emptiness.
+        * dom/ChildListMutationScope.h:
+        (WebCore):
+        (ChildListMutationAccumulator): Extract the inner class to make everything easier to read.
+        (WebCore::ChildListMutationScope::ChildListMutationScope): Store m_accumulator rather than m_target.
+        (WebCore::ChildListMutationScope::~ChildListMutationScope): ditto
+        (WebCore::ChildListMutationScope::childAdded): ditto
+        (WebCore::ChildListMutationScope::willRemoveChild): ditto
+        (ChildListMutationScope):
+        * html/HTMLElement.cpp: Remove unused ChildListMutationScope.h #include.
+
 2012-09-21  Chris Rogers  <crogers@google.com>
 
         BiquadFilterNode must take audio-rate parameter changes into account
