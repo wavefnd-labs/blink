@@ -1,3 +1,38 @@
+2012-09-23  Andreas Kling  <kling@webkit.org>
+
+        Enable ElementAttributeData sharing for non-HTML elements.
+        <http://webkit.org/b/97413>
+
+        Reviewed by Anders Carlsson.
+
+        Use the whole qualified tag name when creating the ElementAttributeData cache key
+        instead of just the localName(). This allows sharing and caching of attribute data
+        for non-HTML elements and makes the code a little cleaner.
+
+        * dom/Element.cpp:
+        (WebCore::Element::parserSetAttributes):
+
+            Enable the ElementAttributeData sharing path for non-HTML elements.
+
+        * dom/ElementAttributeData.h:
+
+            Make immutableAttributeArray() public so Document can call it instead of getting
+            the raw data address from a const_cast'ed attributeItem(0).
+
+        * dom/Document.cpp:
+        (WebCore::ImmutableAttributeDataCacheKey::ImmutableAttributeDataCacheKey):
+        (WebCore::ImmutableAttributeDataCacheKey::operator!=):
+        (WebCore::ImmutableAttributeDataCacheKey::hash):
+        (ImmutableAttributeDataCacheKey):
+        (WebCore::ImmutableAttributeDataCacheEntry::ImmutableAttributeDataCacheEntry):
+        (ImmutableAttributeDataCacheEntry):
+        (WebCore::Document::cachedImmutableAttributeData):
+
+            Let the immutable attribute data cache use a QualifiedName/attributes key
+            instead of the AtomicString/attributes we were using before. We still grab the
+            existingHash() from the QualifiedName::localName() and use that for the actual
+            HashMap key.
+
 2012-09-23  Mike West  <mkwst@chromium.org>
 
         Measure the usage of the "X-WebKit-CSP" header in the hopes of dropping the prefix completely.
