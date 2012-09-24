@@ -1,3 +1,153 @@
+2012-09-24  Antti Koivisto  <antti@apple.com>
+
+        Split stylesheet related code out from Document 
+        https://bugs.webkit.org/show_bug.cgi?id=97353
+
+        Reviewed by Andreas Kling.
+
+        Document is big and unwieldy. The code related to tracking active stylesheets can be factored out.
+        
+        The patch moves stylesheet upkeep, collection and invalidation code from Document to a separate
+        DocumentStyleSheetCollection class. There are no functional changes.
+        
+        The usesLinkRules stylesheet feature bit and the related code is removed as no one was using it.
+
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOneSelector):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver):
+        (WebCore::StyleResolver::Features::Features):
+        (WebCore::StyleResolver::Features::add):
+        (WebCore::StyleResolver::Features::clear):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * css/StyleResolver.h:
+        (WebCore::StyleResolver::usesBeforeAfterRules):
+        (Features):
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::~Document):
+        (WebCore::Document::setCompatibilityMode):
+        (WebCore::Document::recalcStyle):
+        (WebCore):
+        (WebCore::Document::createStyleResolver):
+        (WebCore::Document::seamlessParentUpdatedStylesheets):
+        (WebCore::Document::didRemoveAllPendingStylesheet):
+        (WebCore::Document::processHttpEquiv):
+        (WebCore::Document::styleSheets):
+        (WebCore::Document::preferredStylesheetSet):
+        (WebCore::Document::selectedStylesheetSet):
+        (WebCore::Document::setSelectedStylesheetSet):
+        (WebCore::Document::styleResolverChanged):
+        (WebCore::Document::reportMemoryUsage):
+        (WebCore::Document::haveStylesheetsLoaded):
+        * dom/Document.h:
+        (WebCore):
+        (Document):
+        (WebCore::Document::styleSheetCollection):
+        (WebCore::Document::hasNodesWithPlaceholderStyle):
+        (WebCore::Document::setNeedsNotifyRemoveAllPendingStylesheet):
+        (WebCore::Document::inStyleRecalc):
+        * dom/DocumentStyleSheetCollection.cpp: Added.
+        (WebCore):
+        (WebCore::DocumentStyleSheetCollection::DocumentStyleSheetCollection):
+        (WebCore::DocumentStyleSheetCollection::~DocumentStyleSheetCollection):
+        (WebCore::DocumentStyleSheetCollection::pageUserSheet):
+        (WebCore::DocumentStyleSheetCollection::clearPageUserSheet):
+        (WebCore::DocumentStyleSheetCollection::updatePageUserSheet):
+        (WebCore::DocumentStyleSheetCollection::pageGroupUserSheets):
+        (WebCore::DocumentStyleSheetCollection::clearPageGroupUserSheets):
+        (WebCore::DocumentStyleSheetCollection::updatePageGroupUserSheets):
+        (WebCore::DocumentStyleSheetCollection::addUserSheet):
+        (WebCore::DocumentStyleSheetCollection::removePendingSheet):
+        (WebCore::DocumentStyleSheetCollection::addStyleSheetCandidateNode):
+        (WebCore::DocumentStyleSheetCollection::removeStyleSheetCandidateNode):
+        (WebCore::DocumentStyleSheetCollection::collectActiveStyleSheets):
+        (WebCore::DocumentStyleSheetCollection::testAddedStyleSheetRequiresStyleRecalc):
+        (WebCore::DocumentStyleSheetCollection::analyzeStyleSheetChange):
+        (WebCore::styleSheetsUseRemUnits):
+        (WebCore::DocumentStyleSheetCollection::updateActiveStyleSheets):
+        (WebCore::DocumentStyleSheetCollection::combineCSSFeatureFlags):
+        (WebCore::DocumentStyleSheetCollection::resetCSSFeatureFlags):
+        (WebCore::DocumentStyleSheetCollection::reportMemoryUsage):
+        * dom/DocumentStyleSheetCollection.h: Added.
+        (WebCore):
+        (DocumentStyleSheetCollection):
+        (WebCore::DocumentStyleSheetCollection::authorStyleSheets):
+        (WebCore::DocumentStyleSheetCollection::documentUserSheets):
+        (WebCore::DocumentStyleSheetCollection::needsUpdateActiveStylesheetsOnStyleRecalc):
+        (WebCore::DocumentStyleSheetCollection::preferredStylesheetSetName):
+        (WebCore::DocumentStyleSheetCollection::selectedStylesheetSetName):
+        (WebCore::DocumentStyleSheetCollection::setPreferredStylesheetSetName):
+        (WebCore::DocumentStyleSheetCollection::setSelectedStylesheetSetName):
+        (WebCore::DocumentStyleSheetCollection::addPendingSheet):
+        (WebCore::DocumentStyleSheetCollection::hasPendingSheets):
+        (WebCore::DocumentStyleSheetCollection::usesSiblingRules):
+        (WebCore::DocumentStyleSheetCollection::setUsesSiblingRulesOverride):
+        (WebCore::DocumentStyleSheetCollection::usesFirstLineRules):
+        (WebCore::DocumentStyleSheetCollection::usesFirstLetterRules):
+        (WebCore::DocumentStyleSheetCollection::setUsesFirstLetterRules):
+        (WebCore::DocumentStyleSheetCollection::usesBeforeAfterRules):
+        (WebCore::DocumentStyleSheetCollection::setUsesBeforeAfterRulesOverride):
+        (WebCore::DocumentStyleSheetCollection::usesRemUnits):
+        (WebCore::DocumentStyleSheetCollection::setUsesRemUnit):
+        * dom/Element.cpp:
+        (WebCore::Element::recalcStyle):
+        * dom/ProcessingInstruction.cpp:
+        (WebCore::ProcessingInstruction::~ProcessingInstruction):
+        (WebCore::ProcessingInstruction::checkStyleSheet):
+        (WebCore::ProcessingInstruction::sheetLoaded):
+        (WebCore::ProcessingInstruction::insertedInto):
+        (WebCore::ProcessingInstruction::removedFrom):
+        * dom/StyleElement.cpp:
+        (WebCore::StyleElement::insertedIntoDocument):
+        (WebCore::StyleElement::removedFromDocument):
+        (WebCore::StyleElement::clearDocumentData):
+        (WebCore::StyleElement::createSheet):
+        (WebCore::StyleElement::sheetLoaded):
+        (WebCore::StyleElement::startLoadingDynamicSheet):
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::~HTMLLinkElement):
+        (WebCore::HTMLLinkElement::insertedInto):
+        (WebCore::HTMLLinkElement::removedFrom):
+        (WebCore::HTMLLinkElement::addPendingSheet):
+        (WebCore::HTMLLinkElement::removePendingSheet):
+        * html/HTMLQuoteElement.cpp:
+        (WebCore::HTMLQuoteElement::insertedInto):
+        * html/HTMLViewSourceDocument.cpp:
+        (WebCore::HTMLViewSourceDocument::HTMLViewSourceDocument):
+        * mathml/MathMLMathElement.cpp:
+        (WebCore::MathMLMathElement::insertedInto):
+        * page/Page.cpp:
+        (WebCore::Page::userStyleSheetLocationChanged):
+        * page/PageGroup.cpp:
+        (WebCore::PageGroup::resetUserStyleCacheInAllFrames):
+        * rendering/RenderBR.cpp:
+        (WebCore::RenderBR::lineHeight):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::styleDidChange):
+        (WebCore::RenderBlock::splitBlocks):
+        (WebCore::RenderBlock::addChildIgnoringAnonymousColumnBlocks):
+        (WebCore::RenderBlock::lineHeight):
+        (WebCore::RenderBlock::updateFirstLetter):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::styleDidChange):
+        (WebCore::RenderInline::updateAlwaysCreateLineBoxes):
+        (WebCore::RenderInline::addChildIgnoringContinuation):
+        (WebCore::RenderInline::splitInlines):
+        (WebCore::RenderInline::lineHeight):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::uncachedFirstLineStyle):
+        (WebCore::RenderObject::firstLineStyleSlowCase):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::firstLineStyle):
+        * rendering/RenderObjectChildList.cpp:
+        (WebCore::RenderObjectChildList::updateBeforeAfterContent):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::updateBeforeAndAfterContent):
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::verticalPositionForBox):
+
 2012-09-24  Otto Derek Cheung  <otcheung@rim.com>
 
         [BlackBerry] Reverting implementation for 407 error pages
