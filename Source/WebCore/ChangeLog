@@ -1,3 +1,40 @@
+2012-09-24  David Grogan  <dgrogan@chromium.org>
+
+        Unprefix IndexedDB
+        https://bugs.webkit.org/show_bug.cgi?id=96548
+
+        Reviewed by Adam Barth.
+
+        We are largely compatible with the FF implementation and the w3c test
+        suite submitted by MS. The w3c test suite doesn't yet check
+        for lack of prefix; this is mostly to signal to devs that we think our
+        implementation is stable.
+
+        This patch uses the new FeatureObserver to get data about prefixed
+        vs unprefixed usage.
+
+        Tests: storage/indexeddb/unprefix-workers.html
+               storage/indexeddb/unprefix.html
+
+        * Modules/indexeddb/DOMWindowIndexedDatabase.cpp:
+        (WebCore::DOMWindowIndexedDatabase::indexedDB):
+        * Modules/indexeddb/DOMWindowIndexedDatabase.h:
+        (DOMWindowIndexedDatabase):
+        * Modules/indexeddb/DOMWindowIndexedDatabase.idl:
+        * Modules/indexeddb/WorkerContextIndexedDatabase.cpp:
+        (WebCore::WorkerContextIndexedDatabase::indexedDB):
+        * Modules/indexeddb/WorkerContextIndexedDatabase.h:
+        (WorkerContextIndexedDatabase):
+        * Modules/indexeddb/WorkerContextIndexedDatabase.idl:
+        * bindings/generic/RuntimeEnabledFeatures.h:
+        Making the auxiliary objects RuntimeEnabled didn't make much sense as
+        they are useless without the factory, so always enable them.
+
+        (WebCore::RuntimeEnabledFeatures::indexedDBEnabled):
+        * bindings/scripts/CodeGeneratorGObject.pm:
+        (SkipAttribute):
+        * page/FeatureObserver.h:
+
 2012-09-24  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [WebGL] First step towards 2D canvas instrumentation in injected script
