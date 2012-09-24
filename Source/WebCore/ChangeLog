@@ -1,3 +1,45 @@
+2012-09-24  Vivek Galatage  <vivekgalatage@gmail.com>
+
+        Web Inspector: implement testing harness for pure protocol tests.
+        https://bugs.webkit.org/show_bug.cgi?id=90675
+
+        Reviewed by Yury Semikhatsky.
+
+        Implementing the testing harness as the APIs of Internals object not
+        only reduced platform specific patching of DRTs but also minimized the
+        the effort required to open up the new dummy inspector Frontend. 
+        
+        The openDummyInspectorFrontend method will return the handle to newly 
+        created DOMWindow. This DOMWindow object can be utilized inside the test 
+        case to communicate using postMessage WebAPI.
+        
+        The newly created DOMWindow will host the protocol-test.html which
+        will seed the necessary JS libraries to communicate with the
+        InspectorBackend.
+
+        Test: inspector-protocol/css-getSupportedCSSProperties.html
+
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * inspector/InspectorClient.h:
+        (InspectorClient):
+        * testing/Internals.cpp:
+        (InspectorFrontendClientDummy):
+        (WebCore::InspectorFrontendClientDummy::~InspectorFrontendClientDummy):
+        (WebCore):
+        (WebCore::InspectorFrontendClientDummy::InspectorFrontendClientDummy):
+        (InspectorFrontendChannelDummy):
+        (WebCore::InspectorFrontendChannelDummy::~InspectorFrontendChannelDummy):
+        (WebCore::InspectorFrontendChannelDummy::InspectorFrontendChannelDummy):
+        (WebCore::InspectorFrontendChannelDummy::sendMessageToFrontend):
+        (WebCore::Internals::consoleMessageArgumentCounts):
+        (WebCore::Internals::openDummyInspectorFrontend):
+        (WebCore::Internals::closeDummyInspectorFrontend):
+        * testing/Internals.h:
+        (WebCore):
+        (Internals):
+        * testing/Internals.idl:
+
 2012-09-24  Keishi Hattori  <keishi@webkit.org>
 
         REGRESSION(r127727): Calendar picker focus doesn't loop in calendar-picker.html
