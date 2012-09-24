@@ -1,5 +1,28 @@
 2012-09-24  Andrey Adaikin  <aandrey@chromium.org>
 
+        Web Inspector: [TextEditor] conditional breakpoint popup not showing up the first time
+        https://bugs.webkit.org/show_bug.cgi?id=97442
+
+        Reviewed by Pavel Feldman.
+
+        1) The conditional breakpoint popup may not show up the first time we click on the gutter.
+        This was the case because the popup decoration element would be deleted from the line while
+        it was being highlighted and appended afterwards. Now we do not remove decorations from the
+        DOM while highlighting.
+
+        2) Also the popup will close itself on any mouse click event, even if it's targeted to the
+        input box itself. This was due to pointer-events: none; CSS style for the parent element.
+        Now we just override this style for the input box.
+
+        * inspector/front-end/DefaultTextEditor.js:
+        (WebInspector.TextEditorMainPanel.prototype._paintLine):
+        (WebInspector.TextEditorMainPanel.prototype._insertSpanBefore):
+        (WebInspector.TextEditorMainPanel.prototype._insertTextNodeBefore):
+        * inspector/front-end/inspector.css:
+        (.source-frame-breakpoint-condition):
+
+2012-09-24  Andrey Adaikin  <aandrey@chromium.org>
+
         Web Inspector: [Canvas] set CanvasAgent in InstrumentingAgents upon calling enable command
         https://bugs.webkit.org/show_bug.cgi?id=97331
 
