@@ -68,6 +68,7 @@ public:
 
 #if WEBKIT_IMPLEMENTATION
     WebMediaConstraints(const WTF::PassRefPtr<WebCore::MediaConstraints>&);
+    WebMediaConstraints(WebCore::MediaConstraints*);
 #endif
 
 private:
