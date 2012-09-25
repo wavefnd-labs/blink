@@ -1,3 +1,25 @@
+2012-09-25  Keishi Hattori  <keishi@webkit.org>
+
+        REGRESSION(r129448): multiple fields time input UI doesn't use system time format settings on Chromium-Mac
+        https://bugs.webkit.org/show_bug.cgi?id=97517
+
+        Reviewed by Kent Tamura.
+
+        We need to locale [NSLocale currentLocale] if browser language/@lang equals [[NSLocal currentLocale] localeIdentifier]. Otherwise it won't use the custom time format that the user has set.
+
+        No new tests. Unable to test because we need to change system locale settings.
+
+        * platform/text/mac/LocaleMac.h:
+        (LocaleMac):
+        * platform/text/mac/LocaleMac.mm:
+        (WebCore::languageFromLocale): Moved to top.
+        (WebCore):
+        (WebCore::determineLocale): Modified so it takes a locale as an argument.
+        (WebCore::Localizer::create):
+        (WebCore::LocaleMac::LocaleMac): Added checks for invalid locales to this constructor and removed the other one so we don't have duplicated code.
+        (WebCore::LocaleMac::create):
+        (WebCore::LocaleMac::currentLocale):
+
 2012-09-20  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Relative URL Link Tooltips do not respect <base>
