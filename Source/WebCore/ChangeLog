@@ -1,3 +1,61 @@
+2012-09-25  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=95397
+        Need to merge didFirstVisuallyNonEmptyLayout and 
+        didNewFirstVisuallyNonEmptyLayout
+        -and corresponding-
+        <rdar://problem/10791680>
+
+        Reviewed by Sam Weinig.
+
+        This patch merges didFirstLayout, didFirstVisuallyNonEmptyLayout, 
+        and didNewFirstVisuallyNonEmptyLayout. Page keeps track of which 
+        layout milestones we are interested in with a bit mask, so that 
+        different ports/clients can opt-into different milestones. This 
+        will allow us to safely add more layout milestones in the future 
+        if that seems worthwhile.
+
+        Include new file LayoutMilestoneOptions.h
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+
+        Remove dispatchDidFirstLayout, 
+        dispatchDidFirstVisuallyNonEmptyLayout, and 
+        dispatchDidNewFirstVisuallyNonEmptyLayout. They are now replaced 
+        by dispatchDidLayout(LayoutMilestoneOptions)
+        * loader/EmptyClients.h:
+        (WebCore::EmptyFrameLoaderClient::dispatchDidLayout):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didLayout):
+        * loader/FrameLoader.h:
+        (FrameLoader):
+        * loader/FrameLoaderClient.h:
+        (FrameLoaderClient):
+        (WebCore::FrameLoaderClient::dispatchDidLayout):
+        * page/LayoutMilestoneOptions.h: Added.
+        (WebCore):
+
+        Check with Page to find out which layout milestones the client is 
+        interested in, and then dispatch the notifications when 
+        appropriate.
+        * page/FrameView.cpp:
+        (WebCore::FrameView::performPostLayoutTasks):
+
+        Remove setRelevantRepaintedObjectsCounterThreshold(). Instead keep 
+        track of the layout milestones bit mask.
+        * page/Page.cpp:
+        (WebCore::Page::Page):
+        (WebCore::Page::addLayoutMilestones):
+        (WebCore):
+        (WebCore::Page::isCountingRelevantRepaintedObjects):
+        (WebCore::Page::addRelevantRepaintedObject):
+        * page/Page.h:
+        (Page):
+        (WebCore::Page::layoutMilestones):
+
 2012-09-25  Andreas Kling  <kling@webkit.org>
 
         StylePropertySet: Use subclasses to manage varying object layouts.
