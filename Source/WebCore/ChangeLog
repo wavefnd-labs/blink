@@ -1,3 +1,29 @@
+2012-09-25  Mike West  <mkwst@google.com>
+
+        CSP paths: Ignore invalid path components, rather than dropping the source completely.
+        https://bugs.webkit.org/show_bug.cgi?id=97538
+
+        Reviewed by Adam Barth.
+
+        Content Security Policy directives that accept source lists currently
+        handle soure URI paths containing '?' or '#' in a draconian fashion by
+        dropping the entire source expression. We should be slightly friendlier,
+        and ignore simply the portion of the source expression that we know to
+        be invalid, just as we previously ignored everything after and including
+        a '/' in source expressions before we supported paths.
+
+        The new behavior is covered by existing tests, and two test-cases added
+        to http/tests/security/contentSecurityPolicy/source-list-parsing-paths-02.html.
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPSourceList::parsePath):
+            Report an error to the console, rather than ignoring a path that
+            contains an invalid fragment or query.
+        (WebCore::ContentSecurityPolicy::reportInvalidPathCharacter):
+        (WebCore):
+        * page/ContentSecurityPolicy.h:
+            Add a new warning type to cover this case.
+
 2012-09-25  commit-queue@webkit.org  <commit-queue@webkit.org@268f45cc-cd09-0410-ab3c-d52691b4dbfc>
 
         [BlackBerry] Reverting implementation for 407 error pages
