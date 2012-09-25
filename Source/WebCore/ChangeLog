@@ -1,3 +1,23 @@
+2012-09-24  Yoshifumi Inoue  <yosin@chromium.org>
+
+        Document::adoptNode for multiple fields time input UI should not crash
+        https://bugs.webkit.org/show_bug.cgi?id=97428
+
+        Reviewed by Dimitri Glazkov.
+
+        This patch changes Document::removeFocusedNodeOfSubtree() to check
+        focused node in shadow DOM tree for avoiding Document::m_focusedNode
+        not to have dangling pointer to field owner in DateTimeFieldElement.
+
+        Test:
+         - fast/dom/shadow/shadow-removechild-and-blur-event.html: test for removeChild dispatches blur event.
+         - fast/forms/time-multiple-fields/time-multiple-fields-crash-after-adoptnode.html: test for adoptNode not to crash.
+         - fast/forms/time-multiple-fields/time-multiple-fields-state-change-on-focus-or-blur.html: removeChild of input type "time" dispatches blur event, existing test.
+
+        * dom/Document.cpp:
+        (WebCore::Document::removeFocusedNodeOfSubtree): Changed to check
+        focused node in shadow DOM tree in addition to descendant node.
+
 2012-09-24  Robin Cao  <robin.cao@torchmobile.com.cn>
 
         [Blackberry] Add a software rendering path for media player
