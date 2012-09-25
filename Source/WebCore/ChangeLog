@@ -1,3 +1,20 @@
+2012-09-25  Peter Wang  <peter.wang@torchmobile.com.cn>
+
+        Web Inspector:  The JS code injected by worker inspector shouldn't be evaluated through JSMainThreadExecState
+        https://bugs.webkit.org/show_bug.cgi?id=95341
+
+        Reviewed by Yury Semikhatsky.
+
+        Add extra code to "JSC::InjectedScriptManager" and "JSC::ScriptFunctionCall" to make sure the
+        interfaces of JSMainThreadExecState are invoked only in main thread.
+
+        No new test case for this bug. Without this patch, opening worker inspector will meet failed assert statements.   
+
+        * bindings/js/JSInjectedScriptManager.cpp:
+        (WebCore::InjectedScriptManager::createInjectedScript):
+        * bindings/js/ScriptFunctionCall.cpp:
+        (WebCore::ScriptFunctionCall::call):
+
 2012-09-25  Andreas Kling  <kling@webkit.org>
 
         CSSParserString: Avoid pointless String refcount churn in init().
