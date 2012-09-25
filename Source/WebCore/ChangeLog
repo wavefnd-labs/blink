@@ -1,3 +1,29 @@
+2012-09-25  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=97615
+        fast/loader/scroll-position-restored-on-back.html failing after 
+        didFirstLayout/didFirstVisuallyNonEmptyLayout change
+
+        Reviewed by Sam Weinig.
+
+        http://trac.webkit.org/changeset/129545 made it so we only dispatch 
+        the layout callbacks when the client has opted into them. This is a 
+        problem for a bit of work that used to be done, prior to that patch, 
+        in FrameLoader::didFirstLayout(). Because that function did some work 
+        with scroll position and the state machine, and that is work that we 
+        want to do even when the client has not opted into the didFirstLayout 
+        callback. We are seeing this bug in DRT and WTR since those clients 
+        do not opt into the callback. And they shouldn't have to to get this 
+        scroll position and state machine work done. 
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didLayout):
+        (WebCore::FrameLoader::didFirstLayout):
+        * loader/FrameLoader.h:
+        (FrameLoader):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::performPostLayoutTasks):
+
 2012-09-24  Simon Fraser  <simon.fraser@apple.com>
 
         <rdar://problem/12351906> Have DumpRenderTree and WebKitTestRunner crash logs show which test crashed
