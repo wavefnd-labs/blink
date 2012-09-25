@@ -1,3 +1,55 @@
+2012-09-25  Andreas Kling  <kling@webkit.org>
+
+        StylePropertySet: Use subclasses to manage varying object layouts.
+        <http://webkit.org/b/97470>
+
+        Reviewed by Antti Koivisto.
+
+        Add two StylePropertySet subclasses:
+
+            - MutableStylePropertySet
+            - ImmutableStylePropertySet
+
+        The StylePropertySet::m_isMutable bit determines which subclass to cast to when accessing
+        the property storage. Added mutablePropertyVector() and immutablePropertyArray() helpers
+        to StylePropertySet (with appropriate assertions.)
+
+        This patch removes one heap allocation (and one step of indirection) in the mutable case,
+        since the Vector<CSSProperty> is no longer heap-allocated, but part of MutableStylePropertySet.
+
+        Override RefCounted::deref() in StylePropertySet to make sure that the correct subclass
+        destructor gets called.
+
+        * WebCore.exp.in:
+        * css/StylePropertySet.cpp:
+        (WebCore::immutableStylePropertySetSize):
+        (WebCore::StylePropertySet::createImmutable):
+        (WebCore::StylePropertySet::immutableCopyIfNeeded):
+        (WebCore::MutableStylePropertySet::MutableStylePropertySet):
+        (WebCore::ImmutableStylePropertySet::ImmutableStylePropertySet):
+        (WebCore::ImmutableStylePropertySet::~ImmutableStylePropertySet):
+        (WebCore::StylePropertySet::~StylePropertySet):
+        (WebCore::StylePropertySet::removeProperty):
+        (WebCore::StylePropertySet::parseDeclaration):
+        (WebCore::StylePropertySet::addParsedProperties):
+        (WebCore::StylePropertySet::removePropertiesInSet):
+        (WebCore::StylePropertySet::removeEquivalentProperties):
+        (WebCore::StylePropertySet::copy):
+        (WebCore::StylePropertySet::reportMemoryUsage):
+        (WebCore::StylePropertySet::append):
+        (WebCore::StylePropertySet::create):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        (WebCore::StylePropertySet::StylePropertySet):
+        (ImmutableStylePropertySet):
+        (MutableStylePropertySet):
+        (WebCore::MutableStylePropertySet::MutableStylePropertySet):
+        (WebCore::StylePropertySet::mutablePropertyVector):
+        (WebCore::StylePropertySet::immutablePropertyArray):
+        (WebCore::StylePropertySet::propertyAt):
+        (WebCore::StylePropertySet::propertyCount):
+        (WebCore::StylePropertySet::deref):
+
 2012-09-25  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: One transaction coordinator per database
