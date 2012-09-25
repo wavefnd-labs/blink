@@ -1,3 +1,85 @@
+2012-09-24  Bo Liu  <boliu@chromium.org>
+
+        Reland "Add in-place reload behavior to ImagesEnabled setting" with optimizations
+        https://bugs.webkit.org/show_bug.cgi?id=97055
+
+        Reviewed by Adam Barth.
+
+        Relanding 128780, 128676, 128645. Was reverted in 128914 due to
+        performance regression in Chromium.
+
+        New changes in addition to previously reverted patches:
+
+        Refactored CachedResource::requestResource, loadResource, and
+        revalidateResource. Moved CachedResource::load method to end of
+        requestResource so there is one place where load is called for all
+        resources.
+
+        Added a enum parameter for requestResource and
+        determineRevalidationPolicy so that FrameLoaderClient::allowImage call
+        do not need to be called multiple times.
+
+        Removed CachedImage::load call in requestImage so it is not called
+        twice.
+
+        Removed unnecessary Frame.h includes in CachedResource and
+        CachedImage.
+
+        Removed dead load() method declaration in CachedImage.
+
+        Updated text expectation for two image-permissions tests to reflect
+        the removed calls to allowImage.
+
+        Tests: fast/loader/display-image-unset-allows-cached-image-load.html
+               fast/loader/display-image-unset-can-block-image-and-can-reload-in-place.html
+               fast/loader/images-enabled-unset-can-block-image-and-can-reload-in-place.html
+
+        * WebCore.exp.in:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didBeginDocument):
+        * loader/SubresourceLoader.cpp:
+        (WebCore::SubresourceLoader::willSendRequest):
+        * loader/cache/CachedImage.cpp:
+        * loader/cache/CachedImage.h:
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::didAddClient):
+        * loader/cache/CachedResource.h:
+        (WebCore):
+        (WebCore::CachedResource::stillNeedsLoad):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::CachedResourceLoader):
+        (WebCore::CachedResourceLoader::requestImage):
+        (WebCore::CachedResourceLoader::canRequest):
+        (WebCore::CachedResourceLoader::requestResource):
+        (WebCore::CachedResourceLoader::revalidateResource):
+        (WebCore::CachedResourceLoader::loadResource):
+        (WebCore::CachedResourceLoader::determineRevalidationPolicy):
+        (WebCore::CachedResourceLoader::setAutoLoadImages):
+        (WebCore):
+        (WebCore::CachedResourceLoader::setImagesEnabled):
+        (WebCore::CachedResourceLoader::clientDefersImage):
+        (WebCore::CachedResourceLoader::shouldDeferImageLoad):
+        (WebCore::CachedResourceLoader::reloadImagesIfNotDeferred):
+        * loader/cache/CachedResourceLoader.h:
+        (CachedResourceLoader):
+        * page/Settings.cpp:
+        (WebCore::setImageLoadingSettings):
+        (WebCore::Settings::Settings):
+        (WebCore::Settings::setLoadsImagesAutomatically):
+        (WebCore::Settings::imageLoadingSettingsTimerFired):
+        (WebCore::Settings::setImagesEnabled):
+        * page/Settings.h:
+        (Settings):
+        * testing/InternalSettings.cpp:
+        (WebCore::InternalSettings::Backup::Backup):
+        (WebCore::InternalSettings::Backup::restoreTo):
+        (WebCore::InternalSettings::setImagesEnabled):
+        (WebCore):
+        * testing/InternalSettings.h:
+        (Backup):
+        (InternalSettings):
+        * testing/InternalSettings.idl:
+
 2012-09-24  Filip Pizlo  <fpizlo@apple.com>
 
         SerializedScriptValue isn't aware of indexed storage, but should be
