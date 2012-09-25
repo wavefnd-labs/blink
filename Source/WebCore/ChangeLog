@@ -1,3 +1,50 @@
+2012-09-24  Antti Koivisto  <antti@apple.com>
+
+        Don't use StyleSheetList internally.
+        https://bugs.webkit.org/show_bug.cgi?id=97504
+
+        Reviewed by Ryosuke Niwa.
+
+        StyleSheetList is a DOM type and should not be used internally. Use plain Vector instead and construct StyleSheetList on DOM access only.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver):
+        (WebCore::StyleResolver::addStylesheetsFromSeamlessParents):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        * css/StyleSheetList.cpp:
+        (WebCore::StyleSheetList::StyleSheetList):
+        (WebCore::StyleSheetList::styleSheets):
+        (WebCore):
+        (WebCore::StyleSheetList::detachFromDocument):
+        
+            Use live stylesheet vector of the documents stylesheet collection as long as we are attached to a document. 
+            When detached copy the stylesheet vector to a member field and use that instead.
+
+        (WebCore::StyleSheetList::length):
+        (WebCore::StyleSheetList::item):
+        (WebCore::StyleSheetList::getNamedItem):
+        * css/StyleSheetList.h:
+        
+            Removed StyleSheetVector typedef as Vector<RefPtr<StyleSheet> > is less opaque and not much longer.
+    
+        (WebCore):
+        (WebCore::StyleSheetList::create):
+        (StyleSheetList):
+        (WebCore::StyleSheetList::document):
+        * dom/Document.cpp:
+        (WebCore::Document::~Document):
+        (WebCore::Document::setCompatibilityMode):
+        (WebCore::Document::styleSheets):
+        * dom/Document.h:
+        (Document):
+        * dom/DocumentStyleSheetCollection.cpp:
+        (WebCore::DocumentStyleSheetCollection::DocumentStyleSheetCollection):
+        (WebCore::DocumentStyleSheetCollection::~DocumentStyleSheetCollection):
+        (WebCore::DocumentStyleSheetCollection::analyzeStyleSheetChange):
+        (WebCore::DocumentStyleSheetCollection::updateActiveStyleSheets):
+        * dom/DocumentStyleSheetCollection.h:
+        (WebCore::DocumentStyleSheetCollec
+
 2012-09-24  Laszlo Gombos  <l.gombos@samsung.com>
 
         [GTK][EFL] Remove cairo prefix from include statements 
