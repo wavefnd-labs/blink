@@ -1,3 +1,24 @@
+2012-09-24  Emil A Eklund  <eae@chromium.org>
+
+        [chromium] REGRESSION: Incorrect preferred width calculation for table cells
+        https://bugs.webkit.org/show_bug.cgi?id=97497
+
+        Reviewed by Levi Weintraub.
+
+        In fixing bug 93911 r125694 caused a problem with the preferred
+        width calculations for table cells with a fractional padding
+        where the logic to ensure that the cell is wide enough for the
+        content returns different results for cells with a fixed width
+        and cells with an automatic width.
+
+        Test: fast/sub-pixel/table-cells-have-stable-width.html
+
+        * rendering/AutoTableLayout.cpp:
+        (WebCore::AutoTableLayout::recalcColumn):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computePreferredLogicalWidths):
+        Move the logic that ensures that a cell is wide enough from AutoTableLayout::recalcColumn to RenderBlock::computePreferredLogicalWidths to. This way it also applies to FixedTableLayout which had the same problem.
+
 2012-09-25  Dominic Mazzoni  <dmazzoni@google.com>
 
         AX: Chromium doesn't pass accessibility text range and line number tests
