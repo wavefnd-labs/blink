@@ -1,3 +1,42 @@
+2012-09-25  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: [Styles] For group selectors, transmit their segments with the "matches" flag
+        https://bugs.webkit.org/show_bug.cgi?id=96999
+
+        Reviewed by Pavel Feldman.
+
+        The CSSRule protocol object has been modified to include a SelectorList object that contains selector-related data.
+        CSSAgent methods that return CSS rule matches will return RuleMatch objects that encapsulate matching CSSRules
+        with indices of matching selectors on the associated selector list, so the additional backend roundtrips
+        from StylesSidebarPane are no longer necessary.
+
+        * inspector/Inspector.json:
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::getMatchedStylesForNode):
+        (WebCore::InspectorCSSAgent::buildObjectForRule):
+        (WebCore):
+        (WebCore::InspectorCSSAgent::buildArrayForRuleList):
+        (WebCore::InspectorCSSAgent::buildArrayForMatchedRuleList):
+        * inspector/InspectorCSSAgent.h:
+        (InspectorCSSAgent):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::buildObjectForSelectorList):
+        (WebCore):
+        (WebCore::InspectorStyleSheet::buildObjectForRule):
+        * inspector/InspectorStyleSheet.h:
+        (InspectorStyleSheet):
+        * inspector/front-end/CSSStyleModel.js:
+        (WebInspector.CSSStyleModel.parseRuleMatchArrayPayload):
+        (WebInspector.CSSStyleModel.prototype.getMatchedStylesAsync):
+        (WebInspector.CSSRule):
+        (WebInspector.CSSRule.parsePayload):
+        * inspector/front-end/StylesSidebarPane.js:
+        (WebInspector.StylesSidebarPane.prototype._innerRebuildUpdate):
+        (WebInspector.StylesSidebarPane.prototype._rebuildSectionsForStyleRules):
+        (WebInspector.StylePropertiesSection.prototype._markSelectorMatches):
+        (WebInspector.StylePropertiesSection.prototype._moveEditorFromSelector):
+        (WebInspector.StylePropertiesSection.prototype.editingSelectorCancelled):
+
 2012-09-25  MORITA Hajime  <morrita@google.com>
 
         adoptNode() shouldn't reset ownerDocument if the source node failed to remove itself
