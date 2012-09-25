@@ -1,3 +1,33 @@
+2012-09-24  Dean Jackson  <dino@apple.com>
+
+        [WebGL] Intel Mac needs built-in function emulation
+        https://bugs.webkit.org/show_bug.cgi?id=96140
+
+        Reviewed by Sam Weinig.
+
+        Temporarily turn on built-in function emulation for Intel GPUs
+        on OS X. This is a work-around for a driver bug, and
+        will be removed once the driver is updated:
+        https://bugs.webkit.org/show_bug.cgi?id=97503
+
+        This can be tested using the Khronos WebGL conformance
+        suite, in particular:
+
+        conformance/glsl/functions/glsl-function-dot.html
+        conformance/glsl/functions/glsl-function-length.html
+        conformance/glsl/functions/glsl-function-normalize.html
+        conformance/glsl/functions/glsl-function-reflect.html
+
+        Note that the faceforward built-in will still cause
+        problems on Intel GPUs, but this would require an unnecessary
+        change in the ANGLE project (remember, we're going to
+        remove this code once the driver is fixed).
+
+        * platform/graphics/opengl/Extensions3DOpenGLCommon.cpp:
+        (WebCore::Extensions3DOpenGLCommon::getTranslatedShaderSourceANGLE):
+            Temporarily add "Intel" to the list of GPUs we do translation
+            for in the shader compiler.
+
 2012-09-24  Peter Wang  <peter.wang@torchmobile.com.cn>
 
         There is a mistake in InspectorProfilerAgent::enable(bool skipRecompile)
