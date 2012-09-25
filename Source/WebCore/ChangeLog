@@ -1,3 +1,27 @@
+2012-09-25  Otto Derek Cheung  <otcheung@rim.com>
+
+        Web Inspector: Cookie info in Network Resources Cookies tab shows "Invalid Date"
+        https://bugs.webkit.org/show_bug.cgi?id=97471
+
+        Reviewed by Yury Semikhatsky.
+
+        The original implementation is trying to create a new Date object
+        using another Date object, which is invalid. Also, Date.toGMTString is
+        deprecated.
+
+        The fix replaces toGMTString with toUTCString and fixes cookie.expire
+        so it won't crash when an empty requestDate is passed in.
+
+        Following RFC 6265, Max-age attributes now take precedence over expiresi
+        attribute in CookieParser.
+
+        Manual testing on inspector to make sure the CookiesTable is properly generated.
+
+        * inspector/front-end/CookieParser.js:
+        (WebInspector.Cookie.prototype.expires):
+        * inspector/front-end/CookiesTable.js:
+        (WebInspector.CookiesTable.prototype._createGridNode):
+
 2012-09-25  Keishi Hattori  <keishi@webkit.org>
 
         [Chromium] Enable datalist UI for input type=date
