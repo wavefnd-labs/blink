@@ -1,3 +1,36 @@
+2012-09-25  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: One transaction coordinator per database
+        https://bugs.webkit.org/show_bug.cgi?id=97501
+
+        Reviewed by Tony Chang.
+
+        Per the IDB spec, transactions only need to be sequenced within databases.
+        The implementation was using one coordinator per factory backend (effectively
+        a singleton), which would prevent parallel execution of transactions in different
+        databases. Moved ownership of the transaction coordinator to the database backend.
+
+        Tests: storage/indexeddb/transaction-coordination-across-databases.html
+               storage/indexeddb/transaction-readwrite-exclusive.html
+
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::create):
+        (WebCore):
+        (WebCore::IDBDatabaseBackendImpl::IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h:
+        (IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp:
+        (WebCore::IDBFactoryBackendImpl::deleteDatabase):
+        (WebCore::IDBFactoryBackendImpl::open):
+        * Modules/indexeddb/IDBFactoryBackendImpl.h:
+        (WebCore):
+        (IDBFactoryBackendImpl):
+        * Modules/indexeddb/IDBTransactionCoordinator.cpp:
+        (WebCore::IDBTransactionCoordinator::create):
+        (WebCore::IDBTransactionCoordinator::IDBTransactionCoordinator):
+        * Modules/indexeddb/IDBTransactionCoordinator.h:
+        (IDBTransactionCoordinator):
+
 2012-09-25  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r129517.
