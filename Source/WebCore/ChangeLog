@@ -1,3 +1,33 @@
+2012-09-25  Bear Travis  <betravis@adobe.com>
+
+        [CSS Exclusions] Enable css exclusions for multiple blocks per element
+        https://bugs.webkit.org/show_bug.cgi?id=89993
+
+        Reviewed by Julien Chaffraix.
+
+        Similar to multi-column layout, a parent RenderBlock's WrapShapeInfo may affect
+        the inline content of its children. This patch follows the example of ColumnInfo
+        and adds WrapShapeInfo to LayoutState, which tracks the current shape-inside that
+        inline content should respect.
+
+        Tests: fast/exclusions/shape-inside/shape-inside-multiple-blocks.html
+               fast/exclusions/shape-inside/shape-inside-multiple-blocks-vertical.html
+
+        * rendering/LayoutState.cpp:
+        (WebCore::LayoutState::LayoutState): Initialize m_wrapShapeInfo.
+        * rendering/LayoutState.h:
+        (WebCore):
+        (WebCore::LayoutState::LayoutState): Initialize m_wrapShapeInfo.
+        (LayoutState):
+        (WebCore::LayoutState::wrapShapeInfo): Getter for m_wrapShapeInfo.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::LineWidth::LineWidth): Use LayoutState to lookup WrapShapeInfo.
+        (WebCore::RenderBlock::computeInlineDirectionPositionsForLine): Ditto.
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange): Ditto.
+        * rendering/RenderView.h:
+        (WebCore::RenderView::pushLayoutState): Push LayoutState if a WrapShapeInfo
+        is present.
+
 2012-09-24  Emil A Eklund  <eae@chromium.org>
 
         [chromium] REGRESSION: Incorrect preferred width calculation for table cells
