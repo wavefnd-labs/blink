@@ -1,3 +1,38 @@
+2012-09-24  Benjamin Poulain  <bpoulain@apple.com>
+
+        Fix Geolocation error reporting in the test support
+        https://bugs.webkit.org/show_bug.cgi?id=97386
+
+        Reviewed by Sam Weinig.
+
+        GeolocationController currently expose GeolocationError which can be either
+        PermissionDenied or PositionUnavailable.
+
+        In practice, only PositionUnavailable is supported and tested, only Chrome
+        somewhat expose PermissionDenied.
+        The correct way to deny the permission is through Geolocation::setIsAllowed().
+
+        This patch does some of the initial cleanup toward that goal, reducing how
+        far GeolocationError is spread.
+
+        * WebCore.exp.in:
+        * WebCore.xcodeproj/project.pbxproj:
+        Mac does not use GeolocationClientMock, it should not be compiled in WebCore.
+
+        * platform/mock/GeolocationClientMock.cpp:
+        (WebCore::GeolocationClientMock::GeolocationClientMock):
+        (WebCore::GeolocationClientMock::setPosition):
+        (WebCore::GeolocationClientMock::setPositionUnavailableError):
+        This method replace setError(). It is limited to PositionUnavailable errors.
+
+        (WebCore::GeolocationClientMock::reset):
+        (WebCore::GeolocationClientMock::controllerTimerFired):
+        (WebCore):
+        (WebCore::GeolocationClientMock::clearError):
+        * platform/mock/GeolocationClientMock.h:
+        (WebCore):
+        (GeolocationClientMock):
+
 2012-09-24  Kent Tamura  <tkent@chromium.org>
 
         [Chromium] Implement ValidationMessageClient for Chromium
