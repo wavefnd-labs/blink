@@ -1,3 +1,41 @@
+2012-09-24  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] DateTimeEditElement should return string value for ease of implementing other date/time input types.
+        https://bugs.webkit.org/show_bug.cgi?id=97303
+
+        Reviewed by Kent Tamura.
+
+        This patch introduces a function DateTimeEditElement::value() for
+        setting internal text value of TimeInputType with new function
+        EditControlOwner::formatDateTimeFieldsState() to utilize this protocl
+        in other date time input types.
+
+        We used DateTimeEditElement::valueAsDouble() and and BaseDateAndTimeInputType::serialize()
+        to make string value then setting internal text value of multiple
+        fields time input UI. Although, this steps doesn't work well for
+        other date/time input types.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_TYPE_TIME_MULTIPLE_FIELDS.
+
+        No new tests. This patch doesn't change behavior.
+
+        * html/DateTimeFieldsState.cpp:
+        (WebCore::DateTimeFieldsState::hour23): Added to convert 1 to 12 hour value to 0 to 23 hour.
+        * html/DateTimeFieldsState.h:
+        (DateTimeFieldsState): Added declaration of hour23().
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::editControlValueChanged): Changed to use DateTimeEditElement::value() instead of DateTimeEditElement::valueAsDouble().
+        (WebCore::TimeInputType::DateTimeEditControlOwnerImpl::formatDateTimeFieldsState): Added to format time.
+        (WebCore::TimeInputType::restoreFormControlState): Changed to use DateTimeEditElement::value() instead of DateTimeEditElement::valueAsDouble().
+        * html/TimeInputType.h:
+        (DateTimeEditControlOwnerImpl): Added a declaration of formatDateTimeFieldsState().
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditElement::value): Added.
+        * html/shadow/DateTimeEditElement.h:
+        (EditControlOwner): Added a declaration of formatDateTimeFieldsState().
+        (DateTimeEditElement): Added a declaration of value().
+
 2012-09-24  Dean Jackson  <dino@apple.com>
 
         [WebGL] Intel Mac needs built-in function emulation
