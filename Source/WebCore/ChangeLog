@@ -1,3 +1,24 @@
+2012-09-25  Hans Wennborg  <hans@chromium.org>
+
+        GIFImageReader: fix tautological compare
+        https://bugs.webkit.org/show_bug.cgi?id=97563
+
+        Reviewed by Adam Barth.
+
+        The frame_reader->disposal_method field is of type
+        ImageFrame::FrameDisposalMethod, which has a range of 0--3. Therefore,
+        recent versions of Clang concludes that the expression
+        frame_reader->disposal_method == 4
+        will never be true, and warns about it.
+
+        This patch fixes the code by doing the comparison before storing the
+        value in the enum.
+
+        No new functionality, no new tests.
+
+        * platform/image-decoders/gif/GIFImageReader.cpp:
+        (GIFImageReader::read):
+
 2012-09-25  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Update getUserMedia to match the latest specification
