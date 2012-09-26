@@ -1,3 +1,38 @@
+2012-09-26  Michael Saboff  <msaboff@apple.com>
+
+        Add Latin-1 Line Break Iterator to TextBreakIteratorICU.cpp
+        https://bugs.webkit.org/show_bug.cgi?id=96935
+
+        Reviewed by Geoffrey Garen.
+
+        Added a Latin-1 UText implementation for the ICU library to use.  Added a new acquireLineBreakIterator() for
+        8 bit strings that uses the Latin-1 UText implementation.  This code path is not being called with the current 
+        ToT code.  Subsequent changes will enable calling the new code.
+
+        * platform/text/TextBreakIterator.h:
+        (WebCore::LazyLineBreakIterator::LazyLineBreakIterator):
+        (LazyLineBreakIterator):
+        (WebCore::LazyLineBreakIterator::string):
+        (WebCore::LazyLineBreakIterator::get):
+        (WebCore::LazyLineBreakIterator::reset):
+        * platform/text/TextBreakIteratorICU.cpp:
+        (WebCore::uTextLatin1Clone):
+        (WebCore::uTextLatin1NativeLength):
+        (WebCore::uTextLatin1Access):
+        (WebCore::uTextLatin1Extract):
+        (WebCore::uTextLatin1MapOffsetToNative):
+        (WebCore::uTextLatin1MapNativeIndexToUTF16):
+        (WebCore::uTextLatin1Close):
+        (WebCore::UTextOpenLatin1):
+        (WebCore::acquireLineBreakIterator):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::LineBreaker::nextLineBreak):
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::computePreferredLogicalWidths):
+        * rendering/break_lines.cpp:
+        (WebCore::nextBreakablePosition):
+        (WebCore::nextBreakablePositionIgnoringNBSP):
+
 2012-09-26  Otto Derek Cheung  <otcheung@rim.com>
 
         [BlackBerry] Reverting implementation for 407 error pages
