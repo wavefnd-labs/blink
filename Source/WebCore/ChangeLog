@@ -1,3 +1,35 @@
+2012-09-25  Antti Koivisto  <antti@apple.com>
+
+        Optimize stylesheet insertions
+        https://bugs.webkit.org/show_bug.cgi?id=97627
+
+        Reviewed by Andreas Kling.
+
+        We currently do scope analysis for stylesheets that are added to the end of the active stylesheet list to avoid unnecessary style
+        recalcs and StyleResolver rebuilding. However it is somewhat common to insert <style> elements dynamically to positions other than last.
+        In this case we currently simply force full style recalc. We should do scope analysis and partial style recalcs also in these cases.
+        
+        PerformanceTests/CSS/StyleSheetInsert.html microbenchmark shows ~20x progression from the patch.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver):
+        (WebCore::StyleResolver::resetAuthorStyle):
+        
+            Add a way to reset author RuleSet without deleting the whole StyleResolver.
+
+        (WebCore):
+        * css/StyleResolver.h:
+        (StyleResolver):
+        * dom/DocumentStyleSheetCollection.cpp:
+        (WebCore::DocumentStyleSheetCollection::analyzeStyleSheetChange):
+        
+            Check if there have been insertions to the stylesheet list. If so we need to reset
+            the StyleResolver (to handle rule position changes) but don't need to force full
+            style recalc. Do scope analysis for inserted stylesheets as well.
+
+        (WebCore::DocumentStyleSheetCollection::updateActiveStyleSheets):
+        * dom/DocumentStyleSheetCollection.h:
+
 2012-09-26  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         Gesture tap highlighting entire first line
