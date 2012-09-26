@@ -1,3 +1,88 @@
+2012-09-26  Philip Rogers  <pdr@google.com>
+
+        Refactor SMILTimeContainer to maintain animation information instead of recalculating it every frame
+        https://bugs.webkit.org/show_bug.cgi?id=96697
+
+        Reviewed by Eric Seidel.
+
+        SVGTimeContainer can be improved by maintaining extra information about
+        animations during schedule/unschedule instead of re-calculating it
+        every frame.
+
+        After this patch, SMILTimeContainer maintains a GroupedAnimationsMap instead of
+        just a Vector. This map maps a list of animations to the specific ElementAttributePair
+        that will be animated.
+
+        On schedule/unschedule we modify this map instead of creating it in updateAnimations.
+        As a result, we need to be careful about always notifying (or, re-scheduling) the
+        time container when either an animation's target changes or an animation's attributeName
+        changes. This notification is managed by tracking changes with targetElementWillChange
+        and setAttributeName.
+
+        After this patch, updateAnimations only iterates over m_scheduledAnimations.
+        Furthermore, the sorting of animations by priority is now done over each Vector of
+        SVGSMILElements affecting a {SVGElement*, QualifiedName} pair instead of over all the
+        SVGSMILElements at once.
+
+        Lastly, a guard (m_preventScheduledAnimationsChanges) has been added
+        to prove that we do not modify the scheduled animations map out
+        from under ourselves.
+
+        No new tests as this is just a refactoring.
+
+        * svg/SVGAnimateElement.cpp:
+        (WebCore::SVGAnimateElement::hasValidAttributeType):
+
+        * svg/SVGAnimateMotionElement.cpp:
+        (WebCore::SVGAnimateMotionElement::hasValidAttributeName):
+
+            Per the spec, AnimateMotion is not affected by attributeName. Instead
+            of having a special case for this in SMILTimeContainer::updateAnimations
+            we simply implement this method.
+
+        (WebCore):
+        * svg/SVGAnimateMotionElement.h:
+        (SVGAnimateMotionElement):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::updateAnimation):
+        * svg/animation/SMILTimeContainer.cpp:
+        (WebCore):
+        (WebCore::SMILTimeContainer::SMILTimeContainer):
+        (WebCore::SMILTimeContainer::~SMILTimeContainer):
+
+            This method now cleans up the map since we have dynamically allocated
+            Vectors in it.
+
+        (WebCore::SMILTimeContainer::schedule):
+
+            Here we are just adding an entry to the map. There is some special handling
+            for creating the Vector of one does not exist.
+
+        (WebCore::SMILTimeContainer::unschedule):
+        (WebCore::SMILTimeContainer::notifyIntervalsChanged):
+        (WebCore::SMILTimeContainer::setElapsed):
+        (WebCore::SMILTimeContainer::startTimer):
+        (WebCore::SMILTimeContainer::updateAnimations):
+        * svg/animation/SMILTimeContainer.h:
+        (WebCore::SMILTimeContainer::create):
+        (SMILTimeContainer):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::~SVGSMILElement):
+        (WebCore::SVGSMILElement::insertedInto):
+        (WebCore::SVGSMILElement::removedFrom):
+        (WebCore):
+        (WebCore::SVGSMILElement::hasValidAttributeName):
+        (WebCore::SVGSMILElement::svgAttributeChanged):
+        (WebCore::SVGSMILElement::setAttributeName):
+        (WebCore::SVGSMILElement::targetElementWillChange):
+        (WebCore::SVGSMILElement::resetTargetElement):
+        (WebCore::SVGSMILElement::resolveFirstInterval):
+        (WebCore::SVGSMILElement::beginListChanged):
+        (WebCore::SVGSMILElement::endListChanged):
+        (WebCore::SVGSMILElement::progress):
+        * svg/animation/SVGSMILElement.h:
+        (SVGSMILElement):
+
 2012-09-26  Michael Saboff  <msaboff@apple.com>
 
         Update SVGFontData for 8 bit TextRun changes
