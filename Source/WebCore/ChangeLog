@@ -1,3 +1,32 @@
+2012-09-26  Martin Robinson  <mrobinson@igalia.com>
+
+        [GTK] Use XDamage to simplify RedirectedXCompositeWindow
+        https://bugs.webkit.org/show_bug.cgi?id=97267
+
+        Reviewed by Alejandro G. Castro.
+
+        Use XDamage to queue redraws of the widget when redirecting accelerated compositing
+        to an offscreen window. This allows removing a finicky timer-based approach, improves
+        performance, and allows simplifying things greatly.
+
+        No new tests. This is covered by existing tests.
+
+        * GNUmakefile.am: Add the XDamage CFLAGS in the appropriate place.
+        * platform/gtk/RedirectedXCompositeWindow.cpp:
+        (WebCore::getWindowHashMap): Added.
+        (WebCore::filterXDamageEvent): Added.
+        (WebCore::supportsXDamageAndXComposite): Added.
+        (WebCore::RedirectedXCompositeWindow::create): Fail to create the window if
+        the XServer doesn't support XDamage and XComposite.
+        (WebCore::RedirectedXCompositeWindow::RedirectedXCompositeWindow): Add XDamage support and
+        remove the m_usable size distinction. Add the window the window HashMap now.
+        (WebCore::RedirectedXCompositeWindow::~RedirectedXCompositeWindow): Remove the window
+        from the window HashMap.
+        (WebCore::RedirectedXCompositeWindow::resize): Now just immediately update the size.
+        (WebCore::RedirectedXCompositeWindow::callDamageNotifyCallback): Added.
+        * platform/gtk/RedirectedXCompositeWindow.h:
+        (WebCore::RedirectedXCompositeWindow::setDamageNotifyCallback): Added.
+
 2012-09-26  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: NMI: replace manual JS external resources counting with MemoryInstrumentation
