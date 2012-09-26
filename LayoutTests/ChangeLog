@@ -1,3 +1,24 @@
+2012-09-25  Gavin Barraclough  <barraclough@apple.com>
+
+        REGRESSION (r129456): http/tests/security/xss-eval.html is failing on JSC platforms
+        https://bugs.webkit.org/show_bug.cgi?id=97529
+
+        Reviewed by Filip Pizlo.
+
+        A recent patch changed JSC's EvalError behaviour; bring this more into line with other browsers.
+
+        * fast/js/eval-cross-window-expected.txt:
+        * fast/js/eval-cross-window.html:
+            - Changed not to expect EvalErrors (this matches other browsers), and modified testThis
+              to check that the this object is always set to the global object.
+        * http/tests/security/resources/xss-eval2.html:
+        * http/tests/security/resources/xss-eval3.html:
+        * http/tests/security/xss-eval-expected.txt:
+        * http/tests/security/xss-eval.html:
+            - Updated. Access via the global environment is not a security risk, since the eval is
+              accessing it's own document's informantion. Access via the shell attempts to access
+              the navigated pages document, tripping an access check & throwing a TypeError.
+
 2012-09-25  Bear Travis  <betravis@adobe.com>
 
         [CSS Exclusions] shape-inside line segment layout should be based on line position and height
