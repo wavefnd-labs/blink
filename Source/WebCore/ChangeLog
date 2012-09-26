@@ -1,3 +1,41 @@
+2012-09-26  Gavin Barraclough  <barraclough@apple.com>
+
+        Generalize JSGlobalThis as JSProxy
+        https://bugs.webkit.org/show_bug.cgi?id=97716
+
+        Reviewed by Oliver Hunt.
+
+        This patch moves window shell functionality up to JSC::JSProxy.
+
+        * ForwardingHeaders/runtime/JSGlobalThis.h: Removed.
+        * ForwardingHeaders/runtime/JSProxy.h: Copied from Source/WebCore/ForwardingHeaders/runtime/JSGlobalThis.h.
+        * bindings/js/JSDOMGlobalObject.cpp:
+        (WebCore::JSDOMGlobalObject::finishCreation):
+            - JSGlobalThis -> JSObject
+        * bindings/js/JSDOMGlobalObject.h:
+        (JSDOMGlobalObject):
+            - JSGlobalThis -> JSObject
+        * bindings/js/JSDOMWindowBase.cpp:
+        (WebCore):
+            - Hoist toThisObject up into JSC.
+        * bindings/js/JSDOMWindowBase.h:
+        (JSDOMWindowBase):
+            - Hoist toThisObject up into JSC.
+        * bindings/js/JSDOMWindowShell.cpp:
+        (WebCore):
+            - JSGlobalThis -> JSProxy
+            - moved JSObject callbacks to JSProxy
+        * bindings/js/JSDOMWindowShell.h:
+        (JSDOMWindowShell):
+            - JSGlobalThis -> JSProxy
+            - moved JSObject callbacks to JSProxy
+        (WebCore::JSDOMWindowShell::window):
+            - unwrappedObject() -> target()
+        (WebCore::JSDOMWindowShell::setWindow):
+            - setUnwrappedObject() -> setTarget()
+        (WebCore::JSDOMWindowShell::createStructure):
+            - GlobalThisType -> ProxyType
+
 2012-09-26  Andreas Kling  <kling@webkit.org>
 
         4.95MB below RenderBlock::insertIntoTrackedRendererMaps() on Membuster3.
