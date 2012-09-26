@@ -1,3 +1,71 @@
+2012-09-25  Luke Macpherson   <macpherson@chromium.org>
+
+        Ensure variables are resolved for specialized CSS primitive value types.
+        https://bugs.webkit.org/show_bug.cgi?id=95930
+
+        Reviewed by Tony Chang.
+
+        Sometimes CSSPrimitiveValue contains a collection of other CSSPrimitiveValues (eg. 2, 4 or n).
+        This patch makes sure any variables contained inside those child values are resolved.
+
+        Tests: fast/css/variables/root-background-size.html
+               fast/css/variables/var-inside-pair.html
+               fast/css/variables/var-inside-quad.html
+               fast/css/variables/var-inside-shape.html
+
+        * css/CSSBasicShapes.cpp:
+        (WebCore::buildRectangleString):
+        (WebCore::CSSBasicShapeRectangle::cssText):
+        (WebCore):
+        (WebCore::CSSBasicShapeRectangle::serializeResolvingVariables):
+        Generates a string representation of this value with variables resolved from the provided HashMap of variables.
+        (WebCore::CSSBasicShapeRectangle::hasVariableReference):
+        Returns true if any of the values used to describe the rectange depend on the value of a variable.
+        (WebCore::buildCircleString):
+        (WebCore::CSSBasicShapeCircle::cssText):
+        (WebCore::CSSBasicShapeCircle::serializeResolvingVariables):
+        (WebCore::CSSBasicShapeCircle::hasVariableReference):
+        (WebCore::buildEllipseString):
+        (WebCore::CSSBasicShapeEllipse::cssText):
+        (WebCore::CSSBasicShapeEllipse::serializeResolvingVariables):
+        (WebCore::CSSBasicShapeEllipse::hasVariableReference):
+        (WebCore::CSSBasicShapePolygon::serializeResolvingVariables):
+        (WebCore::CSSBasicShapePolygon::hasVariableReference):
+        * css/CSSBasicShapes.h:
+        (CSSBasicShapeRectangle):
+        (CSSBasicShapeCircle):
+        (CSSBasicShapeEllipse):
+        (CSSBasicShapePolygon):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::customCssText):
+        Move the logic for generating the strings for Rects, Quads, Pairs and Shapes into their respective classes.
+        (WebCore::CSSPrimitiveValue::customSerializeResolvingVariables):
+        Handle Rects, Quads, Pairs and Shapes when they contain variables, by calling their serializeResolvingVariables method.
+        (WebCore):
+        (WebCore::CSSPrimitiveValue::hasVariableReference):
+        Handle Rects, Quads, Pairs and Shapes by calling their respective hasVariableReference methods.
+        * css/CSSPrimitiveValue.h:
+        (CSSPrimitiveValue):
+        * css/Pair.h:
+        (WebCore::Pair::pairString):
+        (Pair):
+        (WebCore::Pair::cssText):
+        (WebCore::Pair::serializeResolvingVariables):
+        (WebCore::Pair::hasVariableReference):
+        * css/Rect.h:
+        (RectBase):
+        (WebCore::RectBase::hasVariableReference):
+        (WebCore::Rect::rectString):
+        (Rect):
+        (WebCore::Rect::cssText):
+        (WebCore::Rect::serializeResolvingVariables):
+        (WebCore::Quad::quadString):
+        (Quad):
+        (WebCore::Quad::cssText):
+        (WebCore::Quad::serializeResolvingVariables):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+
 2012-09-25  Filip Pizlo  <fpizlo@apple.com>
 
         JSC bindings appear to sometimes ignore the possibility of arrays being in sparse mode
