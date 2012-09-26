@@ -1,3 +1,29 @@
+2012-09-25  Emil A Eklund  <eae@chromium.org>
+
+        Change FractionalLayoutUnit denominator to 64 to reduce precision loss when converting to floating point
+        https://bugs.webkit.org/show_bug.cgi?id=96139
+
+        Reviewed by Eric Seidel.
+
+        We currently use a denominator of 60 in FractionalLayoutUnit,
+        this causes a loss of precision when converting to floating
+        point.
+        
+        By changing the denominator to 64 the values can better be
+        represented as floating point (without loosing any precision for
+        many values), this in turn allows us to remove the tolerance
+        hack in the line break logic and avoids problems caused by this
+        precision for web sites that do their own layout based on
+        element measurements.
+
+        Test: fast/sub-pixel/float-precision.html
+
+        * platform/FractionalLayoutUnit.h:
+        Change denominator to 64.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::LineWidth::fitsOnLine):
+        Remove epsilon tolerance hack.
+
 2012-09-26  Csaba Osztrogonác  <ossy@webkit.org>
 
         [Qt] Unreviewed buildfix after r129647.
