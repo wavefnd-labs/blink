@@ -1,3 +1,29 @@
+2012-09-26  Dominik Röttsches  <dominik.rottsches@intel.com>
+
+        [soup] Obey setTimeoutInterval in soup backend
+        https://bugs.webkit.org/show_bug.cgi?id=94796
+
+        Reviewed by Gustavo Noronha Silva.
+
+        Implementing ResourceHandle's setTimeoutInterval support for the soup backend.
+        This is preparatory work for bug 74802, timeout support for XHR2. The patch
+        has been successfully tested in combination with my work-in-progress
+        for that bug.
+
+        No new tests yet, tests will be added with the patch in bug 74802.
+
+        * platform/network/ResourceHandleInternal.h:
+        (WebCore::ResourceHandleInternal::ResourceHandleInternal): Adding a timeout source.
+        (ResourceHandleInternal):
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore):
+        (WebCore::cleanupSoupRequestOperation): Resetting the timer.
+        (WebCore::sendRequestCallback): Stopping the timer.
+        (WebCore::startHTTPRequest): Starting a timeout timer before the async request.
+        (WebCore::ResourceHandle::platformSetDefersLoading): Starting a timeout timer before the async request.
+        (WebCore::requestTimeoutCallback): Preparing a corresponding resource error and notifying clients of failure.
+        (WebCore::startNonHTTPRequest): Starting a timeout timer before the async request.
+
 2012-09-26  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: paint inspector overlay on a transparency layer
