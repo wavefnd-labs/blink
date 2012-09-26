@@ -1,3 +1,45 @@
+2012-09-26  Brady Eidson  <beidson@apple.com>
+
+        (Threaded scrolling) WebKit not scrolling to the correct location upon going back on macsurfer.com
+        <rdar://problem/12039913> and https://bugs.webkit.org/show_bug.cgi?id=97617
+
+        Reviewed by Anders Carlsson.
+
+        In the asynchronous land of threaded scrolling we lose the information about whether or not a scroll
+        is programmatic.
+
+        This caused all scrolls to be treated as user scrolls and to generated scroll events.
+
+        We can fix this by passing the programmatic bit to the scrolling thread and re-applying it back in the main thread.
+
+        Unable to test threaded scrolling at this time.
+
+        Include the "Is programmatic scroll" bit in the scroll state:
+        * page/scrolling/ScrollingTreeState.cpp:
+        (WebCore::ScrollingTreeState::ScrollingTreeState):
+        (WebCore::ScrollingTreeState::setRequestedScrollPosition): Also set whether or not this represents a programmatic scroll.
+        * page/scrolling/ScrollingTreeState.h:
+        (ScrollingTreeState):
+        (WebCore::ScrollingTreeState::requestedScrollPositionRepresentsProgrammaticScroll):
+
+        Pass that bit back to the ScrollingCoordinator:
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::ScrollingTree):
+        (WebCore::ScrollingTree::commitNewTreeState):
+        (WebCore::ScrollingTree::updateMainFrameScrollPosition):
+        * page/scrolling/ScrollingTree.h:
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::requestScrollPositionUpdate): Pass the "is programmatic scroll" bit to the scrolling thread.
+        (WebCore::ScrollingCoordinator::updateMainFrameScrollPosition): Reset the "is programmatic scroll" bit on the FrameView.
+        * page/scrolling/ScrollingCoordinator.h:
+        (ScrollingCoordinator):
+
+        * page/FrameView.h:
+        (FrameView):
+        (WebCore::FrameView::inProgrammaticScroll): Expose setter/getters for the programmatic scroll flag.
+        (WebCore::FrameView::setInProgrammaticScroll):
+
 2012-09-26  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] Use XDamage to simplify RedirectedXCompositeWindow
