@@ -1,3 +1,47 @@
+2012-09-27  Philip Rogers  <pdr@google.com>
+
+        Rewrite multithreaded filter job dispatching
+        https://bugs.webkit.org/show_bug.cgi?id=97500
+
+        Reviewed by Dean Jackson.
+
+        This patch solves the problem of splitting up images into subregions for multithreaded
+        filters. This fixes the way we partition the image array into equal-sized chunks.
+        If we have an array of length N and want to split it into K chunks, we calculate:
+          int jobSize = N / K; // integer division, so this is floored
+          int jobSizeExtra = N % K; // modulus produces the remainder
+        We then split the array into jobSizeExtra number of jobs with size jobSize + 1
+        and (K - jobSizeExtra) number of jobs with size jobSize. This pattern
+        is used in each of the 5 filters in this patch.
+
+        This patch primarily fixes an error in FEMorphology::platformApply where
+        the image array was partitioned into (1 + (N / K)) pieces with the last job
+        taking the remainder. Unfortunately, this can cause overruns in the 2nd-to-last job.
+        Consider N = 2373 and K = 64 jobs. Job 0 would take indices 0...38, job 1 would take
+        38...76, etc. Unfortunately the 62nd job takes 2356...2394 which overruns.
+
+        To prevent similar issues elsewhere this patch updates all of the filters
+        to use the same pattern as FEMorphology.
+
+        Test: svg/filters/feMorphology-crash.html
+
+        * platform/graphics/filters/FEConvolveMatrix.cpp:
+        (WebCore::FEConvolveMatrix::platformApplySoftware):
+        * platform/graphics/filters/FEGaussianBlur.cpp:
+        (WebCore::FEGaussianBlur::platformApply):
+        * platform/graphics/filters/FELighting.cpp:
+        (WebCore::FELighting::platformApplyGeneric):
+        * platform/graphics/filters/FEMorphology.cpp:
+        (WebCore::FEMorphology::platformApply):
+
+            Some special care is taken for Gaussian Blur because there is an
+            extraHeight parameter for sampling outside the image's dimensions.
+            This means we use the same partitioning algorithm but add
+            extraHeight padding on the lower and upper bounds.
+
+        * platform/graphics/filters/FETurbulence.cpp:
+        (WebCore::FETurbulence::platformApplySoftware):
+
 2012-09-27  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Move UNIX-specific theme functions out of PlatformSupport
