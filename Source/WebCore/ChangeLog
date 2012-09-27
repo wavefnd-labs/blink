@@ -1,3 +1,32 @@
+2012-09-27  Adam Klein  <adamk@chromium.org>
+
+        Simplify and clarify MutationObserverRegistration interface and usage
+        https://bugs.webkit.org/show_bug.cgi?id=97742
+
+        Reviewed by Ojan Vafai.
+
+        Minor cleanups in MutationObserverRegistration: make const methods explicitly const,
+        use C++ templates to avoid duplicating logic, improve usage of raw pointers vs PassRefPtr,
+        remove the declaration of a no-longer-existing method.
+
+        No change in behavior.
+
+        * dom/MutationObserverRegistration.cpp:
+        (WebCore::MutationObserverRegistration::observedSubtreeNodeWillDetach): Take a raw pointer because we don't always ref the node.
+        (WebCore::MutationObserverRegistration::shouldReceiveMutationFrom): Make this a const method.
+        * dom/MutationObserverRegistration.h:
+        (MutationObserverRegistration): Removed declaration of non-existent caseInsensitiveAttributeFilter method.
+        (WebCore::MutationObserverRegistration::hasTransientRegistrations): const method.
+        (WebCore::MutationObserverRegistration::isSubtree): Remove superfluous "inline" keyword.
+        (WebCore::MutationObserverRegistration::observer): const method.
+        * dom/Node.cpp:
+        (WebCore):
+        (WebCore::collectMatchingObserversForMutation): Add a templatized function to reduce duplicated code.
+        (WebCore::Node::getRegisteredMutationObserversOfType):
+        (WebCore::Node::registerMutationObserver): Take a raw pointer because we don't always ref the observer.
+        * dom/Node.h:
+        (Node): Remove old method, replaced by templatized static function.
+
 2012-09-27  Erik Arvidsson  <arv@chromium.org>
 
         DOM4: Add support for rest parameters to DOMTokenList
