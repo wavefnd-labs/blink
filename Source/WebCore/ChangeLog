@@ -1,3 +1,102 @@
+2012-09-27  Erik Arvidsson  <arv@chromium.org>
+
+        DOM4: Add support for rest parameters to DOMTokenList
+        https://bugs.webkit.org/show_bug.cgi?id=97335
+
+        Reviewed by Ojan Vafai.
+
+        This adds support for rest paramaters to DOMTokenList add and remove.
+        http://dom.spec.whatwg.org/#domtokenlist
+
+        The code generator has been updated to understand variadic methods.
+        When a method has a rest parameter the remaining arguments are collected
+        into a WTF::Vector.
+
+        DOMTokenList, DOMSettableTokenList and ClassList were restructured a bit to
+        allow code to be shared better.
+
+        Updated existing tests and includes new binding tests.
+
+        * bindings/js/JSDOMBinding.h:
+        (WebCore::toNativeArray):
+        (WebCore):
+        (WebCore::toNativeArguments): Similar to toNativeArray but extracts the arguments instead.
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateArgumentsCountCheck): Updated to treat rest paramaters as optional.
+        (GenerateParametersCheck): Generate code for rest params.
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateFunctionParametersCheck): Updated to treat rest paramaters as optional.
+        (GenerateArgumentsCountCheck): Ditto.
+        (GenerateParametersCheck):  Generate code for rest params.
+        * bindings/scripts/IDLParser.pm:
+        (parseOptionalOrRequiredArgument):
+        * bindings/scripts/IDLStructure.pm:
+        * bindings/scripts/test/CPP/WebDOMTestObj.cpp:
+        (WebDOMTestObj::variadicStringMethod):
+        (WebDOMTestObj::variadicDoubleMethod):
+        (WebDOMTestObj::variadicNodeMethod):
+        * bindings/scripts/test/CPP/WebDOMTestObj.h:
+        * bindings/scripts/test/GObject/WebKitDOMTestObj.cpp:
+        (webkit_dom_test_obj_variadic_string_method):
+        (webkit_dom_test_obj_variadic_double_method):
+        (webkit_dom_test_obj_variadic_node_method):
+        * bindings/scripts/test/GObject/WebKitDOMTestObj.h:
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore):
+        (WebCore::jsTestObjPrototypeFunctionVariadicStringMethod):
+        (WebCore::jsTestObjPrototypeFunctionVariadicDoubleMethod):
+        (WebCore::jsTestObjPrototypeFunctionVariadicNodeMethod):
+        * bindings/scripts/test/JS/JSTestObj.h:
+        (WebCore):
+        * bindings/scripts/test/ObjC/DOMTestObj.h:
+        * bindings/scripts/test/ObjC/DOMTestObj.mm:
+        (-[DOMTestObj variadicStringMethod:tail:]):
+        (-[DOMTestObj variadicDoubleMethod:tail:]):
+        (-[DOMTestObj variadicNodeMethod:tail:]):
+        * bindings/scripts/test/TestObj.idl:
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::variadicStringMethodCallback):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::variadicDoubleMethodCallback):
+        (WebCore::TestObjV8Internal::variadicNodeMethodCallback):
+        (WebCore):
+        (WebCore::ConfigureV8TestObjTemplate):
+        * bindings/v8/V8Binding.h:
+        (WebCore::toNativeArray):
+        (WebCore):
+        (WebCore::toNativeArguments): Similar to toNativeArray but extracts the arguments instead.
+        * html/ClassList.cpp:
+        (WebCore::ClassList::ClassList):
+        * html/ClassList.h:
+        (WebCore):
+        (ClassList):
+        * html/DOMSettableTokenList.cpp:
+        (WebCore::DOMSettableTokenList::containsInternal):
+        (WebCore::DOMSettableTokenList::add):
+        (WebCore::DOMSettableTokenList::addInternal):
+        (WebCore::DOMSettableTokenList::remove):
+        (WebCore::DOMSettableTokenList::removeInternal):
+        (WebCore::DOMSettableTokenList::setValue):
+        * html/DOMSettableTokenList.h:
+        (DOMSettableTokenList):
+        * html/DOMTokenList.cpp:
+        (WebCore::DOMTokenList::validateTokens):
+        (WebCore):
+        (WebCore::DOMTokenList::contains): Moved implementation to base class to allow code sharing.
+        (WebCore::DOMTokenList::add): Ditto.
+        (WebCore::DOMTokenList::remove): Ditto.
+        (WebCore::DOMTokenList::toggle): Ditto.
+        (WebCore::DOMTokenList::addInternal): Ditto.
+        (WebCore::DOMTokenList::removeInternal): Ditto.
+        (WebCore::DOMTokenList::addToken): Ditto.
+        (WebCore::DOMTokenList::addTokens):
+        (WebCore::DOMTokenList::removeToken): Ditto.
+        (WebCore::DOMTokenList::removeTokens):
+        * html/DOMTokenList.h:
+        (DOMTokenList):
+        (WebCore::DOMTokenList::toString):
+        * html/DOMTokenList.idl:
+
 2012-09-27  Andreas Kling  <kling@webkit.org>
 
         332kB below DocumentEventQueue::create() on Membuster3.
