@@ -1,3 +1,32 @@
+2012-09-27  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] BaseMultipleFieldsDateAndTimeInputType class should inherit DateTimeEditElement::EditControlOwner rather than containing
+        https://bugs.webkit.org/show_bug.cgi?id=97756
+
+        Reviewed by Kent Tamura.
+
+        This patch changes class hierarchy of BaseMultipleFieldsDateAndTimeInputType
+        to inherit from DateTimeEditElement::EditControlOwner rather than
+        containing an instance of DateTimeEditElement::EditControlOwner for
+        saving memory, although one pointer, and one memory fetch on using
+        HTMLInputElement.
+
+        Note: This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_MULTIPLE_FIELDS_UI.
+
+        No new tests. This patch doesn't change behavior.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp: DateTimeEditElement::EditControlOwner::DateTimeformatDateTimeFieldsState was removed. We no longer need to redirection. Each date/time input type classe implements it.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::didBlurFromControl): Moved from DateTimeEditControlOwnerImpl and removed reference of m_dateTimeInputType.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::didFocusOnControl): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::editControlValueChanged): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isEditControlOwnerDisabled): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isEditControlOwnerReadOnly): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::BaseMultipleFieldsDateAndTimeInputType): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::createShadowSubtree): Changed to pass BaseMultipleFieldsDateAndTimeInputType instead of DateTimeEditControlOwnerImpl.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h: Changed base class to have DateTImeEditElement::EditControlOwner.
+        (BaseMultipleFieldsDateAndTimeInputType): Removed DateTimeEditControlOwnerImpl class and member variable m_dateTimeEditControlOwner.
+
 2012-09-27  Keishi Hattori  <keishi@webkit.org>
 
         SuggestionPicker should support rtl
