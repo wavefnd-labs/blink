@@ -1,5 +1,68 @@
 2012-09-26  Yoshifumi Inoue  <yosin@chromium.org>
 
+        [Forms] Move multiple fields related functions to BaseDateAndTimeInputType from TimeInputType
+        https://bugs.webkit.org/show_bug.cgi?id=97521
+
+        Reviewed by Kent Tamura.
+
+        This patch introduces new class BaseMultipleFieldsDateAndTimeInputType
+        for sharing code among multiple fields date/time input UI.
+
+        Member functions in BaseMultipleFieldsDateAndTimeInputType are moved
+        from TimeInputType. BaseMultipleFieldsDateAndTimeInputType.{cpp,h}
+        were copied from TimeInputType.{cpp,h} by r129721.
+
+        This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME and
+        ENABLE_INPUT_MULTIPLE_FIELDS_UI.
+
+        No new tests. This patch doesn't change behavior.
+
+        * WebCore.gypi: Changed to have html/BaseMultipleFieldsDateAndTimeInputType.{cpp,h}
+        * html/BaseDateAndTimeInputType.h:
+        (BaseDateAndTimeInputType): Exposed setMillisecondToDateComponents as protected for BaseMultipleFieldsDateAndTimeInputType::restoreFormControlState().
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::DateTimeEditControlOwnerImpl): Moved from TimeInputType::DateTimeEditControlOwnerImpl.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::~DateTimeEditControlOwnerImpl): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::didBlurFromControl): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::didFocusOnControl): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::editControlValueChanged): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::formatDateTimeFieldsState): Moved from TimeInputType::DateTimeEditControlOwnerImpl and changed to call formatDateTimeFieldsState() in BaseMultipleFieldsDateAndTimeInputTypeInputType class.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::hasCustomFocusLogic): Moved from TimeInputType.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::isEditControlOwnerDisabled): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::DateTimeEditControlOwnerImpl::isEditControlOwnerReadOnly): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::BaseMultipleFieldsDateAndTimeInputType): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::~BaseMultipleFieldsDateAndTimeInputType): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::blur): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::createRenderer): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::createShadowSubtree): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::destroyShadowSubtree): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::focus): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::forwardEvent): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::disabledAttributeChanged): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::handleKeydownEvent): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isKeyboardFocusable): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isMouseFocusable): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::minOrMaxAttributeChanged): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::readonlyAttributeChanged): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isTextField): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::restoreFormControlState): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::saveFormControlState): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::setValue): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::shouldUseInputMethod): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::stepAttributeChanged): ditto.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::updateInnerTextValue): Moved from TimeInputType and changed to call setupLayoutParameters() to set date/time format by each input type.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType): Added.
+        (DateTimeEditControlOwnerImpl): Moved from TimeInputType.
+        * html/TimeInputType.cpp: Moved multiple fields UI related functions to BaseMultipleFieldsDateAndTimeInputType.
+        (WebCore::TimeInputType::TimeInputType): Changed base class name to BaseTimeInput.
+        (WebCore::TimeInputType::formatDateTimeFieldsState): Moved from TimeINput::DateTImeEditControlOwnerImpl class.
+        (WebCore::TimeInputType::setupLayoutParameters): Added for set time format.
+        * html/TimeInputType.h:
+        (TimeInputType): Chaned base class to BaseTimeInput which is alias of BaseDateAndTimeInputType or BaseMultipleFieldsDateAndTimeInputType.
+
+2012-09-26  Yoshifumi Inoue  <yosin@chromium.org>
+
         [Forms] Adding localization texts for multiple fields date/time input UI
         https://bugs.webkit.org/show_bug.cgi?id=97633
 
