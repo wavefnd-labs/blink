@@ -1,3 +1,24 @@
+2012-09-27  Tony Chang  <tony@chromium.org>
+
+        flexbox assert fails with auto-sized item with padding
+        https://bugs.webkit.org/show_bug.cgi?id=97606
+
+        Reviewed by Ojan Vafai.
+
+        Depending on the denominator of FractionalLayoutUnit, we can lose precision when
+        converting to a float.  This would cause a rounding error in flex-shrink to trigger an ASSERT.
+        To avoid this problem in the future, switch to using doubles for flex-shrink and flex-grow
+        at layout time.  The CSS values themselves are still floats.
+
+        Test: css3/flexbox/negative-flex-rounding-assert.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutFlexItems): Use doubles for local variables.
+        (WebCore::RenderFlexibleBox::computeNextFlexLine): Pass in doubles.
+        (WebCore::RenderFlexibleBox::freezeViolations): Pass in doubles.
+        (WebCore::RenderFlexibleBox::resolveFlexibleLengths): Pass in doubles.
+        * rendering/RenderFlexibleBox.h:
+
 2012-09-28  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r129751.
