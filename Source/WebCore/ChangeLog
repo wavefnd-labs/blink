@@ -1,3 +1,40 @@
+2012-09-26  Antti Koivisto  <antti@apple.com>
+
+        CSSComputedStyleDeclaration::getPropertyCSSValue() triggering unnecessary relayouts and style recalcs
+        https://bugs.webkit.org/show_bug.cgi?id=97760
+
+        Reviewed by Andreas Kling.
+
+        Currently getPropertyCSSValue() (which is also used to implement the more common getPropertyValue()) 
+        calls Document::updateLayoutIgnorePendingStylesheets() unconditionally. However only a few properties 
+        are actually layout dependent, making many of these relayouts unnecessary. Moreover, triggering full 
+        style recalc is also often unnecessary as the current node may already have valid style even if some 
+        other parts of the tree require recalc.
+        
+        - Only trigger relayouts for layout dependent properties.
+        - Trigger style recalc only if the style of the current element or its ancestors is dirty.
+        
+        This is a significant (several percent) progression on some real world web content based page loading
+        benchmarks.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::isLayoutDependentProperty):
+        (WebCore):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/StyleResolver.h:
+        (WebCore::StyleResolver::hasViewportDependentMediaQueries):
+        * dom/Document.cpp:
+        (WebCore::Document::hasPendingStyleRecalc):
+        
+            Renamed for consistency.
+
+        (WebCore::Document::hasPendingForcedStyleRecalc):
+        (WebCore):
+        * dom/Document.h:
+        (Document):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::imageChanged):
+
 2012-09-27  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Remove unused PlatformSupport reference in DraggedIsolatedFileSystem
