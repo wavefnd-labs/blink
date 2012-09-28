@@ -1,3 +1,22 @@
+2012-09-28  Luiz Agostini  <luiz.agostini@nokia.com>
+
+        TextureMapperGL destructor crashes
+        https://bugs.webkit.org/show_bug.cgi?id=97942
+
+        Reviewed by Noam Rosenthal.
+
+        BitmapTextureGL destructor uses a TextureMapperGL instance. The problem is that 
+        BitmapTextureGL objects are destroyed on TextureMapper destructor and at that 
+        time TextureMapperGL specific methods and data are not available any more.
+
+        This patch creates a new protected method TextureMapper::clearTexturePool()
+        that is called in TextureMapperGL's destructor.
+
+        * platform/graphics/texmap/TextureMapper.h:
+        (WebCore::TextureMapper::clearTexturePool):
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::~TextureMapperGL):
+
 2012-09-28  Julien Chaffraix  <jchaffraix@webkit.org>
 
         REGRESSION(r124168): Null crash in RenderLayer::createScrollbar
