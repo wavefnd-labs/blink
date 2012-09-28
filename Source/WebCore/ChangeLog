@@ -1,3 +1,26 @@
+2012-09-27  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [Chromium] FontHarfBuzz.cpp should not use drawTextOnPath().
+        https://bugs.webkit.org/show_bug.cgi?id=97676
+
+        Reviewed by Tony Chang.
+
+        Use drawPosText() if possible for vertical text.
+        Use drawTextOnPath() only if the font doesn't have vhea/vmtx table.
+
+        No new tests. No change in behavior on LayoutTests.
+        Confirmed improvement in vertical text positioning using ipafont and Skia r5677.
+
+        * platform/graphics/harfbuzz/FontHarfBuzz.cpp:
+        (WebCore::drawVerticalTextWithBrokenIdeographs): Added.
+        (WebCore):
+        (WebCore::Font::drawGlyphs): Draw vertical text by drawPosText() in a similar manner of FontSkia.cpp.
+        (WebCore::Font::drawComplexText): Disable setVerticalText(). Complex path doesn't support it now.
+        * platform/graphics/harfbuzz/FontPlatformDataHarfBuzz.cpp:
+        (WebCore::FontPlatformData::setupPaint): Call setVertialText().
+        * platform/graphics/skia/SimpleFontDataSkia.cpp:
+        (WebCore::SimpleFontData::platformWidthForGlyph): Disable setVerticalText() if the font doesn't have vertical metrics.
+
 2012-09-27  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r129806.
