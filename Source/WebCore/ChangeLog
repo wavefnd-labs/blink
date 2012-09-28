@@ -1,3 +1,58 @@
+2012-09-28  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Adding DateTimeMonthFieldElement and DateTimeYearFieldElement
+        https://bugs.webkit.org/show_bug.cgi?id=97864
+
+        Reviewed by Kent Tamura.
+
+        This patch is a part of preparation of implementing multiple fields
+        date/time input UI.
+
+        This patch introduces DateTimeMonthFieldElement and DateTimeYearFieldElement
+        classes for implementing multiple fields "month" input type.
+
+        Multiple fields "month" input type uses two fields for month and year
+        in locale dependent order. Month field display month as two digit.
+        Year field display year as four digits in usual case and can display
+        up to 6 digits to support maximum year 275760, defined in HTML5
+        specification.
+
+        This patch also changes default value for step down and up on empty
+        field to better UI in year field. Year field displays current year
+        when step down and up on empty field rather than minimum year 1, or
+        maximum year 275760.
+
+        Note: This patch affects ports which enable both ENABLE_INPUT_TYPE_TIME
+        and ENABLE_INPUT_MULTIPLE_FIELDS_UI.
+
+        No new tests. This patch doesn't change behavior.
+
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeMonthFieldElement::DateTimeMonthFieldElement): Added.
+        (WebCore::DateTimeMonthFieldElement::create): Added.
+        (WebCore::DateTimeMonthFieldElement::populateDateTimeFieldsState): Added.
+        (WebCore::DateTimeMonthFieldElement::setValueAsDate): Added.
+        (WebCore::DateTimeMonthFieldElement::setValueAsDateTimeFieldsState): Added.
+        (WebCore::DateTimeYearFieldElement::DateTimeYearFieldElement): Added.
+        (WebCore::DateTimeYearFieldElement::create): Added.
+        (WebCore::DateTimeYearFieldElement::defaultValueForStepDown): Added.
+        (WebCore::DateTimeYearFieldElement::defaultValueForStepUp): Added.
+        (WebCore::DateTimeYearFieldElement::populateDateTimeFieldsState): Added.
+        (WebCore::DateTimeYearFieldElement::setValueAsDate): Added.
+        (WebCore::DateTimeYearFieldElement::setValueAsDateTimeFieldsState): Added.
+        * html/shadow/DateTimeFieldElements.h:
+        (DateTimeMonthFieldElement): Added.
+        (DateTimeYearFieldElement): Added.
+        * html/shadow/DateTimeNumericFieldElement.cpp:
+        (WebCore::DateTimeNumericFieldElement::Range::isInRange): Added for ease of checking value is in range.
+        (WebCore::DateTimeNumericFieldElement::defaultValueForStepDown): Added for default behavior.
+        (WebCore::DateTimeNumericFieldElement::defaultValueForStepUp): ditto.
+        (WebCore::DateTimeNumericFieldElement::stepDown): Changed to use defaultValueForStepDown instead of maximum field value.
+        (WebCore::DateTimeNumericFieldElement::stepUp):  Changed to use defaultValueForStepUp minium field value.
+        (WebCore::DateTimeNumericFieldElement::value): Changed to use "%04d" when maximum field value is greater than 999 for year field.
+        * html/shadow/DateTimeNumericFieldElement.h:
+        (DateTimeNumericFieldElement): Changed to add declarations of defaultValueForStepDown() and defaultValueForStepUp().
+
 2012-09-27  Yoshifumi Inoue  <yosin@chromium.org>
 
         [Forms] Adding placeholder feature to DateTimeNumericElement, and update its existing subclasses.
