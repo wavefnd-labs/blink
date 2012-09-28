@@ -1,3 +1,22 @@
+2012-09-28  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        REGRESSION(r124168): Null crash in RenderLayer::createScrollbar
+        https://bugs.webkit.org/show_bug.cgi?id=96863
+
+        Reviewed by Abhishek Arya.
+
+        After r124168, we synchronously create any overflow:scroll scrollbar on the first style change - we used to wait
+        until layout was called. The issue is that the logic in RenderLayer assumes that our node is completely attached
+        when the style change is dispatched. The crash occured because the 'content' image code path in
+        RenderObject::createObject triggered a style change too early.
+
+        Test: scrollbars/scrollbar-content-crash.html
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::createObject):
+        We need a style associated with the new RenderImage to call setImageResource but we don't need to trigger a
+        style change.
+
 2012-09-28  Ben Wagner  <bungeman@chromium.org>
 
         Chromium should respect 'text-rendering:geometricPrecision' by disabling hinting.
