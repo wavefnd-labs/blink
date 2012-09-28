@@ -1,3 +1,48 @@
+2012-09-28  Kent Tamura  <tkent@chromium.org>
+
+        Clean up Localizer-related functions
+        https://bugs.webkit.org/show_bug.cgi?id=97899
+
+        Reviewed by Kentaro Hara.
+
+        - Rename Document::getLocalizer to getCachedLocalizer
+        - Add default argument to getCachedLocalizer
+        - Add Element::localizer to reduce code size
+        - Rename DateTimeNumericFieldElement::localizer to localizerForOwner to
+          avoid conflict with Element::localizer
+        - Add Localizer::createDefault to improve code readability
+
+        No new tests. This shouldn't make any behavior change.
+
+        * dom/Document.h:
+        (Document): Rename getLocalizer to getCachedLocalizer, and add default
+        argument.
+        * dom/Document.cpp:
+        (WebCore::Document::getCachedLocalizer): ditto.
+
+        * dom/Element.h:
+        (Element): Add localizer function.
+        * dom/Element.cpp:
+        (WebCore::Element::localizer): Added
+
+        * html/shadow/DateTimeNumericFieldElement.h:
+        (DateTimeNumericFieldElement): Rename localizer to localizerForOwner.
+        * html/shadow/DateTimeNumericFieldElement.cpp: ditto.
+        (WebCore::DateTimeNumericFieldElement::handleKeyboardEvent):
+        (WebCore::DateTimeNumericFieldElement::localizerForOwner):
+        (WebCore::DateTimeNumericFieldElement::value):
+
+        * platform/text/Localizer.h:
+        (Localizer): Add createDefault
+        (WebCore::Localizer::createDefault): Implemented.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::updateInnerTextValue):
+        Use Element::localizer.
+        * html/NumberInputType.cpp:
+        (WebCore::NumberInputType::localizeValue): ditto.
+        (WebCore::NumberInputType::convertFromVisibleValue): ditto.
+
 2012-09-28  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: define ChunkedReader interface for compilation
