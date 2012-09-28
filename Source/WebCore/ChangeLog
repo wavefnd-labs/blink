@@ -1,3 +1,31 @@
+2012-09-28  Fady Samuel  <fsamuel@chromium.org>
+
+        [V8] Make v8NPObjectMap per Context
+        https://bugs.webkit.org/show_bug.cgi?id=97703
+
+        Reviewed by Adam Barth.
+
+        V8NPObject is a V8Object wrapper for use by the npruntime.
+
+        staticV8NPObjectMap is used for keeping record of V8NPObjects as they are created and destroyed
+        to ensure that an existing V8NPObject wrapper is returned for a V8Object in npCreateV8ScriptObject.
+        
+        Once a context is gone, the NPObjects for the context are no longer valid and that record keeping
+        no longer makes sense so we clear the map.
+
+        However, because the map was static, it existed for all pages across contexts. Clearing the
+        map if one context is gone should not impact the V8NPObject map of other contexts.
+
+        Thus, this patch makes the V8NPObject map per context.
+
+        * bindings/v8/NPV8Object.cpp:
+        (WebCore::freeV8NPObject):
+        (WebCore::npCreateV8ScriptObject):
+        * bindings/v8/V8PerContextData.h:
+        (WebCore):
+        (WebCore::V8PerContextData::v8NPObjectMap):
+        (V8PerContextData):
+
 2012-09-28  Alberto Garcia  <agarcia@igalia.com>
 
         TextureMapperGL: fix -Wsign-compare compilation warning.
