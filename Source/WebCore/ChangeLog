@@ -1,3 +1,58 @@
+2012-09-27  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] StringCache::v8ExternalString() can return a stale persistent handle
+        https://bugs.webkit.org/show_bug.cgi?id=97767
+
+        Reviewed by Adam Barth.
+
+        For details, see the Chromium bug: http://code.google.com/p/chromium/issues/detail?id=151902
+
+        StringCache::v8ExternalString() can return a stale persistent handle
+        in the following scenario:
+
+        (1) Assume that StringImpl A with value "foo" is in m_stringCache.
+        (2) StringImpl B with value "foo" is accessed. At this point, m_lastStringImpl
+        points to B, and m_lastV8String points to B's handle.
+        (3) A minor GC is triggered and a weak callback is called back for StringImpl A.
+        At this point, "foo" is removed from m_stringCache. A's handle is disposed.
+        However, m_lastV8String is not cleared because m_lastStringImpl (i.e. StringImpl B)
+        is not equal to StringImpl A. As a result, m_lastV8String points to a stale
+        persistent handle.
+        (4) The persistent handle is eventually reused in V8 and made weak again.
+        (5) StringImpl B with value "foo" is accessed. Then StringCache::v8ExternalString()
+        returns the stale persistent handle, which is already used for another purpose.
+
+        To solve the problem, we need to clear m_stringImpl and m_lastV8String when any
+        string wrapper is disposed. Specifically, we need to change the code like this:
+
+          static void cachedStringCallback(v8::Persistent<v8::Value> wrapper, void* parameter)
+          {
+            StringImpl* stringImpl = static_cast<StringImpl*>(parameter);
+            V8PerIsolateData::current()->stringCache()->remove(stringImpl);
+            wrapper.Dispose();
+            stringImpl->deref();
+          }
+
+          void StringCache::remove(StringImpl* stringImpl)
+          {
+            m_stringCache.remove(stringImpl);
+            if (m_lastStringImpl.get() == stringImpl) {  // Remove this line.
+                m_lastStringImpl = 0;
+                m_lastV8String.Clear();
+            }
+          }
+
+        Note: Removing the line might be stronger than is needed. Instead of removing
+        the line, we can just replace the line with 'if (m_lastV8String == wrapper)'.
+        However, just in case (for correctness), I'd prefer removing the line.
+        Given that GC won't happen so frequently, clearing the cache in every weak callback
+        won't affect performance.
+
+        No tests because it depends on the GC behavior and I couldn't reproduce the bug.
+
+        * bindings/v8/V8ValueCache.cpp:
+        (WebCore::StringCache::remove):
+
 2012-09-26  Antti Koivisto  <antti@apple.com>
 
         CSSComputedStyleDeclaration::getPropertyCSSValue() triggering unnecessary relayouts and style recalcs
