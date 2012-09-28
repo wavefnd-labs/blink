@@ -1,3 +1,23 @@
+2012-09-28  Simon Fraser  <simon.fraser@apple.com>
+
+        Crash re-entering Document layout with frame flattening enabled
+        https://bugs.webkit.org/show_bug.cgi?id=97841
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Walking up to parent FrameViews when doing a frame-flattening
+        layout should walk via the Frame tree, not the Widget hierarchy.
+        Walking via the Frame tree ensures that we don't walk up to the
+        root Frame when laying out a subframe that is in the page cache.
+        That's bad, because the root Frame is reused for the new
+        page, and laying it out from a frame in the page cache causes
+        re-entrant layout.
+
+        Test: plugins/frameset-with-plugin-frame.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::parentFrameView):
+
 2012-09-28  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r129911.
