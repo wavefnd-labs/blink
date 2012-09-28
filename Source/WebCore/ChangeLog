@@ -1,3 +1,42 @@
+2012-09-28  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Multiple fields month input UI
+        https://bugs.webkit.org/show_bug.cgi?id=97299
+
+        Reviewed by Kent Tamura.
+
+        This patch introduces multiple fields "month" input UI in DRT. We'll
+        enable this feature once we add tests.
+
+        Note: This patch affects ports which enable both ENABLE_INPUT_TYPE_MONTH
+        and ENABLE_INPUT_MULTIPLE_FIELDS_UI.
+
+        No new tests. To reduce size of this patch, other patches add tests
+        for multiple fields month input UI.
+
+        Note: Actual outputs of two tests
+            - fast/forms/month/month-input-visible-string.html
+            - fast/forms/month/month-stepup-stepdown-from-renderer.html
+        are different.
+
+        * css/html.css:
+        (input::-webkit-datetime-edit-month-field): Added for field appearance.
+        (input::-webkit-datetime-edit-year-field): ditto.
+        (input::-webkit-datetime-edit-month-field:focus): Added to remove focus ring.
+        (input::-webkit-datetime-edit-year-field:focus): ditto.
+        * html/MonthInputType.cpp:
+        (WebCore::MonthInputType::formatDateTimeFieldsState): Added to format numeric value to string value as specified in HTML5 specification.
+        (WebCore::MonthInputType::setupLayoutParameters): Added to set layout of multiple fields.
+        * html/MonthInputType.h: Changed to include BaseMultipleFieldsDateAndTimeInputType.h and introduce BaseMonthInputType typedef.
+        (WebCore::MonthInputType::MonthInputType): Changed base class name to BaseMonthInputType.
+        (MonthInputType): Changed to add declarations for formatDateTimeFieldsState() and setupLayoutParameters().
+        * html/shadow/DateTimeEditElement.cpp:
+        (DateTimeEditBuilder): Changed to have copy of object in m_stepRange and m_dateValue member variables for being robust.
+        (WebCore::DateTimeEditBuilder::DateTimeEditBuilder): Changed to add initialize m_placeholderForMonth and m_placeholderForYear.
+        (WebCore::DateTimeEditBuilder::visitField): Changed to support month field and year field.
+        * html/shadow/DateTimeEditElement.h:
+        (LayoutParameters): Changed to add member variables, placeholderForMonth and placeholderForYear. Changed to have copy of object in stepRange member variable for being robust.
+
 2012-09-28  Eunmi Lee  <eunmi15.lee@samsung.com>
 
         [EFL][WK2] Refactoring initialization and shutdown codes of EFL libraries.
