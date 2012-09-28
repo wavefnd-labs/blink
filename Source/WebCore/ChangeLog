@@ -1,3 +1,28 @@
+2012-09-28  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Destroy thread-specific data for Platform::Graphics::Buffer on the right thread
+        https://bugs.webkit.org/show_bug.cgi?id=97674
+
+        Reviewed by Rob Buis.
+
+        A new API was added to BlackBerry::Platform::Graphics for destroying
+        thread-specific data generated on the compositing thread when we blit
+        buffers. The buffers are otherwise created and destroyed on the WebKit
+        thread, which doesn't give platform any opportunity to destroy the
+        thread-specific data.
+
+        This patch adds calls to the new API to avoid leaking resources.
+
+        Reviewed internally by Jakob Petsovits and Filip Spacek.
+
+        PR 214644
+
+        Verified using manual testing.
+
+        * plugins/blackberry/PluginViewPrivateBlackBerry.cpp:
+        (WebCore::PluginViewPrivate::createBuffers):
+        (WebCore::PluginViewPrivate::destroyBuffers):
+
 2012-09-28  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [Canvas] log property setters too along with function calls
