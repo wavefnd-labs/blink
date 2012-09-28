@@ -1,3 +1,78 @@
+2012-09-28  Kent Tamura  <tkent@chromium.org>
+
+        Add parseDateTime, formatDateTime, and dateFormatText to Localizer
+        https://bugs.webkit.org/show_bug.cgi?id=97885
+
+        Reviewed by Kentaro Hara.
+
+        This is a preparation to remove LocalizedData.h.
+
+        Add the following pure virtual member functions to Localizer.
+          parseDateTime
+          formatDateTime
+          dateFormatText.
+
+        We rename existing parse/format functions for type=date in Locale*
+        classes, and extend their functionality so that they support other
+        date/time types. They override the new functions of Localizer.
+
+        No new tests. This should not change any behavior.
+
+        * platform/text/Localizer.h:
+        (Localizer): Add parseDateTime, formatDateTime, and dateFormatText.
+
+        * platform/text/LocaleICU.h:
+        (LocaleICU):
+        - Rename parseLocalizedDate to parseDateTime
+        - Add type argument to parseDateTime
+        - Rename formatLocalizedDate to formatDateTime
+        - Rename localizedDateFormatText to dateFormatText
+        - Make parseDateTime/formatDateTime/dateFormatText virtual.
+        * platform/text/LocaleICU.cpp:
+        (WebCore::LocaleICU::parseDateTime):
+        Renamed. Reject non-date types.
+        (WebCore::LocaleICU::formatDateTime): ditto.
+        (WebCore::LocaleICU::dateFormatText): Renamed.
+        * platform/text/LocalizedDateICU.cpp: Moved some code to LocaleICU.cpp.
+        (WebCore::parseLocalizedDate):
+        (WebCore::formatLocalizedDate):
+
+        * platform/text/LocaleNone.cpp:
+        Add empty implementations of parseDateTime, formatDateTime, and
+        dateFormatText.
+        (LocaleNone):
+        (WebCore::LocaleNone::parseDateTime):
+        (WebCore::LocaleNone::formatDateTime):
+        (WebCore::LocaleNone::dateFormatText):
+
+        * platform/text/LocaleWin.h:
+        (LocaleWin):
+        - Rename parseDate to parseDateTime
+        - Add type argument to parseDateTime
+        - Rename formatDate to formatDateTime
+        - Make parseDateTime/formatDateTime/dateFormatText virtual.
+        * platform/text/LocaleWin.cpp:
+        (WebCore::LocaleWin::parseDateTime):
+        Renamed. Reject non-date types.
+        (WebCore::LocaleWin::formatDateTime): ditto.
+        * platform/text/LocalizedDateWin.cpp: Moved some code to LocaleWin.cpp.
+        (WebCore::parseLocalizedDate):
+        (WebCore::formatLocalizedDate):
+
+        * platform/text/mac/LocaleMac.h:
+        (LocaleMac):
+        - Rename parseDate to parseDateTime
+        - Add type argument to parseDateTime
+        - Rename formatDate to formatDateTime
+        - Make parseDateTime/formatDateTime/dateFormatText virtual.
+        * platform/text/mac/LocaleMac.mm:
+        (WebCore::LocaleMac::parseDateTime):
+        Renamed. Reject non-date types.
+        (WebCore::LocaleMac::formatDateTime): ditto.
+        * platform/text/mac/LocalizedDateMac.cpp: Moved some code to LocaleMac.mm.
+        (WebCore::parseLocalizedDate):
+        (WebCore::formatLocalizedDate):
+
 2012-09-28  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Run multiple tasks per transaction tick
