@@ -1,3 +1,26 @@
+2012-09-27  Alpha Lam  <hclam@chromium.org>
+
+        REGRESSION(r122215) - CachedImage::likelyToBeUsedSoon crashes on accessing a deleted CachedImageClient
+        https://bugs.webkit.org/show_bug.cgi?id=97749
+
+        Reviewed by James Robinson.
+
+        All implementations of Clipboard set themselves as clients to CachedImage
+        through the JS API setDrageImage() but they do not detach during destruction.
+        This causes memory corruption when CachedImage tries to access a deleted client
+        when MemoryCache prunes and calls CachedImage::likelyToUsedSoon().
+
+        Manual test added: ManualTests/drag-image-no-crash.html
+
+        * platform/chromium/ClipboardChromium.cpp:
+        (WebCore::ClipboardChromium::~ClipboardChromium):
+        * platform/gtk/ClipboardGtk.cpp:
+        (WebCore::ClipboardGtk::~ClipboardGtk):
+        * platform/mac/ClipboardMac.mm:
+        (WebCore::ClipboardMac::~ClipboardMac):
+        * platform/win/ClipboardWin.cpp:
+        (WebCore::ClipboardWin::~ClipboardWin):
+
 2012-09-28  Anders Carlsson  <andersca@apple.com>
 
         Remove Instance::setDidExecuteFunction
