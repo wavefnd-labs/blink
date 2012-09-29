@@ -1,3 +1,25 @@
+2012-09-28  Simon Fraser  <simon.fraser@apple.com>
+
+        Crash re-entering Document layout with frame flattening enabled
+        https://bugs.webkit.org/show_bug.cgi?id=97841
+
+        Reviewed by Brady Eidson.
+
+        When creating a CachedFrame, clearTimers on the Frame later; it has to
+        be done after documentWillSuspendForPageCache(), because the style
+        changes that HTMLPlugInImageElement::documentWillSuspendForPageCache()
+        do can schedule a layout on the FrameView, and we don't want this layout
+        timer to fire while the page is in the page cache.
+
+        Add an assertion in FrameView::layout() that the document is not in
+        the page cache. Without the above change, this would assert in
+        the plugins/frameset-with-plugin-frame.html test.
+
+        * history/CachedFrame.cpp:
+        (WebCore::CachedFrame::CachedFrame):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::layout):
+
 2012-09-28  Dan Carney  <dcarney@google.com>
 
         Remove V8DOMWindowShell::getEntered
