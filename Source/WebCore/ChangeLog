@@ -1,3 +1,42 @@
+2012-09-29  Kenneth Rohde Christiansen  <kenneth@webkit.org>
+
+        Scroll offset of flex items lost during relayout
+        https://bugs.webkit.org/show_bug.cgi?id=97706
+
+        Reviewed by Tony Chang.
+
+        Test: fast/flexbox/overflow-keep-scrollpos.html
+
+        Flex box does a second pass layout of the flex children.
+
+        We layout the child without scrollbars (to get the size
+        used for flexing), then we relayout the child at its final size.
+
+        We must not apply the scroll position during the first pass,
+        as it will be clamped to 0 (no scrolling possible).
+
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+
+        Make updateScrollInfoAfterLayout public
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock):
+
+        Delay applying scroll info until we clamp the size of the child
+        and get scrollbars back again. For this to work we use
+        RenderBlock::updateScrollInfoAfterLayout instead of the non-guarded
+        RenderLayer::updateScrollInfoAfterLayout.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::updateScrollInfoAfterLayout):
+
+        Add workaround for now to keep passing css3/flexbox/child-overflow.html
+
+        Basically do not postpone applying scroll changes for RenderBlocks
+        with opposite writing mode, as they need to have their content
+        overflow in the right direction.
+
 2012-09-29  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Slightly improve clarity of the patch in bug 78595.
