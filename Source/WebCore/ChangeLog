@@ -1,3 +1,46 @@
+2012-09-30  Martin Robinson  <mrobinson@igalia.com>
+
+        [TextureMapper] [WebKit2] Crash in WebCore::BitmapTextureGL::updateContents
+        https://bugs.webkit.org/show_bug.cgi?id=97394
+
+        Reviewed by Noam Rosenthal.
+
+        When a TextureMapper is destroyed, layers can still contain references
+        to textures obtained from that TextureMapper's texture pool. Trying to
+        access an unreffed TextureMapper in the BitmapTexture's destructor
+        causes a crash.
+
+        Instead of storing a raw pointer to a TextureMapper, we can simply store
+        a reference to the underlying GraphicsContext3D. All TextureMapper
+        implementations use the current GL context at this moment, so one GC3D
+        referencing the current context is the same as any other.
+
+        * platform/graphics/texmap/TextureMapper.h: Remove the clearTexturePool
+        method. It's no longer used.
+        (WebCore::BitmapTexture::applyFilters): Add a TextureMapper* argument.
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::BitmapTextureGL::BitmapTextureGL): Keep a reference to the
+        GraphicsContext3D instead of the TextureMapper.
+        (WebCore::BitmapTextureGL::didReset): Use the GC3D reference.
+        (WebCore::BitmapTextureGL::updateContents): Ditto.
+        (WebCore::BitmapTextureGL::applyFilters): Accept the TextureMapper as an argument.
+        (WebCore::BitmapTextureGL::initializeStencil): Use the GC3D reference.
+        (WebCore::BitmapTextureGL::clearIfNeeded): Ditto.
+        (WebCore::BitmapTextureGL::createFboIfNeeded): Ditto.
+        (WebCore::BitmapTextureGL::bind): Accept the TextureMapper as an argument.
+        (WebCore::BitmapTextureGL::~BitmapTextureGL): Use the GC3D reference.
+        (WebCore::TextureMapperGL::~TextureMapperGL): Remove the call to clearTexturePool
+        as it's no longer necessary.
+        (WebCore::TextureMapperGL::bindSurface): Ditto.
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (BitmapTextureGL): Keep a GC3D reference instead of a TextureMapper pointer.
+        * platform/graphics/texmap/TextureMapperImageBuffer.cpp:
+        (WebCore::BitmapTextureImageBuffer::applyFilters): Add a TextureMapper argument.
+        * platform/graphics/texmap/TextureMapperImageBuffer.h:
+        (BitmapTextureImageBuffer):
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::applyFilters): Ditto.
+
 2012-09-29  Dongwoo Joshua Im  <dw.im@samsung.com>
 
         AsyncFileSystem::openFileSystem should have FileSystemType as a parameter.
