@@ -1,5 +1,30 @@
 2012-09-30  Andreas Kling  <kling@webkit.org>
 
+        Split EventTargetData out of NodeRareData to reduce memory use.
+        <http://webkit.org/b/97987>
+        <rdar://problem/12403258>
+
+        Reviewed by Anders Carlsson.
+
+        Move EventTargetData to its own Node-flag/hashmap instead of piggybacking on NodeRareData.
+        This reduces memory consumption by 1.06MB on Membuster3. Note that NodeRareData shrinks by
+        one pointer as well.
+
+        * dom/Node.cpp:
+        (WebCore::Node::~Node):
+        (WebCore::eventTargetDataMap):
+        (WebCore::Node::eventTargetData):
+        (WebCore::Node::ensureEventTargetData):
+        (WebCore::Node::clearEventTargetData):
+        (WebCore::Node::handleLocalEvents):
+        * dom/Node.h:
+        (WebCore::Node::hasEventTargetData):
+        (WebCore::Node::setHasEventTargetData):
+        * dom/NodeRareData.h:
+        (NodeRareData):
+
+2012-09-30  Andreas Kling  <kling@webkit.org>
+
         444kB below CSSParser::parseDeprecatedGradient() on Membuster3.
         <http://webkit.org/b/97981>
         <rdar://problem/12403058>
