@@ -1,3 +1,105 @@
+2012-10-01  Pavel Feldman  <pfeldman@chromium.org>
+
+        Web Inspector: do not use InspectorInstrumentation::hasFrontends() check when collecting stacks
+        https://bugs.webkit.org/show_bug.cgi?id=96730
+
+        Reviewed by Vsevolod Vlasov.
+
+        - Introduced InspectorInstrumentation::console|timeline|runtime|canvasAgentEnabled
+        - Using it all over the place instead of the hasFrontend (the latter is now only used once to guard hot path)
+        - Introduced explicit "enabled" state of the console and runtime agents
+
+        * bindings/js/JSHTMLCanvasElementCustom.cpp:
+        (WebCore::JSHTMLCanvasElement::getContext):
+        * bindings/js/JSMainThreadExecState.h:
+        (WebCore::JSMainThreadExecState::instrumentFunctionCall):
+        * bindings/js/ScheduledAction.cpp:
+        (WebCore::ScheduledAction::create):
+        * bindings/js/ScriptCallStackFactory.cpp:
+        (WebCore::createScriptCallStackForConsole):
+        * bindings/js/ScriptCallStackFactory.h:
+        (WebCore):
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateCallWith):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateCallWith):
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore::jsTestObjWithScriptArgumentsAndCallStackAttribute):
+        (WebCore::setJSTestObjWithScriptArgumentsAndCallStackAttribute):
+        (WebCore::jsTestObjPrototypeFunctionWithScriptArgumentsAndCallStack):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrSetter):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackCallback):
+        * bindings/v8/ScriptCallStackFactory.cpp:
+        (WebCore::createScriptCallStackForConsole):
+        * bindings/v8/ScriptCallStackFactory.h:
+        (WebCore):
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::callFunctionWithInstrumentation):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::setIsolatedWorldSecurityOrigin):
+        * bindings/v8/V8WorkerContextEventListener.cpp:
+        (WebCore::V8WorkerContextEventListener::callListenerFunction):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::WindowSetTimeoutImpl):
+        * bindings/v8/custom/V8HTMLCanvasElementCustom.cpp:
+        (WebCore::V8HTMLCanvasElement::getContextCallback):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::SetTimeoutOrInterval):
+        * inspector/Inspector.json:
+        * inspector/InspectorConsoleAgent.cpp:
+        (WebCore):
+        (WebCore::InspectorConsoleAgent::InspectorConsoleAgent):
+        (WebCore::InspectorConsoleAgent::enable):
+        (WebCore::InspectorConsoleAgent::disable):
+        (WebCore::InspectorConsoleAgent::clearMessages):
+        (WebCore::InspectorConsoleAgent::clearFrontend):
+        (WebCore::InspectorConsoleAgent::addConsoleMessage):
+        * inspector/InspectorConsoleAgent.h:
+        (WebCore::InspectorConsoleAgent::enabled):
+        (InspectorConsoleAgent):
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::connectFrontend):
+        (WebCore::InspectorController::disconnectFrontend):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::canvasAgentEnabled):
+        (WebCore::InspectorInstrumentation::consoleAgentEnabled):
+        (WebCore::InspectorInstrumentation::runtimeAgentEnabled):
+        (WebCore::InspectorInstrumentation::timelineAgentEnabled):
+        * inspector/InspectorInstrumentation.h:
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::canvasAgentEnabled):
+        (WebCore::InspectorInstrumentation::consoleAgentEnabled):
+        (WebCore::InspectorInstrumentation::runtimeAgentEnabled):
+        (WebCore::InspectorInstrumentation::timelineAgentEnabled):
+        * inspector/InspectorRuntimeAgent.cpp:
+        (WebCore::InspectorRuntimeAgent::InspectorRuntimeAgent):
+        * inspector/InspectorRuntimeAgent.h:
+        (WebCore::InspectorRuntimeAgent::enabled):
+        (WebCore::InspectorRuntimeAgent::enable):
+        (WebCore::InspectorRuntimeAgent::disable):
+        (InspectorRuntimeAgent):
+        * inspector/PageRuntimeAgent.cpp:
+        (PageRuntimeAgentState):
+        (WebCore::PageRuntimeAgent::clearFrontend):
+        (WebCore::PageRuntimeAgent::restore):
+        (WebCore):
+        (WebCore::PageRuntimeAgent::enable):
+        (WebCore::PageRuntimeAgent::disable):
+        (WebCore::PageRuntimeAgent::didClearWindowObject):
+        (WebCore::PageRuntimeAgent::didCreateIsolatedContext):
+        (WebCore::PageRuntimeAgent::reportExecutionContextCreation):
+        * inspector/PageRuntimeAgent.h:
+        (PageRuntimeAgent):
+        * inspector/WorkerRuntimeAgent.cpp:
+        * inspector/WorkerRuntimeAgent.h:
+        * inspector/front-end/RuntimeModel.js:
+        (WebInspector.RuntimeModel.prototype._didLoadCachedResources):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::postMessage):
+
 2012-10-01  Kenichi Ishibashi  <bashi@chromium.org>
 
         [WebSocket] Setting wrong value to binaryType should not raise exception
