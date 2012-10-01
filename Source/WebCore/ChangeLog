@@ -1,3 +1,26 @@
+2012-10-01  Philip Rogers  <pdr@google.com>
+
+        Remove overzealous assert in SVGElement::localAttributeToPropertyMap
+        https://bugs.webkit.org/show_bug.cgi?id=97291
+
+        Reviewed by Nikolas Zimmermann.
+
+        This patch removes an assert where we did not expect
+        SVGElement::localAttributeToPropertyMap where we did not to be called. This
+        function turns out to be useful and this patch removes that assert.
+
+        If we encounter a non-SVG tag during SVG parsing (e.g. <svg><price></svg>) we return a
+        vanilla SVGElement instance from SVGElementFactory::createSVGElement. Previously,
+        trying to animate this would ASSERT because it was not possible to determine the
+        animated type. After this patch, an empty localAttributeToPropertyMap is used so
+        that the animated type returned from SVGAnimateElement::determineAnimatedPropertyType
+        is AnimatedUnknown.
+
+        This patch simply removes an ASSERT so no test is provided.
+
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::localAttributeToPropertyMap):
+
 2012-10-01  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r130004.
