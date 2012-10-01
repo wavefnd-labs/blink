@@ -23,32 +23,24 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ScrollingTreeState_h
-#define ScrollingTreeState_h
+#ifndef ScrollingStateScrollingNode_h
+#define ScrollingStateScrollingNode_h
 
 #if ENABLE(THREADED_SCROLLING)
 
-#include "GraphicsLayer.h"
 #include "IntRect.h"
 #include "Region.h"
 #include "ScrollTypes.h"
 #include "ScrollingCoordinator.h"
+#include "ScrollingStateNode.h"
 #include <wtf/PassOwnPtr.h>
-
-#if PLATFORM(MAC)
-#include <wtf/RetainPtr.h>
-#endif
 
 namespace WebCore {
 
-// The ScrollingTreeState object keeps track of the current state of scrolling related properties.
-// Whenever any properties change, the scrolling coordinator will be informed and will update the state
-// and schedule a timer that will clone the new state and send it over to the scrolling thread, avoiding locking.
-// FIXME: Once we support fast scrolling in subframes, this will have to become a tree-like structure.
-class ScrollingTreeState {
+class ScrollingStateScrollingNode : public ScrollingStateNode {
 public:
-    static PassOwnPtr<ScrollingTreeState> create();
-    ~ScrollingTreeState();
+    static PassOwnPtr<ScrollingStateScrollingNode> create(ScrollingStateTree*);
+    virtual ~ScrollingStateScrollingNode();
 
     enum ChangedProperty {
         ViewportRect = 1 << 0,
@@ -63,12 +55,14 @@ public:
         HorizontalScrollbarMode = 1 << 9,
         VerticalScrollbarMode = 1 << 10,
         ScrollOrigin = 1 << 11,
-        ScrollLayer = 1 << 12,
-        RequestedScrollPosition = 1 << 13,
+        RequestedScrollPosition = 1 << 12,
     };
 
-    bool hasChangedProperties() const { return m_changedProperties; }
-    unsigned changedProperties() const { return m_changedProperties; }
+    virtual PassOwnPtr<ScrollingStateNode> cloneNode() OVERRIDE;
+
+    virtual bool hasChangedProperties() const OVERRIDE { return m_changedProperties; }
+    virtual unsigned changedProperties() const OVERRIDE { return m_changedProperties; }
+    virtual void resetChangedProperties() OVERRIDE { m_changedProperties = 0; }
 
     const IntRect& viewportRect() const { return m_viewportRect; }
     void setViewportRect(const IntRect&);
@@ -103,22 +97,17 @@ public:
     ScrollbarMode verticalScrollbarMode() const { return m_verticalScrollbarMode; }
     void setVerticalScrollbarMode(ScrollbarMode);
 
-    PlatformLayer* platformScrollLayer() const;
-    void setScrollLayer(const GraphicsLayer*);
-
     const IntPoint& requestedScrollPosition() const { return m_requestedScrollPosition; }
     void setRequestedScrollPosition(const IntPoint&, bool representsProgrammaticScroll);
 
     const IntPoint& scrollOrigin() const { return m_scrollOrigin; }
     void setScrollOrigin(const IntPoint&);
-    
+
     bool requestedScrollPositionRepresentsProgrammaticScroll() const { return m_requestedScrollPositionRepresentsProgrammaticScroll; }
 
-    // Copies the current tree state and clears the changed properties mask in the original.
-    PassOwnPtr<ScrollingTreeState> commit();
-
 private:
-    ScrollingTreeState();
+    ScrollingStateScrollingNode(ScrollingStateTree*);
+    ScrollingStateScrollingNode(ScrollingStateScrollingNode*);
 
     unsigned m_changedProperties;
 
@@ -143,15 +132,10 @@ private:
 
     IntPoint m_requestedScrollPosition;
     IntPoint m_scrollOrigin;
-
-#if PLATFORM(MAC)
-    RetainPtr<PlatformLayer> m_platformScrollLayer;
-#endif
-
 };
 
 } // namespace WebCore
 
 #endif // ENABLE(THREADED_SCROLLING)
 
-#endif // ScrollingTreeState_h
+#endif // ScrollingStateScrollingNode_h

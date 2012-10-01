@@ -24,18 +24,25 @@
  */
 
 #include "config.h"
-#include "ScrollingTreeState.h"
+#include "ScrollingStateNode.h"
+
+#include "ScrollingStateTree.h"
 
 #if ENABLE(THREADED_SCROLLING)
 
 namespace WebCore {
 
-PlatformLayer* ScrollingTreeState::platformScrollLayer() const
+PlatformLayer* ScrollingStateNode::platformScrollLayer() const
 {
     return m_platformScrollLayer.get();
 }
 
-void ScrollingTreeState::setScrollLayer(const GraphicsLayer* graphicsLayer)
+void ScrollingStateNode::setScrollLayer(PlatformLayer* platformLayer)
+{
+    m_platformScrollLayer = platformLayer;
+}
+
+void ScrollingStateNode::setScrollLayer(const GraphicsLayer* graphicsLayer)
 {
     PlatformLayer* platformScrollLayer = graphicsLayer ? graphicsLayer->platformLayer() : nil;
 
@@ -43,7 +50,8 @@ void ScrollingTreeState::setScrollLayer(const GraphicsLayer* graphicsLayer)
         return;
 
     m_platformScrollLayer = platformScrollLayer;
-    m_changedProperties |= ScrollLayer;
+    m_scrollLayerDidChange = true;
+    m_scrollingStateTree->setHasChangedProperties(true);
 }
 
 } // namespace WebCore

@@ -1,3 +1,143 @@
+2012-10-01  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=97365
+        ScrollingTreeState needs to be a tree of nodes
+
+        Reviewed by Simon Fraser.
+
+        This patch should not change any behavior.
+
+        Prior to this patch, ScrollingTreeState attempted to contain all of 
+        the state information needed for the whole scrolling tree in one 
+        object. But in the future when there are multiple nodes in the 
+        scrolling tree, a single state object will not be sufficient. 
+        ScrollingState should also be represented by a tree. This patch makes 
+        scrolling state into a tree. The old ScrollingTreeState class has 
+        become the ScrollingStateScrollingNode class since the majority of 
+        the class represents scroll state that is specific to ScrollableAreas 
+        and will not be applicable to fixed or sticky layers.
+
+        Some new files and some moved files.
+        * WebCore.xcodeproj/project.pbxproj:
+
+        Everything that used to refer to the ScrollingTreeState should now 
+        refer to the ScrollingStateTree instead. Right now, all of this code 
+        continues to deal with only the root node of the tree. In the future, 
+        it will have to deal with all of the nodes.
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::ScrollingCoordinator):
+        (WebCore::ScrollingCoordinator::pageDestroyed):
+        (WebCore::ScrollingCoordinator::requestScrollPositionUpdate):
+        (WebCore::ScrollingCoordinator::setScrollLayer):
+        (WebCore::ScrollingCoordinator::setNonFastScrollableRegion):
+        (WebCore::ScrollingCoordinator::setScrollParameters):
+        (WebCore::ScrollingCoordinator::setWheelEventHandlerCount):
+        (WebCore::ScrollingCoordinator::setShouldUpdateScrollLayerPositionOnMainThread):
+        (WebCore::ScrollingCoordinator::scheduleTreeStateCommit):
+        (WebCore::ScrollingCoordinator::scrollingStateTreeCommitterTimerFired):
+        (WebCore::ScrollingCoordinator::commitTreeStateIfNeeded):
+        (WebCore::ScrollingCoordinator::commitTreeState):
+        * page/scrolling/ScrollingCoordinator.h:
+        (WebCore):
+        (ScrollingCoordinator):
+
+        This is a new abstract base class for the nodes in the 
+        ScrollingStateTree.
+        * page/scrolling/ScrollingStateNode.cpp: Added.
+        (WebCore):
+        (WebCore::ScrollingStateNode::ScrollingStateNode):
+        (WebCore::ScrollingStateNode::~ScrollingStateNode):
+        (WebCore::ScrollingStateNode::appendChild):
+        (WebCore::ScrollingStateNode::cloneChildNodes):
+        (WebCore::ScrollingStateNode::traverseNext):
+        * page/scrolling/ScrollingStateNode.h: Added.
+        (WebCore):
+        (ScrollingStateNode):
+        (WebCore::ScrollingStateNode::scrollLayerDidChange):
+        (WebCore::ScrollingStateNode::setScrollLayerDidChange):
+        (WebCore::ScrollingStateNode::scrollingStateTree):
+        (WebCore::ScrollingStateNode::parent):
+        (WebCore::ScrollingStateNode::firstChild):
+        (WebCore::ScrollingStateNode::nextSibling):
+        (WebCore::ScrollingStateNode::setParent):
+        (WebCore::ScrollingStateNode::setFirstChild):
+        (WebCore::ScrollingStateNode::setNextSibling):
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        * page/scrolling/mac/ScrollingStateNodeMac.mm: Copied from page/scrolling/mac/ScrollingTreeStateMac.mm.
+        (WebCore::ScrollingStateNode::platformScrollLayer):
+        (WebCore::ScrollingStateNode::setScrollLayer):
+        (WebCore):
+
+        Right now, the ScrollingStateScrollingNode is the only type of 
+        ScrollingStateNode. In the future there will be, for example, 
+        ScrollingStateFixedNodes that will have a different set of state 
+        information to keep track of.
+        * page/scrolling/ScrollingStateScrollingNode.cpp: Copied from page/scrolling/ScrollingTreeState.cpp.
+        (WebCore::ScrollingStateScrollingNode::create):
+        (WebCore::ScrollingStateScrollingNode::ScrollingStateScrollingNode):
+        (WebCore):
+        (WebCore::ScrollingStateScrollingNode::~ScrollingStateScrollingNode):
+        (WebCore::ScrollingStateScrollingNode::cloneNode):
+        (WebCore::ScrollingStateScrollingNode::setViewportRect):
+        (WebCore::ScrollingStateScrollingNode::setContentsSize):
+        (WebCore::ScrollingStateScrollingNode::setNonFastScrollableRegion):
+        (WebCore::ScrollingStateScrollingNode::setWheelEventHandlerCount):
+        (WebCore::ScrollingStateScrollingNode::setShouldUpdateScrollLayerPositionOnMainThread):
+        (WebCore::ScrollingStateScrollingNode::setHorizontalScrollElasticity):
+        (WebCore::ScrollingStateScrollingNode::setVerticalScrollElasticity):
+        (WebCore::ScrollingStateScrollingNode::setHasEnabledHorizontalScrollbar):
+        (WebCore::ScrollingStateScrollingNode::setHasEnabledVerticalScrollbar):
+        (WebCore::ScrollingStateScrollingNode::setHorizontalScrollbarMode):
+        (WebCore::ScrollingStateScrollingNode::setVerticalScrollbarMode):
+        (WebCore::ScrollingStateScrollingNode::setRequestedScrollPosition):
+        (WebCore::ScrollingStateScrollingNode::setScrollOrigin):
+        * page/scrolling/ScrollingStateScrollingNode.h: Copied from page/scrolling/ScrollingTreeState.h.
+        (ScrollingStateScrollingNode):
+        * page/scrolling/ScrollingStateTree.cpp: Added.
+        (WebCore):
+        (WebCore::ScrollingStateTree::create):
+        (WebCore::ScrollingStateTree::ScrollingStateTree):
+        (WebCore::ScrollingStateTree::~ScrollingStateTree):
+        (WebCore::ScrollingStateTree::commit):
+
+        The ScrollingStateTree manages the nodes in the tree via the root 
+        node. It is responsible for cloning the tree and sending it over to 
+        the scrolling thread.
+        * page/scrolling/ScrollingStateTree.h: Added.
+        (WebCore):
+        (ScrollingStateTree):
+        (WebCore::ScrollingStateTree::rootStateNode):
+        (WebCore::ScrollingStateTree::setHasChangedProperties):
+        (WebCore::ScrollingStateTree::hasChangedProperties):
+        (WebCore::ScrollingStateTree::setRootStateNode):
+
+        Everything that used to refer to the ScrollingTreeState should now 
+        refer to the ScrollingStateTree instead. Right now, all of this code 
+        continues to deal with only the root node of the tree. In the future, 
+        it will have to deal with all of the nodes.
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::commitNewTreeState):
+        * page/scrolling/ScrollingTree.h:
+        (WebCore):
+        * page/scrolling/ScrollingTreeNode.cpp:
+        (WebCore::ScrollingTreeNode::update):
+        * page/scrolling/ScrollingTreeNode.h:
+        (WebCore):
+        (ScrollingTreeNode):
+        * page/scrolling/mac/ScrollingTreeNodeMac.h:
+        (ScrollingTreeNodeMac):
+        * page/scrolling/mac/ScrollingTreeNodeMac.mm:
+        (WebCore::ScrollingTreeNodeMac::update):
+
+        ScrollingTreeState.cpp --> ScrollingStateScrollingNode.cpp
+        * page/scrolling/ScrollingTreeState.cpp: Removed.
+
+        ScrollingTreeState.h --> ScrollingStateScrollingNode.h
+        * page/scrolling/ScrollingTreeState.h: Removed.
+
+        ScrollingTreeStateMac.mm --> ScrollingStateNodeMac.mm
+        * page/scrolling/mac/ScrollingTreeStateMac.mm: Removed.
+
 2012-10-01  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Kill transitive effects of SelectorChecker::checkOneSelector.
