@@ -1,3 +1,83 @@
+2012-10-01  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Fire error rather than raising on request creation if transaction aborts asynchronously.
+        https://bugs.webkit.org/show_bug.cgi?id=93054
+
+        Reviewed by Tony Chang.
+
+        All IDB data operations are asynchronous, producing IDBRequest objects. This was implemented
+        by passing all data from the front-end to the back-end synchronously, and synchronously
+        returning an exception code back if the request was invalid. Previous changes have moved
+        request validation to the front-end except for the case of the back-end transaction having
+        asynchronously aborted in the mean time.
+
+        To eliminate that case (which would allow front-end to back-end communication to be
+        asynchronous in multi-process ports), change from returning an exception code to relying on
+        the front-end to abort the request when the abort event finally arrives.
+
+        The difference would be noticeable in scripts - in a multi-process environment:
+
+        var request1 = store.get(0);
+        request1.onerror = errorHandler; // (A)
+        // (B)
+        var request2 = store.get(0); // (C)
+        request2.onerror = errorHandler; // (D)
+
+        If the transaction back-end were to asynchronously abort at exactly point (B), then prior to
+        this patch an exception would be thrown at (C). With this patch, no exception but (D) would
+        fire, same as (A).
+
+        The back-end explicitly fires an error callback as well, as intermediate layers may rely on
+        this to stop tracking the pending callback.
+
+        No new layout tests - change is not observable in single-process ports.
+        Added webkit_unit_test IDBRequestTest.AbortErrorAfterAbort to verify that IDBRequest
+        is resilient to this pattern, but it was previous.
+
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::advance): Back end should never fail a request.
+        (WebCore::IDBCursor::continueFunction): Ditto.
+        (WebCore::IDBCursor::deleteFunction): Ditto, and also move "is key cursor" test
+        here from back-end.
+        * Modules/indexeddb/IDBCursorBackendImpl.cpp:
+        (WebCore::IDBCursorBackendImpl::continueFunction): Change from EC to firing error.
+        (WebCore::IDBCursorBackendImpl::advance): Ditto.
+        (WebCore::IDBCursorBackendImpl::deleteFunction): Ditto, and remove test moved to FE.
+        (WebCore::IDBCursorBackendImpl::prefetchContinue): Ditto.
+        * Modules/indexeddb/IDBDatabaseError.cpp:
+        (WebCore::IDBDatabaseError::create): Add overload that looks up message via code.
+        (WebCore::IDBDatabaseError::IDBDatabaseError): Look up message via exception table.
+        * Modules/indexeddb/IDBDatabaseException.h: Add getErrorDescription.
+        * Modules/indexeddb/IDBDatabaseException.cpp: Implementation of getErrorDescription.
+        * Modules/indexeddb/IDBIndex.cpp:
+        (WebCore::IDBIndex::openCursor): Back end should never fail a request.
+        (WebCore::IDBIndex::count): Ditto.
+        (WebCore::IDBIndex::openKeyCursor): Ditto.
+        (WebCore::IDBIndex::get): Ditto.
+        (WebCore::IDBIndex::getKey): Ditto.
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp:
+        (WebCore::IDBIndexBackendImpl::openCursor): Change from EC to firing error.
+        (WebCore::IDBIndexBackendImpl::openKeyCursor): Ditto.
+        (WebCore::IDBIndexBackendImpl::count): Ditto.
+        (WebCore::IDBIndexBackendImpl::get): Ditto.
+        (WebCore::IDBIndexBackendImpl::getKey): Ditto.
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore::IDBObjectStore::get): Back end should never fail a request.
+        (WebCore::IDBObjectStore::put): Ditto.
+        (WebCore::IDBObjectStore::deleteFunction): Ditto.
+        (WebCore::IDBObjectStore::clear): Ditto.
+        (WebCore): Ditto.
+        (WebCore::IDBObjectStore::openCursor): Ditto.
+        (WebCore::IDBObjectStore::count): Ditto.
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::get): Change from EC to firing error.
+        (WebCore::IDBObjectStoreBackendImpl::putWithIndexKeys): Ditto.
+        (WebCore):
+        (WebCore::IDBObjectStoreBackendImpl::deleteFunction): Ditto.
+        (WebCore::IDBObjectStoreBackendImpl::clear): Ditto.
+        (WebCore::IDBObjectStoreBackendImpl::openCursor): Ditto.
+        (WebCore::IDBObjectStoreBackendImpl::count): Ditto.
+
 2012-10-01  Ryosuke Niwa  <rniwa@webkit.org>
 
         Build fix. Clearly, these objects could be instantiated in worker threads.
