@@ -1,3 +1,22 @@
+2012-10-01  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Kill transitive effects of SelectorChecker::checkOneSelector.
+        https://bugs.webkit.org/show_bug.cgi?id=97953
+
+        Reviewed by Eric Seidel.
+
+        The dynamicPseudo/hasUnknownPseudoelements by-ref parameters that are passed into checkOneSelector make the logic harder to understand and aren't needed. Refactor the code to rid of them, replacing them instead with two flags in SelectorCheckingContext.
+
+        No change in behavior, covered by existing tests.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkSelector): Rolled pseudo-element-checking code out of checkOneSelector into here, since that is where t
+        (WebCore::SelectorChecker::checkOneSelector): Changed to use SelectorCheckingContext rather than transitive params.
+        * css/SelectorChecker.h:
+        (WebCore::SelectorChecker::SelectorCheckingContext::SelectorCheckingContext): Added two new flags.
+        (SelectorCheckingContext): Ditto.
+
+
 2012-10-01  Andreas Kling  <kling@webkit.org>
 
         349kB below SelectorDataList::initialize() on Membuster3.
