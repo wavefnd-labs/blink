@@ -1,3 +1,30 @@
+2012-10-01  Arpita Bahuguna  <arpitabahuguna@gmail.com>
+
+        RenderBlock incorrectly calculates pref width when a replaced object follows a RenderInline with width
+        https://bugs.webkit.org/show_bug.cgi?id=84624
+
+        Reviewed by Levi Weintraub.
+
+        For the specific scenario, wherein an inline replaced element (image)
+        follows an inline flow object within a render block, we should allow
+        for that block to grow to accomodate the replaced element so as to
+        avoid it's overflow.
+
+        This quirk is handled well by other browsers.
+
+        Test: fast/block/block-with-inline-replaced-child.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computeInlinePreferredLogicalWidths):
+        We should not cause our line to break for the scenario wherein an inline
+        replaced element follows an inline flow object.
+
+        For handling the same have introduced a flag: isPrevChildInlineFlow which
+        shall be set for an inline flow element.
+        Based on this, while handling the inline replaced elements, we either
+        terminate the line (for minWidth calculation) or not depending upon
+        this flag.
+
 2012-10-01  Yury Semikhatsky  <yurys@chromium.org>
 
         Unreviewed. Chromium build fix.
