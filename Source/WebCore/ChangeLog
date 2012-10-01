@@ -1,3 +1,237 @@
+2012-10-01  Florin Malita  <fmalita@chromium.org>
+
+        Refactor layer-related logic out of RenderBoxModelObject
+        https://bugs.webkit.org/show_bug.cgi?id=86022
+
+        Reviewed by David Hyatt.
+
+        This patch extracts layer-related logic into a dedicated class
+        (RenderLayerModelObject) and refactors dependent code to make use
+        of the new type instead of RenderBoxModelObject. This is in preparation
+        of adding non-RenderBoxModelObject layer supprt.
+
+        All methods that were using RenderBoxModelObject for layer-related
+        functionality are updated to work with RenderLayerModelObject
+        instead (a RenderLayer's renderer() can no longer be assumed to be
+        a RenderBoxModelObject).
+
+        No new tests: refactoring with no behavior changes.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.order:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * rendering/LayoutRepainter.h:
+        (WebCore):
+        (LayoutRepainter):
+        * rendering/RenderBR.h:
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::selectionGapRectsForRepaint):
+        (WebCore::RenderBlock::rectWithOutlineForRepaint):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleDidChange):
+        (WebCore::RenderBox::updateFromStyle):
+        (WebCore::RenderBox::outlineBoundsForRepaint):
+        (WebCore::RenderBox::mapLocalToContainer):
+        (WebCore::RenderBox::pushMappingToContainer):
+        (WebCore::RenderBox::clippedOverflowRectForRepaint):
+        (WebCore::RenderBox::computeRectForRepaint):
+        (WebCore::RenderBox::enclosingFloatPaintingLayer):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore):
+        (WebCore::RenderBoxModelObject::RenderBoxModelObject):
+        (WebCore::RenderBoxModelObject::~RenderBoxModelObject):
+        (WebCore::RenderBoxModelObject::willBeDestroyed):
+        (WebCore::RenderBoxModelObject::updateFromStyle):
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        * rendering/RenderGeometryMap.cpp:
+        (WebCore::RenderGeometryMap::pushMappingsToAncestor):
+        (WebCore::RenderGeometryMap::popMappingsToAncestor):
+        * rendering/RenderGeometryMap.h:
+        (RenderGeometryMap):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::updateFromStyle):
+        (WebCore::RenderInline::clippedOverflowRectForRepaint):
+        (WebCore::RenderInline::rectWithOutlineForRepaint):
+        (WebCore::RenderInline::computeRectForRepaint):
+        (WebCore::RenderInline::mapLocalToContainer):
+        (WebCore::RenderInline::pushMappingToContainer):
+        * rendering/RenderInline.h:
+        (RenderInline):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::RenderLayer):
+        (WebCore::RenderLayer::updateLayerPositions):
+        (WebCore::RenderLayer::computeRepaintRects):
+        (WebCore::checkContainingBlockChainForPagination):
+        (WebCore::RenderLayer::updateLayerPosition):
+        (WebCore::isPositionedContainer):
+        (WebCore::RenderLayer::hasAncestorWithFilterOutsets):
+        (WebCore::RenderLayer::scrollTo):
+        (WebCore::RenderLayer::repaintIncludingNonCompositingDescendants):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        (WebCore::RenderLayer::renderer):
+        * rendering/RenderLayerBacking.h:
+        (WebCore::RenderLayerBacking::renderer):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::updateBacking):
+        (WebCore::RenderLayerCompositor::repaintOnCompositingChange):
+        (WebCore::RenderLayerCompositor::requiresCompositingLayer):
+        (WebCore::RenderLayerCompositor::reasonForCompositing):
+        * rendering/RenderListMarker.cpp:
+        (WebCore::RenderListMarker::selectionRectForRepaint):
+        * rendering/RenderListMarker.h:
+        (RenderListMarker):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::addChild):
+        (WebCore::addLayers):
+        (WebCore::RenderObject::removeLayers):
+        (WebCore::RenderObject::moveLayers):
+        (WebCore::RenderObject::findNextLayer):
+        (WebCore::RenderObject::enclosingLayer):
+        (WebCore::RenderObject::setLayerNeedsFullRepaint):
+        (WebCore::RenderObject::setLayerNeedsFullRepaintForPositionedMovementLayout):
+        (WebCore::RenderObject::containerForRepaint):
+        (WebCore::RenderObject::repaintUsingContainer):
+        (WebCore::RenderObject::repaint):
+        (WebCore::RenderObject::repaintRectangle):
+        (WebCore::RenderObject::repaintAfterLayoutIfNeeded):
+        (WebCore::RenderObject::rectWithOutlineForRepaint):
+        (WebCore::RenderObject::clippedOverflowRectForRepaint):
+        (WebCore::RenderObject::computeRectForRepaint):
+        (WebCore::RenderObject::computeFloatRectForRepaint):
+        (WebCore::RenderObject::adjustStyleDifference):
+        (WebCore::RenderObject::mapLocalToContainer):
+        (WebCore::RenderObject::pushMappingToContainer):
+        (WebCore::RenderObject::shouldUseTransformFromContainer):
+        (WebCore::RenderObject::getTransformFromContainer):
+        (WebCore::RenderObject::localToContainerQuad):
+        (WebCore::RenderObject::localToContainerPoint):
+        (WebCore::RenderObject::container):
+        (WebCore::RenderObject::willBeDestroyed):
+        (WebCore::RenderObject::isComposited):
+        * rendering/RenderObject.h:
+        (WebCore):
+        (WebCore::RenderObject::isLayerModelObject):
+        (RenderObject):
+        (WebCore::RenderObject::selectionRectForRepaint):
+        (WebCore::RenderObject::outlineBoundsForRepaint):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::selectionRectForRepaint):
+        (WebCore::RenderReplaced::clippedOverflowRectForRepaint):
+        * rendering/RenderReplaced.h:
+        (RenderReplaced):
+        * rendering/RenderSelectionInfo.h:
+        (WebCore::RenderSelectionInfoBase::repaintContainer):
+        (RenderSelectionInfoBase):
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::clippedOverflowRectForRepaint):
+        (WebCore::RenderTableCell::computeRectForRepaint):
+        * rendering/RenderTableCell.h:
+        (RenderTableCell):
+        * rendering/RenderTableCol.cpp:
+        (WebCore::RenderTableCol::clippedOverflowRectForRepaint):
+        * rendering/RenderTableCol.h:
+        (RenderTableCol):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::clippedOverflowRectForRepaint):
+        * rendering/RenderTableRow.h:
+        (RenderTableRow):
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::clippedOverflowRectForRepaint):
+        (WebCore::RenderText::selectionRectForRepaint):
+        * rendering/RenderText.h:
+        (RenderText):
+        * rendering/RenderLayerModelObject.cpp: Added.
+        (WebCore):
+        (WebCore::RenderLayerModelObject::RenderLayerModelObject):
+        (WebCore::RenderLayerModelObject::~RenderLayerModelObject):
+        (WebCore::RenderLayerModelObject::destroyLayer):
+        (WebCore::RenderLayerModelObject::ensureLayer):
+        (WebCore::RenderLayerModelObject::hasSelfPaintingLayer):
+        (WebCore::RenderLayerModelObject::willBeDestroyed):
+        (WebCore::RenderLayerModelObject::styleWillChange):
+        (WebCore::RenderLayerModelObject::styleDidChange):
+        * rendering/RenderLayerModelObject.h: Added.
+        (WebCore):
+        (RenderLayerModelObject):
+        (WebCore::RenderLayerModelObject::layer):
+        (WebCore::RenderLayerModelObject::updateFromStyle):
+        (WebCore::toRenderLayerModelObject):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::mapLocalToContainer):
+        (WebCore::RenderView::pushMappingToContainer):
+        (WebCore::isComposited):
+        (WebCore::RenderView::computeRectForRepaint):
+        (WebCore::RenderView::absoluteRects):
+        (WebCore::RenderView::absoluteQuads):
+        (WebCore::RenderView::selectionBounds):
+        (WebCore::RenderView::setSelection):
+        (WebCore::RenderView::clearSelection):
+        * rendering/RenderView.h:
+        (RenderView):
+        * rendering/RenderingAllInOne.cpp:
+        * rendering/svg/RenderSVGBlock.cpp:
+        (WebCore::RenderSVGBlock::updateFromStyle):
+        * rendering/svg/RenderSVGBlock.h:
+        (RenderSVGBlock):
+        * rendering/svg/RenderSVGForeignObject.cpp:
+        (WebCore::RenderSVGForeignObject::clippedOverflowRectForRepaint):
+        (WebCore::RenderSVGForeignObject::computeFloatRectForRepaint):
+        (WebCore::RenderSVGForeignObject::mapLocalToContainer):
+        (WebCore::RenderSVGForeignObject::pushMappingToContainer):
+        * rendering/svg/RenderSVGForeignObject.h:
+        (RenderSVGForeignObject):
+        * rendering/svg/RenderSVGGradientStop.h:
+        * rendering/svg/RenderSVGHiddenContainer.h:
+        * rendering/svg/RenderSVGInline.cpp:
+        (WebCore::RenderSVGInline::clippedOverflowRectForRepaint):
+        (WebCore::RenderSVGInline::computeFloatRectForRepaint):
+        (WebCore::RenderSVGInline::mapLocalToContainer):
+        (WebCore::RenderSVGInline::pushMappingToContainer):
+        * rendering/svg/RenderSVGInline.h:
+        (RenderSVGInline):
+        * rendering/svg/RenderSVGModelObject.cpp:
+        (WebCore::RenderSVGModelObject::clippedOverflowRectForRepaint):
+        (WebCore::RenderSVGModelObject::computeFloatRectForRepaint):
+        (WebCore::RenderSVGModelObject::mapLocalToContainer):
+        (WebCore::RenderSVGModelObject::pushMappingToContainer):
+        (WebCore::RenderSVGModelObject::outlineBoundsForRepaint):
+        * rendering/svg/RenderSVGModelObject.h:
+        (RenderSVGModelObject):
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::clippedOverflowRectForRepaint):
+        (WebCore::RenderSVGRoot::computeFloatRectForRepaint):
+        (WebCore::RenderSVGRoot::mapLocalToContainer):
+        (WebCore::RenderSVGRoot::pushMappingToContainer):
+        * rendering/svg/RenderSVGRoot.h:
+        (RenderSVGRoot):
+        * rendering/svg/RenderSVGText.cpp:
+        (WebCore::RenderSVGText::clippedOverflowRectForRepaint):
+        (WebCore::RenderSVGText::computeRectForRepaint):
+        (WebCore::RenderSVGText::computeFloatRectForRepaint):
+        (WebCore::RenderSVGText::mapLocalToContainer):
+        (WebCore::RenderSVGText::pushMappingToContainer):
+        * rendering/svg/RenderSVGText.h:
+        (RenderSVGText):
+        * rendering/svg/SVGRenderSupport.cpp:
+        (WebCore::SVGRenderSupport::clippedOverflowRectForRepaint):
+        (WebCore::SVGRenderSupport::computeFloatRectForRepaint):
+        (WebCore::SVGRenderSupport::mapLocalToContainer):
+        (WebCore::SVGRenderSupport::pushMappingToContainer):
+        * rendering/svg/SVGRenderSupport.h:
+        (WebCore):
+        (SVGRenderSupport):
+
 2012-10-01  Stephen Chenney  <schenney@chromium.org>
 
         Refactor WebCore::FontData handling to clarify pointer ownership
