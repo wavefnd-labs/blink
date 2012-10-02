@@ -26,7 +26,7 @@
 #ifndef WebGeolocationManager_h
 #define WebGeolocationManager_h
 
-#include "MessageID.h"
+#include "MessageReceiver.h"
 #include "WebGeolocationPosition.h"
 #include <wtf/HashSet.h>
 #include <wtf/HashMap.h>
@@ -50,7 +50,7 @@ namespace WebKit {
 class WebProcess;
 class WebPage;
 
-class WebGeolocationManager {
+class WebGeolocationManager : private CoreIPC::MessageReceiver {
     WTF_MAKE_NONCOPYABLE(WebGeolocationManager);
 public:
     explicit WebGeolocationManager(WebProcess*);
@@ -61,9 +61,11 @@ public:
 
     void requestPermission(WebCore::Geolocation*);
 
-    void didReceiveMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*);
 
 private:
+    // MessageReceiver
+    virtual void didReceiveMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*) OVERRIDE;
+
     // Implemented in generated WebGeolocationManagerMessageReceiver.cpp
     void didReceiveWebGeolocationManagerMessage(CoreIPC::Connection*, CoreIPC::MessageID, CoreIPC::ArgumentDecoder*);
 
