@@ -1,3 +1,50 @@
+2012-10-02  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: Move UISourceCode creation out from ResourceScriptMapping.
+        https://bugs.webkit.org/show_bug.cgi?id=97680
+
+        Reviewed by Pavel Feldman.
+
+        UISourceCodes for scripts having sourceURL are now created by NetworkUISourceCodeProvider.
+        UISourceCodes for anonymous, dynamic and concatenated scripts are now created on demand only.
+        All UISourceCodes created by ResourceScriptMapping are now "temporary".
+        Temporary UISourceCodes are not stored in workspace and removed when a normal UISourceCode with the same url is available.
+        UISourceCodeReplaced event was replaced with TemporaryUISourceCodeAdded/Removed events.
+
+        * inspector/front-end/BreakpointManager.js:
+        (WebInspector.BreakpointManager):
+        (WebInspector.BreakpointManager.prototype._uiSourceCodeRemoved):
+        (WebInspector.BreakpointManager.Breakpoint.prototype.remove):
+        * inspector/front-end/NavigatorView.js:
+        * inspector/front-end/NetworkUISourceCodeProvider.js:
+        (WebInspector.NetworkUISourceCodeProvider):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._parsedScriptSource):
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping):
+        (WebInspector.ResourceScriptMapping.prototype.rawLocationToUILocation):
+        (WebInspector.ResourceScriptMapping.prototype._workspaceUISourceCodeForScript):
+        (WebInspector.ResourceScriptMapping.prototype.uiLocationToRawLocation):
+        (WebInspector.ResourceScriptMapping.prototype.addScript):
+        (WebInspector.ResourceScriptMapping.prototype._deleteTemporaryUISourceCodeForScripts):
+        (WebInspector.ResourceScriptMapping.prototype._bindUISourceCodeToScripts):
+        (WebInspector.ResourceScriptMapping.prototype._isDynamicScript):
+        (WebInspector.ResourceScriptMapping.prototype._getOrCreateTemporaryUISourceCode):
+        (WebInspector.ResourceScriptMapping.prototype._uiSourceCodeAddedToWorkspace):
+        (WebInspector.ResourceScriptMapping.prototype._scriptsForUISourceCode):
+        (WebInspector.ResourceScriptMapping.prototype._reset):
+        * inspector/front-end/RevisionHistoryView.js:
+        (WebInspector.RevisionHistoryView):
+        * inspector/front-end/ScriptsNavigator.js:
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel):
+        * inspector/front-end/TabbedEditorContainer.js:
+        (WebInspector.TabbedEditorContainer.prototype.removeUISourceCode.get if):
+        (WebInspector.TabbedEditorContainer.prototype.removeUISourceCode):
+        * inspector/front-end/UISourceCode.js:
+        * inspector/front-end/Workspace.js:
+        (WebInspector.Project.prototype.addTemporaryUISourceCode):
+        (WebInspector.Project.prototype.removeTemporaryUISourceCode):
+
 2012-10-02  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: fix front-end compilation
