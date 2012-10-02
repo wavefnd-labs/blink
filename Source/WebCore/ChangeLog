@@ -1,3 +1,60 @@
+2012-10-02  Kenichi Ishibashi  <bashi@chromium.org>
+
+        [Chromium] Introduce caches for HarfBuzzShaper
+        https://bugs.webkit.org/show_bug.cgi?id=97993
+
+        Reviewed by Tony Chang.
+
+        - Implement canRenderCombiningCharacterSequence() for ports which use
+        HarfBuzzShaper. This function caches the result and will improve the
+        performance of HarfBuzzShaper::collectHarfBuzzRuns.
+        - Add a HashMap to HarfBuzzNGFace. It is used as a cache that holds
+        glyph indexes of codepoints. It reduces the number of
+        SkPaint::textToGlyphs() calls.
+
+        This patch makes the intl2 page cycler 4.4% faster on my machine.
+
+        No new tests. No changes in behavior.
+
+        * platform/graphics/SimpleFontData.h:
+        (SimpleFontData): Enabled canRenderCombiningCharacterSequence() if USE(HARFBUZZ_NG) is enabled.
+        * platform/graphics/freetype/SimpleFontDataFreeType.cpp:
+        (WebCore):
+        (WebCore::SimpleFontData::canRenderCombiningCharacterSequence): Added.
+        * platform/graphics/harfbuzz/ng/HarfBuzzNGFace.cpp:
+        (WebCore):
+        (FaceCacheEntry): Added.
+        (WebCore::HarfBuzzNGFace::HarfBuzzNGFace):
+        Lookup the cache entry in harfBuzzFaceCache. Create the entry if there is no entry in the cache.
+        Increment the ref count of the entry and set cache entry values to member variables.
+        (WebCore::HarfBuzzNGFace::~HarfBuzzNGFace):
+        Decrement the ref count of the cache entry. Remove the entry if no one refers the cache.
+        * platform/graphics/harfbuzz/ng/HarfBuzzNGFace.h:
+        (HarfBuzzNGFace):
+        * platform/graphics/harfbuzz/ng/HarfBuzzNGFaceSkia.cpp:
+        (HarfBuzzFontData): Added. Used as |userData| of harfbuzz callback functions.
+        (WebCore):
+        (WebCore::SkiaGetGlyphWidthAndExtents):
+        (WebCore::harfbuzzGetGlyph):
+        Look up the glyphChache first. If the cache entry doesn't exist, call
+        SkPaint::textToGlyphs() to get glyph index and store it to the cache.
+        (WebCore::harfbuzzGetGlyphHorizontalAdvance):
+        (WebCore::harfbuzzGetGlyphExtents):
+        (WebCore::destroyHarfBuzzFontData): Added.
+        (WebCore::HarfBuzzNGFace::createFont):
+        Create HarfBuzzFontData and pass it to harfbuzz.
+        * platform/graphics/harfbuzz/ng/HarfBuzzShaper.cpp:
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::applyShapeResult):
+        Don't initialize m_glyphToCharacterIndexes here.
+        (WebCore::HarfBuzzShaper::collectHarfBuzzRuns):
+        Use SimpleFontData::canRenderCombiningCharacterSequence() instead of
+        fontDataForCombiningCharacterSequence().
+        (WebCore::HarfBuzzShaper::setGlyphPositionsForHarfBuzzRun):
+        Set glyphToCharacterIndexes of the current HarfBuzzRun.
+        * platform/graphics/skia/SimpleFontDataSkia.cpp:
+        (WebCore):
+        (WebCore::SimpleFontData::canRenderCombiningCharacterSequence): Added.
+
 2012-10-02  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=98182
