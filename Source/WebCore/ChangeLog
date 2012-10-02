@@ -1,3 +1,66 @@
+2012-10-02  Mike West  <mkwst@chromium.org>
+
+        Add call stacks to Content Security Policy checks when relevant.
+        https://bugs.webkit.org/show_bug.cgi?id=94433
+
+        Reviewed by Adam Barth.
+
+        Previously, we generated stack traces only for eval-related CSP
+        violations. As it turns out, we can call createScriptCallStack from
+        practically anywhere. This patch takes advantage of that to generate
+        stack traces whenever a warning is logged to the console. If we're in
+        a JavaScript stack, brilliant: we get a detailed warning. If not, the
+        stack trace is empty, and we don't pass it into the console logging
+        method.
+
+        This has the advantage of giving us good developer-facing logging for
+        any and all violations that result from script-based injection of
+        resources. Yay!
+
+        Tests: http/tests/inspector/csp-injected-content-warning-contains-stacktrace.html
+               http/tests/inspector/csp-inline-warning-contains-stacktrace.html
+               http/tests/inspector/csp-setInterval-warning-contains-stacktrace.html
+               http/tests/inspector/csp-setTimeout-warning-contains-stacktrace.html
+
+        * bindings/js/ScheduledAction.cpp:
+        (WebCore::ScheduledAction::create):
+            Replacing the generated stack trace with the current script state,
+            which will enable us to generate the stack trace inside
+            ContentSecurityPolicy::reportViolation if it's relevant.
+        * bindings/v8/ScriptCallStackFactory.cpp:
+        (WebCore::createScriptCallStackForConsole):
+        (WebCore):
+        * bindings/v8/ScriptCallStackFactory.h:
+        (WebCore):
+            Adding a dummy interface to createScriptCallStackForConsole that
+            allows ScriptState to be passed in, which matches JSC's interface.
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::WindowSetTimeoutImpl):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::SetTimeoutOrInterval):
+            Dropping stack trace from call to ContentSecurityPolicy::allowEval.
+        * page/ContentSecurityPolicy.cpp:
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::reportViolation):
+        (WebCore::CSPDirectiveList::checkEvalAndReportViolation):
+        (WebCore::CSPDirectiveList::allowEval):
+            Piping script state through from CSPDirectiveList::allowEval rather
+            than a full stack trace.
+        (WebCore):
+        (WebCore::isAllowedByAll):
+        (WebCore::isAllowedByAllWithState):
+        (WebCore::ContentSecurityPolicy::allowEval):
+        (WebCore::ContentSecurityPolicy::reportViolation):
+        (WebCore::ContentSecurityPolicy::logToConsole):
+            Piping script state through from ContentSecurityPolicy::allowEval
+            rather than a full stack trace. Now, we can simply generate the
+            stack trace just before logging it, and only pass it into
+            addConsoleMessage if it's non-empty.
+        * page/ContentSecurityPolicy.h:
+        (JSC):
+        (WebCore):
+            Including 'ScriptState.h' to normalize V8 and JSC's JS state objects.
+
 2012-10-02  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: migrate from WebInspector.Foo.prototype.__proto__ = to __proto__: syntax
