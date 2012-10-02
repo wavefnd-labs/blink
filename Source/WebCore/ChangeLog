@@ -1,3 +1,189 @@
+2012-10-02  Stephen Chenney  <schenney@chromium.org>
+
+        Refactor WebCore::FontData handling to clarify pointer ownership
+        https://bugs.webkit.org/show_bug.cgi?id=95866
+
+        Reviewed by Eric Seidel.
+
+        Re-commit for a rolled-out original, now with Chromium Windows build fix.
+
+        This patch makes all FontData and derived classes ref-counted in all
+        code paths that lead to caching or other retention of a
+        pointer. The goal is to avert crashes and memory leaks, and to bring
+        the code more in line with current WebKit practices.
+
+        Specifically, this patch allows us to use ref pointers for all the
+        FontData stored in FontFallbackList objects. The FontFallbackList can
+        then own custom font data and manage its lifetime (forthcoming patch).
+        Currently Document owns custom font data and does an end run around
+        FontFallbackList in deleting glyph pages and custom font data, leaving
+        FontFallbackList with invalid pointers.
+
+        All FontData derived classes have been switched to use static create
+        methods with private constructors.
+
+        All caches that hold FontData now use RefPtrs.
+
+        All methods that construct new font data now return PassRefPtr, with the
+        exception of code only used to generate temporary data for text run layout.
+
+        All methods that handle FontData in a call stack that passes through
+        FontFallbackList::fontDataAt return PassRefPtr.
+
+        Performance tested with both WebKit Perf-o-matic, which showed
+        performance changes in the noise, and Chrome's page cycling tests with
+        the acid3 benchmark set, which showed no performance difference at all.
+
+        No new tests as this is refactoring code only and has no impact on functionality.
+
+        * css/CSSFontFace.cpp:
+        (WebCore::CSSFontFace::getFontData):
+        * css/CSSFontFace.h:
+        (CSSFontFace):
+        * css/CSSFontFaceSource.cpp:
+        (WebCore::CSSFontFaceSource::getFontData):
+        * css/CSSFontFaceSource.h:
+        (CSSFontFaceSource):
+        * css/CSSFontSelector.cpp:
+        (WebCore::fontDataForGenericFamily):
+        (WebCore::CSSFontSelector::getFontData):
+        * css/CSSFontSelector.h:
+        * css/CSSSegmentedFontFace.cpp:
+        (WebCore::appendFontDataWithInvalidUnicodeRangeIfLoading):
+        (WebCore::CSSSegmentedFontFace::getFontData):
+        * css/CSSSegmentedFontFace.h:
+        (CSSSegmentedFontFace):
+        * dom/Document.cpp:
+        (WebCore::Document::registerCustomFont):
+        * dom/Document.h:
+        (Document):
+        * platform/graphics/Font.h:
+        (WebCore):
+        * platform/graphics/FontCache.cpp:
+        (WebCore):
+        (WebCore::FontCache::getCachedFontData):
+        (WebCore::FontCache::getNonRetainedLastResortFallbackFont):
+        (WebCore::FontCache::releaseFontData):
+        (WebCore::FontCache::purgeInactiveFontData):
+        (WebCore::FontCache::getFontData):
+        * platform/graphics/FontCache.h:
+        (FontCache):
+        * platform/graphics/FontData.h:
+        * platform/graphics/FontFallbackList.cpp:
+        (WebCore::FontFallbackList::releaseFontData):
+        (WebCore::FontFallbackList::fontDataAt):
+        (WebCore::FontFallbackList::setPlatformFont):
+        * platform/graphics/FontFallbackList.h:
+        (FontFallbackList):
+        * platform/graphics/FontFastPath.cpp:
+        (WebCore::Font::glyphDataAndPageForCharacter):
+        * platform/graphics/FontSelector.h:
+        (FontSelector):
+        * platform/graphics/GlyphPageTreeNode.cpp:
+        (WebCore::GlyphPageTreeNode::initializePage):
+        * platform/graphics/SegmentedFontData.cpp:
+        (WebCore::SegmentedFontData::fontDataForCharacter):
+        * platform/graphics/SegmentedFontData.h:
+        (WebCore::FontDataRange::FontDataRange):
+        (WebCore::FontDataRange::fontData):
+        (FontDataRange):
+        (WebCore::SegmentedFontData::create):
+        (SegmentedFontData):
+        (WebCore::SegmentedFontData::SegmentedFontData):
+        * platform/graphics/SimpleFontData.cpp:
+        (WebCore::SimpleFontData::verticalRightOrientationFontData):
+        (WebCore::SimpleFontData::uprightOrientationFontData):
+        (WebCore::SimpleFontData::brokenIdeographFontData):
+        * platform/graphics/SimpleFontData.h:
+        (WebCore::SimpleFontData::create):
+        (SimpleFontData):
+        (WebCore::SimpleFontData::variantFontData):
+        (DerivedFontData):
+        * platform/graphics/chromium/FontCacheAndroid.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/chromium/FontCacheChromiumWin.cpp:
+        (WebCore::FontCache::fontDataFromDescriptionAndLogFont):
+        (GetLastResortFallbackFontProcData):
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/chromium/SimpleFontDataChromiumWin.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/freetype/FontCacheFreeType.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/freetype/SimpleFontDataFreeType.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/mac/ComplexTextControllerCoreText.mm:
+        (WebCore::ComplexTextController::collectComplexTextRunsForCharacters):
+        * platform/graphics/mac/FontCacheMac.mm:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/mac/FontComplexTextMac.cpp:
+        (WebCore::Font::fontDataForCombiningCharacterSequence):
+        * platform/graphics/mac/SimpleFontDataMac.mm:
+        (WebCore::SimpleFontData::platformDestroy):
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/pango/FontCachePango.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/pango/SimpleFontDataPango.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/qt/FontCacheQt.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/qt/SimpleFontDataQt.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/skia/FontCacheSkia.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/skia/SimpleFontDataSkia.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/win/FontCacheWin.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::fontDataFromDescriptionAndLogFont):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/win/SimpleFontDataWin.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/wince/FontCacheWinCE.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/wince/SimpleFontDataWinCE.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+        * platform/graphics/wx/FontCacheWx.cpp:
+        (WebCore::FontCache::getFontDataForCharacters):
+        (WebCore::FontCache::getSimilarFontPlatformData):
+        (WebCore::FontCache::getLastResortFallbackFont):
+        * platform/graphics/wx/SimpleFontDataWx.cpp:
+        (WebCore::SimpleFontData::createScaledFontData):
+        (WebCore::SimpleFontData::smallCapsFontData):
+        (WebCore::SimpleFontData::emphasisMarkFontData):
+
 2012-10-02  Christophe Dumez  <christophe.dumez@intel.com>
 
         [XMLHttpRequest] overrideMimeType(mime) does not update the response's "Content-Type" header
