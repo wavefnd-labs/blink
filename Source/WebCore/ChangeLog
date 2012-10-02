@@ -1,3 +1,52 @@
+2012-10-02  Takashi Sakamoto  <tasak@google.com>
+
+        [Shadow] ShadowRoot should know whether <shadow> in its treescope
+        https://bugs.webkit.org/show_bug.cgi?id=97184
+
+        Reviewed by Dimitri Glazkov.
+
+        To quickly know whether some shadow dom subtree has any shadow element
+        or not, added hasShadowRootInsertionPoint, registerShadowElement and
+        unregisterShadowElement to class ShadowRoot. The register method or
+        unregister method is used when a shadow element is inserted into
+        document or removed from document. hasShadowInsertionPoint returns true
+        if any shadow element is still registered with the given shadow root.
+        Otherwise returns false. To test hasShadowInsertionPoint, added
+        hasShadowInsertionPoint to Internals.
+
+        Test: fast/dom/shadow/has-shadow-insertion-point.html
+
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::ShadowRoot):
+        Initializes number of shadow elements.
+        * dom/ShadowRoot.h:
+        (WebCore::ShadowRoot::registerShadowElement):
+        Increases number of shadow elements in shadow dom subtree by 1.
+        (WebCore::ShadowRoot::unregisterShadowElement):
+        Decreases number of shadow elements in shadow dom subtree by 1.
+        (WebCore::ShadowRoot::hasShadowInsertionPoint):
+        If number of shadow elements in shadow dom subtree is not equal to 0,
+        returns true. Otherwise, returns false.
+        * html/shadow/HTMLShadowElement.cpp:
+        (WebCore::HTMLShadowElement::HTMLShadowElement):
+        (WebCore::HTMLShadowElement::insertedInto):
+        If a shadow element is inserted into document, register the shadow
+        element with its shadow root.
+        (WebCore::HTMLShadowElement::removedFrom):
+         If a shadow element is removed from document, unregister the shadow
+        element with its shadow root.
+        * html/shadow/HTMLShadowElement.h:
+        Added a new member variable which has information about whether
+        this shadow element has been already registered with its shadow root
+        or not.
+        * testing/Internals.cpp:
+        (WebCore::Internals::hasShadowInsertionPoint):
+        Added a new testing method which returns whether the given shadow
+        root has any shadow element or not.
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2012-10-02  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: [Regression] DevToolsExtensionTest.TestContentScriptIsPresent fails
