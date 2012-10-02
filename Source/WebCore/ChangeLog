@@ -1,3 +1,47 @@
+2012-10-02  Yoshifumi Inoue  <yosin@chromium.org>
+
+        [Forms] Multiple fields datetime/datetime-local input UI
+        https://bugs.webkit.org/show_bug.cgi?id=97997
+
+        Reviewed by Kent Tamura.
+
+        This patch introduces multiple fields "datetime" and "datetime-local"
+        input UI in DRT. We'll enable these features once we add tests.
+
+        No new tests. To reduce size of this patch, other patches add tests
+        for multiple fields datetime/datetime-local input UI.
+
+        Note: Actual outputs of four tests
+          - fast/forms/datetime/datetime-input-visible-string.html
+          - fast/forms/datetime/datetime-stepup-stepdown-from-renderer.html
+          - fast/forms/datetimelocal/datetimelocal-input-visible-string.html
+          - fast/forms/datetimelocal/datetimelocal-stepup-stepdown-from-renderer.html
+        are different.
+
+        * bindings/generic/RuntimeEnabledFeatures.cpp:
+        (WebCore):
+        * css/html.css:
+        (input::-webkit-datetime-edit-day-field): Added for field appearance.
+        (input::-webkit-datetime-edit-day-field:focus):  Added to remove focus ring.
+        * html/DateTimeInputType.cpp:
+        (WebCore::DateTimeInputType::formatDateTimeFieldsState): Added to format numeric value to string value as specified in HTML5 specification.
+        (WebCore::DateTimeInputType::setupLayoutParameters): Added to set layout of multiple fields.
+        * html/DateTimeInputType.h: Changed to include BaseMultipleFieldsDateAndTimeInputType.h and introduce BaseDateTimeInputType typedef.
+        (WebCore::DateTimeInputType::DateTimeInputType): Changed base class name to BaseDateTimeInputType.
+        (DateTimeInputType): Changed to add declarations for formatDateTimeFieldsState() and setupLayoutParameters().
+        * html/DateTimeLocalInputType.cpp:
+        (WebCore::DateTimeLocalInputType::formatDateTimeFieldsState): Added to format numeric value to string value as specified in HTML5 specification.
+        (WebCore::DateTimeLocalInputType::setupLayoutParameters):  Added to set layout of multiple fields.
+        * html/DateTimeLocalInputType.h: Changed to include BaseMultipleFieldsDateAndTimeInputType.h and introduce BaseDateTimeLocalInputType typedef.
+        (WebCore::DateTimeLocalInputType::DateTimeLocalInputType): Changed base class name to BaseDateTimeLocalInputType.
+        (DateTimeLocalInputType): Changed to add declarations for formatDateTimeFieldsState() and setupLayoutParameters().
+        * html/shadow/DateTimeEditElement.cpp:
+        (DateTimeEditBuilder): Changed to add member variable m_placeholderForDay.
+        (WebCore::DateTimeEditBuilder::DateTimeEditBuilder): Changed to initialize m_placeholderForDay.
+        (WebCore::DateTimeEditBuilder::visitField): Changed to support week field.
+        * html/shadow/DateTimeEditElement.h:
+        (LayoutParameters): Changed to add placeholderForDay member variable.
+
 2012-10-02  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: [Regression] Breakpoints restored from storage are not set in debugger.
