@@ -32,6 +32,7 @@
 #define MemoryInstrumentationHashSet_h
 
 #include <wtf/HashSet.h>
+#include <wtf/MemoryInstrumentation.h>
 
 namespace WTF {
 
