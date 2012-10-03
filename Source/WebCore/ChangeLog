@@ -1,3 +1,54 @@
+2012-10-02  Dean Jackson  <dino@apple.com>
+
+        Expose some GPU Information
+        https://bugs.webkit.org/show_bug.cgi?id=97813
+
+        Reviewed by Sam Weinig, Ken Russell and Tim Horton.
+
+        Currently there are a few places in the WebGL code (and elsewhere, like CSS filters)
+        where we do some feature detection by examining the GPU vendor and its capabilities.
+        This patch puts this detection into our shared Extensions3D object.
+
+        Covered by existing tests. No new functionality.
+
+        * platform/graphics/Extensions3D.h: Adds the new methods for detecting vendor and features.
+        * platform/graphics/GraphicsContext3D.h:
+        (GraphicsContext3D): No longer needs function to detect multisampling on ATI.
+        * platform/graphics/chromium/Extensions3DChromium.h: Stub implementations of all
+        the new methods. Chromium does its detection elsewhere.
+        (WebCore::Extensions3DChromium::isNVIDIA):
+        (WebCore::Extensions3DChromium::isAMD):
+        (WebCore::Extensions3DChromium::isIntel):
+        (WebCore::Extensions3DChromium::vendor):
+        (Extensions3DChromium):
+        (WebCore::Extensions3DChromium::maySupportMultisampling):
+        (WebCore::Extensions3DChromium::requiresBuiltInFunctionEmulation):
+        * platform/graphics/filters/FECustomFilter.cpp:
+        (WebCore::FECustomFilter::createMultisampleBuffer): Add test for system multisampling to
+        custom filter code.
+        * platform/graphics/gpu/DrawingBuffer.cpp:
+        (WebCore::DrawingBuffer::create): Add test for system multisampling to drawing buffer's
+        creation code.
+        * platform/graphics/opengl/Extensions3DOpenGLCommon.cpp:
+        (WebCore::Extensions3DOpenGLCommon::Extensions3DOpenGLCommon): Detects all the features
+        as the object is created.
+        (WebCore::Extensions3DOpenGLCommon::getTranslatedShaderSourceANGLE): Can now simply ask
+        itself if it needs to turn on built-in function translation.
+        * platform/graphics/opengl/Extensions3DOpenGLCommon.h:
+        (Extensions3DOpenGLCommon):
+        (WebCore::Extensions3DOpenGLCommon::isNVidia):
+        (WebCore::Extensions3DOpenGLCommon::isAMD):
+        (WebCore::Extensions3DOpenGLCommon::isIntel):
+        (WebCore::Extensions3DOpenGLCommon::vendor):
+        (WebCore::Extensions3DOpenGLCommon::maySupportMultisampling):
+        (WebCore::Extensions3DOpenGLCommon::requiresBuiltInFunctionEmulation):
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::validateAttributes): Ask the extension object instead of
+        testing directly.
+        * platform/graphics/opengl/GraphicsContext3DOpenGLCommon.cpp:
+        (WebCore::GraphicsContext3D::validateDepthStencil): Ask the extension object instead
+        of testing directly.
+
 2012-10-02  Kenichi Ishibashi  <bashi@chromium.org>
 
         [Chromium] Introduce caches for HarfBuzzShaper
