@@ -1,3 +1,29 @@
+2012-10-02  Simon Fraser  <simon.fraser@apple.com>
+
+        Make TiledBacking slightly less aware of scrolling
+        https://bugs.webkit.org/show_bug.cgi?id=98216
+
+        Reviewed by Anders Carlsson.
+
+        TiledBacking shouldn't really care about there being scrollbars;
+        recast this in terms of "tile coverage", described by a bitfield
+        that has flags for coverage optimized for horizontal and vertical
+        scrolling. This allows for additional tile coverage behaviors later.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::performPostLayoutTasks):
+        * platform/graphics/TiledBacking.h:
+        * platform/graphics/ca/mac/TileCache.h:
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::TileCache): Initialize m_isInWindow to false to
+        be more conservative. It gets explicitly set by the only caller now, so this is
+        not a behavior change.
+        (WebCore::TileCache::setIsInWindow):
+        (WebCore::TileCache::setTileCoverage):
+        (WebCore::TileCache::tileCoverageRect):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::RenderLayerBacking):
+
 2012-10-02  Dean Jackson  <dino@apple.com>
 
         Expose some GPU Information
