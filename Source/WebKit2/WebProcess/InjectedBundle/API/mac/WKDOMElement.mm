@@ -25,7 +25,7 @@
 
 #import "config.h"
 
-#if defined(__LP64__) && defined(__CLANG__)
+#if defined(__LP64__) && defined(__clang__)
 
 #import "WKDOMElement.h"
 
@@ -35,4 +35,4 @@
 @implementation WKDOMElement
 @end
 
-#endif // defined(__LP64__) && defined(__CLANG__)
+#endif // defined(__LP64__) && defined(__clang__)
