@@ -51,9 +51,48 @@
     [super dealloc];
 }
 
+- (void)insertNode:(WKDOMNode *)node before:(WKDOMNode *)refNode
+{
+    // FIXME: Do something about the exception.
+    WebCore::ExceptionCode ec;
+    _impl->insertBefore(WebKit::toWebCoreNode(node), WebKit::toWebCoreNode(refNode), ec);
+}
+
+- (void)appendChild:(WKDOMNode *)node
+{
+    // FIXME: Do something about the exception.
+    WebCore::ExceptionCode ec;
+    _impl->appendChild(WebKit::toWebCoreNode(node), ec);
+}
+
 - (WKDOMDocument *)document
 {
     return WebKit::toWKDOMDocument(_impl->document());
+}
+
+- (WKDOMNode *)parentNode
+{
+    return WebKit::toWKDOMNode(_impl->parentNode());
+}
+
+- (WKDOMNode *)firstChild
+{
+    return WebKit::toWKDOMNode(_impl->firstChild());
+}
+
+- (WKDOMNode *)lastChild
+{
+    return WebKit::toWKDOMNode(_impl->lastChild());
+}
+
+- (WKDOMNode *)previousSibling
+{
+    return WebKit::toWKDOMNode(_impl->previousSibling());
+}
+
+- (WKDOMNode *)nextSibling
+{
+    return WebKit::toWKDOMNode(_impl->nextSibling());
 }
 
 @end
