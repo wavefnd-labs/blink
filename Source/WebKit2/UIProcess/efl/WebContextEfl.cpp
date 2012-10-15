@@ -54,8 +54,7 @@ String WebContext::platformDefaultDatabaseDirectory() const
 
 String WebContext::platformDefaultIconDatabasePath() const
 {
-    notImplemented();
-    return "";
+    return String::fromUTF8(efreet_data_home_get()) + "/WebKitEfl/IconDatabase";
 }
 
 String WebContext::platformDefaultLocalStorageDirectory() const
