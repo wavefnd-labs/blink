@@ -41,6 +41,8 @@ class WebGamepads;
 
 namespace WebTestRunner {
 
+class WebTask;
+
 class WebTestDelegate {
 public:
     virtual void clearContextMenuData() = 0;
@@ -50,6 +52,11 @@ public:
     virtual WebKit::WebContextMenuData* lastContextMenuData() const = 0;
     virtual void setGamepadData(const WebKit::WebGamepads&) = 0;
     virtual void printMessage(const std::string& message) const = 0;
+
+    // The delegate takes ownership of the WebTask objects and is responsible
+    // for deleting them.
+    virtual void postTask(WebTask*) = 0;
+    virtual void postDelayedTask(WebTask*, long long ms) = 0;
 };
 
 }
