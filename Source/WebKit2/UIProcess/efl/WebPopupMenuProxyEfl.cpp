@@ -49,7 +49,7 @@ void WebPopupMenuProxyEfl::showPopupMenu(const IntRect& rect, TextDirection text
 
 void WebPopupMenuProxyEfl::hidePopupMenu()
 {
-    ewk_view_popup_menu_close(m_viewImpl->view());
+    m_viewImpl->closePopupMenu();
 }
 
 void WebPopupMenuProxyEfl::valueChanged(int newSelectedIndex)
