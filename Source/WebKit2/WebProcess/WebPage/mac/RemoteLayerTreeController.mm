@@ -26,6 +26,11 @@
 #import "config.h"
 #import "RemoteLayerTreeController.h"
 
+#import "RemoteGraphicsLayer.h"
+#import <wtf/PassOwnPtr.h>
+
+using namespace WebCore;
+
 namespace WebKit {
 
 PassOwnPtr<RemoteLayerTreeController> RemoteLayerTreeController::create()
@@ -39,6 +44,11 @@ RemoteLayerTreeController::RemoteLayerTreeController()
 
 RemoteLayerTreeController::~RemoteLayerTreeController()
 {
+}
+
+PassOwnPtr<GraphicsLayer> RemoteLayerTreeController::createGraphicsLayer(GraphicsLayerClient* client)
+{
+    return RemoteGraphicsLayer::create(client, this);
 }
 
 } // namespace WebKit
