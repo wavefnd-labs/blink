@@ -27,6 +27,7 @@
 #define RemoteLayerTree_h
 
 #include <WebCore/GraphicsLayerFactory.h>
+#include <WebCore/Timer.h>
 
 namespace WebKit {
 
@@ -35,11 +36,17 @@ public:
     static PassOwnPtr<RemoteLayerTreeController> create();
     ~RemoteLayerTreeController();
 
+    void scheduleLayerFlush();
+
 private:
     RemoteLayerTreeController();
 
     // WebCore::GraphicsLayerFactory
     virtual PassOwnPtr<WebCore::GraphicsLayer> createGraphicsLayer(WebCore::GraphicsLayerClient*) OVERRIDE;
+
+    void layerFlushTimerFired(WebCore::Timer<RemoteLayerTreeController>*);
+
+    WebCore::Timer<RemoteLayerTreeController> m_layerFlushTimer;
 };
 
 } // namespace WebKit
