@@ -45,9 +45,9 @@ public:
 
     DocumentFragment* content() const;
 
-    void setContent(PassRefPtr<DocumentFragment>, ExceptionCode&);
-
 private:
+    virtual PassRefPtr<Node> cloneNode(bool deep) OVERRIDE;
+
     HTMLTemplateElement(const QualifiedName&, Document*);
 
     mutable RefPtr<DocumentFragment> m_content;
