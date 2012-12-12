@@ -28,31 +28,23 @@
 
 #include "CodeBlockHash.h"
 #include "JSValue.h"
-#include "ProfilerBytecode.h"
+#include "ProfilerBytecodeSequence.h"
 #include <wtf/PrintStream.h>
 #include <wtf/text/WTFString.h>
 
 namespace JSC { namespace Profiler {
 
-class Bytecodes {
+class Bytecodes : public BytecodeSequence {
 public:
-    Bytecodes(size_t id, const String& inferredName, const String& sourceCode, CodeBlockHash);
+    Bytecodes(size_t id, CodeBlock*);
     ~Bytecodes();
-    
-    void append(const Bytecode& bytecode) { m_bytecode.append(bytecode); }
     
     size_t id() const { return m_id; }
     const String& inferredName() const { return m_inferredName; }
     const String& sourceCode() const { return m_sourceCode; }
+    unsigned instructionCount() const { return m_instructionCount; }
     CodeBlockHash hash() const { return m_hash; }
-    
-    // Note that this data structure is not indexed by bytecode index.
-    unsigned size() const { return m_bytecode.size(); }
-    const Bytecode& at(unsigned i) const { return m_bytecode[i]; }
-    
-    unsigned indexForBytecodeIndex(unsigned bytecodeIndex) const;
-    const Bytecode& forBytecodeIndex(unsigned bytecodeIndex) const;
-    
+
     void dump(PrintStream&) const;
     
     JSValue toJS(ExecState*) const;
@@ -62,7 +54,7 @@ private:
     String m_inferredName;
     String m_sourceCode;
     CodeBlockHash m_hash;
-    Vector<Bytecode> m_bytecode;
+    unsigned m_instructionCount;
 };
 
 } } // namespace JSC::Profiler
