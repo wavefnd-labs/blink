@@ -1,3 +1,34 @@
+2012-12-21  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Combine openConnection and openConnectionWithVersion
+        https://bugs.webkit.org/show_bug.cgi?id=105658
+
+        Reviewed by Tony Chang.
+
+        Combine the logic from these two methods. Mostly a refactor, but in the "pending calls"
+        case the behavior is slightly altered since the version and no-version queues were
+        previously separate, so the order changes. The new order matches the spec and FF/IE
+        behavior, and a test is added to verify this.
+
+        Chromium's webkit_unit_tests rely on a quirk to bypass the upgrade mechanism; the usage
+        is slightly altered and made more explicit, and requires a small amount of test-only code.
+
+        Test: storage/indexeddb/open-ordering.html
+
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenCall::create):
+        (WebCore::IDBDatabaseBackendImpl::PendingOpenCall::PendingOpenCall):
+        (WebCore::IDBDatabaseBackendImpl::VersionChangeOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::transactionFinishedAndAbortFired):
+        (WebCore::IDBDatabaseBackendImpl::processPendingCalls):
+        (WebCore::IDBDatabaseBackendImpl::openConnection):
+        (WebCore::IDBDatabaseBackendImpl::runIntVersionChangeTransaction):
+        (WebCore::IDBDatabaseBackendImpl::close):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h:
+        (IDBDatabaseBackendImpl):
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp:
+        (WebCore::IDBFactoryBackendImpl::open):
+
 2012-12-21  Brady Eidson  <beidson@apple.com>
 
         Update localizable strings as a followup to http://trac.webkit.org/changeset/138387
