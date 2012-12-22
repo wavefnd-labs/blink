@@ -1,3 +1,41 @@
+2012-12-21  Elliott Sprehn  <esprehn@chromium.org>
+
+        Replace documentFragmentIsShadowRoot with isTreeScope
+        https://bugs.webkit.org/show_bug.cgi?id=105345
+
+        Reviewed by Dimitri Glazkov.
+
+        We can replace documentFragmentIsShadowRoot with isTreeScope() which is
+        trival to detect by checking treeScope()->rootNode() == this. To do this
+        we must stop adopting ShadowRoots into the document when they're removed,
+        which was always wrong anyway as it meant that the TreeScope of a ShadowRoot
+        was no longer itself after it had been removed. It also meant that the
+        children of a ShadowRoot that was removed were no longer in it's tree scope
+        despite being descendants of it.
+
+        Making this simplification allows further simplication like
+        Node::containingShadowRoot can be made O(1) instead of O(k) where k is
+        the depth of the node.
+
+        No new tests, just refactoring.
+
+        * WebCore.exp.in:
+        * dom/DocumentFragment.h:
+        (DocumentFragment):
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::removeAllShadowRoots):
+        * dom/Node.cpp:
+        (WebCore::Node::setTreeScope):
+        (WebCore::Node::isTreeScope):
+        (WebCore):
+        * dom/Node.h:
+        (Node):
+        (WebCore::Node::isShadowRoot):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::~ShadowRoot):
+        * dom/ShadowRoot.h:
+        (ShadowRoot):
+
 2012-12-21  Xianzhu Wang  <wangxianzhu@chromium.org>
 
         [Chromium-Android] Use harfbuzz-ng instead of harfbuzz-old on Android
