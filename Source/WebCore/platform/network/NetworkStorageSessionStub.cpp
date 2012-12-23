@@ -24,26 +24,41 @@
  */
 
 #include "config.h"
-#include "WebPlatformStrategies.h"
+#include "NetworkStorageSession.h"
 
-#include "WebFrameNetworkingContext.h"
-#include <WebKitSystemInterface.h>
+#include "NetworkingContext.h"
+#include <wtf/PassOwnPtr.h>
 
-using namespace WebCore;
+namespace WebCore {
 
-namespace WebKit {
-
-RetainPtr<CFHTTPCookieStorageRef> WebPlatformStrategies::defaultCookieStorage()
+NetworkStorageSession::NetworkStorageSession(NetworkingContext* context)
+    : m_context(context)
 {
-    if (CFURLStorageSessionRef session = WebFrameNetworkingContext::defaultStorageSession())
-        return adoptCF(WKCopyHTTPCookieStorage(session));
-
-#if USE(CFNETWORK)
-    return WKGetDefaultHTTPCookieStorage();
-#else
-    // When using NSURLConnection, we also use its shared cookie storage.
-    return 0;
-#endif
 }
 
-} // namespace WebKit
+NetworkStorageSession::~NetworkStorageSession()
+{
+}
+
+NetworkingContext* NetworkStorageSession::context() const
+{
+    return m_context.get();
+}
+
+PassOwnPtr<NetworkStorageSession> NetworkStorageSession::createPrivateBrowsingSession(const String&)
+{
+    ASSERT_NOT_REACHED();
+    return nullptr;
+}
+
+NetworkStorageSession& NetworkStorageSession::defaultStorageSession()
+{
+    DEFINE_STATIC_LOCAL(NetworkStorageSession, session, (0));
+    return session;
+}
+
+void NetworkStorageSession::switchToNewTestingSession()
+{
+}
+
+}
