@@ -1,3 +1,21 @@
+2012-12-23  Tony Chang  <tony@chromium.org>
+
+        [Qt][Mac] Unreviewed fix the build after r138413
+        https://bugs.webkit.org/show_bug.cgi?id=105686
+
+        Don't use a temporary const reference so the compiler doesn't make a copy.
+        An example compile error (clang):
+        Source/WebCore/loader/CookieJar.cpp:73:67: error: copying parameter of type 'WebCore::NetworkStorageSession' invokes deleted constructor
+            return platformStrategies()->cookiesStrategy()->cookiesForDOM(SESSION(document), document->firstPartyForCookies(), url);
+
+        * loader/CookieJar.cpp:
+        (WebCore::cookies):
+        (WebCore::setCookies):
+        (WebCore::cookiesEnabled):
+        (WebCore::cookieRequestHeaderFieldValue):
+        (WebCore::getRawCookies):
+        (WebCore::deleteCookie):
+
 2012-12-22  Alexey Proskuryakov  <ap@apple.com>
 
         Add a separate class for networking related storage
