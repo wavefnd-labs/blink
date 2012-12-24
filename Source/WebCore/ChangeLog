@@ -1,3 +1,51 @@
+2012-12-21  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: Make use of the new InspectorState::remove() in inspector agents
+        https://bugs.webkit.org/show_bug.cgi?id=105438
+
+        Reviewed by Yury Semikhatsky.
+
+        This patch introduces the following refactorings:
+        - setting property values of InspectorState to "empty" objects has been replaced by removing them from the state;
+        - InspectorState instance is no longer shared across agents, so that the property names can no longer clash.
+          Instead, InspectorCompositeState creates and owns InspectorState instances for every agent;
+        - agent-specific prefix has been stripped from most property names, where it looked synthetic.
+        - updateCookie() is called from InspectorState::remove().
+
+        No new tests, as there is no visible change in the behavior.
+
+        * inspector/InspectorAgent.cpp: Agent-specific property name prefix stripped.
+        * inspector/InspectorApplicationCacheAgent.cpp: Ditto.
+        * inspector/InspectorCSSAgent.cpp: Ditto.
+        * inspector/InspectorCanvasAgent.cpp: Ditto.
+        * inspector/InspectorController.cpp: Make use of InspectorCompositeState rather than InspectorState.
+        * inspector/InspectorController.h: Ditto.
+        * inspector/InspectorDOMStorageAgent.cpp: Agent-specific property name prefix stripped.
+        * inspector/InspectorDatabaseAgent.cpp: Ditto.
+        * inspector/InspectorDebuggerAgent.cpp: Ditto.
+        (WebCore::InspectorDebuggerAgent::disable):
+        Use "remove" instead of setting an empty object.
+        * inspector/InspectorFileSystemAgent.cpp: Agent-specific property name prefix stripped.
+        * inspector/InspectorIndexedDBAgent.cpp: Ditto.
+        * inspector/InspectorLayerTreeAgent.cpp: Ditto.
+        * inspector/InspectorPageAgent.cpp: Ditto.
+        (WebCore::InspectorPageAgent::disable):
+        Use "remove" instead of setting empty values for certain properties.
+        (WebCore::InspectorPageAgent::addScriptToEvaluateOnLoad):
+        Remove unnecessary code (object is created and put into the map if none is found).
+        * inspector/InspectorResourceAgent.cpp: Agent-specific property name prefix stripped.
+        (WebCore::InspectorResourceAgent::disable):
+        Use "remove" instead of setting an empty object for userAgentOverride.
+        * inspector/InspectorState.cpp: Add InspectorCompositeState.
+        (WebCore::InspectorState::setFromCookie): Gets invoked from InspectorCompositeState::loadFromCookie().
+        (WebCore::InspectorState::updateCookie): Call updateCookie().
+        (WebCore::InspectorCompositeState::createAgentState): Creates an InspectorState instance to be passed to an agent.
+        * inspector/InspectorState.h: Add InspectorCompositeState.
+        (WebCore::InspectorState::setLong): Fix cast.
+        * inspector/InspectorTimelineAgent.cpp: Agent-specific property name prefix stripped.
+        * inspector/WorkerInspectorController.cpp: Make use of InspectorCompositeState rather than InspectorState.
+        * inspector/WorkerInspectorController.h: Ditto.
+
 2012-12-23  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Split fast-rejection filter logic off SelectorChecker.
