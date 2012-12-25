@@ -1,3 +1,23 @@
+2012-12-24  Takashi Sakamoto  <tasak@google.com>
+
+        ::first-letter { overflow: -webkit-paged-y } causes crash
+        https://bugs.webkit.org/show_bug.cgi?id=105393
+
+        Reviewed by Beth Dakin.
+
+        Should check whether e is available or not before invoking
+        e->hasTagName in adjustRenderStyle in StyleResolver.cpp.
+
+        Test: fast/css/pseudo-element-opagedxy-crash.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::adjustRenderStyle):
+        If adjustRenderStyle is invoked in pseudoStyleForElement, the given
+        element is 0. So e is not available. However if the given style's
+        overflowY is OPAGEDX or OPAGEDY, adjustRenderStyle doesn't check
+        whether e is available or not before e->hasTagName.
+        This causes a crash.
+
 2012-12-24  Alexei Filippov  <alph@chromium.org>
 
         Web Inspector: add async API for passing renderer process memory stats
