@@ -26,26 +26,24 @@
 #ifndef ThunkGenerators_h
 #define ThunkGenerators_h
 
+#include "ThunkGenerator.h"
+
 #if ENABLE(JIT)
 namespace JSC {
-    class ExecutablePool;
-    class JSGlobalData;
-    class NativeExecutable;
-    class MacroAssemblerCodeRef;
 
-    typedef MacroAssemblerCodeRef (*ThunkGenerator)(JSGlobalData*);
-    MacroAssemblerCodeRef charCodeAtThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef charAtThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef fromCharCodeThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef absThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef ceilThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef expThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef floorThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef logThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef roundThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef sqrtThunkGenerator(JSGlobalData*);
-    MacroAssemblerCodeRef powThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef charCodeAtThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef charAtThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef fromCharCodeThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef absThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef ceilThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef expThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef floorThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef logThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef roundThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef sqrtThunkGenerator(JSGlobalData*);
+MacroAssemblerCodeRef powThunkGenerator(JSGlobalData*);
+
 }
-#endif
+#endif // ENABLE(JIT)
 
 #endif // ThunkGenerator_h
