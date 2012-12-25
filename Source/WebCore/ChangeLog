@@ -1,3 +1,92 @@
+2012-12-25  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: Make InspectorState instances per-agent, corresponding to JSON map entries in the cookie
+        https://bugs.webkit.org/show_bug.cgi?id=105722
+
+        Reviewed by Yury Semikhatsky.
+
+        Inspector state cookie (in JSON format) has become a map (agent name -> "properties object")
+        to avoid cross-agent property name clashes in a single property namespace.
+        As such, InspectorState corresponds to a single "properties object" and is now per-agent,
+        managed by an InspectorCompositeState (which is owned by [Worker]InspectorController).
+        Since InspectorCompositeState maps "properties objects" by their agent names, InspectorStates are created
+        by InspectorCompositeState in the InspectorBaseAgentInterface ctor, using the respective agent name.
+
+        No new tests, no change in visible behavior.
+
+        * inspector/InspectorAgent.cpp: Pass InspectorCompositeState rather than InspectorState.
+        * inspector/InspectorAgent.h: Ditto.
+        * inspector/InspectorApplicationCacheAgent.cpp: Ditto.
+        * inspector/InspectorApplicationCacheAgent.h: Ditto.
+        * inspector/InspectorBaseAgent.cpp: Ditto.
+        (WebCore::InspectorBaseAgentInterface::InspectorBaseAgentInterface):
+        Create InspectorState via InspectorCompositeState::createAgentState(agentName).
+        * inspector/InspectorBaseAgent.h: Pass InspectorCompositeState rather than InspectorState.
+        * inspector/InspectorCSSAgent.cpp: Ditto.
+        * inspector/InspectorCSSAgent.h: Ditto.
+        * inspector/InspectorCanvasAgent.cpp: Ditto.
+        * inspector/InspectorCanvasAgent.h: Ditto.
+        * inspector/InspectorConsoleAgent.cpp: Ditto.
+        * inspector/InspectorConsoleAgent.h: Ditto.
+        * inspector/InspectorController.cpp: Use InspectorCompositeState rather than InspectorState.
+        * inspector/InspectorController.h: Ditto.
+        * inspector/InspectorDOMAgent.cpp: Pass InspectorCompositeState rather than InspectorState.
+        (WebCore::InspectorDOMAgent::InspectorDOMAgent): Ditto.
+        * inspector/InspectorDOMAgent.h: Ditto.
+        * inspector/InspectorDOMDebuggerAgent.cpp: Ditto.
+        * inspector/InspectorDOMDebuggerAgent.h: Ditto.
+        * inspector/InspectorDOMStorageAgent.cpp: Ditto.
+        * inspector/InspectorDOMStorageAgent.h: Ditto.
+        * inspector/InspectorDatabaseAgent.cpp: Ditto.
+        * inspector/InspectorDatabaseAgent.h: Ditto.
+        * inspector/InspectorDebuggerAgent.cpp: Ditto.
+        * inspector/InspectorDebuggerAgent.h: Ditto.
+        * inspector/InspectorFileSystemAgent.cpp: Ditto.
+        * inspector/InspectorFileSystemAgent.h: Ditto.
+        * inspector/InspectorIndexedDBAgent.cpp: Ditto.
+        * inspector/InspectorIndexedDBAgent.h: Ditto.
+        * inspector/InspectorInputAgent.cpp: Ditto.
+        * inspector/InspectorInputAgent.h: Ditto.
+        * inspector/InspectorLayerTreeAgent.cpp: Ditto.
+        * inspector/InspectorLayerTreeAgent.h: Ditto.
+        * inspector/InspectorMemoryAgent.cpp: Ditto.
+        * inspector/InspectorMemoryAgent.h: Ditto.
+        * inspector/InspectorPageAgent.cpp: Ditto.
+        * inspector/InspectorPageAgent.h: Ditto.
+        * inspector/InspectorProfilerAgent.cpp: Ditto.
+        * inspector/InspectorProfilerAgent.h: Ditto.
+        * inspector/InspectorResourceAgent.cpp: Ditto.
+        * inspector/InspectorResourceAgent.h: Ditto.
+        * inspector/InspectorRuntimeAgent.cpp: Ditto.
+        * inspector/InspectorRuntimeAgent.h: Ditto.
+        * inspector/InspectorState.cpp: Introduce InspectorCompositeState, refactor.
+        (WebCore::InspectorState::updateCookie): Delegates to the owning InspectorCompositeState instance.
+        (WebCore::InspectorState::setFromCookie): Gets called from InspectorCompositeState::loadFromCookie().
+        (WebCore::InspectorState::remove): Don't forget to update the cookie.
+        (WebCore::InspectorCompositeState::createAgentState): Creates an InspectorState instance for a named agent.
+        (WebCore::InspectorCompositeState::loadFromCookie): Restores InspectorStates from a cookie.
+        (WebCore::InspectorCompositeState::inspectorStateUpdated): Delegate invoked from InspectorState::updateCookie().
+        * inspector/InspectorState.h:
+        (InspectorStateUpdateListener): InspectorCompositeState API exposed to InspectorState.
+        * inspector/InspectorTimelineAgent.cpp: Pass InspectorCompositeState rather than InspectorState.
+        * inspector/InspectorTimelineAgent.h: Ditto.
+        * inspector/InspectorWorkerAgent.cpp: Ditto.
+        * inspector/InspectorWorkerAgent.h: Ditto.
+        * inspector/PageConsoleAgent.cpp: Ditto.
+        * inspector/PageConsoleAgent.h: Ditto.
+        * inspector/PageDebuggerAgent.cpp: Ditto.
+        * inspector/PageDebuggerAgent.h: Ditto.
+        * inspector/PageRuntimeAgent.cpp: Ditto.
+        * inspector/PageRuntimeAgent.h: Ditto.
+        * inspector/WorkerConsoleAgent.cpp: Ditto.
+        * inspector/WorkerConsoleAgent.h: Ditto.
+        * inspector/WorkerDebuggerAgent.cpp: Ditto.
+        * inspector/WorkerDebuggerAgent.h: Ditto.
+        * inspector/WorkerInspectorController.cpp: Ditto.
+        * inspector/WorkerInspectorController.h: Ditto.
+        * inspector/WorkerRuntimeAgent.cpp: Ditto.
+        * inspector/WorkerRuntimeAgent.h: Ditto.
+
 2012-12-24  Yury Semikhatsky  <yurys@chromium.org>
 
         Memory instrumentation: provide a way to mark a node as a root
