@@ -1,3 +1,17 @@
+2012-12-26  Andreas Kling  <akling@apple.com>
+
+        [Mac] MemoryPressureHandler: Occasional crashes in uninstall() when responding to memory pressure signal.
+        <http://webkit.org/b/105772>
+
+        Reviewed by Stephanie Lewis.
+
+        We can't synchronously dereference _cache_event_source in uninstall() just because m_installed
+        is true -- the block that initializes _cache_event_source is asynchronous and may not have executed.
+        Fix this by performing the uninstallation asynchronously on the main queue as well.
+
+        * platform/mac/MemoryPressureHandlerMac.mm:
+        (WebCore::MemoryPressureHandler::uninstall):
+
 2012-12-26  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r137905.
