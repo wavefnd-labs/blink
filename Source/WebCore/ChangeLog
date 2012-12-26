@@ -1,3 +1,91 @@
+2012-12-26  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: extract JS heap profiler specifics into JSHeapSnapshot.js
+        https://bugs.webkit.org/show_bug.cgi?id=105768
+
+        Reviewed by Pavel Feldman.
+
+        Inroduced JSHeapSnapshot, JSHeapSnapshotNode, JSHeapSnapshotEdge and JSHeapSnapshotRetainerEdge which
+        should encapsulate logic specific to JS-heap.
+        No behavioral changes, covered with existing heap profiler tests.
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/HeapSnapshot.js:
+        (WebInspector.HeapSnapshotEdge.prototype.hasStringName):
+        (WebInspector.HeapSnapshotEdge.prototype.name):
+        (WebInspector.HeapSnapshotEdge.prototype.node):
+        (WebInspector.HeapSnapshotEdge.prototype.toString):
+        (WebInspector.HeapSnapshotRetainerEdge.prototype._node):
+        (WebInspector.HeapSnapshotRetainerEdge.prototype._edge):
+        (WebInspector.HeapSnapshotNode.prototype.className):
+        (WebInspector.HeapSnapshotNode.prototype.classIndex):
+        (WebInspector.HeapSnapshotNode.prototype.edges):
+        (WebInspector.HeapSnapshotNode.prototype.id):
+        (WebInspector.HeapSnapshotNode.prototype.retainers):
+        (WebInspector.HeapSnapshot.prototype.createNode):
+        (WebInspector.HeapSnapshot.prototype.createEdge):
+        (WebInspector.HeapSnapshot.prototype.createRetainingEdge):
+        (WebInspector.HeapSnapshot.prototype.rootNode):
+        (WebInspector.HeapSnapshot.prototype.aggregatesForDiff):
+        (WebInspector.HeapSnapshot.prototype._buildAggregates):
+        (WebInspector.HeapSnapshot.prototype._calculateClassesRetainedSize):
+        (WebInspector.HeapSnapshot.prototype._sortAggregateIndexes):
+        (WebInspector.HeapSnapshot.prototype._calculateDiffForClass):
+        (WebInspector.HeapSnapshot.prototype.createEdgesProvider):
+        (WebInspector.HeapSnapshot.prototype.createRetainingEdgesProvider):
+        (WebInspector.HeapSnapshot.prototype.createNodesProviderForDominator):
+        (WebInspector.HeapSnapshotNodesProvider.prototype.nodePosition):
+        * inspector/front-end/HeapSnapshotLoader.js:
+        (WebInspector.HeapSnapshotLoader.prototype.buildSnapshot):
+        * inspector/front-end/HeapSnapshotProxy.js:
+        (WebInspector.HeapSnapshotWorker):
+        * inspector/front-end/HeapSnapshotWorker.js:
+        * inspector/front-end/JSHeapSnapshot.js: Added.
+        (WebInspector.JSHeapSnapshot):
+        (WebInspector.JSHeapSnapshot.prototype.createNode):
+        (WebInspector.JSHeapSnapshot.prototype.createEdge):
+        (WebInspector.JSHeapSnapshot.prototype.createRetainingEdge):
+        (WebInspector.JSHeapSnapshotNode):
+        (WebInspector.JSHeapSnapshotNode.prototype.canBeQueried):
+        (WebInspector.JSHeapSnapshotNode.prototype.isPageObject):
+        (WebInspector.JSHeapSnapshotNode.prototype.distanceToWindow):
+        (WebInspector.JSHeapSnapshotNode.prototype.className):
+        (WebInspector.JSHeapSnapshotNode.prototype.classIndex):
+        (WebInspector.JSHeapSnapshotNode.prototype.id):
+        (WebInspector.JSHeapSnapshotNode.prototype.isHidden):
+        (WebInspector.JSHeapSnapshotNode.prototype.isNative):
+        (WebInspector.JSHeapSnapshotNode.prototype.isSynthetic):
+        (WebInspector.JSHeapSnapshotNode.prototype.isWindow):
+        (WebInspector.JSHeapSnapshotNode.prototype.isDetachedDOMTreesRoot):
+        (WebInspector.JSHeapSnapshotNode.prototype.isDetachedDOMTree):
+        (WebInspector.JSHeapSnapshotEdge):
+        (WebInspector.JSHeapSnapshotEdge.prototype.clone):
+        (WebInspector.JSHeapSnapshotEdge.prototype.hasStringName):
+        (WebInspector.JSHeapSnapshotEdge.prototype.isElement):
+        (WebInspector.JSHeapSnapshotEdge.prototype.isHidden):
+        (WebInspector.JSHeapSnapshotEdge.prototype.isWeak):
+        (WebInspector.JSHeapSnapshotEdge.prototype.isInternal):
+        (WebInspector.JSHeapSnapshotEdge.prototype.isInvisible):
+        (WebInspector.JSHeapSnapshotEdge.prototype.isShortcut):
+        (WebInspector.JSHeapSnapshotEdge.prototype.name):
+        (WebInspector.JSHeapSnapshotEdge.prototype.toString):
+        (WebInspector.JSHeapSnapshotEdge.prototype._hasStringName):
+        (WebInspector.JSHeapSnapshotEdge.prototype._name):
+        (WebInspector.JSHeapSnapshotEdge.prototype._nameOrIndex):
+        (WebInspector.JSHeapSnapshotEdge.prototype._type):
+        (WebInspector.JSHeapSnapshotRetainerEdge):
+        (WebInspector.JSHeapSnapshotRetainerEdge.prototype.clone):
+        (WebInspector.JSHeapSnapshotRetainerEdge.prototype.isElement):
+        (WebInspector.JSHeapSnapshotRetainerEdge.prototype.isHidden):
+        (WebInspector.JSHeapSnapshotRetainerEdge.prototype.isInternal):
+        (WebInspector.JSHeapSnapshotRetainerEdge.prototype.isInvisible):
+        (WebInspector.JSHeapSnapshotRetainerEdge.prototype.isShortcut):
+        (WebInspector.JSHeapSnapshotRetainerEdge.prototype.isWeak):
+        * inspector/front-end/ProfilesPanel.js:
+        * inspector/front-end/WebKit.qrc:
+
 2012-12-26  Patrick Gansterer  <paroga@webkit.org>
 
         [WIN] Build fix for !USE(CFNETWORK) after r138413.
