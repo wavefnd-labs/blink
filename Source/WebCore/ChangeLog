@@ -1,3 +1,32 @@
+2012-12-26  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: prepare HeapSnapshot.js for use with native heap snapshot
+        https://bugs.webkit.org/show_bug.cgi?id=105763
+
+        Reviewed by Alexander Pavlov.
+
+        HeapSnapshot.js now expects root node to be either the first or the last (real) one
+        in the list of all nodes.
+
+        * inspector/HeapGraphSerializer.cpp:
+        (HeapGraphNode):
+        (WebCore::HeapGraphSerializer::serialize): reordered node and edge fields so that the go in
+        the same order as in the JS heap snapshot.
+        * inspector/front-end/HeapSnapshot.js:
+        (WebInspector.HeapSnapshot.prototype._buildAggregates):
+        (WebInspector.HeapSnapshot.prototype._buildDominatedNodes):
+        * inspector/front-end/NativeHeapGraph.js:
+        (WebInspector.NativeHeapGraph):
+        (WebInspector.NativeHeapGraph.prototype.root): now there is explicit root node which is the last
+        one in the list, use it.
+        (WebInspector.NativeHeapGraph.prototype._calculateNodeEdgeIndexes):
+        (WebInspector.NativeHeapGraph.prototype._addDummyNode): fixed dummy node first edge index.
+        (WebInspector.NativeHeapGraph.Edge.prototype.target):
+        (WebInspector.NativeHeapGraph.Node.prototype.referencedNodes):
+        * inspector/front-end/NativeMemorySnapshotView.js:
+        (WebInspector.NativeSnapshotNode.prototype._addChildrenFromGraph): switched to use of the root node
+        (WebInspector.NativeHeapGraphDataGridRoot.prototype._populate):
+
 2012-12-26  Pan Deng  <pan.deng@intel.com>
 
         [Web Inspector]Remove Preview and Response tab from network panel in case websocket.
