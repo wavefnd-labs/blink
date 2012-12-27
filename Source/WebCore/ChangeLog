@@ -1,3 +1,79 @@
+2012-12-27  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [EFL][WebGL] Implement EGL support with GLX.
+        https://bugs.webkit.org/show_bug.cgi?id=105602
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        This is in preparation for adding GLES2 support.
+        This patch adds support for EGL with GLX backend. EGL support can be enabled during compile time
+        by passing -DENABLE_EGL=ON as cmake config parameter. This is disabled by default.
+
+        * PlatformEfl.cmake:
+        * platform/graphics/opengl/GLDefs.h:
+        (WebCore):
+        * platform/graphics/opengl/GLPlatformContext.cpp:
+        (WebCore):
+        (WebCore::GLPlatformContext::createContext): Added GLX checks.
+        (WebCore::GLPlatformContext::createOffScreenContext): Added support for creating EGLOffscreen Context.
+        (WebCore::GLPlatformContext::createCurrentContextWrapper): Added support for creating EGLCurrentContextWrapper.
+        * platform/graphics/opengl/GLPlatformContext.h:
+        * platform/graphics/opengl/GLPlatformSurface.cpp:
+        (WebCore::GLPlatformSurface::createTransportSurface): Added support for creating EGLSurface.
+
+        * platform/graphics/surfaces/egl/EGLContext.cpp: Added.
+        (WebCore):
+        (WebCore::isRobustnessExtSupported):
+        (WebCore::EGLCurrentContextWrapper::EGLCurrentContextWrapper):
+        (WebCore::EGLCurrentContextWrapper::handle):
+        (WebCore::EGLOffScreenContext::EGLOffScreenContext):
+        (WebCore::EGLOffScreenContext::initialize):
+        (WebCore::EGLOffScreenContext::~EGLOffScreenContext):
+        (WebCore::EGLOffScreenContext::isCurrentContext):
+        (WebCore::EGLOffScreenContext::platformMakeCurrent):
+        (WebCore::EGLOffScreenContext::platformReleaseCurrent):
+        (WebCore::EGLOffScreenContext::freeResources):
+        (WebCore::EGLOffScreenContext::destroy):
+        * platform/graphics/surfaces/egl/EGLContext.h:
+        (WebCore):
+        (EGLCurrentContextWrapper):
+        (WebCore::EGLCurrentContextWrapper::~EGLCurrentContextWrapper):
+        (EGLOffScreenContext):
+
+        EGL implementation for Context Management.
+
+        * platform/graphics/surfaces/egl/EGLSurface.cpp: Added.
+        (WebCore):
+        (WebCore::EGLWindowTransportSurface::EGLWindowTransportSurface):
+        (WebCore::EGLWindowTransportSurface::~EGLWindowTransportSurface):
+        (WebCore::EGLWindowTransportSurface::configuration):
+        (WebCore::EGLWindowTransportSurface::swapBuffers):
+        (WebCore::EGLWindowTransportSurface::destroy):
+        (WebCore::EGLWindowTransportSurface::freeEGLResources):
+        * platform/graphics/surfaces/egl/EGLSurface.h:
+        (WebCore):
+        (EGLWindowTransportSurface):
+
+        EGL implementation for Offscreen Surface. The surface is backed by native window.
+
+        * platform/graphics/surfaces/egl/EGLConfigHelper.cpp: Added.
+        (WebCore):
+        (WebCore::SharedEGLDisplay::deref):
+        (WebCore::SharedEGLDisplay::sharedEGLDisplay):
+        (WebCore::SharedEGLDisplay::SharedEGLDisplay):
+        (WebCore::SharedEGLDisplay::cleanup):
+        (WebCore::SharedEGLDisplay::~SharedEGLDisplay):
+        (WebCore::EGLConfigHelper::EGLConfigHelper):
+        (WebCore::EGLConfigHelper::~EGLConfigHelper):
+        (WebCore::EGLConfigHelper::display):
+        (WebCore::EGLConfigHelper::pBufferContextConfig):
+        (WebCore::EGLConfigHelper::surfaceContextConfig):
+        (WebCore::EGLConfigHelper::nativeVisualId):
+        (WebCore::EGLConfigHelper::reset):
+        (WebCore::EGLConfigHelper::createConfig):
+
+        Helper class to initialize EGL resources and choose right EGL configuration.
+
 2012-12-27  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r138509.
