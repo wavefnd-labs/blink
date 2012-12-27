@@ -1,3 +1,71 @@
+2012-12-27  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: Simplify script mappings by introducing DefaultScriptMapping.
+        https://bugs.webkit.org/show_bug.cgi?id=103038
+
+        Reviewed by Pavel Feldman.
+
+        DefaultScriptMapping creates a uiSourceCode for each script and set itself as a mapping for the script.
+        Script can now have a stack of (possibly disabled) mappings, allowing to try several mappings when calculating uiLocation.
+        LiveEditSupport object is added on WebInspector to support live editing of readonly DefaultScriptMapping's uiSourceCodes.
+        DefaultScriptMapping is now the only mapping that creates temporary uiSourceCodes.
+
+        * English.lproj/localizedStrings.js:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/BreakpointManager.js:
+        (WebInspector.BreakpointManager):
+        (WebInspector.BreakpointManager.sourceFileId):
+        (WebInspector.BreakpointManager.Breakpoint.prototype._breakpointStorageId):
+        * inspector/front-end/CompilerScriptMapping.js:
+        (WebInspector.CompilerScriptMapping):
+        (WebInspector.CompilerScriptMapping.prototype.rawLocationToUILocation):
+        (WebInspector.CompilerScriptMapping.prototype.uiLocationToRawLocation):
+        (WebInspector.CompilerScriptMapping.prototype._reset):
+        * inspector/front-end/DebuggerModel.js:
+        (WebInspector.DebuggerModel.prototype._parsedScriptSource):
+        * inspector/front-end/DebuggerScriptMapping.js:
+        (WebInspector.DebuggerScriptMapping):
+        * inspector/front-end/DefaultScriptMapping.js: Added.
+        * inspector/front-end/LiveEditSupport.js: Added.
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping.prototype.rawLocationToUILocation):
+        (WebInspector.ResourceScriptMapping.prototype.addScript):
+        (WebInspector.ResourceScriptMapping.prototype._uiSourceCodeAddedToWorkspace):
+        (WebInspector.ResourceScriptMapping.prototype._hasMergedToVM):
+        (WebInspector.ResourceScriptMapping.prototype._hasDivergedFromVM):
+        (WebInspector.ResourceScriptMapping.prototype._workspaceUISourceCodeForScript):
+        (WebInspector.ResourceScriptMapping.prototype._scriptsForUISourceCode):
+        (WebInspector.ResourceScriptMapping.prototype._bindUISourceCodeToScripts):
+        (WebInspector.ResourceScriptMapping.prototype._reset):
+        * inspector/front-end/Script.js:
+        (WebInspector.Script):
+        (WebInspector.Script.prototype.):
+        (WebInspector.Script.prototype.editSource):
+        (WebInspector.Script.prototype.setIsDynamicScript):
+        (WebInspector.Script.prototype.isDynamicScript):
+        (WebInspector.Script.prototype.rawLocationToUILocation):
+        (WebInspector.Script.prototype._enabledSourceMappings):
+        (WebInspector.Script.prototype._sourceMappingsDiffer):
+        (WebInspector.Script.prototype.disableSourceMapping):
+        (WebInspector.Script.prototype.enableSourceMapping):
+        (WebInspector.Script.prototype.pushSourceMapping):
+        (WebInspector.Script.prototype.popSourceMapping):
+        (WebInspector.Script.prototype._updateLocations):
+        (WebInspector.Script.prototype.createLiveLocation):
+        * inspector/front-end/ScriptSnippetModel.js:
+        (WebInspector.ScriptSnippetModel.prototype._projectWillReset):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype._addUISourceCode):
+        (WebInspector.ScriptsPanel.prototype._uiSourceCodeRemoved):
+        (WebInspector.ScriptsPanel.prototype._createSourceFrame):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/Workspace.js:
+        (WebInspector.Workspace.prototype.addTemporaryUISourceCode):
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/inspector.js:
+
 2012-12-27  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: console.profileEnd() crashes if called without arguments
