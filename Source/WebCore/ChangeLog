@@ -1,3 +1,63 @@
+2012-12-27  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: move js heap snapshot preprocessing to JSHeapSnapshot
+        https://bugs.webkit.org/show_bug.cgi?id=105798
+
+        Reviewed by Pavel Feldman.
+
+        HeapSnapshot.js refactorings:
+        - moved _markInvisibleEdges implementation into JSHeapSnapshot
+        - moved _calculateFlags implementation into JSHeapSnapshot
+        - moved _flags array into JSHeapSnapshot
+        - instead of returning node flags as a field on each node, requesting
+          snapshot node flag constants from the heap snapshot worker and then
+          checking for the flags in HeapSnapshotGridNodes now return two optional
+          boolean fields on each node: canBeQueried and detachedDOMTreeNode
+        - removed unused propertyAccessor property from serialized heap node
+        - moved node and edge serialization from providers to the node and edge
+          classes, js specific fields are serialized only for JSHeapSnapshotNode
+        - renamed first() to rewind() on providers and iterators
+
+        * inspector/front-end/HeapSnapshot.js:
+        (WebInspector.HeapSnapshotEdge.prototype.serialize):
+        (WebInspector.HeapSnapshotEdgeIterator.prototype.rewind):
+        (WebInspector.HeapSnapshotRetainerEdge.prototype.serialize):
+        (WebInspector.HeapSnapshotRetainerEdgeIterator.prototype.rewind):
+        (WebInspector.HeapSnapshotNode.prototype.isUserObject):
+        (WebInspector.HeapSnapshotNode.prototype.serialize):
+        (WebInspector.HeapSnapshotNodeIterator.prototype.rewind):
+        (WebInspector.HeapSnapshot.prototype._init):
+        (WebInspector.HeapSnapshot.prototype._buildAggregates):
+        (WebInspector.HeapSnapshot.prototype._calculateClassesRetainedSize):
+        (WebInspector.HeapSnapshot.prototype._buildPostOrderIndex):
+        (WebInspector.HeapSnapshot.prototype._buildDominatorTree):
+        (WebInspector.HeapSnapshot.prototype._markInvisibleEdges):
+        (WebInspector.HeapSnapshot.prototype._calculateFlags):
+        (WebInspector.HeapSnapshot.prototype.userObjectsMapAndFlag):
+        (WebInspector.HeapSnapshot.prototype.):
+        (WebInspector.HeapSnapshot.prototype.createNodesProviderForClass):
+        (WebInspector.HeapSnapshot.prototype.updateStaticData):
+        (WebInspector.HeapSnapshotFilteredOrderedIterator.prototype._createIterationOrder):
+        (WebInspector.HeapSnapshotFilteredOrderedIterator.prototype.rewind):
+        (WebInspector.HeapSnapshotFilteredOrderedIterator.prototype.isEmpty):
+        (WebInspector.HeapSnapshotFilteredOrderedIterator.prototype.serializeItemsRange):
+        (WebInspector.HeapSnapshotFilteredOrderedIterator.prototype.sortAndRewind):
+        * inspector/front-end/HeapSnapshotGridNodes.js:
+        (WebInspector.HeapSnapshotGenericObjectNode):
+        (WebInspector.HeapSnapshotObjectNode):
+        * inspector/front-end/HeapSnapshotProxy.js:
+        * inspector/front-end/JSHeapSnapshot.js:
+        (WebInspector.JSHeapSnapshot):
+        (WebInspector.JSHeapSnapshot.prototype._markInvisibleEdges):
+        (WebInspector.JSHeapSnapshot.prototype._calculateFlags):
+        (WebInspector.JSHeapSnapshot.prototype.userObjectsMapAndFlag):
+        (WebInspector.JSHeapSnapshot.prototype._flagsOfNode):
+        (WebInspector.JSHeapSnapshot.prototype._markDetachedDOMTreeNodes):
+        (WebInspector.JSHeapSnapshot.prototype._markQueriableHeapObjects):
+        (WebInspector.JSHeapSnapshot.prototype._markPageOwnedNodes):
+        (WebInspector.JSHeapSnapshotNode.prototype.isUserObject):
+        (WebInspector.JSHeapSnapshotNode.prototype.serialize):
+
 2012-12-27  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Refactor SourceMapParser to enable range-based sourcemap
