@@ -1,3 +1,49 @@
+2012-12-27  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: Refactor SourceMapParser to enable range-based sourcemap
+        https://bugs.webkit.org/show_bug.cgi?id=105764
+
+        Reviewed by Vsevolod Vlasov.
+
+        Test: inspector/styles/range-based-mapping.html
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/CompilerScriptMapping.js:
+        (WebInspector.CompilerScriptMapping):
+        (WebInspector.CompilerScriptMapping.prototype.loadSourceMapForScript):
+        * inspector/front-end/SourceMap.js: Copied from Source/WebCore/inspector/front-end/CompilerScriptMapping.js.
+        (WebInspector.SourceMap):
+          Abstract. Renamed from SourceMapParser and supports only direct (generated -> originating source) mapping via findEntry()
+        (WebInspector.SourceMap.prototype.sources):
+        (WebInspector.SourceMap.prototype.sourceContent):
+        (WebInspector.SourceMap.prototype._parseMappingPayload):
+        (WebInspector.SourceMap.prototype._parseSections):
+        (WebInspector.SourceMap.prototype._parseMap):
+        (WebInspector.SourceMap.prototype._isSeparator):
+        (WebInspector.SourceMap.prototype._decodeVLQ):
+        (WebInspector.SourceMap.prototype._canonicalizeURL):
+        (WebInspector.SourceMap.StringCharIterator):
+        (WebInspector.SourceMap.StringCharIterator.prototype.next):
+        (WebInspector.SourceMap.StringCharIterator.prototype.peek):
+        (WebInspector.SourceMap.StringCharIterator.prototype.hasNext):
+        (WebInspector.PositionBasedSourceMap):
+          Extends SourceMap and provides direct (compiled -> original source)
+          and reverse (original -> compiled source) position mapping via findEntryReversed().
+        (WebInspector.PositionBasedSourceMap.prototype.findEntry):
+        (WebInspector.PositionBasedSourceMap.prototype.findEntryReversed):
+        (WebInspector.PositionBasedSourceMap.prototype._parseMap):
+        (WebInspector.RangeBasedSourceMap):
+          Extends SourceMap and provides direct range mapping
+          (compiled source position -> original source range) via findSourceRange().
+        (WebInspector.RangeBasedSourceMap.MappingComparator):
+        (WebInspector.RangeBasedSourceMap.prototype.findSourceRange):
+        (WebInspector.RangeBasedSourceMap.prototype._rangeForStartIndex):
+        (WebInspector.SourceRange):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/inspector.html:
+
 2012-12-25  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [Canvas] report if there is any uninstrumented canvas on a page
