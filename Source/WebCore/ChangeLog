@@ -1,3 +1,37 @@
+2012-12-27  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Move visited link-checking (and caching) code out of SelectorChecker.
+        https://bugs.webkit.org/show_bug.cgi?id=105752
+
+        SelectorChecker knew too much about visited links and how links are stored in DOM. This change
+        moves the code to more relevant locations and moves the visited links cache all the way up to Document,
+        introducing VisitedLinkState class to manage the state of visited links.
+
+        Reviewed by Antti Koivisto.
+
+        No change in behavior, covered by existing tests.
+
+        * CMakeLists.txt: Added VisitedLinkState to build system.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * css/SelectorChecker.cpp: Moved visited-link state code out to VisitedLinkState class.
+        * css/SelectorChecker.h: Ditto.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::initElement): Changed callsite to use VisitedLinkState.
+        * css/StyleResolver.h: Removed plumb-throughs that are now unnecessary.
+        * dom/DOMAllInOne.cpp: Added VisitedLinkState to build system.
+        * dom/Document.cpp: Added VisitedLinkState initalizer.
+        * dom/Document.h: Added VisitedLinkState member.
+        * dom/VisitedLinkState.cpp: Added.
+        * dom/VisitedLinkState.h: Added.
+        * history/CachedPage.cpp:
+        (WebCore::CachedPage::restore): Changed callsite to use VisitedLinkState.
+        * page/Page.cpp:
+        (WebCore::Page::allVisitedStateChanged): Ditto.
+        (WebCore::Page::visitedStateChanged): Ditto.
+
 2012-12-27  Huang Dongsung  <luxtella@company100.net>
 
         [TexMap] Minor refactoring of TextureMapperLayer.
