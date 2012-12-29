@@ -1,3 +1,41 @@
+2012-12-28  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: Native Memory Instrumentation: instrument not instrumented members.
+        https://bugs.webkit.org/show_bug.cgi?id=105830
+
+        Reviewed by Vsevolod Vlasov.
+
+        In some cases we don't want to visit some class members.
+        As example we decided to skip pointers to interface classes such as GraphicLayerClient.
+        We could use addWeakPointer for them but it can't be used for nonpointer members.
+        In the offline discussion we came to a conclusion that we need a new instrumentation
+        method ignoreMember, which will be used for all the members which we won't like to visit/instrument.
+
+        DriveBy: Also I instrumented not yet instrumented members.
+
+        * bindings/v8/DOMWrapperMap.h:
+        (WebCore::DOMWrapperMap::reportMemoryUsage):
+        * bindings/v8/ScriptWrappable.h:
+        (WebCore::ScriptWrappable::reportMemoryUsage):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::reportMemoryUsage):
+        * platform/KURLGoogle.cpp:
+        (WebCore::KURLGooglePrivate::reportMemoryUsage):
+        * platform/SharedBuffer.cpp:
+        (WebCore::SharedBuffer::reportMemoryUsage):
+        * platform/audio/AudioArray.h:
+        (WebCore::AudioArray::reportMemoryUsage):
+        * platform/graphics/GraphicsLayer.cpp:
+        (WebCore::GraphicsLayer::reportMemoryUsage):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::reportMemoryUsage):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::RowStruct::reportMemoryUsage):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::reportMemoryUsage):
+        * rendering/style/StyleRareInheritedData.cpp:
+        (WebCore::StyleRareInheritedData::reportMemoryUsage):
+
 2012-12-29  Andrey Lushnikov  <lushnikov@chromium.com>
 
         Web Inspector: refactor DefaultTextEditor - annotate handlers and fix getters style
