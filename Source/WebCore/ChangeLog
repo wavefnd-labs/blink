@@ -1,3 +1,58 @@
+2012-12-29  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [EFL][WebGL] Refactor GLXImplementation.
+        https://bugs.webkit.org/show_bug.cgi?id=105825
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        This patch decouples native window management and logic to find surface configuration in GLX implementation.
+
+        * platform/graphics/opengl/GLDefs.h:
+        * platform/graphics/surfaces/glx/GLXConfigSelector.h: Renamed from Source/WebCore/platform/graphics/surfaces/glx/GLXWindowResources.h.
+        (WebCore):
+        (GLXConfigSelector):
+        (WebCore::GLXConfigSelector::GLXConfigSelector):
+        (WebCore::GLXConfigSelector::~GLXConfigSelector):
+        (WebCore::GLXConfigSelector::visualInfo):
+        (WebCore::GLXConfigSelector::pBufferContextConfig):
+        (WebCore::GLXConfigSelector::surfaceContextConfig):
+        (WebCore::GLXConfigSelector::reset):
+        (WebCore::GLXConfigSelector::createConfig):
+
+        Helper class to find surface configuration.
+
+        * platform/graphics/surfaces/glx/GLXContext.h:
+        (GLXOffScreenContext):
+        * platform/graphics/surfaces/glx/GLXSurface.cpp:
+        (WebCore::GLXTransportSurface::GLXTransportSurface):
+        (WebCore::GLXTransportSurface::configuration):
+        (WebCore::GLXTransportSurface::setGeometry):
+        (WebCore::GLXTransportSurface::destroy):
+        (WebCore::GLXPBuffer::GLXPBuffer):
+        (WebCore::GLXPBuffer::initialize):
+        (WebCore::GLXPBuffer::configuration):
+        * platform/graphics/surfaces/glx/GLXSurface.h:
+        (GLXTransportSurface):
+        (GLXPBuffer):
+
+        Inheritance changed from X11OffScreenWindow to GLPlatformSurface.
+
+        * platform/graphics/surfaces/glx/X11WindowResources.cpp:
+        (WebCore):
+        (WebCore::X11OffScreenWindow::X11OffScreenWindow):
+        (WebCore::X11OffScreenWindow::reSizeWindow):
+        (WebCore::X11OffScreenWindow::createOffscreenWindow):
+        (WebCore::X11OffScreenWindow::destroyWindow):
+        (WebCore::X11OffScreenWindow::nativeSharedDisplay):
+        (WebCore::X11OffScreenWindow::setVisualInfo):
+        (WebCore::X11OffScreenWindow::isXRenderExtensionSupported):
+        * platform/graphics/surfaces/glx/X11WindowResources.h:
+        (WebCore::SharedX11Resources::create):
+        (SharedX11Resources):
+        (X11OffScreenWindow):
+
+         Removed code related to surface configiration.
+
 2012-12-29  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [Timeline] cpu bar popover shows wrong duration / cpu time.
