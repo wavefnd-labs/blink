@@ -1,3 +1,61 @@
+2012-12-28  No'am Rosenthal  <noam@webkit.org>
+
+        [Texmap] Edge antialiasing in TextureMapper could be done with less per-pixel calls
+        https://bugs.webkit.org/show_bug.cgi?id=105377
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Instead of passing 8 quad edge coefficients as uniforms and analyze the distance in the
+        fragment shader, we render the antialiased quad as 4 edge triangles, which originate in the
+        center of the quad. 
+
+        The vertex shader expands the quad based on the screen transform, and applies a value to each vertex to be interpolated by the GPU. 
+
+        It is very difficult to test performance gain; However, the following is apparent:
+        - The matrix multiplications and inversions done before in the quad inflation code were
+          always visible in instruments/valgrind and they are now gone.
+        - We now perform a single smoothstep() command per pixel instead of 8 clamp(dot()) commands.
+        - It should now be possible to antialias individual edges.
+
+        Covered by existing tests.
+
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGLData::getStaticVBO):
+            Cache the unit-rect and edge-triangle vertex data in a VBO.
+
+        (WebCore::TextureMapperGLData::~TextureMapperGLData):
+            Clear the cached VBOs upon destruction.
+
+        (WebCore::TextureMapperGL::drawBorder):
+        (WebCore::TextureMapperGL::drawTexture):
+            Removed call to useProgram, since it's already called in drawTexturedQuadWithProgram.
+
+        (WebCore::TextureMapperGL::drawTexturedQuadWithProgram):
+        (WebCore::TextureMapperGL::drawSolidColor):
+            Use the new signature "draw" instead of "drawQuad".
+
+        (WebCore::TextureMapperGL::drawEdgeTriangles):
+        (WebCore::TextureMapperGL::drawUnitRect):
+        (WebCore::TextureMapperGL::draw):
+            Removed DrawQuad, instead draw either a unit rect or edge triangles.
+
+        (WebCore::TextureMapperGL::beginClip):
+            Use the new setMatrix function.
+
+        * platform/graphics/texmap/TextureMapperGL.h:
+            Added a paint flag for antialiasing.
+
+        * platform/graphics/texmap/TextureMapperShaderManager.cpp:
+        (WebCore::TextureMapperShaderProgram::setMatrix):
+            Since we now set the matrix in multiple locations, added a convenience 
+            function for matrix uniform.
+
+        (WebCore::getShaderSpec):
+            Update the vertex and fragment shader to account for the new antialiasing
+            mechanism.
+        * platform/graphics/texmap/TextureMapperShaderManager.h:
+        (TextureMapperShaderProgram):
+
 2012-12-28  Mark Rowe  <mrowe@apple.com>
 
         Move logic for extracting the OS X marketing version in to WebCore
