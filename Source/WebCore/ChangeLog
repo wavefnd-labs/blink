@@ -1,3 +1,31 @@
+2012-12-30  Christophe Dumez  <christophe.dumez@intel.com>
+
+        Regression(r138545): Makes WebAudio tests crash
+        https://bugs.webkit.org/show_bug.cgi?id=105869
+
+        Reviewed by Philippe Normand.
+
+        Stop using smart pointers and adoptGRef() for the
+        GstBus object and call gst_object_unref() manually.
+        This fixes assertions hits when calling adoptGRef()
+        since the GstBus object has a floating reference.
+
+        Alternatively, we could keep using smart pointers
+        and stop calling adoptGRef() so that
+        gst_object_ref_sink() is called and the floating
+        flag is cleared but I think it is clearer to do
+        it manually here.
+
+        No new tests, already covered by existing tests.
+
+        * platform/audio/gstreamer/AudioDestinationGStreamer.cpp:
+        (WebCore::messageCallback):
+        (WebCore::AudioDestinationGStreamer::AudioDestinationGStreamer):
+        (WebCore::AudioDestinationGStreamer::~AudioDestinationGStreamer):
+        * platform/audio/gstreamer/AudioFileReaderGStreamer.cpp:
+        (WebCore::AudioFileReader::~AudioFileReader):
+        (WebCore::AudioFileReader::decodeAudioForBusCreation):
+
 2012-12-29  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Rename StyleResolver's member variable that holds SelectorChecker to a proper name.
