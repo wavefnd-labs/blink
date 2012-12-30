@@ -1,3 +1,46 @@
+2012-12-29  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Move pointer to Document up from SelectorChecker to StyleResolver.
+        https://bugs.webkit.org/show_bug.cgi?id=105863
+
+        Now that SelectorChecker is mostly stateless, it no longer needs to keep a pointer to Document, which
+        makes all the code in StyleResolver that reaches for it sort of weird.
+
+        Reviewed by Eric Seidel.
+
+        No change in functionality, covered by existing tests.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::SelectorChecker): Changed to take document as argument (only used to set bit fields).
+        (WebCore::SelectorChecker::checkOneSelector): Changed to use element document.
+        (WebCore::SelectorChecker::checkScrollbarPseudoClass): Ditto.
+        * css/SelectorChecker.h:
+        (WebCore): Removed unnecessary Document forward declaration.
+        (SelectorChecker): Changed constructor declaration, and removed m_document member.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver): Adjusted SelectorChecker initializer accordingly.
+        (WebCore::StyleResolver::initElement): Changed to use own document accessor.
+        (WebCore::StyleResolver::initForStyleResolve): Ditto.
+        (WebCore::StyleResolver::matchUARules): Ditto.
+        (WebCore::StyleResolver::styleForPage): Ditto.
+        (WebCore::StyleResolver::applyProperty): Ditto.
+        (WebCore::StyleResolver::checkForGenericFamilyChange): Ditto.
+        (WebCore::StyleResolver::initializeFontStyle): Ditto.
+        (WebCore::StyleResolver::setFontSize): Ditto.
+        * css/StyleResolver.h:
+        (WebCore::StyleResolver::document): Changed to use own member.
+        (WebCore::StyleResolver::documentSettings): Ditto.
+        (StyleResolver): Added m_document member.
+        * dom/SelectorQuery.cpp:
+        (WebCore::SelectorQuery::matches): Changed callsite to reflect new constructor signature.
+        (WebCore::SelectorQuery::queryAll): Ditto.
+        (WebCore::SelectorQuery::queryFirst): Ditto.
+        * html/shadow/ContentSelectorQuery.cpp:
+        (WebCore::ContentSelectorChecker::ContentSelectorChecker): Ditto.
+        (WebCore::ContentSelectorQuery::ContentSelectorQuery): Ditto.
+        * html/shadow/ContentSelectorQuery.h:
+        (ContentSelectorChecker): Removed unnecessary argument.
+
 2012-12-29  Otto Derek Cheung  <otcheung@rim.com>
 
         [BlackBerry] Cookies with an IP domain are not being loaded properly into memory
