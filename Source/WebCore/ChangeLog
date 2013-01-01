@@ -1,3 +1,29 @@
+2013-01-01  Mike West  <mkwst@chromium.org>
+
+        seamless iframes don't inherit styles when srcdoc is used
+        https://bugs.webkit.org/show_bug.cgi?id=103539
+
+        Reviewed by Eric Seidel.
+
+        Seamless iframes populated via a 'srcdoc' attribute should always
+        inherit styles from their parent documents. At the moment, this is
+        only the case when they contain a stylesheet or some other markup
+        that forces a style recalculation on the document. Simple 'srcdoc'
+        attributes (e.g. "srcdoc='<p>This is a comment.</p>'") bail out of
+        recalculating style early, resulting in unstyled appearance.
+
+        This patch instructs WebCore to treat seamless documents as having an
+        updated StyleResolver regardless of what actions the parser takes,
+        which in turn ensures that the document's style is recalculated
+        correctly.
+
+        Test: fast/frames/seamless/seamless-srcdoc.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::finishedParsing):
+            If it's a seamless document, notify it that its StyleResolver isn't
+            what it might have expected.
+
 2012-12-31  Jeff Rogers  <jrogers@rim.com>
 
         [BlackBerry] Fullscreen Media Time Indicators Background Incorrect
