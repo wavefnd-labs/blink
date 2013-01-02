@@ -1,3 +1,72 @@
+2013-01-02  Tony Chang  <tony@chromium.org>
+
+        Generate internal.settings from Settings.in
+        https://bugs.webkit.org/show_bug.cgi?id=104740
+
+        Reviewed by Adam Barth.
+
+        If the setting is declared in Settings.in and is a basic type, generate a
+        setter function at internals.settings.
+
+        InternalSettingsGenerated.idl is created by make_settings.pl. InternalSettings.idl
+        inherits from InternalSettingsGenerated.idl so we can override generated functions if
+        needed or add additional custom setters.
+
+        This patch removes 2 password echo methods from InternalSettings.idl since they are
+        auto generated. There are other methods we could remove, but I'll do that in a followup.
+
+        No new tests, existing tests should pass. Specifically, editing/input/password* tests should pass.
+
+        * CMakeLists.txt: Add generated cpp file to the testing lib.
+        * DerivedSources.make: Add generated idl file and specify all the outputs of make_settings.pl
+        * DerivedSources.pri: Generate idl file before generating bindings and include generated idl
+        for bindings generation.
+        * GNUmakefile.am: Specify all the generated files of make_settings.pl. Add generated idl to
+        list of files to be processed and resulting output to be compiled.
+        * UseJSC.cmake: Add generated idl file to list of idl files to process.
+        * UseV8.cmake: Same as UseJSC.cmake.
+        * WebCore.gyp/WebCore.gyp: Run make_settings.pl earlier so we can run the output through the
+        bindings generator.
+        * WebCore.gypi: Add new files.
+        * WebCore.vcproj/WebCoreTestSupport.vcproj: Add new files.
+        * WebCore.xcodeproj/project.pbxproj: Add new files.
+        * bindings/scripts/CodeGenerator.pm:
+        (IDLFileForInterface): Add current directory to the include path so DerivedSources.make can
+        find the generated idl file.
+        * page/make_settings.pl:
+        (generateCode): Generate InternalSettingsGenerated.{idl,h,cpp}.
+        (generateSettingsMacrosHeader): Rename since we're generating 2 headers now.
+        (setterFunctionName): Helper function for naming a setter.
+        (printGetterAndSetter): Use setterFunctionName.
+        (enumerateParsedItems): Helper function that visits each parsed item.
+        (generateInternalSettingsIdlFile): Generate idl file.
+        (generateInternalSettingsHeaderFile): Generate header file.
+        (generateInternalSettingsCppFile): Generate C++ file.
+        * testing/InternalSettings.cpp:
+        (WebCore::InternalSettings::Backup::Backup): Remove password echo members.
+        (WebCore::InternalSettings::Backup::restoreTo): Remove password echo members.
+        (InternalSettingsWrapper): We can't use RefCountedSupplemental because we're we're already
+        RefCounted. Create a wrapper class to wrap the RefCounted InternalSettings for Supplement<>::provideTo,
+        which uses an OwnPtr.
+        (WebCore::InternalSettingsWrapper::InternalSettingsWrapper): Wraps an InternalSettings that the Page can own.
+        (WebCore::InternalSettingsWrapper::~InternalSettingsWrapper): Clear's m_page when the Page goes away.
+        (WebCore::InternalSettingsWrapper::internalSettings): Unwrap InternalSettings.
+        (WebCore::InternalSettings::from): Update to use InternalSettingsWrapper.
+        (WebCore::InternalSettings::InternalSettings): Call base class constructor.
+        (WebCore::InternalSettings::resetToConsistentState): Renamed from reset() and pass through to base class.
+        Also remove unnecessary pageScaleFactor reset (done in Internals::resetToConsistentState).
+        * testing/InternalSettings.h:
+        (Backup): Remove password echo members.
+        (WebCore::InternalSettings::create): Create an instance instead of using new.
+        (WebCore::InternalSettings::hostDestroyed): Clear the page. This is similar to the code that
+        RefCountedSupplemental has.
+        * testing/InternalSettings.idl: Extends InternalSettingsGenerated.
+        * testing/js/WebCoreTestSupport.cpp:
+        (WebCoreTestSupport::resetInternalsObject): Rename to resetToConsistentState to be like other code.
+        * testing/v8/WebCoreTestSupport.cpp:
+        (WebCoreTestSupport::resetInternalsObject): Rename to resetToConsistentState to be like other code.
+        Remove an unused header.
+
 2013-01-02  Adam Barth  <abarth@webkit.org>
 
         HTML preload scanner doesn't need to remember whether we're scanning the body
