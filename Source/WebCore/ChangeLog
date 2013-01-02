@@ -1,3 +1,27 @@
+2013-01-02  Mike West  <mkwst@chromium.org>
+
+        Clean up the loadXXXStyle() idiom in StyleResolver.
+        https://bugs.webkit.org/show_bug.cgi?id=105903
+
+        Reviewed by Darin Adler.
+
+        This patch refactors 'loadViewSourceStyle' in order to avoid the
+        necessity of each call site checking whether the relevant data has
+        been loaded. The new 'viewSourceStyle' will load the data if required,
+        and return a pointer which can be used directly.
+
+        No new tests, as this refactoring should exhibit no visible change in
+        behavior.
+
+        * css/StyleResolver.cpp:
+        (WebCore::viewSourceStyle):
+            Lazily populate the static 'defaultViewSourceStyle' with data. I
+            haven't removed the outer variable, as it's used directly in
+            StyleResolver::reportMemoryUsage.
+        (WebCore::StyleResolver::matchUARules):
+        (WebCore::StyleResolver::collectFeatures):
+            Use the new hotness rather than the old, lame method.
+
 2013-01-02  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r138627.
