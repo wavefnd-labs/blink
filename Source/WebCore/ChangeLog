@@ -1,3 +1,40 @@
+2013-01-02  Mike West  <mkwst@chromium.org>
+
+        The 'body' of seamless IFrames should default to 'margin: 0'
+        https://bugs.webkit.org/show_bug.cgi?id=90834
+
+        Reviewed by Eric Seidel.
+
+        Documents displayed in seamless iframes should override the 'body'
+        element's normal 8px default margins with 0px, in order to ensure that
+        contents are displayed flush with the boundries of the seamless box.[1]
+
+        This patch does so by adding a new user agent stylesheet for seamless
+        documents, and teaching the StyleResolver how and when to apply it.
+
+        [1]: http://lists.w3.org/Archives/Public/public-whatwg-archive/2012Jul/0039.html
+
+        Test: fast/frames/seamless/seamless-body-margin.html
+
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.am:
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.vcproj/WebCore.vcproj:
+        * CMakeLists.txt:
+            Added a new CSS file! Let's tell everyone!
+        * css/StyleResolver.cpp:
+        (WebCore):
+        (WebCore::loadSeamlessStyle):
+        (WebCore::StyleResolver::matchUARules):
+        (WebCore::StyleResolver::collectFeatures):
+        (WebCore::StyleResolver::reportMemoryUsage):
+            Load the new stylesheet, and apply it to the document in
+            matchUARules iff the document should be displayed seamlessly.
+        * css/seamless.css: Added.
+        (body):
+            Stylesheet containing defaults for seamless documents.
+
 2013-01-01  Dan Bernstein  <mitz@apple.com>
 
         <rdar://problem/12942239> Update copyright strings
