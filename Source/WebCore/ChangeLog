@@ -1,3 +1,44 @@
+2013-01-02  Adam Barth  <abarth@webkit.org>
+
+        Remove webkitPostMessage
+        https://bugs.webkit.org/show_bug.cgi?id=105910
+
+        Reviewed by Kentaro Hara.
+
+        The vendor-prefixed version of postMessage was never widely used.
+        We've been compiling it out of the Chromium port for a while now and
+        haven't received any reports of compatibility problems. I've done a
+        number of web searches for uses of the API and personally contacted a
+        handful of authors I found using the API, all of whom have now moved to
+        the identical unprefixed API. We've publicied the prefix removal in a
+        blog post:
+
+        http://blog.chromium.org/2012/11/a-web-developers-guide-to-latest-chrome.html
+
+        and discussed it on webkit-dev:
+
+        http://lists.macosforge.org/pipermail/webkit-dev/2012-September/022189.html
+
+        We've done our diligence, and now we should remove the API from the
+        remainder of the ports.
+
+        * bindings/js/JSDOMWindowCustom.cpp:
+        * bindings/js/JSDedicatedWorkerContextCustom.cpp:
+        * bindings/js/JSMessagePortCustom.cpp:
+        * bindings/js/JSWorkerCustom.cpp:
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::V8DOMWindow::postMessageCallback):
+        * bindings/v8/custom/V8DedicatedWorkerContextCustom.cpp:
+        (WebCore::V8DedicatedWorkerContext::postMessageCallback):
+        * bindings/v8/custom/V8MessagePortCustom.cpp:
+        (WebCore::V8MessagePort::postMessageCallback):
+        * bindings/v8/custom/V8WorkerCustom.cpp:
+        (WebCore::V8Worker::postMessageCallback):
+        * dom/MessagePort.idl:
+        * page/DOMWindow.idl:
+        * workers/DedicatedWorkerContext.idl:
+        * workers/Worker.idl:
+
 2013-01-02  Benjamin Poulain  <benjamin@webkit.org>
 
         Optimize TransformationMatrix::multiply() for x86_64
