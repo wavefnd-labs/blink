@@ -1,3 +1,60 @@
+2013-01-03  Adam Klein  <adamk@chromium.org>
+
+        [HTMLTemplateElement] Disallow cycles within template content
+        https://bugs.webkit.org/show_bug.cgi?id=105066
+
+        Reviewed by Ojan Vafai.
+
+        Cycles in <template> content aren't quite as bad as cycles in normal
+        DOM trees, but they can easily cause crashes, e.g. in cloneNode and
+        innerHTML.
+
+        Shadow DOM has an analagous issue, and this patch tackles that problem
+        at the same time by creating a new method, Node::containsIncludingHostElements.
+
+        In order to disallow cycles, the HTMLTemplateElement.content
+        DocumentFragment needs a pointer to its host. The approach here
+        creates a new subclass with a host pointer and a new virtual method
+        to DocumentFragment to identify the subclass.
+
+        To avoid unnecessary virtual function calls, also changed how
+        Document::templateContentsOwnerDocument works to allow fast inlined
+        access and avoid lazy creation when not needed.
+
+        Tests: fast/dom/HTMLTemplateElement/cycles-in-shadow.html
+               fast/dom/HTMLTemplateElement/cycles.html
+               fast/dom/shadow/shadow-hierarchy-exception.html
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/ContainerNode.cpp:
+        (WebCore::isInTemplateContent):
+        (WebCore::containsConsideringHostElements):
+        (WebCore::checkAcceptChild):
+        * dom/Document.cpp:
+        (WebCore::Document::ensureTemplateContentsOwnerDocument): Renamed to make clear that it lazily creates the Document. Updated all existing callers to call this method.
+        * dom/Document.h:
+        (Document):
+        (WebCore::Document::templateContentsOwnerDocument): Fast, inlined accessor for use in checkAcceptChild().
+        * dom/DocumentFragment.h:
+        (WebCore::DocumentFragment::isTemplateContent):
+        * dom/Node.cpp:
+        (WebCore::Node::containsIncludingShadowDOM): made const, simplified
+        (WebCore::Node::containsIncludingHostElements): Specialized version of Node::contains that knows how to jump over template content boundaries.
+        * dom/Node.h:
+        (Node):
+        * dom/TemplateContentDocumentFragment.h: Added.
+        (TemplateContentDocumentFragment): Subclass of DocumentFragment which stores its host template element.
+        (WebCore::TemplateContentDocumentFragment::create):
+        (WebCore::TemplateContentDocumentFragment::host):
+        (WebCore::TemplateContentDocumentFragment::TemplateContentDocumentFragment):
+        * editing/markup.cpp:
+        (WebCore::createFragmentForInnerOuterHTML):
+        * html/HTMLTemplateElement.cpp:
+        (WebCore::HTMLTemplateElement::content): Construct the new subclass.
+
 2013-01-02  Jon Lee  <jonlee@apple.com>
 
         Revert auto-start plugins to snapshotted plugins after a period of inactivity
