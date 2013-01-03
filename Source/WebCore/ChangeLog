@@ -1,3 +1,86 @@
+2013-01-03  Elliott Sprehn  <esprehn@gmail.com>
+
+        [Refactoring] Replace Node's Document pointer with a TreeScope pointer
+        https://bugs.webkit.org/show_bug.cgi?id=59816
+
+        Reviewed by Ryosuke Niwa.
+
+        Instead of giving every node in a shadow a rare data, which can be quite
+        large, we replace the Document pointer in Node with a TreeScope pointer
+        and we give TreeScope a pointer to it's document scope.
+
+        This introduces no branches in document() because in the common
+        case document() becomes equivalent to m_treeScope->m_documentScope where
+        the documentScope is actually m_treeScope so this shouldn't introduce a
+        perf regression.
+
+        Note also that TreeScope can never be null after r136328, and the document
+        pointer is only null for DocumentType nodes so we can use a special
+        no-document TreeScope for this case that always returns null from
+        documentScope().
+
+        My original patch in r137524 for this did not correctly handle the case 
+        where the Document is being destroyed and we would then call guardDeref on
+        ourself in the middle of the Document destructor causing asserts. To fix
+        this we need to go back to the original model where Document passes
+        null to it's super constructor for the Document pointer and assigns
+        it's tree scope later, and we also need to clear the tree scope pointer
+        in Document's destructor.
+
+        No new tests, no change in behavior.
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::~Document):
+        (WebCore::Document::suggestedMIMEType):
+        * dom/Document.h:
+        (WebCore::Node::isDocumentNode):
+        (WebCore::Node::Node):
+        * dom/Element.cpp:
+        (WebCore::Element::createRareData):
+        * dom/ElementRareData.h:
+        (ElementRareData):
+        (WebCore::ElementRareData::ElementRareData):
+        * dom/Node.cpp:
+        (WebCore::Node::~Node):
+        (WebCore::Node::createRareData):
+        (WebCore::Node::attach):
+        (WebCore::Node::reportMemoryUsage):
+        * dom/Node.h:
+        (WebCore::NodeRareDataBase::NodeRareDataBase):
+        (NodeRareDataBase):
+        (WebCore::Node::treeScope):
+        (WebCore::Node::inDocument):
+        (WebCore::Node::documentInternal):
+        (WebCore::Node::setTreeScope):
+        (Node):
+        * dom/NodeRareData.cpp:
+        (SameSizeAsNodeRareData):
+        (WebCore::NodeRareData::reportMemoryUsage):
+        * dom/NodeRareData.h:
+        (WebCore::NodeRareData::NodeRareData):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::ShadowRoot):
+        * dom/TreeScope.cpp:
+        (SameSizeAsTreeScope):
+        (WebCore::TreeScope::TreeScope):
+        (WebCore::TreeScope::clearDocumentScope):
+            Needed to clear the document scope during Document destruction
+            so the Node destructor does not guardDeref the document that is
+            already being destroyed.
+        (WebCore::TreeScope::setParentTreeScope):
+        * dom/TreeScope.h:
+        (TreeScope):
+        (WebCore::TreeScope::documentScope):
+        (WebCore::TreeScope::noDocumentInstance):
+            Special shared tree scope that has a document scope that is always
+            null. This is needed for DocType nodes, and also for Documents
+            during construction.
+        (WebCore::TreeScope::setDocumentScope):
+        * dom/TreeScopeAdopter.cpp:
+        (WebCore::TreeScopeAdopter::moveTreeToNewScope):
+        (WebCore::TreeScopeAdopter::moveNodeToNewDocument):
+
 2013-01-03  Adam Klein  <adamk@chromium.org>
 
         Unreviewed build fix.
