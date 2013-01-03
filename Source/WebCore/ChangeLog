@@ -1,3 +1,63 @@
+2013-01-03  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=105475
+        Nested fixed position elements incorrectly repositioned on scrolling
+
+        Reviewed by Simon Fraser.
+
+        The fix here is to ensure that the ScrollingTree reflects the same hierarchy as 
+        the GraphicsLayer tree. And from there, we can correctly calculate the offset for 
+        nested objects by keeping track of a cumulative delta that parents have been moved 
+        by.
+
+        We already had to fix this same bug in ScrollingStateNode::removeChild(). The 
+        index can be notFound when you are removing a grandchild.
+        * page/scrolling/ScrollingTreeNode.cpp:
+        (WebCore::ScrollingTreeNode::removeChild):
+
+        parentScrollPositionDidChange() now takes a second parameter that represents the 
+        delta that parent graphicsLayers have been moved by.
+        * page/scrolling/ScrollingTreeNode.h:
+        (ScrollingTreeNode):
+        * page/scrolling/ScrollingTreeScrollingNode.h:
+        * page/scrolling/mac/ScrollingTreeFixedNode.h:
+        (ScrollingTreeFixedNode):
+
+        attachToStateTree() now handles re-parenting.
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::attachToStateTree):
+
+        Properly adjust by and compute the new parameter cumulativeDelta. Adjusting by 
+        this will prevent fixed children of fixed objects from moving when they are not 
+        supposed to.
+        * page/scrolling/mac/ScrollingTreeFixedNode.mm:
+        (WebCore::ScrollingTreeFixedNode::parentScrollPositionDidChange):
+
+        Give parentScrollPositionDidChange() an initial delta of (0,0).
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::setScrollLayerPosition):
+
+        Properly adjust by and compute the new parameter cumulativeDelta. This math is 
+        actually not quite right for sticky yet as the FIXME indicates. 
+        * page/scrolling/mac/ScrollingTreeStickyNode.h:
+        (ScrollingTreeStickyNode):
+        * page/scrolling/mac/ScrollingTreeStickyNode.mm:
+        (WebCore::ScrollingTreeStickyNode::parentScrollPositionDidChange):
+
+        Re-named attachToScrollingCoordinator() to attachToScrollingCoordinatorWithParent 
+        to make it clear that the node may already be attached, but it may need to be re-
+        parented.
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::attachToScrollingCoordinatorWithParent):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::updateBacking):
+
+        Always call attachToScrollingCoordinatorWithParent() in case the fixed node has 
+        been re-parented.
+        (WebCore::RenderLayerCompositor::registerOrUpdateViewportConstrainedLayer):
+
 2013-01-03  Simon Fraser  <simon.fraser@apple.com>
 
         Body background with background-attachment:fixed stays in place during rubber-banding
