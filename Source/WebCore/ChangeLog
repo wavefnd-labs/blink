@@ -1,3 +1,26 @@
+2013-01-02  Alexey Proskuryakov  <ap@apple.com>
+
+        [WK2 NetworkProcess] Uploading fails if a client modified the request
+        https://bugs.webkit.org/show_bug.cgi?id=105965
+
+        Reviewed by Brady Eidson.
+
+        Associating streams with additional information via a side HashMap does not work,
+        because the stream we can see is an internal one, with address and other information
+        not matching a stream that we created.
+
+        It's surprising that this design issue was not causing major trouble without NetworkProcess.
+
+        * platform/network/cf/FormDataStreamCFNet.cpp:
+        (WebCore): Renamed FormContext to FormCreationContext, because this type only used
+        for creation. Later, we use FormStreamFields as context.
+        (WebCore::closeCurrentStream): Moved a star.
+        (WebCore::formCreate): We no longer have a side map to keep updated.
+        (WebCore::formFinalize): Ditto.
+        (WebCore::formCopyProperty): Added an accessor to get FormData pointer from a stream.
+        (WebCore::setHTTPBody): Ditto.
+        (WebCore::httpBodyFromStream): Use the new property to get FormData pointer.
+
 2013-01-02  Elliott Sprehn  <esprehn@chromium.org>
 
         Clean up dispatchEvent overrides and overloads
