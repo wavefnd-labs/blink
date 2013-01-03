@@ -1,3 +1,42 @@
+2013-01-03  Alexis Menard  <alexis@webkit.org>
+
+        Querying transition-timing-function value on the computed style does not return keywords when it should.
+        https://bugs.webkit.org/show_bug.cgi?id=105442
+
+        Reviewed by Simon Fraser.
+
+        http://www.w3.org/TR/css3-transitions/#transition-timing-function-property
+        contains a set of predefined timing functions which under the hood are
+        implemented using cubic-bezier but it's an implementation detail that
+        should not be exposed. It seems to be more clear to return a CSS
+        keyword rather than the cubic-bezier form when querying the value of
+        the property on the computed style. In fact the spec even say that for
+        example the initial value is "ease" and not cubic-bezier(0.25, 0.1,
+        0.25, 1.0). We could also imagine that in the future these predefined
+        values could contain other values not represented by a cubic-bezier
+        form. This behavior also align with the "linear" keyword which return
+        "linear" rather than cubic-bezier(0.0, 0.0, 1.0, 1.0).
+
+        Test: transitions/transitions-parsing.html has been updated to cover
+        the new behavior as well as making sure that an explicitly set value of
+        cubic-bezier(0.25, 0.1, 0.25, 1.0) does not return "ease" but the
+        cubic-bezier() form.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::createAnimationValue):
+        (WebCore):
+        (WebCore::getTimingFunctionValue):
+        * css/CSSToStyleMap.cpp:
+        (WebCore::CSSToStyleMap::mapAnimationTimingFunction):
+        * platform/animation/TimingFunction.h:
+        (WebCore::CubicBezierTimingFunction::create):
+        (CubicBezierTimingFunction):
+        (WebCore::CubicBezierTimingFunction::operator==):
+        (WebCore::CubicBezierTimingFunction::timingFunctionPreset): Store the
+        preset value of the timing function if it is one when creating it 
+        so we can use it later from the computed style.
+        (WebCore::CubicBezierTimingFunction::CubicBezierTimingFunction):
+
 2013-01-03  Tony Chang  <tony@chromium.org>
 
         Generate internal.settings from Settings.in
