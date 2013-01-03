@@ -1,3 +1,22 @@
+2013-01-02  Levi Weintraub  <leviw@chromium.org>
+
+        Fix incorrect assumption about in-flow descendants of inlines in touch event rect tracking
+        https://bugs.webkit.org/show_bug.cgi?id=105970
+
+        Reviewed by Simon Fraser.
+
+        Correcting the touch event target rect accumulation code to no longer incorrectly assume that
+        non-block renderers held only normal-flow children. The updated code will always walk the
+        complete renderer sub-tree, but only do the work of calculating the absolute rect when the
+        child won't necessarily fall inside its parent (floating, positioned, or transformed).
+
+        Tests: platform/chromium/fast/events/touch/compositor-touch-hit-rects.html updated to catch bug.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::accumulateRendererTouchEventTargetRects): Walk all renderer sub-trees. Also keeping
+        track of the last added parent container rect to avoid adding redundant rectangles.
+        (WebCore::accumulateDocumentEventTargetRects): Avoiding adding empty rects.
+
 2013-01-03  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Simplify IDBTransactionBackendImpl::scheduleTask usage
