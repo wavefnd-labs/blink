@@ -1,3 +1,31 @@
+2013-01-02  Elliott Sprehn  <esprehn@chromium.org>
+
+        Make ClassList::reset's purpose obvious and don't keep quirks string when not needed
+        https://bugs.webkit.org/show_bug.cgi?id=105963
+
+        Reviewed by Ojan Vafai.
+
+        ClassList::reset only exists to handle updating the special SpaceSplitString
+        for quirks mode documents. This adds a new method that makes this obvious and
+        instead of updating the string immediately clear the value and lazily
+        update it. We also clear the value whenever we're inserted into the
+        document so that when moving from a quirks mode document to a non-quirks
+        mode document we don't keep the SpaceSplitString around if it's not needed.
+
+        No new tests, I'm not sure how to write a test that we don't keep the
+        SpaceSplitString when moving between quirks and non-quirks mode documents.
+
+        * dom/Element.cpp:
+        (WebCore::Element::classAttributeChanged):
+        (WebCore::Element::insertedInto):
+        * dom/Element.h:
+        (Element):
+        * dom/ElementRareData.h:
+        (WebCore::ElementRareData::clearClassListValueForQuirksMode):
+        * html/ClassList.cpp:
+        * html/ClassList.h:
+        (WebCore::ClassList::clearValueForQuirksMode):
+
 2013-01-02  Adam Barth  <abarth@webkit.org>
 
         [V8] V8DOMWrapper.cpp has many more includes than necessary
