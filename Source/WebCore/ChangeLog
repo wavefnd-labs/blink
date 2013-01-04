@@ -1,3 +1,85 @@
+2013-01-04  Adam Klein  <adamk@chromium.org>
+
+        Remove ENABLE_MUTATION_OBSERVERS #define
+        https://bugs.webkit.org/show_bug.cgi?id=105459
+
+        Reviewed by Ryosuke Niwa.
+
+        The flag has been on by default for quite awhile now (nearly a year)
+        and the feature is a standardized part of DOM4.
+
+        The only place it was disabled was under "unstable" features for the
+        gtk port, but the fact that it's shipping in several major WebKit
+        browsers as well as Firefox suggests that it's not too unstable.
+
+        * Configurations/FeatureDefines.xcconfig:
+        * GNUmakefile.am: Removed ENABLE_MUTATION_OBSERVERS from the "unstable features" list.
+        * GNUmakefile.features.am.in:
+        * bindings/js/JSDictionary.cpp:
+        (WebCore):
+        (WebCore::JSDictionary::convertValue):
+        * bindings/js/JSDictionary.h:
+        * bindings/js/JSMainThreadExecState.cpp:
+        (WebCore::JSMainThreadExecState::didLeaveScriptContext):
+        * bindings/js/JSMutationCallbackCustom.cpp:
+        * bindings/js/JSMutationObserverCustom.cpp:
+        * bindings/v8/V8GCController.cpp:
+        * bindings/v8/V8RecursionScope.cpp:
+        (WebCore::V8RecursionScope::didLeaveScriptContext):
+        * bindings/v8/custom/V8MutationCallbackCustom.cpp:
+        * bindings/v8/custom/V8MutationObserverCustom.cpp:
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::setCssText):
+        (WebCore::PropertySetCSSStyleDeclaration::setProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::removeProperty):
+        (WebCore::PropertySetCSSStyleDeclaration::setPropertyInternal):
+        * dom/CharacterData.cpp:
+        (WebCore::CharacterData::dispatchModifiedEvent):
+        * dom/ChildListMutationScope.cpp:
+        * dom/ChildListMutationScope.h:
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::insertBefore):
+        (WebCore::ContainerNode::replaceChild):
+        (WebCore::willRemoveChild):
+        (WebCore::willRemoveChildren):
+        (WebCore::ContainerNode::appendChild):
+        (WebCore::updateTreeAfterInsertion):
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        * dom/Document.h:
+        (Document):
+        * dom/Element.cpp:
+        (WebCore::Element::willModifyAttribute):
+        * dom/MutationCallback.h:
+        * dom/MutationCallback.idl:
+        * dom/MutationObserver.cpp:
+        * dom/MutationObserver.h:
+        * dom/MutationObserver.idl:
+        * dom/MutationObserverInterestGroup.cpp:
+        * dom/MutationObserverInterestGroup.h:
+        * dom/MutationObserverRegistration.cpp:
+        * dom/MutationObserverRegistration.h:
+        * dom/MutationRecord.cpp:
+        * dom/MutationRecord.h:
+        * dom/MutationRecord.idl:
+        * dom/Node.cpp:
+        (WebCore::Node::clearRareData):
+        (WebCore::Node::setTextContent):
+        (WebCore::Node::didMoveToNewDocument):
+        (WebCore::Node::notifyMutationObserversNodeWillDetach):
+        * dom/Node.h:
+        (Node):
+        * dom/NodeRareData.cpp:
+        (SameSizeAsNodeRareData):
+        (WebCore::NodeRareData::reportMemoryUsage):
+        * dom/NodeRareData.h:
+        (NodeRareData):
+        (WebCore::NodeRareData::ensureTransientMutationObserverRegistry):
+        * editing/markup.cpp:
+        (WebCore::replaceChildrenWithFragment):
+        (WebCore::replaceChildrenWithText):
+        * page/DOMWindow.idl:
+
 2013-01-04  Xianzhu Wang  <wangxianzhu@chromium.org>
 
         Change RenderLayerBacking::nameForLayer() to RenderLayer::name()
