@@ -1,3 +1,29 @@
+2013-01-04  Stephen White  <senorblanco@chromium.org>
+
+        Invalidation of some SVG filter attributes on HTML content doesn't work 
+        https://bugs.webkit.org/show_bug.cgi?id=105635
+
+        Reviewed by Dirk Schulze.
+
+        Since HTML elements with filters are only added to m_clientLayers, not
+        m_clients, and do not use the FilterInfo used by SVG filters on SVG
+        elements, they must be invalidated separately.  Some filter attribute
+        invalidations call markAllClientsForInvalidation(), but some call
+        markClientForInvalidation() directly.  These invaldations must also 
+        invalidate m_clientLayers.
+
+        Test: css3/filters/reference-filter-update-on-attribute-change.html
+
+        * rendering/svg/RenderSVGResourceContainer.cpp:
+        (WebCore::RenderSVGResourceContainer::markAllClientsForInvalidation):
+        (WebCore::RenderSVGResourceContainer::markAllClientLayersForInvalidation):
+        * rendering/svg/RenderSVGResourceContainer.h:
+        Refactor client layer invalidation out into its own function.
+        * rendering/svg/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::primitiveAttributeChanged):
+        Mark all client layers for invalidation when a filter primitve attribute is
+        changed.
+
 2013-01-04  Mike West  <mkwst@chromium.org>
 
         CSP 1.1: Experiment with adding line numbers to violation reports.
