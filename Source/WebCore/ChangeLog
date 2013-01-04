@@ -1,3 +1,52 @@
+2013-01-04  Tim Horton  <timothy_horton@apple.com>
+
+        [wk2] Remove non-visible tiles from the layer tree
+        https://bugs.webkit.org/show_bug.cgi?id=106061
+        <rdar://problem/12761821>
+
+        Reviewed by Simon Fraser.
+
+        Unparenting tiles which aren't currently on-screen can allow underlying
+        frameworks to manage the layer's backing stores more effectively than we can.
+
+        In addition, add a setting (AggressiveTileRetentionEnabled) which keeps more
+        tiles around (we don't remove tiles in cohorts, nor when the TileCache moves
+        out of the window), which is off by default.
+
+        * WebCore.exp.in: Export Settings::setAggressiveTileRetentionEnabled.
+        * page/Settings.cpp:
+        (WebCore::Settings::Settings): Initialize m_aggressiveTileRetentionEnabled to false.
+        (WebCore::Settings::setAggressiveTileRetentionEnabled): Added.
+        * page/Settings.h:
+        (WebCore::Settings::aggressiveTileRetentionEnabled): Added.
+        * platform/graphics/TiledBacking.h: Add setter/getter to hand aggressivelyRetainsTiles through to TiledBackings.
+        * platform/graphics/ca/mac/TileCache.h:
+        (TileCache): Turn TileValidationPolicy into TileValidationPolicyFlags, and add
+        a flag for unparenting all tiles.
+        Implement aggressivelyRetainsTiles setter/getter.
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::TileCache): Initialize m_aggressivelyRetainsTiles to false.
+        (WebCore::TileCache::setIsInWindow): Revalidate tiles immediately if the TileCache has just entered the window.
+        (WebCore::TileCache::tileRevalidationTimerFired):
+        This is called if coverage rect, tile cache layer bounds, or visibility changes. We will revalidate tiles:
+            - Removing all tiles from the layer tree for background tile caches.
+            - Not pruning old tiles if the aggressiveTileRetentionEnabled setting is on.
+        (WebCore::TileCache::revalidateTiles):
+        Adopt TileValidationPolicyFlags instead of the old enum, and use separate flags for foreground/background caches.
+        Unparent tiles when they move out of the tile coverage rect.
+        Only schedule the tile cohort removal timer if we're not aggressively keeping tiles around.
+        Ensure that tiles are re-added to the TileCache layer tree if they already exist.
+        Unparent all tiles if TileValidationPolicyFlags says to (from tileRevalidationTimerFired's background flags).
+        Only add new tiles to the TileCache's layer tree if we're currently in the window.
+        Don't prune secondary tiles if the visible rect changes; this will already occur because when the visibleRect
+        changes, we arrive via tileRevalidationTimerFired, which asks for PruneSecondaryTiles anyway (except if we're
+        aggressively retaining tiles). This prevents tiles from being deleted unexpectedly during rubber-banding or when zoomed (this part of the patch is thanks to Simon).
+        (WebCore::TileCache::ensureTilesForRect):
+        Don't ensure any tiles if the TileCache is offscreen.
+        Ensure that tiles are re-added to the TileCache layer tree if they already exist.
+        (WebCore::TileCache::drawTileMapContents):
+        Draw a thick purple border around tiles that have been unparented.
+
 2013-01-04  Adam Barth  <abarth@webkit.org>
 
         HTMLTreeBuilder should ASSERT that it is on the main thread before touching elements
