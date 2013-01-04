@@ -1,3 +1,34 @@
+2013-01-04  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exclusions] The ExclusionPolygon classes should allow more than one type of "Edge" class
+        https://bugs.webkit.org/show_bug.cgi?id=106026
+
+        Reviewed by Dirk Schulze.
+
+        Refactored the ExclusionPolygonEdge class to pave the way for a similar
+        OffsetEdge class. The new VertexPair abstract base class provides the common
+        state and operations. ExclusionPolygonEdge now extends VertexPair and defines
+        ExclusionPolygon as a friend, since the ExclusionPolygon constructor initializes
+        its private state.
+
+        * rendering/ExclusionPolygon.cpp:
+        (WebCore::ExclusionPolygon::ExclusionPolygon): Use ExclusionPolygonEdge accessors instead of direct field access.
+        (WebCore::getVertexIntersectionVertices): Ditto.
+        * rendering/ExclusionPolygon.h:
+        (VertexPair): New abstract base class.
+        (WebCore::VertexPair::~VertexPair):
+        (WebCore::VertexPair::minX): This method was defined in ExclusionPolygonEdge.
+        (WebCore::VertexPair::minY): Ditto.
+        (WebCore::VertexPair::maxX): Ditto.
+        (WebCore::VertexPair::maxY): Ditto.
+        (ExclusionPolygonEdge): Now extends VertexPair.
+        (WebCore::ExclusionPolygonEdge::previousEdge): Refer to m_ private class fields, instead of public struct fields.
+        (WebCore::ExclusionPolygonEdge::nextEdge): Ditto.
+        (WebCore::ExclusionPolygonEdge::polygon): Ditto.
+        (WebCore::ExclusionPolygonEdge::vertexIndex1): Ditto.
+        (WebCore::ExclusionPolygonEdge::vertexIndex2): Ditto.
+        (WebCore::ExclusionPolygonEdge::edgeIndex): Ditto.
+
 2013-01-04  Steve Block  <steveblock@chromium.org>
 
         Add 'float FloatPoint::slopeAngleRadians()'
