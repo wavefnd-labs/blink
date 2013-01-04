@@ -1,3 +1,33 @@
+2013-01-04  Mike West  <mkwst@chromium.org>
+
+        CSP: XHR from an isolated world should bypass a page's policy.
+        https://bugs.webkit.org/show_bug.cgi?id=104480
+
+        Reviewed by Adam Barth.
+
+        Connections of various types are governed by the page's Content Security
+        Policy 'connect-src' directive. In the special case of connections
+        generated from an isolated world, we'd like to bypass these restrictions
+        in order to allow things like extensions to enjoy their uniquely high-
+        privilege lifestyle. This patch does just that.
+
+        We'll lock them down to their own policy in webkit.org/b/104520, but
+        that's a bit far away at the moment. Soon!
+
+        Test: http/tests/security/isolatedWorld/bypass-main-world-csp-for-xhr.html
+
+        * Modules/websockets/WebSocket.cpp:
+        (WebCore::WebSocket::connect):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::canRequest):
+        * page/EventSource.cpp:
+        (WebCore::EventSource::create):
+        * xml/XMLHttpRequest.cpp:
+        (WebCore::XMLHttpRequest::open):
+            Check whether or not code is running in an isolated world that has
+            its own Content Security Policy. If so, bypass the main world's CSP
+            checks. Isolated worlds gotta be free, man.
+
 2013-01-04  Mike Lawther  <mikelawther@chromium.org>
 
         CSS3 calc: mixed percent/absolute for border-radius
