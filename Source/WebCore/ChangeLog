@@ -1,3 +1,38 @@
+2013-01-04  Ojan Vafai  <ojan@chromium.org>
+
+        Vertical writing mode can overflow fixed size grandparent container
+        https://bugs.webkit.org/show_bug.cgi?id=93655
+
+        Reviewed by David Hyatt.
+
+        Add a hook to RenderBox::availableHeight to exclude the containing block's
+        margin, border and padding. This is for auto-sizing perpendicular writing modes
+        to restrict to the minimum of the fill-available height and the viewport height.
+
+        This will be used in a future patch to implement "height: fill-available".
+
+        This behavior was recently specced in http://dev.w3.org/csswg/css3-sizing/#extrinsic-sizing.
+
+        Test: fast/writing-mode/auto-sizing-orthogonal-flows.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::containingBlockAvailableLineWidthInRegion):
+        (WebCore::RenderBox::perpendicularContainingBlockLogicalHeight):
+        (WebCore::RenderBox::computeReplacedLogicalHeightUsing):
+        (WebCore::RenderBox::availableLogicalHeight):
+        (WebCore::RenderBox::availableLogicalHeightUsing):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        (WebCore::RenderBox::availableWidth):
+        (WebCore::RenderBox::availableHeight):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::computeIntrinsicRatioInformation):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::availableLogicalHeight):
+        * rendering/RenderView.h:
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::computeReplacedLogicalHeight):
+
 2013-01-04  Joshua Bell  <jsbell@chromium.org>
 
         Add tests for WebIDL type conversions
