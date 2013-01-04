@@ -1,3 +1,24 @@
+2013-01-04  Benjamin Poulain  <benjamin@webkit.org>
+
+        WebKitCSSTransformValue::customCssText() should always allocate once
+        https://bugs.webkit.org/show_bug.cgi?id=105445
+
+        Reviewed by Alexis Menard.
+
+        When converting a WebKitCSSTransformValue to a String representation,
+        it was typically done with 2 memory allocations due to the string size in StringBuilder.
+
+        This patch changes the code to use the String Concatenate operations in order
+        to create the string at once.
+
+        The opening parenthesis is also moved in the prefix name in order to maximize
+        the range copied with memcopy.
+
+        * css/WebKitCSSTransformValue.cpp:
+        (WebCore::transformValueToCssString): New generic function for boxing values.
+        (WebCore::WebKitCSSTransformValue::customCssText):
+        (WebCore::WebKitCSSTransformValue::customSerializeResolvingVariables):
+
 2013-01-04  James Robinson  <jamesr@chromium.org>
 
         [chromium] WebTransformationMatrix shouldn't alias memory for TransformationMatrix
