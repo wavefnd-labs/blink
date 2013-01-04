@@ -1,3 +1,23 @@
+2013-01-04  Martin Robinson  <mrobinson@igalia.com>
+
+        [GTK] [WebKit2] Clicking on a word that is selected in an editable area deletes it
+        https://bugs.webkit.org/show_bug.cgi?id=106045
+
+        Reviewed by Carlos Garcia Campos.
+
+        Be more selective about when to confirm WebKit compositions. If there is no current
+        preedit, reseting the GTK+ context shouldn't also do an empty confirmation in WebKit,
+        as this will trash the current selection. The second part of this patch also makes the
+        m_composingTextCurrently member more accurately reflect whether or not we are composing
+        text.
+
+        * platform/gtk/GtkInputMethodFilter.cpp:
+        (WebCore::GtkInputMethodFilter::notifyMouseButtonPress): Only confirm the current WebKit composition
+        if we have a preedit.
+        (WebCore::GtkInputMethodFilter::notifyFocusedOut): Ditto.
+        (WebCore::GtkInputMethodFilter::sendCompositionAndPreeditWithFakeKeyEvents): Don't clear the m_composingTextCurrently
+        member if we are not sending a confirmed composition.
+
 2013-01-04  Max Feil  <mfeil@rim.com>
 
         [BlackBerry] Handle re-entrant destruction of MediaPlayerPrivate while a dialog is up
