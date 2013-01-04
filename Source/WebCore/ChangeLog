@@ -1,5 +1,28 @@
 2013-01-04  Mike West  <mkwst@chromium.org>
 
+        CSP: 'frame-src' should block redirects to invalid sources.
+        https://bugs.webkit.org/show_bug.cgi?id=106084
+
+        Reviewed by Adam Barth.
+
+        The 'frame-src' CSP directive whitelists valid iframe targets, but
+        currently fails to correctly deal with redirection. As long as the
+        initial target is valid, any redirection goes through without
+        question. This patch moves the CSP check out of
+        SubframeLoader::loadSubframe, and into
+        PolicyChecker::checkNavigationPolicy. In the new location, the check
+        is well-positioned to check each URL in a redirect chain, as opposed
+        to checking only the initial target.
+
+        Test: http/tests/security/contentSecurityPolicy/frame-src-redirect-blocked.html
+
+        * loader/PolicyChecker.cpp:
+        (WebCore::PolicyChecker::checkNavigationPolicy):
+        * loader/SubframeLoader.cpp:
+        (WebCore::SubframeLoader::loadSubframe):
+
+2013-01-04  Mike West  <mkwst@chromium.org>
+
         CSP: XHR from an isolated world should bypass a page's policy.
         https://bugs.webkit.org/show_bug.cgi?id=104480
 
