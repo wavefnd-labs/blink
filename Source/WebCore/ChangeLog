@@ -1,3 +1,63 @@
+2012-12-18  Philippe Normand  <pnormand@igalia.com>
+
+        [GStreamer] Port WebAudio backend to 1.0 APIs
+        https://bugs.webkit.org/show_bug.cgi?id=105293
+
+        Reviewed by Martin Robinson.
+
+        Port the AudioFileReader and AudioDestination to GStreamer 1.0
+        APIs. It would be preferable to rely on at least GStreamer 1.0.4
+        for this to work properly as that release contains two bug fixes
+        for the deinterleave and interleave elements.
+
+        * platform/audio/FFTFrame.cpp:
+        (WebCore::FFTFrame::reportMemoryUsage): Don't report GstFFTF32
+        structures anymore because they're opaque in GStreamer 1.0.
+        * platform/audio/gstreamer/AudioDestinationGStreamer.cpp:
+        (WebCore):
+        (WebCore::AudioDestinationGStreamer::AudioDestinationGStreamer):
+        The wavparse element in 1.0 has no sometimes-pads anymore.
+        * platform/audio/gstreamer/AudioFileReaderGStreamer.cpp:
+        (AudioFileReader): The decodebin2 element has been renamed to
+        decodebin in GStreamer 1.0.
+        (WebCore::getGStreamerAudioCaps): Audio caps description changed a
+        lot in GStreamer 1.0, the function now handles both APIs.
+        (WebCore::copyGstreamerBuffersToAudioChannel): Adapted to
+        GstBufferList and GstBuffer API changes.
+        (WebCore::onAppsinkPullRequiredCallback): Pull a sample or buffer,
+        depending on which API we use.
+        (WebCore::AudioFileReader::~AudioFileReader): Protect
+        GstBufferListIterators in 0.10-only code path.
+        (WebCore):
+        (WebCore::AudioFileReader::handleSample): Pull an audio sample
+        from appsink and insert it in the appropriate buffer list.
+        (WebCore::AudioFileReader::handleNewDeinterleavePad): Handle
+        appsink API changes from GStreamer 0.10 to 1.0.
+        (WebCore::AudioFileReader::decodeAudioForBusCreation): Create the
+        correct decodebin element.
+        (WebCore::AudioFileReader::createBus): Protect GstBufferListIterators
+        in 0.10-only code path.
+        * platform/audio/gstreamer/WebKitWebAudioSourceGStreamer.cpp:
+        (_WebKitWebAudioSourcePrivate): GstTask in GStreamer 1.0 uses a
+        GRecMutex instead of a (deprecated) GStaticRecMutex.
+        (getGStreamerMonoAudioCaps): Handle caps description changes
+        between GStreamer 0.10 and 1.0.
+        (webKitWebAudioGStreamerChannelPosition): POSITION_LFE in
+        GStreamer 1.0 is now POSITION_LFE1. Also map ChannelCenter to its
+        GStreamer equivalent.
+        (webkit_web_audio_src_class_init): Use generic setGstElementClassMetadata.
+        (webkit_web_audio_src_init): Handle GRecMutex initialisation.
+        (webKitWebAudioSrcConstructed): Set channel position on
+        capsfilter. This is done for GStreamer 1.0 code path only because
+        in 0.10 the caps have no way to store this information.
+        (webKitWebAudioSrcFinalize): Clear GRecMutex.
+        (webKitWebAudioSrcLoop): Handle GstBuffer API changes and add an
+        error check if buffers can't be chained to queue's source pad.
+        (webKitWebAudioSrcChangeState): As advised in the GStreamer docs,
+        fixup the state changes for this live source element: NO_PREROLL
+        in READY->PAUSED and start/stop the GstTask when going/coming
+        to/from PLAYING.
+
 2013-01-04  Mihnea Ovidenie  <mihnea@adobe.com>
 
         [CSS Regions]Content overflowing last region displayed wrong
