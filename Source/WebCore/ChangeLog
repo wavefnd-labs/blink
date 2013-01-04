@@ -1,3 +1,30 @@
+2013-01-03  Tony Chang  <tony@chromium.org>
+
+        incorrect flexbox relayout with overflow, padding and absolute positioning
+        https://bugs.webkit.org/show_bug.cgi?id=106022
+
+        Reviewed by Ojan Vafai.
+
+        The problem was we were entering simplified layout, which doesn't apply the stretch
+        behavior for flex children. That should be fine if we had kept the override size from
+        the previous layout. So clear the override size during layout rather than after layout.
+
+        Not clearing the override size re-triggers bug 98611. Fix this by always forcing a
+        layout of an image if it has an override size set. The presence of an override size means
+        we did some special layout that may not be covered by re-computing the logical width and
+        height.
+
+        Test: css3/flexbox/stretch-simplified-layout.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock): Don't clear the override size after layout.
+        (WebCore::RenderFlexibleBox::computeMainAxisPreferredSizes): Clear the override size right before layout.
+        * rendering/RenderFlexibleBox.h:
+        (RenderFlexibleBox): Remove clearChildOverrideSizes() since it's not called anymore.
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::imageDimensionsChanged): If an override size is present, force a relayout.
+        Also cleaned up the code a bit to avoid computing the width and height unless we need to.
+
 2013-01-03  Adam Klein  <adamk@chromium.org>
 
         Unreviewed rebaseline of binding tests after r138754
