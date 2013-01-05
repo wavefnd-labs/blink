@@ -1,3 +1,131 @@
+2013-01-05  Alec Flett  <alecflett@chromium.org>
+
+        IndexedDB: Migrate backend ObjectStore calls to use transaction id
+        https://bugs.webkit.org/show_bug.cgi?id=102741
+
+        Reviewed by Tony Chang.
+
+        Fully migrate 8 core data calls (get, put, setIndexKeys, setIndexesReady,
+        openCursor, count, deleteRange, and clear) into IDBDatabaseBackendImpl,
+        combining common code from IDBObjectStoreBackendImpl and IDBIndexBackendImpl
+        in order to simplify the backend interface. These calls are now
+        implemented in terms of an int64_t-based transactionId rather than
+        an IDBTransactionBackendInterface, which simplifies the ownership model
+        between the frontend and the backend.
+
+        In addition, remove references to IDBObjectStoreBackend* from IDBIndex,
+        as it is no longer needed.
+
+        A few duplicate IDB_TRACE methods have been removed from wrapper methods
+        that call another method that already have IDB_TRACE's.
+
+        Finally, IDBCursorBackendImpl now no longer holds onto an 
+        IDBObjectStoreBackendImpl*, so its destruction and member variables are
+        simplified, and reordered to match proper destruction order.
+
+        * Modules/indexeddb/IDBCursorBackendImpl.cpp: Reordered to account for proper destruction.
+        (WebCore::IDBCursorBackendImpl::IDBCursorBackendImpl):
+        (WebCore::IDBCursorBackendImpl::~IDBCursorBackendImpl):
+        (WebCore::IDBCursorBackendImpl::deleteFunction):
+        * Modules/indexeddb/IDBCursorBackendImpl.h:
+        (WebCore::IDBCursorBackendImpl::create):
+        (IDBCursorBackendImpl):
+        * Modules/indexeddb/IDBDatabase.h:
+        (WebCore::IDBDatabase::backend):
+        (IDBDatabase):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (GetOperation): Combined from IDBObjectStoreBackendImpl/IDBIndexBackendImpl::*RetrievalOperation
+        (WebCore::GetOperation::create):
+        (WebCore::GetOperation::GetOperation):
+        (WebCore):
+        (PutOperation): Combined from IDBObjectStoreBackendImpl/IDBIndexBackendImpl::*StorageOperation.
+        (WebCore::PutOperation::create):
+        (WebCore::PutOperation::PutOperation):
+        (SetIndexesReadyOperation): Moved from IDBObjectStoreBackendImpl::IndexesReadyOperation
+        (WebCore::SetIndexesReadyOperation::create): 
+        (WebCore::SetIndexesReadyOperation::SetIndexesReadyOperation):
+        (OpenCursorOperation): Combined from IDBObjectStoreBackendImpl/IDBIndexBackendImpl::Open*CursorOperation
+        (WebCore::OpenCursorOperation::create):
+        (WebCore::OpenCursorOperation::OpenCursorOperation):
+        (CountOperation): Combined from IDBObjectStoreBackendImpl/IDBIndexBackendImpl::CountOperation
+        (WebCore::CountOperation::create):
+        (WebCore::CountOperation::CountOperation):
+        (DeleteRangeOperation): Moved from IDBObjectStoreBackendImpl::DeleteOperation
+        (WebCore::DeleteRangeOperation::create):
+        (WebCore::DeleteRangeOperation::DeleteRangeOperation):
+        (ClearOperation): Moved from IDBObjectStoreBackendImpl::ClearOperation
+        (WebCore::ClearOperation::create):
+        (WebCore::ClearOperation::ClearOperation):
+        (WebCore::IDBDatabaseBackendImpl::get): Combined from IDBObjectStoreBackendImpl/IDBIndexBackendImpl::get*
+        (WebCore::GetOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::put): Moved from IDBObjectStoreBackendImpl::put
+        (WebCore::PutOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::setIndexKeys): Moved from IDBObjectStoreBackendImpl::setIndexKeys
+        (WebCore::IDBDatabaseBackendImpl::setIndexesReady):
+        (WebCore::SetIndexesReadyOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::openCursor):
+        (WebCore::IDBDatabaseBackendImpl::count):
+        (WebCore::CountOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::deleteRange):
+        (WebCore::DeleteRangeOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::clear):
+        (WebCore::ClearOperation::perform):
+        (WebCore::OpenCursorOperation::perform):
+        * Modules/indexeddb/IDBIndex.cpp:
+        (WebCore::IDBIndex::IDBIndex):
+        (WebCore::IDBIndex::openCursor):
+        (WebCore::IDBIndex::count):
+        (WebCore::IDBIndex::openKeyCursor):
+        (WebCore::IDBIndex::get):
+        (WebCore::IDBIndex::getKey):
+        (WebCore::IDBIndex::backendDB):
+        (WebCore):
+        * Modules/indexeddb/IDBIndex.h:
+        (WebCore::IDBIndex::create):
+        (IDBIndex):
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp:
+        (WebCore::IDBIndexBackendImpl::IDBIndexBackendImpl):
+        * Modules/indexeddb/IDBIndexBackendImpl.h:
+        (WebCore::IDBIndexBackendImpl::create):
+        (WebCore::IDBIndexBackendImpl::openCursor):
+        (WebCore::IDBIndexBackendImpl::count):
+        (WebCore::IDBIndexBackendImpl::openKeyCursor):
+        (WebCore::IDBIndexBackendImpl::get):
+        (WebCore::IDBIndexBackendImpl::getKey):
+        (IDBIndexBackendImpl):
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore::IDBObjectStore::get):
+        (WebCore::IDBObjectStore::put):
+        (WebCore::IDBObjectStore::deleteFunction):
+        (WebCore::IDBObjectStore::clear):
+        (WebCore):
+        (WebCore::IDBObjectStore::createIndex):
+        (WebCore::IDBObjectStore::index):
+        (WebCore::IDBObjectStore::openCursor):
+        (WebCore::IDBObjectStore::count):
+        (WebCore::IDBObjectStore::backendDB):
+        * Modules/indexeddb/IDBObjectStore.h:
+        (WebCore::IDBObjectStore::id):
+        (IDBObjectStore):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp:
+        (WebCore::IDBObjectStoreBackendImpl::createIndex):
+        (WebCore::IDBObjectStoreBackendImpl::loadIndexes):
+        (WebCore::IDBObjectStoreBackendImpl::generateKey):
+        (WebCore::IDBObjectStoreBackendImpl::updateKeyGenerator):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.h:
+        (WebCore::IDBObjectStoreBackendImpl::get):
+        (WebCore::IDBObjectStoreBackendImpl::put):
+        (WebCore::IDBObjectStoreBackendImpl::deleteFunction):
+        (WebCore::IDBObjectStoreBackendImpl::clear):
+        (WebCore::IDBObjectStoreBackendImpl::setIndexKeys):
+        (WebCore::IDBObjectStoreBackendImpl::setIndexesReady):
+        (WebCore::IDBObjectStoreBackendImpl::openCursor):
+        (WebCore::IDBObjectStoreBackendImpl::count):
+        (IDBObjectStoreBackendImpl):
+        * Modules/indexeddb/IDBTransactionBackendImpl.h:
+        (WebCore::IDBTransactionBackendImpl::database):
+        (IDBTransactionBackendImpl):
+
 2013-01-05  Robert Hogan  <robert@webkit.org>
 
         Max width of a floated container with floated children calculated incorrectly
