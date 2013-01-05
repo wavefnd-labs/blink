@@ -1,3 +1,31 @@
+2013-01-04  Benjamin Poulain  <benjamin@webkit.org>
+
+        Optimize TransformationMatrix::multiply() for x86_64
+        https://bugs.webkit.org/show_bug.cgi?id=105719
+
+        Reviewed by Sam Weinig.
+
+        On x86_64, we have access to 16 XMM registers. This can hold 32 double values.
+        We can use that in two ways to optimize matrix multiplications:
+        -Keep the source matrix completely in registers. Write the result directly in
+         the source matrix's memory. This avoids the memcpy at the end of the multiplication
+         and various memory operations.
+        -Use SIMD with SSE to perform 2 operations at a time.
+
+        The parameter from the second matrix are loaded one by one in XMM registers.
+        Loading them with SSE then shuffling the values perform worse than loading
+        one by one.
+
+        This is only enabled on 64bits as x86 only has access to 8 XMM registers and
+        the function should be written differently.
+
+        On a i5, TransformationMatrix::multiply() perform about 3 times faster with the change.
+
+        * platform/graphics/transforms/TransformationMatrix.cpp:
+        (WebCore::TransformationMatrix::multiply):
+        * platform/graphics/transforms/TransformationMatrix.h:
+        (TransformationMatrix): Fix an incorrect comment. Unify the comment with the cpp file.
+
 2013-01-04  Joshua Bell  <jsbell@chromium.org>
 
         Unreviewed, fix Apple Win build following http://trac.webkit.org/changeset/138838
