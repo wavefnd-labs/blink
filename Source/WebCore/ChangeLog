@@ -1,3 +1,44 @@
+2013-01-05  Elliott Sprehn  <esprehn@chromium.org>
+
+        Remove RenderObjectChildList::beforePseudoElementRenderer and afterPseudoElementRenderer
+        https://bugs.webkit.org/show_bug.cgi?id=106132
+
+        Reviewed by Abhishek Arya.
+
+        We no longer need the complicated traversals in beforePseudoElementRenderer
+        and afterPseudoElementRenderer since we can get the renderers of pseudo
+        elements through the node. This removes all that code and swaps it for
+        Element::pseudoElementRenderer.
+
+        This is possible now that r138850 removed all the now incorrect manual
+        management of pseudo element renderers from the render tree that was
+        left over from before the switch to DOM based pseudo elements.
+
+        No new tests, just refactoring.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * dom/Element.cpp:
+        (WebCore::Element::pseudoElementRenderer):
+            Added, gets the renderer of the pseudo element by PseudoId if it
+            exists.
+        * dom/Element.h:
+        (Element):
+        * dom/NodeRenderingTraversal.cpp:
+        (WebCore::NodeRenderingTraversal::nextSiblingSlow):
+        (WebCore::NodeRenderingTraversal::previousSiblingSlow):
+        * rendering/RenderCounter.cpp:
+        (WebCore::previousInPreOrder):
+        (WebCore::previousSiblingOrParent):
+        (WebCore::nextInPreOrder):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::lastChild):
+        * rendering/RenderObjectChildList.cpp:
+        * rendering/RenderObjectChildList.h:
+        (RenderObjectChildList):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::counterValueForElement):
+
 2013-01-05  Robert Hogan  <robert@webkit.org>
 
         Heap-use-after-free in WebCore::RenderBlock::insertIntoTrackedRendererMaps
