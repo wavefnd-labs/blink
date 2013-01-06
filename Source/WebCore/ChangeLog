@@ -1,3 +1,21 @@
+2013-01-05  Ryosuke Niwa  <rniwa@webkit.org>
+
+        REGRESSION: [Mac] Intermittent crashes in AXObjectCache::notificationPostTimerFired
+        https://bugs.webkit.org/show_bug.cgi?id=106106
+
+        Reviewed by Eric Seidel.
+
+        The crash was cause by notification post timer firing after the object destruction had taken place.
+        Clear the timer so that this won't happen. Also make sure the document doesn't go away while we're
+        going through m_notificationsToPost.
+
+        No new tests since crashes have been caught by various layout tests, and we can't easily
+        create a deterministic layout test for this particular crash.
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore::AXObjectCache::~AXObjectCache):
+        (WebCore::AXObjectCache::notificationPostTimerFired):
+
 2013-01-05  Michael Pruett  <michael@68k.org>
 
         IndexedDB: Replace int64 with int64_t
