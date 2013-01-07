@@ -1,3 +1,24 @@
+2013-01-07  Victor Carbune  <victor@rosedu.org>
+
+        [Track] Rendering crash
+        https://bugs.webkit.org/show_bug.cgi?id=106199
+
+        Reviewed by Eric Carlson.
+
+        The browser is crashing if a text track is added through JavaScript,
+        due to the fact that the containing block is not marked as inline at
+        the time RenderTextTrackCue::layout() is called. The fix consists
+        of ensuring that the pseudo id is set, even if the track isn't
+        yet visible.
+
+        Test: media/track/track-cue-inline-assertion-crash.html
+
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::updateDisplayTree): The pseudo-id should
+        be set when the display tree is generated.
+        (WebCore::TextTrackCue::getDisplayTree): Added extra check to not
+        do unneccessary logic if the track will never be displayed.
+
 2013-01-07  Michael Pruett  <michael@68k.org>
 
         [JSC] Copy non-index properties of arrays in SerializedScriptValue
