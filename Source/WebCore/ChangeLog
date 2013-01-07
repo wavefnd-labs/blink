@@ -1,3 +1,63 @@
+2013-01-04  Alexey Proskuryakov  <ap@apple.com>
+
+        ResourceHandle::willLoadFromCache is evil
+        https://bugs.webkit.org/show_bug.cgi?id=106147
+
+        Reviewed by Brady Eidson.
+
+        For back/forward navigations to a page that's a result of form submission, we may
+        never silently re-submit the form. So, we show a warning dialog when about to re-submit,
+        but try to load from cache if possible.
+
+        This patch changes the logic so that we always try to fetch from cache, without
+        any preflighting. If cache load fails, we restart the load as a known re-submit.
+
+        No behavior change expected, so no tests.
+
+        * html/HTMLAnchorElement.cpp: (WebCore::HTMLAnchorElement::handleClick):
+        Added a FIXME.
+
+        * loader/DocumentLoader.cpp: (WebCore::DocumentLoader::startLoadingMainResource):
+        Amended a FIXME with some information about why this call may still be needed.
+
+        * loader/FrameLoader.h:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::loadURLIntoChildFrame): Pass an explicit argument for unchanged caching behavior.
+        (WebCore::FrameLoader::reloadWithOverrideEncoding): Added a FIXME. This function
+        can silently re-submit a form.
+        (WebCore::FrameLoader::addExtraFieldsToMainResourceRequest): Added a FIXME about
+        an incorrect use of current load type.
+        (WebCore::FrameLoader::addExtraFieldsToRequest): Make sure that a correct caching
+        policy is used for subresources even if main resource was loaded from cache. We
+        didn't need that before because initial request had wrong extra fields due to a use
+        of m_loadType when it was first called.
+        Removed code to change caching policy for b/f navigations. This function does not
+        have enough context to decide what the policy should be.
+        (WebCore::FrameLoader::loadDifferentDocumentItem): Added an argument telling the
+        function whether it should attempt loading from cache. It should do that on first
+        attempt to navigate to a form submission result, but not if that failed.
+        Pass a correct loadType - m_loadType is one for _previous_ load.
+        Removed a special case for https - we've long stopped prohibiting caching of https
+        resources, and using a resource that's already cached should definitely be allowed.
+        (WebCore::FrameLoader::loadItem): Pass an explicit argument for unchanged caching behavior.
+        (WebCore::FrameLoader::retryAfterFailedCacheOnlyMainResourceLoad): Added.
+
+        * loader/MainResourceLoader.cpp: (WebCore::MainResourceLoader::notifyFinished):
+        Removed a check for m_resource being null, because we were immediately dereferencing
+        it anyway.
+        Call retryAfterFailedCacheOnlyMainResourceLoad() to let FrameLoader restart the navigation.
+
+        * platform/network/ResourceHandle.h:
+        * platform/network/blackberry/ResourceHandleBlackBerry.cpp:
+        * platform/network/cf/ResourceHandleCFNet.cpp:
+        * platform/network/chromium/ResourceHandle.cpp:
+        * platform/network/curl/ResourceHandleCurl.cpp:
+        * platform/network/mac/ResourceHandleMac.mm:
+        * platform/network/qt/ResourceHandleQt.cpp:
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        * platform/network/win/ResourceHandleWin.cpp:
+        Removed willLoadFromCache() - the new logic is cross-platform.
+
 2013-01-07  Alberto Garcia  <agarcia@igalia.com>
 
         [GTK] Disable deprecation warnings for GStaticRecMutex
