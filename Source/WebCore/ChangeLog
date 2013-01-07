@@ -1,3 +1,62 @@
+2013-01-06  Jon Lee  <jonlee@apple.com>
+
+        Show label automatically for plug-ins of significant size
+        https://bugs.webkit.org/show_bug.cgi?id=106146
+        <rdar://problem/12783010>
+
+        Reviewed by Simon Fraser.
+
+        For significantly sized plug-ins, trigger a timer that displays the label automatically
+        without requiring the user to mouse over the element first. The trickiness of the logic
+        here is that there are two delays involved-- one for whether the user mouses over (shorter),
+        and one for when the label is shown automatically (longer). Mousing over a plug-in that is
+        marked to show it automatically should have the timer delay switched. And if the label
+        showed automatically, mousing in and out of the element should not change that label's
+        state.
+
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore): Add constants that determine whether the plug-in is of a significant size.
+        (WebCore::shouldPlugInShowLabelAutomatically): Based on the size of the frame view and the
+        clipped plug-in size, determine whether the label should show automatically. If the plug-in is
+        not contained within the bounds of the frame view, or is not at least as large as the threshold
+        size, then do not show the label automatically.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): After we've determined that
+        the plug-in should not auto-start, make a check to see if the label should show automatically.
+        Also, update some of the logging.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderDidCreatePlugIn): Update the logging.
+
+        * platform/Timer.h:
+        (WebCore::DeferrableOneShotTimer::setDelay): Added to allow changing the delay of the timer. It
+        does not change any currently set timer, but should change the delay for the next one.
+
+        * rendering/RenderSnapshottedPlugIn.h: Rename the timer to m_showLabelDelayTimer since
+        it can fire for two different reasons. Add some additional state variables, and an enum
+        to explain why the label appeared.
+        * rendering/RenderSnapshottedPlugIn.cpp:
+        (WebCore): Change hoverDelay to showLabelAfterMouseOverDelay. Add a new, longer delay for
+        when the plug-in is supposed to auto-show the label.
+        (WebCore::RenderSnapshottedPlugIn::RenderSnapshottedPlugIn): Initialize the member variables.
+        (WebCore::RenderSnapshottedPlugIn::updateSnapshot): When the snapshot image is updated,
+        start the timer to auto-show the label.
+        (WebCore::RenderSnapshottedPlugIn::paintLabel): Avoid painting the label only if the element
+        is not hovered and the user was mousing over the plug-in. Otherwise, the plug-in is supposed
+        to show automatically, and we should paint. Mark the renderer as having showed the label at
+        least once.
+        (WebCore::RenderSnapshottedPlugIn::showLabelDelayTimerFired): Renamed to reflect the
+        purpose of the timer.
+        (WebCore::RenderSnapshottedPlugIn::setShouldShowLabelAutomatically): Set the variable that
+        determines whether, in general, this plug-in should show the label automatically even
+        without user input.
+        (WebCore::RenderSnapshottedPlugIn::handleEvent): If the user mouses over the plug-in,
+        only reset the show timer is the label has never appeared before, or if it has, that
+        it's not because the label was supposed to show automatically. That is, if the label is
+        supposed to show automatically, the label should remain visible. This is also true when
+        the user mouses out of the plug-in. If the user moused out before the time had a chance
+        to fire and show the label for the first time, then we check to see if the plug-in should
+        be displaying the label automatically, and if so, restart the timer using the longer delay.
+        (WebCore::RenderSnapshottedPlugIn::stopAndRestartDelayTimer): Convenience function to
+        update the m_showReason variable, and reset the timer with the appropriate delay.
+
 2013-01-06  Abhishek Arya  <inferno@chromium.org>
 
         Heap-use-after-free in DocumentLoader::stopLoading
