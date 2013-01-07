@@ -1,3 +1,28 @@
+2013-01-07  Tim Horton  <timothy_horton@apple.com>
+
+        Tiled-layer TileCaches shouldn't unparent offscreen tiles
+        https://bugs.webkit.org/show_bug.cgi?id=106258
+        <rdar://problem/12969116>
+
+        Reviewed by Simon Fraser.
+
+        Add a setting on TiledBacking (implemented on TileCache) that controls whether or not
+        the TileCache should unparent offscreen tiles. We can't use this behavior for tiled-layer TileCaches
+        currently because m_isInWindow is not updated for tiled-layer TileCaches, and because we haven't
+        decided exactly what their behavior should be. So, revert to the old behavior for them.
+
+        * platform/graphics/TiledBacking.h:
+        * platform/graphics/ca/mac/TileCache.h:
+        (TileCache): Add setUnparentsOffscreenTiles/unparentsOffscreenTiles.
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::TileCache): m_unparentsOffscreenTiles defaults to false.
+        (WebCore::TileCache::revalidateTiles):
+        Return to the old behavior of always adding new layers to the layer tree regardless of m_isInWindow if m_unparentsOffscreenTiles is false.
+        Return to the old behavior of never unparenting tiles regardless of m_isInWindow if m_unparentsOffscreenTiles is false.
+        (WebCore::TileCache::ensureTilesForRect): Return to the old behavior of always ensuring tiles regardless of m_isInWindow if m_unparentsOffscreenTiles is false.
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::RenderLayerBacking): Tell primary TileCaches that it's OK to unparent offscreen tiles.
+
 2013-01-07  Justin Novosad  <junov@google.com>
 
         Fixing memory read after free in CanvasRenderingContext2D::accessFont
