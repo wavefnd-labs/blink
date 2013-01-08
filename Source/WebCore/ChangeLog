@@ -1,3 +1,37 @@
+2013-01-08  Antoine Quint  <graouts@apple.com>
+
+        <track> element's mode set to "disabled" after load although it was explicitly set to "hidden"
+        https://bugs.webkit.org/show_bug.cgi?id=105536
+
+        Remove all concept of "showing by default". This means removing the showingByDefault()
+        and setShowingByDefault() methods on TextTrack. As I was going  through this code,
+        I also noticed that in HTMLMediaElement::configureTextTrackGroup(), we would set
+        defaultTrack to textTrack.get() even though defaultTrack was created to be a RefPtr<TextTrack>.
+
+        As a result, we can now pass an additional 8 tests from the Opera-submitted test suite:
+
+        LayoutTests/media/track/opera/interfaces/TextTrack/addCue.html
+        LayoutTests/media/track/opera/interfaces/TextTrack/removeCue.html
+        LayoutTests/media/track/opera/interfaces/TextTrackCue/endTime.html
+        LayoutTests/media/track/opera/interfaces/TextTrackCue/startTime.html
+        LayoutTests/media/track/opera/interfaces/TextTrackCue/align.html
+        LayoutTests/media/track/opera/interfaces/TextTrackCue/id.html
+        LayoutTests/media/track/opera/interfaces/TextTrackCue/pauseOnExit.html
+        LayoutTests/media/track/opera/interfaces/TextTrackCue/track.html
+
+        Reviewed by Eric Carlson.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::configureTextTrackGroup):
+        (WebCore::HTMLMediaElement::toggleTrackAtIndex):
+        * html/track/TextTrack.cpp:
+        (WebCore::TextTrack::TextTrack):
+        (WebCore::TextTrack::setMode):
+        (WebCore::TextTrack::isRendered):
+        * html/track/TextTrack.h:
+        (WebCore::TextTrack::mode):
+        (TextTrack):
+
 2013-01-08  Mark Lam  <mark.lam@apple.com>
 
         Removed the need for the ProposedDatabase mechanism.
