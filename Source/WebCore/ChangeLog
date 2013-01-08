@@ -1,3 +1,63 @@
+2013-01-08  Hajime Morrita  <morrita@google.com>
+
+        [Shadow DOM] Refactoring: invalidateParentDistributionIfNecessary() calls are too intrusive
+        https://bugs.webkit.org/show_bug.cgi?id=106305
+
+        Reviewed by Dimitri Glazkov.
+
+        Scattering invalidateParentDistributionIfNecessary() looks bad because
+        - it has long name whose terminology is cryptic for people who don't know much about Shadow DOM standard.
+        - its calls are always paired with setNeedsStyleRecalc() and people do setNeedsStyleRecalc()
+          need to be aware about distribution feature bit tracking. Separate invalidateParentDistributionIfNecessary()
+          call doesn't help that recognition.
+
+        This change introduces Element::didAffectSelector() to replace a setNeedsStyleRecalc()-i37y() call sequence.
+        SelectRuleFeatureSet::FeatureRule is renamed AffectedSelectorType so that it explains its purpose
+        in a bit more plain WebKit term.
+
+        No new tests. Refactoring.
+
+        * dom/Document.cpp:
+        (WebCore::Document::setCSSTarget): Adopted didAffectSelector.
+        * dom/Element.cpp:
+        (WebCore::Element::didAffectSelector): Added.
+        (WebCore):
+        * dom/Element.h:
+        (Element):
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::didAffectSelector): Morphed from invalidateParentDistributionIfNecessary().
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        * html/HTMLAnchorElement.cpp:
+        (WebCore::HTMLAnchorElement::parseAttribute): Adopted didAffectSelector
+        * html/HTMLDetailsElement.cpp:
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::disabledAttributeChanged): Adopted didAffectSelector
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::setChecked): Adopted didAffectSelector
+        (WebCore::HTMLInputElement::setIndeterminate): Adopted didAffectSelector
+        * html/HTMLOptGroupElement.cpp:
+        (WebCore::HTMLOptGroupElement::parseAttribute): Adopted didAffectSelector
+        * html/HTMLOptionElement.cpp:
+        (WebCore::HTMLOptionElement::parseAttribute): Adopted didAffectSelector
+        (WebCore::HTMLOptionElement::setSelectedState): Adopted didAffectSelector
+        * html/HTMLProgressElement.cpp:
+        (WebCore::HTMLProgressElement::didElementStateChange): Adopted didAffectSelector
+        * html/HTMLSummaryElement.cpp:
+        * html/shadow/HTMLContentElement.cpp:
+        * html/shadow/SelectRuleFeatureSet.cpp:
+        (WebCore::SelectRuleFeatureSet::collectFeaturesFromSelector): Followed renaming.
+        * html/shadow/SelectRuleFeatureSet.h: Followed renaming.
+        (WebCore::SelectRuleFeatureSet::hasSelectorForChecked):
+        (WebCore::SelectRuleFeatureSet::hasSelectorForEnabled):
+        (WebCore::SelectRuleFeatureSet::hasSelectorForDisabled):
+        (WebCore::SelectRuleFeatureSet::hasSelectorForIndeterminate):
+        (WebCore::SelectRuleFeatureSet::hasSelectorForLink):
+        (WebCore::SelectRuleFeatureSet::hasSelectorForTarget):
+        (WebCore::SelectRuleFeatureSet::hasSelectorForVisited):
+        (WebCore::SelectRuleFeatureSet::hasSelectorFor):
+        (WebCore::SelectRuleFeatureSet::setSelectRuleFeature):
+
 2013-01-08  Sergio Villar Senin  <svillar@igalia.com>
 
         [Qt] Fix build with --web-audio
