@@ -34,6 +34,7 @@
 namespace WebCore {
 
 class Document;
+class HTMLParserOptions;
 class HTMLToken;
 class HTMLTokenizer;
 class SegmentedString;
@@ -41,7 +42,7 @@ class SegmentedString;
 class HTMLPreloadScanner {
     WTF_MAKE_NONCOPYABLE(HTMLPreloadScanner); WTF_MAKE_FAST_ALLOCATED;
 public:
-    explicit HTMLPreloadScanner(Document*);
+    HTMLPreloadScanner(Document*, const HTMLParserOptions&);
 
     void appendToEnd(const SegmentedString&);
     void scan();
