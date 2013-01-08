@@ -1,3 +1,50 @@
+2013-01-07  Kunihiko Sakamoto  <ksakamoto@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Step-up/-down of month/day field should respect min/max attributes
+        https://bugs.webkit.org/show_bug.cgi?id=106212
+
+        Reviewed by Kent Tamura.
+
+        Make step-up/-down of the month and day fields respect the min/max
+        attributes of the element.
+        Note that these fields still accept any keyboard inputs (the element
+        becomes 'invalid' state when out-of-bounds values entered).
+
+        Tests: fast/forms/date-multiple-fields/date-multiple-fields-readonly-subfield.html
+               fast/forms/date-multiple-fields/date-multiple-fields-stepup-stepdown-from-renderer.html
+               fast/forms/month-multiple-fields/month-multiple-fields-readonly-subfield.html
+               fast/forms/month-multiple-fields/month-multiple-fields-stepup-stepdown-from-renderer.html
+
+        * css/html.css: Add CSS rules for month and day fields.
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditBuilder::visitField):
+        Compute minimum/maximum values of month/day fields from the min/max
+        parameters of the element. If minimum, maximum, and current value is
+        the same, makes the field read-only.
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeAMPMFieldElement::DateTimeAMPMFieldElement): Add mininum/maximum arguments.
+        (WebCore::DateTimeDayFieldElement::DateTimeDayFieldElement): Ditto.
+        (WebCore::DateTimeDayFieldElement::create): Ditto.
+        (WebCore::DateTimeDayFieldElement::clampValueForHardLimits): Added.
+        (WebCore::DateTimeMonthFieldElement::DateTimeMonthFieldElement): Add mininum/maximum arguments.
+        (WebCore::DateTimeMonthFieldElement::create): Ditto.
+        (WebCore::DateTimeMonthFieldElement::clampValueForHardLimits): Added.
+        (WebCore::DateTimeSymbolicMonthFieldElement::DateTimeSymbolicMonthFieldElement): Add mininum/maximum arguments.
+        (WebCore::DateTimeSymbolicMonthFieldElement::create): Ditto.
+        * html/shadow/DateTimeFieldElements.h:
+        (DateTimeDayFieldElement): Add mininum/maximum arguments and declare clampValueForHardLimits.
+        (DateTimeMonthFieldElement): Ditto.
+        (DateTimeSymbolicMonthFieldElement): Add mininum/maximum arguments.
+        * html/shadow/DateTimeSymbolicFieldElement.cpp:
+        (WebCore::DateTimeSymbolicFieldElement::DateTimeSymbolicFieldElement): Add mininum/maximum arguments.
+        (WebCore::DateTimeSymbolicFieldElement::maximum): Returns m_maximumIndex + 1 as it assumes 1-origin value.
+        (WebCore::DateTimeSymbolicFieldElement::minimum): Ditto.
+        (WebCore::DateTimeSymbolicFieldElement::stepDown): Restrict value to m_minimumIndex-m_maximumIndex.
+        (WebCore::DateTimeSymbolicFieldElement::stepUp): Ditto.
+        * html/shadow/DateTimeSymbolicFieldElement.h:
+        (DateTimeSymbolicFieldElement): Add m_minimumIndex and m_maximumIndex.
+        (WebCore::DateTimeSymbolicFieldElement::isInRange): Added.
+
 2013-01-07  Viatcheslav Ostapenko  <sl.ostapenko@samsung.com>
 
         [EFL][WK2][WebGL] The top left side of the screen is shown inside the canvas element
