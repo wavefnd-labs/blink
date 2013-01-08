@@ -1,3 +1,72 @@
+2013-01-08  Kihong Kwon  <kihong.kwon@samsung.com>
+
+        Add DeviceProximityController to support Device Proximity Events.
+        https://bugs.webkit.org/show_bug.cgi?id=97630
+
+        Reviewed by Hajime Morita.
+
+        Implement DeviceProximityController which is inherited from DeviceController to support Device Proximity Events.
+        DeviceProximityController has two major functionalities.
+        - When listener is added, DeviceProximityController stores DOMWindow pointer to m_listeners
+          and start gathering proximity event.
+        - When DeviceProximityController receives a proximity event from client, fire an event using m_listeners.
+        In addition, setDeviceProximity function is added to Internals for layout test.
+
+        Tests: proximity/add-listener-from-callback.html
+               proximity/basic-operation.html
+               proximity/create-event.html
+               proximity/event-after-navigation.html
+               proximity/multiple-frames.html
+               proximity/no-page-cache.html
+               proximity/optional-event-properties.html
+               proximity/updates.html
+               proximity/window-property.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.am:
+        * GNUmakefile.list.am:
+        * Modules/proximity/DeviceProximityClient.h: Added.
+        (WebCore):
+        (DeviceProximityClient):
+        (WebCore::DeviceProximityClient::~DeviceProximityClient):
+        * Modules/proximity/DeviceProximityController.cpp: Added.
+        (WebCore):
+        (WebCore::DeviceProximityController::DeviceProximityController):
+        (WebCore::DeviceProximityController::create):
+        (WebCore::DeviceProximityController::didChangeDeviceProximity):
+        (WebCore::DeviceProximityController::deviceProximityClient):
+        (WebCore::DeviceProximityController::hasLastData):
+        (WebCore::DeviceProximityController::getLastEvent):
+        (WebCore::DeviceProximityController::supplementName):
+        (WebCore::DeviceProximityController::from):
+        (WebCore::DeviceProximityController::isActiveAt):
+        (WebCore::provideDeviceProximityTo):
+        * Modules/proximity/DeviceProximityController.h: Added.
+        (WebCore):
+        (DeviceProximityController):
+        (WebCore::DeviceProximityController::~DeviceProximityController):
+        * Target.pri:
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        * WebCore.pri:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcproj/WebCoreCommon.vsprops:
+        * WebCore.xcodeproj/project.pbxproj:
+        * history/PageCache.cpp:
+        When a page has Device Proximity Event Listener, it has not to be cached like Device Orientation.
+        (WebCore::logCanCachePageDecision):
+        (WebCore::PageCache::canCache):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::addEventListener):
+        (WebCore::DOMWindow::removeEventListener):
+        (WebCore::DOMWindow::removeAllEventListeners):
+        * testing/Internals.cpp:
+        (WebCore::Internals::setDeviceProximity):
+        (WebCore):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2013-01-03  Sergio Villar Senin  <svillar@igalia.com>
 
         [GTK] Add WebP image support
