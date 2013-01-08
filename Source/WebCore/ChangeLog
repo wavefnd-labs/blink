@@ -1,3 +1,37 @@
+2013-01-08  Adam Barth  <abarth@webkit.org>
+
+        HTMLTreeBuilder shouldn't keep a Document pointer
+        https://bugs.webkit.org/show_bug.cgi?id=106268
+
+        Reviewed by Eric Seidel.
+
+        The tree builder shouldn't interact with the Document directly.
+        Instead, the tree builder should use the HTMLConstructionSite to
+        interact with the document.
+
+        Unfortunately, the HTMLTreeBuilder does need to read back one bit of
+        information (the quirks mode) from the Document. Currently the
+        HTMLConstructionSite reads the information directly from the Document.
+        If/when we move the parser onto its own thread, we'll need to keep
+        track of this bit on the parser thread. (We should be able to
+        encapsulate all that logic in the HTMLConstructionSite.)
+
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::setDefaultCompatibilityMode):
+        (WebCore):
+        (WebCore::HTMLConstructionSite::finishedParsing):
+        (WebCore::HTMLConstructionSite::inQuirksMode):
+        * html/parser/HTMLConstructionSite.h:
+        (HTMLConstructionSite):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::HTMLTreeBuilder):
+        (WebCore::HTMLTreeBuilder::detach):
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody):
+        (WebCore::HTMLTreeBuilder::defaultForInitial):
+        (WebCore::HTMLTreeBuilder::finished):
+        * html/parser/HTMLTreeBuilder.h:
+        (HTMLTreeBuilder):
+
 2013-01-08  Yuki Sekiguchi  <yuki.sekiguchi@access-company.com>
 
         Float block's logical top margin is illegal in vertical writing mode.
