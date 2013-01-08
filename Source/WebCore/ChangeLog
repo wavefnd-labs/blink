@@ -1,3 +1,46 @@
+2013-01-08  Mike West  <mkwst@chromium.org>
+
+        CSP: 'none' should take effect only if no other source expression is present.
+        https://bugs.webkit.org/show_bug.cgi?id=106314
+
+        Reviewed by Adam Barth.
+
+        WebKit's handling of 'none' in Content Security Policy source lists
+        doesn't quite match the spec. Currently, we're treating any source list
+        that contains 'none' as its first token as an empty list. That is:
+        "script-src 'none'" is handled in the same way as
+        "script-src 'none' example.com". Based on a bit of public-webappsec@
+        discussion[1], the behavior we actually want should treat the first as
+        an empty list, while treating the second as "script-src example.com". In
+        other words, 'none' in a source list is a no-op, unless it is the _only_
+        item in the source list.
+
+        This patch adjusts our parsing behavior accordingly, and tweaks the
+        console log we emit for invalid source expressions to warn specifically
+        about this case.
+
+        [1]: http://lists.w3.org/Archives/Public/public-webappsec/2013Jan/0006.html
+
+        Test: http/tests/security/contentSecurityPolicy/source-list-parsing-none.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::isSourceListNone):
+            A new static method that returns true when given a string that
+            contains only 'none' (potentially surrounded by whitespace), and
+            false otherwise.
+        (WebCore):
+        (WebCore::CSPSourceList::parse):
+            Move the 'none' check into the initial layer of parsing, which means
+            that we can drop the 'isFirstSourceInList' check entirely.
+        (WebCore::CSPSourceList::parseSource):
+            Since we've already checked for 'none' in ::parse, we can at this
+            point safely treat any occurance of 'none' in the source list as an
+            invalid expression.
+        (WebCore::ContentSecurityPolicy::reportInvalidSourceExpression):
+            If the invalid expression is 'none', add a clarification to the
+            console message, noting that 'none' only has effect when it's all
+            alone.
+
 2013-01-08  Alok Priyadarshi  <alokp@chromium.org>
 
         Added OpaqueRegionSkia::currentTrackingOpaqueRect
