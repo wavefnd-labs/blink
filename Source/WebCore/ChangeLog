@@ -1,3 +1,23 @@
+2013-01-08  Alexis Menard  <alexis@webkit.org>
+
+        transition-delay and transition-duration return incorrect values when querying using the computed style.
+        https://bugs.webkit.org/show_bug.cgi?id=105432
+
+        Reviewed by Dean Jackson.
+
+        When setting the transition-delay to 10ms for example the value of transition-delay
+        on the computed style was incorrect, it should return 0.01s but it was
+        returning something like 0.0099999999...s. In fact the bug was after
+        the parsing step when creating the Animation object where a conversion
+        from a double to float was done. This conversion is not needed as the
+        animation class expects double for delay and transition times.
+
+        Test: transitions/transitions-parsing.html
+
+        * css/CSSToStyleMap.cpp:
+        (WebCore::CSSToStyleMap::mapAnimationDelay):
+        (WebCore::CSSToStyleMap::mapAnimationDuration):
+
 2013-01-08  Hajime Morrita  <morrita@google.com>
 
         [Shadow DOM] Refactoring: invalidateParentDistributionIfNecessary() calls are too intrusive
