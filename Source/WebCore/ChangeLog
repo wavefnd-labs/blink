@@ -1,3 +1,43 @@
+2013-01-09  Antti Koivisto  <antti@apple.com>
+
+        Release FastMalloc thread caches on memory warning
+        https://bugs.webkit.org/show_bug.cgi?id=106471
+
+        Reviewed by Geoff Garen.
+        
+        FastMalloc keeps some memory in per-thread caches (currently 2MB each). We currently flush these caches on memory warning 
+        for the main thread only. We should do it for other WebKit threads that use FastMalloc too.
+
+        Call WTF::releaseFastMallocFreeMemory in a bunch of WebCore support threads on memory warning. Unfortunately we don't have 
+        an uniform way of doing threads so this requires bunch of thread type specific code.
+        
+        Looks to be ~1% progression in membuster3 final and maximum numbers.
+
+        * platform/mac/MemoryPressureHandlerMac.mm:
+        (WebCore::MemoryPressureHandler::releaseMemory):
+        * storage/StorageTask.cpp:
+        (WebCore::StorageTask::performTask):
+        * storage/StorageTask.h:
+        (WebCore::StorageTask::createReleaseFastMallocFreeMemory):
+        * storage/StorageThread.cpp:
+        (WebCore::storageThreads):
+        (WebCore):
+        (WebCore::StorageThread::StorageThread):
+        (WebCore::StorageThread::~StorageThread):
+        (WebCore::StorageThread::releaseFastMallocFreeMemoryInAllThread):
+        * storage/StorageThread.h:
+        (StorageThread):
+        * workers/WorkerThread.cpp:
+        (WebCore::threadSetMutex):
+        (WebCore::workerThreads):
+        (WebCore::WorkerThread::workerThreadCount):
+        (WebCore::WorkerThread::WorkerThread):
+        (WebCore::WorkerThread::~WorkerThread):
+        (WebCore::WorkerThread::releaseFastMallocFreeMemoryInAllThread):
+        (WebCore):
+        * workers/WorkerThread.h:
+        (WorkerThread):
+
 2013-01-09  Tony Gentilcore  <tonyg@chromium.org>
 
         REGRESSION(r139141): Assertion failure in WebCore::HTMLConstructionSite::HTMLConstructionSite
