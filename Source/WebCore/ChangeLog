@@ -1,3 +1,79 @@
+2013-01-08  Hajime Morrita  <morrita@google.com>
+
+        [Shadow DOM] Distribution related code on ShadowRoot should be minimized.
+        https://bugs.webkit.org/show_bug.cgi?id=106282
+
+        Reviewed by Dimitri Glazkov.
+
+        ShadowRoot had a certain amount of logic which is dedicated for
+        node distribution computation.  These code is going to be compiled
+        out (Bug 103339) and better be part of the node distribution
+        algorithm, which is ScopeContentDistribution class.
+
+        This change
+
+        - Renames ShadowRootContentDistributionData to
+          ScopeContentDistribution.  New name is concise and a bit more
+          meaningful: It owns per TreeScope distribution state.
+        - Moves distribution related code from ShadowRoot to ScopeContentDistribution
+
+        No new tests. Refactoring.
+
+        * WebCore.exp.in:
+        * css/StyleScopeResolver.cpp:
+        (WebCore::StyleScopeResolver::styleSharingCandidateMatchesHostRules):
+        (WebCore::StyleScopeResolver::matchHostRules):
+        * dom/ComposedShadowTreeWalker.cpp:
+        (WebCore::nodeCanBeDistributed):
+        (WebCore::ComposedShadowTreeWalker::traverseBackToYoungerShadowRoot):
+        (WebCore::ComposedShadowTreeWalker::traverseParentBackToYoungerShadowRootOrHost):
+        (WebCore::AncestorChainWalker::parent):
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::collectSelectFeatureSetFrom):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::insertedInto):
+        (WebCore::ShadowRoot::removedFrom):
+        (WebCore::ShadowRoot::ensureScopeDistribution):
+        (WebCore::ShadowRoot::reportMemoryUsage):
+        * dom/ShadowRoot.h:
+        (WebCore):
+        (ShadowRoot):
+        (WebCore::ShadowRoot::scopeDistribution):
+        * html/shadow/ContentDistributor.cpp:
+        (WebCore::ScopeContentDistribution::ScopeContentDistribution):
+        (WebCore::ScopeContentDistribution::invalidateInsertionPointList):
+        (WebCore::ScopeContentDistribution::ensureInsertionPointList):
+        (WebCore::ScopeContentDistribution::registerInsertionPoint):
+        (WebCore::ScopeContentDistribution::unregisterInsertionPoint):
+        (WebCore::ScopeContentDistribution::hasShadowElement):
+        (WebCore):
+        (WebCore::ScopeContentDistribution::hasContentElement):
+        (WebCore::ScopeContentDistribution::countElementShadow):
+        (WebCore::ScopeContentDistribution::hasInsertionPoint):
+        (WebCore::ScopeContentDistribution::assignedTo):
+        (WebCore::ContentDistributor::distribute):
+        (WebCore::ContentDistributor::invalidate):
+        * html/shadow/ContentDistributor.h:
+        (ScopeContentDistribution):
+        (WebCore::ScopeContentDistribution::registerElementShadow):
+        (WebCore::ScopeContentDistribution::unregisterElementShadow):
+        (WebCore::ScopeContentDistribution::hasElementShadow):
+        * html/shadow/HTMLShadowElement.cpp:
+        (WebCore::HTMLShadowElement::olderShadowRoot):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::insertedInto):
+        (WebCore::InsertionPoint::removedFrom):
+        (WebCore::InsertionPoint::contains):
+        (WebCore):
+        (WebCore::resolveReprojection):
+        * html/shadow/InsertionPoint.h:
+        (InsertionPoint):
+        (WebCore):
+        * testing/Internals.cpp:
+        (WebCore::Internals::hasShadowInsertionPoint):
+        (WebCore::Internals::hasContentElement):
+        (WebCore::Internals::countElementShadow):
+
 2013-01-08  Tom Sepez  <tsepez@chromium.org>
 
         Copy-paste preserves <embed> tags containing active content.
