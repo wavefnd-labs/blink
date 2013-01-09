@@ -1,3 +1,27 @@
+2013-01-09  Andreas Kling  <akling@apple.com>
+
+        SVG-as-image: Throw out cached bitmap renderings after they sit unused for some time.
+        <http://webkit.org/b/106484>
+        <rdar://problem/12983216>
+
+        Reviewed by Antti Koivisto.
+
+        Add a one-shot timer to SVGImageCache to self-clear the bitmap cache 30 seconds after last access.
+        This prevents us from keeping huge ImageBuffers around in memory for the lifetime of the elements
+        referencing that particular SVG file. (The ownership model is actually a bit more complicated
+        but that's irrelevant to this issue.)
+
+        10234kB progression on Membuster3.
+
+        * svg/graphics/SVGImageCache.cpp:
+        (WebCore::SVGImageCache::SVGImageCache):
+        (WebCore::SVGImageCache::~SVGImageCache):
+        (WebCore::SVGImageCache::clearBitmapCache):
+        (WebCore::SVGImageCache::cacheClearTimerFired):
+        (WebCore::SVGImageCache::lookupOrCreateBitmapImageForRenderer):
+        * svg/graphics/SVGImageCache.h:
+        (SVGImageCache):
+
 2013-01-09  Alexey Proskuryakov  <ap@apple.com>
 
         Assertion failure in SubresourceLoader::didFail when reloading
