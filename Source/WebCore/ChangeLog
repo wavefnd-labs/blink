@@ -1,3 +1,77 @@
+2013-01-08  Brandon Jones  <bajones@chromium.org>
+
+        Make WebGLRenderingContext inherit from ActiveDOMObject
+        https://bugs.webkit.org/show_bug.cgi?id=104733
+
+        Reviewed by Adam Barth.
+
+        When ActiveDOMObject::stop is called on the WebGLRenderingContext the
+        DrawingBuffer and GraphicsContext3D instances are forcibly released in
+        order to keep GPU memory utilization to a minimum.
+
+        Incorporated new layout test based on one just added to the WebGL
+        conformance suite. Also tested manually by reloading and
+        navigating between many WebGL apps.
+
+        Test: fast/canvas/webgl/context-release-upon-reload.html
+
+        * bindings/v8/custom/V8HTMLCanvasElementCustom.cpp:
+        (WebCore::V8HTMLCanvasElement::getContextCallback):
+            Removed garbage collection hack added in Bug 76255.
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore):
+        (WebCore::WebGLRenderingContext::create):
+            Call suspendIfNeeded per ActiveDOMObject contract.
+        (WebCore::WebGLRenderingContext::WebGLRenderingContext):
+            Call ActiveDOMObject constructor.
+        (WebCore::WebGLRenderingContext::~WebGLRenderingContext):
+            Call destroyGraphicsContext3D.
+        (WebCore::WebGLRenderingContext::destroyGraphicsContext3D):
+            Drop DrawingBuffer backing store and delete GraphicsContext3D.
+        (WebCore::WebGLRenderingContext::hasPendingActivity):
+            Always return false.
+        (WebCore::WebGLRenderingContext::stop):
+            Force lost context upon page reload or navigation.
+        * html/canvas/WebGLRenderingContext.h:
+        (WebGLRenderingContext):
+            Inherit from ActiveDOMObject and override notifications.
+        * platform/graphics/blackberry/DrawingBufferBlackBerry.cpp:
+        (WebCore):
+        (WebCore::DrawingBuffer::clearPlatformLayer):
+            Add currently no-op implementation.
+        * platform/graphics/cairo/DrawingBufferCairo.cpp:
+        (WebCore):
+        (WebCore::DrawingBuffer::clearPlatformLayer):
+            Add currently no-op implementation.
+        * platform/graphics/chromium/DrawingBufferChromium.cpp:
+        (WebCore::DrawingBufferPrivate::clearTextureId):
+            Clear texture ID from compositor's layer.
+        (DrawingBufferPrivate):
+        (WebCore::DrawingBuffer::framebuffer):
+            Moved around to reduce number of #ifdefs.
+        (WebCore):
+        (WebCore::DrawingBuffer::platformLayer):
+        (WebCore::DrawingBuffer::clearPlatformLayer):
+            Tell compositor to stop referencing DrawingBuffer's texture.
+        * platform/graphics/clutter/DrawingBufferClutter.cpp:
+        (WebCore):
+        (WebCore::DrawingBuffer::clearPlatformLayer):
+            Add currently no-op implementation.
+        * platform/graphics/gpu/DrawingBuffer.cpp:
+        (WebCore::DrawingBuffer::clear):
+            Call clearPlatformLayer before deleting OpenGL resources.
+        * platform/graphics/gpu/DrawingBuffer.h:
+        (DrawingBuffer):
+            Add clearPlatformLayer.
+        * platform/graphics/gpu/mac/DrawingBufferMac.mm:
+        (WebCore):
+        (WebCore::DrawingBuffer::clearPlatformLayer):
+            Add currently no-op implementation.
+        * platform/graphics/gpu/qt/DrawingBufferQt.cpp:
+        (WebCore):
+        (WebCore::DrawingBuffer::clearPlatformLayer):
+            Add currently no-op implementation.
+
 2013-01-08  Tony Gentilcore  <tonyg@chromium.org>
 
         Remove dependency on Document from HTMLConstructionSite::inQuirksMode()
