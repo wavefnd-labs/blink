@@ -1,3 +1,37 @@
+2013-01-08  Alexandru Chiculita  <achicu@adobe.com>
+
+        Assert in RenderGeometryMap::mapToContainer
+        https://bugs.webkit.org/show_bug.cgi?id=106068
+
+        Reviewed by Simon Fraser.
+
+        The assert was due to a pending layout, so the values used to compute the layer bounding boxes were incorrect.
+        That was because of the Document::setVisualUpdatesAllowed mechanism, which triggers a compositor update
+        and a repaint, but before this patch didn't check whether a layout was pending or not.
+
+        Added a check in Document::setVisualUpdatesAllowed for pending layouts and bailed when such case happened.
+        A layout will come anyway and trigger the correct updates. Couldn't not force an inline layout at that time
+        as this function is sometimes called really soon, when the WebKit parts are not fully created yet and updates were
+        calling back into some client callbacks that were not ready.
+
+        Also added an assert in RenderLayerCompositor::updateCompositingLayers to check for other cases that might
+        try to update the layers with a layout pending. That one led to finding an issue in the RenderMarquee, which
+        was updating on a timer callback. It might happen that a layout is pending while this timer fires and it 
+        tries to update the scroll position of the layers while a layout is still due.
+
+        There was already a protection to bail if a layout is pending in RenderMarquee::timerFired, so I've just broadened the scope
+        to the whole RenderView to catch all the layout requests.
+
+        Tests: compositing/geometry/assert-layout-not-done.html
+               compositing/geometry/assert-marquee-timer.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::setVisualUpdatesAllowed):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::updateCompositingLayers):
+        * rendering/RenderMarquee.cpp:
+        (WebCore::RenderMarquee::timerFired):
+
 2013-01-08  Justin Novosad  <junov@google.com>
 
         CanvasRenderingContext2D::setFont argument may reference destroyed object
