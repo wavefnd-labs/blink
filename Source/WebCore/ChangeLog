@@ -1,3 +1,41 @@
+2013-01-09  Dan Winship  <danw@gnome.org>
+
+        [Soup] Handle redirection inside WebKit
+        https://bugs.webkit.org/show_bug.cgi?id=61122
+        https://bugs.webkit.org/show_bug.cgi?id=88961
+
+        Reviewed by Martin Robinson.
+
+        Rather than using libsoup's built-in redirection handling (which
+        doesn't do everything exactly the way WebKit wants, and can't
+        handle redirects to non-http URIs anyway), process redirections
+        ourselves.
+
+        No new tests; unskips a few existing tests.
+
+        * platform/network/ResourceHandleInternal.h:
+        (WebCore::ResourceHandleInternal::ResourceHandleInternal):
+        (ResourceHandleInternal):
+        * platform/network/soup/ResourceError.h:
+        (ResourceError):
+        * platform/network/soup/ResourceErrorSoup.cpp:
+        (WebCore::ResourceError::transportError):
+        (WebCore):
+        (WebCore::ResourceError::httpError):
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore):
+        (WebCore::gotHeadersCallback):
+        (WebCore::restartedCallback):
+        (WebCore::shouldRedirect):
+        (WebCore::doRedirect):
+        (WebCore::redirectCloseCallback):
+        (WebCore::redirectSkipCallback):
+        (WebCore::cleanupSoupRequestOperation):
+        (WebCore::sendRequestCallback):
+        (WebCore::createSoupMessageForHandleAndRequest):
+        (WebCore::createSoupRequestAndMessageForHandle):
+        (WebCore::ResourceHandle::start):
+
 2013-01-09  Florin Malita  <fmalita@chromium.org>
 
         [Skia] Implement GraphicsContext::addRoundedRectClip() using SkCanvas::clipRRect()
