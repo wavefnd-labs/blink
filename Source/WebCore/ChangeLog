@@ -1,3 +1,38 @@
+2013-01-08  Rafael Weinstein  <rafaelw@chromium.org>
+
+        [HTMLTemplateElement] Allow <template> content to be inspected
+        https://bugs.webkit.org/show_bug.cgi?id=105839
+
+        Reviewed by Pavel Feldman.
+
+        In addition to the plumbing which allows template contents to be
+        displayed within the inspector, this patch adds a manually-managed
+        weakref from the template document back to its host document (typically
+        the creator). This is required so that the inspector agent can be found
+        for template elements.
+
+        * dom/Document.cpp:
+        (WebCore::Document::~Document):
+        (WebCore::Document::templateDocument):
+        * dom/Document.h:
+        (Document):
+        (WebCore::Document::setTemplateDocumentHost):
+        (WebCore::Document::templateDocumentHost):
+        * editing/markup.cpp:
+        (WebCore::createFragmentForInnerOuterHTML):
+        * html/HTMLTemplateElement.cpp:
+        (WebCore::HTMLTemplateElement::content):
+        * inspector/Inspector.json:
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::buildObjectForNode):
+        * inspector/InspectorInstrumentation.h:
+        (WebCore::InspectorInstrumentation::instrumentingAgentsForDocument):
+        * inspector/front-end/DOMAgent.js:
+        (WebInspector.DOMNode):
+        (WebInspector.DOMNode.prototype.hasChildNodes):
+        (WebInspector.DOMNode.prototype._insertChild):
+        (WebInspector.DOMNode.prototype._setChildrenPayload):
+
 2013-01-08  Hajime Morrita  <morrita@google.com>
 
         [Shadow DOM] Distribution related code on ShadowRoot should be minimized.
