@@ -1,3 +1,28 @@
+2013-01-09  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Detached identifier after mesh box type is not applied
+        https://bugs.webkit.org/show_bug.cgi?id=105321
+
+        Reviewed by Dean Jackson.
+
+        Before this patch, if a "detached" identifier followed a mesh box type identifier, the
+        detached identifier was not applied. In other words, the mesh would still be attached.
+
+        For example:
+        -webkit-filter: custom(url(...) mix(url(...) normal source-atop), 1 1 border-box detached);
+
+        Although the mesh box type is being removed from the Filter Effects spec, for now, we
+        continue to accept the mesh box type in parsing because of existing content. Eventually,
+        custom filters will transition to an at-rule syntax, once it is defined.
+
+        Test: css3/filters/custom/custom-filter-detached-mesh-with-mesh-box-type.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseCustomFilter):
+            In CSSParser, do not add the mesh box type identifier to the list that will be passed to
+            StyleResolver. StyleResolver is expecting a "detached" identifier in that position and
+            does not interpret mesh box types.
+
 2013-01-09  Dan Winship  <danw@gnome.org>
 
         [Soup] Handle redirection inside WebKit
