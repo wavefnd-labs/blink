@@ -1,3 +1,50 @@
+2013-01-08  Arpita Bahuguna  <arpitabahuguna@gmail.com>
+
+        Caret is incorrectly painted for a contenteditable <div> containing a <br> in vertical writing mode
+        https://bugs.webkit.org/show_bug.cgi?id=103621
+
+        Reviewed by Ryosuke Niwa.
+
+        While computing the caret rect for the given specific scenario, we
+        canonicalize our position. For the upstream (or downstream) block flow
+        candidates a check to ignore the nodes having renderers with zero height
+        is carried out. This is where we fail our check in the vertical writing mode.
+
+        In the vertical writing mode, instead of verifying the height of the descendants
+        of the candidate nodes, a check for their width should be carried out.
+
+        For our case, i.e. the <br> element contained inside the div, the bounding box
+        in the vertical writing mode would have a width greater than zero and height
+        equal to zero (as is to be expected in the vertical mode).
+
+        Thus, we need to make a check against the logical height. For the vertical
+        writing mode, the logical height should return the width of the computed
+        bounding box.
+
+        Test: editing/selection/caret-in-div-containing-br-in-vertical-mode.html
+
+        * dom/Position.cpp:
+        (WebCore::Position::hasRenderedNonAnonymousDescendantsWithHeight):
+        Have modified the code to verify against the logical height, instead
+        of simply the height, both in case of RenderText and RenderBox.
+        The logical height of the computed rects returns a value according
+        to the writing mode.
+
+        For the RenderText a new function, linesLogicalBoundingBox() is called
+        which returns the values depending on the writing mode.
+        Similarly, on the RenderBox, pixelSnappedLogicalHeight() is called which
+        too takes care of the writing mode internally. (borderBoundingBox()
+        internally calls on the pixelSnappedRect).
+
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::linesLogicalBoundingBox):
+        (WebCore):
+        * rendering/RenderText.h:
+        (RenderText):
+        New function is added to return the logical linesBoundingBox, i.e.,
+        the width and height of the linesBoundingBox are set according to
+        the writing mode.
+
 2013-01-08  Tony Gentilcore  <tonyg@chromium.org>
 
         Remove a few unused includes from HTMLTreeBuilder
