@@ -1,3 +1,20 @@
+2013-01-09  Alexandru Chiculita  <achicu@adobe.com>
+
+        Assertion Failure in WebCore::RenderLayerCompositor::updateCompositingLayers
+        https://bugs.webkit.org/show_bug.cgi?id=106419
+
+        Reviewed by Simon Fraser.
+
+        No new tests added, just un-skipped 3 existing tests.
+
+        RenderLayerCompositor::updateCompositingLayers is being called with a pending layout, so computing the
+        layers at that point would be useless & error-prone as they will be using incorrect layout values. If a layout is pending it means that 
+        RenderLayerCompositor::updateCompositingLayers would get called again after the pending layout ends, so any values calculated at that point would be
+        overwritten immediately. This patch removes the old ASSERT and makes it a return instead.
+
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::updateCompositingLayers):
+
 2013-01-09  Robert Hogan  <robert@webkit.org>
 
         REGRESSION(r111439): Focus ring is rendered incorrectly in fast/inline/continuation-outlines-with-layers.html
