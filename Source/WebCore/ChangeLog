@@ -1,3 +1,20 @@
+2013-01-10  Alexander Pavlov  <apavlov@chromium.org>
+
+        CSSParser does not allow the absence of whitespace between "and" and "expression"
+        https://bugs.webkit.org/show_bug.cgi?id=106458
+
+        Reviewed by Antti Koivisto.
+
+        The issue was that a construct similar to "and(max-width: 480px)" looks like a function call (token type FUNCTION), even though
+        it is actually a MEDIA_AND followed by a parenthesized expression.
+
+        Test: fast/css/media-rule-no-whitespace.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::detectFunctionTypeToken): Return if the detection has been successful.
+        (WebCore::CSSParser::realLex): Test for media query tokens if function type detection has failed.
+        * css/CSSParser.h:
+
 2013-01-10  Alexis Menard  <alexis@webkit.org>
 
         ASSERT_NOT_REACHED in StylePropertySet::fontValue when accessing font style property through JS after setting style font size.
