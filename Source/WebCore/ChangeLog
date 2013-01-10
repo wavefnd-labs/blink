@@ -1,3 +1,31 @@
+2013-01-10  Dan Beam  <dbeam@chromium.org>
+
+        Implement AutocompleteErrorEvent#reason
+        https://bugs.webkit.org/show_bug.cgi?id=105568
+
+        Reviewed by Adam Barth.
+
+        Test: fast/events/constructors/autocomplete-error-event-constructor.html
+
+        * WebCore.gypi: Added AutocompleteErrorEvent.idl and AutocompleteErrorEvent.h for chromium port's build.
+        * dom/AutocompleteErrorEvent.h: Added.
+        (WebCore): Added new type of error named AutocompleteErrorEvent.
+        (AutocompleteErrorEventInit): Added init params for AutocompleteErrorEvents (so initEvent() can be used).
+        (AutocompleteErrorEvent): Added a new error event that inherits from Event but also has a reason for failure.
+        (WebCore::AutocompleteErrorEvent::create): Factory function to create AutocompleteErrorEvents.
+        (WebCore::AutocompleteErrorEvent::reason): The reason why a requestAutocomplete() invocation failed. Can be
+                                                   "disabled", "cancel", or "invalid".
+        (WebCore::AutocompleteErrorEvent::interfaceName): The name of the event's interface (for event.toString()).
+        (WebCore::AutocompleteErrorEvent::AutocompleteErrorEvent): Various ways of constructing the error event.
+        * dom/AutocompleteErrorEvent.idl: Added.
+        * dom/EventNames.in: Added AutocompleteError to this list, based on REQUEST_AUTOCOMPLETE conditional.
+        * html/HTMLFormElement.cpp: Updated form elements to dispatch AutocompleteErrorEvents on errors and to give
+                                    more details (event.reason) when the request fails.
+        (WebCore::HTMLFormElement::requestAutocomplete): Changed to newly added failure type "disabled".
+        (WebCore::HTMLFormElement::finishRequestAutocomplete): Changed
+        * html/HTMLFormElement.h: Added new results (ErrorDisabled, ErrorCancel, ErrorInvalid).
+        * page/DOMWindow.idl: Added global event constructor for new AutocompleteErrorEvent() style event creation.
+
 2013-01-10  Yong Li  <yoli@rim.com>
 
         HTMLMediaElement::resume() should schedule a load rather than load immediately
