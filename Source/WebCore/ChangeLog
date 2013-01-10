@@ -1,3 +1,118 @@
+2013-01-09  Alec Flett  <alecflett@chromium.org>
+
+        IndexedDB: Allow createIndex/createObjectStore to be asynchronous
+        https://bugs.webkit.org/show_bug.cgi?id=106377
+
+        Reviewed by Tony Chang.
+
+        Migrate implementations of createIndex/deleteIndex,
+        createObjectStore/deleteObjectStore over to IDBDatabaseBackendImpl,
+        so that they can be asynchronous in multi-process ports.
+
+        Has the side effect of removing the last consumers of
+        IDBIndexBackendImpl and IDBObjectStoreBackendImpl. The former
+        is removed complete and the latter becomes a temporary namespace
+        pending a further more mechanical code shuffle.
+
+        A key refactoring effect is that the IDBDatabaseBackendImpl
+        now contains the authoritative IDBDatabaseMetadata hierarchy,
+        and updates to it are consolidated in one place rather than
+        scattered across a parallel object tree.
+
+        No new tests as this is just refactoring.
+
+        * Modules/indexeddb/IDBBackingStore.cpp: Simplify objectstore/index loading and propagate errors.
+        (WebCore::IDBBackingStore::getObjectStores):
+        (WebCore::IDBBackingStore::getIndexes):
+        * Modules/indexeddb/IDBBackingStore.h:
+        (IDBBackingStore):
+        * Modules/indexeddb/IDBCursorBackendImpl.cpp: Dependency cleanup.
+        * Modules/indexeddb/IDBCursorBackendImpl.h: Dependency cleanup.
+        (WebCore):
+        * Modules/indexeddb/IDBDatabase.cpp: Frontend IDBObjectStores no longer hold onto backend objects.
+        (WebCore::IDBDatabase::createObjectStore):
+        (WebCore::IDBDatabase::deleteObjectStore):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp: Add all create/deleteIndex operations from IDBIndexBackendImpl.
+        (WebCore::CreateObjectStoreOperation::create):
+        (WebCore::CreateObjectStoreOperation::CreateObjectStoreOperation):
+        (CreateObjectStoreOperation):
+        (WebCore::DeleteObjectStoreOperation::create):
+        (WebCore::DeleteObjectStoreOperation::DeleteObjectStoreOperation):
+        (DeleteObjectStoreOperation):
+        (WebCore::CreateObjectStoreAbortOperation::create):
+        (WebCore::CreateObjectStoreAbortOperation::CreateObjectStoreAbortOperation):
+        (CreateObjectStoreAbortOperation):
+        (WebCore::DeleteObjectStoreAbortOperation::create):
+        (WebCore::DeleteObjectStoreAbortOperation::DeleteObjectStoreAbortOperation):
+        (DeleteObjectStoreAbortOperation):
+        (CreateIndexOperation):
+        (WebCore::CreateIndexOperation::create):
+        (WebCore::CreateIndexOperation::CreateIndexOperation):
+        (WebCore):
+        (DeleteIndexOperation):
+        (WebCore::DeleteIndexOperation::create):
+        (WebCore::DeleteIndexOperation::DeleteIndexOperation):
+        (CreateIndexAbortOperation):
+        (WebCore::CreateIndexAbortOperation::create):
+        (WebCore::CreateIndexAbortOperation::CreateIndexAbortOperation):
+        (DeleteIndexAbortOperation):
+        (WebCore::DeleteIndexAbortOperation::create):
+        (WebCore::DeleteIndexAbortOperation::DeleteIndexAbortOperation):
+        (WebCore::GetOperation::GetOperation):
+        (WebCore::IDBDatabaseBackendImpl::addObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::removeObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::addIndex):
+        (WebCore::IDBDatabaseBackendImpl::removeIndex):
+        (WebCore::IDBDatabaseBackendImpl::openInternal):
+        (WebCore::IDBDatabaseBackendImpl::metadata):
+        (WebCore::IDBDatabaseBackendImpl::createObjectStore):
+        (WebCore::CreateObjectStoreOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::deleteObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::createIndex):
+        (WebCore::CreateIndexOperation::perform):
+        (WebCore::CreateIndexAbortOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::deleteIndex):
+        (WebCore::DeleteIndexOperation::perform):
+        (WebCore::DeleteIndexAbortOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::get):
+        (WebCore::IDBDatabaseBackendImpl::put):
+        (WebCore::IDBDatabaseBackendImpl::setIndexKeys):
+        (WebCore::IDBDatabaseBackendImpl::count):
+        (WebCore::DeleteRangeOperation::perform):
+        (WebCore::DeleteObjectStoreOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::deleteDatabaseFinal):
+        (WebCore::IDBDatabaseBackendImpl::loadObjectStores): Load directly into metadata from backing store.
+        (WebCore::CreateObjectStoreAbortOperation::perform):
+        (WebCore::DeleteObjectStoreAbortOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::VersionChangeAbortOperation::perform):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.h:
+        (WebCore):
+        (IDBDatabaseBackendImpl):
+        (WebCore::IDBDatabaseBackendImpl::createObjectStore):
+        (WebCore::IDBDatabaseBackendImpl::deleteObjectStore):
+        * Modules/indexeddb/IDBIndexBackendImpl.cpp: Removed.
+        * Modules/indexeddb/IDBIndexBackendImpl.h: Removed.
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore::IDBObjectStore::IDBObjectStore): Frontend IDBIndex objects no longer hold onto backend.
+        (WebCore::IDBObjectStore::createIndex): 
+        (WebCore::IDBObjectStore::deleteIndex):
+        * Modules/indexeddb/IDBObjectStore.h:
+        (WebCore::IDBObjectStore::create):
+        (IDBObjectStore):
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.cpp:
+        * Modules/indexeddb/IDBObjectStoreBackendImpl.h:
+        (WebCore):
+        (IDBObjectStoreBackendImpl):
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::objectStore):
+        * Modules/indexeddb/IDBTransaction.h:
+        * Modules/indexeddb/IDBTransactionBackendImpl.cpp:
+        * Modules/indexeddb/IDBTransactionBackendImpl.h:
+        (WebCore::IDBTransactionBackendImpl::objectStore):
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+
 2013-01-09  John J. Barton  <johnjbarton@chromium.org>
 
         Web Inspector: Don't throw exceptions when we don't have a callstack
