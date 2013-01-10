@@ -1,5 +1,21 @@
 2013-01-10  Levi Weintraub  <leviw@chromium.org>
 
+        ScrollingCoordinator touch event hit rects aren't converted to proper coordinates when in nested views
+        https://bugs.webkit.org/show_bug.cgi?id=106383
+
+        Reviewed by James Robinson.
+
+        ScrollingCoordinator uses clippedOverflowRectForRepaint(0) to generate the bounds for a renderer's hit
+        testing rect. The rect this returns is in the coordinates of its document. This change converts the
+        rect to the outermost view's coordinate system using convertToContainingView.
+
+        Tests: platform/chromium/fast/events/touch/touch-hit-rects-in-iframe.html
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::accumulateRendererTouchEventTargetRects):
+
+2013-01-10  Levi Weintraub  <leviw@chromium.org>
+
         Regression(r137939): Heap-use-after-free in WebCore::accumulateDocumentEventTargetRects
         https://bugs.webkit.org/show_bug.cgi?id=106454
 
