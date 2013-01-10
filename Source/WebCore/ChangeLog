@@ -1,3 +1,75 @@
+2013-01-09  Hajime Morrita  <morrita@google.com>
+
+        [Shadow DOM] Distribution related code on ElementShadow should be minimized.
+        https://bugs.webkit.org/show_bug.cgi?id=106294
+
+        Reviewed by Dimitri Glazkov.
+
+        This change moves ElementShadow::m_selectFeatures,
+        m_shouldCollectSelectFeatureSet and related methods to
+        ContentDistributor.
+
+        There are also some renaming and small refactorings for better fit
+        on new place:
+
+        - shouldCollectSelectFeatureSet is renamed needsSelectorRuleSet for conciseness.
+        - setShouldCollectSelectFeatureSet() which used recursion morphed into
+          iterative willAffectSelector().
+        - ensureDistributionFromDocument() becomes a static method.
+
+        No new tests. Refactoring.
+
+        * WebCore.exp.in:
+        * dom/Element.cpp:
+        (WebCore::Element::shouldInvalidateDistributionWhenAttributeChanged):
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::addShadowRoot):
+        (WebCore::ElementShadow::removeAllShadowRoots):
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        (WebCore::ElementShadow::invalidateDistribution):
+        (WebCore::ElementShadow::ensureDistribution):
+        (WebCore::ElementShadow::didAffectSelector):
+        (WebCore::ElementShadow::willAffectSelector):
+        (WebCore::ElementShadow::containingShadow):
+        (WebCore):
+        * html/shadow/ContentDistributor.cpp:
+        (WebCore::ScopeContentDistribution::registerInsertionPoint):
+        (WebCore::ScopeContentDistribution::unregisterInsertionPoint):
+        (WebCore::ContentDistributor::ContentDistributor):
+        (WebCore::ContentDistributor::ensureDistribution):
+        (WebCore):
+        (WebCore::ContentDistributor::ensureDistributionFromDocument):
+        (WebCore::ContentDistributor::invalidateDistribution):
+        (WebCore::ContentDistributor::ensureSelectFeatureSet):
+        (WebCore::ContentDistributor::collectSelectFeatureSetFrom):
+        (WebCore::ContentDistributor::didAffectSelector):
+        (WebCore::ContentDistributor::willAffectSelector):
+        (WebCore::ContentDistributor::didShadowBoundaryChange):
+        * html/shadow/ContentDistributor.h:
+        (ScopeContentDistribution):
+        (WebCore::ContentDistributor::needsSelectFeatureSet):
+        (WebCore::ContentDistributor::setNeedsSelectFeatureSet):
+        (ContentDistributor):
+        (WebCore::ContentDistributor::setValidity):
+        (WebCore::ContentDistributor::needsInvalidation):
+        * html/shadow/HTMLContentElement.cpp:
+        (WebCore::HTMLContentElement::parseAttribute):
+        * html/shadow/HTMLContentElement.h:
+        * html/shadow/HTMLShadowElement.cpp:
+        (WebCore::HTMLShadowElement::olderShadowRoot):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::getDistributedNodes):
+        (WebCore::InsertionPoint::insertedInto):
+        (WebCore::InsertionPoint::removedFrom):
+        * html/shadow/InsertionPoint.h:
+        (WebCore::InsertionPoint::canAffectSelector):
+        * testing/Internals.cpp:
+        (WebCore::Internals::hasSelectorForIdInShadow):
+        (WebCore::Internals::hasSelectorForClassInShadow):
+        (WebCore::Internals::hasSelectorForAttributeInShadow):
+        (WebCore::Internals::hasSelectorForPseudoClassInShadow):
+
 2013-01-09  Shinya Kawanaka  <shinyak@chromium.org>
 
         Assert triggered in SelectorChecker::checkOneSelector when scrollbar (e.g. :horizontal) selector is specified.
