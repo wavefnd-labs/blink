@@ -1,3 +1,17 @@
+2013-01-10  Nate Chapin  <japhet@chromium.org>
+
+        Replace unnecessary null-checks with an assert in MainResourceLoader::continueAfterNavigationPolicy.
+        https://bugs.webkit.org/show_bug.cgi?id=106476
+
+        Reviewed by Alexey Proskuryakov.
+
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::continueAfterNavigationPolicy): Null-checks for resourceLoader were
+            added in an abundance of caution in r139150. Given that we know the load hasn't been cancelled,
+            resourceLoader can only be null if continueAfterNavigationPolicy() has already been called
+            before when m_substituteData is valid. continueAfterNavigationPolicy() is only called for redirects,
+            and SubstituteData doesn't support redirects, so it is correct to assert that resourceLoader is non-null.
+
 2013-01-10  Levi Weintraub  <leviw@chromium.org>
 
         ScrollingCoordinator touch event hit rects aren't converted to proper coordinates when in nested views
