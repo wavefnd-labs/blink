@@ -1,3 +1,39 @@
+2013-01-10  Ojan Vafai  <ojan@chromium.org>
+
+        Flexboxes incorrectly add the scrollbar width to the intrinsic width of fixed-width items
+        https://bugs.webkit.org/show_bug.cgi?id=106591
+
+        Reviewed by Levi Weintraub.
+
+        The scrollbar width should only be added if the width of the flex item
+        is not fixed.
+
+        Test: fast/css/fixed-width-intrinsic-width-excludes-scrollbars.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computePreferredLogicalWidths):
+        Use shared helper method. This also happens to fix the vertical
+        writing-mode case.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::instrinsicScrollbarLogicalWidth):
+        (WebCore):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        Add a method for determining the scrollbar's contribution to the boxes
+        intrinsic width.
+
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::computePreferredLogicalWidths):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::computePreferredLogicalWidths):
+        Use shared code for determining the scrollbar width and only add the
+        width when computing the intrinsic widths.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::computePreferredLogicalWidths):\
+        Just adding a FIXME to account for scrollbar width.
+
 2013-01-10  Nate Chapin  <japhet@chromium.org>
 
         Replace unnecessary null-checks with an assert in MainResourceLoader::continueAfterNavigationPolicy.
