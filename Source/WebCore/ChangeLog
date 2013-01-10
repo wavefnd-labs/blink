@@ -1,3 +1,60 @@
+2013-01-10  John Mellor  <johnme@chromium.org>
+
+        Fix scale of screen.width, window.outerWidth and @media device-width when page scale not applied in compositor.
+        https://bugs.webkit.org/show_bug.cgi?id=106460
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        screen.width, window.outerWidth and @media device-width should be in
+        density independent (UI) pixels, not physical screen pixels.
+
+        This already works on most ports (including iOS). However Chrome for
+        Android currently internally sizes its windows in physical screen pixels
+        instead of density independent pixels, and this leaks through in the
+        sizes provided to WebCore.
+
+        This patch scales these sizes appropriately before they reach JavaScript,
+        on platforms where the applyPageScaleFactorInCompositor setting is false
+        (i.e. just Chrome for Android). Once Chrome for Android switches over to
+        the same coordinate space, the applyPageScaleFactorInCompositor setting
+        will be removed, along with any code (such as this) that depends on it.
+
+        The effect of this patch on Chrome for Android when viewing a page with
+        a width=device-width viewport on a Galaxy Nexus (720x1280 @ dPR 2) is:
+            @media device-width      changes from 720 to 360
+            screen.width             changes from 720 to 360
+            screen.availWidth        changes from 720 to 360
+            window.outerWidth        changes from 720 to 360
+            window.innerWidth                    remains 360 (at overview zoom)
+            @media width                         remains 360
+            document.documentElement.clientWidth remains 360
+            document.documentElement.offsetWidth remains 360
+            document.documentElement.scrollWidth remains 360
+            document.body.clientWidth            remains 360
+            document.body.offsetWidth            remains 360
+            document.body.scrollWidth            remains 360
+        And similarly for heights (though they are slightly less than 640, since
+        toolbars etc. get subtracted from the available height).
+
+        No new tests, as applyDeviceScaleFactorInCompositor appears to always be
+        true in DumpRenderTree, so this situation cannot occur there.
+
+        * page/Settings.in:
+            Added applyDeviceScaleFactorInCompositor setting, which allows
+            detecting whether we need to normalize the scale.
+        * platform/chromium/PlatformScreenChromium.cpp:
+        (WebCore::toUserSpace):
+            Static function for normalizing screen rect scale.
+        (WebCore::screenRect):
+            Uses toUserSpace.
+        (WebCore::screenAvailableRect):
+            Uses toUserSpace.
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::processSubtree):
+            Use applyDeviceScaleFactorInCompositor instead of
+            applyPageScaleFactorInCompositor, to scale the window rect correctly
+            on platforms other than Chrome for Android.
+
 2013-01-10  Florin Malita  <fmalita@chromium.org>
 
         Rename GraphicsContext::addRoundedRectClip
