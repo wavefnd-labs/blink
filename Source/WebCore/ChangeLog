@@ -1,3 +1,63 @@
+2013-01-10  Hajime Morrita  <morrita@google.com>
+
+        ComposedShadowTreeWalker shouldn't be exposed to non-ShadowDOM classes
+        https://bugs.webkit.org/show_bug.cgi?id=106505
+
+        Reviewed by Dimitri Glazkov.
+
+        This change hides ComposedShadowTreeWalker from non-ShadowDOM classes by
+
+        - introducing thin wrapper functions on NodeRenderingTraversal and relacing
+          CSTW callsites with it,
+        - replacing ComposedShadowTreeWalker usage with AncestorChainWalker if possible and
+        - moving AncestorChainWalker to its own file and including it on files
+          which needs only AncestorChainWalker. This eliminates ComposedShadowTreeWalker.h inclusions.
+
+        No new tests. No behavior change.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/AncestorChainWalker.cpp: Added. Extracted from ComposedShadowTreeWalker.cpp
+        (WebCore):
+        (WebCore::AncestorChainWalker::AncestorChainWalker):
+        (WebCore::AncestorChainWalker::parent):
+        * dom/AncestorChainWalker.h: Added. Extracted from ComposedShadowTreeWalker.h
+        (WebCore):
+        (AncestorChainWalker):
+        (WebCore::AncestorChainWalker::get):
+        (WebCore::AncestorChainWalker::crossingInsertionPoint):
+        * dom/ComposedShadowTreeWalker.cpp:
+        * dom/ComposedShadowTreeWalker.h:
+        * dom/DOMAllInOne.cpp:
+        * dom/ElementShadow.h:
+        (WebCore::shadowOfParent):
+        (WebCore):
+        * dom/EventDispatcher.cpp:
+        * dom/Node.cpp:
+        * dom/NodeRenderingTraversal.cpp:
+        (WebCore::NodeRenderingTraversal::nextInScope):
+        (NodeRenderingTraversal):
+        (WebCore::NodeRenderingTraversal::previousInScope): Added.
+        (WebCore::NodeRenderingTraversal::parentInScope): Added.
+        (WebCore::NodeRenderingTraversal::lastChildInScope): Added.
+        * dom/NodeRenderingTraversal.h:
+        (NodeRenderingTraversal):
+        * dom/TreeScope.cpp:
+        * html/HTMLLIElement.cpp:
+        (WebCore::HTMLLIElement::attach):
+        * page/EventHandler.cpp:
+        * page/FocusController.cpp: Replacing CSTW with NRT
+        (WebCore):
+        (WebCore::FocusNavigationScope::focusNavigationScopeOf):
+        (WebCore::FocusController::findNodeWithExactTabIndex):
+        (WebCore::nextNodeWithGreaterTabIndex):
+        (WebCore::previousNodeWithLowerTabIndex):
+        (WebCore::FocusController::nextFocusableNode):
+        (WebCore::FocusController::previousFocusableNode):
+
 2013-01-10  Zan Dobersek  <zandobersek@gmail.com>
 
         Remove the ENABLE_ANIMATION_API feature define occurences
