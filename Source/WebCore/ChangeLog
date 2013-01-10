@@ -1,3 +1,21 @@
+2013-01-09  Tim Horton  <timothy_horton@apple.com>
+
+        Don't drop to huge tile mode if we're only slow-scrolling because of a page overlay
+        https://bugs.webkit.org/show_bug.cgi?id=106502
+        <rdar://problem/12959143>
+
+        Reviewed by Simon Fraser.
+
+        We only use the MainThreadScrollingReason "ForcedOnMainThread" if WebKit2 installs
+        a page overlay (TiledCoreAnimationDrawingArea::didInstallPageOverlay), which clients
+        can cause arbitrarily.
+
+        We probably should still use default-sized tiles in this case (this will also
+        prevent us from falling into gigantic tiles for WebKit2 find-in-page, among other things).
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::adjustTileCacheCoverage):
+
 2013-01-09  Takashi Sakamoto  <tasak@google.com>
 
         border-radius with box-shadow is not rendered correctly
