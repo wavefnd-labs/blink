@@ -1,3 +1,40 @@
+2013-01-09  Chris Rogers  <crogers@google.com>
+
+        Allow live/local audio input to be enabled only when needed
+        https://bugs.webkit.org/show_bug.cgi?id=106490
+
+        Reviewed by Kenneth Russell.
+        
+        WebAudio can process live/local audio input using a MediaStreamAudioSourceNode.
+        But currently the audio back-end is not able to know when/if audio input will be
+        needed, so it needs to assume the worst and initialize the system to support potential
+        audio input in all cases.  For some audio back-ends this can end up being less efficient
+        than initializing for audio output only.  This patch adds the ability for the audio back-end
+        to be able to initialize itself for audio input later on, only when/if it's needed.
+
+        * Modules/webaudio/AudioContext.cpp:
+        (WebCore::AudioContext::createMediaStreamSource):
+        * Modules/webaudio/AudioDestinationNode.h:
+        (AudioDestinationNode):
+        * Modules/webaudio/DefaultAudioDestinationNode.cpp:
+        (WebCore::DefaultAudioDestinationNode::DefaultAudioDestinationNode):
+        (WebCore::DefaultAudioDestinationNode::initialize):
+        (WebCore::DefaultAudioDestinationNode::uninitialize):
+        (WebCore::DefaultAudioDestinationNode::createDestination):
+        (WebCore):
+        (WebCore::DefaultAudioDestinationNode::enableInput):
+        * Modules/webaudio/DefaultAudioDestinationNode.h:
+        (DefaultAudioDestinationNode):
+        * Modules/webaudio/OfflineAudioDestinationNode.h:
+        (OfflineAudioDestinationNode):
+        (WebCore::OfflineAudioDestinationNode::sampleRate):
+        * platform/audio/AudioDestination.h:
+        (AudioDestination):
+        * platform/audio/gstreamer/AudioDestinationGStreamer.cpp:
+        (WebCore::AudioDestination::create):
+        * platform/audio/mac/AudioDestinationMac.cpp:
+        (WebCore::AudioDestination::create):
+
 2013-01-09  Tim Horton  <timothy_horton@apple.com>
 
         Don't drop to huge tile mode if we're only slow-scrolling because of a page overlay
