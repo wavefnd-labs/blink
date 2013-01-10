@@ -1,3 +1,35 @@
+2013-01-10  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Filters] RenderLayerCompositor::addToOverlapMap should take into account the filters outsets (ie. blur and drop-shadow)
+        https://bugs.webkit.org/show_bug.cgi?id=94022
+
+        Reviewed by Simon Fraser.
+
+        When a layer has a filter that moves pixels, we need to add its entire bounds, including its
+        outsets and children, to the overlap map. The filter can move the children's pixels
+        anywhere in the layer, so we can't rely on the children's bounds.
+
+        Eventually, we should avoid adding children to the overlap map if the parent's bounds used
+        for overlap testing already include the children. I've added a FIXME for this optimization.
+
+        Tests: compositing/filters/sw-layer-overlaps-hw-shadow.html
+               compositing/filters/sw-nested-shadow-overlaps-hw-nested-shadow.html
+               compositing/filters/sw-shadow-overlaps-hw-layer.html
+               compositing/filters/sw-shadow-overlaps-hw-shadow.html
+
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::overlapBounds):
+            If necessary, return the calculated layer bounds, including the children. Otherwise,
+            return the localBoundingBox.
+        (RenderLayer):
+        (WebCore::RenderLayer::overlapBoundsIncludeChildren):
+            If the layer has a filter that moves pixels, return true.
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::addToOverlapMap):
+            Add the overlapBounds instead of the localBoundingBox to the overlap map.
+        (WebCore::RenderLayerCompositor::computeCompositingRequirements):
+            Use the overlapBounds instead of the localBoundingBox for overlap testing.
+
 2013-01-09  Ojan Vafai  <ojan@chromium.org>
 
         intrinsic min-widths don't override width for file upload controls
