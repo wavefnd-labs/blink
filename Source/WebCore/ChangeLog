@@ -1,3 +1,36 @@
+2013-01-10  Tony Chang  <tony@chromium.org>
+
+        Speed up supplemental dependency computation
+        https://bugs.webkit.org/show_bug.cgi?id=106503
+
+        Reviewed by Adam Barth.
+
+        On my machine, generating supplemental IDL dependencies was taking about 18s
+        because it has to run the C preprocessor on each IDL file. Avoid this by using
+        a regular expression to find the Supplemental= value in each IDL file rather than
+        doing a full parse. Now generating supplemental IDL dependencies is less than a
+        second.
+
+        preprocess-idls.pl used to also check IDL attributes against IDLAttributes.txt.
+        Move this code to run in generate-bindings.pl. This change revealed that
+        TestRunner.idl uses PassContext so add that to IDLAttributes.txt.
+
+        No new tests, this is a build refactor. EWS bots should be green.
+
+        * DerivedSources.make: Remove --idlAttributesFile from preprocess-idls.pl and add it to generate-bindings.pl.
+        * DerivedSources.pri: Remove --idlAttributesFile from preprocess-idls.pl and add it to generate-bindings.pl.
+        * GNUmakefile.am: Remove --idlAttributesFile from preprocess-idls.pl and add it to generate-bindings.pl.
+        * UseJSC.cmake: Remove --idlAttributesFile from preprocess-idls.pl and add it to generate-bindings.pl.
+        * UseV8.cmake: Remove --idlAttributesFile from preprocess-idls.pl and add it to generate-bindings.pl.
+        * WebCore.gyp/WebCore.gyp: Remove --idlAttributesFile from preprocess-idls.pl and add it to generate-bindings.pl.
+        * bindings/scripts/IDLAttributes.txt: Add PassContext needed by TestRunner.idl.
+        * bindings/scripts/generate-bindings.pl:
+        (loadIDLAttributes): Moved from preprocess-idls.pl.
+        (checkIDLAttributes): Moved from preprocess-idls.pl.
+        (checkIfIDLAttributesExists): Moved from preprocess-idls.pl.
+        * bindings/scripts/preprocess-idls.pl:
+        (getSupplementalFromIDLFile): Helper method to get Supplemental=* quickly.
+
 2013-01-10  Max Vujovic  <mvujovic@adobe.com>
 
         [CSS Filters] RenderLayerCompositor::addToOverlapMap should take into account the filters outsets (ie. blur and drop-shadow)
