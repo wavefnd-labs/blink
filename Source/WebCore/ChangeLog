@@ -1,3 +1,41 @@
+2013-01-11  Alexandru Chiculita  <achicu@adobe.com>
+
+        Element is displayed behind a composited layer when clipping is used on a previous element
+        https://bugs.webkit.org/show_bug.cgi?id=104981
+
+        Reviewed by Simon Fraser.
+
+        RenderLayerCompositor::computeCompositingRequirements uses the local bounding box of the layers to optimize the number of composited 
+        layers that are created. That's needed in order to make sure that composited layers that are displayed behind non-composited
+        layers are correctly promoting the layers in front to be composited. Otherwise the non-composited layers are rendered
+        in the parent composited layer, displaying behind the other composited layers. That might be wrong as the correct paint order might not be
+        preserved.
+
+        In order to make animations work, there's a flag that will disable that optimization. That's because the animations run in the platform
+        layer and the platform layer doesn't know about the layers that are not promoted to composited layers. When the overlapping of the layers
+        is computed it just uses the start or the stop state, but no intermediate states. For that reason, all the 'top' layers in front of animated 
+        elements will become composited.
+
+        When an animation has a clipping rectangle, then we know for sure that the animation is going to be contained inside the clip area, so WebKit 
+        uses the bounding box of the clipping area to detect the overlapping layers, so there's no need to disable the optimization in that case.
+
+        However, if there is a different animation displaying behind the clipping container, we cannot safely disable that optimization anymore. That's
+        because we still don't know what are the intermediate states of that particular animated layer. The bug was that the optimization was re-enabled
+        anyway, even in this particular case.
+
+        In order to fix it, I changed the logic, so that instead of re-enabling the optimization after a clipping container, it will just avoid to propagate 
+        the internal state to the following layers when there's no need to so.
+
+        Note that 3D transforms behave like animations for now and disable the optimization. Because of that some of the existing tests ended up
+        creating more layers than needed. That's because the tests had an overflow area that recreated the issue that this patch fixes, but with
+        3D transforms instead of animations. 3D transforms will be treated in a separate patch.
+
+        Tests: compositing/layer-creation/overlap-animation-clipping.html
+               compositing/layer-creation/overlap-animation-container.html
+
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::computeCompositingRequirements):
+
 2013-01-11  Philip Rogers  <pdr@google.com>
 
         Skip CachedImage::CreateImage if we don't have image data
