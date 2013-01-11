@@ -1,3 +1,33 @@
+2013-01-11  Tony Chang  <tony@chromium.org>
+
+        [chromium] Don't regenerate all bindings when any idl file changes
+        https://bugs.webkit.org/show_bug.cgi?id=106604
+
+        Reviewed by Kentaro Hara.
+
+        Currently, every idl file is a dependency of generating the supplemental dependency map
+        and generating bindings is a dependency of the map. This means that touching any idl file
+        causes us to regenerate all the bindings.
+
+        Change it so that generating bindings only depends on the idl files that have Supplemental= in them.
+        We only have 24 idl files with Supplemental (3.7% of the 638 idl files in WebCore) so modifying
+        any of those will cause all bindings to be regenerated.
+
+        If you add or remove a new idl file, you have to rerun gyp which will fix up any dependencies.
+        If you edit an existing file and add Supplemental= to it, you will now need to rerun gyp_{webkit,chromium}.
+        I think that's a reasonable tradeoff since it seems highly unlikely that you would adding Supplemental=
+        to an existing file without renaming it. The bots will always be fine because they always run
+        gyp after updating.
+
+        No new tests, this is a build only change.
+
+        * WebCore.gyp/WebCore.gyp: Remove <(SHARED_INTERMEDIATE_DIR)/supplemental_dependency.tmp, which was causing
+        the full rebuild. The step to generate this file is still a hard dependency so it will still be generated and
+        used by generate-bindings.pl. Also remove <@(webcore_test_support_idl_files). This was saying we should regenerate
+        all bindings if a test idl file changed. That doesn't make sense.
+        * WebCore.gyp/scripts/supplemental_idl_files.py: Added.
+        (DoMain):
+
 2013-01-11  Alexandru Chiculita  <achicu@adobe.com>
 
         Element is displayed behind a composited layer when clipping is used on a previous element
