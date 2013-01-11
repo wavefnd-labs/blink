@@ -1,3 +1,22 @@
+2013-01-10  Shinya Kawanaka  <shinyak@chromium.org>
+
+        When a selected node in nested ShadowDOM is deleted, selection have wrong range.
+        https://bugs.webkit.org/show_bug.cgi?id=106526
+
+        Reviewed by Ryosuke Niwa.
+
+        Since FrameSelection and htmlediting did not consider nested Shadow DOM, the FrameSelection still selects
+        removed elements if selected nodes in nested Shadow DOM are removed.
+
+        We have to use containsIncludingShadowDOM to handle with nested Shadow DOM correctly.
+
+        Test: fast/dom/shadow/selection-in-nested-shadow.html
+
+        * editing/FrameSelection.cpp:
+        (WebCore::removingNodeRemovesPosition):
+        * editing/htmlediting.cpp:
+        (WebCore::updatePositionForNodeRemoval):
+
 2013-01-10  Hajime Morrita  <morrita@google.com>
 
         [Shadow DOM] Refactoring: InsertionPoint could simplify its subclass hooks
