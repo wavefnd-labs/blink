@@ -1,3 +1,44 @@
+2013-01-11  Antoine Quint  <graouts@apple.com>
+
+        Web Inspector: Option+Click on Node Expander Doesn't Work the First Time
+        https://bugs.webkit.org/show_bug.cgi?id=66868
+
+        Up to now, the TreeElement.prototype.expandRecursively() method would correctly
+        expand children recursively based on the provided depth, but would not wait to
+        perform this task until all child nodes had been populated, which means that this
+        would only work incrementally with one additional level of child nodes being shown
+        expanded in the DOM tree upon alt+clicking a given node with a deep hierarchy.
+        
+        In order to fix this, this patch adds a new optional argument to the DOMAgent's
+        requestChildNodes() methods to provide the depth at which we want to retrieve children
+        of a given node. The DOMAgent provides a new .getSubtree() method that calls
+        requestChildNodes() with the provided depth.
+
+        Then in ElementsTreeOutline, we subclass .expandRecursively() to first call DOMAgent's
+        new .getSubtree() method and then call the default implementation when all nodes
+        have been retrieved from the backend.
+
+        Reviewed by Pavel Feldman.
+
+        Tests: inspector-protocol/dom-request-child-nodes-depth.html
+               inspector/elements/expand-recursively.html
+
+        * inspector/Inspector.json: Add the new `depth` parameter to DOM.requestChildNodes().
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::pushChildNodesToFrontend): Add a new optional `depth` parameter
+        which defaults to 1.
+        (WebCore::InspectorDOMAgent::requestChildNodes): Add a new optional `depth` parameter
+        which defaults to 1 and allows -1 as an unbound value.
+        * inspector/InspectorDOMAgent.h:
+        (InspectorDOMAgent):
+        * inspector/front-end/DOMAgent.js:
+        (WebInspector.DOMNode.prototype.):
+        (WebInspector.DOMNode.prototype.getSubtree): New method allowing to specify at what depth
+        we want to retrieve children of a given node from the backend.
+        * inspector/front-end/ElementsTreeOutline.js:
+        (WebInspector.ElementsTreeElement.prototype.expandRecursively): Override default implementation
+        to first obtain the deepest subtree for the current node so that deep expansion happens as expected.
+
 2013-01-11  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: [Elements] Search in the DOM tree does not scroll horizontally
