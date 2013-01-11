@@ -1,3 +1,41 @@
+2013-01-11  Kent Tamura  <tkent@chromium.org>
+
+        BaseDateAndTimeInputType should not inherit from TextFieldInputType
+        https://bugs.webkit.org/show_bug.cgi?id=106306
+
+        Reviewed by Hajime Morita.
+
+        Date/time input types don't need text-field features at all.
+
+        No new tests. This should not make any behavior changes except reduction
+        of memory usage.
+
+        * html/BaseDateAndTimeInputType.h:
+        Inherit InputType instead of TextFieldInputType.
+        (WebCore::BaseDateAndTimeInputType::BaseDateAndTimeInputType):
+        (BaseDateAndTimeInputType): Update function declarations.
+        * html/BaseDateAndTimeInputType.cpp:
+        Remove handleKeydownEvent and convertFromVisibleValue, which are for
+        TextFieldInputType.
+        (WebCore::BaseDateAndTimeInputType::shouldRespectListAttribute):
+        Added. This is necessary for <datalist> support. TextFieldInputType has
+        the same code.
+        (WebCore::BaseDateAndTimeInputType::valueMissing):
+        Added. This is necessary for validity.valueMissing. TextFieldInputType
+        has the same code.
+
+        * html/BaseChooserOnlyDateAndTimeInputType.cpp:
+        Remove unnecessary functions which cancel TextFieldInputType behavior.
+        * html/BaseChooserOnlyDateAndTimeInputType.h:
+        (BaseChooserOnlyDateAndTimeInputType): Remove declarations for them.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        Remove unnecessary functions which cancel TextFieldInputType behavior.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType):
+        Add SpinButtonOwner interface. We didn't need it because
+        TextFieldInputType implements it.
+
 2013-01-11  Mary Wu  <mary.wu@torchmobile.com.cn>
 
         [BlackBerry] Enable concatenating headers with same field name
