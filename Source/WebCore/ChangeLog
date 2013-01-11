@@ -1,3 +1,110 @@
+2013-01-11  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: Workspace should support several projects and should not have temporary UISourceCodes.
+        https://bugs.webkit.org/show_bug.cgi?id=105856
+
+        Reviewed by Pavel Feldman.
+
+        Workspace now supports several projects with the networkProject being a main one.
+        Replaced temporary UISourceCodes with specific projects (debugger and liveedit).
+        The concept of workspace reset on navigation is now replaced with project reset concept instead.
+        Introduced snippets project (that is not reset on navigation).
+        Script mappings are now reset on GlobalObjectCleared event.
+
+        * inspector/front-end/BreakpointManager.js:
+        (WebInspector.BreakpointManager):
+        (WebInspector.BreakpointManager.prototype._innerSetBreakpoint):
+        (WebInspector.BreakpointManager.prototype._filteredBreakpointLocations):
+        (WebInspector.BreakpointManager.prototype.toggleAllBreakpoints):
+        (WebInspector.BreakpointManager.prototype.removeAllBreakpoints):
+        (WebInspector.BreakpointManager.prototype._projectWillReset.get for):
+        (WebInspector.BreakpointManager.prototype._projectWillReset):
+        * inspector/front-end/CSSStyleModel.js:
+        (WebInspector.CSSStyleModel):
+        (WebInspector.CSSStyleModel.prototype._inspectedURLChanged):
+        (WebInspector.CSSStyleModel.prototype._resetSourceMappings):
+        (WebInspector.CSSStyleModelResourceBinding):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._viaInspectorResourceURL):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._reset):
+        * inspector/front-end/CompilerScriptMapping.js:
+        (WebInspector.CompilerScriptMapping):
+        (WebInspector.CompilerScriptMapping.prototype._debuggerReset):
+        * inspector/front-end/DebuggerScriptMapping.js:
+        * inspector/front-end/DefaultScriptMapping.js:
+        (WebInspector.DefaultScriptMapping):
+        (WebInspector.DefaultScriptMapping.prototype.addScript):
+        (WebInspector.DefaultScriptMapping.prototype._debuggerReset):
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onGetPageResources):
+        * inspector/front-end/FilteredItemSelectionDialog.js:
+        (WebInspector.OpenResourceDialog.show):
+        * inspector/front-end/LiveEditSupport.js:
+        (WebInspector.LiveEditSupport):
+        (WebInspector.LiveEditSupport.prototype.uiSourceCodeForLiveEdit):
+        (WebInspector.LiveEditSupport.prototype._debuggerReset):
+        * inspector/front-end/NetworkUISourceCodeProvider.js:
+        (WebInspector.NetworkUISourceCodeProvider):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._mainFrameNavigated):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._addFile):
+        (WebInspector.NetworkUISourceCodeProvider.prototype._reset):
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping):
+        (WebInspector.ResourceScriptMapping.prototype._uiSourceCodeAddedToWorkspace):
+        (WebInspector.ResourceScriptMapping.prototype._debuggerReset):
+        * inspector/front-end/RevisionHistoryView.js:
+        (WebInspector.RevisionHistoryView):
+        (WebInspector.RevisionHistoryView.prototype._projectWillReset):
+        * inspector/front-end/SASSSourceMapping.js:
+        (_bindUISourceCode):
+        * inspector/front-end/ScriptSnippetModel.js:
+        (WebInspector.ScriptSnippetModel):
+        (WebInspector.ScriptSnippetModel.prototype._addScriptSnippet):
+        (WebInspector.ScriptSnippetModel.prototype.reset):
+        * inspector/front-end/ScriptsNavigator.js:
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel):
+        (WebInspector.ScriptsPanel.prototype._addUISourceCode):
+        (WebInspector.ScriptsPanel.prototype._uiSourceCodeRemoved):
+        (WebInspector.ScriptsPanel.prototype._removeUISourceCodes):
+        (WebInspector.ScriptsPanel.prototype._debuggerWasDisabled):
+        (WebInspector.ScriptsPanel.prototype._debuggerReset):
+        (WebInspector.ScriptsPanel.prototype._projectWillReset):
+        (WebInspector.ScriptsPanel.prototype.canShowAnchorLocation):
+        (WebInspector.ScriptsPanel.prototype._revealExecutionLine):
+        (WebInspector.ScriptsPanel.prototype.showGoToSourceDialog):
+        * inspector/front-end/SimpleWorkspaceProvider.js:
+        (WebInspector.SimpleWorkspaceProvider):
+        (WebInspector.SimpleWorkspaceProvider.prototype.addFile):
+        (WebInspector.SimpleWorkspaceProvider.prototype.addFileForURL):
+        (WebInspector.SimpleWorkspaceProvider.prototype.reset):
+        * inspector/front-end/StylesSourceMapping.js:
+        (WebInspector.StylesSourceMapping):
+        (WebInspector.StylesSourceMapping.prototype._projectWillReset):
+        * inspector/front-end/TabbedEditorContainer.js:
+        (WebInspector.TabbedEditorContainer.prototype.reset):
+        * inspector/front-end/UISourceCode.js:
+        (WebInspector.UISourceCode.prototype.project):
+        * inspector/front-end/Workspace.js:
+        (WebInspector.WorkspaceController):
+        (WebInspector.WorkspaceController.prototype._inspectedURLChanged):
+        (WebInspector.Project):
+        (WebInspector.Project.prototype.name):
+        (WebInspector.Project.prototype.isServiceProject):
+        (WebInspector.Project.prototype._reset):
+        (WebInspector.Workspace):
+        (WebInspector.Workspace.prototype.uiSourceCodeForURL):
+        (WebInspector.Workspace.prototype.uiSourceCodeForURI):
+        (WebInspector.Workspace.prototype.addProject):
+        (WebInspector.Workspace.prototype.project):
+        (WebInspector.Workspace.prototype.projects):
+        (WebInspector.Workspace.prototype.uiSourceCodes):
+        (WebInspector.Workspace.prototype.projectForUISourceCode):
+        (WebInspector.Workspace.prototype.requestFileContent):
+        (WebInspector.Workspace.prototype.setFileContent):
+        (WebInspector.Workspace.prototype.searchInFileContent):
+        * inspector/front-end/inspector.js:
+        * inspector/front-end/utilities.js:
+
 2013-01-11  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [Resources] Make grid columns set configurable.
