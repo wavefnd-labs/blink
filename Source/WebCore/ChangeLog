@@ -1,3 +1,23 @@
+2013-01-11  Levi Weintraub  <leviw@chromium.org>
+
+        RenderGeometryMap and TransformState disagree with sub-pixel layout and translations
+        https://bugs.webkit.org/show_bug.cgi?id=106047
+
+        Reviewed by Simon Fraser.
+
+        Mirror RenderGeometryMap's optimization for integer-translated transforms in TransformState.
+        This avoids the current behavior where the two can disagree on mappings, since RenderGeometryMap
+        pixel-snapped later when a translation occurred between two sub-pixel containers.
+
+        Test: fast/layers/geometry-map-transform-state-translation-mismatch.html
+
+        * platform/graphics/transforms/TransformState.h:
+        (WebCore::TransformState::setQuad): Clear accumulatedOffset when setting a new quad. Note: this
+        implementation only works properly when only tracking a quad.
+        * platform/graphics/transforms/TransformState.cpp:
+        (WebCore::TransformState::applyTransform): apply integral translations to the accumulatedOffset
+        for performance and consistency with RenderGeometryMap.
+
 2013-01-11  Abhishek Arya  <inferno@chromium.org>
 
         Heap-use-after-free in WebCore::RenderText::computePreferredLogicalWidths
