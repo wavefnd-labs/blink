@@ -1,3 +1,67 @@
+2013-01-10  Takashi Sakamoto  <tasak@google.com>
+
+        Implement CSSGroupingRule for @host @-rules and @supports.
+        https://bugs.webkit.org/show_bug.cgi?id=106418
+
+        Reviewed by Antti Koivisto.
+
+        CSSGroupingRule is to share code between CSSMediaRule, CSSSupportsRule
+        and CSSHostRule. @supports and @host @-rules are dervied from
+        CSSGroupingRule:
+        http://www.w3.org/TR/2012/WD-css3-conditional/#the-cssgroupingrule-interface
+        https://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html#css-host-rule-interface
+        Since @media is also derived from CSSGroupingRule and @region has the
+        same interface as CSSGroupingRule, modify to use CSSGroupingRule:
+        http://dev.w3.org/csswg/css3-regions/#the-at-region-style-rule
+
+        No new tests, because no new feature is implemented.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        Added CSSGroupingRule.h and CSSGroupingRule.cpp.
+        * css/CSSAllInOne.cpp:
+        Modified to include CSSGroupingRule.cpp.
+        * css/CSSGroupingRule.cpp: Added.
+        (WebCore):
+        (WebCore::CSSGroupingRule::CSSGroupingRule):
+        (WebCore::CSSGroupingRule::~CSSGroupingRule):
+        (WebCore::CSSGroupingRule::insertRule):
+        (WebCore::CSSGroupingRule::deleteRule):
+        (WebCore::CSSGroupingRule::appendCssTextForItems):
+        (WebCore::CSSGroupingRule::length):
+        (WebCore::CSSGroupingRule::item):
+        (WebCore::CSSGroupingRule::cssRules):
+        (WebCore::CSSGroupingRule::reattach):
+        (WebCore::CSSGroupingRule::reportMemoryUsage):
+        These codes are moved from CSSMediaRule and WebKitCSSRegionRule.
+        * css/CSSGroupingRule.h:
+        (WebCore):
+        (CSSGroupingRule):
+        * css/CSSMediaRule.cpp:
+        (WebCore::CSSMediaRule::CSSMediaRule):
+        (WebCore::CSSMediaRule::~CSSMediaRule):
+        Make CSSMediaRule inherit CSSGroupingRule.
+        (WebCore::CSSMediaRule::media):
+        (WebCore::CSSMediaRule::reattach):
+        Keep the code for updating media queries' CSSOMWrapper.
+        (WebCore::CSSMediaRule::reportMemoryUsage):
+        We need to report media queries' CSSOMWrapper memory usage.
+        (WebCore::CSSMediaRule::mediaQueries):
+        (WebCore::CSSMediaRule::cssText):
+        * css/CSSMediaRule.h:
+        * css/WebKitCSSRegionRule.cpp:
+        Make WebKitCSSRegionRule inherit CSSGroupingRule.
+        (WebCore::WebKitCSSRegionRule::WebKitCSSRegionRule):
+        (WebCore::WebKitCSSRegionRule::cssText):
+        * css/WebKitCSSRegionRule.h:
+        * css/StyleRule.h:
+        Added inlined accessor to obtain StyleRuleMedia* and StyleRuleRegion*
+        from StyleRuleBlock*.
+
 2012-12-28  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [Canvas] add an option to reload the page if there is an uninstrumented canvas
