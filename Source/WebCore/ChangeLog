@@ -1,3 +1,53 @@
+2013-01-10  Grzegorz Czajkowski  <g.czajkowski@samsung.com>
+
+        On Linux, should be able to get spelling suggestions without selecting the misspelled word
+        https://bugs.webkit.org/show_bug.cgi?id=103520
+
+        Reviewed by Ryosuke Niwa.
+
+        Allow to get/insert spelling suggestions without selecting the misspelled word for
+        Linux WebKit ports. WebCore assumes that the misspelled word has to be selected
+        to get its suggestions.
+
+        In compliance with native application behaviour a new editing policy is introduced,
+        to do not highlight the misspelled word to just get its guesses.
+
+        No new tests, covered by context-menu-suggestions.html.
+
+        * WebCore.exp.in:
+        Remove _ZN7WebCore6Editor21isSelectionMisspelledEv symbol as Mac port doesn't
+        need it any longer.
+
+        * editing/EditingBehavior.h:
+        (EditingBehavior):
+        (WebCore::EditingBehavior::shouldAllowSpellingSuggestionsWithoutSelection):
+        Add a new behavior for Linux, to allow spelling suggestions without selecting
+        the misspelled word.
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::isContinuousSpellCheckingEnabled):
+        Add missing const modifier, to use this method in 'misspelledWordAtCaretOrRange() const'.
+
+        (WebCore::Editor::misspelledWordAtCaretOrRange):
+        Allow to check spelling under the caret or selected word.
+        Does nothing for selection made on the multiple words.
+
+        (WebCore::Editor::misspelledSelectionString):
+        Return the misspelled selection.
+
+        (WebCore::Editor::guessesForMisspelledWord):
+        Remove 'Selection' from method name as it may return guesses without selection.
+
+        (WebCore::Editor::guessesForMisspelledOrUngrammatical):
+        Ditto.
+
+        * page/ContextMenuController.cpp:
+        (WebCore::ContextMenuController::contextMenuItemSelected):
+        Select the word under caret to meet the conditions from misspelledWordAtCaretOrRange.
+
+        (WebCore::ContextMenuController::populate):
+        Update guessesForMisspelledOrUngrammatical call.
+
 2013-01-10  Hajime Morrita  <morrita@google.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=106283
