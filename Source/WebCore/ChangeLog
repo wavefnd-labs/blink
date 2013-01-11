@@ -1,3 +1,49 @@
+2013-01-10  Hajime Morrita  <morrita@google.com>
+
+        [Shadow DOM] Refactoring: InsertionPoint could simplify its subclass hooks
+        https://bugs.webkit.org/show_bug.cgi?id=106614
+
+        Reviewed by Dimitri Glazkov.
+
+        This change simplifies InsertionPoint overrides and give some flexibility to it.
+
+        The change
+
+        - Removes InsertionPoint::isSelectValid(). now ContentSelectorQuery parses given selector anyway.
+          Invalid select attribute is handled by newly introduced matchTypeFor() method.
+        - Introduces InsertionPoint::matchTypeFor() to give a chance each InsertionPoint to decide whether it
+          accepts the given node as its distribution. Then it lets DetailsSummaryElement adopt it.
+        - Pulls some HTMLShadowElement overrides up to InsertionPoint so that other upcoming InsertionPoint
+          subclasses don't need to override them.
+
+        No new tests. Refactoring.
+
+        * html/HTMLDetailsElement.cpp:
+        (WebCore::DetailsSummaryElement::DetailsSummaryElement):
+        - Implemented matchTypeFor() to get rid of HTMLContentElement machinery which is compiled out in the upcoming change.
+        (DetailsSummaryElement):
+        * html/shadow/ContentSelectorQuery.cpp:
+        (WebCore::ContentSelectorQuery::ContentSelectorQuery):
+        (WebCore::ContentSelectorQuery::matches):
+        * html/shadow/HTMLContentElement.cpp:
+        (WebCore::HTMLContentElement::matchTypeFor): Added.
+        (WebCore):
+        * html/shadow/HTMLContentElement.h:
+        (HTMLContentElement):
+        (WebCore::isHTMLContentElement):
+        * html/shadow/HTMLShadowElement.cpp:
+        * html/shadow/HTMLShadowElement.h:
+        (HTMLShadowElement):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::emptySelectorList): Moved from HTMLShadowElement.
+        (WebCore):
+        * html/shadow/InsertionPoint.h:
+        (WebCore::InsertionPoint::matchTypeFor): Added.
+        (WebCore::InsertionPoint::selectorList): Moved from HTMLShadowElement.
+        (InsertionPoint):
+        * testing/Internals.cpp:
+        (WebCore::Internals::isValidContentSelect):
+
 2013-01-10  Dean Jackson  <dino@apple.com>
 
         Plugin snapshot label should take device resolution and inset into account
