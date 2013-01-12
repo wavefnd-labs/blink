@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if [[ $# -ne 4 ]];then
+if [[ $# -ne 3 ]];then
 echo "Usage: build-repo.sh QUEUE_TYPE BUGZILLA_USERNAME BUGZILLA_PASSWORD"
 exit 1
 fi
@@ -38,7 +38,7 @@ cd /mnt/git
 
 echo "Cloning WebKit git repository, process takes ~30m."
 echo "Note: No status output will be shown via remote pipe."
-git clone http://git.webkit.org/WebKit.git webkit-$1
+git clone git://git.webkit.org/WebKit.git webkit-$1
 cd webkit-$1
 
 cat >> .git/config <<EOF
