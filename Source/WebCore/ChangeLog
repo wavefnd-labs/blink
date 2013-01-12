@@ -1,3 +1,52 @@
+2013-01-10  Ojan Vafai  <ojan@chromium.org>
+
+        Setting width overrides intrinsic min-width/max-width on flexboxes and their subclasses
+        https://bugs.webkit.org/show_bug.cgi?id=106617
+
+        Reviewed by Tony Chang.
+
+        Override computeIntrinsicLogicalWidths for all RenderFlexibleBox and RenderDeprecatedFlexibleBox
+        classes that override computePreferredLogicalWidths so that RenderBox can use
+        computeIntrinsicLogicalWidths in order to get the correct intrinsic values.
+
+        Tests: css3/flexbox/intrinsic-min-width-applies-with-fixed-width.html
+               fast/flexbox/intrinsic-min-width-applies-with-fixed-width.html
+               fast/forms/select/intrinsic-min-width-applies-with-fixed-width.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeLogicalWidthInRegionUsing):
+        fit-content needs to use the intrinsic sizes not the preferred sizes
+        since a fixed width overrides the preferred size.
+        As best I can tell, the sizesLogicalWidthToFitContent codepath can keep
+        using preferred widths, which are considerably faster, since that's only used
+        computing width values. Added a clause to that if-statement to make this more
+        explicit.
+
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::computeIntrinsicLogicalWidths):
+        (WebCore::RenderDeprecatedFlexibleBox::computePreferredLogicalWidths):
+        * rendering/RenderDeprecatedFlexibleBox.h:
+        (RenderDeprecatedFlexibleBox):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::computeIntrinsicLogicalWidths):
+        (WebCore):
+        (WebCore::RenderFlexibleBox::computePreferredLogicalWidths):
+        * rendering/RenderFlexibleBox.h:
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::computeIntrinsicLogicalWidths):
+        (WebCore):
+        (WebCore::RenderMenuList::computePreferredLogicalWidths):
+        * rendering/RenderMenuList.h:
+        (RenderMenuList):
+        * rendering/RenderSlider.cpp:
+        (WebCore::RenderSlider::computeIntrinsicLogicalWidths):
+        (WebCore):
+        (WebCore::RenderSlider::computePreferredLogicalWidths):
+        * rendering/RenderSlider.h:
+        (RenderSlider):
+        No logic changes in any of these computeIntrinsic methods. Just moving
+        the code over from the computePreferred methods.
+
 2013-01-11  Tony Gentilcore  <tonyg@chromium.org>
 
         Move HTMLTokenTypes to its own file
