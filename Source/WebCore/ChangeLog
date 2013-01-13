@@ -1,3 +1,23 @@
+2013-01-13  Dima Gorbik  <dgorbik@apple.com>
+
+        Styling disappears from the cue that's being styled by ::cue pseudo element
+        https://bugs.webkit.org/show_bug.cgi?id=106723
+
+        Reviewed by Antti Koivisto.
+
+        Fixes a regression caused by r138966. Setting a pseudoId in TextTrackCue::updateDisplayTree for m_allDocumentNodes
+        was triggering recalculating styles the next run loop. Now when this was removed we append the WebVTT tree after its children have
+        been marked by markFutureAndPastNodes so that correct styles are set within this append call.
+
+        Test: media/track/track-css-cue-lifetime.html
+
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::markFutureAndPastNodes): changing the type of the first argument because DocumentFragment is not a subclass
+        of Element.
+        (WebCore::TextTrackCue::updateDisplayTree): appending the WebVTT rendering tree after its children have been marked properly.
+        * html/track/TextTrackCue.h:
+        (TextTrackCue):
+
 2013-01-12  David Grogan  <dgrogan@chromium.org>
 
         IndexedDB: Provide LevelDB with IDBEnv instead of Env::Default
