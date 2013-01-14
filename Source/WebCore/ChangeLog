@@ -1,3 +1,21 @@
+2013-01-14  Andrei Bucur  <abucur@adobe.com>
+
+        Crash caused by incomplete cleanup of regions information for anonymous block
+        https://bugs.webkit.org/show_bug.cgi?id=106191
+
+        Reviewed by Abhishek Arya.
+
+        When an anonymous block is no longer required it is removed from the render tree and deleted. For example, this can happen when an anonymous block children change
+        from inlines to blocks. The patch updates the removeLeftoverAnonymousBlock function to delete the flow thread information attached to the obsolete anonymous block.
+        The removeFromRenderFlowThread() function is recursive and it needs to be called after the anonymous block children were reparented and the child list cleared.
+        I've also placed the children reset operation before clearing the parent because the latter also deletes the inRenderFlowThread flag from the object and it makes
+        flow thread ownership detection impossible.
+
+        Tests: fast/regions/remove-leftover-anon-block-crash.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::removeLeftoverAnonymousBlock):
+
 2013-01-14  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Make an Isolate parameter mandatory in v8DateOrNull()
