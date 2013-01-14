@@ -1,3 +1,27 @@
+2013-01-14  Huang Dongsung  <luxtella@company100.net>
+
+        [TexMap] Use a premuliplied color in TextureMapperGL.
+        https://bugs.webkit.org/show_bug.cgi?id=105786
+
+        Reviewed by Noam Rosenthal.
+
+        TextureMapperGL always uses a premultiplied color, so we must convert
+        an unmultiplied color to a premultiplied color before setting the uniform value of
+        colorLocation.
+
+        Test: compositing/background-color/background-color-alpha-with-opacity.html
+
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::drawBorder):
+        (WebCore::TextureMapperGL::drawSolidColor):
+        (WebCore::prepareFilterProgram):
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::blendWithOpacity):
+        (WebCore):
+        (WebCore::TextureMapperLayer::paintSelf):
+            TextureMapperLayer must not convert solidColor to premultiplied
+            color, because TextureMapperImageBuffer expects unmultiplied color.
+
 2013-01-14  Arko Saha  <arko@motorola.com>
 
         Microdata: REGRESSION(r138725): Causes crash in chromium port
