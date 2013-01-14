@@ -1,3 +1,31 @@
+2013-01-11  Emil A Eklund  <eae@chromium.org>
+
+        offsetWidth/height incorrect for images when zoomed
+        https://bugs.webkit.org/show_bug.cgi?id=106624
+
+        Reviewed by Levi Weintraub.
+        
+        offsetWidth and height are incorrect for images at certain zoom
+        levels due to flooring the values ones adjusted for zoom.
+        By rounding the value instead we avoid the problem and return
+        the right size.
+
+        Test: fast/images/zoomed-offset-size.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::offsetWidth):
+        (WebCore::Element::offsetHeight):
+        (WebCore::Element::clientWidth):
+        (WebCore::Element::clientHeight):
+        Change to round (as opposed to floor) the zoom adjusted value.
+        
+        * rendering/RenderObject.h:
+        (WebCore::adjustLayoutUnitForAbsoluteZoom):
+        * rendering/style/RenderStyle.h:
+        (WebCore::adjustLayoutUnitForAbsoluteZoom):
+        Add LayoutUnit version of adjustForAbsoluteZoom to avoid float
+        conversion.
+
 2013-01-14  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Move AudioDestinationChromium into WebCore
