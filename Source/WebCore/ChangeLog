@@ -1,3 +1,62 @@
+2013-01-14  Joshua Bell  <jsbell@chromium.org>
+
+        Bindings: Remove special cases for DOMString[]
+        https://bugs.webkit.org/show_bug.cgi?id=106506
+
+        Remove special in binding code generators that map DOMString[] to DOMStringList.
+        Array (T[]) and sequence (sequence<T>) are supported enough now that to be used
+        for Internals, which is the only IDL that needed updating.
+
+        Reviewed by Adam Barth.
+
+        Tests: fast/forms/file/selected-files-from-history-state.html
+               fast/forms/state-restore-broken-state.html
+               fast/forms/state-restore-skip-stateless.html
+
+        Bindings test results updated for JS/V8.
+
+        * bindings/scripts/CodeGenerator.pm: Remove redundant IsArrayType (use GetArrayType instead)
+        (IsRefPtrType): Array and Sequence types are not RefPtr types.
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (IndexGetterReturnsStrings): Remove special case for DOMString[].
+        (AddIncludesForType): Skip Array types, just like Sequence types. (Should probably recurse
+        for the base type, but not needed for now.)
+        (GenerateParametersCheckExpression): s/IsArrayType/GetArrayType/
+        (GetNativeType): Remove special case for DOMString[].
+        (GetNativeTypeForCallbacks): Ditto.
+        (JSValueToNative): Ditto.
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateParametersCheckExpression): s/IsArrayType/GetArrayType/
+        (GetNativeType): Remove special case for DOMString[].
+        (JSValueToNative): Ditto.
+        (GetV8HeaderName): Ditto.
+        (IsWrapperType):
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore):
+        (WebCore::jsTestObjPrototypeFunctionOverloadedMethod7):
+        (WebCore::jsTestObjPrototypeFunctionOverloadedMethod9):
+        (WebCore::jsTestObjPrototypeFunctionStringArrayFunction):
+        (WebCore::jsTestObjPrototypeFunctionDomStringListFunction):
+        * bindings/scripts/test/JS/JSTestObj.h:
+        (WebCore):
+        * bindings/scripts/test/TestObj.idl: Added explicit new cases for DOMStringList
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::overloadedMethod7Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod9Callback):
+        (WebCore::TestObjV8Internal::stringArrayFunctionCallback):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::domStringListFunctionCallback):
+        (WebCore):
+        (WebCore::ConfigureV8TestObjTemplate):
+        * testing/Internals.cpp:
+        (WebCore::Internals::formControlStateOfPreviousHistoryItem):
+        (WebCore::Internals::setFormControlStateOfPreviousHistoryItem):
+        (WebCore::Internals::iconURLs):
+        (WebCore::Internals::getReferencedFilePaths):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl: Produce DOMString[], consume sequence<DOMString> to match tests.
+
 2013-01-14  Elliott Sprehn  <esprehn@chromium.org>
 
         Clean up WebVTTNodeType code
