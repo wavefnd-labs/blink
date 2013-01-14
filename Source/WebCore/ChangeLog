@@ -1,3 +1,66 @@
+2013-01-11  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Move functions from NodeRareData to ElementRareData and other classes
+        https://bugs.webkit.org/show_bug.cgi?id=106679
+
+        Reviewed by Benjamin Poulain.
+
+        Moved tab index related functions from NodeRareData to ElementRareData since only
+        HTMLElement uses them, and moved related functions on Node to Element accordingly.
+
+        Also replaced transientMutationObserverRegistry and ensureTransientMutationObserverRegistry
+        by ensureMutationObserverData, and moved micro-data related member functions into
+        NodeMicroDataTokenLists, and moved NodeMutationObserverData and NodeMicroDataTokenLists
+        out of NodeRareData as they're used outside of NodeRareData now.
+
+        The intention is to move more code into NodeMutationObserverData and NodeMicroDataTokenLists
+        in the follow up patches so that they can detect the removability of NodeRareData.
+
+        No new tests are added since there should be no behavior changes.
+
+        * dom/Element.cpp:
+        (WebCore::Element::clearTabIndexExplicitlyIfNeeded):
+        (WebCore::Element::setTabIndexExplicitly):
+        (WebCore::Element::tabIndex):
+        (WebCore::Element::supportsFocus):
+        * dom/Element.h:
+        (Element):
+        * dom/ElementRareData.h:
+        (ElementRareData):
+        (WebCore::ElementRareData::tabIndex):
+        (WebCore::ElementRareData::setTabIndexExplicitly):
+        (WebCore::ElementRareData::tabIndexSetExplicitly):
+        (WebCore::ElementRareData::clearTabIndexExplicitly):
+        * dom/Node.cpp:
+        (WebCore::Node::tabIndex):
+        (WebCore::Node::supportsFocus):
+        (WebCore::Node::mutationObserverRegistry):
+        (WebCore::Node::transientMutationObserverRegistry):
+        (WebCore::Node::registerMutationObserver):
+        (WebCore::Node::registerTransientMutationObserver):
+        (WebCore::Node::itemProp):
+        (WebCore::Node::setItemProp):
+        (WebCore::Node::itemRef):
+        (WebCore::Node::setItemRef):
+        (WebCore::Node::itemType):
+        (WebCore::Node::setItemType):
+        * dom/Node.h:
+        (Node):
+        * dom/NodeRareData.h:
+        (NodeMutationObserverData):
+        (WebCore::NodeMutationObserverData::create):
+        (NodeMicroDataTokenLists):
+        (WebCore::NodeMicroDataTokenLists::create):
+        (WebCore::NodeMicroDataTokenLists::itemProp):
+        (WebCore::NodeMicroDataTokenLists::itemRef):
+        (WebCore::NodeMicroDataTokenLists::itemType):
+        (NodeRareData):
+        (WebCore::NodeRareData::mutationObserverData):
+        (WebCore::NodeRareData::ensureMutationObserverData):
+        (WebCore::NodeRareData::ensureMicroDataTokenLists):
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::parseAttribute):
+
 2013-01-14  Ojan Vafai  <ojan@chromium.org>
 
         Remove unnecessary setNeedsLayoutAndPrefWidthsRecalc from RenderTable
