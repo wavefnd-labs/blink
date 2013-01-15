@@ -1,3 +1,37 @@
+2013-01-14  Dima Gorbik  <dgorbik@apple.com>
+
+        Implement element type selectors for the WebVTT ::cue pseudo class
+        https://bugs.webkit.org/show_bug.cgi?id=105480
+
+        Reviewed by Antti Koivisto.
+
+        Implemented tag matching for the WebVTT specific tags "c" and "v". All common html tags like "b" and "i" are 
+        handled without any changes to the code. Creating a rendering tree and DOM tree now use different code paths. 
+        They both are made by cloning and modifying the tree produced by the parser. Voice tags now use spans for both 
+        rendering and DOM trees to conform to specs. Since this changes a lot of code little refactoring has been
+        done. Removed m_hasInnerTimestamps since it is no longer needed, it doesn't affect anything. m_documentFragment 
+        was renamed to m_webVTTNodeTree.
+
+        Existing tests were modified to cover this case.
+
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::TextTrackCue):
+        (WebCore::TextTrackCue::setText): rename m_documentFragment to m_webVTTNodeTree
+        (WebCore::TextTrackCue::createWebVTTNodeTree): parse the cue if it hasn't been parsed before.
+        (WebCore::TextTrackCue::copyWebVTTNodeToDOMTree): clone and prepare a node for using in the DOM tree according to specs.
+        (WebCore::TextTrackCue::getCueAsHTML): get a DOM tree for the cue.
+        (WebCore::TextTrackCue::createCueRenderingTree): create a rendering tree (main tree is just being cloned for now).
+        (WebCore::TextTrackCue::markFutureAndPastNodes): tightening the argument type.
+        (WebCore::TextTrackCue::updateDisplayTree):
+        (WebCore::TextTrackCue::getDisplayTree): code cleanup, removed m_hasInnerTimeStamps.
+        * html/track/TextTrackCue.h:
+        (WebCore::TextTrackCue::voiceElementTagName):
+        (TextTrackCue):
+        (WebCore::TextTrackCue::classElementTagName):
+        * html/track/WebVTTParser.cpp:
+        (WebCore::WebVTTParser::constructTreeFromToken): type of the newly created elements was changed to Element to avoid hitting 
+        an assertion when cloning because a cloned element will not have HTMLElement type for elements with "v" and "c" tag.
+
 2013-01-14  Xianzhu Wang  <wangxianzhu@chromium.org>
 
         Sometimes RenderLayer::updateNeedsCompositedScrolling is not called
