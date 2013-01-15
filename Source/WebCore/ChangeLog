@@ -1,3 +1,25 @@
+2013-01-15  Alexandru Chiculita  <achicu@adobe.com>
+
+        [Compositor] Do not disable overlap testing for layers in front of 3D transformed layers
+        https://bugs.webkit.org/show_bug.cgi?id=106721
+
+        Reviewed by Simon Fraser.
+
+        RenderLayerCompositor is checking for overlapping layers and tries to figure out all the layers that need
+        to be drawn using composited layers. It doesn't know anything about animations yet and it only works with "start"
+        and "end" states. However, it knows that animations might happen, so in that cases it will avoid to do any optimizations,
+        as layers might get moved.
+
+        The overlapping layers optimization was also disabled for 3D layers. However, 3D layers can be computed in WebKit and 
+        can be checked for overlap using just the "start"/"stop" states. In this patch I enable that optimization for 3D layers, too.
+        The result is that more layers are drawn in software mode now, so I've updated a couple of test results.
+
+        Tests: compositing/layer-creation/overlap-transformed-3d.html
+               compositing/layer-creation/overlap-transformed-preserved-3d.html
+
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::computeCompositingRequirements):
+
 2013-01-15  Elliott Sprehn  <esprehn@gmail.com>
 
         HTML parser should queue MutationRecords for its operations
