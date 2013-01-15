@@ -1,3 +1,40 @@
+2013-01-14  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Make an Isolate parameter mandatory in SerializedScriptValue methods
+        https://bugs.webkit.org/show_bug.cgi?id=106800
+
+        Reviewed by Adam Barth.
+
+        SerializedScriptValue methods are used by both V8 bindings
+        and WebCore. So they should support both an Isolate-version
+        method and an non-Isolate version method.
+
+        There are two ways to accomplish that:
+
+        [1] Use an optional Isolate parameter.
+
+        [2] Implement two versions and delegate the non-Isolate
+        version method to the Isolate version method.
+
+        I would prefer the approach [2], because I'd like to statically
+        make sure that we never pass a 0 Isolate. If we take the approach
+        [1], we need to insert ASSERT(isolate) here and there.
+
+        This patch implements the approach [2].
+
+        No tests. No change in behavior.
+
+        * bindings/v8/SerializedScriptValue.cpp:
+        (WebCore::SerializedScriptValue::create):
+        (WebCore):
+        (WebCore::SerializedScriptValue::nullValue):
+        (WebCore::SerializedScriptValue::undefinedValue):
+        (WebCore::SerializedScriptValue::booleanValue):
+        (WebCore::SerializedScriptValue::numberValue):
+        (WebCore::SerializedScriptValue::SerializedScriptValue):
+        * bindings/v8/SerializedScriptValue.h:
+        (SerializedScriptValue):
+
 2013-01-15  Dongwoo Joshua Im  <dw.im@samsung.com>
 
         [CSS] Rename the enum, from "ETextAlignLast" to "TextAlignLast"
