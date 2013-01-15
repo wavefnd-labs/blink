@@ -1,3 +1,27 @@
+2013-01-14  Xianzhu Wang  <wangxianzhu@chromium.org>
+
+        Sometimes RenderLayer::updateNeedsCompositedScrolling is not called
+        https://bugs.webkit.org/show_bug.cgi?id=106271
+
+        Reviewed by Simon Fraser.
+
+        1. If a layer has no out-of-flow descendant, m_hasOutOfFlowPositionedDescendant won't change and won't trigger updateNeedsCompositedScrolling in updateDescendantDependentFlags. Set m_hasOutOfFlowPositionedDescendantDirty to true and call updateNeedsCompositedScrolling when the dirty flag becomes false from true.
+        2. When the content size changes causing change of scrollable status, updateNeedsCompositedScrolling should also be called.
+
+        Test: compositing/overflow/dynamic-composited-scrolling-status.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::addScrollableArea): Returns whether the scrollable area has just been newly added.
+        (WebCore::FrameView::removeScrollableArea): Returns whether the scrollable area has just been removed.
+        * page/FrameView.h:
+        (FrameView):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::RenderLayer): Changed the initial value of m_hasOutOfFlowPositionedDescendantDirty to true to make sure m_hasOutOfFlowPositionedDescendant will be updated initially.
+        (WebCore::RenderLayer::updateDescendantDependentFlags): Call updateNeedsCompositedScrolling when m_hasOutOfFlowPositionedDescendantDirty is true.
+        (RenderLayer::updateScrollableAreaSet): Calls updateNeedsCompositedScrolling() when scrollable status changes.
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+
 2013-01-14  Ryosuke Niwa  <rniwa@webkit.org>
 
         EFL build fix after r139681.
