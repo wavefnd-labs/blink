@@ -1,3 +1,48 @@
+2013-01-15  Alexis Menard  <alexis@webkit.org>
+
+        Unprefixed transitionend event doesn't seem to be implemented, which breaks many sites
+        https://bugs.webkit.org/show_bug.cgi?id=105647
+
+        Reviewed by Julien Chaffraix.
+
+        Add support for transitionend event delivery as part as the unprefixing
+        work on CSS Transitions. This patch adds some code in EventTarget to
+        figure out if the current event to dispatch has a prefixed version or
+        not. Then from the list of listeners we deduce which event should be delivered
+        (prefixed or unprefixed).
+
+        In the case of the CSS Transitions, WebKit will now behave as follow :
+        if an event listener is attached to the prefixed version of the
+        transition end event then only the prefixed event will be send.
+        If an event listener is attached to the unprefixed version
+        of the transition end event then only the unprefixed event will be
+        send. If there are event listeners on both unprefixed and prefixed
+        events then only the unprefixed event will be send.
+
+        The behavior was discussed here :
+        http://lists.webkit.org/pipermail/webkit-dev/2013-January/023301.html.
+
+        Tests: transitions/transition-end-event-unprefixed-01.html
+               transitions/transition-end-event-unprefixed-02.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::addListenerTypeIfNeeded): Register the prefixed
+        listener too as transitionend listeners so that we properly dispatch
+        events for them.
+        * dom/EventNames.h:
+        (WebCore): Add the new transitionend name.
+        * dom/EventTarget.cpp:
+        (WebCore::createMatchingPrefixedEvent):
+        (WebCore::prefixedType):
+        (WebCore::EventTarget::fireEventListeners): Find out if somebody is
+        listening for unprefixed events, if so we always send the unprefixed
+        event, if not then we create a prefixed event and send it.
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationControllerPrivate::fireEventsAndUpdateStyle):
+        * page/animation/ImplicitAnimation.cpp:
+        (WebCore::ImplicitAnimation::sendTransitionEvent): Always create by
+        default unprefixed events.
+
 2013-01-15  Tony Gentilcore  <tonyg@chromium.org>
 
         Make AtomicMarkupTokenBase use a bare UChar* for external characters
