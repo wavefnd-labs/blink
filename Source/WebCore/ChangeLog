@@ -1,5 +1,34 @@
 2013-01-15  Kondapally Kalyan  <kalyan.kondapally@intel.com>
 
+        [EFL][WebGL] Add error handling to carefully manage Window backing pixmaps.
+        https://bugs.webkit.org/show_bug.cgi?id=106582
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        We use XCompositeNameWindowPixmap to create a pixmap that serves as a reference to
+        the off-screen storage for a Window Handle. We expect the Window to be valid and
+        the created glx pixmap to be a valid drawable. This may not be true always.
+        This patch adds support for X Error checks and handles the generated errors.
+
+        Covered by existing WebGL layout tests.
+
+        * platform/graphics/surfaces/glx/GraphicsSurfaceGLX.cpp:
+        (WebCore):
+        (WebCore::handleXPixmapCreationError):
+        (ScopedXPixmapCreationErrorHandler):
+        (WebCore::ScopedXPixmapCreationErrorHandler::ScopedXPixmapCreationErrorHandler):
+        (WebCore::ScopedXPixmapCreationErrorHandler::~ScopedXPixmapCreationErrorHandler):
+        (WebCore::ScopedXPixmapCreationErrorHandler::isValidOperation):
+        Helper Class to catch XErrors.
+
+        (WebCore::GraphicsSurfacePrivate::~GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::createPixmap): Added support to check and handle generated XErrors.
+        (WebCore::GraphicsSurfacePrivate::findFBConfigWithAlpha):
+        (WebCore::GraphicsSurfacePrivate::clear): Destroys GL Resources.
+        (GraphicsSurfacePrivate):
+
+2013-01-15  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
         [EFL] [WebGL] Minor cleanup in PlatformContext.
         https://bugs.webkit.org/show_bug.cgi?id=106758
 
