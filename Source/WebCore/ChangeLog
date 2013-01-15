@@ -1,3 +1,53 @@
+2013-01-14  Nate Chapin  <japhet@chromium.org>
+
+        Enable reuse of cached main resources
+        https://bugs.webkit.org/show_bug.cgi?id=105667
+
+        Reviewed by Antti Koivisto.
+
+        Test: http/tests/cache/cached-main-resource.html
+
+        * WebCore.exp.in:
+        * dom/Document.cpp:
+        (WebCore::Document::hasManifest): Returns true if the <html> element has a non-empty manifest attribute.
+        * dom/Document.h:
+        (Document):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::loadedResourceFromMemoryCache): Don't send delegate callbacks for cache hit here, since
+            MainResourceLoader will take care of it.
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::MainResourceLoader):
+        (WebCore::MainResourceLoader::receivedError):
+        (WebCore::MainResourceLoader::willSendRequest):
+        (WebCore::MainResourceLoader::responseReceived): Don't try to cache loads from the application cache.
+        (WebCore::MainResourceLoader::didFinishLoading): Don't try to cache loads from the application cache.
+        (WebCore::MainResourceLoader::load): Ensure we create a resource load identifier for cache hits. Also,
+            ensure we correctly popualate fragment identifiers in the ResourceRequest reported to DocumentLoader.
+        (WebCore::MainResourceLoader::identifier):
+        * loader/MainResourceLoader.h: Rename m_substituteDataLoadIdentifier to m_identifierForLoadWithoutResourceLoader
+            to better describe when it is used.
+        * loader/cache/CachedRawResource.cpp:
+        (WebCore::CachedRawResource::didAddClient): Synthesize redirect notifications for cache hits if necessary.
+        (WebCore::CachedRawResource::willSendRequest): Note the redirects we received.
+        (WebCore::CachedRawResource::canReuse): Don't reuse a resource if the redirect chain included a "Cache-control: no-store".
+        * loader/cache/CachedRawResource.h:
+        (CachedRawResource):
+        (RedirectPair):
+        (WebCore::CachedRawResource::RedirectPair::RedirectPair):
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::addClientToSet):: Don't return cached data for a main resource synchronously
+        * loader/cache/CachedResource.h:
+        (WebCore::CachedResource::canReuse):
+        (CachedResource):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::determineRevalidationPolicy): Permit cache reuse for main resources.
+        * testing/Internals.cpp:
+        (WebCore::Internals::isLoadingFromMemoryCache):
+        (WebCore):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2013-01-11  Ryosuke Niwa  <rniwa@webkit.org>
 
         Move functions from NodeRareData to ElementRareData and other classes
