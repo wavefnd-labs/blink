@@ -1,3 +1,21 @@
+2013-01-15  Elliott Sprehn  <esprehn@gmail.com>
+
+        display:inline's hover behavior is not applied to ::before and ::after pseudo elements
+        https://bugs.webkit.org/show_bug.cgi?id=91723
+
+        Reviewed by Eric Seidel.
+
+        When hovering over the anonymous text renderers inside :before and :after
+        we would correctly detect a hit in InlineTextBox::nodeAtPoint, but would
+        then fail to set the correct node for the hit test because in
+        RenderObject::updateHitTestResult node() is null. Instead we should walk
+        up the render tree to the PseudoElement and treat it as if we hit that.
+
+        Test: fast/css-generated-content/hover-inline.html
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::updateHitTestResult):
+
 2013-01-15  Zeno Albisser  <zeno@webkit.org>
 
         GraphicsSurface: Canvas with WebGL content is painted off by one pixel
