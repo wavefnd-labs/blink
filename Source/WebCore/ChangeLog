@@ -1,3 +1,50 @@
+2013-01-15  Antti Koivisto  <antti@apple.com>
+
+        Move parent pointer from TreeShared to subclass
+        https://bugs.webkit.org/show_bug.cgi?id=106910
+
+        Reviewed by Darin Adler.
+
+        This simplifies both TreeShared and clients, and makes code dealing with parents more understandable in general.
+
+        * dom/Document.h:
+        (WebCore::Node::Node):
+        * dom/Node.cpp:
+        (WebCore::Node::reportMemoryUsage):
+        * dom/Node.h:
+    
+            Add m_parentOrHostNode variable (matching the accessor names).
+
+        (Node):
+        (WebCore::Node::hasTreeSharedParent):
+        (WebCore::Node::parentNode):
+        (WebCore::Node::setParentOrHostNode):
+        (WebCore::Node::parentOrHostNode):
+        * platform/TreeShared.h:
+        (WebCore):
+        (WebCore::TreeShared::TreeShared):
+        (WebCore::TreeShared::deref):
+        
+            Call subclass hasTreeSharedParent() to figure out if it is time to delete.
+
+        (TreeShared):
+
+            Remove parent pointer and accessors.
+            Remove ParentNodeType template parameter.
+            Remove now unnecessay reportMemoryUsage().
+
+        (WebCore::adopted):
+        * svg/SVGElementInstance.cpp:
+        (WebCore::SVGElementInstance::SVGElementInstance):
+        * svg/SVGElementInstance.h:
+        
+            Add m_parentInstance variable.
+
+        (WebCore::SVGElementInstance::setParentOrHostNode):
+        (WebCore::SVGElementInstance::parentNode):
+        (SVGElementInstance):
+        (WebCore::SVGElementInstance::hasTreeSharedParent):
+
 2013-01-15  Simon Fraser  <simon.fraser@apple.com>
 
         Allow tiled WKViews to have transparent backgrounds
