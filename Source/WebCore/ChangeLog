@@ -1,3 +1,34 @@
+2013-01-14  Dean Jackson  <dino@apple.com>
+
+        Blur the label background of a snapshotted plugin
+        https://bugs.webkit.org/show_bug.cgi?id=106630
+
+        Reviewed by Simon Fraser.
+
+        When we are showing a label indicating the plugin has been snapshotted,
+        slightly blur the snapshot behind the label so that it is more clear. I expect
+        that if/when other ports pick up this code, we'll need to separate the
+        UI treatment somewhat, but this is ok for a first step.
+
+        * rendering/RenderSnapshottedPlugIn.cpp:
+        (RenderSnapshottedPlugInBlurFilter): Private class to use FEGaussianBlur to blur an image.
+        (WebCore::RenderSnapshottedPlugInBlurFilter::create):
+        (WebCore::RenderSnapshottedPlugInBlurFilter::setSourceImageRect):
+        (WebCore::RenderSnapshottedPlugInBlurFilter::sourceImageRect):
+        (WebCore::RenderSnapshottedPlugInBlurFilter::filterRegion):
+        (WebCore::RenderSnapshottedPlugInBlurFilter::output):
+        (WebCore::RenderSnapshottedPlugInBlurFilter::RenderSnapshottedPlugInBlurFilter):
+        (WebCore::RenderSnapshottedPlugInBlurFilter::apply):
+        (WebCore::RenderSnapshottedPlugIn::RenderSnapshottedPlugIn): New member variable to hold a cached version of a preblurred snapshot.
+        (WebCore::RenderSnapshottedPlugIn::~RenderSnapshottedPlugIn): Remember to remove the preblurred image from the cache.
+        (WebCore::RenderSnapshottedPlugIn::updateSnapshot): Zero the preblurred version if it exists.
+        (WebCore::RenderSnapshottedPlugIn::paintReplaced): Either paint snapshot or blurred snapshot with label.
+        (WebCore::RenderSnapshottedPlugIn::paintSnapshot): New method to paint a full sized snapshot.
+        (WebCore::RenderSnapshottedPlugIn::paintReplacedSnapshot):
+        (WebCore::snapshottedPluginImageForLabelDisplay): Static function to produce the blurred snapshot.
+        (WebCore::RenderSnapshottedPlugIn::paintReplacedSnapshotWithLabel): Calls paintSnapshot with the blurred snapshot on Mac.
+        * rendering/RenderSnapshottedPlugIn.h:
+
 2013-01-14  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Move BlobRegistryProxy into WebCore
