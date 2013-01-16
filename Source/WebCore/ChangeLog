@@ -1,3 +1,57 @@
+2013-01-16  Ken Kania  <kkania@chromium.org>
+
+        [Inspector] Add events for tracking page loads and scheduled navigations.
+        https://bugs.webkit.org/show_bug.cgi?id=104168
+
+        Reviewed by Pavel Feldman.
+
+        These events are needed for clients who need to be aware of when a page is
+        navigating or about to navigate. Some clients may wish to prevent interaction
+        with the page during this time. Two of the new events track loading start and
+        stop, as measured by the ProgressTracker. The other two events track when a
+        page has a new scheduled navigation and when it no longer has a scheduled
+        navigation. These latter two events won't allow the client to determine if
+        a load is going to happen in all circumstances, but is sufficient for many cases.
+
+        Tests: inspector-protocol/page/frameScheduledNavigation.html
+               inspector-protocol/page/frameStartedLoading.html
+
+        * inspector/Inspector.json:
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::frameStartedLoadingImpl):
+        (WebCore::InspectorInstrumentation::frameStoppedLoadingImpl):
+        (WebCore::InspectorInstrumentation::frameScheduledNavigationImpl):
+        (WebCore::InspectorInstrumentation::frameClearedScheduledNavigationImpl):
+        * inspector/InspectorInstrumentation.h:
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::frameStartedLoading):
+        (WebCore):
+        (WebCore::InspectorInstrumentation::frameStoppedLoading):
+        (WebCore::InspectorInstrumentation::frameScheduledNavigation):
+        (WebCore::InspectorInstrumentation::frameClearedScheduledNavigation):
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::InspectorPageAgent::frameStartedLoading):
+        (WebCore):
+        (WebCore::InspectorPageAgent::frameStoppedLoading):
+        (WebCore::InspectorPageAgent::frameScheduledNavigation):
+        (WebCore::InspectorPageAgent::frameClearedScheduledNavigation):
+        * inspector/InspectorPageAgent.h:
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.PageDispatcher.prototype.frameDetached):
+        (WebInspector.PageDispatcher.prototype.frameStartedLoading):
+        (WebInspector.PageDispatcher.prototype.frameStoppedLoading):
+        (WebInspector.PageDispatcher.prototype.frameScheduledNavigation):
+        (WebInspector.PageDispatcher.prototype.frameClearedScheduledNavigation):
+        * loader/NavigationScheduler.cpp:
+        (WebCore::NavigationScheduler::clear):
+        (WebCore::NavigationScheduler::timerFired):
+        (WebCore::NavigationScheduler::startTimer):
+        (WebCore::NavigationScheduler::cancel):
+        * loader/ProgressTracker.cpp:
+        (WebCore::ProgressTracker::progressStarted):
+        (WebCore::ProgressTracker::finalProgressComplete):
+
 2013-01-16  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Update MediaStreamTrack::readyState to match specification
