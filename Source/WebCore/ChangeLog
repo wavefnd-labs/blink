@@ -1,3 +1,35 @@
+2013-01-16  Christophe Dumez  <christophe.dumez@intel.com>
+
+        [gstreamer] Some media tests occasionally crash with gstreamer 1.0 backend
+        https://bugs.webkit.org/show_bug.cgi?id=106551
+
+        Reviewed by Philippe Normand.
+
+        ImageGStreamerCairo was passing mapped memory to
+        cairo_image_surface_create_for_data() and then unmapping it straight
+        away even though the cairo_surface_t is still used. The cairo
+        documentation states:
+        "The output buffer must be kept around until the cairo_surface_t is
+        destroyed or cairo_surface_finish() is called on the surface."
+
+        This patch keeps the GstBuffer memory mapped until the ImageGStreamer
+        is destroyed so that the internal cairo_surface_t stays valid while
+        avoiding copying the image data.
+
+        No new tests, already covered by existing tests.
+
+        * platform/graphics/gstreamer/GRefPtrGStreamer.cpp:
+        (WTF::adoptGRef):
+        (WTF):
+        (WTF::GstBuffer):
+        * platform/graphics/gstreamer/GRefPtrGStreamer.h:
+        (WTF): Add support for using GRefPtr with GstBuffer.
+        * platform/graphics/gstreamer/ImageGStreamer.h:
+        (ImageGStreamer):
+        * platform/graphics/gstreamer/ImageGStreamerCairo.cpp:
+        (ImageGStreamer::ImageGStreamer):
+        (ImageGStreamer::~ImageGStreamer):
+
 2013-01-16  Mike Reed  <reed@google.com>
 
         Use SkMatrix::I() when we need to pass identity, rather than constructing a new matrix.
