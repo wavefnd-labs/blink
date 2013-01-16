@@ -1,3 +1,104 @@
+2013-01-16  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Make a creationContext parameter of toV8() mandatory
+        https://bugs.webkit.org/show_bug.cgi?id=107020
+
+        Reviewed by Adam Barth.
+
+        Currently a creationContext parameter of toV8() is optional:
+
+          Handle<Value> toV8(..., Handle<Object> creationContext = Handle<Object>(), ...) {
+            ...;
+          }
+
+        On the other hand, looking at the implementation of
+        V8WrapperInstantiationScope:
+
+            explicit V8WrapperInstantiationScope(v8::Handle<v8::Object> creationContext)
+                : m_didEnterContext(false)
+                , m_context(v8::Context::GetCurrent())
+            {
+                if (creationContext.IsEmpty()) // We do nothing for this case!
+                    return;
+                v8::Handle<v8::Context> contextForWrapper = creationContext->CreationContext();
+                if (contextForWrapper == m_context)
+                    return;
+                m_context = v8::Local<v8::Context>::New(contextForWrapper);
+                m_didEnterContext = true;
+                m_context->Enter();
+            }
+
+        we're assuming that a creationContext parameter is passed
+        to toV8() when a creationContext exists. In other words,
+        if we forget to pass a creationContext parameter, we will
+        end up with creating an object on the current context, which
+        is wrong. To avoid the mistake, we should make the
+        creationContext parameter mandatory. When we really do not
+        have a creationContext, we can pass Handle<Object>() explicitly.
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        * bindings/scripts/test/V8/V8Float64Array.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestEventConstructor.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestEventTarget.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestException.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestInterface.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestNode.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestObj.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestOverloadedConstructors.h:
+        (WebCore::toV8):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.h:
+        (WebCore::toV8):
+        * bindings/v8/IDBBindingUtilities.cpp:
+        (WebCore::injectIDBKeyIntoScriptValue):
+        (WebCore::idbKeyToScriptValue):
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::createScriptObject):
+        (WebCore::ScriptController::createScriptObjectForPluginElement):
+        * bindings/v8/ScriptDebugServer.cpp:
+        (WebCore::ScriptDebugServer::currentCallFrame):
+        * bindings/v8/ScriptObject.cpp:
+        (WebCore::ScriptGlobalObject::set):
+        * bindings/v8/V8AbstractEventListener.cpp:
+        (WebCore::V8AbstractEventListener::handleEvent):
+        (WebCore::V8AbstractEventListener::getReceiverObject):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::updateDocumentProperty):
+        * bindings/v8/V8LazyEventListener.cpp:
+        (WebCore::toObjectWrapper):
+        * bindings/v8/V8MutationCallback.cpp:
+        (WebCore::V8MutationCallback::handleEvent):
+        * bindings/v8/V8NodeFilterCondition.cpp:
+        (WebCore::V8NodeFilterCondition::acceptNode):
+        * bindings/v8/V8WorkerContextEventListener.cpp:
+        (WebCore::V8WorkerContextEventListener::handleEvent):
+        (WebCore::V8WorkerContextEventListener::getReceiverObject):
+        * bindings/v8/custom/V8CustomSQLStatementErrorCallback.cpp:
+        (WebCore::V8SQLStatementErrorCallback::handleEvent):
+        * bindings/v8/custom/V8InjectedScriptHostCustom.cpp:
+        (WebCore::InjectedScriptHost::nodeAsScriptValue):
+        * css/MediaQueryListListener.cpp:
+        (WebCore::MediaQueryListListener::queryChanged):
+        * testing/v8/WebCoreTestSupport.cpp:
+        (WebCoreTestSupport::injectInternalsObject):
+
 2013-01-15  Jer Noble  <jer.noble@apple.com>
 
         Add a Setting to disable QTKit media engine.
