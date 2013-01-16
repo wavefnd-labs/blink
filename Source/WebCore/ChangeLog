@@ -1,3 +1,29 @@
+2013-01-15  Ryosuke Niwa  <rniwa@webkit.org>
+
+        NodeRareData doesn't need to have a vtable pointer
+        https://bugs.webkit.org/show_bug.cgi?id=106965
+
+        Reviewed by Benjamin Poulain.
+
+        Made the destructor and reportMemoryUsage of NodeRareDataBase and NodeRareData
+        respectively and their subclasses non-virtual.
+
+        * dom/ElementRareData.cpp:
+        (SameSizeAsElementRareData): Added.
+        (WebCore): Added a compile assertion for the size of ElementRareData.
+        * dom/ElementRareData.h:
+        (ElementRareData):
+        * dom/Node.cpp:
+        (WebCore::Node::clearRareData): Explicitely delete NodeRareData or ElementRareData.
+        (WebCore::Node::reportMemoryUsage): Explicitely add NodeRareData or ElementRareData.
+        * dom/Node.h:
+        (NodeRareDataBase): Deleted the virtual destructor.
+        * dom/NodeRareData.cpp:
+        (SameSizeAsNodeRareData): Removed one pointer.
+        * dom/NodeRareData.h:
+        (NodeRareData): Removed the virtual destructor.
+        (NodeRareData::reportMemoryUsage): Made non-virtual.
+
 2013-01-15  Ian Vollick  <vollick@chromium.org>
 
         [chromium] Create GraphicsLayerChromiums using a factory
