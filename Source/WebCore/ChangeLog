@@ -1,3 +1,41 @@
+2013-01-16  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Unable to edit a time field with step=86400, and confusing appearance
+        https://bugs.webkit.org/show_bug.cgi?id=106983
+
+        Reviewed by Kentaro Hara.
+
+        For example, we show a read-only hour field and a read-only minutes
+        field for <input type=time min="17:00" step=86400> because the step
+        value is 24 hours and the hour field can be only 17. However, we need to
+        provide a way to clear the value of the time field in such case. We
+        shouldn't make the hour field read-only if no other fields are editable.
+
+        - We don't make hour fields read-only for input[type=time].
+
+        - We make hour fields read-only for input[type=datetime-local] only if
+          year, month, or day field is editable. e.g.
+          <input type=datetime-local min=2013-01-16T17:00 step=86400>:
+            The hour field is read-only, and year/month/day fields are editable.
+          <input type=datetime-local min=2013-01-16T17:00 max=2013-01-16T18:00 step=86400>:
+            The hour field is editable, and year/month/day fields are read-only.
+
+        Test: fast/forms/datetimelocal-multiple-fields/datetimelocal-multiple-fields-readonly-subfield.html
+
+        * html/shadow/DateTimeEditElement.cpp:
+        (DateTimeEditBuilder): Declare new functions.
+        (WebCore::DateTimeEditBuilder::getRangeOfDayOfMonthField):
+        Added a function by extracting some code from visitField.
+        (WebCore::DateTimeEditBuilder::visitField):
+        (WebCore::DateTimeEditBuilder::shouldDayOfMonthFieldReadOnly):
+        Added a function by extracting some code from visitField.
+        (WebCore::DateTimeEditBuilder::shouldHourFieldReadOnly):
+        If the type is "time", we don't make hour fields read-only.
+        Otherwise, we don't make hour fields read-only if year/month/day fields
+        are read-only. Note that we don't need to check read-only status of year
+        and month fields explicitly here because a day field can be read-only
+        only if the year field and the month field are read-only.
+
 2013-01-16  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [TexMap] Composited CSS shaders crash when using non-GL TextureMapper
