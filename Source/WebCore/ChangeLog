@@ -1,3 +1,94 @@
+2013-01-16  Pablo Flouret  <pablof@motorola.com>
+
+        Implement CSSSupportsRule
+        https://bugs.webkit.org/show_bug.cgi?id=104822
+
+        Reviewed by Allan Sandfeld Jensen.
+
+        http://dev.w3.org/csswg/css3-conditional/#the-csssupportsrule-interface
+
+        Right now, @supports is not implemented as a proper CSSRule. Apart from
+        the CSSOM implications it gives wrong results when, for instance, an
+        @supports rule is nested inside a @media rule.
+
+        Test: css3/supports-cssom.html
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+            Add CSSSupportsRule.* and associated files.
+
+        * bindings/js/JSCSSRuleCustom.cpp:
+        (WebCore::toJS):
+        * bindings/objc/DOMCSS.mm:
+        (kitClass):
+        * bindings/v8/custom/V8CSSRuleCustom.cpp:
+        (WebCore::wrap):
+            Create the correct wrappers for the rule.
+
+        * css/CSSGrammar.y.in:
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::createSupportsRule):
+        (WebCore::CSSParser::markSupportsRuleHeaderStart):
+        (WebCore::CSSParser::markSupportsRuleHeaderEnd):
+        * css/CSSParser.h:
+            Create the supports rule when parsing and add it where it corresponds,
+            instead of directly adding the child rules to the stylesheet.
+
+        * css/CSSPropertySourceData.h:
+        * css/CSSRule.h:
+        * css/CSSRule.idl:
+            Add SUPPORTS_RULE type to enums.
+
+        * css/CSSSupportsRule.cpp: Added.
+        (WebCore::CSSSupportsRule::CSSSupportsRule):
+        (WebCore::CSSSupportsRule::~CSSSupportsRule):
+        (WebCore::CSSSupportsRule::cssText):
+        (WebCore::CSSSupportsRule::conditionText):
+        * css/CSSSupportsRule.h: Added.
+        (WebCore::CSSSupportsRule::create):
+        * css/CSSSupportsRule.idl: Added.
+            DOM interface.
+
+        * css/RuleSet.cpp:
+        (WebCore::RuleSet::addChildRules):
+            Add rules included in the @supports rule.
+
+        * css/StyleResolver.cpp:
+        (WebCore::collectCSSOMWrappers):
+            Collect CSSSupportsRule wrappers.
+
+        * css/StyleRule.cpp:
+        (WebCore::StyleRuleBase::reportMemoryUsage):
+        (WebCore::StyleRuleBase::destroy):
+        (WebCore::StyleRuleBase::copy):
+        (WebCore::StyleRuleBase::createCSSOMWrapper):
+        (WebCore::StyleRuleSupports::StyleRuleSupports):
+        * css/StyleRule.h:
+        (StyleRuleBase):
+        (WebCore::StyleRuleBase::isSupportsRule):
+        (StyleRuleSupports):
+        (WebCore::StyleRuleSupports::create):
+        (WebCore::StyleRuleSupports::conditionText):
+        (WebCore::StyleRuleSupports::conditionIsSupported):
+        (WebCore::StyleRuleSupports::copy):
+        (WebCore::toStyleRuleSupports):
+            New subclass of StyleRuleBlock: StyleRuleSupports.
+
+        * css/StyleSheetContents.cpp:
+        (WebCore::childRulesHaveFailedOrCanceledSubresources):
+        * inspector/InspectorStyleSheet.cpp:
+        (flattenSourceData):
+        (WebCore::asCSSRuleList):
+            Handle @supports rules where needed.
+
 2013-01-16  Kent Tamura  <tkent@chromium.org>
 
         INPUT_MULTIPLE_FIELDS_UI: Unable to edit a time field with step=86400, and confusing appearance
