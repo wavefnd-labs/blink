@@ -1,3 +1,31 @@
+2013-01-15  Jer Noble  <jer.noble@apple.com>
+
+        Add a Setting to disable QTKit media engine.
+        https://bugs.webkit.org/show_bug.cgi?id=106972
+
+        Reviewed by Eric Carlson.
+
+        Allow the MediaPlayerPrivateQTKit engine to be disabled by adding a
+        runtime setting to Settings. Make the setting 'live' by requerying the
+        installed media engines when the setting changes.
+
+        * WebCore.exp.in: Add new symbols to export list.
+        * page/Settings.cpp: Add new gQTKitEnabled global.
+        (WebCore::Settings::setAVFoundationEnabled): Requery media engines.
+        (WebCore::Settings::setQTKitEnabled): Ditto. Setter for global setting variable.
+        * page/Settings.h:
+        (WebCore::Settings::isQTKitEnabled): Getter for same.
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::installedMediaEngines): Check isQTKitEnabled() before adding
+            MediaPlayerPrivateQTKit engine.
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::requeryMediaEngines): Pass through to MediaPlayer.
+        * html/HTMLMediaElement.h:
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::installedMediaEngines): Take an optional requery options parameter.
+        (WebCore::MediaPlayer::requeryMediaEngines): Pass through to installedMediaEngines().
+        * platform/graphics/MediaPlayer.h:
+
 2013-01-16  Christophe Dumez  <christophe.dumez@intel.com>
 
         [gstreamer] Some media tests occasionally crash with gstreamer 1.0 backend
