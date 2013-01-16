@@ -1,3 +1,200 @@
+2013-01-16  Antti Koivisto  <antti@apple.com>
+
+        Tighten RenderLayerModelObject subclass constructors to operate on ContainerNodes.
+        https://bugs.webkit.org/show_bug.cgi?id=107041
+
+        Reviewed by Simon Fraser.
+
+        In rendering code only Nodes that are not ContainerNodes are used by RenderText. Tighter typing is better in general. 
+        It also enables better code generation (especially with Document* moving from Node to ContainerNode).
+
+        This patch tightens constuctors for better static type checking. It also overrides node() with a covariant ContainerNode* return type
+        version in RenderLayerModelObject. RenderObject::createObject() is tightened to take Element*.
+        
+        This patch does not change Node* usage in non-construction code (expect for the node() override).
+        
+        With some further work it should be possible to tighten most of the rendering tree to operate on Elements for even less branchiness.
+
+        * dom/Document.cpp:
+        (WebCore::Document::attach):
+        * html/shadow/SliderThumbElement.cpp:
+        (WebCore::RenderSliderThumb::RenderSliderThumb):
+        (WebCore::RenderSliderContainer::RenderSliderContainer):
+        * html/shadow/SliderThumbElement.h:
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::RenderBlock):
+        * rendering/RenderBlock.h:
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::RenderBox):
+        * rendering/RenderBox.h:
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::RenderBoxModelObject):
+        * rendering/RenderBoxModelObject.h:
+        * rendering/RenderButton.cpp:
+        (WebCore::RenderButton::RenderButton):
+        * rendering/RenderButton.h:
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::RenderDeprecatedFlexibleBox):
+        * rendering/RenderDeprecatedFlexibleBox.h:
+        * rendering/RenderDetailsMarker.cpp:
+        (WebCore::RenderDetailsMarker::RenderDetailsMarker):
+        * rendering/RenderDetailsMarker.h:
+        * rendering/RenderDialog.h:
+        (WebCore::RenderDialog::RenderDialog):
+        * rendering/RenderFieldset.cpp:
+        (WebCore::RenderFieldset::RenderFieldset):
+        * rendering/RenderFieldset.h:
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::RenderFlexibleBox):
+        * rendering/RenderFlexibleBox.h:
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderFullScreen.cpp:
+        (RenderFullScreen::RenderFullScreen):
+        * rendering/RenderFullScreen.h:
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::RenderGrid):
+        * rendering/RenderGrid.h:
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::RenderImage):
+        * rendering/RenderImage.h:
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::RenderInline):
+        * rendering/RenderInline.h:
+        * rendering/RenderLayerModelObject.cpp:
+        (WebCore::RenderLayerModelObject::RenderLayerModelObject):
+        * rendering/RenderLayerModelObject.h:
+        (WebCore::RenderLayerModelObject::node):
+        * rendering/RenderListItem.cpp:
+        (WebCore::RenderListItem::RenderListItem):
+        * rendering/RenderListItem.h:
+        * rendering/RenderMediaControlElements.cpp:
+        (WebCore::RenderMediaVolumeSliderContainer::RenderMediaVolumeSliderContainer):
+        (WebCore::RenderMediaControlTimeDisplay::RenderMediaControlTimeDisplay):
+        (WebCore::RenderTextTrackContainerElement::RenderTextTrackContainerElement):
+        * rendering/RenderMediaControlElements.h:
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::RenderMultiColumnBlock::RenderMultiColumnBlock):
+        * rendering/RenderMultiColumnBlock.h:
+        * rendering/RenderMultiColumnFlowThread.cpp:
+        (WebCore::RenderMultiColumnFlowThread::RenderMultiColumnFlowThread):
+        * rendering/RenderMultiColumnFlowThread.h:
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::RenderMultiColumnSet):
+        * rendering/RenderMultiColumnSet.h:
+        (RenderMultiColumnSet):
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::RenderNamedFlowThread):
+        * rendering/RenderNamedFlowThread.h:
+        (RenderNamedFlowThread):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::createObject):
+        * rendering/RenderObject.h:
+        (RenderObject):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::RenderRegion):
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        * rendering/RenderRegionSet.cpp:
+        (WebCore::RenderRegionSet::RenderRegionSet):
+        * rendering/RenderRegionSet.h:
+        (RenderRegionSet):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::RenderReplaced):
+        * rendering/RenderReplaced.h:
+        (RenderReplaced):
+        * rendering/RenderReplica.cpp:
+        (WebCore::RenderReplica::RenderReplica):
+        (WebCore::RenderReplica::~RenderReplica):
+        * rendering/RenderReplica.h:
+        * rendering/RenderRuby.cpp:
+        (WebCore::RenderRubyAsInline::RenderRubyAsInline):
+        (WebCore::RenderRubyAsBlock::RenderRubyAsBlock):
+        * rendering/RenderRuby.h:
+        * rendering/RenderRubyBase.cpp:
+        (WebCore::RenderRubyBase::RenderRubyBase):
+        * rendering/RenderRubyBase.h:
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::RenderRubyRun):
+        * rendering/RenderRubyRun.h:
+        (RenderRubyRun):
+        * rendering/RenderRubyText.cpp:
+        (WebCore::RenderRubyText::RenderRubyText):
+        * rendering/RenderRubyText.h:
+        (RenderRubyText):
+        * rendering/RenderScrollbarPart.cpp:
+        (WebCore::RenderScrollbarPart::RenderScrollbarPart):
+        * rendering/RenderScrollbarPart.h:
+        (RenderScrollbarPart):
+        * rendering/RenderSearchField.cpp:
+        (WebCore::RenderSearchField::RenderSearchField):
+        * rendering/RenderSearchField.h:
+        (RenderSearchField):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::RenderTable):
+        * rendering/RenderTable.h:
+        (RenderTable):
+        * rendering/RenderTableCaption.cpp:
+        (WebCore::RenderTableCaption::RenderTableCaption):
+        * rendering/RenderTableCaption.h:
+        (RenderTableCaption):
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::RenderTableCell):
+        * rendering/RenderTableCell.h:
+        (RenderTableCell):
+        * rendering/RenderTableCol.cpp:
+        (WebCore::RenderTableCol::RenderTableCol):
+        * rendering/RenderTableCol.h:
+        (RenderTableCol):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::RenderTableRow):
+        * rendering/RenderTableRow.h:
+        (RenderTableRow):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::RenderTableSection):
+        * rendering/RenderTableSection.h:
+        (RenderTableSection):
+        * rendering/RenderTextControl.cpp:
+        (WebCore::RenderTextControl::RenderTextControl):
+        * rendering/RenderTextControl.h:
+        * rendering/RenderTextControlMultiLine.cpp:
+        (WebCore::RenderTextControlMultiLine::RenderTextControlMultiLine):
+        * rendering/RenderTextControlMultiLine.h:
+        (RenderTextControlMultiLine):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::RenderTextControlSingleLine):
+        * rendering/RenderTextControlSingleLine.h:
+        (RenderTextControlSingleLine):
+        (WebCore::RenderTextControlInnerBlock::RenderTextControlInnerBlock):
+        * rendering/RenderTextTrackCue.cpp:
+        (WebCore::RenderTextTrackCue::RenderTextTrackCue):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::RenderView):
+        * rendering/RenderView.h:
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::RenderWidget):
+        * rendering/RenderWidget.h:
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::RenderMathMLBlock):
+        * rendering/mathml/RenderMathMLBlock.h:
+        (WebCore::RenderMathMLTable::RenderMathMLTable):
+        * rendering/mathml/RenderMathMLOperator.cpp:
+        (WebCore::RenderMathMLOperator::RenderMathMLOperator):
+        * rendering/mathml/RenderMathMLOperator.h:
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::RenderMathMLRow):
+        * rendering/mathml/RenderMathMLRow.h:
+        (RenderMathMLRow):
+        (WebCore::RenderSVGInline::RenderSVGInline):
+        * rendering/svg/RenderSVGInline.h:
+        * rendering/svg/RenderSVGTSpan.cpp:
+        (WebCore::RenderSVGTSpan::RenderSVGTSpan):
+        * rendering/svg/RenderSVGTSpan.h:
+        * rendering/svg/RenderSVGTextPath.cpp:
+        (WebCore::RenderSVGTextPath::RenderSVGTextPath):
+        * rendering/svg/RenderSVGTextPath.h:
+
 2013-01-16  Chris Fleizach  <cfleizach@apple.com>
 
         Stub out WebSpeech synthesis
