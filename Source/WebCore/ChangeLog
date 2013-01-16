@@ -1,3 +1,37 @@
+2013-01-16  Arnaud Renevier  <a.renevier@sisa.samsung.com>
+
+        inconsistency in drawImage with target rect negative dimensions.
+        https://bugs.webkit.org/show_bug.cgi?id=100026
+
+        Reviewed by Dean Jackson.
+
+        Remove -1, -1 special case in drawImage and drawImageBuffer. Replace
+        all -1 -1 arguments calls to with the correct rectangle dimensions.
+
+        Remove FloatRect(0, 0, -1, -1) default argument for srcRect, and
+        instead, add new overloaded functions to create a FloatRect from image
+        size.
+
+        Replace -1 -1 arguments calls in FEComposite::platformApplySoftware
+        with correct rectangle dimensions.
+
+        Replace ImageGStreamer rect method (which may return -1 -1 rectangle)
+        with cropRect method, and make caller check for rectangle emptiness.
+
+        * fast/canvas/drawImage-with-negative-source-destination-expected.txt:
+        * fast/canvas/drawImage-with-negative-source-destination.js:
+
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::drawImage):
+        (WebCore):
+        (WebCore::GraphicsContext::drawImageBuffer):
+        * platform/graphics/GraphicsContext.h:
+        (GraphicsContext):
+        * platform/graphics/filters/FEComposite.cpp:
+        (WebCore::FEComposite::platformApplySoftware):
+        * platform/graphics/gstreamer/ImageGStreamer.h:
+        (WebCore::ImageGStreamer::rect):
+
 2013-01-16  Simon Fraser  <simon.fraser@apple.com>
 
         Allow PaintInfo to carry all PaintBehavior flags
