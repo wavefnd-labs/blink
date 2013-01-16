@@ -1,3 +1,53 @@
+2013-01-15  Simon Fraser  <simon.fraser@apple.com>
+
+        Add the ability for a RenderLayerBacking to have a layer that renders backgrounds.
+        https://bugs.webkit.org/show_bug.cgi?id=106961
+
+        Reviewed by Dean Jackson.
+
+        In some cases we need a compositing layer to render its background into
+        a separate GraphicsLayer (e.g. for background-attachment: fixed in some scenarios).
+        
+        To support this, have RenderLayer optionally create a GraphicsLayer for the background.
+        Currently nothing causes background layers to get created.
+        
+        Having a background layer requires that we add an additional containment layer
+        which encloses the background, primary and foreground layers, since the 
+        background layer has to be composited behind the primary content. This containment
+        layer gets any transform, including page scale on the RenderView's layer.
+        
+        No new tests; there's no way to create a background layer yet. This was tested during
+        development by forcing a background layer.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateDebugIndicators): Show borders on both new layers
+        and repaint counters on the background layer.
+        (WebCore::RenderLayerBacking::destroyGraphicsLayers): Clear the two new layers.
+        (WebCore::RenderLayerBacking::updateTransform): If we have a containment layer, it
+        takes the transform (and clear the transform on the primary layer).
+        (WebCore::RenderLayerBacking::updateGraphicsLayerConfiguration): Make the background
+        layer if we need one (currently never).
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry): Position and size
+        the containment layer if we have one. If we do, then the m_graphicsLayer will
+        be at 0,0 in that containment layer. The background layer is also sized similarly
+        to the foreground layer.
+        (WebCore::RenderLayerBacking::updateInternalHierarchy): Adapt to the new hierarchy
+        with containment and background layers if we have them.
+        (WebCore::RenderLayerBacking::updateBackgroundLayer): Here's where we create the background
+        and containment layers.
+        (WebCore::RenderLayerBacking::childForSuperlayers): If we have a containment layer, that's
+        what gets attached to our parent.
+        (WebCore::RenderLayerBacking::getCurrentTransform): The containment layer gets the transform
+        if we have one, so check that here.
+        (WebCore::RenderLayerBacking::backingStoreMemoryEstimate):
+        (WebCore::RenderLayerBacking::reportMemoryUsage):
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::deviceOrPageScaleFactorChanged): We need to start notifying
+        about page/device scale on the containment layer if there is one (since it takes page scale), so
+        use childForSuperlayers() rather than just getting the primary layer.
+
 2013-01-15  Pan Deng  <pan.deng@intel.com>
 
         Remove Key3 and Challenge Response fields from Websocket implementation and Web Inspector.
