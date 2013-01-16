@@ -1,5 +1,72 @@
 2013-01-15  Vsevolod Vlasov  <vsevik@chromium.org>
 
+        Web Inspector: Introduce file mapping allowing to map network loaded scripts and stylesheets to file system files.
+        https://bugs.webkit.org/show_bug.cgi?id=106795
+
+        Reviewed by Pavel Feldman.
+
+        Introduced file mapping for inspector.
+        FileMapping is essentially an array of MappingEntries where each MappingEntry is a pair of urlPrefix and pathPrefix.
+        When scripts and stylesheets are mapped to uiSourceCodes FileMapping methods are used to establish
+        prefix based matching with file system uiSourceCodes if possible.
+
+        Test: inspector/file-mapping.html
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/CompilerScriptMapping.js:
+        (WebInspector.CompilerScriptMapping):
+        (WebInspector.CompilerScriptMapping.prototype.rawLocationToUILocation):
+        (WebInspector.CompilerScriptMapping.prototype.uiLocationToRawLocation):
+        (WebInspector.CompilerScriptMapping.prototype.get addScript.get this):
+        (WebInspector.CompilerScriptMapping.prototype.get addScript):
+        (WebInspector.CompilerScriptMapping.prototype._bindUISourceCode):
+        (WebInspector.CompilerScriptMapping.prototype._uiSourceCodeAddedToWorkspace):
+        * inspector/front-end/FileMapping.js: Added.
+        (WebInspector.FileMapping):
+        (WebInspector.FileMapping.prototype.hasMappingForURL):
+        (WebInspector.FileMapping.prototype.uriForURL):
+        (WebInspector.FileMapping.prototype.urlForURI):
+        (WebInspector.FileMapping.prototype.setMappings):
+        (WebInspector.FileMapping.prototype.mappings):
+        (WebInspector.FileMapping.prototype._deserialize):
+        (WebInspector.FileMapping.prototype._serialize):
+        (WebInspector.FileMapping.MappingEntry):
+        (WebInspector.FileMapping.MappingEntry.deserialize):
+        (WebInspector.FileMapping.MappingEntry.prototype.matchesURL):
+        (WebInspector.FileMapping.MappingEntry.prototype.matchesURI):
+        (WebInspector.FileMapping.MappingEntry.prototype.uriForURL):
+        (WebInspector.FileMapping.MappingEntry.prototype.urlForURI):
+        (WebInspector.FileMapping.MappingEntry.prototype.serialize):
+        * inspector/front-end/NetworkUISourceCodeProvider.js:
+        (WebInspector.NetworkUISourceCodeProvider.prototype._addFile):
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping.prototype._workspaceUISourceCodeForScript):
+        (WebInspector.ResourceScriptMapping.prototype._scriptsForUISourceCode):
+        * inspector/front-end/ResourceUtils.js:
+        (WebInspector.displayNameForURL):
+        * inspector/front-end/SASSSourceMapping.js:
+        (WebInspector.SASSSourceMapping):
+        (WebInspector.SASSSourceMapping.prototype._reloadCSS):
+        (_addURLMapping):
+        (rawLocationToUILocation):
+        (_reset):
+        (WebInspector.SASSSourceMapping.MappingEntry):
+        * inspector/front-end/StylesSourceMapping.js:
+        (WebInspector.StylesSourceMapping):
+        (WebInspector.StylesSourceMapping.prototype.rawLocationToUILocation):
+        (WebInspector.StylesSourceMapping.prototype._uiSourceCodeAddedToWorkspace):
+        (WebInspector.StylesSourceMapping.prototype._projectWillReset):
+        (WebInspector.StyleContentBinding.prototype.):
+        (WebInspector.StyleContentBinding.prototype._innerStyleSheetChanged):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/Workspace.js:
+        * inspector/front-end/inspector.html:
+        * inspector/front-end/inspector.js:
+
+2013-01-15  Vsevolod Vlasov  <vsevik@chromium.org>
+
         Web Inspector: Introduce UISourceCode.originURL().
         https://bugs.webkit.org/show_bug.cgi?id=106909
 
