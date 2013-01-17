@@ -1,3 +1,36 @@
+2013-01-17  Robert Hogan  <robert@webkit.org>
+
+        Nested fixed position element not staying with parent
+        https://bugs.webkit.org/show_bug.cgi?id=65477
+
+        Reviewed by David Hyatt.
+
+        Tests: fast/inline/fixed-pos-moves-with-abspos-inline-parent.html
+               fast/inline/fixed-pos-moves-with-abspos-parent-relative-ancestor.html
+               fast/inline/fixed-pos-moves-with-abspos-parent.html
+               fast/inline/fixed-pos-with-transform-container-moves-with-abspos-parent.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::simplifiedLayout):
+        If an absolute position element inside a relative positioned container moves, and the absolute element has a fixed position
+        child, neither the container nor the fixed element learn of the movement since posChildNeedsLayout() is only marked as far as the 
+        relative positioned container. So if our positioned objects list can contain fixed position elements perform the
+        checks in markFixedPositionObjectForLayoutIfNeeded for each fixed pos object in the container's positioned object list. 
+        (WebCore::RenderBlock::markFixedPositionObjectForLayoutIfNeeded):
+        For a fixed position element in the positioned objects list that has a static x or y position check for an absolute positioned ancestor
+        and if we find one, see if the static x or y position of the fixed pos element has changed. If it has, mark it for layout.
+        (WebCore):
+        (WebCore::RenderBlock::layoutPositionedObjects):
+        A fixed position element with an absolute position ancestor has no way of learning if the latter has changed position. So perform the
+        checks in markFixedPositionObjectForLayoutIfNeeded for each fixed pos object in the container's positioned object list. 
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::containingBlock): Use new helper function canContainFixedPositionObjects().
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::canContainFixedPositionObjects):
+        (RenderObject):
+
 2013-01-17  Antti Koivisto  <antti@apple.com>
 
         Make renderer constructors take Element where possible
