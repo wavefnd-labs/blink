@@ -1,3 +1,64 @@
+2013-01-17  Andrei Bucur  <abucur@adobe.com>
+
+        [CSS Regions] Content flows incorrectly in autoheight regions with min/max-height set
+        https://bugs.webkit.org/show_bug.cgi?id=102099
+
+        Reviewed by David Hyatt.
+
+        The current layout algorithm for auto-height regions is gives wrong results when the max-height property is set on them. The reason is we
+        consider the max-height restriction too late in the layout, when applying a forced break. This is what happens when content is laid out
+        in an auto-height region.
+        1. The content flows without a limit until a forced break appears. If there's no forced break in the content, one is forced anyway at the end
+        of the layout.
+        2. The region where the forced break is placed is not always the one where content is laid out because of max-height restrictions.
+        3. All the regions with max-height are iterated and their height accumulated until the break offset is reached and the region at that point is ended.
+        This gives wrong results because the forced break position in the content was computed assuming there's only one region where the content is laid out.
+        The regions with max-height could have generated unforced breaks at their height and the forced break actually should have a different position.
+
+        This patch changes the algorithm in this way:
+        1. From the flow thread perspective all the regions start with a height: max-height for auto-height regions (or LayoutSize.max()/2 if not defined)
+        or the fixed height value when specified.
+        2. When the content is laid out, if there's no forced break, the height of the content is correctly estimated because the layout sees unforced breaks
+        at the max-height values.
+        3. If a forced break appears, the affected region can be obtained only by looking at the break offset in the region chain. If the region has auto-height,
+        its height is updated by the forced break.
+        4. At the end of the layout, there's the additional task to clear the height of all the regions that didn't receive content. This can be done optimally
+        without adding a new iteration through the regions by attaching to the RegionOverset computation loop.
+
+        Tests:  fast/regions/autoheight-maxheight-mixed-break.html
+                fast/regions/autoheight-maxheight-simple-break.html
+                fast/regions/autoheight-maxheight-simple-nobreak.html
+                fast/regions/autoheight-minmaxheight-mixed-break-hbt.html
+                fast/regions/autoheight-minmaxheight-mixed-break-vlr.html
+                fast/regions/autoheight-minmaxheight-mixed-break-vrl.html
+                fast/regions/autoheight-minmaxheight-mixed-break.html
+                fast/regions/autoheight-minmaxheight-simple-break.html
+                fast/regions/autoheight-minmaxheight-simple-nobreak.html
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::layout):
+        (WebCore::RenderFlowThread::computeLogicalHeight):
+        (WebCore::RenderFlowThread::regionAtBlockOffset):
+        (WebCore::RenderFlowThread::pageLogicalHeightForOffset):
+        (WebCore::RenderFlowThread::pageRemainingLogicalHeightForOffset):
+        (WebCore::RenderFlowThread::computeOverflowStateForRegions): Attach to the loop in this function to clear the overrideLogicalHeight on empty regions.
+        (WebCore):
+        (WebCore::RenderFlowThread::updateRegionsFlowThreadPortionRect): Add an ASSERT that a region always has overrideLogicalHeight or a fixed height.
+        (WebCore::RenderFlowThread::initializeRegionsOverrideLogicalContentHeight): A new function that updates the region chain height to use the max-height value
+        for auto-height regions.
+        (WebCore::RenderFlowThread::addForcedRegionBreak):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::pageLogicalHeight): the decorations size is incorrectly considered in the page height.
+        (WebCore):
+        (WebCore::RenderRegion::maxPageLogicalHeight): new function that returns the max page size for a region. It shouldn't be called too often
+        or the returned value can be cached
+        (WebCore::RenderRegion::logicalHeightOfAllFlowThreadContent): the decorations size is incorrectly considered in the logical height of
+        the flow thread content.
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+
+
 2013-01-17  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: Open resource dialog has poor performance.
