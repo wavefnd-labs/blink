@@ -1,3 +1,20 @@
+2013-01-16  Shinya Kawanaka  <shinyak@chromium.org>
+
+        [Refactoring] HTMLTextFormControlElement should use shadowHost instead of shadowAncestorNode
+        https://bugs.webkit.org/show_bug.cgi?id=106533
+
+        Reviewed by Kent Tamura.
+
+        Since Node::shadowAncestorNode() is deprecated, we would like to use Node::shadowHost().
+
+        No new tests, simple refactoring.
+
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::HTMLTextFormControlElement::setSelectionRange): Here, startPosition and endPosition is in ShadowDOM,
+        converting shadowAncestorNode to shadowHost is safe.
+        (WebCore::enclosingTextFormControl): Actually ASSERT in this method is wrong since shadowAncestorNode() does not
+        return NULL. This should be shadowHost().
+
 2013-01-16  Tony Gentilcore  <tonyg@chromium.org>
 
         Disable an ASSERT for the threaded parser
