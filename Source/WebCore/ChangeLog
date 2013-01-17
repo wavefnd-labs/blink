@@ -1,3 +1,275 @@
+2013-01-17  Antti Koivisto  <antti@apple.com>
+
+        Make renderer constructors take Element where possible
+        https://bugs.webkit.org/show_bug.cgi?id=107138
+
+        Reviewed by David Hyatt.
+        
+        Tighter typing prevents bugs and enables optimizations.
+
+        The patch changes how anonymous rendererer are constructed. Previously Document* as the node parameter
+        indicated that the renderer was anonymous. This forced the code to operate on ContainerNodes (Document
+        is not an Element). Now anonymous renderers are constructed by passing null and the document is set by
+        separate setDocumentForAnonymous() call. The patch uses RenderFoo::createAnonymous() pattern consistently.
+
+        Most constructors are switched to take Element. RenderBlock still takes ContainerNode due to a few subclasses
+        (RenderView and RenderFlowThread) that pass in a Document.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::updateScrollCorner):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::createAnonymous):
+        (WebCore):
+        (WebCore::RenderBlock::createReplacementRunIn):
+        (WebCore::RenderBlock::updateFirstLetterStyle):
+        (WebCore::RenderBlock::createFirstLetterRenderer):
+        (WebCore::RenderBlock::createAnonymousWithParentRendererAndDisplay):
+        (WebCore::RenderBlock::createAnonymousColumnsWithParentRenderer):
+        (WebCore::RenderBlock::createAnonymousColumnSpanWithParentRenderer):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::RenderDeprecatedFlexibleBox):
+        (WebCore::RenderDeprecatedFlexibleBox::createAnonymous):
+        (WebCore):
+        * rendering/RenderDeprecatedFlexibleBox.h:
+        (RenderDeprecatedFlexibleBox):
+        * rendering/RenderDetailsMarker.cpp:
+        (WebCore::RenderDetailsMarker::RenderDetailsMarker):
+        * rendering/RenderDetailsMarker.h:
+        (RenderDetailsMarker):
+        * rendering/RenderDialog.h:
+        (WebCore::RenderDialog::RenderDialog):
+        * rendering/RenderFieldset.cpp:
+        (WebCore::RenderFieldset::RenderFieldset):
+        * rendering/RenderFieldset.h:
+        (RenderFieldset):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::RenderFlexibleBox):
+        * rendering/RenderFlexibleBox.h:
+        (RenderFlexibleBox):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore):
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderFullScreen.cpp:
+        (RenderFullScreenPlaceholder::RenderFullScreenPlaceholder):
+        (RenderFullScreen::RenderFullScreen):
+        (RenderFullScreen::createAnonymous):
+        (RenderFullScreen::wrapRenderer):
+        * rendering/RenderFullScreen.h:
+        (RenderFullScreen):
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::RenderGrid):
+        * rendering/RenderGrid.h:
+        (RenderGrid):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::RenderImage):
+        (WebCore::RenderImage::createAnonymous):
+        (WebCore):
+        * rendering/RenderImage.h:
+        (RenderImage):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::RenderInline):
+        (WebCore::RenderInline::createAnonymous):
+        (WebCore):
+        (WebCore::RenderInline::addChildIgnoringContinuation):
+        * rendering/RenderInline.h:
+        (RenderInline):
+        (WebCore::RenderInline::node):
+        
+            Add version with covariant Element return type.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateScrollCornerStyle):
+        (WebCore::RenderLayer::updateResizerStyle):
+        (WebCore::RenderLayer::createReflection):
+        * rendering/RenderListItem.cpp:
+        (WebCore::RenderListItem::RenderListItem):
+        (WebCore::RenderListItem::styleDidChange):
+        * rendering/RenderListItem.h:
+        (RenderListItem):
+        * rendering/RenderListMarker.cpp:
+        (WebCore::RenderListMarker::RenderListMarker):
+        (WebCore::RenderListMarker::createAnonymous):
+        (WebCore):
+        * rendering/RenderListMarker.h:
+        (RenderListMarker):
+        * rendering/RenderMediaControlElements.cpp:
+        (WebCore::RenderMediaVolumeSliderContainer::RenderMediaVolumeSliderContainer):
+        (WebCore::RenderMediaControlTimeDisplay::RenderMediaControlTimeDisplay):
+        (WebCore::RenderTextTrackContainerElement::RenderTextTrackContainerElement):
+        * rendering/RenderMediaControlElements.h:
+        (RenderMediaVolumeSliderContainer):
+        (RenderMediaControlTimeDisplay):
+        (RenderTextTrackContainerElement):
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::RenderMultiColumnBlock::RenderMultiColumnBlock):
+        (WebCore::RenderMultiColumnBlock::ensureColumnSets):
+        * rendering/RenderMultiColumnBlock.h:
+        (RenderMultiColumnBlock):
+        * rendering/RenderMultiColumnFlowThread.cpp:
+        (WebCore::RenderMultiColumnFlowThread::RenderMultiColumnFlowThread):
+        * rendering/RenderMultiColumnFlowThread.h:
+        (RenderMultiColumnFlowThread):
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::RenderMultiColumnSet):
+        (WebCore::RenderMultiColumnSet::createAnonymous):
+        (WebCore):
+        * rendering/RenderMultiColumnSet.h:
+        (RenderMultiColumnSet):
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::RenderNamedFlowThread):
+        * rendering/RenderNamedFlowThread.h:
+        (RenderNamedFlowThread):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::RenderObject):
+        * rendering/RenderObject.h:
+        
+             Passed in null node indicates that the renderer is anonymous. Remove now unnecessary setIsAnonymous() function.
+
+        (WebCore::RenderObject::isAnonymous):
+        (WebCore::RenderObject::setDocumentForAnonymous):
+        (RenderObject):
+        (WebCore::RenderObject::RenderObjectBitfields::RenderObjectBitfields):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::RenderRegion):
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+        * rendering/RenderRegionSet.cpp:
+        (WebCore::RenderRegionSet::RenderRegionSet):
+        * rendering/RenderRegionSet.h:
+        (RenderRegionSet):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::RenderReplaced):
+        * rendering/RenderReplaced.h:
+        (RenderReplaced):
+        * rendering/RenderReplica.cpp:
+        (WebCore::RenderReplica::RenderReplica):
+        (WebCore::RenderReplica::createAnonymous):
+        (WebCore):
+        * rendering/RenderReplica.h:
+        (RenderReplica):
+        * rendering/RenderRuby.cpp:
+        (WebCore::createAnonymousRubyInlineBlock):
+        (WebCore::RenderRubyAsInline::RenderRubyAsInline):
+        (WebCore):
+        (WebCore::RenderRubyAsBlock::RenderRubyAsBlock):
+        * rendering/RenderRuby.h:
+        (RenderRubyAsInline):
+        (RenderRubyAsBlock):
+        * rendering/RenderRubyBase.cpp:
+        (WebCore::RenderRubyBase::RenderRubyBase):
+        (WebCore::RenderRubyBase::createAnonymous):
+        (WebCore):
+        * rendering/RenderRubyBase.h:
+        (RenderRubyBase):
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::RenderRubyRun):
+        (WebCore::RenderRubyRun::createRubyBase):
+        (WebCore::RenderRubyRun::staticCreateRubyRun):
+        * rendering/RenderRubyRun.h:
+        (RenderRubyRun):
+        * rendering/RenderRubyText.cpp:
+        (WebCore::RenderRubyText::RenderRubyText):
+        * rendering/RenderRubyText.h:
+        (RenderRubyText):
+        * rendering/RenderScrollbar.cpp:
+        (WebCore::RenderScrollbar::updateScrollbarPart):
+        * rendering/RenderScrollbarPart.cpp:
+        (WebCore::RenderScrollbarPart::RenderScrollbarPart):
+        (WebCore::RenderScrollbarPart::createAnonymous):
+        (WebCore):
+        * rendering/RenderScrollbarPart.h:
+        (RenderScrollbarPart):
+        * rendering/RenderSearchField.cpp:
+        (WebCore::RenderSearchField::RenderSearchField):
+        * rendering/RenderSearchField.h:
+        (RenderSearchField):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::RenderTable):
+        (WebCore::RenderTable::createAnonymousWithParentRenderer):
+        * rendering/RenderTable.h:
+        (RenderTable):
+        * rendering/RenderTableCaption.cpp:
+        (WebCore::RenderTableCaption::RenderTableCaption):
+        * rendering/RenderTableCaption.h:
+        (RenderTableCaption):
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::RenderTableCell):
+        (WebCore::RenderTableCell::createAnonymousWithParentRenderer):
+        * rendering/RenderTableCell.h:
+        (RenderTableCell):
+        * rendering/RenderTableCol.cpp:
+        (WebCore::RenderTableCol::RenderTableCol):
+        * rendering/RenderTableCol.h:
+        (RenderTableCol):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::RenderTableRow::RenderTableRow):
+        (WebCore::RenderTableRow::createAnonymousWithParentRenderer):
+        * rendering/RenderTableRow.h:
+        (RenderTableRow):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::RenderTableSection):
+        (WebCore::RenderTableSection::createAnonymousWithParentRenderer):
+        * rendering/RenderTableSection.h:
+        (RenderTableSection):
+        * rendering/RenderTextControl.cpp:
+        (WebCore::RenderTextControl::RenderTextControl):
+        * rendering/RenderTextControl.h:
+        (RenderTextControl):
+        * rendering/RenderTextControlMultiLine.cpp:
+        (WebCore::RenderTextControlMultiLine::RenderTextControlMultiLine):
+        * rendering/RenderTextControlMultiLine.h:
+        (RenderTextControlMultiLine):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::RenderTextControlSingleLine):
+        * rendering/RenderTextControlSingleLine.h:
+        (RenderTextControlSingleLine):
+        (WebCore::RenderTextControlInnerBlock::RenderTextControlInnerBlock):
+        * rendering/RenderTextTrackCue.cpp:
+        (WebCore::RenderTextTrackCue::RenderTextTrackCue):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::RenderView):
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::RenderWidget):
+        * rendering/RenderWidget.h:
+        (RenderWidget):
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::RenderMathMLBlock):
+        (WebCore::RenderMathMLBlock::createAnonymousMathMLBlock):
+        * rendering/mathml/RenderMathMLBlock.h:
+        (RenderMathMLBlock):
+        * rendering/mathml/RenderMathMLFenced.cpp:
+        (WebCore::RenderMathMLFenced::createMathMLOperator):
+        * rendering/mathml/RenderMathMLOperator.cpp:
+        (WebCore::RenderMathMLOperator::RenderMathMLOperator):
+        (WebCore::RenderMathMLOperator::updateFromElement):
+        (WebCore::RenderMathMLOperator::createGlyph):
+        * rendering/mathml/RenderMathMLOperator.h:
+        (RenderMathMLOperator):
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::RenderMathMLRow):
+        (WebCore::RenderMathMLRow::createAnonymousWithParentRenderer):
+        * rendering/mathml/RenderMathMLRow.h:
+        (RenderMathMLRow):
+        * rendering/style/ContentData.cpp:
+        (WebCore::ImageContentData::createRenderer):
+        * rendering/svg/RenderSVGBlock.cpp:
+        (WebCore::RenderSVGBlock::RenderSVGBlock):
+        * rendering/svg/RenderSVGInline.cpp:
+        (WebCore::RenderSVGInline::RenderSVGInline):
+        * rendering/svg/RenderSVGInline.h:
+        (RenderSVGInline):
+        * rendering/svg/RenderSVGTSpan.cpp:
+        (WebCore::RenderSVGTSpan::RenderSVGTSpan):
+        * rendering/svg/RenderSVGTSpan.h:
+        (RenderSVGTSpan):
+        * rendering/svg/RenderSVGTextPath.cpp:
+        (WebCore::RenderSVGTextPath::RenderSVGTextPath):
+        * rendering/svg/RenderSVGTextPath.h:
+        (RenderSVGTextPath):
+
 2013-01-17  Leo Yang  <leoyang@rim.com>
 
         [BlackBerry] Update Authentication Type and Scheme implementation
