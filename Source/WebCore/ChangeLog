@@ -1,3 +1,30 @@
+2013-01-16  Grzegorz Czajkowski  <g.czajkowski@samsung.com>
+
+        [EFL][GTK] checkSpellingOfString treats the multiple words as spelled correctly
+        https://bugs.webkit.org/show_bug.cgi?id=106662
+
+        Reviewed by Antonio Gomes.
+
+        No new tests, covered by spelling-backspace-between-lines.html.
+
+        TextCheckerEnchant::checkSpellingOfString() method, treats the multiple words
+        as spelled correctly if one of them is ok. For example, string such as
+        "OK zz OK" is spelled correctly!
+
+        The method at the beginning assumes that the given string is spelled correctly,
+        then it iterates over the words to find out the misspelled location and length
+        in the whole string. In checkSpellingOfWord, if the word is ok, we mark
+        it as spelled correctly and we do return to check the next words. In the fact,
+        the location and length of the previously misspelled words are overwritten.
+
+        * platform/text/enchant/TextCheckerEnchant.cpp:
+        (WebCore::TextCheckerEnchant::checkSpellingOfWord):
+        Update of the word's misspeling location and length was moved out the loop.
+
+        (WebCore::TextCheckerEnchant::checkSpellingOfString):
+        Stop checking the next words If the current word is misspelled, to do not overwrite
+        its misspelled location and length.
+
 2013-01-17  Chris Fleizach  <cfleizach@apple.com>
 
         WebSpeech: implement voices list
