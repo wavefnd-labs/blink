@@ -1,3 +1,57 @@
+2013-01-16  Adam Barth  <abarth@webkit.org>
+
+        Introduce BackgroundHTMLParser for parsing HTML on a background thread
+        https://bugs.webkit.org/show_bug.cgi?id=107083
+
+        Reviewed by Eric Seidel.
+
+        This patch contains a basic version of an HTML parser that runs on a
+        background thread. The parser passes the majority of the tests in
+        fast/parser and a large number of the subtests in html5lib.
+
+        Notably absent from this early version of the parser is speculation
+        (which will eventually replace preload scanning) and atomization (which
+        we suspect will be important for performance). Our plan is to introduce
+        those elements in subsequent patches.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * html/parser/BackgroundHTMLParser.cpp: Added.
+        (WebCore):
+        (WebCore::checkThatTokensAreSafeToSendToAnotherThread):
+        (WebCore::parserMap):
+        (WebCore::ParserMap::backgroundParsers):
+        (WebCore::ParserMap::mainThreadParsers):
+        (WebCore::BackgroundHTMLParser::BackgroundHTMLParser):
+        (WebCore::BackgroundHTMLParser::append):
+        (WebCore::BackgroundHTMLParser::continueParsing):
+        (WebCore::BackgroundHTMLParser::finish):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (TokenDelivery):
+        (WebCore::TokenDelivery::execute):
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+        (WebCore::BackgroundHTMLParser::createPartial):
+        (WebCore::BackgroundHTMLParser::stopPartial):
+        (WebCore::BackgroundHTMLParser::appendPartial):
+        (WebCore::BackgroundHTMLParser::continuePartial):
+        (WebCore::BackgroundHTMLParser::finishPartial):
+        * html/parser/BackgroundHTMLParser.h: Added.
+        (WebCore):
+        (BackgroundHTMLParser):
+        (WebCore::BackgroundHTMLParser::create):
+        (ParserMap):
+        (WebCore::ParserMap::identifierForParser):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore):
+        (WebCore::HTMLDocumentParser::didReceiveTokensFromBackgroundParser):
+        * html/parser/HTMLDocumentParser.h:
+        (WebCore):
+        (HTMLDocumentParser):
+
 2013-01-16  Donghyun Kim  <dhkim715@hotmail.com>
 
         [soup] Fix build warning in ResourceHandleSoup.cpp
