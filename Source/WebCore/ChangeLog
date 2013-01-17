@@ -1,3 +1,23 @@
+2013-01-17  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Prevent crash dereferencing null if script context has stopped
+        https://bugs.webkit.org/show_bug.cgi?id=107146
+
+        Reviewed by Tony Chang.
+
+        We have crash reports from Chromium users (but no local repro) for a crash coming
+        from IDBRequest::dispatchEvent() that looks like it's calling toV8Context() after
+        the script execution context has stopped. The dispatch shouldn't be occurring
+        and we ASSERT as such, but something weird is going on during Worker tear down.
+        If this patch prevents the crash it would indicate that stop() is called before
+        dispatchEvent() which shouldn't be happening, and would let us continue chasing
+        the issue.
+
+        No new tests - this shouldn't be happening.
+
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::dispatchEvent):
+
 2013-01-17  Robert Hogan  <robert@webkit.org>
 
         Nested fixed position element not staying with parent
