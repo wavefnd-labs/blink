@@ -1,3 +1,26 @@
+2013-01-17  Andrei Bucur  <abucur@adobe.com>
+
+        Widows and orphans test4 fails if isolated
+        https://bugs.webkit.org/show_bug.cgi?id=106006
+
+        Reviewed by Dean Jackson.
+
+        To determine if the orphans condition is not respected, every time a fragmentation break is encountered adjustLinePositionForPagination() is called for the current line.
+        If the index on the line in the block is smaller than the number of orphans specified in the style object, the block is shifted in the next fragmentainer. The index of
+        the line is obtained by calling RenderBlock::lineCount. However, this only works in a full layout when lineCount() will coincidentally return the index of the line.
+        In subsequent layouts, during the determineStartPosition() phase, lineCount() returns all the lines in the block so the orphans condition is never triggered.
+        The patch modifies the lineCount() function to have two optional parameters. The first parameter is the line where lineCount should stop counting lines. The second
+        is an output boolean parameter indicating if the line was found or not. This change makes the lineCount() more flexible and allows retreiving the index of a
+        specific line (e.g. the index of the current line inside adjustLinePositionForPagination()).
+
+        Tests: fast/multicol/orphans-relayout.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::lineCount): See the detailed description.
+        (WebCore::RenderBlock::adjustLinePositionForPagination): Make use of the modified lineCount() function.
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+
 2013-01-17  Martin Robinson  <mrobinson@igalia.com>
 
         REGRESSION (r137487): Crashes in editing/execCommand/indent-paragraphs.html on GTK, EFL
