@@ -1,3 +1,32 @@
+2013-01-17  Ojan Vafai  <ojan@chromium.org>
+
+        Table layout does not need to explicitly call computePreferredLogicalWidths
+        https://bugs.webkit.org/show_bug.cgi?id=106931
+
+        Reviewed by Julien Chaffraix.
+
+        Code shouldn't need to explicitly call computePreferredLogicalWidths.
+        It should only get called as a by-product of calling minPreferredLogicalWidth
+        or maxPreferredLogicalWidth.
+
+        Instead, make it clear that the calling code is just trying to clear
+        preferred width dirty bits.
+
+        * rendering/AutoTableLayout.cpp:
+        (WebCore::AutoTableLayout::recalcColumn):
+        The computePreferredLogicalWidths call on the table cell is redundant
+        with the minPreferredLogicalWidth call on the next line.
+
+        * rendering/FixedTableLayout.cpp:
+        (WebCore::FixedTableLayout::calcWidthArray):
+        We only need to clear the dirty bit here. Table cells don't use
+        their preferred widths in fixed table layout calculations.
+
+        * rendering/RenderTableCell.h:
+        * rendering/RenderTableCol.cpp:
+        (WebCore::RenderTableCol::clearPreferredLogicalWidthsDirtyBits):
+        * rendering/RenderTableCol.h:
+
 2013-01-17  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Updating -webkit-grid-rows or -webkit-grid-columns doesn't work as expected
