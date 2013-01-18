@@ -1,3 +1,71 @@
+2013-01-18  Takashi Sakamoto  <tasak@google.com>
+
+        Implement CSSHostRule for @host @-rules.
+        https://bugs.webkit.org/show_bug.cgi?id=102344
+
+        Reviewed by Dimitri Glazkov.
+
+        CSSHostRule is defined in Shadow DOM spec:
+        http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html#css-host-rule-interface
+        To see or to modify @host @-rules by using inspector, we need to
+        implement CSSHostRule interface.
+
+        Test: fast/dom/shadow/css-hostrule-api.html
+
+        * DerivedSources.cpp:
+        Modified to include JSCSSHostRule.cpp.
+        * CMakeLists.txt:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        Added CSSHostRule.cpp, CSSHostRule.h, and CSSHostRule.idl.
+        * bindings/js/JSCSSRuleCustom.cpp:
+        (WebCore::toJS):
+        Add a new case that the given rule is @host @-rules to support @host
+        @-rules.
+        * bindings/objc/DOMCSS.mm:
+        (kitClass):
+        Add a new case that the given rule is @host @-rules to support @host
+        @-rules.
+        * bindings/v8/custom/V8CSSRuleCustom.cpp:
+        (WebCore::wrap):
+        * css/CSSAllInOne.cpp:
+        * css/CSSHostRule.cpp: Added.
+        (WebCore):
+        (WebCore::CSSHostRule::CSSHostRule):
+        (WebCore::CSSHostRule::cssText):
+        * css/CSSHostRule.h: Added.
+        (WebCore):
+        (CSSHostRule):
+        (WebCore::CSSHostRule::create):
+        Implemented class CSSHostRule which inherits CSSGroupingRule.
+        Since CSSHostRule has the same interface as CSSGroupingRule, it is
+        required to implement its constructor and to override only type
+        method and cssText method.
+        * css/CSSHostRule.idl: Added.
+        * css/CSSRule.h:
+        * css/CSSRule.idl:
+        Added internal HOST_RULE type number.
+        * css/StyleResolver.cpp:
+        (WebCore::collectCSSOMWrappers):
+        * css/StyleRule.cpp:
+        (WebCore::StyleRuleBase::reportMemoryUsage):
+        (WebCore::StyleRuleBase::destroy):
+        (WebCore::StyleRuleBase::copy):
+        (WebCore::StyleRuleBase::createCSSOMWrapper):
+        Modified to handle StyleRuleHost.
+        * css/StyleRule.h:
+        (WebCore::StyleRuleBase::isHostRule):
+        (WebCore::StyleRuleHost::StyleRuleHost):
+        * css/StyleSheetContents.cpp:
+        (WebCore::childRulesHaveFailedOrCanceledSubresources):
+        * page/DOMWindow.idl:
+        Added CSSHostRule constructor.
+
 2013-01-18  John J. Barton  <johnjbarton@chromium.org>
 
         Web Inspector: inspectedWindow.eval("IamUndefined.prop", callback) fails to give exception text
