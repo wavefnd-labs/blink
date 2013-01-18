@@ -1,3 +1,26 @@
+2013-01-18  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [EFL][WebGL] Fix Memory leaks in EGL and GLX surface.
+        https://bugs.webkit.org/show_bug.cgi?id=107100
+
+        Reviewed by Laszlo Gombos.
+
+        GLX and EGL surface don't release GL resources created by them.
+        This patch ensures that the leaks are fixed and
+        native display is not closed before releasing the current
+        context and surface.
+
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (GraphicsContext3DPrivate::releaseResources):
+        * platform/graphics/surfaces/egl/EGLSurface.cpp:
+        (WebCore::EGLWindowTransportSurface::destroy): Call base class to free any allocated GL resources.
+        * platform/graphics/surfaces/glx/GLXContext.cpp:
+        (WebCore::GLXOffScreenContext::platformReleaseCurrent):
+        (WebCore::GLXOffScreenContext::freeResources): Don't reset the display to null.
+        * platform/graphics/surfaces/glx/GLXSurface.cpp:
+        (WebCore::GLXTransportSurface::destroy): Call base class to free any allocated GL resources.
+        (WebCore::GLXPBuffer::freeResources): Call base class to free any allocated GL resources.
+
 2013-01-18  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [Canvas] introduce Resource.toDataURL
