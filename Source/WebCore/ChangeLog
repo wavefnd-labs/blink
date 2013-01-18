@@ -1,3 +1,26 @@
+2013-01-14  Dominik Röttsches  <dominik.rottsches@intel.com>
+
+        [EFL] Update freetype in jhbuild to 2.4.11 and activate subpixel layout
+        https://bugs.webkit.org/show_bug.cgi?id=106774
+
+        In order to fix a long standing linespacing/font ascent & descent issue
+        we found that FreeType commit b0962ac34e660 solves that problem.
+        Let's update FreeType accordingly, but bump it to 2.4.11 due to the
+        maintainer recommending several security updates after that said commit.
+
+        Also, in order to avoid extra rebaselining, let's activate subpixel
+        layout at the same time. With subpixel layout I propose to remove
+        rounding of the linespacing value in order to not introduce rounding
+        inaccuracies at the SimpleFontData level. Other platforms don't do that
+        anymore, furthermore the linegap value is not rounded either.
+
+        Reviewed by Martin Robinson.
+
+        No new tests, affects a large number of tests that will require rebaselining.
+
+        * platform/graphics/freetype/SimpleFontDataFreeType.cpp:
+        (WebCore::SimpleFontData::platformInit): Remove rounding when setting linespacing.
+
 2013-01-18  Vivek Galatage  <vivek.vg@samsung.com>
 
         Web Inspector: Search shortcut clears the current search box contents
