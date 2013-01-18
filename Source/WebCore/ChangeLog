@@ -1,3 +1,32 @@
+2013-01-18  Dima Gorbik  <dgorbik@apple.com>
+
+        Implement ::cue() pseudo element property whitelist
+        https://bugs.webkit.org/show_bug.cgi?id=105477
+
+        Reviewed by Antti Koivisto.
+
+        Only allowed by specs properties are applied to WebVTT nodes. We used whitelists before for the region
+        style rule so this refactors the code a little bit to pass bitfields that contain the information on which 
+        whitelists should be used.
+
+        Test: media/track/track-css-property-whitelist.html
+
+        * css/RuleSet.cpp: 
+        (WebCore::RuleData::RuleData): set a region bit when creating a RuleData.
+        (WebCore::RuleSet::addRule): set a cue bit when PseudoCue type is set for a selector.
+        * css/RuleSet.h: add the new bitfield as an ivar and setters/getters to access it.
+        (WebCore::RuleData::isInRegionRule):
+        (WebCore::RuleData::whitelistType):
+        (WebCore::RuleData::isInCueRule):
+        (WebCore::RuleData::setIsInCueRule):
+        * css/StyleResolver.cpp: refactor the code to pass a bitfield instead of single bits.
+        (WebCore::StyleResolver::addMatchedProperties):
+        (WebCore::StyleResolver::sortAndTransferMatchedRules):
+        (WebCore::StyleResolver::applyProperties):
+        (WebCore::StyleResolver::applyMatchedProperties):
+        (WebCore::StyleResolver::isValidCueStyleProperty): 
+        * css/StyleResolver.h:
+
 2013-01-18  Tony Chang  <tony@chromium.org>
 
         Incorrect scrollable height during simplified layout
