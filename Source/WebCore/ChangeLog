@@ -1,3 +1,34 @@
+2013-01-17  Matt Falkenhagen  <falken@chromium.org>
+
+        Top layer fails for inline elements
+        https://bugs.webkit.org/show_bug.cgi?id=106538
+
+        Reviewed by Hajime Morita.
+
+        This patch makes position 'static' and 'relative' compute to
+        'absolute' for elements in the top layer, as mandated by the
+        Fullscreen spec.[1] By doing so, we also fix a crash that occurred in
+        RenderLayer::rebuildZOrderLists when an inline element wrapped in an
+        anonymous block was added to the top layer.
+
+        [1]: http://fullscreen.spec.whatwg.org/#new-stacking-layer
+
+        Tests: fast/dom/HTMLDialogElement/element-removed-from-top-layer-has-original-position.html
+               fast/dom/HTMLDialogElement/top-layer-position-relative.html
+               fast/dom/HTMLDialogElement/top-layer-position-static.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::adjustRenderStyle): Set position 'absolute'
+        for an element in the top layer. Typically, absolutely positioned
+        elements also automatically get display 'block', but it seems we must do
+        that manually here. We require display 'block' to ensure the renderer is not
+        considered inline and consequently wrapped in an anonymous block.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::rebuildZOrderLists): Check node() so we don't
+        crash on, e.g., an anonymous block. We don't expect top layer
+        renderers to have anonymous blocks anymore, but we nevertheless
+        shouldn't crash if some other renderer is parented by RenderView.
+
 2013-01-17  Simon Fraser  <simon.fraser@apple.com>
 
         Fix crash accessing RenderView's layer's backing when not composited
