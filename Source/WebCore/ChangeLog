@@ -1,3 +1,27 @@
+2013-01-17  Adam Barth  <abarth@webkit.org>
+
+        BackgroundHTMLParser should go 18% faster on html-parser-srcdoc benchmark
+        https://bugs.webkit.org/show_bug.cgi?id=107201
+
+        Reviewed by Tony Gentilcore.
+
+        Prior to this patch, we would tokenize all the input before delivering
+        any tokens to the main thread. Effectively, that prevented the
+        background parser from running in parallel with the main thread.
+
+        This patch causes us to send tokens to the main thread periodically.
+        The constant in this patch is somewhat arbitrary. We'll need to tune it
+        later with more realistic workloads.
+
+        This patch improves the performance of the html-parser-srcdoc benchmark
+        by 18%. (This patch is based on Eric's work in
+        https://github.com/tonygentilcore/webkit/commit/072331194520c7770b5e34baefbbbba948834971.)
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+
 2013-01-17  Matt Falkenhagen  <falken@chromium.org>
 
         Top layer fails for inline elements
