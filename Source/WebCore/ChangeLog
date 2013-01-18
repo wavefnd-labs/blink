@@ -1,3 +1,23 @@
+2013-01-18  Levi Weintraub  <leviw@chromium.org>
+
+        LayoutUnit should round half consistently, not away from zero
+        https://bugs.webkit.org/show_bug.cgi?id=107208
+
+        Reviewed by Eric Seidel.
+
+        The current implementation of LayoutUnit::round() always rounds half away from zero. This can result in
+        a shift of 1 pixel moving an element aligned at a half-pixel by 2. This problem is particularly common with
+        RenderLayers, which pass the sub-pixel accumulation into their renderers after translating the graphics
+        context passed in by their rounded location. This changes round() to always round 0.5 up.
+
+        Test: fast/sub-pixel/sub-pixel-root-layer.html
+
+        * platform/LayoutUnit.h:
+        (WebCore::LayoutUnit::round): Always round 0.5 up.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayerContents): We no longer need to prevent rootLayers from passing in a
+        sub-pixel offset. This eliminates the shifting of elements when applying translateZ(0) or similar.
+
 2013-01-18  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Remove custom V8ScriptProfileNodeCustom::toV8()
