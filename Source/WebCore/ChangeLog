@@ -1,3 +1,39 @@
+2013-01-18  Terry Anderson  <tdanderson@chromium.org>
+
+        Scroll gestures should not create wheel events
+        https://bugs.webkit.org/show_bug.cgi?id=103952
+
+        Reviewed by James Robinson.
+
+        Tests: fast/events/touch/gesture/touch-gesture-scroll-div-propagated.html
+               fast/events/touch/gesture/touch-gesture-scroll-div-twice-propagated.html
+               fast/events/touch/gesture/touch-gesture-scroll-iframe-editable.html
+               fast/events/touch/gesture/touch-gesture-scroll-iframe-propagated.html
+               fast/events/touch/gesture/touch-gesture-scroll-page-propagated.html
+
+        In EventHandler::handleGestureEvent(), scroll gestures should not be handled by synthesizing
+        and dispatching wheel events; we should instead scroll the relevant layer directly.
+
+        Note that this patch should be landed together with the patch for
+        https://bugs.webkit.org/show_bug.cgi?id=106589.
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::EventHandler):
+        (WebCore::EventHandler::clear):
+        (WebCore::EventHandler::handleGestureEvent):
+        (WebCore::EventHandler::passGestureEventToWidget):
+        (WebCore::EventHandler::passGestureEventToWidgetIfPossible):
+        (WebCore):
+        (WebCore::closestScrollableNodeInDocumentIfPossibleOrSelfIfNotScrollable):
+        (WebCore::EventHandler::handleGestureScrollBegin):
+        (WebCore::EventHandler::handleGestureScrollUpdate):
+        (WebCore::EventHandler::isScrollbarHandlingGestures):
+        * page/EventHandler.h:
+        (EventHandler):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::scrollByRecursively):
+        * rendering/RenderLayer.h:
+
 2013-01-18  Nate Chapin  <japhet@chromium.org>
 
         Cannot abort multiple XHR POSTs made to same url
