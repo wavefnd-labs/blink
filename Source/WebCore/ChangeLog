@@ -1,3 +1,96 @@
+2013-01-17  Simon Fraser  <simon.fraser@apple.com>
+
+        Make it possible for the root background to be painted into its own GraphicsLayer
+        https://bugs.webkit.org/show_bug.cgi?id=107177
+
+        Reviewed by Dave Hyatt.
+        
+        Make it possible to paint the root background into its own GraphicsLayer, and enable
+        this when the root background has background-images that are all background-attachment: fixed.
+        
+        This is a step towards optimizing scrolling on pages with fixed root backgrounds.        
+
+        Tests: platform/mac/tiled-drawing/fixed-background/fixed-body-background-body-layer.html
+               platform/mac/tiled-drawing/fixed-background/fixed-body-background-opacity-html.html
+               platform/mac/tiled-drawing/fixed-background/fixed-body-background-transformed-html.html
+               platform/mac/tiled-drawing/fixed-background/fixed-body-background-zoomed.html
+               platform/mac/tiled-drawing/fixed-background/fixed-body-background.html
+               platform/mac/tiled-drawing/fixed-background/fixed-html-background.html
+               platform/mac/tiled-drawing/fixed-background/fixed-non-propagated-body-background.html
+
+        * rendering/PaintInfo.h:
+        (WebCore::PaintInfo::skipRootBackground): Utility function to check the paintBehavior flag.
+        (WebCore::PaintInfo::paintRootBackgroundOnly): Ditto.
+        * rendering/PaintPhase.h: New paint behavior flags to indicate that we should skip painting
+        the root background, and only paint the root background.
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::paint): When we're only painting the root background, avoid painting column
+        rules, and bail early.
+        (WebCore::RenderBlock::paintObject): Don't paint children if we're just painting the root background.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleWillChange): If this box can paint the root background, tell the compositor
+        when the fixedness of those backgrounds changes.
+        (WebCore::RenderBox::paintRootBoxFillLayers): If the paintBehavior flag is set to skip painting the root
+        background, bail. This will be true for the non-background GraphicsLayers which are painting the root.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayerContents): We can bail early if we're not a root-like renderer and the
+        flag is set to paint the root background only. This avoids walking the whole layer tree when just painting
+        into the root background GraphicsLayer.
+        Migrate layer paint flags into PaintBehavior flags, and use them.
+        * rendering/RenderLayer.h: Layer painting flags that replicate the paintBehavior flags.
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::RenderLayerBacking): Init the m_backgroundLayerPaintsFixedRootBackground bit.
+        (WebCore::RenderLayerBacking::~RenderLayerBacking): Clear the background layer.
+        (WebCore::RenderLayerBacking::createPrimaryGraphicsLayer): No need to handle the transparent background
+        stuff here. We'll do it later in updateRootLayerConfiguration().
+        (WebCore::RenderLayerBacking::updateGraphicsLayerConfiguration): Actually make a background layer now
+        if the compositor says we should.
+        Call updateRootLayerConfiguration() to adjust the background color and opaqueness of the background/primary layers.
+        (WebCore::RenderLayerBacking::updateInternalHierarchy): Parent the m_backgroundLayer in the containment layer,
+        not m_graphicsLayer (this is a bug fix).
+        (WebCore::RenderLayerBacking::updateDrawsContent):
+        (WebCore::RenderLayerBacking::setBackgroundLayerPaintsFixedRootBackground):
+        (WebCore::RenderLayerBacking::paintingPhaseForPrimaryLayer):
+        (WebCore::RenderLayerBacking::updateBackgroundColor): This no longer needs to update the tile cache
+        background color; updateRootLayerConfiguration() does this now.
+        (WebCore::RenderLayerBacking::updateRootLayerConfiguration): Update the opaqueness and background color
+        of the background and/or main graphics layers.
+        (WebCore::RenderLayerBacking::setContentsNeedDisplay): Invalidate the background layer if we have one.
+        (WebCore::RenderLayerBacking::setContentsNeedDisplayInRect): Invalidate the background layer if we have one.
+        This will be optimized to only repaint the background if it was the background that changed.
+        (WebCore::RenderLayerBacking::paintIntoLayer): Take a GraphicsLayer, not a RenderLayer argument.
+        Adjust the paintFlags if we're being asked to paint the background layer, or if we have one, but are painting the foreground.
+        (WebCore::RenderLayerBacking::paintContents):
+        (WebCore::RenderLayerBacking::backingStoreMemoryEstimate):
+        (WebCore::RenderLayerBacking::reportMemoryUsage):
+        * rendering/RenderLayerBacking.h:
+        (WebCore::RenderLayerBacking::backgroundLayer):
+        (WebCore::RenderLayerBacking::backgroundLayerPaintsFixedRootBackground):
+        (RenderLayerBacking):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::rootFixedBackgroundsChanged): If we're told that the fixed-ness of
+        the root background changed and we're using a TileCache, we need to re-evaluate compositing (this could be
+        optimized to only update the root layer).
+        (WebCore::RenderLayerCompositor::needsFixedRootBackgroundLayer): For the root (RenderView's) layer,
+        check whether the renderer that will paint the root (taking background propagation into account) has
+        background images that are all fixed.
+        (WebCore::RenderLayerCompositor::fixedRootBackgroundLayer): Accessor for the GraphicsLayer that paints
+        the root background (will be used later).
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::hasEntirelyFixedBackground): Returns true there are background images
+        and all are fixed.
+        * rendering/RenderObject.h:
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::paintBoxDecorations): This function paints a solid color if we know that the root
+        isn't going to fill the viewport; we want to avoid this painting if we're not painting the root background
+        in this pass.
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::allLayersAreFixed):
+        (WebCore::RenderStyle::hasEntirelyFixedBackground): New helper function.
+        * rendering/style/RenderStyle.h:
+
 2013-01-17  Rafael Weinstein  <rafaelw@chromium.org>
 
         [Template] Avoid reading beyond the end of the buffer in preload scanner when check for </template>
