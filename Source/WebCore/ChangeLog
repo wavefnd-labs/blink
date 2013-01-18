@@ -1,3 +1,27 @@
+2013-01-17  Takashi Sakamoto  <tasak@google.com>
+
+        Heap-use-after-free in WebCore::LiveNodeListBase::invalidateCache
+        https://bugs.webkit.org/show_bug.cgi?id=106958
+
+        Reviewed by Ryosuke Niwa.
+
+        Need to update node lists that nodes in shadow dom trees have
+        when document is changed.
+
+        No new tests; it is difficult to reproduce crash by using
+        DumpRenderTree. Manually tested by using attached repro.html.
+
+        * dom/NodeRareData.h:
+        (WebCore::NodeListsNodeData::adoptTreeScope):
+        Added to adopt node lists when tree scope is changed.
+        (WebCore::NodeListsNodeData::adoptDocument):
+        Renamed the original adoptTreeScope to adoptDocument.
+        * dom/TreeScopeAdopter.cpp:
+        (WebCore::TreeScopeAdopter::moveTreeToNewScope):
+        If document scope is not changed, modify to invoke adoptTreeScope.
+        (WebCore::TreeScopeAdopter::moveNodeToNewDocument):
+        Modify to invoked adoptDocument.
+
 2013-01-17  Sankeerth V S  <sankeerth.vs@samsung.com>
 
         Search for a selected word should trigger _performSearch to populate
