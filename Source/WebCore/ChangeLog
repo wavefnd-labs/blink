@@ -1,3 +1,29 @@
+2013-01-18  Chris Hopman  <cjhopman@google.com>
+
+        Fix scrollRectToVisible in the presence of transforms
+        https://bugs.webkit.org/show_bug.cgi?id=105574
+
+        Reviewed by Simon Fraser.
+
+        When scrolling to reveal an overflow layer, the required scroll was
+        being calculated in absolute coordinates. To properly account for
+        transforms, this calculation should be done in the local coordinates
+        of the renderBox.
+
+        Tests: editing/input/reveal-selection-transformed-overflow-parent.html
+               editing/input/reveal-selection-transformed-textarea.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::scrollRectToVisible):
+        When scrolling to reveal an overflow layer, calculate the required
+        scroll in the local coordinates of the RenderBox.
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::absoluteToLocalQuad):
+        (WebCore):
+        * rendering/RenderObject.h:
+        (RenderObject):
+        Add function to convert an absolute quad to a local quad.
+
 2013-01-18  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Add support for min-content
