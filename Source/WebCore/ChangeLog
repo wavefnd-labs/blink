@@ -1,3 +1,36 @@
+2013-01-18  Adam Barth  <abarth@webkit.org>
+
+        BackgroundHTMLParser shouldn't create AtomicStrings
+        https://bugs.webkit.org/show_bug.cgi?id=107150
+
+        Reviewed by Tony Gentilcore.
+
+        Previously, we were creating an AtomicString from the HTMLToken for
+        every start and end tag. This caused us to have a static dependency on
+        the parser thread's atomic string table. We want to avoid static
+        dependencies because we want to eventually run the background parser
+        using a library like libdispatch that will let us run many version in
+        parallel.
+
+        This patch uses a different approach whereby we use the tag name from
+        the CompactHTMLToken. In order to avoid calling strcmp excessively, we
+        use StringImpl::hash to quickly reject matches with some common tag
+        names. As a side effect, the hash value will be cached in the
+        StringImpl, speeding up atomization once these StringImpls arrive on
+        the main thread.
+
+        This patch also improves the performance on html-parser-srcdoc.html.
+        With the patch in bug 107236 applied (which focuses the benchmark more
+        tightly on the parser), we spend 2.3% less time on the main thread
+        (likely due to pre-caching the hash values) and 11.5% less time on the
+        parser thread.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore):
+        (WebCore::threadSafeEqual):
+        (WebCore::threadSafeMatch):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+
 2013-01-18  Tony Gentilcore  <tonyg@chromium.org>
 
         Run defer scripts in the threaded HTML parser
