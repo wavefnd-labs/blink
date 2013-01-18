@@ -1,3 +1,28 @@
+2013-01-18  Tony Chang  <tony@chromium.org>
+
+        Incorrect scrollable height during simplified layout
+        https://bugs.webkit.org/show_bug.cgi?id=107193
+
+        Reviewed by Ojan Vafai.
+
+        Test: fast/overflow/height-during-simplified-layout.html
+
+        When computing overflow, we use the height of the block before it was clamped
+        (i.e., before updateLogicalHeight() has been called).
+
+        During simplfied layout, we use the previous sizes rather than doing a full
+        layout. We still compute overflow, but we were using the clamped height rather
+        than the full height.
+
+        This caused us to incorrectly compute the overflow by the vertical padding.
+        Since we were passing in the already clamped clientHeight to RenderBlock::computeOverflow,
+        we would only include the overflow from our children sizes and not include the overflow
+        from ourselves caused by padding + content.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::simplifiedLayout): Use the scrollable height rather than the
+        already clamped height.
+
 2013-01-18  Joe Mason  <jmason@rim.com>
 
         [BlackBerry] fix compile warnings in NetworkJob
