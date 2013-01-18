@@ -1,3 +1,29 @@
+2013-01-17  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        REGRESSION (r139444): Crashes in three accessibility tests on GTK
+        https://bugs.webkit.org/show_bug.cgi?id=106922
+
+        Reviewed by Chris Fleizach.
+
+        r139444 exposed an infinite loop that was just waiting to happen.
+        Currently, getting the role value of an ARIA table row involves
+        getting the parent table via parentObjectUnignored() which in turn
+        can lead to the role value of the table row being checked. Moving
+        the roleValue() logic to determineAccessibilityRole() avoids this.
+
+        This fix, however, introduced a regression when an accessible row
+        was examined without having first examined the parent table for
+        non-ARIA tables. Now that it is safe to call parentObjectUnignored(),
+        the parentTable() method used for ARIA table rows can also be used
+        by non-ARIA table rows.
+
+        No new tests; instead unskipped the three crashing tests.
+
+        * accessibility/AccessibilityTableRow.cpp:
+        (WebCore::AccessibilityTableRow::determineAccessibilityRole):
+        * accessibility/AccessibilityTableRow.h:
+        (AccessibilityTableRow):
+
 2013-01-17  Rik Cabanier  <cabanier@adobe.com>
 
         Update GraphicsContext to support winding rule in clip operator for QT
