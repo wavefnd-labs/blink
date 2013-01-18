@@ -1,3 +1,19 @@
+2013-01-18  Nate Chapin  <japhet@chromium.org>
+
+        Cannot abort multiple XHR POSTs made to same url
+        https://bugs.webkit.org/show_bug.cgi?id=106937
+
+        Reviewed by Alexey Proskuryakov.
+
+        Test: http/tests/cache/cancel-multiple-post-xhrs.html
+
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::removeClient): Call allClientsRemoved() regardless
+            of whether this resource is inCache(). Otherwise, CachedRawResources will
+            not have the opportunity to cancel as expected. However, don't cancel
+            if the last client was removed because we're in the middle of switching
+            the clients over to a successfully revalidated resource.
+
 2013-01-18  Dima Gorbik  <dgorbik@apple.com>
 
         Implement ::cue() pseudo element property whitelist
