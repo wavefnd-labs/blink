@@ -1,3 +1,36 @@
+2013-01-18  Shinya Kawanaka  <shinyak@chromium.org>
+
+        Introduce isHTMLTextFormControlElement and toHTMLTextFormControlElement instead of toTextFormControl
+        https://bugs.webkit.org/show_bug.cgi?id=107089
+
+        Reviewed by Kent Tamura.
+
+        toTextFormControl(node) returns 0 if node is not HTMLTextFormControl. In recent coding convention,
+        we only have ASSERT and statc_cast in this kind of conversion function. So this code looks like
+        having a bad cast, though it does not.
+
+        In this patch, we convert toTextFromControl to isHTMLTextFormControlElement and toHTMLFormControlElement,
+        which aligns our coding convention.
+
+        No new tests, simple refactoring.
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::selectionForCommand):
+        (WebCore::Editor::setBaseWritingDirection):
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::directionality):
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::enclosingTextFormControl):
+        * html/HTMLTextFormControlElement.h:
+        (WebCore::isHTMLTextFormControlElement):
+        (WebCore):
+        (WebCore::toHTMLTextFormControlElement):
+        * rendering/RenderTextControl.cpp:
+        (WebCore::RenderTextControl::RenderTextControl):
+        (WebCore::RenderTextControl::layoutSpecialExcludedChild):
+        * testing/Internals.cpp:
+        (WebCore::Internals::visiblePlaceholder):
+
 2013-01-18  Emil A Eklund  <eae@chromium.org>
 
         Change RenderStyle::getRoundedInnerBorderFor to take ints for border widths
