@@ -1,3 +1,88 @@
+2013-01-18  Simon Fraser  <simon.fraser@apple.com>
+
+        Allow fixed background layers to be moved by the ScrollingCoordinator
+        https://bugs.webkit.org/show_bug.cgi?id=107213
+
+        Reviewed by Tim Horton.
+        
+        Start using the RenderView's RenderLayerBacking's background layer for
+        fixed root backgrounds (those which have background images all of which have
+        background-attachment: fixed).
+        
+        The background-layer is contained in the RenderLayer's RenderLayerBacking's
+        containment view, so it gets page scale applied to it, but scrolling happens
+        above this layer, so the background has to be counter-scrolled. We plumb
+        this layer through to the ScrollingCoordinator so that this counter-scrolling
+        can be done on the scrolling thread.
+        
+        Test: platform/mac/tiled-drawing/fixed-background/fixed-body-background-positioned.html
+
+        * WebCore.xcodeproj/project.pbxproj: Add ScrollingStateScrollingNodeMac.mm
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::counterScrollingLayerForFrameView): New function to get
+        the counter-scrolling layer.
+        (WebCore::ScrollingCoordinator::updateMainFrameScrollPosition): Sync or set the position of the
+        counter-scrolling layer just like we do for the main scrolling layer.
+        * page/scrolling/ScrollingCoordinator.h:
+        (WebCore::ScrollingCoordinator::updateScrollingNode):
+        * page/scrolling/ScrollingStateNode.cpp:
+        (WebCore::ScrollingStateNode::ScrollingStateNode): setScrollLayer() renamed to setScrollPlatformLayer(),
+        and added a FIXME comment because this code is confusing and possibly wrong.
+        * page/scrolling/ScrollingStateNode.h: Renamed setScrollLayer() to setScrollPlatformLayer().
+        * page/scrolling/ScrollingStateScrollingNode.cpp:
+        (WebCore::ScrollingStateScrollingNode::ScrollingStateScrollingNode):
+        * page/scrolling/ScrollingStateScrollingNode.h:
+        (ScrollingStateScrollingNode): Track the counter-scrolling layer.
+        (WebCore::ScrollingStateScrollingNode::counterScrollingLayer):
+        (WebCore::ScrollingStateScrollingNode::counterScrollingLayerDidChange):
+        (WebCore::ScrollingStateScrollingNode::setCounterScrollingLayerDidChange):
+        * page/scrolling/mac/ScrollingCoordinatorMac.h:
+        (ScrollingCoordinatorMac): Add updateScrollingNode() which is less expensive than frameViewRootLayerDidChange()
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::frameViewRootLayerDidChange): Fetch the counter-scrolling layer if we have one.
+        (WebCore::ScrollingCoordinatorMac::setCounterScrollingLayerForNode):
+        (WebCore::ScrollingCoordinatorMac::updateScrollingNode):
+        * page/scrolling/mac/ScrollingStateNodeMac.mm:
+        (WebCore::ScrollingStateNode::setScrollPlatformLayer):
+        * page/scrolling/mac/ScrollingStateScrollingNodeMac.mm: New file for implementation of setCounterScrollingLayer().
+        (WebCore::ScrollingStateScrollingNode::counterScrollingPlatformLayer):
+        (WebCore::ScrollingStateScrollingNode::setCounterScrollingLayer):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.h:
+        (ScrollingTreeScrollingNodeMac):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::update):
+        (WebCore::ScrollingTreeScrollingNodeMac::setScrollLayerPosition):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::fixedBackgroundPaintsInLocalCoordinates):
+        (WebCore::RenderBoxModelObject::calculateBackgroundImageGeometry): If we're painting into the fixed root layer,
+        we want to always paint with the top,left at 0,0.
+        * rendering/RenderBoxModelObject.h:
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry): In the fixed root background case,
+        we can make the background layer viewport-sized, and we have to set its counter-scrolled position.
+        (WebCore::RenderLayerBacking::updateBackgroundLayer): If the background layer was created or destroyed,
+        we have to tell the ScrollingCoordinator.
+        (WebCore::RenderLayerBacking::didCommitChangesForLayer): Send the GraphicsLayer down.
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::didFlushChangesForLayer): If the background layer changed (e.g. it became
+        tiled) we need to tell the ScrollingCoordinator.
+        (WebCore::RenderLayerCompositor::rebuildCompositingLayerTree): We failed to update the borders on new
+        layers sometimes; this fixes that.
+        (WebCore::RenderLayerCompositor::frameViewDidScroll): In the non-threaded scrolling case, if we have
+        a fixed background layer, we need to update its position.
+        (WebCore::RenderLayerCompositor::fixedRootBackgroundLayerChanged): Feed the newly created/destroyed layer
+        down to the ScrollingCoordinator.
+        (WebCore::RenderLayerCompositor::supportsFixedRootBackgroundCompositing):
+        (WebCore::RenderLayerCompositor::needsFixedRootBackgroundLayer):
+        * rendering/RenderLayerCompositor.h:
+        * rendering/RenderObject.cpp:
+        (WebCore::rendererHasBackground):
+        (WebCore::RenderObject::styleWillChange): If the compositor supports fixed root backgrounds, we no longer
+        treat these as slow repaint objects.
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::rootBackgroundIsEntirelyFixed): Helper function called by RLC.
+        * rendering/RenderView.h:
+
 2013-01-18  Alec Flett  <alecflett@chromium.org>
 
         IndexedDB: Switch to new createTransaction call
