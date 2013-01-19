@@ -1,3 +1,48 @@
+2013-01-18  Alec Flett  <alecflett@chromium.org>
+
+        IndexedDB: Switch to new createTransaction call
+        https://bugs.webkit.org/show_bug.cgi?id=107311
+
+        Reviewed by Tony Chang.
+
+        Convert frontend callers to use the new backend createTransaction
+        call which is the final divorce between the frontend and backend
+        transaction objects. This allows an asynchronous call in Chromium
+        and allows the front and backend to have their own lifecycle,
+        allowing the backend to be cleaned up as soon as a transaction is complete,
+        rather than waiting for the JS object to get cleaned up.
+
+        No new tests, this is a refactor covered by existing tests.
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::transaction):
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::commit):
+        (WebCore::IDBDatabaseBackendImpl::abort):
+        (WebCore::IDBDatabaseBackendImpl::createTransaction):
+        (WebCore::IDBDatabaseBackendImpl::runIntVersionChangeTransaction):
+        * Modules/indexeddb/IDBDatabaseCallbacksImpl.cpp:
+        (WebCore::IDBDatabaseCallbacksImpl::onAbort):
+        (WebCore::IDBDatabaseCallbacksImpl::onComplete):
+        * Modules/indexeddb/IDBOpenDBRequest.cpp:
+        (WebCore::IDBOpenDBRequest::onUpgradeNeeded):
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::create):
+        (WebCore::IDBTransaction::IDBTransaction):
+        (WebCore::IDBTransaction::setActive):
+        (WebCore::IDBTransaction::abort):
+        * Modules/indexeddb/IDBTransaction.h:
+        (WebCore):
+        (IDBTransaction):
+        * Modules/indexeddb/IDBTransactionBackendImpl.cpp:
+        (WebCore::IDBTransactionBackendImpl::create):
+        (WebCore::IDBTransactionBackendImpl::IDBTransactionBackendImpl):
+        (WebCore::IDBTransactionBackendImpl::abort):
+        (WebCore::IDBTransactionBackendImpl::commit):
+        * Modules/indexeddb/IDBTransactionBackendImpl.h:
+        (IDBTransactionBackendImpl):
+        (WebCore::IDBTransactionBackendImpl::setCallbacks):
+
 2013-01-18  Brady Eidson  <beidson@apple.com>
 
         Rework NetworkProcess resource load identifiers.
