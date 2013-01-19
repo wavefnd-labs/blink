@@ -1,3 +1,45 @@
+2013-01-18  Dima Gorbik  <dgorbik@apple.com>
+
+        Remove a TextTrack.h include from the Element.h and move WebVTT related stuff outside the Element
+        https://bugs.webkit.org/show_bug.cgi?id=107080
+
+        Reviewed by Sam Weinig.
+
+        WebVTT objects are now subclasses of the Element. This allows us to remove major WebVTT chunks of code from
+        Element.h and NodeRareData. WebVTTElement is deriving from HTMLElement and not Element to prevent possible
+        problems that could happen because we reuse qTags that are being used in HTML like <b>, <i> and <u>.
+
+        No new tests. This is just a refactoring of the existing code.
+
+        * CMakeLists.txt:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOne):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRules):
+        (WebCore::StyleResolver::canShareStyleWithElement):
+        * dom/Element.cpp:
+        * dom/Element.h:
+        * dom/ElementRareData.h:
+        (WebCore::ElementRareData::ElementRareData):
+        * dom/Node.h:
+        (WebCore::Node::isWebVTTElement):
+        * html/track/TextTrack.h:
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::copyWebVTTNodeToDOMTree):
+        (WebCore::TextTrackCue::markFutureAndPastNodes):
+        * html/track/WebVTTElement.cpp: Added.
+        (WebCore::WebVTTElement::create):
+        (WebCore::WebVTTElement::cloneElementWithoutAttributesAndChildren):
+        * html/track/WebVTTElement.h: Added.
+        (WebCore::WebVTTElement::setWebVTTNodeType):
+        (WebCore::WebVTTElement::webVTTNodeType):
+        (WebCore::WebVTTElement::WebVTTElement):
+        (WebCore::toWebVTTElement):
+        * html/track/WebVTTParser.cpp:
+        (WebCore::WebVTTParser::constructTreeFromToken):
+
 2013-01-18  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=106946
