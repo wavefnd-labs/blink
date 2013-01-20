@@ -1,3 +1,378 @@
+2013-01-20  Filip Pizlo  <fpizlo@apple.com>
+
+        Add more JavaScript tests.
+
+        Rubber stampted by Geoffrey Garen.
+        
+        This adds my JSRegress suite to LayoutTests. This includes silly microbenchmarks that I've
+        used to test JSC's performance on various interesting cases. But it's also good at catching
+        bugs, so we might as well be running it as part of regression testing. All of these tests
+        are short-running, so it shouldn't get in the way of anyone.
+
+        * fast/js/regress: Added.
+        * fast/js/regress/Float32Array-matrix-mult-expected.txt: Added.
+        * fast/js/regress/Float32Array-matrix-mult.html: Added.
+        * fast/js/regress/Int16Array-bubble-sort-expected.txt: Added.
+        * fast/js/regress/Int16Array-bubble-sort.html: Added.
+        * fast/js/regress/Int16Array-load-int-mul-expected.txt: Added.
+        * fast/js/regress/Int16Array-load-int-mul.html: Added.
+        * fast/js/regress/Int8Array-load-expected.txt: Added.
+        * fast/js/regress/Int8Array-load.html: Added.
+        * fast/js/regress/adapt-to-double-divide-expected.txt: Added.
+        * fast/js/regress/adapt-to-double-divide.html: Added.
+        * fast/js/regress/aliased-arguments-getbyval-expected.txt: Added.
+        * fast/js/regress/aliased-arguments-getbyval.html: Added.
+        * fast/js/regress/allocate-big-object-expected.txt: Added.
+        * fast/js/regress/allocate-big-object.html: Added.
+        * fast/js/regress/arity-mismatch-inlining-expected.txt: Added.
+        * fast/js/regress/arity-mismatch-inlining.html: Added.
+        * fast/js/regress/array-access-polymorphic-structure-expected.txt: Added.
+        * fast/js/regress/array-access-polymorphic-structure.html: Added.
+        * fast/js/regress/array-with-double-add-expected.txt: Added.
+        * fast/js/regress/array-with-double-add.html: Added.
+        * fast/js/regress/array-with-double-increment-expected.txt: Added.
+        * fast/js/regress/array-with-double-increment.html: Added.
+        * fast/js/regress/array-with-double-mul-add-expected.txt: Added.
+        * fast/js/regress/array-with-double-mul-add.html: Added.
+        * fast/js/regress/array-with-double-sum-expected.txt: Added.
+        * fast/js/regress/array-with-double-sum.html: Added.
+        * fast/js/regress/array-with-int32-add-sub-expected.txt: Added.
+        * fast/js/regress/array-with-int32-add-sub.html: Added.
+        * fast/js/regress/array-with-int32-or-double-sum-expected.txt: Added.
+        * fast/js/regress/array-with-int32-or-double-sum.html: Added.
+        * fast/js/regress/big-int-mul-expected.txt: Added.
+        * fast/js/regress/big-int-mul.html: Added.
+        * fast/js/regress/boolean-test-expected.txt: Added.
+        * fast/js/regress/boolean-test.html: Added.
+        * fast/js/regress/cast-int-to-double-expected.txt: Added.
+        * fast/js/regress/cast-int-to-double.html: Added.
+        * fast/js/regress/cell-argument-expected.txt: Added.
+        * fast/js/regress/cell-argument.html: Added.
+        * fast/js/regress/cfg-simplify-expected.txt: Added.
+        * fast/js/regress/cfg-simplify.html: Added.
+        * fast/js/regress/cmpeq-obj-to-obj-other-expected.txt: Added.
+        * fast/js/regress/cmpeq-obj-to-obj-other.html: Added.
+        * fast/js/regress/constant-test-expected.txt: Added.
+        * fast/js/regress/constant-test.html: Added.
+        * fast/js/regress/direct-arguments-getbyval-expected.txt: Added.
+        * fast/js/regress/direct-arguments-getbyval.html: Added.
+        * fast/js/regress/double-pollution-getbyval-expected.txt: Added.
+        * fast/js/regress/double-pollution-getbyval.html: Added.
+        * fast/js/regress/double-pollution-putbyoffset-expected.txt: Added.
+        * fast/js/regress/double-pollution-putbyoffset.html: Added.
+        * fast/js/regress/external-arguments-getbyval-expected.txt: Added.
+        * fast/js/regress/external-arguments-getbyval.html: Added.
+        * fast/js/regress/external-arguments-putbyval-expected.txt: Added.
+        * fast/js/regress/external-arguments-putbyval.html: Added.
+        * fast/js/regress/fold-double-to-int-expected.txt: Added.
+        * fast/js/regress/fold-double-to-int.html: Added.
+        * fast/js/regress/function-dot-apply-expected.txt: Added.
+        * fast/js/regress/function-dot-apply.html: Added.
+        * fast/js/regress/function-test-expected.txt: Added.
+        * fast/js/regress/function-test.html: Added.
+        * fast/js/regress/get-by-id-chain-from-try-block-expected.txt: Added.
+        * fast/js/regress/get-by-id-chain-from-try-block.html: Added.
+        * fast/js/regress/indexed-properties-in-objects-expected.txt: Added.
+        * fast/js/regress/indexed-properties-in-objects.html: Added.
+        * fast/js/regress/inline-arguments-access-expected.txt: Added.
+        * fast/js/regress/inline-arguments-access.html: Added.
+        * fast/js/regress/inline-arguments-local-escape-expected.txt: Added.
+        * fast/js/regress/inline-arguments-local-escape.html: Added.
+        * fast/js/regress/inline-get-scoped-var-expected.txt: Added.
+        * fast/js/regress/inline-get-scoped-var.html: Added.
+        * fast/js/regress/inlined-put-by-id-transition-expected.txt: Added.
+        * fast/js/regress/inlined-put-by-id-transition.html: Added.
+        * fast/js/regress/int-or-other-abs-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-abs-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-abs-zero-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-abs-zero-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-add-expected.txt: Added.
+        * fast/js/regress/int-or-other-add-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-add-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-add.html: Added.
+        * fast/js/regress/int-or-other-div-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-div-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-max-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-max-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-min-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-min-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-mod-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-mod-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-mul-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-mul-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-neg-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-neg-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-neg-zero-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-neg-zero-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-sub-expected.txt: Added.
+        * fast/js/regress/int-or-other-sub-then-get-by-val-expected.txt: Added.
+        * fast/js/regress/int-or-other-sub-then-get-by-val.html: Added.
+        * fast/js/regress/int-or-other-sub.html: Added.
+        * fast/js/regress/int-overflow-local-expected.txt: Added.
+        * fast/js/regress/int-overflow-local.html: Added.
+        * fast/js/regress/integer-divide-expected.txt: Added.
+        * fast/js/regress/integer-divide.html: Added.
+        * fast/js/regress/make-indexed-storage-expected.txt: Added.
+        * fast/js/regress/make-indexed-storage.html: Added.
+        * fast/js/regress/method-on-number-expected.txt: Added.
+        * fast/js/regress/method-on-number.html: Added.
+        * fast/js/regress/new-array-buffer-dead-expected.txt: Added.
+        * fast/js/regress/new-array-buffer-dead.html: Added.
+        * fast/js/regress/new-array-buffer-push-expected.txt: Added.
+        * fast/js/regress/new-array-buffer-push.html: Added.
+        * fast/js/regress/new-array-dead-expected.txt: Added.
+        * fast/js/regress/new-array-dead.html: Added.
+        * fast/js/regress/new-array-push-expected.txt: Added.
+        * fast/js/regress/new-array-push.html: Added.
+        * fast/js/regress/number-test-expected.txt: Added.
+        * fast/js/regress/number-test.html: Added.
+        * fast/js/regress/object-closure-call-expected.txt: Added.
+        * fast/js/regress/object-closure-call.html: Added.
+        * fast/js/regress/object-test-expected.txt: Added.
+        * fast/js/regress/object-test.html: Added.
+        * fast/js/regress/poly-stricteq-expected.txt: Added.
+        * fast/js/regress/poly-stricteq.html: Added.
+        * fast/js/regress/polymorphic-structure-expected.txt: Added.
+        * fast/js/regress/polymorphic-structure.html: Added.
+        * fast/js/regress/polyvariant-monomorphic-get-by-id-expected.txt: Added.
+        * fast/js/regress/polyvariant-monomorphic-get-by-id.html: Added.
+        * fast/js/regress/rare-osr-exit-on-local-expected.txt: Added.
+        * fast/js/regress/rare-osr-exit-on-local.html: Added.
+        * fast/js/regress/register-pressure-from-osr-expected.txt: Added.
+        * fast/js/regress/register-pressure-from-osr.html: Added.
+        * fast/js/regress/resources: Added.
+        * fast/js/regress/resources/regress-post.js: Added.
+        * fast/js/regress/resources/regress-pre.js: Added.
+        (window.onerror):
+        * fast/js/regress/script-tests: Added.
+        * fast/js/regress/script-tests/Float32Array-matrix-mult.js: Added.
+        (makeEmptyMatrix):
+        (multiplyMatrices):
+        (checkMatricesEqual):
+        (parseMatrix.string.split.forEach):
+        (parseMatrix):
+        (printMatrix.pad):
+        (printMatrix):
+        * fast/js/regress/script-tests/Int16Array-bubble-sort.js: Added.
+        (bubbleSort):
+        (myRandom):
+        (validateSort):
+        * fast/js/regress/script-tests/Int16Array-load-int-mul.js: Added.
+        (stringHash):
+        * fast/js/regress/script-tests/Int8Array-load.js: Added.
+        (adler32):
+        * fast/js/regress/script-tests/adapt-to-double-divide.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/aliased-arguments-getbyval.js: Added.
+        (bar):
+        * fast/js/regress/script-tests/allocate-big-object.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/arity-mismatch-inlining.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/array-access-polymorphic-structure.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/array-with-double-add.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/array-with-double-increment.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/array-with-double-mul-add.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/array-with-double-sum.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/array-with-int32-add-sub.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/array-with-int32-or-double-sum.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/big-int-mul.js: Added.
+        (stringHash):
+        * fast/js/regress/script-tests/boolean-test.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/cast-int-to-double.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/cell-argument.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/cfg-simplify.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/cmpeq-obj-to-obj-other.js: Added.
+        (foo):
+        (bar):
+        (baz):
+        (dostuff):
+        * fast/js/regress/script-tests/constant-test.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/direct-arguments-getbyval.js: Added.
+        (bar):
+        * fast/js/regress/script-tests/double-pollution-getbyval.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/double-pollution-putbyoffset.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/external-arguments-getbyval.js: Added.
+        (foo):
+        (bar):
+        * fast/js/regress/script-tests/external-arguments-putbyval.js: Added.
+        (foo):
+        (bar):
+        * fast/js/regress/script-tests/fold-double-to-int.js: Added.
+        (Math.random):
+        * fast/js/regress/script-tests/function-dot-apply.js: Added.
+        (thingy):
+        (doCall):
+        (foo):
+        * fast/js/regress/script-tests/function-test.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/get-by-id-chain-from-try-block.js: Added.
+        (A):
+        (B):
+        (C):
+        (D):
+        (E):
+        (F):
+        (G):
+        (foo):
+        * fast/js/regress/script-tests/indexed-properties-in-objects.js: Added.
+        * fast/js/regress/script-tests/inline-arguments-access.js: Added.
+        (foo):
+        (bar):
+        * fast/js/regress/script-tests/inline-arguments-local-escape.js: Added.
+        (foo):
+        (bar):
+        * fast/js/regress/script-tests/inline-get-scoped-var.js: Added.
+        (foo.bar):
+        (foo):
+        * fast/js/regress/script-tests/inlined-put-by-id-transition.js: Added.
+        (foo):
+        (Foo):
+        * fast/js/regress/script-tests/int-or-other-abs-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-abs-zero-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-add-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-add.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-div-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-max-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-min-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-mod-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-mul-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-neg-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-neg-zero-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-sub-then-get-by-val.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-or-other-sub.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/int-overflow-local.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/integer-divide.js: Added.
+        (foo):
+        (bar):
+        * fast/js/regress/script-tests/make-indexed-storage.js: Added.
+        (foo):
+        (sum):
+        * fast/js/regress/script-tests/method-on-number.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/new-array-buffer-dead.js: Added.
+        (foo):
+        (bar):
+        (baz):
+        (thingy):
+        * fast/js/regress/script-tests/new-array-buffer-push.js: Added.
+        (foo):
+        (bar):
+        (baz):
+        (thingy):
+        * fast/js/regress/script-tests/new-array-dead.js: Added.
+        (foo):
+        (bar):
+        * fast/js/regress/script-tests/new-array-push.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/number-test.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/object-closure-call.js: Added.
+        (makeObjectClosure.foo):
+        (makeObjectClosure):
+        * fast/js/regress/script-tests/object-test.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/poly-stricteq.js: Added.
+        * fast/js/regress/script-tests/polymorphic-structure.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/polyvariant-monomorphic-get-by-id.js: Added.
+        (foo):
+        (Foo):
+        (Bar):
+        (bar):
+        * fast/js/regress/script-tests/rare-osr-exit-on-local.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/register-pressure-from-osr.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/simple-activation-demo.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/slow-array-profile-convergence.js: Added.
+        (foo):
+        (sum):
+        * fast/js/regress/script-tests/slow-convergence.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/sparse-conditional.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/splice-to-remove.js: Added.
+        * fast/js/regress/script-tests/string-hash.js: Added.
+        (stringHash):
+        * fast/js/regress/script-tests/string-repeat-arith.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/string-sub.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/string-test.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/structure-hoist-over-transitions.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/tear-off-arguments-simple.js: Added.
+        (bar):
+        * fast/js/regress/script-tests/tear-off-arguments.js: Added.
+        (bar):
+        * fast/js/regress/script-tests/temporal-structure.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/to-int32-boolean.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/undefined-test.js: Added.
+        (foo):
+        * fast/js/regress/simple-activation-demo-expected.txt: Added.
+        * fast/js/regress/simple-activation-demo.html: Added.
+        * fast/js/regress/slow-array-profile-convergence-expected.txt: Added.
+        * fast/js/regress/slow-array-profile-convergence.html: Added.
+        * fast/js/regress/slow-convergence-expected.txt: Added.
+        * fast/js/regress/slow-convergence.html: Added.
+        * fast/js/regress/sparse-conditional-expected.txt: Added.
+        * fast/js/regress/sparse-conditional.html: Added.
+        * fast/js/regress/splice-to-remove-expected.txt: Added.
+        * fast/js/regress/splice-to-remove.html: Added.
+        * fast/js/regress/string-hash-expected.txt: Added.
+        * fast/js/regress/string-hash.html: Added.
+        * fast/js/regress/string-repeat-arith-expected.txt: Added.
+        * fast/js/regress/string-repeat-arith.html: Added.
+        * fast/js/regress/string-sub-expected.txt: Added.
+        * fast/js/regress/string-sub.html: Added.
+        * fast/js/regress/string-test-expected.txt: Added.
+        * fast/js/regress/string-test.html: Added.
+        * fast/js/regress/structure-hoist-over-transitions-expected.txt: Added.
+        * fast/js/regress/structure-hoist-over-transitions.html: Added.
+        * fast/js/regress/tear-off-arguments-expected.txt: Added.
+        * fast/js/regress/tear-off-arguments-simple-expected.txt: Added.
+        * fast/js/regress/tear-off-arguments-simple.html: Added.
+        * fast/js/regress/tear-off-arguments.html: Added.
+        * fast/js/regress/temporal-structure-expected.txt: Added.
+        * fast/js/regress/temporal-structure.html: Added.
+        * fast/js/regress/to-int32-boolean-expected.txt: Added.
+        * fast/js/regress/to-int32-boolean.html: Added.
+        * fast/js/regress/undefined-test-expected.txt: Added.
+        * fast/js/regress/undefined-test.html: Added.
+
 2013-01-19  Philip Rogers  <pdr@google.com>
 
         Refactor SVGSVGElement to inherit from SVGStyledTransformableElement
