@@ -1,3 +1,35 @@
+2013-01-21  Bem Jones-Bey  <bjonesbe@adobe.com>
+
+        [CSS Exclusions] shape-outside on floats for rectangle shapes positioning
+        https://bugs.webkit.org/show_bug.cgi?id=100399
+
+        Reviewed by David Hyatt.
+
+        When a float has a shape-outside with non-zero x or y, the float's
+        exclusion behavior can happen at a completely different location than
+        where the float's content is painted. This patch brings initial
+        support for this behavior.
+
+        Test: fast/exclusions/shape-outside-floats/shape-outside-floats-positioning.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::flipFloatForWritingModeForChild): If called
+            during painting, make sure to pass that state down to the float
+            positioning so that it can use the proper position.
+        (WebCore::RenderBlock::paintFloats): Since this is concerned with
+            painting, use the position of the float, not the shape.
+        (WebCore::RenderBlock::positionNewFloats): Set the correct location
+            for the float, relative to the location of the shape.
+        (WebCore::RenderBlock::addOverhangingFloats): Add FIXME.
+        * rendering/RenderBlock.h:
+        (WebCore::RenderBlock::xPositionForFloatIncludingMargin): 
+        (WebCore::RenderBlock::yPositionForFloatIncludingMargin): Since the 
+            position of the shape (FloatingObject) can be different from the
+            position of the float's box (RenderBox), the position needs to be
+            computed differently for painting than for determining layout.
+        (WebCore::RenderBlock::flipFloatForWritingModeForChild): Change
+            signature to take painting flag.
+
 2013-01-21  Eric Carlson  <eric.carlson@apple.com>
 
         Support non-WebVTT cues from in-band text tracks
