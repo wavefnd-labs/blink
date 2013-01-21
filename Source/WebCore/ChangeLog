@@ -1,3 +1,28 @@
+2013-01-21  Joanmarie Diggs  <jdiggs@igalia.com>
+
+        Crash in AccessibilityTableCell::parentTable()
+        https://bugs.webkit.org/show_bug.cgi?id=107261
+
+        Reviewed by Chris Fleizach.
+
+        Test: accessibility/table-destroyed-crash.html
+
+        Getting the parent table in order to get the role value should not be
+        done when objects are being destroyed. Also, it does not seem safe to
+        assume we have an AXObjectCache.
+
+        Moving the logic from roleValue() to determineAccessibilityRole() has
+        the side effect of not being able to verify the cell is in an AXTable
+        when that AXTable has not yet been created. Therefore isTableCell()
+        should look to see if it is the descendant of an AXRow.
+
+        * accessibility/AccessibilityTableCell.cpp:
+        (WebCore::AccessibilityTableCell::parentTable):
+        (WebCore::AccessibilityTableCell::isTableCell):
+        (WebCore::AccessibilityTableCell::determineAccessibilityRole):
+        * accessibility/AccessibilityTableCell.h:
+        (AccessibilityTableCell):
+
 2013-01-21  Halton Huo  <halton.huo@intel.com>
 
         [GTK] Volume button should not be shown for videos without audio
