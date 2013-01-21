@@ -1,3 +1,40 @@
+2013-01-21  Viatcheslav Ostapenko  <sl.ostapenko@samsung.com>
+
+        [EFL][Qt][WebGl] Random crash in GraphicsContext3D::drawArrays
+        https://bugs.webkit.org/show_bug.cgi?id=107178
+
+        Reviewed by Noam Rosenthal.
+
+        Workaround for the problem in mesa when internal llvm pipe object is deleted
+        later than the screen object. Screen object is deleted because the corresponding 
+        X server display connection closed.
+        Keep X server display connection open until program shutdown. 
+        OffScreenRootWindow::display is now static, so there is no need to create
+        OffScreenRootWindow object on client side.
+
+        Fixes crash that appears during run of fast/canavs/webgl tests.
+
+        * platform/graphics/surfaces/glx/GraphicsSurfaceGLX.cpp:
+        (OffScreenRootWindow):
+        (WebCore::OffScreenRootWindow::DisplayConnection::DisplayConnection):
+        (DisplayConnection):
+        (WebCore::OffScreenRootWindow::DisplayConnection::~DisplayConnection):
+        (WebCore::OffScreenRootWindow::DisplayConnection::display):
+        (WebCore::OffScreenRootWindow::display):
+        (WebCore::OffScreenRootWindow::~OffScreenRootWindow):
+        (WebCore):
+        (WebCore::GraphicsSurfacePrivate::GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::createSurface):
+        (WebCore::GraphicsSurfacePrivate::createPixmap):
+        (WebCore::GraphicsSurfacePrivate::makeCurrent):
+        (WebCore::GraphicsSurfacePrivate::doneCurrent):
+        (WebCore::GraphicsSurfacePrivate::swapBuffers):
+        (WebCore::GraphicsSurfacePrivate::display):
+        (WebCore::GraphicsSurfacePrivate::size):
+        (WebCore::GraphicsSurfacePrivate::findFBConfigWithAlpha):
+        (WebCore::GraphicsSurfacePrivate::clear):
+        (GraphicsSurfacePrivate):
+
 2013-01-21  Michael[tm] Smith  <mike@w3.org>
 
         Implement the HTML <main> element.
