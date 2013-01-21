@@ -1,3 +1,24 @@
+2013-01-21  Dan Winship  <danw@gnome.org>
+
+        [Soup] Work around a glib bug
+        https://bugs.webkit.org/show_bug.cgi?id=106789
+
+        Reviewed by Martin Robinson.
+
+        In glib <= 2.35.4, g_input_stream_skip_async() applied to a
+        libsoup response stream will do a synchronous skip() in another
+        thread, which libsoup isn't expecting and doesn't have proper
+        locking for. Work around this until the next time we bump the glib
+        requirement by using read_async() (and throwing away the result)
+        instead of skip_async().
+
+        No new tests; fixes a race condition in existing tests with older
+        glib
+
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::redirectSkipCallback):
+        (WebCore::sendRequestCallback):
+
 2013-01-18  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: data grid resize is slow
