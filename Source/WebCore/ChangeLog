@@ -1,3 +1,49 @@
+2013-01-20  Yoshifumi Inoue  <yosin@chromium.org>
+
+        Dragging over an element with scrollbars should scroll the element when dragging near edges
+        https://bugs.webkit.org/show_bug.cgi?id=39725
+
+        Reviewed by Hajime Morita.
+
+        This patch introduces auto scrolling functionality during drag-and-drop
+        when drop source is near edge of scrollable element.
+
+        When drop source is inside 20px of scrollable element more than 200ms,
+        scrollable element is automatically scrolled every 50ms toward drop
+        source position, e.g. vertically scroll up when drop source is in top
+        edge.
+
+        Test: fast/events/drag-and-drop-autoscroll.html
+
+        * page/AutoscrollController.cpp:
+        (WebCore::AutoscrollController::AutoscrollController): Changed to initialize m_dragAndDropAutoscrollStartTime.
+        (WebCore::AutoscrollController::updateDragAndDrop): Added for start/stop autoscroll during drag-and-drop.
+        (WebCore::AutoscrollController::autoscrollTimerFired): Changed to add autoscroll for drag-and-drop, and to pass last know position to RenderBox::autoscroll().
+        * page/AutoscrollController.h:
+        (AutoscrollController): Changed to add updateDragAndDrop() and m_dragAndDropAutoscrollReferencePosition and m_dragAndDropAutoscrollStartTime.
+        * page/ChromeClient.h:
+        (WebCore::ChromeClient): Changed to add new function shouldAutoscrollForDragAndDrop().
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::updateDragAndDrop): Changed to call AutoscrollController::updateDragAndDrop().
+        (WebCore::EventHandler::clearDragState): Changed to call stopAutoscrollTimer().
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::autoscroll): Changed for new parameter position.
+        (WebCore::RenderBox::calculateAutoscrollDirection): Added for autoscroll.
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::autoscroll):  Changed for new parameter position and move updateSelectionForMouseDrag() to AutoscrollController.
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::autoscroll):  Changed for new parameter position.
+        * rendering/RenderListBox.h:
+        (RenderListBox):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::autoscroll):  Changed for new parameter position.
+        * rendering/RenderTextControlSingleLine.h:
+        (RenderTextControlSingleLine):
+
 2013-01-20  Laszlo Gombos  <l.gombos@samsung.com>
 
         Simplify a list of negative PLATFORM() tests
