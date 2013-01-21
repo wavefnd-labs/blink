@@ -1,3 +1,25 @@
+2013-01-21  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: should not dispatch 'input' events if the element value is not updated
+        https://bugs.webkit.org/show_bug.cgi?id=107429
+
+        Reviewed by Kentaro Hara.
+
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/common-input-element-attributes.html#common-event-behaviors
+        > any time the user causes the element's value to change, the user agent
+        > must queue a task to fire a simple event that bubbles named input at the
+        > input element.
+
+        Tests:
+        fast/forms/time-multiple-fields/time-multiple-fields-keyboard-event.html
+        is updated to cover this change.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::editControlValueChanged):
+        If the new value is equivalent to the old value, don't dispatch events.
+        However we should recalculate validity and call notifyFormStateChanged
+        because input.validity.badInput state might be changed.
+
 2013-01-21  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: Do not dispatch mousemove when emulating touch event and no touch is active
