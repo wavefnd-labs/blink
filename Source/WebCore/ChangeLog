@@ -1,3 +1,94 @@
+2013-01-21  Eric Carlson  <eric.carlson@apple.com>
+
+        Support non-WebVTT cues from in-band text tracks
+        https://bugs.webkit.org/show_bug.cgi?id=107046
+
+        Reviewed by Sam Weinig.
+
+        * CMakeLists.txt: Add new files.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlTextTrackContainerElement::updateDisplay): Pass video size to getDisplayTree.
+
+        * html/track/InbandTextTrack.cpp:
+        (WebCore::InbandTextTrack::addGenericCue): New, create a generic cue if it doesn't already exist.
+        (WebCore::InbandTextTrack::addWebVTTCue): Renamed from addCue.
+        * html/track/InbandTextTrack.h:
+
+        * html/track/TextTrack.cpp:
+        (WebCore::TextTrack::hasCue): Moved from InbandTextTrack.cpp, use operator == instead of inline
+            comparison so derived TextTrackCues can be compared.
+        * html/track/TextTrack.h:
+
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCueBox::applyCSSProperties): Interface change.
+        (WebCore::TextTrackCue::TextTrackCue): Don't create the display tree in the constructor, it may
+            never be needed.
+        (WebCore::TextTrackCue::createDisplayTree): New, create the display tree.
+        (WebCore::TextTrackCue::displayTreeInternal): Display tree accessor, allows it to be created lazily.
+        (WebCore::TextTrackCue::setAlign): Alignment -> CueAlignment.
+        (WebCore::TextTrackCue::setIsActive): Use displayTreeInternal().
+        (WebCore::TextTrackCue::getDisplayTree): Use displayTreeInternal(), pass video size to applyCSSProperties.
+        (WebCore::TextTrackCue::removeDisplayTree): Use displayTreeInternal().
+        (WebCore::TextTrackCue::operator==): New.
+        * html/track/TextTrackCue.h:
+        (WebCore::TextTrackCue::getAlignment): Alignment -> CueAlignment.
+        (WebCore::TextTrackCue::operator!=): New.
+        (WebCore::TextTrackCue::cueType): New, cue type identified needed by operator==.
+        (WebCore::TextTrackCue::ownerDocument): New.
+
+        * html/track/TextTrackCueGeneric.cpp: Added.
+        (WebCore::TextTrackCueGenericBox::create):
+        (WebCore::TextTrackCueGenericBox::TextTrackCueGenericBox):
+        (WebCore::TextTrackCueGenericBox::applyCSSProperties):
+        (WebCore:::TextTrackCue):
+        (WebCore::TextTrackCueGeneric::createDisplayTree):
+        (WebCore::TextTrackCueGeneric::operator==):
+        * html/track/TextTrackCueGeneric.h: Added.
+        (WebCore::TextTrackCueGeneric::create):
+        (WebCore::TextTrackCueGeneric::~TextTrackCueGeneric):
+        (WebCore::TextTrackCueGeneric::baseFontSizeRelativeToVideoHeight):
+        (WebCore::TextTrackCueGeneric::setBaseFontSizeRelativeToVideoHeight):
+        (WebCore::TextTrackCueGeneric::fontSizeMultiplier):
+        (WebCore::TextTrackCueGeneric::setFontSizeMultiplier):
+        (WebCore::TextTrackCueGeneric::fontName):
+        (WebCore::TextTrackCueGeneric::setFontName):
+        (WebCore::TextTrackCueGeneric::operator!=):
+        (WebCore::TextTrackCueGeneric::cueType):
+
+        * platform/graphics/InbandTextTrackPrivateClient.h:
+        * platform/graphics/avfoundation/InbandTextTrackPrivateAVF.cpp:
+        (WebCore::InbandTextTrackPrivateAVF::processCueAttributes): Copy cue attributes into GenericCueData
+            struct instead of trying to convert to WebVTT settings string. Process font size,font base
+            size, font name, and vertical layout attributes,
+        (WebCore::InbandTextTrackPrivateAVF::processCue): Create separate cues for each attributed
+            string in the array because each one can be at a different screen location.
+        (WebCore::InbandTextTrackPrivateAVF::resetCueValues):
+        * platform/graphics/avfoundation/InbandTextTrackPrivateAVF.h:
+        (InbandTextTrackPrivateAVF):
+
+        * platform/graphics/avfoundation/MediaPlayerPrivateAVFoundation.cpp:
+        (WebCore::MediaPlayerPrivateAVFoundation::seekCompleted): Reset any partially accumulated cues
+            delivered since the seek was started.
+        (WebCore::MediaPlayerPrivateAVFoundation::addGenericCue): Renamed from flushCurrentCue.
+        * platform/graphics/avfoundation/MediaPlayerPrivateAVFoundation.h:
+
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm:
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::createAVPlayer): Whitespace cleanup.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::createAVPlayerItem): Ditto.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::tracksChanged): Tell legible output to deliver cues
+            without any additional styling needed by the internal renderer.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::processTextTracks):
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::setCurrentTrack): Do nothing if asked to change
+            to the track that is already current.
+        (-[WebCoreAVFMovieObserver legibleOutput:didOutputAttributedStrings:nativeSampleBuffers:forItemTime:]):
+            Check to make sure that the client callback isn't NULL.
+
 2013-01-21  Robert Hogan  <robert@webkit.org>
 
         Misaligned logo on www.nzherald.co.nz possibly due to negative margin-top
