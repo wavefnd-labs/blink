@@ -1,3 +1,25 @@
+2013-01-20  Shinya Kawanaka  <shinyak@chromium.org>
+
+        [Shadow DOM] Specifying scrollbar style of an element having RenderLayer in ShadowDOM does not work.
+        https://bugs.webkit.org/show_bug.cgi?id=107222
+
+        Reviewed by Simon Fraser.
+
+        When specifying scrollbar style in ShadowDOM, it's not used. If the host element of ShadowDOM has scrollbar style,
+        it's used instead.
+
+        The root cause of this bug is that RenderLayer always see shadowAncestorNode's style. Some elements having
+        UserAgent ShadowDOM (e.g. <textarea>) should see host's style, but most of elements should see its style.
+
+        Test: fast/dom/shadow/scrollbar.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::rendererForScrollbar):
+        (WebCore):
+        (WebCore::RenderLayer::createScrollbar):
+        (WebCore::RenderLayer::updateScrollCornerStyle):
+        (WebCore::RenderLayer::updateResizerStyle):
+
 2013-01-20  Yoshifumi Inoue  <yosin@chromium.org>
 
         Dragging over an element with scrollbars should scroll the element when dragging near edges
