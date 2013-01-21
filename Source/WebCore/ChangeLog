@@ -1,3 +1,49 @@
+2013-01-20  Shinya Kawanaka  <shinyak@chromium.org>
+
+        Distribution state becomes inconsistent with content/shadow reprojection
+        https://bugs.webkit.org/show_bug.cgi?id=106634
+
+        Reviewed by Hajime Morita.
+
+        Distribution should be resolved from shallower ShadowDOM to deeper Shadow DOM. However, in the current implementation,
+        there is a case that distribution for deeper ShadowDOM happens to be resolved before distribution
+        for shallower ShadowDOM is resolved.
+
+        Here, we have 2 problems about distribution.
+        1) Invalidation state is not propagated to nested (= deeper) ShadowDOM.
+            - This causes deeper ShadowDOM looks having a valid distribution though it should be invalid.
+        2) We are not resolving shallower ShadowDOM when deeper ShadowDOM's distribution is needed.
+            - Because of (1), we have to check all the ancestor ShadowDOM.
+
+        For (1), we change invalidate() to invalidate nested ShadowDOM's distribution as well.
+        For (2), when resolving distribution, we will check the ancestor ShadowDOM's distribution state. If the ancestor's
+        distribution is not valid, we resolve it first.
+
+        For optimization of (1), actually we can skip invalidating distribution of some ShadowDOMs.
+        If ShadowRoot of deeper ShadowDOM does not have an InsertionPoint as children, we can skip invalidating
+        its distribution, because only children can be distributed to InsertionPoint.
+
+        Tests: fast/dom/shadow/distribution-crash.html
+               fast/dom/shadow/nested-reprojection-inconsistent.html
+
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::attach): Should resolve distribution from ancestor.
+        * dom/ElementShadow.h:
+        * html/shadow/ContentDistributor.cpp:
+        (WebCore::ContentDistributor::distribute): Added ASSERT that the parent ShadowRoot's distribution is resolved.
+        (WebCore::ContentDistributor::invalidate): For each InsertionPoint, we have to invalidate
+        its parent element's distribution (if it has ElementShadow).
+        (WebCore::ContentDistributor::ensureDistribution):
+        * html/shadow/ContentDistributor.h:
+        (WebCore::ContentDistributor::isValid):
+        * html/shadow/HTMLShadowElement.cpp:
+        (WebCore::HTMLShadowElement::olderShadowRoot): Should resolve distribution from ancestor.
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::InsertionPoint::attach): ditto.
+        (WebCore::InsertionPoint::detach): ditto.
+        (WebCore::InsertionPoint::getDistributedNodes): ditto.
+        (WebCore::resolveReprojection): ditto.
+
 2013-01-20  Dominic Mazzoni  <dmazzoni@google.com>
 
         Make SpeechSynthesis compile in the Chromium port
