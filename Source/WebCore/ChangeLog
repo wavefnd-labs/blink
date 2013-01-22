@@ -1,3 +1,44 @@
+2013-01-22  Christophe Dumez  <christophe.dumez@intel.com>
+
+        [gstreamer] MediaPlayerPrivateGStreamer should take ownership of the playbin
+        https://bugs.webkit.org/show_bug.cgi?id=107445
+
+        Reviewed by Philippe Normand.
+
+        In gstreamer 1.0, gst_element_factory_make() now returns a floating reference.
+        MediaPlayerPrivateGStreamer calls gst_element_factory_make() to create the
+        playbin object but does not take ownership of the object. As a consequence,
+        the object keeps floating until it is unref'd in the
+        MediaPlayerPrivateGStreamer destructor.
+
+        This patch uses a GRefPtr<GstElement> to store the playbin object and only
+        adopt the object returned by gst_element_factory_make() if gstreamer 0.10
+        is used. When gstreamer 1.0 is used, the returned object will not be adopted,
+        which will remove the floating reference. This way, we ensure that the
+        playbin object is owned by MediaPlayerPrivateGStreamer.
+
+        No new tests, no behavior change for layout tests.
+
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::load):
+        (WebCore::MediaPlayerPrivateGStreamer::playbackPosition):
+        (WebCore::MediaPlayerPrivateGStreamer::changePipelineState):
+        (WebCore::MediaPlayerPrivateGStreamer::duration):
+        (WebCore::MediaPlayerPrivateGStreamer::seek):
+        (WebCore::MediaPlayerPrivateGStreamer::paused):
+        (WebCore::MediaPlayerPrivateGStreamer::notifyPlayerOfVideo):
+        (WebCore::MediaPlayerPrivateGStreamer::notifyPlayerOfAudio):
+        (WebCore::MediaPlayerPrivateGStreamer::setVolume):
+        (WebCore::MediaPlayerPrivateGStreamer::notifyPlayerOfVolumeChange):
+        (WebCore::MediaPlayerPrivateGStreamer::setRate):
+        (WebCore::MediaPlayerPrivateGStreamer::buffered):
+        (WebCore::MediaPlayerPrivateGStreamer::handleMessage):
+        (WebCore::MediaPlayerPrivateGStreamer::fillTimerFired):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h:
+        (MediaPlayerPrivateGStreamer):
+
 2013-01-22  Yury Semikhatsky  <yurys@chromium.org>
 
         Unreviewed. Fix closure compiler warning in inspector front-end after r140390.
