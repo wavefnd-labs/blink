@@ -1,3 +1,24 @@
+2013-01-22  Adam Barth  <abarth@webkit.org>
+
+        Wean BackgroundHTMLParser off HTMLInputStream
+        https://bugs.webkit.org/show_bug.cgi?id=107575
+
+        Reviewed by Eric Seidel.
+
+        The BackgroundHTMLParser doesn't need to use HTMLInputStream because it
+        doesn't need to handle nested calls to document.write. Instead, we can
+        just use a SegmentedString directly, which will let us checkpoint
+        m_input for speculation.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::append):
+        (WebCore::BackgroundHTMLParser::finish):
+        (WebCore::BackgroundHTMLParser::markEndOfFile):
+        (WebCore):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        * html/parser/BackgroundHTMLParser.h:
+        (BackgroundHTMLParser):
+
 2013-01-22  Sergio Villar Senin  <svillar@igalia.com>
 
         [Soup] Random thread crashes
