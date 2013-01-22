@@ -1,3 +1,93 @@
+2013-01-22  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Remove dependency on IDBKey type from IDLs
+        https://bugs.webkit.org/show_bug.cgi?id=106912
+
+        Reviewed by Kentaro Hara.
+
+        This is a preamble to wkbug.com/97375 "Remove IDBKey from WebKitIDL"; IDBKey is
+        not a concept from the Indexed DB spec but a convenient internal type. It was
+        exposed in the IDL with custom binding code and special cases in the generator
+        to map from script values to the WebCore type. To remove those special cases
+        and match the WebIDL in the spec, the IDLs are changed to use "any" and the
+        implementations now take ScriptValues. This does mean that each call site must
+        call into IDBBindingUtilities to map from ScriptValue to IDBKey.
+
+        No new tests - just a refactor.
+
+        * Modules/indexeddb/IDBAny.cpp: Remove IDBKey as a variant type - just use ScriptValue.
+        * Modules/indexeddb/IDBAny.h:
+        (WebCore):
+        (IDBAny):
+        * Modules/indexeddb/IDBCursor.cpp:
+        (WebCore::IDBCursor::continueFunction): Now takes any/ScriptValue.
+        (WebCore):
+        * Modules/indexeddb/IDBCursor.h:
+        (WebCore::IDBCursor::continueFunction):
+        (IDBCursor):
+        * Modules/indexeddb/IDBCursor.idl:
+        * Modules/indexeddb/IDBCursorBackendImpl.cpp:
+        (WebCore::IDBCursorBackendImpl::deleteFunction):
+        * Modules/indexeddb/IDBFactory.cpp:
+        (WebCore::IDBFactory::cmp): Now takes any/ScriptValue.
+        * Modules/indexeddb/IDBFactory.h:
+        (IDBFactory):
+        * Modules/indexeddb/IDBFactory.idl:
+        * Modules/indexeddb/IDBIndex.cpp:
+        (WebCore::IDBIndex::openCursor): Now takes any/ScriptValue.
+        (WebCore::IDBIndex::count): Now takes any/ScriptValue.
+        (WebCore::IDBIndex::openKeyCursor): Now takes any/ScriptValue.
+        (WebCore::IDBIndex::get): Now takes any/ScriptValue.
+        (WebCore::IDBIndex::getKey): Now takes any/ScriptValue.
+        * Modules/indexeddb/IDBIndex.h:
+        (WebCore::IDBIndex::openCursor):
+        (IDBIndex):
+        (WebCore::IDBIndex::openKeyCursor):
+        * Modules/indexeddb/IDBIndex.idl:
+        * Modules/indexeddb/IDBKeyRange.cpp:
+        (WebCore::IDBKeyRange::create): Add helper for back-end creation of single-key ranges.
+        (WebCore):
+        (WebCore::IDBKeyRange::lowerValue): Impl. of new "any" type accessor exposed to script.
+        (WebCore::IDBKeyRange::upperValue): Ditto.
+        (WebCore::IDBKeyRange::only): Now takes any/ScriptValue.
+        (WebCore::IDBKeyRange::lowerBound): Now takes any/ScriptValue.
+        (WebCore::IDBKeyRange::upperBound): Now takes any/ScriptValue.
+        (WebCore::IDBKeyRange::bound): Now takes any/ScriptValue.
+        * Modules/indexeddb/IDBKeyRange.h:
+        (IDBKeyRange):
+        (WebCore::IDBKeyRange::lowerBound):
+        (WebCore::IDBKeyRange::upperBound):
+        (WebCore::IDBKeyRange::bound):
+        * Modules/indexeddb/IDBKeyRange.idl:
+        * Modules/indexeddb/IDBObjectStore.cpp:
+        (WebCore::IDBObjectStore::get): Now takes any/ScriptValue.
+        (WebCore::IDBObjectStore::add): Now takes any/ScriptValue.
+        (WebCore):
+        (WebCore::IDBObjectStore::put): Now takes any/ScriptValue.
+        (WebCore::IDBObjectStore::deleteFunction): Now takes any/ScriptValue.
+        (WebCore::IDBObjectStore::openCursor): Now takes any/ScriptValue.
+        (WebCore::IDBObjectStore::count): Now takes any/ScriptValue.
+        * Modules/indexeddb/IDBObjectStore.h:
+        (IDBObjectStore):
+        (WebCore::IDBObjectStore::openCursor):
+        * Modules/indexeddb/IDBObjectStore.idl:
+        * Modules/indexeddb/IDBRequest.cpp: Result IDBAny type is now ScriptValue.
+        (WebCore::IDBRequest::onSuccess):
+        * bindings/js/IDBBindingUtilities.cpp:
+        (WebCore::scriptValueToIDBKey): The inverse of idbKeyToScriptValue().
+        (WebCore):
+        * bindings/js/IDBBindingUtilities.h:
+        (WebCore):
+        * bindings/js/JSIDBAnyCustom.cpp:
+        (WebCore::toJS):
+        * bindings/v8/IDBBindingUtilities.cpp:
+        (WebCore::scriptValueToIDBKey): Ditto.
+        (WebCore):
+        * bindings/v8/IDBBindingUtilities.h:
+        (WebCore):
+        * bindings/v8/custom/V8IDBAnyCustom.cpp:
+        (WebCore::toV8): Remove IDBKey variant type.
+
 2013-01-22  Justin Schuh  <jschuh@chromium.org>
 
         TRANSFORMATION_MATRIX_USE_X86_64_SSE2 broken for 64-bit Windows builds
