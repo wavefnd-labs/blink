@@ -1,3 +1,35 @@
+2013-01-21  Kent Tamura  <tkent@chromium.org>
+
+        Date selection from calendar picker should dispatch 'input' event in addition to 'change' event
+        https://bugs.webkit.org/show_bug.cgi?id=107427
+
+        Reviewed by Kentaro Hara.
+
+        According to the specification and Opera's behavior, we should dispatch
+        not only 'change' event but also 'input' event when a user chooses a
+        date from the calender picker.
+
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/common-input-element-attributes.html#common-event-behaviors
+        > When the user agent changes the element's value on behalf of the user
+        > (e.g. as part of a form prefilling feature), the user agent must follow
+        > these steps:
+        > 1. If the input event applies, queue a task to fire a simple event
+        > that bubbles named input at the input element.
+        > 2. If the change event applies, queue a task to fire a simple event
+        > that bubbles named change at the input element.
+
+        Tests: platform/chromium/fast/forms/calendar-picker/date-picker-events.html
+               platform/chromium/fast/forms/calendar-picker/datetimelocal-picker-events.html
+
+        * html/InputType.cpp:
+        (WebCore::InputType::setValue): Add DispatchInputAndChangeEvent support.
+        * html/BaseChooserOnlyDateAndTimeInputType.cpp:
+        (WebCore::BaseChooserOnlyDateAndTimeInputType::didChooseValue):
+        Use DispatchInputAndChangeEvent, not DispatchChangeEvent.
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::pickerIndicatorChooseValue):
+        Ditto.
+
 2013-01-21  Justin Schuh  <jschuh@chromium.org>
 
         [CHROMIUM] Suppress c4267 build warnings for Win64 targets
