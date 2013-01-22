@@ -1,3 +1,58 @@
+2013-01-22  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSS Regions] min-max height will not trigger a relayout when set on a region with auto-height
+        https://bugs.webkit.org/show_bug.cgi?id=103738
+
+        Reviewed by David Hyatt.
+
+        When the style of an auto-height region changes with different min/max-height, we have to make sure
+        that the 2-pass layout algorithm is run so that the region height is properly computed. When doing a 2-pass layout 
+        for auto-height regions, we have to make sure that in the first pass, all auto-height regions start without a previously
+        computed overrideLogicalContentHeight, otherwise we may end-up with incorrect results, illustrated by tests
+        autoheight-two-pass-layout-complex-001.html and autoheight-two-pass-layout-complex-002.html.
+
+        If we do not have auto height regions, a single pass layout in enough to correctly flow content inside regions.
+        When we have auto height regions, the algorithm to lay out content should be:
+        1. If the flow thread content does not need lay out, we do a single pass layout.
+        If during the layout, an auto-height region needs layout or a normal (not auto height) region changes its box dimensions,
+        we need to perform a new 2-pass layout after this layout completes. If not, we bail out and skip step 2.
+        2. Do a full two pass layout and make sure that all auto height regions start the 2-pass layout without a previously computed
+        override logical content height.
+
+        Tests: fast/regions/autoheight-region-decrease-maxheight.html
+               fast/regions/autoheight-region-decrease-minheight.html
+               fast/regions/autoheight-region-decrease-width.html
+               fast/regions/autoheight-region-increase-maxheight.html
+               fast/regions/autoheight-region-increase-minheight.html
+               fast/regions/autoheight-region-increase-width.html
+               fast/regions/autoheight-region-new-maxheight-vrl.html
+               fast/regions/autoheight-region-new-maxheight.html
+               fast/regions/autoheight-region-new-minheight-vlr.html
+               fast/regions/autoheight-region-new-minheight.html
+               fast/regions/autoheight-region-remove-maxheight.html
+               fast/regions/autoheight-region-remove-minheight.html
+               fast/regions/autoheight-two-pass-layout-complex-001.html
+               fast/regions/autoheight-two-pass-layout-complex-002.html
+               fast/regions/region-height-auto-to-defined.html
+               fast/regions/region-height-defined-to-auto.html
+
+        * rendering/FlowThreadController.cpp: Added a flag that is needed to mark whether we need a full 2-pass layout.
+        (WebCore::FlowThreadController::FlowThreadController):
+        * rendering/FlowThreadController.h:
+        (WebCore::FlowThreadController::needsTwoPassLayoutForAutoHeightRegions):
+        (WebCore::FlowThreadController::setNeedsTwoPassLayoutForAutoHeightRegions):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::resetRegionsOverrideLogicalContentHeight): Use invalidateRegions because we need also to mark the flow thread as needing layout.
+        (WebCore::RenderFlowThread::markAutoLogicalHeightRegionsForLayout):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::layout): Make sure we do a 2-pass layout if needed.
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::layoutContentInAutoLogicalHeightRegions): Added a new function that models the layout algorithm for the case when we have auto height regions
+        and flow threads.
+        (WebCore::RenderView::layout):
+        (WebCore::RenderView::checkTwoPassLayoutForAutoHeightRegions):
+        * rendering/RenderView.h:
+
 2013-01-22  Adam Barth  <abarth@webkit.org>
 
         ENABLE(NEW_XML) isn't used by anyone and no one is actively working on it
