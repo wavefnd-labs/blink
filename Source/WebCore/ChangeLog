@@ -1,3 +1,22 @@
+2013-01-22  Min Qin  <qinmin@chromium.org>
+
+        Fix a race condition on SkBitmap::lockPixels()/unlockPixels() for lazy image decoding
+        https://bugs.webkit.org/show_bug.cgi?id=107404
+
+        Reviewed by Stephen White.
+
+        Skbitmap::lockPixels()/unlockPixels() are not threadsafe.
+        unlike SkPixelRef, these 2 calls are not protected by an internal mutex.
+        Bugfix, no behaviral change and hard to test as tests will be flaky.
+
+        * platform/graphics/chromium/ImageDecodingStore.cpp:
+        (WebCore::ImageDecodingStore::lockCache):
+        (WebCore::ImageDecodingStore::unlockCache):
+        (WebCore::ImageDecodingStore::insertAndLockCache):
+        (WebCore::ImageDecodingStore::overwriteAndLockCache):
+        * platform/graphics/chromium/ImageDecodingStore.h:
+        (ImageDecodingStore):
+
 2013-01-22  Eric Seidel  <eric@webkit.org>
 
         Make CompactHTMLToken a little more compact
