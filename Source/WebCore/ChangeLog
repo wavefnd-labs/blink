@@ -1,3 +1,29 @@
+2013-01-22  Robert Hogan  <robert@webkit.org>
+
+        When we do setAttribute("border", null) on a table we should create a border like every other browser
+        https://bugs.webkit.org/show_bug.cgi?id=102112
+
+        Reviewed by Ryosuke Niwa.
+
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/rendering.html#tables says:
+        "If the [table's border] attribute is present but parsing the attribute's value using the rules for parsing 
+        non-negative integers generates an error, a default value of 1px is expected to be used for that property instead."
+
+        Match the spec and bring us into line with other browsers by observing the 'parsing non-negative integers' algorithm.
+
+        Tests: fast/dom/HTMLTableElement/table-with-invalid-border.html
+               fast/table/table-with-borderattr-null.html
+               fast/table/table-with-borderattr-set-to-null.html
+
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::parseBorderWidthAttribute):
+        (WebCore::HTMLElement::applyBorderAttributeToStyle):
+        * html/HTMLElement.h:
+        (HTMLElement):
+        * html/HTMLTableElement.cpp:
+        (WebCore::HTMLTableElement::collectStyleForPresentationAttribute):
+        (WebCore::HTMLTableElement::parseAttribute):
+
 2013-01-22  Abhishek Arya  <inferno@chromium.org>
 
         Heap-use-after-free in WebCore::RenderObject::isDescendantOf
