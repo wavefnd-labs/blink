@@ -1,3 +1,32 @@
+2013-01-22  Elliott Sprehn  <esprehn@chromium.org>
+
+        Assertion parent->inDocument() failed in WebCore::PseudoElement::PseudoElement
+        https://bugs.webkit.org/show_bug.cgi?id=106224
+
+        Reviewed by Ojan Vafai.
+
+        Appending a node that contains a <style> and also elements that should have
+        generated content can cause us to create PseudoElements in nodes that are not
+        yet inDocument because we may recalcStyle in HTMLStyleElement::insertedInto
+        triggering a reattach() which could then traverse into the siblings of the
+        <style> attaching them even though they are not yet inDocument.
+
+        This means that we should not assert about the parent of a PseudoElement
+        being inDocument as this is not always the case.
+
+        Instead forward Node::insertedInto and removedFrom notifications to
+        PseudoElements so they will correctly get their inDocument bit set. Nothing
+        in the code appears to depend on them being inDocument we just make sure to
+        set it so they're consistent with the rest of the document.
+
+        No new tests, there's no way to test that PseudoElements are really inDocument.
+
+        * dom/Element.cpp:
+        (WebCore::Element::insertedInto):
+        (WebCore::Element::removedFrom):
+        * dom/PseudoElement.cpp:
+        (WebCore::PseudoElement::PseudoElement):
+
 2013-01-22  Alexis Menard  <alexis@webkit.org>
 
         Allow construction of unprefixed transition DOM events.
