@@ -1,3 +1,36 @@
+2013-01-22  Matt Falkenhagen  <falken@chromium.org>
+
+        Move top layer flag from ElementRareData to NodeFlags
+        https://bugs.webkit.org/show_bug.cgi?id=107542
+
+        Reviewed by Hajime Morita.
+
+        This is a speculative fix for a perf regression (https://bugs.webkit.org/show_bug.cgi?id=106726)
+        likely due to checking the top layer flag in Element::removedFrom. It
+        also simplifies code dealing with top layer and makes it no longer
+        necessary to allocate rare data for top layer.
+
+        * dom/Element.cpp:
+        (WebCore::Element::removedFrom): Check isInTopLayer first in case it helps fix the perf regression.
+        (WebCore):
+        * dom/Element.h: Move top layer functions from Element to Node.
+        * dom/ElementRareData.h:
+        (ElementRareData):
+        (WebCore::ElementRareData::ElementRareData): Remove top layer flag from ElementRareData.
+        * dom/Node.cpp: Move top layer functions from Element to Node.  
+        (WebCore):
+        (WebCore::Node::setIsInTopLayer):
+        * dom/Node.h:
+        (Node):
+        (WebCore::Node::isInTopLayer):
+        * dom/NodeRenderingContext.cpp: Remove unnecessary casts to Element for isInTopLayer().
+        (WebCore::isRendererReparented):
+        (WebCore::NodeRenderingContext::previousRenderer):
+        (WebCore::NodeRenderingContext::parentRenderer):
+        * rendering/RenderLayer.cpp: Ditto.
+        (WebCore::RenderLayer::isInTopLayer):
+        (WebCore::RenderLayer::rebuildZOrderLists):
+
 2013-01-22  Mark Lam  <mark.lam@apple.com>
 
         Fix broken mac builds due to <http://trac.webkit.org/changeset/140399>.
