@@ -1,3 +1,33 @@
+2013-01-22  Simon Fraser  <simon.fraser@apple.com>
+
+        Fix scrollperf logging
+        https://bugs.webkit.org/show_bug.cgi?id=107589
+
+        Reviewed by Tim Horton.
+
+        The scrollperf logging had two issues:
+
+        1. It relied on a paint logging a "filled" event, but it's possible
+        for existing tiles to be moved into the viewport and filling it, so
+        we need to log from the scrolling thread both when we have unfilled pixels,
+        and when the last scroll revealed unfilled pixels.
+        
+        2. On some pages, z-index:-1 elements behind the body cause the root
+        TileCache to have drawsContent set to false, so none of its tiles paint. In
+        that case, the check for a non-zero paintCount in TileCache::blankPixelCountForTiles()
+        was wrong; we don't think there's a way to have an unpainted tile in the tree.
+        
+        Also fix the signature of blankPixelCountForTiles() to take references.
+
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.h:
+        (ScrollingTreeScrollingNodeMac):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::ScrollingTreeScrollingNodeMac):
+        (WebCore::ScrollingTreeScrollingNodeMac::logExposedUnfilledArea):
+        * platform/graphics/ca/mac/TileCache.h:
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::blankPixelCountForTiles):
+
 2013-01-22  Eric Seidel  <eric@webkit.org>
 
         Make CompactHTMLToken a little more compact
