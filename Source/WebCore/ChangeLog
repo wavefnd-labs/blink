@@ -1,3 +1,38 @@
+2013-01-22  Christophe Dumez  <christophe.dumez@intel.com>
+
+        [gstreamer] GstBus signal watch should be removed on clean up
+        https://bugs.webkit.org/show_bug.cgi?id=107544
+
+        Reviewed by Philippe Normand.
+
+        Our gstreamer backend code currently calls gst_bus_add_signal_watch()
+        on GstBus to add a signal watch. As per the gstreamer  documentation,
+        "To clean up, the caller is responsible for calling
+        gst_bus_remove_signal_watch() as many times as this function is
+        called". This is because gst_bus_add_signal_watch() causes the GstBus
+        object to be ref'd and gst_bus_remove_signal_watch() needs to be
+        called to properly unref it.
+
+        This patch makes sure that gst_bus_remove_signal_watch() is called
+        on the GstBus object when cleaning up. This patch also uses smart
+        pointers for GstBus objects for consistency.
+
+        No new tests, no behavior change for layout tests.
+
+        * platform/audio/gstreamer/AudioDestinationGStreamer.cpp:
+        (WebCore::AudioDestinationGStreamer::AudioDestinationGStreamer):
+        (WebCore::AudioDestinationGStreamer::~AudioDestinationGStreamer):
+        * platform/audio/gstreamer/AudioFileReaderGStreamer.cpp:
+        (WebCore::AudioFileReader::~AudioFileReader):
+        (WebCore::AudioFileReader::decodeAudioForBusCreation):
+        * platform/graphics/gstreamer/GStreamerGWorld.cpp:
+        (WebCore::GStreamerGWorld::GStreamerGWorld):
+        * platform/graphics/gstreamer/GStreamerVersioning.cpp:
+        (webkitGstPipelineGetBus):
+        * platform/graphics/gstreamer/GStreamerVersioning.h:
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer):
+
 2013-01-22  Adam Barth  <abarth@webkit.org>
 
         BackgroundHTMLParser should simulate tree building in a separate function
