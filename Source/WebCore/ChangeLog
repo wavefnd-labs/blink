@@ -1,3 +1,41 @@
+2013-01-22  Adam Barth  <abarth@webkit.org>
+
+        The BackgroundHTMLParser shouldn't pause when waiting for scripts
+        https://bugs.webkit.org/show_bug.cgi?id=107584
+
+        Reviewed by Eric Seidel.
+
+        Previously, the BackgroundHTMLParser would pause itself when it
+        encountered a scrip tag and wait for a signal from the main thread to
+        continue. After this patch, the BackgroundHTMLParser continues ahead
+        and the main thread keeps a queue of pending tokens.
+
+        This patch brings us closer to speculative parsing because when the
+        BackgroundHTMLParser is continuing ahead, it is speculating that it is
+        in the correct state. A future patch will let us abort incorret
+        speculations and resume from an eariler point in the input stream.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::checkThatTokensAreSafeToSendToAnotherThread):
+        (WebCore::BackgroundHTMLParser::BackgroundHTMLParser):
+        (WebCore::BackgroundHTMLParser::simulateTreeBuilder):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (WebCore::TokenDelivery::TokenDelivery):
+        (TokenDelivery):
+        (WebCore::TokenDelivery::execute):
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+        * html/parser/BackgroundHTMLParser.h:
+        (BackgroundHTMLParser):
+        * html/parser/CompactHTMLToken.h:
+        (WebCore):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::didReceiveTokensFromBackgroundParser):
+        (WebCore):
+        (WebCore::HTMLDocumentParser::processTokensFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::resumeParsingAfterScriptExecution):
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+
 2013-01-22  Simon Fraser  <simon.fraser@apple.com>
 
         Fix scrollperf logging
