@@ -1,3 +1,57 @@
+2013-01-22  Alexis Menard  <alexis@webkit.org>
+
+        Allow construction of unprefixed transition DOM events.
+        https://bugs.webkit.org/show_bug.cgi?id=107319
+
+        Reviewed by Dean Jackson.
+
+        Make possible to construct unprefixed DOM events for transitions.
+        Unfortunately I have to duplicate the C++ implementation class of the
+        events (TransitionEvent.h and TransitionEvent.cpp). I can't find a
+        better way to re-use the WebKitTransitionEvent class to back the
+        TransitionEvent.idl as our code generators don't allow to have a
+        different name for the C++ class used in the generated file than the
+        interface name specified in the IDL file. Unfortunately
+        https://trac.webkit.org/wiki/WebKitIDL#InterfaceName doesn't help as
+        it's only a way to unlink the interface name specified in the IDL with
+        the one exposed in JavaScript. I don't think we should support such a
+        feature in our code generators as WebKitTransitionEvent class and more
+        exactly prefixed DOM events for transitions will be removed one day so
+        this use case will become obselete.
+
+        Test: fast/events/constructors/transition-event-constructor.html
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/DOMAllInOne.cpp:
+        * dom/EventNames.in:
+        * dom/TransitionEvent.cpp: Added.
+        (WebCore):
+        (WebCore::TransitionEventInit::TransitionEventInit):
+        (WebCore::TransitionEvent::TransitionEvent):
+        (WebCore::TransitionEvent::~TransitionEvent):
+        (WebCore::TransitionEvent::propertyName):
+        (WebCore::TransitionEvent::elapsedTime):
+        (WebCore::TransitionEvent::interfaceName):
+        * dom/TransitionEvent.h: Added.
+        (WebCore):
+        (TransitionEventInit):
+        (TransitionEvent):
+        (WebCore::TransitionEvent::create):
+        * dom/TransitionEvent.idl: Added.
+        * page/DOMWindow.idl:
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationControllerPrivate::fireEventsAndUpdateStyle): always
+        create a TransitionEvent now. EventTarget will be responsible to create
+        a WebKitTransitionEvent if necessary.
+
 2013-01-22  Adam Barth  <abarth@webkit.org>
 
         Wean BackgroundHTMLParser off HTMLInputStream
