@@ -1,3 +1,170 @@
+2013-01-21  Andreas Kling  <akling@apple.com>
+
+        CSS: Make tag sub-selectors standalone CSSSelectors.
+        <http://webkit.org/b/107111>
+
+        Reviewed by Antti Koivisto.
+
+        TL;DR: Instead of storing a QualifiedName with every CSSSelector, special-case tag selectors
+               by promoting them to stand-alone CSSSelectors.
+               33% reduction in CSS selector memory usage, 4.77 MB progression on Membuster3.
+               Fixed some bugs in Shadow DOM that were exposed by these changes.
+
+        A selector like this:
+
+            div.tripp.trapp#trull { }
+
+        Would previously be represented by a chain of 3 CSSSelector objects like so:
+
+            [ Tag: "div",  Type: Class,  Value: "tripp" ]
+            [ Tag:     *,  Type: Class,  Value: "trapp" ]
+            [ Tag:     *,  Type: ID,     Value: "trull" ]
+
+        After this change, the memory layout becomes:
+
+            [ Type: Tag,    Value: "div"   ]
+            [ Type: Class,  Value: "tripp" ]
+            [ Type: Class,  Value: "trapp" ]
+            [ Type: ID,     Value: "trull" ]
+
+        This is a huge net memory win since the majority of selectors don't even have a tag name
+        and those that do now have a flat cost of one more CSSSelector.
+        Traversal is also slightly cleaner since any tag name will now be in a predictable place.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::isFastCheckableMatch):
+        * html/shadow/HTMLContentElement.cpp:
+        (WebCore::validateSubSelector):
+
+            Renamed CSSSelector::None to CSSSelector::Tag.
+
+        * css/SelectorChecker.h:
+        (WebCore::SelectorChecker::tagMatches):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::ruleMatches):
+
+            Changed SelectorChecker::tagMatches() to take a QualifiedName instead of a CSSSelector.
+
+        * dom/QualifiedName.cpp:
+        (WebCore::QualifiedName::deref):
+        (WebCore::QualifiedName::QualifiedNameImpl::~QualifiedNameImpl):
+        * dom/QualifiedName.h:
+        (QualifiedNameImpl):
+
+            Give QualifiedNameImpl a destructor so it can remove itself from the global cache instead of
+            having QualifiedName do it. This makes it possible to participate in ownership of QualifiedNames
+            via a QualifiedNameImpl pointer, as used by the union member in CSSSelector.
+
+        * css/CSSGrammar.y.in:
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::createFloatingSelectorWithTagName):
+        (WebCore::CSSParser::updateSpecifiersWithNamespaceIfNeeded):
+        (WebCore::CSSParser::updateSpecifiersWithElementName):
+        * css/CSSParser.h:
+        * css/CSSParserValues.h:
+        (CSSParserSelector):
+        * css/CSSParserValues.cpp:
+        (WebCore::CSSParserSelector::CSSParserSelector):
+        (WebCore::CSSParserSelector::prependTagSelector):
+
+            Make the CSS parser slap a CSSSelector with m_match=Tag at the head of all selectors that match
+            one or more of these criteria:
+
+            - The selector starts with a tag, e.g "div.foo" or just plain "span"
+            - There is a @namespace rule in effect, and the override namespace needs to be stored with the selector.
+              These will have CSSSelectors::m_isTagForNamespaceRule set, this is only so that selector serialization
+              can avoid outputting a '*' tag where we previously didn't.
+
+        (WebCore::CSSParserSelector::isSimple):
+
+            Merged the CSSSelector::isSimple() logic into CSSParserSelector, since it's only needed during parsing
+            to figure out if a selector is allowed within :not().
+
+        * css/CSSSelector.h:
+        (CSSSelector):
+        (WebCore::CSSSelector::setValue):
+        (WebCore::CSSSelector::CSSSelector):
+        (WebCore::CSSSelector::~CSSSelector):
+        (WebCore::CSSSelector::tagQName):
+        * css/CSSSelector.cpp:
+        (WebCore::CSSSelector::createRareData):
+        (WebCore::CSSSelector::operator==):
+
+            Add a QualifiedNameImpl* m_tagQName member to the CSSSelector data union. This union pointer is used
+            if m_match == Tag. tagQName() is used to retrieve the tag (renamed from tag().) 
+
+        (WebCore::CSSSelector::selectorText):
+
+            Only serialize Tag selector components that aren't namespace placeholders. This behavior is web-facing
+            so we make an effort to stay consistent.
+
+        (WebCore::CSSSelector::specificityForOneSelector):
+        (WebCore::CSSSelector::specificityForPage):
+        * css/CSSSelectorList.cpp:
+        (WebCore::SelectorNeedsNamespaceResolutionFunctor::operator()):
+        * css/RuleSet.cpp:
+        (WebCore::isSelectorMatchingHTMLBasedOnRuleHash):
+        * css/SelectorFilter.cpp:
+        (WebCore::collectDescendantSelectorIdentifierHashes):
+        (WebCore::SelectorFilter::collectIdentifierHashes):
+
+            Adapt algorithms to having Tag selectors.
+
+        (WebCore::selectorListContainsUncommonAttributeSelector):
+
+            Loop through all selector components when looking for uncommon attributes.
+
+        (WebCore::determinePropertyWhitelistType):
+
+            Loop through all selector components when looking for ::cue().
+
+        (WebCore::RuleSet::addRule):
+        (WebCore::RuleSet::findBestRuleSetAndAdd):
+
+            Break addRule into two methods to be able to peek ahead if the first selector is a Tag.
+            Otherwise we'd end up sticking most selectors in m_tagRules, breaking the class/ID/etc optimizations.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::fastCheck):
+        (WebCore::SelectorChecker::fastCheckSingleSelector):
+
+            It's no longer necessary to check the tagQName for every selector component, so don't.
+            Also simplified the signature of the template argument function.
+
+        (WebCore::SelectorChecker::fastCheckRightmostSelector):
+
+            Updated for Tag selectors.
+
+        (WebCore::SelectorChecker::checkOne):
+        (WebCore::SelectorChecker::matches):
+        (WebCore::SelectorChecker::match):
+
+            Have match() take a SiblingTraversalStrategy so it can forward that to checkOne().
+            This is necessary for shadow DOM code that was incorrectly calling checkOne() instead of match().
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::ruleMatches):
+
+            The meaning of "single-part selector" changes a bit with this patch, and no longer includes "div.foo"
+            as that is now a Tag, followed by a Class. Given that, we can't assume the tag check is unnecessary
+            just because the rightmost descendant was found in one of the hashes.
+
+        (WebCore::StyleResolver::matchPageRulesForList):
+
+            Loop through all selector components when matching @page since pseudo types may not always be in
+            the first subselector now.
+
+        * html/shadow/ContentDistributor.cpp:
+        (WebCore::ContentDistributor::collectSelectFeatureSetFrom):
+
+            Collect feature information from subselectors to make sure nothing is missed. (This bug was exposed
+            by offsetting the subselectors.)
+
+        * html/shadow/ContentSelectorQuery.cpp:
+        (WebCore::ContentSelectorChecker::checkContentSelector):
+
+            Call SelectorChecker::match() instead of checkOne() to make subselector traversal work properly.
+
 2013-01-21  Levi Weintraub  <leviw@chromium.org>
 
         Event target rects on the top level document shouldn't be clipped.
