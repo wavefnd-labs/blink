@@ -1,3 +1,25 @@
+2013-01-22  Joshua Bell  <jsbell@chromium.org>
+
+        Prevent race condition during Worker shutdown
+        https://bugs.webkit.org/show_bug.cgi?id=107577
+
+        Reviewed by Dmitry Titov.
+
+        During worker shutdown, from the main thread a cleanup task is posted followed by
+        terminating the message queue, which prevents further tasks from being processed. It was
+        possible for another task be posted by another thread between the main thread calls
+        to postTask and terminate(), which would cause that task to run after cleanup. Expose
+        a new WTF::MessageQueue::appendAndKill() method which keeps a mutex around the two steps,
+        and use that during worker shutdown.
+
+        No reliable tests for the race - problem identified by inspection of user crash stacks.
+
+        * workers/WorkerRunLoop.cpp:
+        (WebCore::WorkerRunLoop::postTaskAndTerminate): New method, uses MessageQueue::appendAndKill()
+        * workers/WorkerRunLoop.h:
+        * workers/WorkerThread.cpp:
+        (WebCore::WorkerThread::stop): Uses postTaskAndTerminate() to avoid race.
+
 2013-01-22  Tony Chang  <tony@chromium.org>
 
         Unreviewed, rolling out r140171.
