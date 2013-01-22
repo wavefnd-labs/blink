@@ -1,3 +1,93 @@
+2013-01-22  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: reuse JS heap profiler UI for native heap graph representaion
+        https://bugs.webkit.org/show_bug.cgi?id=107452
+
+        Reviewed by Pavel Feldman.
+
+        NativeHeapSnapshot is introduced to leverage JS heap snapshot processing algorithms
+        for native heap graph. New snapshot type ("Native Heap Snapshot") is added to the
+        profiles panel. It will represent native heap snapshots using the same UI as we use
+        for JS heap snapshots.
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/HeapSnapshot.js:
+        (WebInspector.HeapSnapshot):
+        (WebInspector.HeapSnapshot.prototype._init):
+        * inspector/front-end/HeapSnapshotProxy.js:
+        (WebInspector.HeapSnapshotWorker):
+        * inspector/front-end/HeapSnapshotView.js:
+        (WebInspector.HeapProfileHeader.prototype.load):
+        (WebInspector.HeapProfileHeader.prototype.startSnapshotTransfer): extracted a few methods
+        to support overrides for native heap snapshots.
+        (WebInspector.HeapProfileHeader.prototype.snapshotConstructorName):
+        (WebInspector.HeapProfileHeader.prototype._setupWorker):
+        * inspector/front-end/NativeHeapSnapshot.js: Added.
+        (WebInspector.NativeHeapSnapshot):
+        (WebInspector.NativeHeapSnapshot.prototype.createNode):
+        (WebInspector.NativeHeapSnapshot.prototype.createEdge):
+        (WebInspector.NativeHeapSnapshot.prototype.createRetainingEdge):
+        (WebInspector.NativeHeapSnapshot.prototype._markInvisibleEdges):
+        (WebInspector.NativeHeapSnapshot.prototype._calculateFlags):
+        (WebInspector.NativeHeapSnapshot.prototype.canHaveDistanceOne):
+        (WebInspector.NativeHeapSnapshot.prototype.userObjectsMapAndFlag):
+        (WebInspector.NativeHeapSnapshotNode):
+        (WebInspector.NativeHeapSnapshotNode.prototype.canBeQueried):
+        (WebInspector.NativeHeapSnapshotNode.prototype.isUserObject):
+        (WebInspector.NativeHeapSnapshotNode.prototype.className):
+        (WebInspector.NativeHeapSnapshotNode.prototype.classIndex):
+        (WebInspector.NativeHeapSnapshotNode.prototype.id):
+        (WebInspector.NativeHeapSnapshotNode.prototype.name):
+        (WebInspector.NativeHeapSnapshotNode.prototype.isHidden):
+        (WebInspector.NativeHeapSnapshotNode.prototype.isSynthetic):
+        (WebInspector.NativeHeapSnapshotNode.prototype.isWindow):
+        (WebInspector.NativeHeapSnapshotNode.prototype.isDetachedDOMTreesRoot):
+        (WebInspector.NativeHeapSnapshotNode.prototype.isDetachedDOMTree):
+        (WebInspector.NativeHeapSnapshotEdge):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.clone):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.hasStringName):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.isElement):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.isHidden):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.isWeak):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.isInternal):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.isInvisible):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.isShortcut):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.name):
+        (WebInspector.NativeHeapSnapshotEdge.prototype.toString):
+        (WebInspector.NativeHeapSnapshotEdge.prototype._nameOrIndex):
+        (WebInspector.NativeHeapSnapshotRetainerEdge):
+        (WebInspector.NativeHeapSnapshotRetainerEdge.prototype.clone):
+        (WebInspector.NativeHeapSnapshotRetainerEdge.prototype.isElement):
+        (WebInspector.NativeHeapSnapshotRetainerEdge.prototype.isHidden):
+        (WebInspector.NativeHeapSnapshotRetainerEdge.prototype.isInternal):
+        (WebInspector.NativeHeapSnapshotRetainerEdge.prototype.isInvisible):
+        (WebInspector.NativeHeapSnapshotRetainerEdge.prototype.isShortcut):
+        (WebInspector.NativeHeapSnapshotRetainerEdge.prototype.isWeak):
+        * inspector/front-end/NativeMemorySnapshotView.js:
+        (WebInspector.NativeSnapshotProfileType):
+        (WebInspector.NativeSnapshotProfileType.prototype.get buttonTooltip):
+        (WebInspector.NativeSnapshotProfileType.prototype.buttonClicked.didReceiveMemorySnapshot):
+        (WebInspector.NativeSnapshotProfileType.prototype.buttonClicked):
+        (WebInspector.NativeSnapshotProfileType.prototype.get treeItemTitle):
+        (WebInspector.NativeSnapshotProfileType.prototype.get description):
+        (WebInspector.NativeSnapshotProfileType.prototype.createTemporaryProfile):
+        (WebInspector.NativeSnapshotProfileType.prototype.createProfile):
+        (WebInspector.NativeSnapshotProfileHeader):
+        (WebInspector.NativeSnapshotProfileHeader.prototype.createView):
+        (WebInspector.NativeSnapshotProfileHeader.prototype.startSnapshotTransfer):
+        (WebInspector.NativeSnapshotProfileHeader.prototype.snapshotConstructorName):
+        (WebInspector.NativeSnapshotProfileHeader.prototype._takeNativeSnapshot): build a datastructure
+        resembling one used for JS heap snapshots but populated with the data from the native snaphot.
+        (WebInspector.NativeHeapSnapshotView):
+        (WebInspector.NativeHeapSnapshotView.prototype.get profile):
+        (WebInspector.NativeMemoryProfileType):
+        (WebInspector.NativeMemoryProfileType.prototype.get buttonTooltip):
+        * inspector/front-end/ProfilesPanel.js:
+        (WebInspector.ProfilesPanel):
+        * inspector/front-end/WebKit.qrc:
+
 2013-01-21  Kentaro Hara  <haraken@chromium.org>
 
         [V8] ScriptState::isolate() should use Context::GetIsolate()
