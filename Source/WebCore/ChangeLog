@@ -1,3 +1,56 @@
+2013-01-23  Beth Dakin  <bdakin@apple.com>
+
+        https://bugs.webkit.org/show_bug.cgi?id=107628
+        Sometimes scroll position is jerky during rubber-band, affects nytimes.com
+        -and corresponding-
+        <rdar://problem/12679549>
+
+        Reviewed by Simon Fraser.
+
+        The basic problem here is that isRubberBandInProgress() was only implemented for 
+        main thread scrolling. So when we were actually scrolling on the scrolling thread, 
+        that function would always return false regardless.
+
+        New ScrollableArea virtual function isRubberBandInProgress() will allow us to ask 
+        the ScrollingCoordinator when the scrolling thread is scrolling, or the 
+        ScrollAnimator otherwise.
+        * page/FrameView.cpp:
+        (WebCore::FrameView::isRubberBandInProgress):
+        * page/FrameView.h:
+        (FrameView):
+        * platform/ScrollableArea.h:
+        (WebCore::ScrollableArea::isRubberBandInProgress):
+
+        New ScrollingCoordinator function isRubberBandInProgress() always returns false 
+        for non-Mac ports, and is overridden in ScrollingCoordinatorMac to consult the 
+        ScrollingTree.
+        * page/scrolling/ScrollingCoordinator.h:
+        (WebCore::ScrollingCoordinator::isRubberBandInProgress):
+        * page/scrolling/mac/ScrollingCoordinatorMac.h:
+        (ScrollingCoordinatorMac):
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::isRubberBandInProgress):
+
+        New variable m_mainFrameIsRubberBanding keeps track of whether there is currently 
+        a rubber-band happening on the scrolling thread.
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::ScrollingTree):
+        (WebCore::ScrollingTree::isRubberBandInProgress):
+        (WebCore::ScrollingTree::setMainFrameIsRubberBanding):
+        * page/scrolling/ScrollingTree.h:
+        (ScrollingTree):
+        (WebCore::ScrollingTree::rootNode):
+
+        Call setMainFrameIsRubberBanding() whenever the stretchAmount is calculated and 
+        whenever we stop the rubber-band timer.
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::stretchAmount):
+        (WebCore::ScrollingTreeScrollingNodeMac::stopSnapRubberbandTimer):
+
+        Consult FrameView for isRubberBandInProgress().
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::updateScrollbars):
+
 2013-01-23  Robert Hogan  <robert@webkit.org>
 
         Abspos Inline block not positioned correctly in text-aligned container
