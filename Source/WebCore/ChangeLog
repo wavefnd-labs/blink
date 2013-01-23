@@ -1,3 +1,36 @@
+2013-01-23  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exclusions] Add support for computing first included interval position for polygons
+        https://bugs.webkit.org/show_bug.cgi?id=103429
+
+        Reviewed by Dirk Schulze.
+
+        Added support for computing the "first fit" location, i.e. the logical shape-inside
+        location where a line's layout begins. The algorithm for doing so is described here:
+        http://hansmuller-webkit.blogspot.com/2012/08/revised-algorithm-for-finding-first.html.
+
+        Tests: fast/exclusions/shape-inside/shape-inside-first-fit-001.html
+               fast/exclusions/shape-inside/shape-inside-first-fit-002.html
+               fast/exclusions/shape-inside/shape-inside-first-fit-003.html
+
+        * platform/graphics/FloatSize.h:
+        (WebCore::operator*): Scale a FloatSize. This simplified the final expression in VertexPair::intersection().
+        * rendering/ExclusionPolygon.cpp:
+        (WebCore::isPointOnLineSegment): Returns true if the specified point is collinear and within the line segement's bounds.
+        (WebCore::leftSide): Return a value > 0 if point is on the left side of the line segment, < 0 if it's on the right, 0 if it's collinear.
+        (WebCore::ExclusionPolygon::contains): Return true if the point is within the polygon or on an edge.
+        (WebCore::VertexPair::overlapsRect): Returns true if the line segment from vertex1 to vertex2 overlaps the specified FloatRect.
+        (WebCore::VertexPair::intersection): Finds the intersection of a pair of line segments defined by VertexPairs.
+        (WebCore::ExclusionPolygon::firstFitRectInPolygon): Returns true if none of the polygon's edges, except the two used
+            to define by the offset edges, overlap the FloatRect.
+        (WebCore::aboveOrToTheLeft): Defines the top/left preference for "first fit" locations.
+        (WebCore::ExclusionPolygon::firstIncludedIntervalLogicalTop): Replaced the stub implementation of this method.
+        * rendering/ExclusionPolygon.h:
+        (ExclusionPolygon): Added declarations noted above.
+        (VertexPair): Abstract class that defines a pair of FloatPoints.
+        (OffsetPolygonEdge): Represents an edge that's horizontally offset from a polygon edge.
+        (WebCore::OffsetPolygonEdge::edgeIndex): The ExclusionPolygon edge index used to define this OffsetEdge.
+
 2013-01-23  Dirk Schulze  <dschulze@adobe.com>
 
         Implement Canvas Path object
