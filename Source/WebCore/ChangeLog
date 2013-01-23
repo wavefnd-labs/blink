@@ -1,3 +1,44 @@
+2013-01-22  Jun Jiang  <jun.a.jiang@intel.com>
+
+        Optimize the texture packing for texImage2D() and texSubImage2D() in WebGL
+        https://bugs.webkit.org/show_bug.cgi?id=105821
+
+        Reviewed by Kenneth Russell.
+
+        The original texture packing code uses function pointers to denote each unpack and pack operations for different combination of Source formats,
+        Destination formats and Alpha Operations. It could be made cleaner and simpler. In this patch, template functions are used and try best to avoid
+        generating useless code for unreachable path to avoid code bloat. Moreover, the flipY operation is moved into the pack operation instead of
+        operating in a standalone method to improve performance.
+
+        Already covered by current test.
+
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore):
+        (WebCore::WebGLRenderingContext::texImage2DImpl):
+        (WebCore::WebGLRenderingContext::texSubImage2DImpl):
+        * platform/graphics/GraphicsContext3D.cpp:
+        (WebCore::GraphicsContext3D::packImageData):
+        (WebCore::GraphicsContext3D::extractImageData):
+        (WebCore::GraphicsContext3D::extractTextureData):
+        (WebCore):
+        (WebCore::GraphicsContext3D::packPixels):
+        * platform/graphics/GraphicsContext3D.h:
+        (WebCore::GraphicsContext3D::srcFormatComeFromDOMElementOrImageData):
+        (GraphicsContext3D):
+        (WebCore::GraphicsContext3D::ImageExtractor::imageSourceFormat):
+        (ImageExtractor):
+        * platform/graphics/cairo/GraphicsContext3DCairo.cpp:
+        (WebCore::GraphicsContext3D::ImageExtractor::extractImage):
+        * platform/graphics/cg/GraphicsContext3DCG.cpp:
+        (WebCore::getSourceDataFormat):
+        (WebCore::GraphicsContext3D::ImageExtractor::extractImage):
+        * platform/graphics/efl/GraphicsContext3DEfl.cpp:
+        (WebCore::GraphicsContext3D::ImageExtractor::extractImage):
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (WebCore::GraphicsContext3D::ImageExtractor::extractImage):
+        * platform/graphics/skia/GraphicsContext3DSkia.cpp:
+        (WebCore::GraphicsContext3D::ImageExtractor::extractImage):
+
 2013-01-21  Kentaro Hara  <haraken@chromium.org>
 
         Implement UIEvent constructor
