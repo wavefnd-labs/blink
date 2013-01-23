@@ -1,3 +1,63 @@
+2013-01-23  Dirk Schulze  <dschulze@adobe.com>
+
+        Implement Canvas Path object
+        https://bugs.webkit.org/show_bug.cgi?id=97333
+
+        Reviewed by Dean Jackson.
+
+        The Canvas part of the WHATWG specification defines a Path object. This Path object
+        shares several path segment functions (path methods) with the CanvasRenderingContext2D
+        interface. This patch introduces the Path object and shares the path segment functions
+        in the class CanvasPathMethods.
+        This patch does just implement the basic path functions that have a general agreement on
+        the WHAT WG and W3C mailing lists.
+        This feature is behind a flag and won't be activated by default.
+
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#path-objects
+
+        Test: fast/canvas/canvas-path-object.html
+
+        * CMakeLists.txt: Add DOMPath and CanvasPathMedthods to build system.
+        * DerivedSources.cpp: Ditto.
+        * DerivedSources.make: Ditto.
+        * DerivedSources.pri: Ditto.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * html/canvas/CanvasPathMethods.cpp: Added.
+        (WebCore): This class shares the path segment functions (moveTo, lineTo, ...) between
+            DOMPath (the Path object) and CanvasRenderingContext2D.
+        (WebCore::CanvasPathMethods::closePath):
+        (WebCore::CanvasPathMethods::moveTo):
+        (WebCore::CanvasPathMethods::lineTo):
+        (WebCore::CanvasPathMethods::quadraticCurveTo):
+        (WebCore::CanvasPathMethods::bezierCurveTo):
+        (WebCore::CanvasPathMethods::arcTo):
+        (WebCore::CanvasPathMethods::arc):
+        (WebCore::CanvasPathMethods::rect):
+        * html/canvas/CanvasPathMethods.h: Added.
+        (WebCore):
+        (CanvasPathMethods):
+        (WebCore::CanvasPathMethods::~CanvasPathMethods):
+        (WebCore::CanvasPathMethods::transformIsInvertible):
+        (WebCore::CanvasPathMethods::CanvasPathMethods):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        * html/canvas/CanvasRenderingContext2D.h: Remove the path segment functions here.
+        (CanvasRenderingContext2D):
+        (WebCore::CanvasRenderingContext2D::transformIsInvertible): This checks if the CTM
+            of the context is still invertible. Drawing should stop if it is not.
+        * html/canvas/CanvasRenderingContext2D.idl:
+        * html/canvas/DOMPath.h: Added.
+        (WebCore):
+        (DOMPath):
+        (WebCore::DOMPath::create):
+        (WebCore::DOMPath::~DOMPath):
+        (WebCore::DOMPath::DOMPath):
+        * html/canvas/DOMPath.idl: Added.
+        * page/DOMWindow.idl: Added CTOR for Path.
+
 2013-01-23  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Remove IDBVersionChangeRequest
