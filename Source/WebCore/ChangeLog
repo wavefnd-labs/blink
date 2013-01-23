@@ -1,3 +1,45 @@
+2013-01-23  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Remove IDBVersionChangeRequest
+        https://bugs.webkit.org/show_bug.cgi?id=107711
+
+        Reviewed by Tony Chang.
+
+        When the setVersion() API was removed from the Indexed DB spec the IDBVersionChangeRequest
+        interface was replaced with IDBOpenDBRequest. We switched over for open(), this completes
+        the work by switching over for deleteDatabase() and removing the old code. (On the Event
+        side we still need to combine IDBVersionChangeEvent and IDBUpgradeNeededEvent.)
+
+        Test: storage/indexeddb/intversion-long-queue.html
+              storage/indexeddb/intversion-upgrades.html
+
+        * CMakeLists.txt: Remove references to deleted code.
+        * DerivedSources.make: Ditto.
+        * GNUmakefile.list.am: Ditto.
+        * Modules/indexeddb/IDBCallbacks.h: Remove unused onBlocked() overload.
+        * Modules/indexeddb/IDBDatabase.cpp: Remove references to deleted code.
+        * Modules/indexeddb/IDBDatabase.h: Ditto.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::deleteDatabase): Fire onBlocked with current version.
+        * Modules/indexeddb/IDBFactory.cpp:
+        (WebCore::IDBFactory::openInternal): Don't need to specify source.
+        (WebCore::IDBFactory::deleteDatabase): Use an IDBOpenDBRequest.
+        * Modules/indexeddb/IDBFactory.h: Change return type of deleteDatabase()
+        * Modules/indexeddb/IDBFactory.idl: Ditto.
+        * Modules/indexeddb/IDBOpenDBRequest.cpp:
+        (WebCore::IDBOpenDBRequest::create): Always use a null source.
+        (WebCore::IDBOpenDBRequest::IDBOpenDBRequest): Pass null source to base class.
+        (WebCore::IDBOpenDBRequest::dispatchEvent): Don't assume result is a database in existing
+        special case.
+        * Modules/indexeddb/IDBOpenDBRequest.h: Don't need a source argument (always null).
+        * Modules/indexeddb/IDBVersionChangeRequest.cpp: Removed.
+        * Modules/indexeddb/IDBVersionChangeRequest.h: Removed.
+        * Modules/indexeddb/IDBVersionChangeRequest.idl: Removed.
+        * WebCore.gypi: Remove references to deleted code.
+        * WebCore.xcodeproj/project.pbxproj: Remove references to deleted code.
+        * dom/EventTarget.h: Remove references to deleted code.
+        * dom/EventTargetFactory.in: Ditto.
+
 2013-01-23  Scott Graham  <scottmg@chromium.org>
 
         [Chromium] Fix inclusion of pch .cpp in webcore_platform and webcore_rendering
