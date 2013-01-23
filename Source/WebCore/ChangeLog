@@ -1,3 +1,28 @@
+2013-01-22  Matt Falkenhagen  <falken@chromium.org>
+
+        20% regression on dom_perf/DomDivWalk
+        https://bugs.webkit.org/show_bug.cgi?id=106726
+
+        Reviewed by Hajime Morita.
+
+        This patch moves the checks in Element::removedFrom for Fullscreen and top layer flags
+        into a slow path. The idea is for the two checks for Fullscreen and top layer
+        to be replaced by one faster check in the fast path.
+
+        The plan is to migrate the Fullscreen implementation to use top layer, so this is just a
+        short-term fix for the perf regression.
+
+        No new tests: no functionality change
+
+        * dom/Element.cpp:
+        (WebCore::Element::removedFrom): Create a slow path to move the Fullscreen and top layer checks into.
+        * dom/Node.cpp:
+        (WebCore::Node::setIsInTopLayer): To allow for cleaner code in Element::removedFrom, define
+        setIsInTopLayer and isInTopLayer even when the feature flag is off.
+        * dom/Node.h:
+        (WebCore::Node::isInTopLayer): Ditto.
+        (Node):
+
 2013-01-22  Mark Lam  <mark.lam@apple.com>
 
         Change the Supplementable class to not use AtomicString.
