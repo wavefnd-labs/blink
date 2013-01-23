@@ -1,3 +1,19 @@
+2013-01-23  Xianzhu Wang  <wangxianzhu@chromium.org>
+
+        Should update compositing state when an out-of-view fixed position element becomes in-view
+        https://bugs.webkit.org/show_bug.cgi?id=107410
+
+        Reviewed by Simon Fraser.
+
+        When a non-compositing page contains some not-composited fixed position element because of bounds out-of-view, when the element changes position and RenderLayerCompositor::updateCompositingLayers() is called, the function may return early because of "if (!m_reevaluateCompositingAfterLayout && !m_compositing)" without updating the compositing layers.
+
+        Set m_reevaluateCompositingAfterLayout when a fixed position element is not composited because of bounds out-of-view.
+
+        Test: compositing/layer-creation/fixed-position-change-out-of-view-in-view.html
+
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::requiresCompositingForPosition):
+
 2013-01-23  Tony Chang  <tony@chromium.org>
 
         Unreviewed, set svn:eol-style to CRLF on Windows .sln files.
