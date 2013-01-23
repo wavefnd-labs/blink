@@ -1,3 +1,31 @@
+2013-01-23  Andrey Lushnikov  <lushnikov@chromium.org>
+
+        Web Inspector: speedup highlight regex API in DefaultTextEditor
+        https://bugs.webkit.org/show_bug.cgi?id=107238
+
+        Reviewed by Pavel Feldman.
+
+        Move overlay highlight measurement (highlight regex API) from DefaultTextEditor._paintLine
+        method to the DefaultTextEditor._paintLines method which allows to relayout dom only
+        once. This is a significant improvement to the current state of the
+        art which does relayout on each regex occurence.
+        In addition, use "left" css attribute instead of "margin-left": this
+        way it will be possible to avoid an unnecessary relayouting during
+        appending overlay highlight.
+
+        No new tests: no change in behaviour.
+
+        * inspector/front-end/DefaultTextEditor.js:
+        (WebInspector.TextEditorMainPanel.prototype.markAndRevealRange):
+        (WebInspector.TextEditorMainPanel.prototype._paintLines):
+        (WebInspector.TextEditorMainPanel.prototype._measureRegexHighlight):
+        (WebInspector.TextEditorMainPanel.prototype._measureSpans):
+        (WebInspector.TextEditorMainPanel.prototype._appendOverlayHighlight):
+        (WebInspector.TextEditorMainPanel.prototype._paintLine):
+        (WebInspector.TextEditorMainPanel.ElementMetrics):
+        (WebInspector.TextEditorMainPanel.LineOverlayHighlight):
+        (WebInspector.TextEditorMainChunk.prototype.expand):
+
 2013-01-23  Ojan Vafai  <ojan@chromium.org>
 
         Assert that computePreferredLogicalWidths never calls setNeedsLayout
