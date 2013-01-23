@@ -1,3 +1,21 @@
+2013-01-23  Sergio Villar Senin  <svillar@igalia.com>
+
+        REGRESSION(r140338): WebKitGtk+ trying to allocate a buffer too big
+        https://bugs.webkit.org/show_bug.cgi?id=107646
+
+        Reviewed by Carlos Garcia Campos.
+
+        g_input_stream_skip_async() was replaced in r140338 by
+        g_input_stream_read_async() to workaround a glib buffer. The former
+        was using G_MAXSSIZE to skip the whole redirect message but we
+        cannot use it for the latter because it will try to
+        allocate a buffer of that size. Replaced it by READ_BUFFER_SIZE. No
+        new tests required, functionality already covered by network tests..
+
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::redirectSkipCallback):
+        (WebCore::sendRequestCallback):
+
 2013-01-23  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: use inspectedWindow.document instead of document in InjectedScript
