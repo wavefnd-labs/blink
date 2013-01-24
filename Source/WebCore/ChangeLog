@@ -1,3 +1,25 @@
+2013-01-23  Elliott Sprehn  <esprehn@gmail.com>
+
+        Don't allocate rare data on every Element on removal
+        https://bugs.webkit.org/show_bug.cgi?id=107756
+
+        Reviewed by Eric Seidel.
+
+        We should not allocate an ElementRareData for every element
+        in Element::removedFrom. Previously calls to setIsInTopLayer
+        would unconditionally call ensureElementRareData(), and this was
+        called from Element::removedFrom meaning removing an element
+        made the entire subtree suddenly balloon to huge in size as each
+        one got an ElementRareData.
+
+        This is a regression from my patch on Bug 103912 where I removed a check
+        that avoided this allocation.
+
+        No new tests needed, covered by existing tests.
+
+        * dom/Element.cpp:
+        (WebCore::Element::setIsInTopLayer):
+
 2013-01-23  Adam Barth  <abarth@webkit.org>
 
         BackgroundHTMLParser should use more const references to avoid copy constructors
