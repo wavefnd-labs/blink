@@ -27,9 +27,9 @@
 #define JSValueInlines_h
 
 #include "InternalFunction.h"
+#include "JSCJSValue.h"
 #include "JSCellInlines.h"
 #include "JSFunction.h"
-#include "JSValue.h"
 
 namespace JSC {
 

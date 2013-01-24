@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef JSValue_h
-#define JSValue_h
+#ifndef JSCJSValue_h
+#define JSCJSValue_h
 
 #include <math.h>
 #include <stddef.h> // for size_t
@@ -245,12 +245,12 @@ public:
 
     JSObject* toThisObject(ExecState*) const;
 
-    static bool equal(ExecState* exec, JSValue v1, JSValue v2);
-    static bool equalSlowCase(ExecState* exec, JSValue v1, JSValue v2);
-    static bool equalSlowCaseInline(ExecState* exec, JSValue v1, JSValue v2);
-    static bool strictEqual(ExecState* exec, JSValue v1, JSValue v2);
-    static bool strictEqualSlowCase(ExecState* exec, JSValue v1, JSValue v2);
-    static bool strictEqualSlowCaseInline(ExecState* exec, JSValue v1, JSValue v2);
+    static bool equal(ExecState*, JSValue v1, JSValue v2);
+    static bool equalSlowCase(ExecState*, JSValue v1, JSValue v2);
+    static bool equalSlowCaseInline(ExecState*, JSValue v1, JSValue v2);
+    static bool strictEqual(ExecState*, JSValue v1, JSValue v2);
+    static bool strictEqualSlowCase(ExecState*, JSValue v1, JSValue v2);
+    static bool strictEqualSlowCaseInline(ExecState*, JSValue v1, JSValue v2);
 
     bool isCell() const;
     JSCell* asCell() const;
@@ -494,4 +494,4 @@ inline bool operator!=(const JSCell* a, const JSValue b) { return JSValue(a) != 
 
 } // namespace JSC
 
-#endif // JSValue_h
+#endif // JSCJSValue_h

@@ -21,17 +21,17 @@
  */
 
 #include "config.h"
-#include "JSValue.h"
+#include "JSCJSValue.h"
 
 #include "BooleanConstructor.h"
 #include "BooleanPrototype.h"
 #include "Error.h"
 #include "ExceptionHelpers.h"
 #include "GetterSetter.h"
-#include "JSGlobalObject.h"
+#include "JSCJSValueInlines.h"
 #include "JSFunction.h"
+#include "JSGlobalObject.h"
 #include "JSNotAnObject.h"
-#include "JSValueInlines.h"
 #include "NumberObject.h"
 #include <wtf/MathExtras.h>
 #include <wtf/StringExtras.h>
