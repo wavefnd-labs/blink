@@ -1,3 +1,27 @@
+2013-01-23  Benjamin Poulain  <bpoulain@apple.com>
+
+        RenderProgress does not repaint on value change
+        https://bugs.webkit.org/show_bug.cgi?id=106977
+
+        Reviewed by Joseph Pecoraro.
+
+        No test because the ouput depends on the code of RenderTheme, and
+        we use the platform theme for testing.
+
+        * rendering/RenderProgress.cpp:
+        (WebCore::RenderProgress::updateFromElement):
+        (WebCore::RenderProgress::updateAnimationState):
+        Previously, repaint() was only called on two occasions:
+        -On animationTimerFired().
+        -In response to updateFromElement() if and only if the RenderTheme start/stop an
+         animation previously stopped/running.
+
+        When changing the value of HTMLProgressElement, no repaint was called until
+        the next timer fired for the animation.
+        This is a problem if:
+        -The animation of RenderTheme is slow.
+        -If there is no animation (the element is never updated in that case).
+
 2013-01-23  Ian Vollick  <vollick@chromium.org>
 
         Introduce the "stacking container" concept.
