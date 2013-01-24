@@ -1,3 +1,27 @@
+2013-01-23  Martin Robinson  <mrobinson@igalia.com>
+
+        WebKit should support decoding multi-byte entities in XML content
+        https://bugs.webkit.org/show_bug.cgi?id=107459
+
+        Reviewed by Adam Barth.
+
+        Test: fast/parser/entities-in-xhtml.xhtml
+
+        * html/parser/HTMLEntityParser.cpp:
+        (WebCore::appendUChar32ToUCharArray): Added this helper function. Later patches
+        may try to move this code to somewhere that it can be shared more easily.
+        (WebCore::decodeNamedEntityToUCharArray): Modify this function to work on a UChar
+        array four elements long, so that multi-byte and multi-character entities can be resolved.
+        * html/parser/HTMLEntityParser.h: Updated function declaratoin.
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore): Modify the statically allocated entity string memory area to accommodate
+        up to two UTF-8 characters. Each UTF-8 character can be 4 bytes, so this brings the
+        total size to 9 bytes.
+        (WebCore::getXHTMLEntity): Use the new entity decoding API.
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::EntityResolver::resolveUndeclaredEntity): Ditto.
+        (WebCore::XMLDocumentParser::parse): Ditto.
+
 2013-01-23  Eric Seidel  <eric@webkit.org>
 
         Stop the background-parser during HTMLDocumentParser::detatch to prevent crashes/asserts
