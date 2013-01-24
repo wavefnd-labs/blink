@@ -1,3 +1,39 @@
+2013-01-24  Philip Rogers  <pdr@google.com>
+
+        Preserve container size requests across image loads
+        https://bugs.webkit.org/show_bug.cgi?id=106733
+
+        Reviewed by Tim Horton.
+
+        Some images, such as SVG with relative dimensions, depend on the renderer's container size.
+        r137981 introduced the ability to store pending container size requests that are made
+        after the image element lays out but before the image loads. Before this patch, cached
+        images could discard these pending container size requests during cache revalidation.
+
+        During a cached image load, two CachedImages exist: the image in cache and a new CachedImage
+        that will be used if the cache is stale. Pending container size requests are stored
+        on the second cached image which is discarded if a 304 not modified response is received.
+
+        This patch modifies the switchClientsToRevalidatedResource logic to maintain pending
+        container size requests. This fixes a bug where cached SVG images would be sized
+        incorrectly.
+
+        Test: http/tests/svg/cached-image-sizing.html
+
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::switchClientsToRevalidatedResource):
+
+            In this virtual call we special-case images with pending size requests and
+            transfer these requests to the revalidating resource. Note that all container size
+            requests received before revalidation will be pending because the image has not loaded.
+            Therefore, there is no risk of discarding non-pending container size requests.
+
+        (WebCore):
+        * loader/cache/CachedImage.h:
+        (CachedImage):
+        * loader/cache/CachedResource.h:
+        (CachedResource):
+
 2013-01-24  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r140296.
