@@ -1,3 +1,42 @@
+2013-01-23  Luke Macpherson   <macpherson@chromium.org>
+
+        Support variables inside -webkit-box-reflect CSS property.
+        https://bugs.webkit.org/show_bug.cgi?id=106856
+
+        Reviewed by Tony Chang.
+
+        The primary change is to make the direction parameter a CSSPrimitiveValue style ident,
+        so that it can also be a variable reference.
+
+        Covered by existing LayoutTests/compositing/reflections/ tests.
+        Added Test: fast/css/variables/var-inside-box-reflect.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::valueForReflection):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseReflect):
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore):
+        (WebCore::CSSPrimitiveValue::operator CSSReflectionDirection):
+        (WebCore::CSSPrimitiveValue::convertToLength):
+        * css/CSSReflectValue.cpp:
+        (WebCore::CSSReflectValue::customCssText):
+        Use String addition operator instead of StringBuilder.
+        (WebCore):
+        (WebCore::CSSReflectValue::customSerializeResolvingVariables):
+        Use String addition operator instead of StringBuilder.
+        * css/CSSReflectValue.h:
+        (WebCore::CSSReflectValue::create):
+        (WebCore::CSSReflectValue::direction):
+        (CSSReflectValue):
+        (WebCore::CSSReflectValue::CSSReflectValue):
+        * css/CSSValue.cpp:
+        (WebCore::CSSValue::serializeResolvingVariables):
+        * css/StyleResolver.cpp:
+        (WebCore::hasVariableReference):
+        (WebCore::StyleResolver::applyProperty):
+
 2013-01-23  Abhishek Arya  <inferno@chromium.org>
 
         Add ASSERT_WITH_SECURITY_IMPLICATION to detect bad casts in rendering
