@@ -1,3 +1,34 @@
+2013-01-24  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Filters] CSS opacity property clips filter outsets
+        https://bugs.webkit.org/show_bug.cgi?id=106549
+
+        Reviewed by Dirk Schulze.
+
+        Expand the transparencyClipBox for filter outsets and pass the filter output rect instead of
+        the input rect to beginTransparencyLayers for clipping. Details below.
+
+        Test: css3/filters/css-opacity-with-drop-shadow.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore):
+        (WebCore::RenderLayer::setFilterBackendNeedsRepaintingInRect):
+            Replace filter outset calcuation with a call to expandRectForFilterOutsets.
+        (WebCore::expandRectForFilterOutsets):
+            New method to factor out repeated filter outset calculation code.
+        (WebCore::transparencyClipBox):
+            After expanding the clip rect for descendants and reflection, expand it for filter
+            outsets, so they don't get clipped when we begin a transparency layer.
+        (WebCore::RenderLayer::paintLayerContents):
+            Pass paintingInfo.paintDirtyRect instead of localPaintingInfo.paintDirtyRect to
+            beginTransparencyLayers for clipping. localPaintingInfo.paintDirtyRect (aka the filter
+            input rect) does not contain filter outsets, so they would get clipped. Now, we pass
+            paintingInfo.paintDirtyRect (the filter output rect), which includes the filter outsets.
+        (WebCore::RenderLayer::calculateLayerBounds):
+            Replace filter outset calcuation with a call to expandRectForFilterOutsets.
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+
 2013-01-24  Ryosuke Niwa  <rniwa@webkit.org>
 
         Fix a typo after r139838.
