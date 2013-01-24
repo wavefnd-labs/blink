@@ -1,3 +1,39 @@
+2012-12-12  Ryosuke Niwa  <rniwa@webkit.org>
+
+        REGRESSION: WebKit does not render selection in non-first ruby text nodes.
+        https://bugs.webkit.org/show_bug.cgi?id=92818
+
+        Reviewed by Levi Weintraub.
+
+        The patch is based on the one submitted by Sukolsak Sakshuwong.
+
+        The bug was caused by the fact isSelectionRoot was returning false on RenderRubyRun even though
+        it doesn't lay down its children in block direction.
+
+        The selection painting code assumes that all blocks in each selection root are laid down in
+        the containing block direction. In particular, InlineTextBox::paintSelection calls
+        RootInlineBox::selectionTopAdjustedForPrecedingBlock in order to determine the end of the previous
+        line, which in turn calls blockBeforeWithinSelectionRoot. blockBeforeWithinSelectionRoot goes
+        through block nodes that appears before "this" block, and selectionTopAdjustedForPrecedingBlock
+        assumes that to compute the end of the previous line.
+
+        Now suppose we have markup such as <ruby>Ichi<rt>One</rt></ruby><ruby>Ni<rt>Two</rt></ruby>. When
+        selectionTopAdjustedForPrecedingBlock is called on the line box generated for "Two", it tries to
+        determine the bottom of the inline box above that of "Two", which blockBeforeWithinSelectionRoot
+        determines to be that of "One". At this point, everything goes wrong and the selection height is
+        computed to be 0.
+
+        The fix to this problem is to allow RenderRubyRun to be a selection root. Since RenderRubyRun is
+        already an inline-block, it suffices to bypass the !nonPseudoNode() check. In fact, there is no
+        need to check this condition anymore as far as I can tell. The check was added in
+        http://trac.webkit.org/changeset/12986 but all tests added by this change set as well as the rest
+        of layout tests pass without this condition.
+
+        Test: fast/ruby/select-ruby.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::isSelectionRoot):
+
 2013-01-23  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Reduce usage of deprecatedV8String() and deprecatedV8Integer()
