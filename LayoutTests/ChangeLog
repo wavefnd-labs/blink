@@ -1,3 +1,29 @@
+2013-01-23  Ken Kania  <kkania@chromium.org>
+
+        [Inspector] Add events for tracking page loads and scheduled navigations.
+        https://bugs.webkit.org/show_bug.cgi?id=104168
+
+        Reviewed by Pavel Feldman.
+
+        These events are needed for clients who need to be aware of when a page is
+        navigating or about to navigate. Some clients may wish to prevent interaction
+        with the page during this time. Two of the new events track loading start and
+        stop, as measured by the ProgressTracker. The other two events track when a
+        page has a new scheduled navigation and when it no longer has a scheduled
+        navigation. These latter two events won't allow the client to determine if
+        a load is going to happen in all circumstances, but is sufficient for many cases.
+        Make sure we hold a reference to the frame in NavigationScheduler::timerFired
+        in case the redirect causes the frame to be detached.
+
+        Also, minor update to InspectorInputAgent::dispatchMouseEvent to reorder params
+        to match dispatchKeyEvent.
+
+        * inspector-protocol/page/frameScheduledNavigation-expected.txt: Added.
+        * inspector-protocol/page/frameScheduledNavigation.html: Added.
+        * inspector-protocol/page/frameStartedLoading-expected.txt: Added.
+        * inspector-protocol/page/frameStartedLoading.html: Added.
+        * platform/chromium/TestExpectations:
+
 2013-01-23  Simon Fraser  <simon.fraser@apple.com>
 
         Avoid creating background layers on pages with a fixed background, but no image
