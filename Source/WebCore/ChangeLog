@@ -1,3 +1,114 @@
+2013-01-23  Kentaro Hara  <haraken@chromium.org>
+
+        Implement MouseEvent constructor
+        https://bugs.webkit.org/show_bug.cgi?id=107630
+
+        Reviewed by Adam Barth.
+
+        Spec: https://dvcs.w3.org/hg/d4e/raw-file/tip/source_respec.htm
+
+        The MouseEvent constructor should be implemented under a DOM4_EVENTS_CONSTRUCTOR flag.
+        This significantly simplifies JavaScript code to construct a MouseEvent.
+
+        Before:
+          event = document.createEvent("MouseEvents");
+          event.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+
+        After:
+          event = new MouseEvent("click");
+
+        Test: fast/events/constructors/mouse-event-constructor.html
+
+        * bindings/scripts/CodeGenerator.pm:
+        (IsSubType):
+        (IsInheritExtendedAttribute):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        (GenerateNamedConstructorCallback):
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore):
+        (WebCore::V8Float64Array::createWrapper):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore):
+        (WebCore::V8TestActiveDOMObject::createWrapper):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore):
+        (WebCore::V8TestCustomNamedGetter::createWrapper):
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp:
+        (WebCore):
+        (WebCore::V8TestEventConstructor::createWrapper):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore):
+        (WebCore::V8TestEventTarget::toEventTarget):
+        (WebCore::V8TestEventTarget::createWrapper):
+        * bindings/scripts/test/V8/V8TestEventTarget.h:
+        (V8TestEventTarget):
+        * bindings/scripts/test/V8/V8TestException.cpp:
+        (WebCore):
+        (WebCore::V8TestException::createWrapper):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore):
+        (WebCore::V8TestInterface::toActiveDOMObject):
+        (WebCore::V8TestInterface::createWrapper):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore):
+        (WebCore::V8TestMediaQueryListListener::createWrapper):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        (WebCore):
+        (WebCore::V8TestNamedConstructor::toActiveDOMObject):
+        (WebCore::V8TestNamedConstructor::createWrapper):
+        * bindings/scripts/test/V8/V8TestNode.cpp:
+        (WebCore):
+        (WebCore::V8TestNode::toEventTarget):
+        (WebCore::V8TestNode::createWrapper):
+        * bindings/scripts/test/V8/V8TestNode.h:
+        (V8TestNode):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore):
+        (WebCore::V8TestObj::createWrapper):
+        * bindings/scripts/test/V8/V8TestOverloadedConstructors.cpp:
+        (WebCore):
+        (WebCore::V8TestOverloadedConstructors::createWrapper):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore):
+        (WebCore::V8TestSerializedScriptValueInterface::createWrapper):
+        * bindings/v8/Dictionary.cpp:
+        (WebCore::Dictionary::get):
+        (WebCore):
+        * bindings/v8/Dictionary.h:
+        (Dictionary):
+        * bindings/v8/NPV8Object.cpp:
+        (WebCore::npObjectTypeInfo):
+        * bindings/v8/V8DOMWrapper.cpp:
+        (WebCore::V8DOMWrapper::isDOMWrapper):
+        (WebCore):
+        * bindings/v8/V8DOMWrapper.h:
+        (V8DOMWrapper):
+        * bindings/v8/WrapperTypeInfo.h:
+        (WebCore):
+        (WebCore::WrapperTypeInfo::toEventTarget):
+        (WrapperTypeInfo):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.cpp:
+        (WebCore):
+        * dom/MouseEvent.cpp:
+        (WebCore::MouseEventInit::MouseEventInit):
+        (WebCore):
+        (WebCore::MouseEvent::create):
+        (WebCore::MouseEvent::MouseEvent):
+        * dom/MouseEvent.h:
+        (MouseEventInit):
+        (WebCore):
+        (MouseEvent):
+        (WebCore::MouseEvent::create):
+        (WebCore::MouseEvent::button):
+        (WebCore::MouseEvent::buttonDown):
+        (WebCore::MouseEvent::relatedTarget):
+        (WebCore::MouseEvent::setRelatedTarget):
+        (WebCore::MouseEvent::clipboard):
+        (WebCore::MouseEvent::dataTransfer):
+        * dom/MouseEvent.idl:
+
 2013-01-23  Kent Tamura  <tkent@chromium.org>
 
         Add form-related instrumentations, and support 33+ features in FeatureObserver
