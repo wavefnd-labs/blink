@@ -1,3 +1,32 @@
+2013-01-23  Rafael Weinstein  <rafaelw@chromium.org>
+
+        Template element should parse in XHTML just as it does in HTML
+        https://bugs.webkit.org/show_bug.cgi?id=106491
+
+        Reviewed by Ryosuke Niwa.
+
+        https://dvcs.w3.org/hg/webcomponents/raw-file/f33622c39c5e/spec/templates/index.html#parsing-xhtml-documents.
+        https://dvcs.w3.org/hg/webcomponents/raw-file/f33622c39c5e/spec/templates/index.html#serializing-xhtml-documents.
+
+        This patch modifies the XML parser in two ways: (1) when nodes are created, their owner document is
+        the owner document of the current node, rather than the containing document, and (2) when an HTMLTemplateElement
+        is encountered, its content document fragment is pushed onto the stack, rather than the element itself, so that children
+        are appended to the template content. Also, because XSLT operates on the serialized input document, transforms consider
+        template contents to be descendants.
+
+        Tests: fast/dom/HTMLTemplateElement/xhtml-parsing-and-serialization.xml
+               fast/xpath/xpath-template-element.html
+               fast/xsl/xslt-processor-template.html
+               fast/xsl/xslt-xhtml-template.xml
+
+        * xml/parser/XMLDocumentParser.cpp:
+        (WebCore::XMLDocumentParser::enterText):
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::startElementNs):
+        (WebCore::XMLDocumentParser::processingInstruction):
+        (WebCore::XMLDocumentParser::cdataBlock):
+        (WebCore::XMLDocumentParser::comment):
+
 2013-01-23  Tony Gentilcore  <tonyg@chromium.org>
 
         Teach threaded HTML parser to update InspectorInstrumentation when writing HTML
