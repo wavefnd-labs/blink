@@ -1,3 +1,24 @@
+2013-01-24  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Abandoned Memory: SVGFontElement and Corresponding SVGDocument Never Deconstructed
+        https://bugs.webkit.org/show_bug.cgi?id=66438
+
+        Reviewed by Dirk Schulze.
+
+        The memory leak was caused by SVGFontFaceElement storing its own parent in a RefPtr.
+
+        Fixed the bug by storing a raw pointer instead, and clearing the pointer in removedFrom
+        when the node detached from the document. Also added several sanity check assertions.
+
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::SVGFontFaceElement):
+        (WebCore::SVGFontFaceElement::associatedFontElement):
+        (WebCore::SVGFontFaceElement::rebuildFontFace):
+        (WebCore::SVGFontFaceElement::insertedInto):
+        (WebCore::SVGFontFaceElement::removedFrom):
+        * svg/SVGFontFaceElement.h:
+        (SVGFontFaceElement):
+
 2013-01-22  Robert Hogan  <robert@webkit.org>
 
         Inline Containing Only Collapsed Whitespace Not Getting a Linebox
