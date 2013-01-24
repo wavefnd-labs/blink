@@ -1,3 +1,25 @@
+2013-01-24  Emil A Eklund  <eae@chromium.org>
+
+        [svg] Remove unnecessary rounding in SVGRootInlineBox::layoutRootBox
+        https://bugs.webkit.org/show_bug.cgi?id=107771
+
+        Reviewed by Levi Weintraub.
+        
+        SVGRootInlineBox::layoutRootBox rounds the location and size of
+        the container to the nearest enclosing integer values. Now that
+        layout uses subpixel positioning this is no longer needed and
+        results in undesirable rounding. For high-dpi screens in
+        particular this is especially noticeable as it is rounded to
+        "pixels" which can map to two our more device pixels.
+
+        Test: svg/text/text-rect-precision.html
+
+        * rendering/svg/SVGRootInlineBox.cpp:
+        (WebCore::SVGRootInlineBox::layoutRootBox):
+        Change from enclosingIntRect to enclosingLayoutRect to align to
+        the closest containing LayoutRect now that layout is done using
+        subpixel precision.
+
 2013-01-24  Philip Rogers  <pdr@google.com>
 
         Preserve container size requests across image loads
