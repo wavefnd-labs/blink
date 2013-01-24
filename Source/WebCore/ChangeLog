@@ -1,3 +1,24 @@
+2013-01-23  Jer Noble  <jer.noble@apple.com>
+
+        Mac: Avoid using k32BGRAPixelFormat on certain platforms.
+        https://bugs.webkit.org/show_bug.cgi?id=107732
+
+        Reviewed by Eric Carlson.
+
+        Using a AVPlayerItemVideoOutput to generate ARGB pixel buffers is a potential performance
+        hit, as the AVPlayerItemVideoOutput will send YUV buffers through a VTPixeBufferTransferSession
+        to convert them to ARGB regardless of whether or not a given buffer will be used. Instead,
+        ask the AVPlayerItemVideoOutput for pixel buffers in the decoder's native pixel format and use
+        the VTPixelBufferTransferSession to convert to ARGB only those pixel buffers which were actually
+        requested.
+
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.h:
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm:
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::createVideoOutput): Ask for the decoder's native
+            pixel format.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::createPixelBuffer): Lazily create a VTPixelTransferSession
+            and convert output pixel buffers to k32BGRAPixelFormat.
+
 2013-01-24  Christian Biesinger  <cbiesinger@chromium.org>
 
         Convert RenderFullScreen to use the non-deprecated flexbox
