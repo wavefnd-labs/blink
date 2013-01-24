@@ -1,3 +1,59 @@
+2013-01-24  Dominic Mazzoni  <dmazzoni@google.com>
+
+        AX: should init an AXObject only after AXObjectCache has added it
+        https://bugs.webkit.org/show_bug.cgi?id=107533
+
+        Reviewed by Chris Fleizach.
+
+        Initialize each AXObject after the AXObjectCache has
+        finished adding it to its hash maps, so that it's
+        impossible for initialization of an AXObject to result in
+        exploring the tree and creating another AXObject instance
+        that points to the same renderer / node.
+
+        Test: accessibility/duplicate-axrenderobject-crash.html
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore::AXObjectCache::getOrCreate):
+        * accessibility/AccessibilityARIAGrid.cpp:
+        (WebCore::AccessibilityARIAGrid::create):
+        * accessibility/AccessibilityARIAGridCell.cpp:
+        (WebCore::AccessibilityARIAGridCell::create):
+        * accessibility/AccessibilityARIAGridRow.cpp:
+        (WebCore::AccessibilityARIAGridRow::create):
+        * accessibility/AccessibilityList.cpp:
+        (WebCore::AccessibilityList::create):
+        * accessibility/AccessibilityListBox.cpp:
+        (WebCore::AccessibilityListBox::create):
+        * accessibility/AccessibilityMediaControls.cpp:
+        (WebCore::AccessibilityMediaControl::create):
+        (WebCore::AccessibilityMediaControlsContainer::create):
+        (WebCore::AccessibilityMediaTimeline::create):
+        (WebCore::AccessibilityMediaTimeDisplay::create):
+        * accessibility/AccessibilityMenuList.cpp:
+        (WebCore::AccessibilityMenuList::create):
+        * accessibility/AccessibilityNodeObject.cpp:
+        (WebCore::AccessibilityNodeObject::create):
+        * accessibility/AccessibilityObject.h:
+        (WebCore::AccessibilityObject::init):
+        (AccessibilityObject):
+        * accessibility/AccessibilityProgressIndicator.cpp:
+        (WebCore::AccessibilityProgressIndicator::create):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::create):
+        (WebCore::AccessibilityRenderObject::accessibilityIsIgnored):
+            assert that the object has been initialized
+        * accessibility/AccessibilitySVGRoot.cpp:
+        (WebCore::AccessibilitySVGRoot::create):
+        * accessibility/AccessibilitySlider.cpp:
+        (WebCore::AccessibilitySlider::create):
+        * accessibility/AccessibilityTable.cpp:
+        (WebCore::AccessibilityTable::create):
+        * accessibility/AccessibilityTableCell.cpp:
+        (WebCore::AccessibilityTableCell::create):
+        * accessibility/AccessibilityTableRow.cpp:
+        (WebCore::AccessibilityTableRow::create):
+
 2013-01-23  Kentaro Hara  <haraken@chromium.org>
 
         Implement MouseEvent constructor
