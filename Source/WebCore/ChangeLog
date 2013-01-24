@@ -1,3 +1,25 @@
+2013-01-24  Hajime Morrita  <morrita@google.com>
+
+        There are a few of wrong removeAllChildren() call
+        https://bugs.webkit.org/show_bug.cgi?id=107790
+
+        Reviewed by Ryosuke Niwa.
+
+        removeAllChildren() is designed for trashing deleting children out.
+        It doesn't detach() children and could have possible leak.
+        This change replaces such removeAllChildren() usage with safer removeChildren().
+
+        No new tests. Covered by existing tests.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::parseAttribute):
+        * html/InputType.cpp:
+        (WebCore::InputType::destroyShadowSubtree):
+        * html/ValidationMessage.cpp:
+        (WebCore::ValidationMessage::setMessageDOMAndStartTimer):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processEndTag):
+
 2013-01-24  Dominic Mazzoni  <dmazzoni@google.com>
 
         AX: should init an AXObject only after AXObjectCache has added it
