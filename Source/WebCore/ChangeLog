@@ -1,3 +1,18 @@
+2013-01-24  James Robinson  <jamesr@chromium.org>
+
+        REGRESSION(140571): Crash in ScrollingCoordinator::mainThreadScrollingReasons during Frame::createView
+        https://bugs.webkit.org/show_bug.cgi?id=107868
+
+        Reviewed by Beth Dakin.
+
+        When using fixed layout mode, it's possible to update the scrollbar state of the main FrameView before
+        it's set on the main frame, which can lead to calling in to ScrollingCoordinator to compute main thread
+        scrolling regions when m_page->mainFrame()->view() is 0. In this case, we don't have any main
+        thread scrolling reasons and should just return 0.
+
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::mainThreadScrollingReasons):
+
 2013-01-24  Martin Robinson  <mrobinson@igalia.com>
 
         Abstract the logic for appending a UChar32 onto StringBuilder
