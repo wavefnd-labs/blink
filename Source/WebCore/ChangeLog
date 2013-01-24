@@ -1,3 +1,42 @@
+2013-01-24  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Remove IDBUpgradeNeededEvent, merge with IDBVersionChangeEvent
+        https://bugs.webkit.org/show_bug.cgi?id=107754
+
+        Reviewed by Tony Chang.
+
+        The IndexedDB spec calls deleteDatabase() to fire a "blocked" event with the
+        IDBVersionChangeEvent interface which we were doing, but with an older interface - just
+        a "version" property. We were already firing an event on "versionchange" with the new
+        "oldVersion" and "newVersion" properties, but with an IDBUpgradeNeededEvent interface that
+        doesn't exist in the spec. This patch merges the event types to match the spec, including
+        that the newVersion property is null when deleting.
+
+        Test: storage/indexeddb/events.html
+              storage/indexeddb/deletedatabase-*.html
+
+        * CMakeLists.txt: Remove references to deleted files.
+        * GNUmakefile.list.am: Ditto.
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::onVersionChange): Generate IDBVersionChangeEvent.
+        * Modules/indexeddb/IDBOpenDBRequest.cpp:
+        (WebCore::IDBOpenDBRequest::onBlocked): Ditto.
+        (WebCore::IDBOpenDBRequest::onUpgradeNeeded): Ditto.
+        * Modules/indexeddb/IDBUpgradeNeededEvent.cpp: Removed.
+        * Modules/indexeddb/IDBUpgradeNeededEvent.h: Removed.
+        * Modules/indexeddb/IDBUpgradeNeededEvent.idl: Removed.
+        * Modules/indexeddb/IDBVersionChangeEvent.cpp:
+        (WebCore::IDBVersionChangeEvent::create): Take IDBAny's as old/new versions
+        may be integers, strings (for legacy databases), or null (when deleting).
+        (WebCore::IDBVersionChangeEvent::IDBVersionChangeEvent):
+        * Modules/indexeddb/IDBVersionChangeEvent.h:
+        (IDBVersionChangeEvent): Remove version property.
+        (WebCore::IDBVersionChangeEvent::oldVersion): Added new property.
+        (WebCore::IDBVersionChangeEvent::newVersion): Added new property.
+        * Modules/indexeddb/IDBVersionChangeEvent.idl: Updated properties.
+        * WebCore.gypi: Remove references to deleted files.
+        * dom/EventNames.in: Ditto.
+
 2013-01-24  Pratik Solanki  <psolanki@apple.com>
 
         CertificateChain functions in ResourceResponse should be inside proper ifdefs
