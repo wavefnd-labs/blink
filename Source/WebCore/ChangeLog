@@ -1,3 +1,41 @@
+2013-01-24  Christian Biesinger  <cbiesinger@chromium.org>
+
+        resize property doesn't work on iframes
+        https://bugs.webkit.org/show_bug.cgi?id=9221
+
+        Reviewed by Eric Seidel.
+
+        Test: fast/css/resize-corner-tracking-transformed-iframe.html
+        and fast/css/resize-corner-tracking.html
+
+        * rendering/RenderIFrame.cpp:
+        (WebCore::RenderIFrame::requiresLayer):
+        (WebCore):
+        * rendering/RenderIFrame.h:
+        <iframe>s need a layer to be resizable, so make requiresLayer return
+        true if the css property is set.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::canResize):
+        (WebCore):
+        (WebCore::RenderLayer::resize):
+        (WebCore::RenderLayer::positionOverflowControls):
+        (WebCore::RenderLayer::isPointInResizeControl):
+        (WebCore::RenderLayer::hitTestOverflowControls):
+        (WebCore::RenderLayer::hitTestLayer):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        Add a new canResize() function and use it instead of hasOverflowClip()
+        to check whether resizing should be allowed (there's still the
+        additional check of style()->resize() != RESIZE_NONE, of course)
+
+        Make hitTestLayer return |this| when the point is inside the
+        resizer rectangle.
+
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::paint):
+        Call layer()->paintResizer() to actually paint the resizer.
+
 2013-01-24  Kentaro Hara  <haraken@chromium.org>
 
         Regression(r107058): Use-after-free in SerializedScriptValue::deserialize
