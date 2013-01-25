@@ -1,3 +1,43 @@
+2013-01-25  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Inconsistent value of aria-valuetext attribute
+        https://bugs.webkit.org/show_bug.cgi?id=107897
+
+        Reviewed by Kentaro Hara.
+
+        aria-valuetext and aria-valuenow attributes had inconsistent values in
+        a case of initial empty state and a case that a user clears a field.
+
+        - aria-valuetext attribute should have "blank" message in the initial
+          empty state.
+        - aria-valuenow attribute should be removed in the cleared empty state.
+
+        Also, we have a bug that aira-valuenow had a symbolic value such as "AM"
+        "January". It should always have a numeric value according to the
+        specification.
+        http://www.w3.org/TR/wai-aria/states_and_properties#aria-valuenow
+
+        No new tests. Updates fast/forms/*-multiple-fields/*-multiple-fields-ax-aria-attributes.html.
+
+        * html/shadow/DateTimeFieldElement.cpp:
+        (WebCore::DateTimeFieldElement::DateTimeFieldElement):
+        Set "blank" message to aria-valuetext attribute.
+        (WebCore::DateTimeFieldElement::updateVisibleValue):
+        aria-valuenow attribute should be a numeric value. Apply String::number
+        to the return value of valueForARIAValueNow.
+        Remove aria-valuenow attribute if nothing is selected.
+        (WebCore::DateTimeFieldElement::valueForARIAValueNow):
+        Added.
+        * html/shadow/DateTimeFieldElement.h:
+        (DateTimeFieldElement): Declare valueForARIAValueNow.
+
+        * html/shadow/DateTimeSymbolicFieldElement.cpp:
+        (WebCore::DateTimeSymbolicFieldElement::valueForARIAValueNow):
+        Added. Returns 1 + internal selection index.
+        For example, the function returns 1 for January.
+        * html/shadow/DateTimeSymbolicFieldElement.h:
+        (DateTimeSymbolicFieldElement): Declare valueForARIAValueNow.
+
 2013-01-24  Hans Wennborg  <hans@chromium.org>
 
         Disable Clang's -Wreturn-type-c-linkage for Source/WebCore/bindings/v8/
