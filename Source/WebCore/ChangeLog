@@ -1,3 +1,62 @@
+2013-01-25  Elliott Sprehn  <esprehn@gmail.com>
+
+        Assert the connectedSubframeCount is consistent and fix over counting
+        https://bugs.webkit.org/show_bug.cgi?id=107302
+
+        Reviewed by Alexey Proskuryakov.
+
+        Add a debug assertion that walks the subtree during frame disconnection
+        and manually counts the number of connected subframes to assert that the
+        value from Node::connectedSubframeCount() is the same as if we traversed
+        through the tree.
+
+        In fixing the places where this assertion failed I made document destruction
+        faster by not walking the entire document looking for frames if the entire
+        frame tree has been destroyed by way of FrameLoader::detachChildren().
+        I had inadvertently introduced this improvement in r133933, but then I
+        regressed it in r140090 when we switched to counting because I didn't
+        realize we destroy the frame tree separate of frame disconnection on
+        document unload so all frames could have been destroyed but the counts
+        left on the ancestors.
+
+        I also fixed another overcounting case where the adoption agency algorithm
+        may call ContainerNode::takeAllChildrenFrom() which in turn calls
+        ContainerNode::removeAllChildren() and could have left a connected subframe
+        count on the node even though all the frames had been removed.
+
+        This assertion did not uncover any cases of undercounting the number of
+        frames.
+
+        This also fixes a rare edge case where removeChild of an iframe that
+        was already being unloaded would not unload the frame until the top level
+        unload was done, and a reparenting of the iframe would not cause it to load.
+
+        Test: fast/frames/reparent-in-unload-contentdocument.html
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::removeAllChildren):
+        (WebCore::ContainerNode::parserInsertBefore):
+        (WebCore::ContainerNode::parserRemoveChild):
+        (WebCore::ContainerNode::parserAppendChild):
+        * dom/ContainerNodeAlgorithms.cpp:
+        (WebCore):
+        (WebCore::assertConnectedSubframeCountIsConsistent):
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore):
+        (WebCore::ChildFrameDisconnector::disconnect):
+        * dom/Node.cpp:
+        (WebCore::Node::updateAncestorConnectedSubframeCountForRemoval):
+        (WebCore):
+        (WebCore::Node::updateAncestorConnectedSubframeCountForInsertion):
+        * dom/Node.h:
+        (Node):
+        * html/HTMLFrameOwnerElement.cpp:
+        (WebCore::HTMLFrameOwnerElement::clearContentFrame):
+        (WebCore):
+        (WebCore::HTMLFrameOwnerElement::disconnectContentFrame):
+        * html/HTMLFrameOwnerElement.h:
+        (HTMLFrameOwnerElement):
+
 2013-01-25  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: inspector slows down pages with many anonymous scripts.
