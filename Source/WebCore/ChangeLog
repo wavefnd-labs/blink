@@ -1,3 +1,19 @@
+2013-01-25  Tony Gentilcore  <tonyg@chromium.org>
+
+        Fix an ASSERT in BackgroundHTMLParser::appendPartial
+        https://bugs.webkit.org/show_bug.cgi?id=107983
+
+        Reviewed by Eric Seidel.
+
+        The complier may create a temporary for the isolatedCopy of the source string. This could cause the refCount of the
+        StringImpl to be greater than one when appendPartial is invoked on the background thread.
+        This patch ensures the temporary is gone by that time which fixes the ASSERT in numerous layout tests.
+
+        No new tests because covered by existing tests.
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::append):
+
 2013-01-25  Dean Jackson  <dino@apple.com>
 
         Add a user agent stylesheet for plugins
