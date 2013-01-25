@@ -1,3 +1,73 @@
+2013-01-25  Huang Dongsung  <luxtella@company100.net>
+
+        [Texmap] Refactor code related to debug border and repaint count.
+        https://bugs.webkit.org/show_bug.cgi?id=105787
+
+        Reviewed by Noam Rosenthal.
+
+        Currently, TextureMapperBackingStore, CoordinatedBackingStore and
+        GraphicsLayerTextureMapper have duplicated code to draw debug border or
+        repaint count. This patch refactors that all platform layers draw debug
+        border and repaint count in the consistent way:
+        TextureMapper::drawBorder() and TextureMapper::drawRepaintCounter().
+
+        There are three big changes:
+        1. TextureMapperLayer has the debug visuals like GraphicsLayer.
+        Both debug border and repaint count are called as the debug visuals.
+        2. We use the same color and width to Mac port because we get that info using
+        GraphicsLayer::updateDebugIndicators().
+        3. Draw borders for background color, backing store and contents layer,
+        while drawing repaint count only for backing store.
+
+        No new tests. This functionality is for debugging, so we cannot test using DRT.
+
+        * platform/graphics/cairo/GraphicsContext3DPrivate.h:
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.cpp:
+        (WebCore::GraphicsLayerTextureMapper::setShowDebugBorder):
+        (WebCore):
+        (WebCore::GraphicsLayerTextureMapper::setShowRepaintCounter):
+        (WebCore::GraphicsLayerTextureMapper::flushCompositingStateForThisLayerOnly):
+        (WebCore::GraphicsLayerTextureMapper::updateDebugBorderAndRepaintCountIfNeeded):
+        (WebCore::GraphicsLayerTextureMapper::setDebugBorder):
+        (WebCore::GraphicsLayerTextureMapper::updateBackingStoreIfNeeded):
+        (WebCore::GraphicsLayerTextureMapper::prepareBackingStore):
+        (WebCore::GraphicsLayerTextureMapper::setRepaintCount):
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.h:
+        (GraphicsLayerTextureMapper):
+        (WebCore::GraphicsLayerTextureMapper::debugBorderColor):
+        (WebCore::GraphicsLayerTextureMapper::debugBorderWidth):
+        * platform/graphics/texmap/TextureMapper.h:
+        * platform/graphics/texmap/TextureMapperBackingStore.cpp:
+        (WebCore::TextureMapperTiledBackingStore::adjustedTransformForRect):
+        (WebCore):
+        (WebCore::TextureMapperTiledBackingStore::paintToTextureMapper):
+        (WebCore::TextureMapperTiledBackingStore::drawBorder):
+            Override TextureMapperPlatformLayer::drawBorder() to draw the border
+            for each tile.
+        (WebCore::TextureMapperTiledBackingStore::drawRepaintCounter):
+        * platform/graphics/texmap/TextureMapperBackingStore.h:
+        (WebCore::TextureMapperBackingStore::drawRepaintCounter):
+        (TextureMapperBackingStore):
+        (TextureMapperTiledBackingStore):
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::drawRepaintCounter):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        * platform/graphics/texmap/TextureMapperImageBuffer.cpp:
+        (WebCore::TextureMapperImageBuffer::drawBorder):
+        (WebCore):
+        (WebCore::TextureMapperImageBuffer::drawRepaintCounter):
+        * platform/graphics/texmap/TextureMapperImageBuffer.h:
+        (TextureMapperImageBuffer):
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::paintSelf):
+        (WebCore::TextureMapperLayer::flushCompositingStateForThisLayerOnly):
+        * platform/graphics/texmap/TextureMapperLayer.h:
+        (State):
+        (WebCore::TextureMapperLayer::State::State):
+        * platform/graphics/texmap/TextureMapperPlatformLayer.h:
+        (WebCore::TextureMapperPlatformLayer::drawBorder):
+
 2013-01-24  Patrick Gansterer  <paroga@webkit.org>
 
         Build fix for !ENABLE(DRAG_SUPPORT) after r140286.
