@@ -1,3 +1,39 @@
+2013-01-25  Dean Jackson  <dino@apple.com>
+
+        Add a user agent stylesheet for plugins
+        https://bugs.webkit.org/show_bug.cgi?id=107890
+
+        Reviewed by Alexey Proskuryakov.
+
+        As a step along the way to providing a Shadow DOM for plug-in elements, add a
+        User Agent stylesheet that is loaded when an embed or object element is
+        in the document. At the moment the stylesheet is empty.
+
+        The stylesheet can be overridden by the RenderTheme or the ChromeClient, allowing
+        ports to provide a custom appearance. This involved hooking up some virtual methods
+        on ChromeClient, the stubs of which are already implemented in WK2.
+        As a drive-by, since snapshotted plugins will need some localization I've also
+        exposed the ChromeClient methods to get text labels.
+
+        * CMakeLists.txt: Add plugIns.css.
+        * DerivedSources.make: Ditto.
+        * DerivedSources.pri: Ditto.
+        * GNUmakefile.am: Ditto.
+        * WebCore.gyp/WebCore.gyp: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.vcxproj/WebCore.vcxproj: Ditto.
+        * WebCore.vcxproj/WebCore.vcxproj.filters: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditoo.
+        * css/StyleResolver.cpp:
+        (WebCore::ensureDefaultStyleSheetsForElement): Load and inject new plugInsStyleSheet if there is an object or embed element.
+        * css/plugIns.css: Added. Empty for now.
+        * page/ChromeClient.h: New methods for querying the client.
+        (WebCore::ChromeClient::plugInStartLabelTitle):
+        (WebCore::ChromeClient::plugInStartLabelSubtitle):
+        (WebCore::ChromeClient::plugInExtraStyleSheet):
+        * rendering/RenderTheme.h:
+        (WebCore::RenderTheme::extraPlugInsStyleSheet): Allow the theme to provide an extra stylesheet.
+
 2013-01-25  Eric Carlson  <eric.carlson@apple.com>
 
         Adding a text track should not make controls visible
