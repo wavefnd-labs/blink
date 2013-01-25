@@ -1,3 +1,29 @@
+2013-01-25  Abhishek Arya  <inferno@chromium.org>
+
+        Regression(r139836): Crash in WTF::equalIgnoringCase
+        https://bugs.webkit.org/show_bug.cgi?id=107703
+
+        Reviewed by Eric Seidel.
+
+        Check |a| is a CSS_IDENT before considering it a string and
+        calling equalIgnoringCase on it. To avoid future mistakes like
+        this, add a function override for equalIgnoringCase that takes
+        CSSParserValue as a parameter and ASSERTs if that CSSParserValue
+        is not a CSS_STRING/CSS_IDENT.       
+
+        Test: fast/gradients/parse-radial-gradient-crash.html
+
+        * css/CSSParser.cpp:
+        (WebCore):
+        (WebCore::equalIgnoringCase):
+        (WebCore::CSSParser::parseAnimationName):
+        (WebCore::CSSParser::parseAnimationProperty):
+        (WebCore::CSSParser::parseDashboardRegions):
+        (WebCore::parseDeprecatedGradientPoint):
+        (WebCore::CSSParser::parseDeprecatedGradient):
+        (WebCore::CSSParser::parseLinearGradient):
+        (WebCore::CSSParser::parseRadialGradient):
+
 2013-01-25  Chang Shu  <cshu@webkit.org>
 
         Build broken when svg is disabled.
