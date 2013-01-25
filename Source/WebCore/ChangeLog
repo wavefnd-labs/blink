@@ -1,3 +1,29 @@
+2013-01-25  Tony Chang  <tony@chromium.org>
+
+        Re-layout child blocks when border/padding of the box-sizing:border-box parent is updated
+        https://bugs.webkit.org/show_bug.cgi?id=104997
+
+        Reviewed by Ojan Vafai.
+
+        Original patch by Kent Tamura:
+        When padding or border is updated for a parent block with
+        box-sizing:border-box and width, the width of its child block was not
+        updated.
+
+        The change is to look at border width specifically, not all changes to the border style
+        since changes to border color should not trigger a relayout.
+
+        Tests: fast/css/box-sizing-border-box-dynamic-padding-border-update.html
+               fast/forms/border-color-relayout.html
+               fast/forms/text/text-padding-dynamic-change.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::borderWidthChanged): Helper method to compare border widths.
+        (WebCore::RenderBox::styleDidChange):
+        If box-sizing of the old style and/or the new style is border-box and
+        padding or border is changed, apply setChildNeedsLayout(true) for child
+        boxes.
+
 2013-01-25  Arnaud Renevier  <a.renevier@sisa.samsung.com>
 
         Move WebGLErrorsToConsole page setting to window.internals.settings
