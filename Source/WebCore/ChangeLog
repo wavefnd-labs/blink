@@ -1,3 +1,30 @@
+2013-01-25  Mike West  <mkwst@chromium.org>
+
+        ScriptController::executeIfJavaScriptURL incorrectly checks viewsource mode.
+        incorrectly blocks execution based on the frame's viewsource state.
+        https://bugs.webkit.org/show_bug.cgi?id=101683
+
+        Reviewed by Adam Barth.
+
+        ScriptController::executeIfJavaScriptURL currently checks whether the
+        frame in which a 'javascript:' URL might be executed is in viewsource
+        mode. This incorrectly handles the case where the viewsource attribute
+        is added after a document loads: the _frame_ is in viewsource mode, the
+        _document_ is not. The latter should control execution, not the former.
+
+        This patch drops the inViewSourceMode check from executeIfJavaScriptURL
+        entirely, as the document's viewsource state is checked in
+        canExecuteScripts, which is already called when the 'javascript:' URL is
+        passed to executeScript. The checks should remain centralized there.
+
+        Test: http/tests/security/view-source-javascript-url-in-document.html
+
+        * bindings/ScriptControllerBase.cpp:
+        (WebCore::ScriptController::executeIfJavaScriptURL):
+            Drop the incorrect check against the Frame's viewsource mode. The
+            correct check against the Document's viewsource mode is performed
+            in canExecuteScripts (which is called via executeScript).
+
 2013-01-25  Gustavo Noronha Silva  <gns@gnome.org>
 
         [Soup] Streamline cancellation and client checks
