@@ -1,3 +1,33 @@
+2013-01-25  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Share code between the different min-content / max-content code paths
+        https://bugs.webkit.org/show_bug.cgi?id=107740
+
+        Reviewed by Tony Chang.
+
+        This change enables sharing between the different content based computations
+        by using function pointers to specialize the behavior as needed.
+
+        Refactoring, covered by existing tests.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::GridTrack::growUsedBreadth):
+        (WebCore::GridTrack::usedBreadth):
+        (WebCore::GridTrack::growMaxBreadth):
+        Added the previous getters / setters that will be passed to resolveContentBasedTrackSizingFunctionsForItems.
+
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctions):
+        Updated to reuse resolveContentBasedTrackSizingFunctionsForItems instead of duplicating code.
+        One change is that now, we properly apply the min on all branches, which was an oversight of
+        the previous patches.
+
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctionsForItems):
+        Added this function as the core content-sized resolution function. For now, we pass the
+        current track by direction & index to be able to filter grid items.
+
+        * rendering/RenderGrid.h:
+        Added resolveContentBasedTrackSizingFunctionsForItems and the function pointers typedef's.
+
 2013-01-25  Kentaro Hara  <haraken@chromium.org>
 
         Remove InjectedScript::wrapSerializedObject()
