@@ -1,3 +1,58 @@
+2013-01-24  Ojan Vafai  <ojan@chromium.org>
+
+        MathML preferred widths should not depend on layout information
+        https://bugs.webkit.org/show_bug.cgi?id=107353
+
+        Reviewed by Levi Weintraub.
+
+        * mathml/MathMLTextElement.cpp:
+        (WebCore::MathMLTextElement::attach):
+        (WebCore::MathMLTextElement::childrenChanged):
+        * mathml/MathMLTextElement.h:
+        Need to update the render tree when the text of a <mo> changes.
+
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::RenderMathMLBlock):
+        * rendering/mathml/RenderMathMLBlock.h:
+        * rendering/mathml/RenderMathMLFenced.cpp:
+        (WebCore::RenderMathMLFenced::makeFences):
+        (WebCore::RenderMathMLFenced::styleDidChange):
+        Need to update the rendertree to apply operator stretching.
+
+        * rendering/mathml/RenderMathMLOperator.cpp:
+        (WebCore::RenderMathMLOperator::glyphHeightForCharacter):
+        (WebCore::RenderMathMLOperator::widthForCharacter):
+        (WebCore::RenderMathMLOperator::computeIntrinsicLogicalWidths):
+        (WebCore::RenderMathMLOperator::stretchDisabledByMarkup):
+        (WebCore::RenderMathMLOperator::firstTextCharacter):
+        (WebCore::RenderMathMLOperator::stretchyCharacterIndex):
+        (WebCore::RenderMathMLOperator::updateFromElement):
+        (WebCore::RenderMathMLOperator::firstLineBoxBaseline):
+        -Make the preferred widths of operators the max of all possible
+        characters to be used in the operator and center the operator in that width.
+        -For stretching where we don't use multiple glyphs, use transforms
+        instead of font-size. This both looks better and avoids affecting the width.
+        -Now that preferred widths don't depends on height, we don't need to
+        override computePreferredLogicalWidths at all in MathML code.
+
+        * rendering/mathml/RenderMathMLOperator.h:
+        * rendering/mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::index):
+        Tighten up the type.
+
+        (WebCore::RenderMathMLRoot::layout):
+        Move the laying out of children to the layout method.
+
+        * rendering/mathml/RenderMathMLRoot.h:
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::logicalHeightExcludingOperators):
+        (WebCore::RenderMathMLRow::stretchOperatorsAndLayout):
+        (WebCore::RenderMathMLRow::layout):
+        Move the laying out of children and the subsequent setting of stretchHeight
+        to the layout method.
+
+        * rendering/mathml/RenderMathMLRow.h:
+
 2013-01-25  Raymond Toy  <rtoy@google.com>
 
         Don't subtract too much from nonSilentFramesToProcess
