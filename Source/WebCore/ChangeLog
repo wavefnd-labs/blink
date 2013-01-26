@@ -1,3 +1,79 @@
+2013-01-25  Andy Estes  <aestes@apple.com>
+
+        Wrap content filtering code in an object
+        https://bugs.webkit.org/show_bug.cgi?id=107914
+
+        Reviewed by Alexey Proskuryakov.
+
+        Content filtering code currently requires explicit and somewhat complex
+        lifetime management of the WebFilterEvaluator object for correct
+        behavior. Simplify this by wrapping WebFilterEvaluator in an object and
+        have MainResourceLoader implicitly manage its lifetime by holding it in
+        an OwnPtr.
+
+        This change has benefits other than the simplified lifetime management.
+        It removes direct calls into WebKitSystemInterface from the loader, and
+        it allows us to keep a strong reference to the replacement data
+        returned from wkFilterAddData() and wkFilterDataComplete() rather than
+        relying on it being autoreleased.
+
+        * WebCore.exp.in: Updated to match changes in WebCoreSystemInterface.
+        * WebCore.xcodeproj/project.pbxproj: Added new files.
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::MainResourceLoader): Removed unneeded initialization.
+        (WebCore::MainResourceLoader::~MainResourceLoader): Removed an unneeded ASSERT().
+        (WebCore::MainResourceLoader::cancel): Removed unneeded wkFilterRelease().
+        (WebCore::MainResourceLoader::responseReceived): Created a
+        ContentFilter object rather than calling wkFilterCreateInstance().
+        (WebCore::MainResourceLoader::dataReceived): Rewrote content filtering
+        logic in terms of the wrapper object. Removed any explicit lifetime
+        management.
+        (WebCore::MainResourceLoader::didFinishLoading): Ditto.
+        (WebCore::MainResourceLoader::notifyFinished): Removed unneeded wkFilterRelease().
+        * loader/MainResourceLoader.h:
+        * platform/ContentFilter.h: Added.
+        * platform/mac/ContentFilterMac.mm: Added.
+        (WebCore::ContentFilter::create):
+        (WebCore::ContentFilter::ContentFilter):
+        (WebCore::ContentFilter::isEnabled): Returned the result of wkFilterIsManagedSession().
+        (WebCore::ContentFilter::addData): Called wkFilterAddData() and stored
+        the resulting NSData in m_replacementData.
+        (WebCore::ContentFilter::finishedAddingData): Called wkFilterDataComplete()
+        and stored the resulting NSData in m_replacementData.
+        (WebCore::ContentFilter::needsMoreData): Returned the result of wkFilterIsBuffering().
+        (WebCore::ContentFilter::didBlockData): Returned the result of wkFilterWasBlocked().
+        (WebCore::ContentFilter::getReplacementData): Returned the data stored in m_replacementData.
+        * platform/mac/WebCoreSystemInterface.h: Updated to reflect changes in WKSI.
+        * platform/mac/WebCoreSystemInterface.mm: Ditto.
+
+        * WebCore.exp.in:
+        * WebCore.xcodeproj/project.pbxproj:
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::MainResourceLoader):
+        (WebCore::MainResourceLoader::~MainResourceLoader):
+        (WebCore::MainResourceLoader::cancel):
+        (WebCore::MainResourceLoader::responseReceived):
+        (WebCore::MainResourceLoader::dataReceived):
+        (WebCore::MainResourceLoader::didFinishLoading):
+        (WebCore::MainResourceLoader::notifyFinished):
+        * loader/MainResourceLoader.h:
+        (MainResourceLoader):
+        * platform/ContentFilter.h: Added.
+        (WebCore):
+        (ContentFilter):
+        * platform/mac/ContentFilterMac.mm: Added.
+        (WebCore):
+        (WebCore::ContentFilter::create):
+        (WebCore::ContentFilter::ContentFilter):
+        (WebCore::ContentFilter::isEnabled):
+        (WebCore::ContentFilter::addData):
+        (WebCore::ContentFilter::finishedAddingData):
+        (WebCore::ContentFilter::needsMoreData):
+        (WebCore::ContentFilter::didBlockData):
+        (WebCore::ContentFilter::getReplacementData):
+        * platform/mac/WebCoreSystemInterface.h:
+        * platform/mac/WebCoreSystemInterface.mm:
+
 2013-01-25  Simon Fraser  <simon.fraser@apple.com>
 
         When the FrameView has a non-opaque background color, make sure the TileCache tiles are not opaque
