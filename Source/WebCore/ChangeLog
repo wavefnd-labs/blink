@@ -1,3 +1,25 @@
+2013-01-26  Robert Hogan  <robert@webkit.org>
+
+        REGRESSION(r120616): Cell's logical height wrongly computed with vertical-align: baseline and rowspan
+        https://bugs.webkit.org/show_bug.cgi?id=106571
+
+        Reviewed by Julien Chaffraix.
+
+        When a cell spans multiple rows, its baseline is set on the first row it spans. r120616 contained a
+        couple of errors in its attempt to ensure the row height calculated in such cases was correct. When it
+        calculated the baseline on the first row in the span, it didn't ensure that the row height was increased
+        if necessary. It also suffered from allowing the baseline descent calculated on a rowspan to affect the
+        height of the other cells in the first row of the span.
+
+        Fix both of these errors in calcRowLogicalHeight() and refactor the calculation of the baseline and baseline
+        descent so that it is freestanding (rather than depending on the height of the section so far). 
+
+        Tests: fast/css/vertical-align-baseline-rowspan-010.html
+               fast/css/vertical-align-baseline-rowspan-011.html
+
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight):
+
 2013-01-26  James Simonsen  <simonjam@chromium.org>
 
         [chromium] Export ResourceRequest's priority through WebURLRequest
