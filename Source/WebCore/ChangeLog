@@ -1,3 +1,37 @@
+2013-01-26  Alexey Proskuryakov  <ap@apple.com>
+
+        Remove code for handling NetworkProcess authentication challenges in WebProcess
+        https://bugs.webkit.org/show_bug.cgi?id=108003
+
+        Reviewed by Sam Weinig.
+
+        * loader/ResourceLoader.cpp:
+        (WebCore::ResourceLoader::didReceiveAuthenticationChallenge):
+        Once again, there can be no authentication without an in-process network request.
+
+        * WebCore.exp.in:
+        * platform/network/AuthenticationChallengeBase.cpp:
+        (WebCore::AuthenticationChallengeBase::AuthenticationChallengeBase):
+        * platform/network/AuthenticationChallengeBase.h:
+        (AuthenticationChallengeBase):
+        * platform/network/cf/AuthenticationCF.cpp:
+        (WebCore::AuthenticationChallenge::AuthenticationChallenge):
+        * platform/network/cf/AuthenticationChallenge.h:
+        (AuthenticationChallenge):
+        * platform/network/curl/AuthenticationChallenge.h:
+        (WebCore::AuthenticationChallenge::AuthenticationChallenge):
+        * platform/network/mac/AuthenticationMac.mm:
+        (WebCore::AuthenticationChallenge::AuthenticationChallenge):
+        * platform/network/qt/AuthenticationChallenge.h:
+        (WebCore::AuthenticationChallenge::AuthenticationChallenge):
+        * platform/network/soup/AuthenticationChallenge.h:
+        (WebCore::AuthenticationChallenge::AuthenticationChallenge):
+        * platform/network/win/AuthenticationChallenge.h:
+        (WebCore::AuthenticationChallenge::AuthenticationChallenge):
+        Removed everything related to AuthenticationChallengeBase::m_identifier.
+        The identifier is now tracked for IPC only, which is the right thing, because
+        nothing can guarantee identifier uniqueness across processes.
+
 2013-01-26  Laszlo Gombos  <l.gombos@samsung.com>
 
         Fix the test for CHANNEL_MESSAGING in idl files
