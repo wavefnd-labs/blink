@@ -1,3 +1,89 @@
+2013-01-28  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Parse @-webkit-filter
+        https://bugs.webkit.org/show_bug.cgi?id=106837
+
+        Reviewed by Dean Jackson.
+
+        The new CSS Custom Filters syntax includes an @filter rule:
+        @filter IDENT { <custom-filter-description> }
+
+        IDENT is the filter name. For example:
+        @filter my-filter { ... }
+
+        <custom-filter-description> is a set of CSS properties, which are still under discussion in
+        the CSSWG.
+
+        This patch adds parsing and JS bindings for the prefixed at-rule. It does not add parsing
+        for any of the at-rule's internal properties.
+
+        Spec: https://dvcs.w3.org/hg/FXTF/raw-file/tip/filters/index.html#the-atfilter-rule
+
+        Tests: css3/filters/custom/custom-filter-parsing-at-rule-invalid.html
+               css3/filters/custom/custom-filter-parsing-at-rule-valid.html
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/JSCSSRuleCustom.cpp:
+        (WebCore::toJS):
+        * bindings/objc/DOMCSS.mm:
+        (kitClass):
+        * bindings/v8/custom/V8CSSRuleCustom.cpp:
+        (WebCore::wrap):
+        * css/CSSGrammar.y.in:
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::createFilterRule):
+        (WebCore::CSSParser::detectAtToken):
+        * css/CSSParser.h:
+        * css/CSSPropertySourceData.h:
+        * css/CSSRule.h:
+        * css/CSSRule.idl:
+            Only contains a CSSStyleDeclaration "style" property, like the other at-rules that are
+            supposed to contain properties (e.g. CSSStyleRule, CSSFontFaceRule, CSSPageRule).
+            Eventually, when it's specified, we should expose the filter name as well.
+            Other at-rules IDL Spec: http://www.w3.org/TR/DOM-Level-2-Style/idl-definitions.html
+        * css/StyleRule.cpp:
+        (WebCore::StyleRuleBase::reportMemoryUsage):
+        (WebCore::StyleRuleBase::destroy):
+        (WebCore::StyleRuleBase::copy):
+        (WebCore::StyleRuleBase::createCSSOMWrapper):
+        (WebCore::StyleRuleFilter::StyleRuleFilter):
+        (WebCore::StyleRuleFilter::~StyleRuleFilter):
+        (WebCore::StyleRuleFilter::mutableProperties):
+        (WebCore::StyleRuleFilter::setProperties):
+        (WebCore::StyleRuleFilter::reportDescendantMemoryUsage):
+        * css/StyleRule.h:
+        (StyleRuleBase):
+        (WebCore::StyleRuleBase::isFilterRule):
+        (StyleRuleFilter):
+        (WebCore::StyleRuleFilter::create):
+        (WebCore::StyleRuleFilter::filterName):
+        (WebCore::StyleRuleFilter::properties):
+        (WebCore::StyleRuleFilter::copy):
+        * css/StyleSheetContents.cpp:
+        (WebCore::childRulesHaveFailedOrCanceledSubresources):
+        * css/WebKitCSSFilterRule.cpp: Added.
+            WebKitCSSFilterRule is implemented similar to CSSFontFaceRule.
+        (WebCore::WebKitCSSFilterRule::WebKitCSSFilterRule):
+        (WebCore::WebKitCSSFilterRule::~WebKitCSSFilterRule):
+        (WebCore::WebKitCSSFilterRule::style):
+        (WebCore::WebKitCSSFilterRule::cssText):
+            The CSS text implementation for WebKitCSSFilterRule is almost the same as
+            CSSFontFaceRule. WebKitCSSFilterRule additionally needs to output the filter name in its
+            syntax (e.g. @-webkit-filter my-filter { }).
+        (WebCore::WebKitCSSFilterRule::reattach):
+        (WebCore::WebKitCSSFilterRule::reportMemoryUsage):
+        * css/WebKitCSSFilterRule.h: Added.
+        (WebKitCSSFilterRule):
+        (WebCore::WebKitCSSFilterRule::create):
+        * css/WebKitCSSFilterRule.idl: Added.
+
 2013-01-28  Anders Carlsson  <andersca@apple.com>
 
         Add StorageStrategy member functions to WebKit2
