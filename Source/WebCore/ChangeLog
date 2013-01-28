@@ -1,3 +1,23 @@
+2013-01-28  Simon Fraser  <simon.fraser@apple.com>
+
+        Repaint issues in background tabs after r138858
+        https://bugs.webkit.org/show_bug.cgi?id=108092
+        <rdar://problem/13076430>
+
+        Reviewed by Tim Horton.
+
+        In r138858, we unparented all tiles in the tile caches of background tabs.
+        That broke repaints in background tabs; when bringing that tab back to the
+        foreground, we would call -setNeedsDisplayInRect:, and then reparent the tiles
+        on a zero-delay timer. Those repaints would then be flipped (possibly because
+        CA can't look up the layer tree to check for flipped geometry).
+        
+        Fix by revalidating tiles (which reparents the tiles) at the time we're told
+        we're moving into the window, which happens before repaints are flushed.
+
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::setIsInWindow):
+
 2013-01-28  Adam Barth  <abarth@webkit.org>
 
         Remove webkitNotifications.createHTMLNotification
