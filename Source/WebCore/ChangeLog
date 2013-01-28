@@ -1,3 +1,72 @@
+2013-01-28  Bear Travis  <betravis@adobe.com>
+
+        [CSS Exclusions] Refactor ExclusionShapeInsideInfo to more general ExclusionShapeInfo
+        https://bugs.webkit.org/show_bug.cgi?id=100766
+
+        Reviewed by Dirk Schulze.
+
+        Refactoring, covered by existing tests.
+
+        Factoring out code common to ExclusionShapeInsideInfo and ExclusionShapeOutsideInfo
+        into common classes in ExclusionShapeInfo.h. Since the ExclusionShapeInsideInfo and
+        ExclusionShapeOutsideInfo share almost all of their code, save the RenderObject type
+        they work with and the specific shapeInside/Outside methods they call on RenderStyle
+        and ExclusionShape, the code has been templated. The code responsible for maintaining
+        global maps has also been factored out into a MappedInfo class.
+
+        * CMakeLists.txt: Adding ExclusionShapeInfo files.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * rendering/ExclusionShapeInfo.cpp: Added.
+        (WebCore::::computedShape): Determine the shape based on the current logical
+        dimensions. Call this method rather than accessing m_shape directly.
+        * rendering/ExclusionShapeInfo.h: Added.
+        (MappedInfo): Helper class that maintains a global info map.
+        (WebCore::MappedInfo::ensureInfo): Look up the info for a key and add it if not present.
+        (WebCore::MappedInfo::removeInfo): Remove the info associated with a key.
+        (WebCore::MappedInfo::info): Look up the info associated with a key.
+        (WebCore::MappedInfo::infoMap): The map used to store key/info pairs.
+        (ExclusionShapeInfo): A common parent class for ExclusionShapeInside/OutsideInfos.
+        The methods were factored out of the code common to ExclusionShapeInside/OutsideInfo.
+        (WebCore::ExclusionShapeInfo::~ExclusionShapeInfo): Destructor.
+        (WebCore::ExclusionShapeInfo::setShapeSize): Sets the shape's logical size.
+        (WebCore::ExclusionShapeInfo::shapeLogicalTop/Bottom/Left/Right/Width/Height):
+        Returns the shape's logical dimensions.
+        (WebCore::ExclusionShapeInfo::dirtyShapeSize): Mark the shape for recomputation.
+        (WebCore::ExclusionShapeInfo::owner): The renderer to which this info belongs.
+        (WebCore::ExclusionShapeInfo::ExclusionShapeInfo): Constructor.
+        (WebCore::ExclusionShapeInfo::floatLogicalTopToLayoutUnit/floatLogicalBottomToLayoutUnit):
+        Helper methods that round float units from ExclusionShapes to LayoutUnits for layout.
+        * rendering/ExclusionShapeInsideInfo.cpp:
+        (WebCore::ExclusionShapeInsideInfo::computeSegmentsForLine): Modified to use
+        computedShape() rather than m_shape.
+        (WebCore::ExclusionShapeInsideInfo::adjustLogicalLineTop): Ditto.
+        * rendering/ExclusionShapeInsideInfo.h:
+        (WebCore::ExclusionShapeInsideInfo::createInfo): Renamed to match MappedInfo.
+        (WebCore::ExclusionShapeInsideInfo::isEnabledFor): Renamed to match shorter naming.
+        (WebCore::ExclusionShapeInsideInfo::lineOverlapsShapeBounds): Modified to use
+        computedShape().
+        * rendering/ExclusionShapeOutsideInfo.cpp:
+        (WebCore::ExclusionShapeOutsideInfo::isEnabledFor): Renamed to match shorter naming.
+        * rendering/ExclusionShapeOutsideInfo.h:
+        (WebCore::ExclusionShapeOutsideInfo::createInfo): Renamed to match MappedInfo.
+        (WebCore::ExclusionShapeOutsideInfo::ExclusionShapeOutsideInfo): Constructor.
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::willBeDestroyed): Use shortened MappedInfo names for looking
+        up infos.
+        (WebCore::RenderBlock::exclusionShapeInsideInfo): Ditto.
+        (WebCore::RenderBlock::updateExclusionShapeInsideInfoAfterStyleChange): Ditto.
+        (WebCore::RenderBlock::computeExclusionShapeSize): Ditto.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::willBeDestroyed): Ditto.
+        (WebCore::RenderBox::updateExclusionShapeOutsideInfoAfterStyleChange): Ditto.
+        * rendering/RenderBox.h:
+        (WebCore):
+        (WebCore::RenderBox::exclusionShapeOutsideInfo): Ditto.
+
 2013-01-28  Stephen Chenney  <schenney@chromium.org>
 
         SVGViewSpec fails when corresponding element has been removed
