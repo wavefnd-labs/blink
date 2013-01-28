@@ -1,3 +1,44 @@
+2013-01-28  Ian Vollick  <vollick@chromium.org>
+
+        Promote composited-scrolling layers to stacking containers.
+        https://bugs.webkit.org/show_bug.cgi?id=106142
+
+        Reviewed by Simon Fraser.
+
+        With this patch, RenderLayers that use composited scrolling are
+        treated as stacking contexts. Since isStackingContainer now depends on
+        the value of m_needsCompositedScrolling, special care needed to be
+        taken to ensure that the value of isStackingContainer is not used when
+        updating m_needsCompositedScrolling. In particular, the code for
+        rebuilding the layer lists needed to be generalized so that we could
+        build the layer lists using the value of isStackingContext rather than
+        isStackingContainer when building the layer lists used to determine if
+        the descendants are contiguous in stacking order. Also, updating
+        m_needsCompositedScrolling can now affect stacking container status
+        and can therefore dirty layer lists.
+
+        Test: compositing/overflow/composited-scrolling-creates-a-stacking-container.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateDescendantsAreContiguousInStackingOrder):
+          Modified to use layer lists built based on isStackingContext rather
+          than isStackingContainer.
+        (WebCore::RenderLayer::updateNeedsCompositedScrolling):
+          This function can now affect stacking container status and layer
+          lists.
+        (WebCore::RenderLayer::rebuildZOrderLists):
+          Refactored to generalize layer list building.
+        (WebCore::RenderLayer::collectLayers):
+          This function can now stop at either stacking containers or
+          contexts.
+        (WebCore::RenderLayer::updateLayerListsIfNeeded):
+          Layer lists may need to be built a 2nd time if we opt into
+          composited scrolling.
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        (WebCore::RenderLayer::isStackingContainer):
+          Returns true if we use composited scrolling.
+
 2013-01-28  Max Vujovic  <mvujovic@adobe.com>
 
         [CSS Shaders] Parse @-webkit-filter

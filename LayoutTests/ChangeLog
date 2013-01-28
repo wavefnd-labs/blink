@@ -1,3 +1,27 @@
+2013-01-28  Ian Vollick  <vollick@chromium.org>
+
+        Promote composited-scrolling layers to stacking containers.
+        https://bugs.webkit.org/show_bug.cgi?id=106142
+
+        Reviewed by Simon Fraser.
+
+        With this patch, RenderLayers that use composited scrolling are
+        treated as stacking contexts. Since isStackingContainer now depends on
+        the value of m_needsCompositedScrolling, special care needed to be
+        taken to ensure that the value of isStackingContainer is not used when
+        updating m_needsCompositedScrolling. In particular, the code for
+        rebuilding the layer lists needed to be generalized so that we could
+        build the layer lists using the value of isStackingContext rather than
+        isStackingContainer when building the layer lists used to determine if
+        the descendants are contiguous in stacking order. Also, updating
+        m_needsCompositedScrolling can now affect stacking container status
+        and can therefore dirty layer lists.
+
+        * compositing/overflow/composited-scrolling-creates-a-stacking-container-expected.txt: Added.
+        * compositing/overflow/composited-scrolling-creates-a-stacking-container.html: Added.
+        * platform/chromium/TestExpectations:
+        * platform/mac/compositing/overflow/composited-scrolling-creates-a-stacking-container-expected.txt: Added.
+
 2013-01-28  Max Vujovic  <mvujovic@adobe.com>
 
         [CSS Shaders] Parse @-webkit-filter
