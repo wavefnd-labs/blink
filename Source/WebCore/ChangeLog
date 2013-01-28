@@ -1,3 +1,48 @@
+2013-01-27  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSSRegions] RenderFlowThread should keep a count of auto height regions
+        https://bugs.webkit.org/show_bug.cgi?id=105185
+
+        Reviewed by Julien Chaffraix.
+
+        Keep the count of auto height regions on the flow thread instead of flow thread controller.
+        This way, we can streamline the operations associated with the two-pass layout only to those
+        flow threads that have auto height regions associated.
+        The flow thread controller will keep a count of flow thread with auto height regions instead.
+        This is a performance refactoring without an expected change in behavior, therefore no new tests were added.
+
+        * rendering/FlowThreadController.cpp: Keep a count of flow threads with auto logical height regions.
+        (WebCore::FlowThreadController::FlowThreadController):
+        (WebCore::FlowThreadController::layoutRenderNamedFlowThreads): Check the count of auto height regions for all the flow threads.
+        (WebCore::FlowThreadController::isAutoLogicalHeightRegionsCountConsistent):
+        Make sure that we call these methods only when we have auto logical height regions.
+        (WebCore::FlowThreadController::resetRegionsOverrideLogicalContentHeight):
+        (WebCore::FlowThreadController::markAutoLogicalHeightRegionsForLayout):
+        * rendering/FlowThreadController.h:
+        (WebCore::FlowThreadController::hasFlowThreadsWithAutoLogicalHeightRegions):
+        (WebCore::FlowThreadController::incrementFlowThreadsWithAutoLogicalHeightRegions):
+        (WebCore::FlowThreadController::decrementFlowThreadsWithAutoLogicalHeightRegions):
+        * rendering/RenderFlowThread.cpp: Keep a count of auto logical height regions.
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        (WebCore::RenderFlowThread::isAutoLogicalHeightRegionsCountConsistent):
+        (WebCore::RenderFlowThread::resetRegionsOverrideLogicalContentHeight): Iterate the region chain only if the region chain has auto height regions.
+        (WebCore::RenderFlowThread::initializeRegionsOverrideLogicalContentHeight): Ditto.
+        (WebCore::RenderFlowThread::markAutoLogicalHeightRegionsForLayout): Ditto.
+        (WebCore::RenderFlowThread::incrementAutoLogicalHeightRegions):
+        (WebCore::RenderFlowThread::decrementAutoLogicalHeightRegions):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderRegion.cpp: Add increment/decrementAutoLogicalHeightCount to increase/decrease
+        the counter inside the flow thread and use them throughout the code as needed.
+        (WebCore::RenderRegion::incrementAutoLogicalHeightCount):
+        (WebCore::RenderRegion::decrementAutoLogicalHeightCount):
+        (WebCore::RenderRegion::updateRegionHasAutoLogicalHeightFlag):
+        (WebCore::RenderRegion::attachRegion):
+        (WebCore::RenderRegion::detachRegion):
+        * rendering/RenderRegion.h:
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::checkTwoPassLayoutForAutoHeightRegions): Use the count of flow threads with auto height regions
+        instead of the count of auto height regions when deciding whether we should attempt the 2 pass layout for auto height regions.
+
 2013-01-27  Shinya Kawanaka  <shinyak@chromium.org>
 
         [Shadow DOM] Selecting a node to another node in ShadowDOM fires 'click' event unexpectedly
