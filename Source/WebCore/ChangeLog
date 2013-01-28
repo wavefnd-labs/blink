@@ -1,3 +1,45 @@
+2013-01-28  Stephen Chenney  <schenney@chromium.org>
+
+        SVGViewSpec fails when corresponding element has been removed
+        https://bugs.webkit.org/show_bug.cgi?id=106957
+
+        Reviewed by Dirk Schulze.
+
+        When JS holds an SVGViewSpec object while deleting the object that
+        defines the spec (an SVGSVGElement, or one of a few others) the
+        pointer to the target is cleared in the SVGViewSpec but the methods
+        that serve JS queries do not check and try to access the now null
+        target. This patch fixes the prooblem, returning null when the
+        corresponding object has been deleted.
+
+        Also removing SVGViewSpec::setPreserveAspectRatioString, which is no
+        longer used by any callers.
+
+        Test: svg/dom/SVGViewSpec-invalid-ref-crash.html
+
+        * svg/SVGViewSpec.cpp:
+        (WebCore):
+        (WebCore::SVGViewSpec::viewTarget): Check for null target and return null.
+        (WebCore::SVGViewSpec::transform): Check for null target and return null..
+        (WebCore::SVGViewSpec::viewBoxAnimated): Check for null target and return null.
+        (WebCore::SVGViewSpec::preserveAspectRatioAnimated): Check for null target and return null.
+        (WebCore::SVGViewSpec::lookupOrCreateViewBoxWrapper): ASSERT non-null target.
+        (WebCore::SVGViewSpec::lookupOrCreatePreserveAspectRatioWrapper): ASSERT non-null target.
+        (WebCore::SVGViewSpec::lookupOrCreateTransformWrapper): ASSERT non-null target.
+        * svg/SVGViewSpec.h:
+        (SVGViewSpec): Move some methods out of the header and into the implementation file.
+
+        * svg/SVGViewSpec.cpp:
+        (WebCore):
+        (WebCore::SVGViewSpec::transform):
+        (WebCore::SVGViewSpec::viewBoxAnimated):
+        (WebCore::SVGViewSpec::preserveAspectRatioAnimated):
+        (WebCore::SVGViewSpec::lookupOrCreateViewBoxWrapper):
+        (WebCore::SVGViewSpec::lookupOrCreatePreserveAspectRatioWrapper):
+        (WebCore::SVGViewSpec::lookupOrCreateTransformWrapper):
+        * svg/SVGViewSpec.h:
+        (SVGViewSpec):
+
 2013-01-28  James Craig  <james@cookiecrook.com>
 
         HTML5 promotes DL from specific 'definition list' to superset 'description list'; accessibility strings and accessors should be updated to match.
