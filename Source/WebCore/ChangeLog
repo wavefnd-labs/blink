@@ -1,3 +1,27 @@
+2013-01-27  Matt Falkenhagen  <falken@chromium.org>
+
+        Elements must be reattached when inserted/removed from top layer
+        https://bugs.webkit.org/show_bug.cgi?id=105489
+
+        Relanding r139402 as the apparent perf regression has been explained as not real (bug 106726).
+
+        Reviewed by Julien Chaffraix.
+
+        Ensure a reattach occurs when an element is inserted/removed from top layer, so its renderer can be inserted correctly:
+        as a child of RenderView in top layer sibling order if it's in the top layer, and in the usual place otherwise.
+
+        We previously relied on style recalc to catch when an element is inserted/removed from the top layer, because it
+        only happens on dialog.show/close which toggle display: none. But that is incorrect because, for example, close()
+        followed immediately by show() results in no style change.
+
+        Tests: fast/dom/HTMLDialogElement/removed-element-is-removed-from-top-layer.html
+               fast/dom/HTMLDialogElement/top-layer-stacking-correct-order-remove-readd.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::removedFrom): Call Document::removeFromTopLayer to let the element be removed from the top layer vector.
+        removeFromTopLayer calls Element::setIsInTopLayer(false) itself if needed.
+        (WebCore::Element::setIsInTopLayer): Ensure a reattach occurs if the element is already attached.
+
 2013-01-27  Zoltan Arvai  <zarvai@inf.u-szeged.hu>
 
         Fixing atomicIncrement implementation for Windows by dropping support before XP SP2.
