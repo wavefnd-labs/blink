@@ -1,3 +1,67 @@
+2013-01-28  Min Qin  <qinmin@chromium.org>
+
+        adding support for DiscardablePixelRef for caching lazily decoded images
+        https://bugs.webkit.org/show_bug.cgi?id=106842
+
+        Reviewed by Stephen White.
+
+        This change allows using discardable memory in the deferred image decoding path.
+        Fully decoded images are unpinned and stored in ImageDecodingStore.
+        Partially decoded images are pinned and stored in ImageDecodingStore.
+        Discardable memory allocation could fail. Fall back to heap allocation in that case.
+        There is a separate size limit for heap entries and no limit on discardable entries.
+        New tests are added to ImageDecodingStoreTests
+
+        * WebCore.gypi:
+        * platform/graphics/chromium/DiscardablePixelRef.cpp: Added.
+          Added implementation of the DiscardablePixelRef object that is backed by discardable memory.
+          Memory allocated to the DiscardablePixelRef can be purged when it is unlocked.
+        (WebCore::DiscardablePixelRefAllocator::allocPixelRef):
+        (WebCore):
+        (WebCore::DiscardablePixelRef::DiscardablePixelRef):
+        (WebCore::DiscardablePixelRef::~DiscardablePixelRef):
+        (WebCore::DiscardablePixelRef::allocAndLockDiscardableMemory):
+        (WebCore::DiscardablePixelRef::onLockPixels):
+        (WebCore::DiscardablePixelRef::onUnlockPixels):
+        (WebCore::DiscardablePixelRef::isDiscardable):
+        * platform/graphics/chromium/DiscardablePixelRef.h: Added.
+          Added class definition of the DiscardablePixelRef.
+        (WebCore):
+        (DiscardablePixelRefAllocator):
+        (DiscardablePixelRef):
+        * platform/graphics/chromium/ImageDecodingStore.cpp:
+          Added new cache replacement strategy for DiscardablePixelRef.
+        (WebCore::ImageDecodingStore::lockCache):
+        (WebCore::ImageDecodingStore::overwriteAndLockCache):
+        (WebCore::ImageDecodingStore::prune):
+        (WebCore::ImageDecodingStore::insertCacheInternal):
+        (WebCore::ImageDecodingStore::removeFromCacheInternal):
+        * platform/graphics/chromium/ImageDecodingStore.h:
+          Added isDiscardable() calls to check if a cache entry is discardable.
+        (WebCore::ImageDecodingStore::CacheEntry::CacheEntry):
+        (WebCore::ImageDecodingStore::CacheEntry::overwriteCachedImage):
+        (WebCore::ImageDecodingStore::CacheEntry::isDiscardable):
+        (CacheEntry):
+        * platform/graphics/chromium/ImageFrameGenerator.cpp:
+          Added some code to pass DiscardableMemoryAllocator to the image decoder.
+        (WebCore::ImageFrameGenerator::tryToScale):
+        (WebCore::ImageFrameGenerator::decode):
+        * platform/graphics/chromium/ImageFrameGenerator.h:
+          Added a new member variable of type DiscardableMemoryAllocator.
+        (ImageFrameGenerator):
+        * platform/image-decoders/ImageDecoder.h:
+          Added methods to pass Allocator to ImageFrame.
+        (ImageFrame):
+        (WebCore::ImageFrame::setMemoryAllocator):
+        (WebCore::ImageFrame::allocator):
+        (ImageDecoder):
+        (WebCore::ImageDecoder::setMemoryAllocator):
+        * platform/image-decoders/skia/ImageDecoderSkia.cpp:
+          Added code to allocate pixel memory using the allocator passed from the caller.
+        (WebCore::ImageFrame::ImageFrame):
+        (WebCore::ImageFrame::operator=):
+        (WebCore::ImageFrame::setSize):
+
 2013-01-28  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r140869.
