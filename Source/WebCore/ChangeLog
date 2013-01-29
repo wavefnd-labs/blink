@@ -1,3 +1,72 @@
+2013-01-29  Kent Tamura  <tkent@chromium.org>
+
+        FeatureObserver: Input types are counted unexpectedly in a page with Modernizr
+        https://bugs.webkit.org/show_bug.cgi?id=108141
+
+        Reviewed by Kentaro Hara.
+
+        We don't want to record input type instantiation by Modernizr. Modernizr
+        creates input elements with these types, append it to document.body, and
+        render it with visibility:hidden. So, we record input types only when
+        they are attached without visibility:hidden.
+
+        No new tests. FeatureObserver is not testable by layout test.
+
+        * html/InputType.cpp:
+        (WebCore::InputType::create): Remove FeatureObserver::observe
+        callsites. They are moved to TextInputType::attach.
+        (WebCore::InputType::observeFeatureIfVisible):
+        Added. A helper for attach().
+        * html/InputType.h:
+        (InputType): Add observeFeatureIfVisible.
+
+        * html/ColorInputType.cpp:
+        (WebCore::ColorInputType::create):
+        Remove a FeatureObserver::observe callsite.
+        (WebCore::ColorInputType::attach):
+        Calls FetureObserver through InputType::observeFeatureIfVisible.
+        * html/ColorInputType.h:
+        (ColorInputType): Declare attach.
+        * html/DateInputType.cpp: Ditto.
+        * html/DateInputType.h: Ditto.
+        * html/DateTimeInputType.cpp: Ditto.
+        * html/DateTimeInputType.h: Ditto.
+        * html/DateTimeLocalInputType.cpp: Ditto.
+        * html/DateTimeLocalInputType.h: Ditto.
+        * html/MonthInputType.cpp: Ditto.
+        * html/MonthInputType.h: Ditto.
+        * html/RangeInputType.cpp: Ditt
+        * html/RangeInputType.h: Ditto.
+        * html/TimeInputType.cpp: Ditto.
+        * html/TimeInputType.h: Ditto.
+        * html/WeekInputType.cpp: Ditto.
+        * html/WeekInputType.h: Ditto.
+
+        * html/TextFieldInputType.h:
+        (TextFieldInputType):
+        Make attach protected in order that sub classes can call it.
+        * html/EmailInputType.cpp:
+        (WebCore::EmailInputType::create):
+        Remove a FeatureObserver::observe callsite.
+        (WebCore::EmailInputType::attach): Calls FetureObserver through
+        InputType::observeFeatureIfVisible after TextFieldInptuType::attach.
+        * html/EmailInputType.h:
+        (EmailInputType):Declare attach.
+        * html/NumberInputType.cpp: Ditto.
+        * html/NumberInputType.h: Ditto.
+        * html/SearchInputType.cpp: Ditto.
+        * html/SearchInputType.h: Ditto.
+        * html/TelephoneInputType.cpp: Ditto.
+        * html/TelephoneInputType.h: Ditto.
+        * html/URLInputType.cpp: Ditto.
+        * html/URLInputType.h: Ditto.
+
+        * html/TextInputType.cpp:
+        (WebCore::TextInputType::attach):
+        Move the code for type fallback from InputType::create.
+        * html/TextInputType.h:
+        (TextInputType): Declare attach.
+
 2013-01-29  Michael Brüning  <michael.bruning@digia.com>
 
         [Qt][WK1] Reflect recursion limit and loop checks also for list conversions.
