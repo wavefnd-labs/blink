@@ -1,3 +1,67 @@
+2013-01-28  Alexandre Elias  <aelias@chromium.org>
+
+        Make page scale shrink FrameView in applyPageScaleInCompositor mode
+        https://bugs.webkit.org/show_bug.cgi?id=107424
+
+        Reviewed by Levi Weintraub.
+
+        If applyPageScaleFactorInCompositor is enabled (Chromium-only setting),
+        instead of the entire document expanding as the user pinch zooms, the
+        viewport shrinks instead. This patch applies the pageScaleFactor to
+        visibleContentRect to get this behavior, and simplifies Chromium's
+        resize logic to stop hiding the true viewport size from WebCore.
+
+        I verified that the scaling makes sense for all the callers of
+        visibleContentRect. The exceptions are clip-layer size,
+        layout size in non-fixed-layout mode, and text autosizing, which need
+        the original unscaled size. Therefore I added a new method
+        unscaledVisibleContentSize() to ScrollView/FrameView.
+
+        This patch also modifies Page::setPageScaleFactor to perform no
+        invalidates or layout when applyPageScaleFactorInCompositor is true,
+        and also writes pageScaleFactor into HistoryItems instead of using
+        frameScaleFactor.
+
+        Since all behavior changes are tied to applyPageScaleFactorInCompositor,
+        this patch should be a no-op for non-Chromium ports.
+
+        New unit tests in WebFrameTest.cpp.
+
+        * loader/HistoryController.cpp:
+        (WebCore::HistoryController::saveScrollPositionAndViewStateToItem):
+        Use pageScaleFactor here because frameScaleFactor always returns 1
+        with our setting.
+        * page/FrameView.cpp:
+        (WebCore::FrameView::visibleContentScaleFactor):
+        (WebCore):
+        * page/FrameView.h:
+        (FrameView):
+        * page/Page.cpp:
+        (WebCore::Page::setPageScaleFactor): Make setPageScaleFactor stop
+        invalidating/layouting as this is handled by our compositor.
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::unscaledVisibleContentSize): This new method
+        just returns the original visible rect without pageScaleFactor being
+        applied.
+        (WebCore):
+        (WebCore::ScrollView::visibleContentRect): This now is divided by
+        pageScaleFactor if our setting is active.
+        (WebCore::ScrollView::layoutSize):
+        * platform/ScrollView.h:
+        (WebCore::ScrollView::visibleContentScaleFactor): Returns
+        pageScaleFactor if the visible rect is scaled, 1 normally.
+        (ScrollView):
+        (WebCore::ScrollView::layoutWidth):
+        (WebCore::ScrollView::layoutHeight):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::frameViewDidChangeSize):
+        (WebCore::RenderLayerCompositor::updateRootLayerPosition): Clip layer
+        should use unscaled size, because it's above the root scroll layer
+        on the layer tree (i.e. page scale isn't applied on it).
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::processSubtree): Text autosizer should use
+        unscaled size, because it cares about physical screen size.
+
 2013-01-28  Geoffrey Garen  <ggaren@apple.com>
 
         Static size inference for JavaScript objects
