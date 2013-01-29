@@ -1,3 +1,59 @@
+2013-01-29  Martin Robinson  <mrobinson@igalia.com>
+
+        [Freetype] Cannot use characters outside the BMP
+        https://bugs.webkit.org/show_bug.cgi?id=108102
+
+        Reviewed by Carlos Garcia Campos.
+
+        Test: platform/gtk/fonts/non-bmp-characters.html
+
+        Instead of never handling surrogate pairs when dealing with UChar arrays,
+        abstract way the logic for this into UTF16UChar32Iterator and use it
+        everywhere in Freetype. This allows the Freetype backend to render
+        non-BMP characters which are always represented as surrogate pairs in
+        UTF-16.
+
+        * GNUmakefile.list.am: Added UTF16UChar32Iterator to the source list.
+        * platform/graphics/freetype/FontCacheFreeType.cpp:
+        (WebCore::createFontConfigPatternForCharacters): Use the new iterator.
+        (WebCore::FontCache::getFontDataForCharacters): Ditto.
+        * platform/graphics/freetype/GlyphPageTreeNodeFreeType.cpp:
+        (WebCore::GlyphPage::fill): Ditto. Remove the early return when dealing
+        with non-BMP data.
+        * platform/graphics/freetype/SimpleFontDataFreeType.cpp:
+        (WebCore::SimpleFontData::containsCharacters): Use the new iterator.
+        * platform/graphics/freetype/UTF16UChar32Iterator.h: Added. An iterator that
+        extracts UChar32 from UTF-16 UChar arrays.
+
+        * GNUmakefile.list.am:
+        * platform/graphics/freetype/FontCacheFreeType.cpp:
+        (WebCore::createFontConfigPatternForCharacters):
+        (WebCore::FontCache::getFontDataForCharacters):
+        * platform/graphics/freetype/GlyphPageTreeNodeFreeType.cpp:
+        (WebCore::GlyphPage::fill):
+        * platform/graphics/freetype/SimpleFontDataFreeType.cpp:
+        (WebCore::SimpleFontData::containsCharacters):
+        * platform/graphics/freetype/UTF16UChar32Iterator.h: Added.
+        (WebCore):
+        (UTF16UChar32Iterator):
+        (WebCore::UTF16UChar32Iterator::UTF16UChar32Iterator):
+        (WebCore::UTF16UChar32Iterator::end):
+        (WebCore::UTF16UChar32Iterator::next):
+
+        * GNUmakefile.list.am:
+        * platform/graphics/freetype/FontCacheFreeType.cpp:
+        (WebCore::createFontConfigPatternForCharacters):
+        * platform/graphics/freetype/GlyphPageTreeNodeFreeType.cpp:
+        (WebCore::GlyphPage::fill):
+        * platform/graphics/freetype/SimpleFontDataFreeType.cpp:
+        (WebCore::SimpleFontData::containsCharacters):
+        * platform/graphics/freetype/UTF16UChar32Iterator.h: Added.
+        (WebCore):
+        (UTF16UChar32Iterator):
+        (WebCore::UTF16UChar32Iterator::UTF16UChar32Iterator):
+        (WebCore::UTF16UChar32Iterator::end):
+        (WebCore::UTF16UChar32Iterator::next):
+
 2013-01-29  Glenn Hartmann  <hartmanng@chromium.org>
 
         Don't overlap test for composited scroll DIVs after scroll
