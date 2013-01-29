@@ -1,3 +1,85 @@
+2013-01-28  Elliott Sprehn  <esprehn@chromium.org>
+
+        Handle createShadowSubtree inside of ensureUserAgentShadowRoot
+        https://bugs.webkit.org/show_bug.cgi?id=108116
+
+        Reviewed by Dimitri Glazkov.
+
+        Instead of making everyone create the UserAgentShadowRoot manually all
+        over, centralize it in ensureUserAgentShadowRoot() and add a notification
+        Element::didAddUserAgentShadowRoot that lets elements fill in the subtree.
+        This lets us get rid of lots of code duplication.
+
+        No new tests, just refactoring.
+
+        * dom/Element.cpp:
+        (WebCore::Element::ensureUserAgentShadowRoot):
+        * dom/Element.h:
+        (WebCore::Element::didAddUserAgentShadowRoot):
+        (Element):
+        * html/HTMLDetailsElement.cpp:
+        (WebCore::DetailsSummaryElement::create):
+        (WebCore::HTMLDetailsElement::create):
+        (WebCore::HTMLDetailsElement::didAddUserAgentShadowRoot):
+        * html/HTMLDetailsElement.h:
+        (HTMLDetailsElement):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::create):
+        (WebCore::HTMLInputElement::didAddUserAgentShadowRoot):
+        * html/HTMLInputElement.h:
+        (HTMLInputElement):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::willAddAuthorShadowRoot):
+        (WebCore::HTMLMediaElement::createMediaControls):
+        * html/HTMLMediaElement.h:
+        * html/HTMLMeterElement.cpp:
+        (WebCore::HTMLMeterElement::create):
+        (WebCore::HTMLMeterElement::didAddUserAgentShadowRoot):
+        * html/HTMLMeterElement.h:
+        (HTMLMeterElement):
+        * html/HTMLProgressElement.cpp:
+        (WebCore::HTMLProgressElement::create):
+        (WebCore::HTMLProgressElement::didAddUserAgentShadowRoot):
+        * html/HTMLProgressElement.h:
+        * html/HTMLSummaryElement.cpp:
+        (WebCore::HTMLSummaryElement::create):
+        (WebCore::HTMLSummaryElement::didAddUserAgentShadowRoot):
+        * html/HTMLSummaryElement.h:
+        (HTMLSummaryElement):
+        * html/HTMLTextAreaElement.cpp:
+        (WebCore::HTMLTextAreaElement::create):
+        (WebCore::HTMLTextAreaElement::didAddUserAgentShadowRoot):
+        * html/HTMLTextAreaElement.h:
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlPanelMuteButtonElement::create):
+        (WebCore::MediaControlVolumeSliderMuteButtonElement::create):
+        (WebCore::MediaControlPlayButtonElement::create):
+        (WebCore::MediaControlOverlayPlayButtonElement::create):
+        (WebCore::MediaControlSeekForwardButtonElement::create):
+        (WebCore::MediaControlSeekBackButtonElement::create):
+        (WebCore::MediaControlRewindButtonElement::create):
+        (WebCore::MediaControlReturnToRealtimeButtonElement::create):
+        (WebCore::MediaControlToggleClosedCaptionsButtonElement::create):
+        (WebCore::MediaControlTimelineElement::create):
+        (WebCore::MediaControlPanelVolumeSliderElement::create):
+        (WebCore::MediaControlFullscreenVolumeSliderElement::create):
+        (WebCore::MediaControlFullscreenButtonElement::create):
+        (WebCore::MediaControlFullscreenVolumeMinButtonElement::create):
+        (WebCore::MediaControlFullscreenVolumeMaxButtonElement::create):
+        * html/shadow/MediaControlsBlackBerry.cpp:
+        (WebCore::MediaControlFullscreenPlayButtonElement::create):
+        (WebCore::MediaControlFullscreenFullscreenButtonElement::create):
+        (WebCore::MediaControlFullscreenTimelineElement::create):
+        (WebCore::MediaControlAudioMuteButtonElement::create):
+        * svg/SVGTRefElement.cpp:
+        (WebCore::SVGTRefElement::create):
+        * svg/SVGTRefElement.h:
+        (SVGTRefElement):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::create):
+        * svg/SVGUseElement.h:
+        (SVGUseElement):
+
 2013-01-28   Vineet Chaudhary  <rgf748@motorola.com>
 
         HTMLOutputElement::htmlFor should be readonly
