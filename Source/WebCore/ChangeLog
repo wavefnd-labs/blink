@@ -1,3 +1,64 @@
+2013-01-29  Alexis Menard  <alexis@webkit.org>
+
+        Implement pseudoElement attribute on transition DOM events.
+        https://bugs.webkit.org/show_bug.cgi?id=107986
+
+        Reviewed by Julien Chaffraix.
+
+        Implement the pseudoElement attribute documented here :
+        http://dev.w3.org/csswg/css3-transitions/#transition-events.
+        This add a new attribute to the transition DOM event useful when
+        animating pseudo elements. As they are not accessible in JS, it's
+        very useful to get on which pseudo element the transition just ended.
+        This patch adds the new attribute on the IDLs of DOM transition events as well
+        as adding it to the C++ classes representing them. The event
+        dispatching code have been patched to change the target of the event
+        (we can't send the current target as it is the actual DOM
+        representation of the pseudo element).
+
+        Test: fast/css-generated-content/pseudo-transition-event.html
+
+        * dom/EventDispatcher.cpp:
+        (WebCore::eventTargetRespectingTargetRules): Change the target of the
+        event in the case of a pseudo element. We can't expose them through the
+        public interface so the target is the node they belong to.
+        (WebCore::EventDispatcher::ensureEventAncestors):
+        (WebCore::EventDispatcher::dispatchScopedEvent):
+        (WebCore::EventDispatcher::dispatchEvent):
+        (WebCore::EventDispatcher::dispatchEventPostProcess):
+        * dom/EventTarget.cpp:
+        (WebCore::createMatchingPrefixedEvent):
+        * dom/PseudoElement.cpp:
+        (WebCore::PseudoElement::pseudoElementNameForEvents):
+        (WebCore):
+        * dom/PseudoElement.h:
+        * dom/TransitionEvent.cpp:
+        (WebCore::TransitionEventInit::TransitionEventInit):
+        (WebCore::TransitionEvent::TransitionEvent):
+        (WebCore::TransitionEvent::pseudoElement):
+        (WebCore):
+        * dom/TransitionEvent.h:
+        (TransitionEventInit):
+        (WebCore::TransitionEvent::create):
+        (TransitionEvent):
+        * dom/TransitionEvent.idl:
+        * dom/WebKitTransitionEvent.cpp:
+        (WebCore::WebKitTransitionEventInit::WebKitTransitionEventInit):
+        (WebCore::WebKitTransitionEvent::WebKitTransitionEvent):
+        (WebCore::WebKitTransitionEvent::pseudoElement):
+        (WebCore):
+        * dom/WebKitTransitionEvent.h:
+        (WebKitTransitionEventInit):
+        (WebCore::WebKitTransitionEvent::create):
+        (WebKitTransitionEvent):
+        * dom/WebKitTransitionEvent.idl:
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationControllerPrivate::fireEventsAndUpdateStyle): Pass
+        the pseudo element name when creating the Event objects. If the element
+        is not a pseudo element then the name will be empty which is what the
+        spec is telling to do. If the element is a pseudo element then the name
+        will be the pseudo element's name with "::" as a prefix.
+
 2013-01-29  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] Implement GCActivityCallback
