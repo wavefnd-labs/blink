@@ -1,5 +1,31 @@
 2013-01-28  Simon Fraser  <simon.fraser@apple.com>
 
+        Avoid doing work at 60fps for tiled layers when not necessary
+        https://bugs.webkit.org/show_bug.cgi?id=108135
+
+        Reviewed by Dean Jackson.
+
+        When there were any tiled layers on the page, we would run a CVDisplayLink
+        to cause GraphicsLayerCA to flush, in order to update tiled layer visible rects.
+        This is overkill; we should only do this if the tiled layer is affected by
+        an accelerated animation.
+        
+        Fix by tracking whether an ancestor has a running animation when committing
+        GraphicsLayerCAs.
+
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::flushCompositingState): Start with an empty CommitState.
+        (WebCore::GraphicsLayerCA::recursiveCommitChanges): Push CommitState for
+        each layer, which tracks whether an ancestor has a running transform animation.
+        (WebCore::GraphicsLayerCA::commitLayerChangesBeforeSublayers): updateLayerAnimations() renamed.
+        (WebCore::GraphicsLayerCA::updateAnimations): Renamed from updateLayerAnimations().
+        (WebCore::GraphicsLayerCA::isRunningTransformAnimation): Look in the map of running
+        animations for one affecting transform. This list is normally small (one item).
+        * platform/graphics/ca/GraphicsLayerCA.h:
+        (WebCore::GraphicsLayerCA::CommitState::CommitState):
+
+2013-01-28  Simon Fraser  <simon.fraser@apple.com>
+
         compositing/reflections/become-simple-composited-reflection.html pixel result shows bug
         https://bugs.webkit.org/show_bug.cgi?id=107174
 
