@@ -1,3 +1,34 @@
+2013-01-29  Glenn Hartmann  <hartmanng@chromium.org>
+
+        Don't overlap test for composited scroll DIVs after scroll
+        https://bugs.webkit.org/show_bug.cgi?id=107471
+
+        Reviewed by Simon Fraser.
+
+        We don't need to test for overlap after scroll when both
+        usesCompositedScrolling and !hasOutOfFlowPositionedDescendant
+        because:
+
+        a) Since we're using composited-scrolling, the composited region
+        presented by the composited-scrolling element to other non-descendant
+        layers doesn't change during composited scrolling (it's always the
+        entire scroll layer), and
+
+        b) Since we have no out of flow positioned descendants, the scrolling
+        descendants all move together, so their overlap with respect to each
+        other cannot change.
+
+        So no descendants nor any non-descendants can have their overlap
+        affected, so it's safe to skip testing.
+
+        No new tests (no change in behaviour).
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateCompositingLayersAfterScroll):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::updateCompositingLayers):
+        * rendering/RenderLayerCompositor.h:
+
 2013-01-29  Alexis Menard  <alexis@webkit.org>
 
         Implement pseudoElement attribute on transition DOM events.
