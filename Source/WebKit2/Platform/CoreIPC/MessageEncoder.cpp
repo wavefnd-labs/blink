@@ -27,11 +27,12 @@
 #include "MessageEncoder.h"
 
 #include "ArgumentCoders.h"
+#include "MessageFlags.h"
 #include "StringReference.h"
 
 namespace CoreIPC {
 
-static uint8_t messageSendFlagsPlaceholderValue = 0xff;
+static uint8_t defaultMessageFlags = 0;
 
 PassOwnPtr<MessageEncoder> MessageEncoder::create(StringReference messageReceiverName, StringReference messageName, uint64_t destinationID)
 {
@@ -42,7 +43,7 @@ MessageEncoder::MessageEncoder(StringReference messageReceiverName, StringRefere
 {
     ASSERT(!messageReceiverName.isEmpty());
 
-    encode(messageSendFlagsPlaceholderValue);
+    encode(defaultMessageFlags);
     encode(messageReceiverName);
     encode(messageName);
     encode(destinationID);
@@ -50,15 +51,23 @@ MessageEncoder::MessageEncoder(StringReference messageReceiverName, StringRefere
 
 MessageEncoder::~MessageEncoder()
 {
-    ASSERT(*buffer() != messageSendFlagsPlaceholderValue);
 }
 
-void MessageEncoder::setMessageSendFlags(uint8_t messageSendFlags)
+void MessageEncoder::setIsSyncMessage(bool isSyncMessage)
 {
-    ASSERT(messageSendFlags != messageSendFlagsPlaceholderValue);
-    ASSERT(*buffer() == messageSendFlagsPlaceholderValue);
+    if (isSyncMessage)
+        *buffer() |= SyncMessage;
+    else
+        *buffer() &= ~SyncMessage;
 
-    *buffer() = messageSendFlags;
+}
+
+void MessageEncoder::setShouldDispatchMessageWhenWaitingForSyncReply(bool shouldDispatchMessageWhenWaitingForSyncReply)
+{
+    if (shouldDispatchMessageWhenWaitingForSyncReply)
+        *buffer() |= DispatchMessageWhenWaitingForSyncReply;
+    else
+        *buffer() &= ~DispatchMessageWhenWaitingForSyncReply;
 }
 
 } // namespace CoreIPC
