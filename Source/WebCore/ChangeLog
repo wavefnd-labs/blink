@@ -1,3 +1,23 @@
+2013-01-28  Shinya Kawanaka  <shinyak@chromium.org>
+
+        [Shadow] Gesture event is not fired in ShadowDOM
+        https://bugs.webkit.org/show_bug.cgi?id=107797
+
+        Reviewed by Dimitri Glazkov.
+
+        Gesture event (e.g. touchstart) is not fired in ShadowDOM.
+
+        We have to run event retargetting algorithm to retarget touchTarget, however it is not implemented yet (Bug 107800).
+        Until it's implemented, we use the shadow ancestor node of touchTarget in Document treescope as touchTarget
+        for backward compatibility. If a touch event is fired in nested ShadowDOM, touchTarget will be always element in
+        document tree, so an event listener in ShadowDOM will get a wrong touchTarget. However we prioritized
+        the correctness of document tree.
+
+        Test: fast/dom/shadow/touch-event.html
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleTouchEvent): Allows us to take elements in ShadowDOM.
+
 2013-01-28  Alexandre Elias  <aelias@chromium.org>
 
         Make page scale shrink FrameView in applyPageScaleInCompositor mode
