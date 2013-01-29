@@ -1,3 +1,30 @@
+2013-01-29  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Make resolveContentBasedTrackSizingFunctionsForItems reuse distributeSpaceToTracks
+        https://bugs.webkit.org/show_bug.cgi?id=108110
+
+        Reviewed by Tony Chang.
+
+        This change makes us match more closely the specification by reusing distributeSpaceToTracks inside
+        resolveContentBasedTrackSizingFunctionsForItems. This also removes some existing code duplication.
+
+        Refactoring covered by existing tests.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::computedUsedBreadthOfGridTracks):
+        Updated after distributeSpaceToTracks new arguments. Copying the tracks to a Vector<GridTrack*> is
+        now done here.
+
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctionsForItems):
+        Removed code duplication and switched to using distributeSpaceToTracks.
+
+        (WebCore::RenderGrid::distributeSpaceToTracks):
+        Refactored distributeSpaceToTracks to implement the distribution of any extra space above max breadth
+        as it was required to pass the tests (required to properly handling min-content > max). Also changed
+        the arguments of the function to better match the intent of the function.
+
+        * rendering/RenderGrid.h: Updated distributeSpaceToTracks's arguments.
+
 2013-01-29  Elliott Sprehn  <esprehn@chromium.org>
 
         Remove all ShadowRoots during ElementShadow destruction
