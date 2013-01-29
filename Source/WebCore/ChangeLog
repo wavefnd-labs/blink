@@ -1,3 +1,34 @@
+2013-01-28  Alec Flett  <alecflett@chromium.org>
+
+        IndexedDB: Pass metadata in to IDBOpenDBRequest.onUpgradeNeeded/onSuccess
+        https://bugs.webkit.org/show_bug.cgi?id=103920
+
+        Reviewed by Dimitri Glazkov.
+
+        Update IDBCallbacks::onSuccess and IDBCallbacks::onUpgradeNeeded to
+        pass through a metadata parameter. While there, remove the unused
+        IDBTransactionBackendInterface parameter to onUpgradeNeeded.
+
+        As this is another step in the IDB refactor, I've simplified future cleanup
+        work by making the WebKit API code still use the old API. This
+        will make it possible to outright remove code on the chromium side rather
+        than another three-step checkin.
+
+        No new tests, as this is more refactoring.
+
+        * Modules/indexeddb/IDBCallbacks.h:
+        (WebCore::IDBCallbacks::onUpgradeNeeded): new method signature.
+        (WebCore::IDBCallbacks::onSuccess): new method signature.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::VersionChangeOperation::perform):
+        (WebCore::IDBDatabaseBackendImpl::processPendingCalls):
+        (WebCore::IDBDatabaseBackendImpl::openConnection):
+        * Modules/indexeddb/IDBOpenDBRequest.cpp:
+        (WebCore::IDBOpenDBRequest::onUpgradeNeeded): use passed-in metadata.
+        (WebCore::IDBOpenDBRequest::onSuccess): use passed-in metadata.
+        * Modules/indexeddb/IDBOpenDBRequest.h:
+        (IDBOpenDBRequest):
+
 2013-01-28  Simon Fraser  <simon.fraser@apple.com>
 
         position:fixed that doesn't render any content should not force compositing
