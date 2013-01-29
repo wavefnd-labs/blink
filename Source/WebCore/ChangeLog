@@ -1,3 +1,76 @@
+2013-01-29  Mark Lam  <mark.lam@apple.com>
+
+        Change DatabaseContext lookup to be thread-safe.
+        https://bugs.webkit.org/show_bug.cgi?id=107784.
+
+        Reviewed by Geoffrey Garen.
+
+        DatabaseContext will no longer be a Supplement of ScriptExecutionContext.
+        Instead we will maintain a mutex guarded contextMap in the DatabaseManager
+        which maps ScriptExecutionContexts to DatabaseContexts.
+
+        Also cleaned up the shutdown mechanism of the DatabaseContext,
+        DatabaseThread, and Databases when their owner ScriptExecutionContext
+        destructs.
+
+        No new tests.
+
+        * Modules/webdatabase/AbstractDatabase.cpp:
+        (WebCore::AbstractDatabase::AbstractDatabase):
+        * Modules/webdatabase/AbstractDatabase.h:
+        (WebCore::AbstractDatabase::databaseContext):
+        (AbstractDatabase):
+        * Modules/webdatabase/Database.cpp:
+        (WebCore::Database::Database):
+        * Modules/webdatabase/Database.h:
+        (WebCore):
+        (Database):
+        * Modules/webdatabase/DatabaseContext.cpp:
+        (WebCore):
+        (WebCore::DatabaseContext::DatabaseContext):
+        (WebCore::DatabaseContext::~DatabaseContext):
+        (WebCore::DatabaseContext::contextDestroyed):
+        (WebCore::DatabaseContext::stop):
+        (WebCore::DatabaseContext::databaseThread):
+        (WebCore::DatabaseContext::stopDatabases):
+        * Modules/webdatabase/DatabaseContext.h:
+        (DatabaseContext):
+        (WebCore::DatabaseContext::scriptExecutionContext):
+        (WebCore::DatabaseContext::hasOpenDatabases):
+        (WebCore::DatabaseContext::stopDatabases):
+        * Modules/webdatabase/DatabaseManager.cpp:
+        (WebCore::DatabaseManager::manager):
+        (WebCore::DatabaseManager::DatabaseManager):
+        (WebCore::DatabaseManager::getExistingDatabaseContext):
+        (WebCore):
+        (WebCore::DatabaseManager::getDatabaseContext):
+        (WebCore::DatabaseManager::registerDatabaseContext):
+        (WebCore::DatabaseManager::unregisterDatabaseContext):
+        (WebCore::DatabaseManager::notifyDatabaseContextConstructed):
+        (WebCore::DatabaseManager::notifyDatabaseContextDestructed):
+        (WebCore::DatabaseManager::openDatabase):
+        (WebCore::DatabaseManager::openDatabaseSync):
+        (WebCore::DatabaseManager::hasOpenDatabases):
+        (WebCore::DatabaseManager::stopDatabases):
+        (WebCore::DatabaseManager::interruptAllDatabasesForContext):
+        * Modules/webdatabase/DatabaseManager.h:
+        (WebCore):
+        (DatabaseManager):
+        (WebCore::DatabaseManager::notifyDatabaseContextConstructed):
+        (WebCore::DatabaseManager::notifyDatabaseContextDestructed):
+        * Modules/webdatabase/DatabaseSync.cpp:
+        (WebCore::DatabaseSync::DatabaseSync):
+        * Modules/webdatabase/DatabaseSync.h:
+        (WebCore):
+        (DatabaseSync):
+        * Modules/webdatabase/DatabaseThread.cpp:
+        (WebCore::DatabaseThread::~DatabaseThread):
+        (WebCore::DatabaseThread::requestTermination):
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::canEstablishDatabase):
+        * dom/ActiveDOMObject.cpp:
+        (WebCore::ActiveDOMObject::~ActiveDOMObject):
+
 2013-01-29  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Make resolveContentBasedTrackSizingFunctionsForItems reuse distributeSpaceToTracks
