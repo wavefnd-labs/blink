@@ -1,3 +1,31 @@
+2013-01-29  Mike West  <mkwst@chromium.org>
+
+        IDBFactory::webkitGetDatabaseNames should raise DOMExceptions.
+        https://bugs.webkit.org/show_bug.cgi?id=108154
+
+        Reviewed by Jochen Eisinger.
+
+        In order to properly support blocking third-party IndexedDB usage,
+        open(), getDatabaseNames(), and deleteDatabase() should all throw
+        SECURITY_ERR when used in a blocked third-party context. That's possible
+        now for open() and deleteDatabase(), but getDatabaseNames() can't
+        currently raise exceptions.
+
+        This patch adjusts the IDL file and implementation. No exceptions are
+        currently thrown, but that will change as soon as wkbug.com/94171 lands.
+
+        * Modules/indexeddb/IDBFactory.cpp:
+        (WebCore::IDBFactory::getDatabaseNames):
+        * Modules/indexeddb/IDBFactory.h:
+        (IDBFactory):
+        * Modules/indexeddb/IDBFactory.idl:
+            Add "raises (DOMException)" to getDatabaseNames, and adjust the
+            implementation to match.
+        * inspector/InspectorIndexedDBAgent.cpp:
+        (WebCore::InspectorIndexedDBAgent::requestDatabaseNamesForFrame):
+            Pass in an ExceptionCode when calling getDatabaseNames, and handle
+            possible exceptions.
+
 2013-01-29  Hayato Ito  <hayato@chromium.org>
 
         Revert an accidentally changed line of EventHander::handleMousePressEvent(PlatformMouseEvent&) in r135650.
