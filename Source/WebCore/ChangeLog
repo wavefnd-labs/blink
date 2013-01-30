@@ -1,3 +1,28 @@
+2013-01-29  Elliott Sprehn  <esprehn@chromium.org>
+
+        Move ShadowRoot creation into ElementShadow
+        https://bugs.webkit.org/show_bug.cgi?id=108267
+
+        Reviewed by Hajime Morita.
+
+        Instead of the ShadowRoot::create method doing crazy factory things and
+        then needing to assert about the state of the ShadowRoot in addShadowRoot,
+        just create ShadowRoots from inside ElementShadow.
+
+        No new tests, just refactoring.
+
+        * dom/Element.cpp:
+        (WebCore::Element::createShadowRoot): Use addShadowRoot().
+        (WebCore::Element::ensureUserAgentShadowRoot): Use addShadowRoot().
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::addShadowRoot): Now returns the new ShadowRoot.
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        * dom/ShadowRoot.cpp:
+        * dom/ShadowRoot.h:
+        (WebCore::ShadowRoot::create): No longer does the association.
+        (WebCore::ShadowRoot::setHost): Sets parent tree scope automatically.
+
 2013-01-29  Mark Lam  <mark.lam@apple.com>
 
         Rename DBBackend::Server to DatabaseServer.
