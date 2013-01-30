@@ -1,3 +1,155 @@
+2013-01-30  Dominik Röttsches  <dominik.rottsches@intel.com>
+
+        [HarfBuzz] Naming fixes after removing old HarfBuzz code
+        https://bugs.webkit.org/show_bug.cgi?id=108170
+
+        Reviewed by Tony Chang.
+
+        Since the old harfbuzz code is gone in r141241, it makes sense to get rid
+        of the now unnecessray NG suffix in a number of places. While at it,
+        I am also fixing some naming inconsistencies.
+
+        Renamed all occurences of HarfBuzzNG* to HarfBuzz*,
+        renamed lowercase variants of harfbuzz* in variable and function names to camel-case harfBuzz*,
+        moved files in platform/graphics/harfbuzz/ng/* one level up and removed ng folder.
+        Updated corresponding entries in Chromium, GTK and EFL build system files.
+
+        No new tests, no change in behavior.
+
+        * GNUmakefile.list.am:
+        * PlatformEfl.cmake:
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        * platform/graphics/FontPlatformData.cpp:
+        * platform/graphics/FontPlatformData.h:
+        (WebCore):
+        (FontPlatformData):
+        * platform/graphics/cocoa/FontPlatformDataCocoa.mm:
+        (WebCore::FontPlatformData::platformDataInit):
+        (WebCore::FontPlatformData::platformDataAssign):
+        (WebCore::FontPlatformData::harfBuzzFace):
+        * platform/graphics/freetype/FontPlatformData.h:
+        (FontPlatformData):
+        * platform/graphics/freetype/FontPlatformDataFreeType.cpp:
+        (WebCore::FontPlatformData::operator=):
+        (WebCore::FontPlatformData::FontPlatformData):
+        (WebCore::FontPlatformData::harfBuzzFace):
+        * platform/graphics/harfbuzz/FontPlatformDataHarfBuzz.cpp:
+        (WebCore::FontPlatformData::FontPlatformData):
+        (WebCore::FontPlatformData::operator=):
+        (WebCore::FontPlatformData::harfBuzzFace):
+        * platform/graphics/harfbuzz/FontPlatformDataHarfBuzz.h:
+        (WebCore):
+        (FontPlatformData):
+        * platform/graphics/harfbuzz/HarfBuzzFace.cpp: Renamed from Source/WebCore/platform/graphics/harfbuzz/ng/HarfBuzzNGFace.cpp.
+        (WebCore):
+        (FaceCacheEntry):
+        (WebCore::FaceCacheEntry::create):
+        (WebCore::FaceCacheEntry::~FaceCacheEntry):
+        (WebCore::FaceCacheEntry::face):
+        (WebCore::FaceCacheEntry::glyphCache):
+        (WebCore::FaceCacheEntry::FaceCacheEntry):
+        (WebCore::harfBuzzFaceCache):
+        (WebCore::HarfBuzzFace::HarfBuzzFace):
+        (WebCore::HarfBuzzFace::~HarfBuzzFace):
+        (WebCore::findScriptForVerticalGlyphSubstitution):
+        (WebCore::HarfBuzzFace::setScriptForVerticalGlyphSubstitution):
+        * platform/graphics/harfbuzz/HarfBuzzFace.h: Renamed from Source/WebCore/platform/graphics/harfbuzz/ng/HarfBuzzNGFace.h.
+        (WebCore):
+        (HarfBuzzFace):
+        (WebCore::HarfBuzzFace::create):
+        * platform/graphics/harfbuzz/HarfBuzzFaceCairo.cpp: Renamed from Source/WebCore/platform/graphics/harfbuzz/ng/HarfBuzzNGFaceCairo.cpp.
+        (WebCore):
+        (CairoFtFaceLocker):
+        (WebCore::CairoFtFaceLocker::CairoFtFaceLocker):
+        (WebCore::CairoFtFaceLocker::lock):
+        (WebCore::CairoFtFaceLocker::~CairoFtFaceLocker):
+        (WebCore::floatToHarfBuzzPosition):
+        (WebCore::doubleToHarfBuzzPosition):
+        (WebCore::CairoGetGlyphWidthAndExtents):
+        (WebCore::harfBuzzGetGlyph):
+        (WebCore::harfBuzzGetGlyphHorizontalAdvance):
+        (WebCore::harfBuzzGetGlyphHorizontalOrigin):
+        (WebCore::harfBuzzGetGlyphExtents):
+        (WebCore::harfBuzzCairoTextGetFontFuncs):
+        (WebCore::harfBuzzCairoGetTable):
+        (WebCore::HarfBuzzFace::createFace):
+        (WebCore::HarfBuzzFace::createFont):
+        (WebCore::HarfBuzzShaper::createGlyphBufferAdvance):
+        * platform/graphics/harfbuzz/HarfBuzzFaceCoreText.cpp: Renamed from Source/WebCore/platform/graphics/harfbuzz/ng/HarfBuzzNGFaceCoreText.cpp.
+        (WebCore):
+        (WebCore::floatToHarfBuzzPosition):
+        (WebCore::getGlyph):
+        (WebCore::getGlyphHorizontalAdvance):
+        (WebCore::getGlyphHorizontalOrigin):
+        (WebCore::getGlyphExtents):
+        (WebCore::harfbuzzCoreTextGetFontFuncs):
+        (WebCore::releaseTableData):
+        (WebCore::harfBuzzCoreTextGetTable):
+        (WebCore::HarfBuzzFace::createFace):
+        (WebCore::HarfBuzzFace::createFont):
+        (WebCore::HarfBuzzShaper::createGlyphBufferAdvance):
+        * platform/graphics/harfbuzz/HarfBuzzFaceSkia.cpp: Renamed from Source/WebCore/platform/graphics/harfbuzz/ng/HarfBuzzNGFaceSkia.cpp.
+        (WebCore):
+        (WebCore::HarfBuzzFontData::HarfBuzzFontData):
+        (HarfBuzzFontData):
+        (WebCore::SkiaScalarToHarfBuzzPosition):
+        (WebCore::SkiaGetGlyphWidthAndExtents):
+        (WebCore::harfBuzzGetGlyph):
+        (WebCore::harfBuzzGetGlyphHorizontalAdvance):
+        (WebCore::harfBuzzGetGlyphHorizontalOrigin):
+        (WebCore::harfBuzzGetGlyphExtents):
+        (WebCore::harfBuzzSkiaGetFontFuncs):
+        (WebCore::harfBuzzSkiaGetTable): Also fixed style checker whitespace complaint / indentation.
+        (WebCore::destroyHarfBuzzFontData):
+        (WebCore::HarfBuzzFace::createFace):
+        (WebCore::HarfBuzzFace::createFont):
+        (WebCore::HarfBuzzShaper::createGlyphBufferAdvance):
+        * platform/graphics/harfbuzz/HarfBuzzShaper.cpp: Renamed from Source/WebCore/platform/graphics/harfbuzz/ng/HarfBuzzShaper.cpp.
+        (WebCore):
+        (HarfBuzzScopedPtr):
+        (WebCore::HarfBuzzScopedPtr::HarfBuzzScopedPtr):
+        (WebCore::HarfBuzzScopedPtr::~HarfBuzzScopedPtr):
+        (WebCore::HarfBuzzScopedPtr::get):
+        (WebCore::harfBuzzPositionToFloat):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::HarfBuzzRun):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::applyShapeResult):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::setGlyphAndPositions):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::characterIndexForXPosition):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::xPositionForOffset):
+        (WebCore::normalizeCharacters):
+        (WebCore::HarfBuzzShaper::HarfBuzzShaper):
+        (WebCore::HarfBuzzShaper::~HarfBuzzShaper):
+        (WebCore::HarfBuzzShaper::setDrawRange):
+        (WebCore::HarfBuzzShaper::setFontFeatures):
+        (WebCore::HarfBuzzShaper::shape):
+        (WebCore::HarfBuzzShaper::adjustStartPoint):
+        (WebCore::HarfBuzzShaper::collectHarfBuzzRuns):
+        (WebCore::HarfBuzzShaper::shapeHarfBuzzRuns):
+        (WebCore::HarfBuzzShaper::setGlyphPositionsForHarfBuzzRun):
+        (WebCore::HarfBuzzShaper::fillGlyphBufferFromHarfBuzzRun):
+        (WebCore::HarfBuzzShaper::fillGlyphBuffer):
+        (WebCore::HarfBuzzShaper::offsetForPosition):
+        (WebCore::HarfBuzzShaper::selectionRect):
+        * platform/graphics/harfbuzz/HarfBuzzShaper.h: Renamed from Source/WebCore/platform/graphics/harfbuzz/ng/HarfBuzzShaper.h.
+        (WebCore):
+        (HarfBuzzShaper):
+        (WebCore::HarfBuzzShaper::totalWidth):
+        (HarfBuzzRun):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::create):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::setWidth):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::fontData):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::startIndex):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::numCharacters):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::numGlyphs):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::glyphs):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::advances):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::offsets):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::glyphToCharacterIndexes):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::width):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::rtl):
+        (WebCore::HarfBuzzShaper::HarfBuzzRun::script):
+
 2013-01-30  Tony Chang  <tony@chromium.org>
 
         REGRESSION(r136324): Flexbox should relayout flex children when width changes
