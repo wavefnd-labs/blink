@@ -1,3 +1,30 @@
+2013-01-30  Tim Horton  <timothy_horton@apple.com>
+
+        [mac] ImageBuffer should create accelerated buffers for small canvases, but we shouldn't force them to create compositing layers
+        https://bugs.webkit.org/show_bug.cgi?id=107804
+        <rdar://problem/11752381>
+
+        Reviewed by Simon Fraser.
+
+        Make all canvases IOSurface-backed if requested, instead of having a size threshold
+        under which we won't use accelerated canvas.
+
+        Make requiresCompositingForCanvas take the size of the canvas into account, using
+        the threshold which was previously in ImageBuffer to determine whether or not a
+        canvas should be forced into a compositing layer.
+
+        This improves canvas performance on some benchmarks
+        (http://www.mikechambers.com/html5/javascript/QuadTree/examples/collision.html, for example)
+        significantly, in cases where canvases which fall below the size limit
+        (and thus are unaccelerated) are being drawn rapidly into either accelerated
+        tiles or another accelerated canvas, by preventing excessive copying to/from the GPU.
+
+        * platform/graphics/cg/ImageBufferCG.cpp:
+        (WebCore):
+        (WebCore::ImageBuffer::ImageBuffer):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::requiresCompositingForCanvas):
+
 2013-01-30  Alec Flett  <alecflett@chromium.org>
 
         IndexedDB: clean up scheduleTask return type
