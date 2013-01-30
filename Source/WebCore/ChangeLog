@@ -1,3 +1,85 @@
+2013-01-29  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: The content should not overflow the <input> boundary
+        https://bugs.webkit.org/show_bug.cgi?id=108069
+
+        Reviewed by Hajime Morita.
+
+        To avoid the overflow, we do:
+        A) Specify overflow:hidden to <input>.
+
+        However, we need to make sub-fields and buttons workable even if the
+        width is smaller than the intrinsic size. So, we do:
+        B) Make DateTimeEditElement shrinkable, and
+        C) Make the sub-fields scrollable horizontally like input[type=text].
+
+        To achieve B, we need to remove -webkit-date-and-time-container (D)
+        because width property for <input> can shrink only the direct child
+        elements.
+
+        Tests: fast/forms/time-multiple-fields/time-multiple-fields-narrow-width-scroll.html
+        and new test cases in fast/forms/date/date-appearance-basic.html.
+
+        * css/html.css:
+        (input[type="date"]):
+        Change -webkit-align-items value. (D)
+        Specify overflow:hidden. (A)
+        (input[type="datetime"]): Ditto.
+        (input[type="datetime-local"]): Ditto.
+        (input[type="month"]): Ditto.
+        (input[type="time"]): Ditto.
+        (input[type="week"]): Ditto.
+        (input::-webkit-datetime-edit):
+        Add min-width:0 (B), and overflow:hidden. (C)
+        Remove unnecessary white-space:pre because of white-space:nowrap below.
+        (input::-webkit-datetime-edit-fields-wrapper):
+        Added. This is the child of -webkit-datetime-edit, and contains
+        sub-fields. (C)
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::createShadowSubtree):
+        Remove -webkit-date-and-time-container, and append DateTimeEditElement,
+        spin button, and picker indicator element to the ShadowRoot. (D)
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::shouldApplyLocaleDirection):
+        <input> for multiple fields UI should have the direction of the browser
+        locale. This is a replacement of the code for dir attribute in
+        updateInnerTextValue below. (D)
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::updateInnerTextValue):
+        Remove the code to set dir= to -webkit-date-and-time-container.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType):
+        Declare shouldApplyLocaleDirection. (D)
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::HTMLInputElement):
+        Calls setHasCustomCallbacks for customStyleForRenderer. (D)
+        (WebCore::HTMLInputElement::customStyleForRenderer):
+        Set direction to RenderStyle if shouldApplyLocaleDirection is true. This
+        is a replacement of the dir setting code in
+        BaseMultipleFieldsDateAndTimeInputType::updateInnerTextValue. (D)
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Declare customStyleForRenderer. (D)
+        * html/InputType.cpp:
+        (WebCore::InputType::shouldApplyLocaleDirection):
+        Add default implmentation of shouldApplyLocaleDirection. (D)
+        * html/InputType.h:
+        (InputType): Declare shouldApplyLocaleDirection. (D)
+
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditBuilder::visitLiteral):
+        Add elements to -webkit-datetime-edit-fields-wrapper element. (C)
+        (WebCore::DateTimeEditElement::fieldsWrapperElement):
+        A helper to get -webkit-datetime-edit-fields-wrapper element. (C)
+        (WebCore::DateTimeEditElement::addField):
+        Add elements to -webkit-datetime-edit-fields-wrapper element. (C)
+        (WebCore::DateTimeEditElement::customStyleForRenderer):
+        - Iterate over children of -webkit-datetime-edit-fields-wrapper element. (C)
+        - Set width property instead of min-width. (B)
+        (WebCore::DateTimeEditElement::layout):
+        - Prepare -webkit-datetime-edit-fields-wrapper element. (C)
+        - Handle children of -webkit-datetime-edit-fields-wrapper element. (C)
+        - Need to do style recalc because child structure is changed. (C)
+        * html/shadow/DateTimeEditElement.h:
+        (DateTimeEditElement): Declare fieldsWrapperElement. (C)
+
 2013-01-29  Tom Sepez  <tsepez@chromium.org>
 
         [v8] Enable binding integrity on linux
