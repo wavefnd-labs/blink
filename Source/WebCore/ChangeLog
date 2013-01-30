@@ -1,3 +1,23 @@
+2013-01-29  James Robinson  <jamesr@chromium.org>
+
+        Scrollbar and scroll corner composited layers positioned incorrectly
+        https://bugs.webkit.org/show_bug.cgi?id=108255
+
+        Reviewed by Simon Fraser.
+
+        ScrollView::updateScrollbars() needs to update the overflow controls composited layers if scrollbars are added
+        or removed. It was doing this by recording on entry to the function if it had horizontal or vertical scrollbars
+        and then comparing that to m_horizontal/verticalScrollbar on exit. Unfortunately updateScrollbars is recursive
+        and exits without running the postamble code when nested on the callstack. As a result, scrollbars may be
+        added or removed several times during the recursion, possibly leaving the overflow control layers in an
+        inconsistent state, while ending up with the same set of scrollbars.
+
+        This changes the "has anything changed" logic to only compare local state (hasXXXScrollbar vs
+        newHasXXXScrollbar) so changes in recursive calls are not considered.
+
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::updateScrollbars):
+
 2013-01-29  Shinya Kawanaka  <shinyak@chromium.org>
 
         Convert deprecatedShadowAncestorNode() to shadowHost() in Editor.cpp
