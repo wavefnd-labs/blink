@@ -1,3 +1,43 @@
+2013-01-30  Adam Barth  <abarth@webkit.org>
+
+        HTMLDocumentParser::insert should be aware of threaded parsing
+        https://bugs.webkit.org/show_bug.cgi?id=107764
+
+        Reviewed by Eric Seidel.
+
+        This patch is an incremental step towards recovering from
+        document.write invalidating our speculative parsing buffer. The
+        approach I've taken is to make it possible to transfer the
+        HTMLDocumentParser's HTMLTokenizer and HTMLToken to the background
+        thread. To make that possible, I've taught the HTMLDocumentParser how
+        to operate without a tokenizer or a token.
+
+        Not having a tokenizer or a token while parsing in the background also
+        helps us avoid accidentially feeding input to the main thread's
+        tokenizer when we're supposed to feed it to the background thread.
+
+        This patch shouldn't have any behavior change (other than possibly
+        fixing a crash in fast/parser when threading parsing is enabled).
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::HTMLDocumentParser):
+        (WebCore::HTMLDocumentParser::didFailSpeculation):
+        (WebCore):
+        (WebCore::HTMLDocumentParser::insert):
+        (WebCore::HTMLDocumentParser::finish):
+        (WebCore::HTMLDocumentParser::resumeParsingAfterScriptExecution):
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::constructTree):
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody):
+        (WebCore::HTMLTreeBuilder::processEndTag):
+        (WebCore::HTMLTreeBuilder::processGenericRCDATAStartTag):
+        (WebCore::HTMLTreeBuilder::processGenericRawTextStartTag):
+        (WebCore::HTMLTreeBuilder::processScriptStartTag):
+        * html/parser/TextDocumentParser.cpp:
+        (WebCore::TextDocumentParser::TextDocumentParser):
+
 2013-01-30  Rafael Weinstein  <rafaelw@chromium.org>
 
         [HTMLTemplateElement] prevent the parser from removing nodes from the content when the foster agency is processing formatting elements
