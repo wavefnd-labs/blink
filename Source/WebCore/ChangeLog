@@ -1,3 +1,138 @@
+2013-01-29  Mark Lam  <mark.lam@apple.com>
+
+        Rename AbstractDatabase to DatabaseBackend.
+        https://bugs.webkit.org/show_bug.cgi?id=108275.
+
+        Reviewed by Sam Weinig.
+
+        This is a pure rename operation as part of the webdatabase refactoring
+        effort. There is no semantic change in this patch.
+
+        No new tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase/AbstractDatabase.cpp: Removed.
+        * Modules/webdatabase/AbstractDatabase.h: Removed.
+        * Modules/webdatabase/AbstractDatabaseServer.h:
+        (WebCore):
+        (AbstractDatabaseServer):
+        * Modules/webdatabase/DBBackendServer.cpp:
+        (WebCore::DBBackend::Server::databaseChanged):
+        (WebCore::DBBackend::Server::addOpenDatabase):
+        (WebCore::DBBackend::Server::removeOpenDatabase):
+        (WebCore::DBBackend::Server::getMaxSizeForDatabase):
+        * Modules/webdatabase/DBBackendServer.h:
+        * Modules/webdatabase/Database.cpp:
+        (WebCore::Database::Database):
+        (WebCore::Database::version):
+        (WebCore::Database::performOpenAndVerify):
+        * Modules/webdatabase/Database.h:
+        * Modules/webdatabase/DatabaseBackend.cpp: Copied from Source/WebCore/Modules/webdatabase/AbstractDatabase.cpp.
+        (WebCore):
+        (WebCore::DatabaseBackend::databaseInfoTableName):
+        (WebCore::DatabaseBackend::DatabaseBackend):
+        (WebCore::DatabaseBackend::~DatabaseBackend):
+        (WebCore::DatabaseBackend::closeDatabase):
+        (WebCore::DatabaseBackend::version):
+        (WebCore::DatabaseBackend::performOpenAndVerify):
+        (WebCore::DatabaseBackend::scriptExecutionContext):
+        (WebCore::DatabaseBackend::securityOrigin):
+        (WebCore::DatabaseBackend::stringIdentifier):
+        (WebCore::DatabaseBackend::displayName):
+        (WebCore::DatabaseBackend::estimatedSize):
+        (WebCore::DatabaseBackend::fileName):
+        (WebCore::DatabaseBackend::details):
+        (WebCore::DatabaseBackend::getVersionFromDatabase):
+        (WebCore::DatabaseBackend::setVersionInDatabase):
+        (WebCore::DatabaseBackend::setExpectedVersion):
+        (WebCore::DatabaseBackend::getCachedVersion):
+        (WebCore::DatabaseBackend::setCachedVersion):
+        (WebCore::DatabaseBackend::getActualVersionForTransaction):
+        (WebCore::DatabaseBackend::disableAuthorizer):
+        (WebCore::DatabaseBackend::enableAuthorizer):
+        (WebCore::DatabaseBackend::setAuthorizerReadOnly):
+        (WebCore::DatabaseBackend::setAuthorizerPermissions):
+        (WebCore::DatabaseBackend::lastActionChangedDatabase):
+        (WebCore::DatabaseBackend::lastActionWasInsert):
+        (WebCore::DatabaseBackend::resetDeletes):
+        (WebCore::DatabaseBackend::hadDeletes):
+        (WebCore::DatabaseBackend::resetAuthorizer):
+        (WebCore::DatabaseBackend::maximumSize):
+        (WebCore::DatabaseBackend::incrementalVacuumIfNeeded):
+        (WebCore::DatabaseBackend::interrupt):
+        (WebCore::DatabaseBackend::isInterrupted):
+        (WebCore::DatabaseBackend::logErrorMessage):
+        (WebCore::DatabaseBackend::reportOpenDatabaseResult):
+        (WebCore::DatabaseBackend::reportChangeVersionResult):
+        (WebCore::DatabaseBackend::reportStartTransactionResult):
+        (WebCore::DatabaseBackend::reportCommitTransactionResult):
+        (WebCore::DatabaseBackend::reportExecuteStatementResult):
+        (WebCore::DatabaseBackend::reportVacuumDatabaseResult):
+        * Modules/webdatabase/DatabaseBackend.h: Copied from Source/WebCore/Modules/webdatabase/AbstractDatabase.h.
+        (DatabaseBackend):
+        * Modules/webdatabase/DatabaseManager.cpp:
+        (WebCore::DatabaseManager::databaseChanged):
+        (WebCore::DatabaseManager::addOpenDatabase):
+        (WebCore::DatabaseManager::removeOpenDatabase):
+        (WebCore::DatabaseManager::getMaxSizeForDatabase):
+        * Modules/webdatabase/DatabaseManager.h:
+        (DatabaseManager):
+        * Modules/webdatabase/DatabaseSync.cpp:
+        (WebCore::DatabaseSync::DatabaseSync):
+        * Modules/webdatabase/DatabaseSync.h:
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::getMaxSizeForDatabase):
+        (WebCore::DatabaseTracker::databaseChanged):
+        (WebCore::DatabaseTracker::interruptAllDatabasesForContext):
+        (WebCore::DatabaseTracker::addOpenDatabase):
+        (WebCore::DatabaseTracker::removeOpenDatabase):
+        (WebCore::DatabaseTracker::getOpenDatabases):
+        (WebCore::DatabaseTracker::deleteDatabaseFile):
+        * Modules/webdatabase/DatabaseTracker.h:
+        (WebCore):
+        (DatabaseTracker):
+        * Modules/webdatabase/OriginQuotaManager.cpp:
+        (WebCore::OriginQuotaManager::markDatabase):
+        * Modules/webdatabase/OriginQuotaManager.h:
+        (WebCore):
+        (OriginQuotaManager):
+        * Modules/webdatabase/SQLTransactionClient.cpp:
+        (WebCore::SQLTransactionClient::didCommitWriteTransaction):
+        (WebCore::SQLTransactionClient::didExecuteStatement):
+        (WebCore::SQLTransactionClient::didExceedQuota):
+        * Modules/webdatabase/SQLTransactionClient.h:
+        (WebCore):
+        (SQLTransactionClient):
+        * Modules/webdatabase/chromium/DatabaseObserver.h:
+        (WebCore):
+        (DatabaseObserver):
+        * Modules/webdatabase/chromium/DatabaseTrackerChromium.cpp:
+        (WebCore::DatabaseTracker::addOpenDatabase):
+        (WebCore::NotifyDatabaseObserverOnCloseTask::create):
+        (WebCore::NotifyDatabaseObserverOnCloseTask::NotifyDatabaseObserverOnCloseTask):
+        (NotifyDatabaseObserverOnCloseTask):
+        (WebCore::DatabaseTracker::removeOpenDatabase):
+        (WebCore::DatabaseTracker::getMaxSizeForDatabase):
+        (WebCore::DatabaseTracker::CloseOneDatabaseImmediatelyTask::create):
+        (WebCore::DatabaseTracker::CloseOneDatabaseImmediatelyTask::CloseOneDatabaseImmediatelyTask):
+        (DatabaseTracker::CloseOneDatabaseImmediatelyTask):
+        (WebCore::DatabaseTracker::closeOneDatabaseImmediately):
+        * Modules/webdatabase/chromium/SQLTransactionClientChromium.cpp:
+        (WebCore::NotifyDatabaseChangedTask::create):
+        (WebCore::NotifyDatabaseChangedTask::NotifyDatabaseChangedTask):
+        (NotifyDatabaseChangedTask):
+        (WebCore::SQLTransactionClient::didCommitWriteTransaction):
+        (WebCore::SQLTransactionClient::didExecuteStatement):
+        (WebCore::SQLTransactionClient::didExceedQuota):
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.order:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+
 2013-01-29  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r140983.
