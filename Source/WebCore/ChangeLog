@@ -1,3 +1,20 @@
+2013-01-30  Florin Malita  <fmalita@chromium.org>
+
+        Do not restart the matched properties cache timer if active
+        https://bugs.webkit.org/show_bug.cgi?id=108345
+
+        Reviewed by Andreas Kling.
+
+        StyleResolver::addToMatchedPropertiesCache() keeps resetting the timer as more than
+        matchedDeclarationCacheAdditionsBetweenSweeps entries are added. When armed, we should let
+        the timer expire at its scheduled time - otherwise it may never get a chance to fire if
+        entries keep getting added.
+
+        No new tests. This is a long lived timer (1min) which makes testing impractical.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::addToMatchedPropertiesCache):
+
 2013-01-30  Simon Fraser  <simon.fraser@apple.com>
 
         Temporarily disable assertions related to clip rect computation in RenderLayer
