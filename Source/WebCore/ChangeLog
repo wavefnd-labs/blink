@@ -1,3 +1,32 @@
+2013-01-30  Benjamin Poulain  <benjamin@webkit.org>
+
+        Do not convert to String->AtomicString for NamedNodeMap
+        https://bugs.webkit.org/show_bug.cgi?id=108289
+
+        Reviewed by Kentaro Hara.
+
+        NamedNodeMap's API was taking a WTF::String. Internally, attribute
+        names are AtomicString.
+
+        The conversions String->AtomicString was causing an additional ref-deref
+        for the JS/V8 bindings. And could cause an additional memory allocation for the Objective-C
+        bindings.
+
+        This patch changes the API to use AtomicString, and update the custom bindings accordingly.
+
+        * bindings/js/JSNamedNodeMapCustom.cpp:
+        (WebCore::JSNamedNodeMap::canGetItemsForName):
+        (WebCore::JSNamedNodeMap::nameGetter):
+        * bindings/v8/custom/V8NamedNodeMapCustom.cpp:
+        (WebCore::V8NamedNodeMap::namedPropertyGetter):
+        * dom/NamedNodeMap.cpp:
+        (WebCore::NamedNodeMap::getNamedItem):
+        (WebCore::NamedNodeMap::getNamedItemNS):
+        (WebCore::NamedNodeMap::removeNamedItem):
+        (WebCore::NamedNodeMap::removeNamedItemNS):
+        * dom/NamedNodeMap.h:
+        (NamedNodeMap):
+
 2013-01-30  Zan Dobersek  <zdobersek@igalia.com>
 
         [GTK] http/tests/w3c/webperf/submission/Intel/user-timing/test_user_timing_entry_type.html is failing
