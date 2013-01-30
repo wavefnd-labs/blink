@@ -1,3 +1,28 @@
+2013-01-30  Simon Fraser  <simon.fraser@apple.com>
+
+        Elements that dynamically become fixed sometimes jump to the top left on scrolling
+        https://bugs.webkit.org/show_bug.cgi?id=108389
+
+        Reviewed by Beth Dakin.
+
+        When an element became position:fixed and gained a compositing layer
+        as a result, we would compute its viewport constraints (including the 
+        last GraphicsLayer position) before we had actually updated the GraphicsLayer
+        geometry for the first time. This would cause a jump to 0,0 on scrolling.
+        
+        Fix by removing the call to updateViewportConstraintStatus() just after
+        creating the backing. Instead, hook in to registerScrollingLayers(),
+        which is called on every geometry update, to update the viewport
+        constraints for this layer.
+        
+        Tested via existing tests, which now show correct positions at last
+        layout.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::registerScrollingLayers):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::updateBacking):
+
 2013-01-30  Adam Barth  <abarth@webkit.org>
 
         HTMLDocumentParser::insert should be aware of threaded parsing
