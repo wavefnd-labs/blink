@@ -1,3 +1,52 @@
+2013-01-30  Adam Klein  <adamk@chromium.org>
+
+        [JSC] MutationObservers should not create circular, leaky references
+        https://bugs.webkit.org/show_bug.cgi?id=93661
+
+        Reviewed by Adam Barth.
+
+        This patch makes JSMutationCallback an entirely-custom class that
+        holds a weak reference to the function it wraps. To keep that function
+        alive, it also adds a PrivateName between the JSMutationObserver
+        wrapper and the function when the MutationObserver is constructed.
+
+        Unlike the generated JSC callbacks, JSMutationCallback doesn't hold a
+        reference to the JSDOMGlobalObject, instead holding the
+        DOMWrapperWorld it was created in. As an ActiveDOMCallback, it also
+        holds a weak pointer to ScriptExecutionContext (via ContextDestructionObserver).
+
+        It's not clear to me how to write a test for this. There's an existing
+        manual test in ManualTests/leak-cycle-observer-wrapper.html which may
+        be of use but which doesn't seem to currently give meaningful output.
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * UseJSC.cmake:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/js/JSBindingsAllInOne.cpp:
+        * bindings/js/JSMutationCallback.cpp: Added.
+        (WebCore):
+        (WebCore::JSMutationCallback::JSMutationCallback):
+        (WebCore::JSMutationCallback::~JSMutationCallback):
+        (WebCore::JSMutationCallback::handleEvent):
+        * bindings/js/JSMutationCallback.h: Added.
+        (WebCore):
+        (JSMutationCallback): Instead of a JSCallbackData, hold a weak ref to the callback and a RefPtr to the DOMWrapperWorld.
+        (WebCore::JSMutationCallback::create):
+        * bindings/js/JSMutationCallbackCustom.cpp: Removed.
+        * bindings/js/JSMutationObserverCustom.cpp:
+        (WebCore::JSMutationObserverConstructor::constructJSMutationObserver):
+        When constructing the JSMutationObserver, add a reference via PrivateName from the MutationObserver to the callback function.
+        * dom/MutationCallback.idl: Removed. Neither JSC nor V8 use an IDL file to generate this class any more.
+
 2013-01-30  Elliott Sprehn  <esprehn@chromium.org>
 
         Remove willAddAuthorShadowRoot and replace with alwaysCreateUserAgentShadowRoot
