@@ -1,3 +1,31 @@
+2013-01-30  Elliott Sprehn  <esprehn@chromium.org>
+
+        Remove willAddAuthorShadowRoot and replace with alwaysCreateUserAgentShadowRoot
+        https://bugs.webkit.org/show_bug.cgi?id=108248
+
+        Reviewed by Dimitri Glazkov.
+
+        The only reason willAddAuthorShadowRoot exists is so that a handful of
+        other elements can create the user agent shadow root right before the
+        author shadow root is created. Instead of providing this generic hook
+        just expose a virtual method on Element that requests this behavior.
+
+        No new tests, just refactoring.
+
+        * dom/Element.cpp:
+        (WebCore::Element::createShadowRoot):
+        * dom/Element.h:
+        (Element):
+        (WebCore::Element::alwaysCreateUserAgentShadowRoot): Added.
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::addShadowRoot): Remove willAddAuthorShadowRoot notification.
+        * html/HTMLButtonElement.cpp:
+        * html/HTMLButtonElement.h:
+        * html/HTMLFormControlElement.cpp:
+        * html/HTMLFormControlElement.h:
+        * html/HTMLMediaElement.cpp:
+        * html/HTMLMediaElement.h:
+
 2013-01-30  Dominik Röttsches  <dominik.rottsches@intel.com>
 
         [HarfBuzz] Naming fixes after removing old HarfBuzz code
