@@ -1,3 +1,32 @@
+2013-01-29  Simon Fraser  <simon.fraser@apple.com>
+
+        Rubberband scrolling on news.google.com causes text to blink repeatedly
+        https://bugs.webkit.org/show_bug.cgi?id=107326
+
+        Reviewed by Beth Dakin.
+
+        When in the middle of layout, RenderBlock::updateScrollInfoAfterLayout()
+        could cause us to re-evaluate reasons for compositing, via the call
+        to updateLayerCompositingState() in RenderLayer::updateScrollInfoAfterLayout().
+        
+        At this time, when layout is still happening, it's bad to look at render
+        geometry to decide when to do compositing (e.g. for fixed position); we might
+        incorrectly conclude that the layer is outside the viewport.
+        
+        Fix by having RenderLayerCompositing store in a member whether it's safe
+        to look at layout information. requiresCompositingForPosition() then consults
+        this bit, and, if it needs to make decisions based on layout but layout is not
+        complete, it doesn't change the compositing state of the layer.
+        
+        Not testable, since dumping the layer tree will update layout and mask the bug.
+
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::RenderLayerCompositor):
+        (WebCore::RenderLayerCompositor::updateCompositingLayers):
+        (WebCore::RenderLayerCompositor::requiresCompositingForPosition):
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+
 2013-01-29  Mark Lam  <mark.lam@apple.com>
 
         Introducing WTF::TypeSafeEnum and DatabaseError.
