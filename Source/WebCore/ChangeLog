@@ -1,3 +1,40 @@
+2013-01-29  Elliott Sprehn  <esprehn@chromium.org>
+        Refactor ShadowRoot exception handling
+        https://bugs.webkit.org/show_bug.cgi?id=108209
+
+        Reviewed by Dimitri Glazkov.
+
+        Many of the exception cases for ShadowRoot are actually impossible and
+        should be asserts instead. We can also move the one case of exception logic,
+        for elements that don't allow author shadows into Element::createShadowRoot
+        instead of having it all over the ShadowRoot and ElementShadow classes. This
+        is the first step in centralizing all ShadowRoot creation inside ElementShadow.
+
+        No new tests, covered by existing tests.
+
+        * WebCore.exp.in:
+        * dom/Element.cpp:
+        (WebCore::Element::createShadowRoot): Be explicit about what kind of ShadowRoot you're creating.
+        (WebCore::Element::ensureUserAgentShadowRoot): No more exceptions.
+        * dom/ElementShadow.cpp:
+        (WebCore::ElementShadow::addShadowRoot): This never actually throws exceptions, remove ExceptionCode.
+        * dom/ElementShadow.h:
+        (ElementShadow):
+        * dom/ShadowRoot.cpp:
+        (WebCore::determineUsageType): Merge with Element::createShadowRoot.
+        (WebCore):
+        (WebCore::ShadowRoot::ShadowRoot): Moved Histogram logic here since it's actually about the constructor anyway.
+        (WebCore::ShadowRoot::create): Removed overload that made the code less obvious.
+        * dom/ShadowRoot.h:
+        (ShadowRoot):
+        * html/HTMLKeygenElement.cpp:
+        (WebCore::HTMLKeygenElement::HTMLKeygenElement):
+        * html/shadow/TextFieldDecorationElement.cpp:
+        (WebCore::getDecorationRootAndDecoratedRoot):
+        * testing/Internals.cpp:
+        (WebCore::Internals::ensureShadowRoot):
+        (WebCore::Internals::createShadowRoot):
+
 2013-01-29  Mark Lam  <mark.lam@apple.com>
 
         Change DatabaseContext lookup to be thread-safe.
