@@ -1,3 +1,25 @@
+2013-01-30  Tim Horton  <timothy_horton@apple.com>
+
+        GraphicsContext3DCG needs to copy image data in paintToCanvas
+        https://bugs.webkit.org/show_bug.cgi?id=108310
+
+        Reviewed by Simon Fraser.
+
+        Make the CG implementation of GraphicsContext3D::paintToCanvas copy image data
+        before drawing if we're drawing into an accelerated context, matching the fix made
+        in http://trac.webkit.org/changeset/106095 for 2D canvas.
+
+        No new tests, depends on acceleration and would be flaky at best.
+
+        * platform/graphics/GraphicsContext3D.h:
+        (GraphicsContext3D): Make CG's paintToCanvas take a GraphicsContext instead of a CGContextRef.
+        * platform/graphics/cg/GraphicsContext3DCG.cpp:
+        (WebCore::releaseImageData): Added.
+        (WebCore::GraphicsContext3D::paintToCanvas): Copy image data if the destination is
+        an accelerated context. Also, use GraphicsContext API instead of CGContext.
+        * platform/graphics/opengl/GraphicsContext3DOpenGLCommon.cpp:
+        (WebCore::GraphicsContext3D::paintRenderingResultsToCanvas):
+
 2013-01-29  Jer Noble  <jer.noble@apple.com>
 
         MediaPlayerPrivateQTKit claims it supports application/x-diskcopy, breaking downloads.
