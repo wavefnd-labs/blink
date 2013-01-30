@@ -1,3 +1,55 @@
+2013-01-30  Philip Rogers  <pdr@google.com>
+
+        Track scale and zoom together when drawing SVG images
+        https://bugs.webkit.org/show_bug.cgi?id=108108
+
+        Reviewed by Tim Horton.
+
+        This patch refactors SVGImage::drawSVGToImageBuffer to take a single zoomAndScale parameter
+        and removes two messy calls to setPageZoomFactor. This patch makes progress towards an
+        SVG image cache keyed on just container size and scale.
+
+        This refactoring is covered by existing tests.
+
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::setContainerSizeForRenderer):
+        (WebCore::CachedImage::imageSizeForRenderer):
+
+            This complex logic has been refactored out of CachedImage and into SVGImageCache.
+            In addition to the code move, we no longer divide by the zoom factor because the
+            container size is stored without zoom.
+
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::drawSVGToImageBuffer):
+
+            This method signature has changed to take a FloatSize for the container size and
+            a combined zoom and scale parameter (zoomAndScale). A FloatSize is needed for the
+            container size because we now store the container size unzoomed, and in this process
+            we do not want to lose precision.
+
+            The messy setPageZoomFactor calls have also been removed which cleans this function up.
+
+        * svg/graphics/SVGImage.h:
+        * svg/graphics/SVGImageCache.cpp:
+        (WebCore::SVGImageCache::setContainerSizeForRenderer):
+
+            This function now stores the container size unzoomed. The container size was changed
+            to a FloatSize so that precision is not lost.
+
+        (WebCore::SVGImageCache::imageSizeForRenderer):
+
+            Note that the ImageBuffer size will stay the same. We now store the size as:
+                containerSize (without zoom) * zoom * scale
+            Previously this was:
+                containerSize (with zoom) * scale
+
+        (WebCore::SVGImageCache::redraw):
+        (WebCore::SVGImageCache::lookupOrCreateBitmapImageForRenderer):
+        * svg/graphics/SVGImageCache.h:
+        (WebCore::SVGImageCache::SizeAndScales::SizeAndScales):
+        (SizeAndScales):
+        (SVGImageCache):
+
 2013-01-30  Benjamin Poulain  <benjamin@webkit.org>
 
         Do not convert to String->AtomicString for NamedNodeMap
