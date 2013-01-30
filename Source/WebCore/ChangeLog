@@ -1,3 +1,29 @@
+2013-01-29  Shinya Kawanaka  <shinyak@chromium.org>
+
+        [Chromium] Cannot copy text when selecting readonly (or disabled) input elements
+        https://bugs.webkit.org/show_bug.cgi?id=106287
+
+        Reviewed by Hajime Morita.
+
+        When an input element is disabled or readonly, its inner element is not editable. So its rootEditableElement
+        does not exist. In WebViewImpl::caretOrSelectionRange, if rootEditableElement does not exist, it uses
+        a document element. However, the inner element and document element have a different tree scope, the selection range
+        cannot be gotten correctly.
+
+        We should use ShadowRoot instead of document so that we can stay in the same tree scope.
+
+        * WebCore.exp.in:
+        * editing/FrameSelection.cpp:
+        (WebCore::FrameSelection::rootEditableElementOrTreeScopeRootNode): Added. Returns ShadowRoot so that we can
+        stay in the same tree scope.
+        (WebCore):
+        * editing/FrameSelection.h:
+        (FrameSelection):
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::getLocationAndLengthFromRange):
+        * editing/TextIterator.h:
+        (TextIterator):
+
 2013-01-29  Kent Tamura  <tkent@chromium.org>
 
         INPUT_MULTIPLE_FIELDS_UI: The content should not overflow the <input> boundary
