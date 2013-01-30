@@ -1,3 +1,97 @@
+2013-01-20  Philippe Normand  <pnormand@igalia.com>
+
+        [GStreamer] USE(NATIVE_FULLSCREEN_VIDEO) support
+        https://bugs.webkit.org/show_bug.cgi?id=106760
+
+        Reviewed by Gustavo Noronha Silva.
+
+        Initial support for NATIVE_FULLSCREEN_VIDEO in the GStreamer media
+        player. A new FullscreenVideoControllerGStreamer class is
+        introduced, ports interested to implement native fullscreen video
+        support should inherit from it (see FullscreenVideoControllerGtk)
+        and hook it in the MediaPlayerPrivateGStreamer backend.
+
+        The GStreamerGWorld port to GStreamer 1.x is partly based on a
+        patch by Sebastian Dröge <sebastian.droge@collabora.com>.
+
+        * GNUmakefile.am: Enable NATIVE_FULLSCREEN_VIDEO support.
+        * GNUmakefile.list.am: New
+        FullscreenVideoController{GStreamer,Gtk} modules.
+        * platform/graphics/gstreamer/FullscreenVideoControllerGStreamer.cpp: Added.
+        (WebCore):
+        (WebCore::playerVolumeChangedCallback): Playbin notify::volume
+        signal callback.
+        (WebCore::playerMuteChangedCallback): Playbin notify::mute signal callback.
+        (WebCore::FullscreenVideoControllerGStreamer::FullscreenVideoControllerGStreamer):
+        (WebCore::FullscreenVideoControllerGStreamer::~FullscreenVideoControllerGStreamer):
+        (WebCore::FullscreenVideoControllerGStreamer::enterFullscreen):
+        Switch GStreamerGWorld to full screen, hook in to playbin's
+        notify::volume and mute signals and initialize the full screen window.
+        (WebCore::FullscreenVideoControllerGStreamer::exitFullscreen):
+        Destroy the full screen window, disconnect from playbin signals
+        and switch GStreamerGWorld out of full screen.
+        (WebCore::FullscreenVideoControllerGStreamer::exitOnUserRequest):
+        Trigger exit from full screen mode. This method is meant to be
+        called when the user explicitely requests to exit from full screen
+        by pressing a key or something similar.
+        (WebCore::FullscreenVideoControllerGStreamer::togglePlay): Switch
+        between play and pause states. Useful for child classes.
+        (WebCore::FullscreenVideoControllerGStreamer::increaseVolume):
+        Useful for child classes as well.
+        (WebCore::FullscreenVideoControllerGStreamer::decreaseVolume): Ditto.
+        (WebCore::FullscreenVideoControllerGStreamer::setVolume): Ditto.
+        (WebCore::FullscreenVideoControllerGStreamer::timeToString): Ditto.
+        * platform/graphics/gstreamer/FullscreenVideoControllerGStreamer.h: Added.
+        (WebCore):
+        (FullscreenVideoControllerGStreamer):
+        (WebCore::FullscreenVideoControllerGStreamer::playStateChanged):
+        To be implemented by child class to reflect the player's state changed.
+        (WebCore::FullscreenVideoControllerGStreamer::volumeChanged): To
+        be implemented by child class as well.
+        (WebCore::FullscreenVideoControllerGStreamer::muteChanged): Ditto.
+        (WebCore::FullscreenVideoControllerGStreamer::initializeWindow): Ditto.
+        (WebCore::FullscreenVideoControllerGStreamer::destroyWindow): Ditto.
+        * platform/graphics/gstreamer/GStreamerGWorld.cpp:
+        (WebCore::gstGWorldSyncMessageCallback): Adapt for GStreamer video
+        overlay API changes.
+        (WebCore::GStreamerGWorld::GStreamerGWorld):
+        gst_bus_set_sync_handler takes one more argument in GStreamer 1.x.
+        (WebCore::GStreamerGWorld::enterFullscreen): ffmpegcolorspace was
+        renamed to videoconvert in GStreamer 1.x and the tee src pad
+        template was renamed to src_%u. There is no need to send a new
+        segment query either.
+        (WebCore):
+        (WebCore::gstGWorldPadProbeCallback): Remove the platform video
+        sink branch once the tee source pad starting it has been blocked.
+        (WebCore::GStreamerGWorld::exitFullscreen): Refactor to use an
+        asynchronous pad probe.
+        (WebCore::GStreamerGWorld::removePlatformVideoSink): Refactored
+        from exitFullscreen.
+        (WebCore::GStreamerGWorld::setWindowOverlay): Adapt for GStreamer video
+        overlay API changes.
+        * platform/graphics/gstreamer/GStreamerGWorld.h:
+        (GStreamerGWorld):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer):
+        Hook NATIVE_FULLSCREEN_VIDEO support.
+        (WebCore::MediaPlayerPrivateGStreamer::volume): Playbin volume
+        query used by the FullscreenVideoController.
+        (WebCore):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h:
+        (WebCore):
+        (MediaPlayerPrivateGStreamer): volume(), muted() and MediaPlayer
+        accessor methods added. NATIVE_FULLSCREEN_VIDEO methods added as well.
+        (WebCore::MediaPlayerPrivateGStreamer::canEnterFullscreen):
+        (WebCore::MediaPlayerPrivateGStreamer::mediaPlayer):
+        * platform/graphics/gstreamer/PlatformVideoWindow.h: Re-enable
+        module if NATIVE_FULLSCREEN_VIDEO is turned on.
+        * platform/graphics/gstreamer/PlatformVideoWindowGtk.cpp: Ditto.
+        * platform/graphics/gstreamer/VideoSinkGStreamer.cpp: Re-enable
+        GStreamerGWorld support.
+        (_WebKitVideoSinkPrivate):
+        (webkitVideoSinkRender):
+        * platform/graphics/gstreamer/VideoSinkGStreamer.h: Ditto.
+
 2013-01-30  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: beautify file selector dialog to render as two rows
