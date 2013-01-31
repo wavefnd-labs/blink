@@ -1,3 +1,35 @@
+2013-01-30  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: IDBKeyRange::isOnlyKey() does pointer equality comparison
+        https://bugs.webkit.org/show_bug.cgi?id=107582
+
+        Reviewed by Tony Chang.
+
+        Per the bug title, IDBKeyRange::isOnlyKey() was testing the upper/lower pointers to
+        determine if this was a "trivial" range, which can be used to fast-path lookups. This
+        is insufficient in multi-process ports where range values may be thrown across the wire.
+        This is addressed by using the existing key equality tests.
+
+        In addition, the bounds type check incorrectly checked m_lowerType == LowerBoundOpen, which
+        meant the function could never return true (since upper == lower implies closed bounds).
+        Therefore, the fast-path case wasn't used even in single-process ports (e.g. DRT). The
+        slow-path case contructed a backing store cursor over the range, and exited early if the
+        cursor yielded nothing. The fast-path case doesn't need to create a cursor, so needs to
+        deal with lookup misses. This revealed two similar (but trivial) lurking bugs in the
+        fast-path.
+
+        No new behavior; covered by tests such as: storage/indexeddb/get-keyrange.html
+
+        * Modules/indexeddb/IDBBackingStore.cpp:
+        (WebCore::IDBBackingStore::getRecord): Handle backing store read miss case.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::GetOperation::perform): Handle backing store read miss case.
+        * Modules/indexeddb/IDBKeyRange.cpp:
+        (WebCore::IDBKeyRange::isOnlyKey): Compare keys by value, not pointer, correct
+        type checks, add assertions.
+        * Modules/indexeddb/IDBKeyRange.h:
+        (IDBKeyRange): Move implementation to CPP file.
+
 2013-01-30  Joe Mason  <jmason@rim.com>
 
         [BlackBerry] Never store empty credentials in NetworkJob::storeCredentials
