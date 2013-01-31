@@ -1,3 +1,31 @@
+2013-01-31  Yury Semikhatsky  <yurys@chromium.org>
+
+        Layout Test inspector-protocol/take-heap-snapshot.html crashes in the Debug mode
+        https://bugs.webkit.org/show_bug.cgi?id=104800
+
+        Reviewed by Jochen Eisinger.
+
+        The test crashed because during snapshot generation Profiler.reportHeapSnapshotProgress
+        events were sent to the inspector front-end, then parsed and dispatched there.
+        Since in case of layout tests the front-end resides in the same process
+        as the inspected page parsing the event broke an assumption that there are
+        no JS heap allocations while heap snapshot is being taken.
+
+        I added optional boolean parameter 'reportProgress' to Profiler.takeHeapSnapshot
+        command so that the protocol client can control whether progress events should
+        be sent during snapshot generation. The protocol test is not interested in the
+        progress events and sets reportProgress to false.
+
+        Test: inspector-protocol/heap-profiler/take-heap-snapshot.html
+
+        * inspector/Inspector.json:
+        * inspector/InspectorProfilerAgent.cpp:
+        (WebCore::InspectorProfilerAgent::takeHeapSnapshot):
+        * inspector/InspectorProfilerAgent.h:
+        (InspectorProfilerAgent):
+        * inspector/front-end/ProfilesPanel.js:
+        (WebInspector.ProfilesPanel.prototype.takeHeapSnapshot):
+
 2013-01-31  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r141110.
