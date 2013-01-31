@@ -1,3 +1,25 @@
+2013-01-31  Aurimas Liutikas  <aurimas@chromium.org>
+
+        Editor::m_compositionNode not updated on HTMLInputElement::setValue()
+        https://bugs.webkit.org/show_bug.cgi?id=107737
+
+        Reviewed by Ryosuke Niwa.
+
+        Chromium has a bug where the IME composition did not get cancelled on JavaScript changes
+        to the focused editing field. Most of other WebKit ports were already doing this check
+        in their EditorClient::respondToChangedSelection. I took that logic and moved it to the
+        Editor so every port and use the same code.
+
+        An existing test editing/input/setting-input-value-cancel-ime-composition.html covers this change.
+        This test used to have an expectation to fail on Chromium and after this patch it will start passing.
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::cancelCompositionIfSelectionIsInvalid):
+            Adding a call that can be used by any the port to cancel the composition if it's no longer valid.
+        (WebCore):
+        * editing/Editor.h:
+        (Editor):
+
 2013-01-31  Joseph Pecoraro  <pecoraro@apple.com>
 
         Disable ENABLE_FULLSCREEN_API on iOS
