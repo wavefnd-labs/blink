@@ -1,3 +1,28 @@
+2013-01-31  Mike West  <mkwst@chromium.org>
+
+        Cleanup: Use ScriptExecutionContext::topOrigin when relevant.
+        https://bugs.webkit.org/show_bug.cgi?id=108476
+
+        Reviewed by Jochen Eisinger.
+
+        Rather than diving through 'frame()->top()' or 'topDocument()' to get
+        the SecurityOrigin of the top-level document in a frame, we can now
+        directly grab the 'topOrigin()' off of a ScriptExecutionContext. This
+        patch adjusts a few callsites to use the new hotness rather than the
+        old brokenness.
+
+        This is a pure refactoring: No web-visible changes should result.
+
+        * Modules/webdatabase/DOMWindowWebDatabase.cpp:
+        (WebCore::DOMWindowWebDatabase::openDatabase):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::sessionStorage):
+        (WebCore::DOMWindow::localStorage):
+        * workers/SharedWorker.cpp:
+        (WebCore::SharedWorker::create):
+        * workers/WorkerMessagingProxy.cpp:
+        (WebCore::WorkerMessagingProxy::startWorkerContext):
+
 2013-01-31  peavo@outlook.com  <peavo@outlook.com>
 
         [Curl] There is no way for a WebKit client to set the Curl cookie jar path
