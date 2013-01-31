@@ -1,3 +1,52 @@
+2013-01-30  Kentaro Hara  <haraken@chromium.org>
+
+        Implement KeyboardEvent constructor
+        https://bugs.webkit.org/show_bug.cgi?id=108320
+
+        Reviewed by Adam Barth.
+
+        This patch implements KeyboardEvent constructor under a DOM4_EVENTS_CONSTRUCTOR flag,
+        which is enabled on Chromium and Safari.
+
+        This significantly simplifies a code to construct a KeyboardEvent.
+
+        Before:
+          e = document.createEvent("KeyboardEvent");
+          e.initKeyboardEvent("keypress", true, true, null, false, false, false, false, 0, 0);
+
+        After:
+          e = new KeyboardEvent("keypress");
+
+        Editor's draft: https://dvcs.w3.org/hg/d4e/raw-file/tip/source_respec.htm
+
+        - 'char' and 'code' are not yet supported due to lack of WebCore implementation.
+
+        - 'altGraphKey' is not supported because it's an extended attribute in WebKit
+        and is not speced.
+
+        - Renamed keyboard event constant variables to avoid style errors.
+
+        Test: fast/events/constructors/keyboard-event-constructor.html
+
+        * dom/KeyboardEvent.cpp:
+        (WebCore::keyLocationCode):
+        (WebCore::KeyboardEventInit::KeyboardEventInit):
+        (WebCore):
+        (WebCore::KeyboardEvent::KeyboardEvent):
+        * dom/KeyboardEvent.h:
+        (WebCore):
+        (WebCore::KeypressCommand::KeypressCommand):
+        (KeypressCommand):
+        (KeyboardEventInit):
+        (KeyboardEvent):
+        (WebCore::KeyboardEvent::create):
+        (WebCore::KeyboardEvent::keyIdentifier):
+        (WebCore::KeyboardEvent::keyLocation):
+        (WebCore::KeyboardEvent::altGraphKey):
+        (WebCore::KeyboardEvent::keyEvent):
+        (WebCore::KeyboardEvent::keypressCommands):
+        * dom/KeyboardEvent.idl:
+
 2013-01-30  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: IDBKeyRange::isOnlyKey() does pointer equality comparison
