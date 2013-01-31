@@ -1,3 +1,52 @@
+2013-01-31  Mike West  <mkwst@chromium.org>
+
+        Allow blocking of IndexedDB in third-party contexts
+        https://bugs.webkit.org/show_bug.cgi?id=94171
+
+        Reviewed by Jochen Eisinger.
+
+        This patch ensures that the origin of the top window is passed into
+        SecurityOrigin::canAccessDatabase when working with IndexedDB. Giving
+        SecurityOrigin access to this data means that it can properly check
+        whether the database is being opened in a third-party context, and
+        therefore properly enforce the third-party access checks that were
+        added in http://trac.webkit.org/changeset/125736.
+
+        Third-party checks are added to IDBFactory::open,
+        IDBFactory::deleteDatabase, and IDBFactory::getDatabaseNames; each will
+        now throw a SECURITY_ERR exception when access in a third-party context
+        if third-party access checks are enabled.
+
+        To make this process slightly more clear, and avoid some ugly casting
+        logic, this patch adds a 'topOrigin'  method to ScriptExecutionContext,
+        and implements it on both WorkerContext and Document.
+
+        Tests: http/tests/security/cross-origin-indexeddb-allowed.html
+               http/tests/security/cross-origin-indexeddb.html
+               http/tests/security/cross-origin-worker-indexeddb-allowed.html
+               http/tests/security/cross-origin-worker-indexeddb.html
+
+        * Modules/indexeddb/IDBFactory.cpp:
+        (WebCore::IDBFactory::getDatabaseNames):
+        (WebCore::IDBFactory::openInternal):
+        (WebCore::IDBFactory::deleteDatabase):
+            Grab the SecurityOrigin of the current context's top-level origin,
+            and pass it to SecurityOrigin::canAccessDatabase to ensure that
+            access checks are properly applied to these three methods.
+        * dom/Document.cpp:
+        (WebCore::Document::topOrigin):
+        (WebCore):
+        * dom/Document.h:
+        (Document):
+        * dom/ScriptExecutionContext.h:
+        (ScriptExecutionContext):
+            Add a topOrigin() method to ScriptExecutionContext, and implement it
+            on Document in order to give callers access to the top document's
+            SecurityOrigin without casting ScriptExecutionContext.
+        * workers/WorkerContext.h:
+            Change the existing topOrigin() method to override the new method
+            on ScriptExecutionContext.
+
 2013-01-31  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [Network] Add cookie column to show presence of request/response cookies.
