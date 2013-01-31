@@ -1,3 +1,43 @@
+2013-01-30  Joe Mason  <jmason@rim.com>
+
+        [BlackBerry] Store both proxy and host credentials simultaneously for NetworkJob
+        https://bugs.webkit.org/show_bug.cgi?id=108388
+
+        Reviewed by Yong Li.
+
+        The platform NetworkRequest interface has been updated again, to store both a proxy and host
+        credential for each request (to prevent an infinite loop when a request authenticates against a
+        proxy but fails the host authentication, and then the followup contains the host credential but not
+        the proxy credential so it fails proxy authentication, so the next followup contains the proxy
+        credential but not the host credential...)
+
+        Complying with the new interface requires the host and proxy challenge to be stored separately in
+        webkit so they can both be added to the same NetworkRequest.
+
+        Internal PR: 281172
+        Internal Reviewer: Leo Yang
+
+        * platform/network/ResourceHandleInternal.h:
+        (ResourceHandleInternal):
+        * platform/network/blackberry/AuthenticationChallenge.h:
+        (WebCore::AuthenticationChallenge::hasCredentials):
+        (AuthenticationChallenge):
+        * platform/network/blackberry/NetworkJob.cpp:
+        (WebCore::NetworkJob::notifyAuthReceived):
+        (WebCore::NetworkJob::handleRedirect):
+        (WebCore::NetworkJob::sendRequestWithCredentials):
+        (WebCore::NetworkJob::storeCredentials):
+        (WebCore):
+        (WebCore::NetworkJob::purgeCredentials):
+        (WebCore::NetworkJob::notifyChallengeResult):
+        (WebCore::NetworkJob::updateCurrentWebChallenge):
+        * platform/network/blackberry/NetworkJob.h:
+        (NetworkJob):
+        * platform/network/blackberry/NetworkManager.cpp:
+        (WebCore::setAuthCredentials):
+        (WebCore):
+        (WebCore::NetworkManager::startJob):
+
 2013-01-30  Oliver Hunt  <oliver@apple.com>
 
         Make JSEventListener more robust in the event of the compiled handler being released.
