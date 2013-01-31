@@ -1,3 +1,57 @@
+2013-01-31  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Parse custom filter function with the at-rule reference syntax
+        https://bugs.webkit.org/show_bug.cgi?id=108351
+
+        Reviewed by Dean Jackson.
+
+        This patch implements the parsing for the new custom filter function "at-rule reference"
+        syntax. It does not implement the style resolution yet.
+
+        The custom function syntax has changed in the spec. Instead of including all of the custom
+        filter information inline, the custom function can now reference an @filter rule by name.
+        The custom function can still accept a list of parameters.
+
+        The syntax is defined as the following, where IDENT is the name of the @filter rule:
+        filter: custom(IDENT [, <param>]*)
+
+        In practice, it can look like this:
+        filter: custom(page-curl, direction 90, amount 0.5);
+
+        Spec: https://dvcs.w3.org/hg/FXTF/raw-file/tip/filters/index.html#customident-ltparamgt
+
+        Tests: css3/filters/custom-with-at-rule-syntax/parsing-custom-function-invalid.html
+               css3/filters/custom-with-at-rule-syntax/parsing-custom-function-valid.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseCustomFilterParameters):
+            Factor out a new function that just parses custom filter parameters. This is used by the
+            previous inline syntax and the new at-rule reference syntax.
+        (WebCore):
+        (WebCore::CSSParser::parseCustomFilterFunctionWithAtRuleReferenceSyntax):
+            This method parses the new at-rule reference syntax. When we remove the inline syntax,
+            we can rename this method to "parseCustomFilterFunction" and call it directly.
+        (WebCore::CSSParser::parseCustomFilterFunctionWithInlineSyntax):
+            Move the previous inline syntax parsing code into a new function.
+        (WebCore::CSSParser::parseCustomFilterFunction):
+            This method looks ahead in the CSS parser values and decides whether to parse the custom
+            function with the previous inline syntax or with the new at-rule reference syntax.
+        (WebCore::CSSParser::parseFilter):
+            I renamed the "parseCustomFilter" method to "parseCustomFilterFunction" to be more
+            explicit. Here, we update the name in the call site.
+        * css/CSSParser.h:
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::createCustomFilterOperationWithAtRuleReferenceSyntax):
+            This is a stub method. In the future, style resolution for the at-rule reference
+            syntax will happen here. When we remove the inline syntax, we can rename this method 
+        (WebCore::StyleResolver::createCustomFilterOperationWithInlineSyntax):
+            This method contains the previous inline syntax style resolution code.
+        (WebCore):
+        (WebCore::StyleResolver::createCustomFilterOperation):
+            This method decides which syntax we should use to resolve the style.
+        * css/StyleResolver.h:
+        (StyleResolver):
+
 2013-01-31  Aurimas Liutikas  <aurimas@chromium.org>
 
         Editor::m_compositionNode not updated on HTMLInputElement::setValue()
