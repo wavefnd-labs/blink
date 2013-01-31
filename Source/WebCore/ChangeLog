@@ -1,3 +1,22 @@
+2013-01-30  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Remove speculative dispatchEvent crash fix now that root cause is addressed
+        https://bugs.webkit.org/show_bug.cgi?id=108131
+
+        Reviewed by Tony Chang.
+
+        A patch was landed in r140027 to prevent a null pointer crash in
+        IDBRequest::dispatchEvent and confirm the source of the crash (which
+        we couldn't repro locally). Following confirmation from user reports,
+        the root cause was tracked down to a race condition in MessageQueue,
+        and was fixed in r140483. This patch is no longer needed, and there's
+        always been an ASSERT in place to catch regressions while debugging.
+
+        No new tests - no behavior change.
+
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::dispatchEvent): Remove extraneous test.
+
 2013-01-30  Joe Mason  <jmason@rim.com>
 
         [BlackBerry] Store both proxy and host credentials simultaneously for NetworkJob
