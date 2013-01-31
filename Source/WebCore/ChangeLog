@@ -1,3 +1,31 @@
+2013-01-31  Arnaud Renevier  <a.renevier@sisa.samsung.com>
+
+        [Gtk] drag and drop has black background without composition
+        https://bugs.webkit.org/show_bug.cgi?id=108376
+
+        Reviewed by Martin Robinson.
+
+        Use gtk_drag_set_icon_surface (or gtk_drag_set_icon_pixbuf) when the
+        screen is not composited. That way, drag window will be decomposited
+        and rendered transparent with Xshape.
+
+        To determine which parts of the window must be transparent, gtk checks
+        if a pixel is more than 50% opaque. With dissolveDragImageToFraction,
+        all pixels are made 25% transparent. With antialiasing, opacity goes
+        below the threshold for some pixels, which makes the resulting image
+        messy. So, we need to skip dissolveDragImageToFraction when we use
+        gtk_drag_set_icon_surface.
+
+        * platform/gtk/DragIcon.cpp:
+        (WebCore::DragIcon::DragIcon):
+        (WebCore::DragIcon::~DragIcon):
+        (WebCore::DragIcon::setImage):
+        (WebCore::DragIcon::useForDrag):
+        * platform/gtk/DragIcon.h:
+        (DragIcon):
+        * platform/gtk/DragImageGtk.cpp:
+        (WebCore::dissolveDragImageToFraction):
+
 2013-01-31  Tony Gentilcore  <tonyg@chromium.org>
 
         Begin to make XSSAuditor thread aware
