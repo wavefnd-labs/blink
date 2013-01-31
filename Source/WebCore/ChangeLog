@@ -1,3 +1,26 @@
+2013-01-30  Oliver Hunt  <oliver@apple.com>
+
+        Make JSEventListener more robust in the event of the compiled handler being released.
+        https://bugs.webkit.org/show_bug.cgi?id=108390
+
+        Reviewed by Michael Saboff.
+
+        It shouldn't be possible for a handler to be collected for any object that
+        might still trigger an event.  Nonetheless it does still happen, and the
+        only point of failure that currently exists is compiling the handler.
+
+        This patch is mostly just assertions, but also removes a bunch of field
+        clearing that was previously being performed.  Given we do seem to periodically
+        end up needing to recompile a handler this appears to be necessary.  That
+        said there does not appear to be a memory hit from this as the event handlers
+        that make us use JSLazyEventListener are not frequently compiled, and the bulk
+        of the functions that are compiled end up causing us to keep the strings around
+        anyway.
+
+        * bindings/js/JSLazyEventListener.cpp:
+        (WebCore::JSLazyEventListener::JSLazyEventListener):
+        (WebCore::JSLazyEventListener::initializeJSFunction):
+
 2013-01-30  Kentaro Hara  <haraken@chromium.org>
 
         Implement KeyboardEvent constructor
