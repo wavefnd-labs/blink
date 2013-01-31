@@ -1,3 +1,54 @@
+2013-01-31  Kent Tamura  <tkent@chromium.org>
+
+        Click on a label element won't select input[type=date]
+        https://bugs.webkit.org/show_bug.cgi?id=108428
+
+        Reviewed by Kentaro Hara.
+
+        date/time input types with INPUT_MULTIPLE_FIELDS_UI are not
+        mouse-focusable. <input> as a shadow host never gets focus and
+        sub-fields in its shadow tree are focusable. Howevever, the click
+        handling of <label> checked isMouseFocusable. We introduce new function
+        isFocusableByClickOnLabel to HTMLElement. It's default implementation is
+        same as isMouseFocusable, and we add special handling for
+        BaseMultipleFieldsDateAndTimeInputType::isFocusableByClickOnLabel.
+
+        Also, date/time input types without INPUT_MULTIPLE_FIELDS_UI were not
+        mouse-focusable by a mistake. It should be mouse-focusable.
+
+        Test: fast/forms/date/date-click-on-label.html
+
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::isFocusableByClickOnLabel):
+        Added. Just calls isMouseFocusable.
+        * html/HTMLElement.h:
+        (HTMLElement): Declare isFocusableByClickOnLabel.
+        * html/HTMLLabelElement.cpp:
+        (WebCore::HTMLLabelElement::defaultEventHandler):
+        Calls isFocusableByClickOnLabel instead of isMouseFocusable.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::isFocusableByClickOnLabel):
+        Delegate to InputType::isFocusableByClickOnLabel.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Declare isFocusableByClickOnLabel.
+        * html/InputType.cpp:
+        (WebCore::InputType::isFocusableByClickOnLabel):
+        Added. Calls isMouseFocusable.
+        * html/InputType.h:
+        (InputType): Declare isFocusableByClickOnLabel.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isFocusableByClickOnLabel):
+        Added. Use the same logic with textfields.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType): Declare isFocusableByClickOnLabel.
+        * html/BaseChooserOnlyDateAndTimeInputType.cpp:
+        (WebCore::BaseChooserOnlyDateAndTimeInputType::isMouseFocusable):
+        Added. Use the same logic with textfields.
+        * html/BaseChooserOnlyDateAndTimeInputType.h:
+        (BaseChooserOnlyDateAndTimeInputType): Declare isMouseFocusable.
+
 2013-01-31  Kentaro Hara  <haraken@chromium.org>
 
         Rename WheelEvent::Granularity to WheelEvent::DeltaMode
