@@ -1,3 +1,50 @@
+2013-01-30  Adam Barth  <abarth@webkit.org>
+
+        The background HTML parser should be able to parse speculatively
+        https://bugs.webkit.org/show_bug.cgi?id=107753
+
+        Reviewed by Eric Seidel.
+
+        This patch adds the ability for the foreground HTML parser to
+        invalidate speculative parsing done by the background HTML parser.
+        Currently, we're a bit overly agressive an invalidate all speculations
+        on document.write. We plan to refine that in the future.
+
+        Test: fast/parser/document-write-partial-script.html
+
+        * WebCore.gypi:
+        * html/parser/BackgroundHTMLInputStream.cpp: Added.
+        (WebCore):
+        (WebCore::BackgroundHTMLInputStream::BackgroundHTMLInputStream):
+        (WebCore::BackgroundHTMLInputStream::append):
+        (WebCore::BackgroundHTMLInputStream::close):
+        (WebCore::BackgroundHTMLInputStream::createCheckpoint):
+        (WebCore::BackgroundHTMLInputStream::rewindTo):
+        * html/parser/BackgroundHTMLInputStream.h: Added.
+        (WebCore):
+        (BackgroundHTMLInputStream):
+        (WebCore::BackgroundHTMLInputStream::current):
+        (WebCore::BackgroundHTMLInputStream::Checkpoint::Checkpoint):
+        (Checkpoint):
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::append):
+        (WebCore):
+        (WebCore::BackgroundHTMLParser::resumeFrom):
+        (WebCore::BackgroundHTMLParser::markEndOfFile):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+        (WebCore::BackgroundHTMLParser::resumeFromPartial):
+        * html/parser/BackgroundHTMLParser.h:
+        (BackgroundHTMLParser):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::didFailSpeculation):
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::resumeParsingAfterScriptExecution):
+        * html/parser/HTMLDocumentParser.h:
+        (ParsedChunk):
+        (HTMLDocumentParser):
+
 2013-01-30  Nils Barth  <nbarth@google.com>
 
         [V8] Add IDL 'enum' support to CodeGeneratorV8.pm
