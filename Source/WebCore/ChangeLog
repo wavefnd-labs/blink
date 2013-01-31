@@ -1,3 +1,72 @@
+2013-01-30  Nils Barth  <nbarth@google.com>
+
+        [V8] Add IDL 'enum' support to CodeGeneratorV8.pm
+        https://bugs.webkit.org/show_bug.cgi?id=106553
+
+        Reviewed by Kentaro Hara.
+
+        Add partial support for Web IDL enumerations in V8 bindings
+
+        Binding generators currently cannot handle IDL enumerations.
+        (An enumeration is an DOMString with a limited set of values, thus
+        treated internally as DOMString, with validation code added in
+        bindings.)
+        This adds support for enumerations in V8, adding validation checking
+        to setters.
+        It does not add validation checking to operations (no test case), and
+        does not add support in JSC.
+
+        Test: bindings/scripts/test/TestObj.idl (run-bindings-test)
+
+        * bindings/scripts/IDLParser.pm:
+         - Parser assumes all IDL definitions are interfaces; add support for
+           other definitions
+         - Parser parses but discards enum definitions; instead, record
+           parsed data
+        (Parse): Sort definitions into interfaces and enums.
+        Remove "@definitions eq (someIdlDocument)" test, as this never
+        happens (fossil code) -- parseDefinitions returns list of definitions,
+        never a one-item list consisting of a document (no nested documents).
+        (unquoteString): new utility function to unquote StringToken (token
+        itself still quoted)
+        (parseEnum):
+        (parseEnumValueList):
+        (parseEnumValues):
+        (parseEnumOld):
+
+        * bindings/scripts/CodeGenerator.pm:
+         - Expose parsed enum data to backends (detect enums, list valid
+           values)
+         - Enums treated as DOMString type in internal function
+        (ProcessDocument):
+        (IsEnumType):
+        (ValidEnumValues):
+        (IsRefPtrType):
+        * bindings/scripts/CodeGeneratorV8.pm:
+         - Enums treated as DOMString type in internal functions
+         - Add validation to setter
+        (GenerateNormalAttrSetter):
+        (GetNativeType):
+        (JSValueToNative):
+        (NativeToJSValue):
+        (ConvertToV8StringResource):
+        * bindings/scripts/test/TestObj.idl:
+         - New enum type and enum variable test for IDL enumeration support
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+         - Generated code, desired behavior
+        (WebCore::TestObjV8Internal::enumAttrAttrGetter):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::enumAttrAttrSetter):
+        (WebCore):
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+         - Generated code, currently incorrect
+        (WebCore):
+        (WebCore::jsTestObjEnumAttr):
+        (WebCore::setJSTestObjEnumAttr):
+        * bindings/scripts/test/JS/JSTestObj.h:
+         - Generated code, currently incorrect
+        (WebCore):
+
 2013-01-30  Nico Weber  <thakis@chromium.org>
 
         [chromium] Build webkit with enable_web_intents set to 0.
