@@ -1,3 +1,51 @@
+2013-01-20 Kondapally Kalyan <kalyan.kondapally@intel.com>
+
+        [Efl][WebGL] Add better support to track and free XResources.
+        https://bugs.webkit.org/show_bug.cgi?id=107397
+
+        Reviewed by Noam Rosenthal.
+
+        We leak Memory during config selection as we dont free temporary
+        allocated visuals, config etc. This patch ensures that we dont leak any
+        memory.
+
+        Covered by existing WebGL tests.
+
+        * platform/graphics/surfaces/egl/EGLSurface.cpp:
+        (WebCore::EGLWindowTransportSurface::EGLWindowTransportSurface):
+        * platform/graphics/surfaces/glx/GLXConfigSelector.h:
+        (WebCore::GLXConfigSelector::GLXConfigSelector):
+        (WebCore::GLXConfigSelector::visualInfo):
+        (WebCore::GLXConfigSelector::pBufferContextConfig):
+        (WebCore::GLXConfigSelector::surfaceContextConfig):
+        (WebCore::GLXConfigSelector::createSurfaceConfig):
+        (GLXConfigSelector):
+        Removed XVisualInfo as member variable. Fixed memory leaks.
+
+        * platform/graphics/surfaces/glx/GLXSurface.cpp:
+        (WebCore::GLXTransportSurface::GLXTransportSurface):
+        * platform/graphics/surfaces/glx/OwnPtrX11.h: Added.
+        (OwnPtrX11):
+        (WebCore::OwnPtrX11::OwnPtrX11):
+        (WebCore::OwnPtrX11::~OwnPtrX11):
+        (WebCore::OwnPtrX11::operator=):
+        (WebCore::OwnPtrX11::operator T*):
+        (WebCore::OwnPtrX11::operator->):
+        (WebCore::OwnPtrX11::get):
+        Calls XFree on pointer to memory allocated by X when the class goes out of scope.
+        OwnPtr cannot be used here as GLXFBConfig is a pointer to an array of pointers.
+
+        * platform/graphics/surfaces/glx/X11WindowResources.cpp:
+        (WebCore::X11OffScreenWindow::X11OffScreenWindow):
+        (WebCore::X11OffScreenWindow::~X11OffScreenWindow):
+        (WebCore):
+        (WebCore::X11OffScreenWindow::createOffScreenWindow):
+        (WebCore::X11OffScreenWindow::destroyWindow):
+        (WebCore::X11OffScreenWindow::nativeSharedDisplay):
+        * platform/graphics/surfaces/glx/X11WindowResources.h:
+        (X11OffScreenWindow):
+        Removed unused code. Fixed memory leaks.
+
 2013-01-31  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [Canvas] remove invalid canvas profile trace logs upon frame navigation
