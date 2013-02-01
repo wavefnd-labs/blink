@@ -1,3 +1,30 @@
+2013-02-01  Benjamin Poulain  <bpoulain@apple.com>
+
+        Clean the String->AtomicString conversion for AnimationController::pauseAnimationAtTime
+        https://bugs.webkit.org/show_bug.cgi?id=108558
+
+        Reviewed by Dean Jackson.
+
+        This is a step torward killing the implicit conversion from String to AtomicString.
+
+        The animation name are AtomicString. The API is changed all the way to the callers
+        to take an AtomicString. When needed, we use explicit conversion.
+
+        * WebCore.exp.in:
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationControllerPrivate::pauseAnimationAtTime):
+        (WebCore::AnimationController::pauseAnimationAtTime):
+        * page/animation/AnimationController.h:
+        (AnimationController):
+        * page/animation/AnimationControllerPrivate.h:
+        (AnimationControllerPrivate):
+        * page/animation/CompositeAnimation.cpp:
+        (WebCore::CompositeAnimation::pauseAnimationAtTime):
+        We should not null check the name. Getting a null name from the HashMap would be
+        an error from the tests, and the HashMap would never return a value anyway.
+        * testing/Internals.cpp:
+        (WebCore::Internals::pauseAnimationAtTimeOnPseudoElement):
+
 2013-02-01  Dominic Mazzoni  <dmazzoni@google.com>
 
         AX: memoize expensive computation during blocks where tree doesn't change
