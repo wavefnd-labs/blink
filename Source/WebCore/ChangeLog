@@ -1,5 +1,30 @@
 2013-02-01  Chris Fleizach  <cfleizach@apple.com>
 
+        AX: when aria-activedescendant is used with a ComboBox role, focus should not be changed
+        https://bugs.webkit.org/show_bug.cgi?id=108596
+
+        Reviewed by Ryosuke Niwa.
+
+        Normally, an aria-activedescendant change causes a focus change to be triggered.
+        However, when used in conjunction with a combo box, this causes problems for screen readers.
+        Namely, the user expects focus to remain in the text field so that the user can keep typing. 
+        If focus moves to an item in the combobox list, it is not possible to keep typing.
+
+        The solution is to not trigger a focus change in this case and instead use a selected children change notification.
+
+        Test: platform/mac/accessibility/combobox-activedescendant-notifications.html
+
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::shouldNotifyActiveDescendant):
+        (WebCore::AccessibilityRenderObject::shouldFocusActiveDescendant):
+        (WebCore::AccessibilityRenderObject::handleActiveDescendantChanged):
+        * accessibility/AccessibilityRenderObject.h:
+        (AccessibilityRenderObject):
+        * accessibility/mac/AXObjectCacheMac.mm:
+        (WebCore::AXObjectCache::postPlatformNotification):
+
+2013-02-01  Chris Fleizach  <cfleizach@apple.com>
+
         [Mac] REGRESSION(r140974): accessibility/lists.html fails on Lion=
         https://bugs.webkit.org/show_bug.cgi?id=108291
 
