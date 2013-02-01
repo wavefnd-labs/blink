@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Igalia S.L
+ *  Copyright (C) 2013 Igalia S.L
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Library General Public
@@ -17,32 +17,23 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#ifndef FullscreenVideoController_h
-#define FullscreenVideoController_h
+#ifndef FullscreenVideoControllerGtk_h
+#define FullscreenVideoControllerGtk_h
 
-#if ENABLE(VIDEO) && !defined(GST_API_VERSION_1)
+#if ENABLE(VIDEO) && USE(GSTREAMER) && USE(NATIVE_FULLSCREEN_VIDEO)
 
-#include "GStreamerGWorld.h"
-#include "HTMLMediaElement.h"
-#include <wtf/RefPtr.h>
-#include <wtf/gobject/GRefPtr.h>
+#include "FullscreenVideoControllerGStreamer.h"
 
-class FullscreenVideoController {
-    WTF_MAKE_NONCOPYABLE(FullscreenVideoController);
+namespace WebCore {
+
+class FullscreenVideoControllerGtk : public FullscreenVideoControllerGStreamer {
 public:
-    FullscreenVideoController();
-    virtual ~FullscreenVideoController();
+    FullscreenVideoControllerGtk(MediaPlayerPrivateGStreamer*);
 
-    void setMediaElement(WebCore::HTMLMediaElement*);
-    WebCore::HTMLMediaElement* mediaElement() const { return m_mediaElement.get(); }
+    void gtkConfigure(GdkEventConfigure*);
 
-    void gtkConfigure(GdkEventConfigure* event);
+    void playStateChanged();
 
-    void enterFullscreen();
-    void exitFullscreen();
-
-    void exitOnUserRequest();
-    void togglePlay();
     void beginSeek();
     void doSeek();
     void endSeek();
@@ -51,30 +42,15 @@ public:
     void showHud(bool);
     gboolean updateHudProgressBar();
 
-    float volume() const;
-    void setVolume(float);
     void volumeChanged();
     void muteChanged();
 
 private:
-    bool canPlay() const;
-    void play();
-    void pause();
-    void playStateChanged();
-
-    bool muted() const;
-
-    float currentTime() const;
-    void setCurrentTime(float);
-
-    float duration() const;
-    float percentLoaded() const;
+    void initializeWindow();
+    void destroyWindow();
 
     void createHud();
     void updateHudPosition();
-
-    RefPtr<WebCore::HTMLMediaElement> m_mediaElement;
-    RefPtr<WebCore::GStreamerGWorld> m_gstreamerGWorld;
 
     guint m_hudTimeoutId;
     guint m_progressBarUpdateId;
@@ -89,8 +65,20 @@ private:
     GtkWidget* m_timeHScale;
     GtkWidget* m_timeLabel;
     GtkWidget* m_volumeButton;
+
+    unsigned long m_keyPressSignalId;
+    unsigned long m_destroySignalId;
+    unsigned long m_isActiveSignalId;
+    unsigned long m_motionNotifySignalId;
+    unsigned long m_configureEventSignalId;
+    unsigned long m_hudMotionNotifySignalId;
+    unsigned long m_timeScaleButtonPressedSignalId;
+    unsigned long m_timeScaleButtonReleasedSignalId;
+    unsigned long m_playActionActivateSignalId;
+    unsigned long m_exitFullcreenActionActivateSignalId;
 };
 
+}
 #endif
 
-#endif // FullscreenVideoController_h
+#endif // FullscreenVideoControllerGtk_h
