@@ -1,3 +1,49 @@
+2013-01-31  Dima Gorbik  <dgorbik@apple.com>
+
+        REGRESSION(r140231): media track layout tests crashing
+        https://bugs.webkit.org/show_bug.cgi?id=107579
+
+        Reviewed by Eric Carlson.
+
+        We were using non-standard element names with HTMLElement, which made v8 try to cast
+        WebVTTElements to HTMLUnknownElements which was not possible. Subclassing Element instead
+        of HTMLElement, though this requires building HTMLElements from WebVTTElements for creating
+        a DOM tree. The code has been refactored to move WebVTT node type to QuialifiedName mappings 
+        inside the WebVTTElement class. All WebVTTElements in the shadow dom tree now are in the 
+        namespace defined by 'NullAtom'. This prevents regular styles from being applied to <b>, <i>
+        and similar tags. Those have to be styled separately without reusing existing QualifiedNames
+        and their styles. https://bugs.webkit.org/show_bug.cgi?id=107214
+
+        Unskipping tests to cover this.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOne):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRules):
+        (WebCore::StyleResolver::canShareStyleWithElement):
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::copyWebVTTNodeToDOMTree):
+        (WebCore::TextTrackCue::getCueAsHTML):
+        (WebCore::TextTrackCue::createCueRenderingTree):
+        (WebCore::TextTrackCue::markFutureAndPastNodes):
+        * html/track/TextTrackCue.h:
+        (WebCore::TextTrackCue::cueShadowPseudoId):
+        * html/track/WebVTTElement.cpp:
+        (WebCore::nodeTypeToTagName): get a QualifiedName to use in the shadow DOM tree.
+        (WebCore::WebVTTElement::WebVTTElement):
+        (WebCore::WebVTTElement::create):
+        (WebCore::WebVTTElement::cloneElementWithoutAttributesAndChildren):
+        (WebCore::WebVTTElement::createEquivalentHTMLElement): create an HTMLElement to use in the DOM tree.
+        * html/track/WebVTTElement.h:
+        (WebCore::WebVTTElement::setWebVTTNodeType):
+        (WebCore::WebVTTElement::webVTTNodeType):
+        (WebCore::WebVTTElement::isPastNode):
+        (WebCore::WebVTTElement::setIsPastNode):
+        (WebCore::WebVTTElement::voiceAttributeName):
+        * html/track/WebVTTParser.cpp:
+        (WebCore::tokenToNodeType): determine a WebVTT node type for the token.
+        (WebCore::WebVTTParser::constructTreeFromToken):
+
 2013-01-31  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r141479.
