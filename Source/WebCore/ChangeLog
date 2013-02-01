@@ -1,3 +1,50 @@
+2013-02-01  Dominic Mazzoni  <dmazzoni@google.com>
+
+        AX: memoize expensive computation during blocks where tree doesn't change
+        https://bugs.webkit.org/show_bug.cgi?id=106497
+
+        Reviewed by Ryosuke Niwa.
+
+        Add a cache for computed attributes of AXObjects.
+        The cache can be enabled at the start of a batch of
+        read-only operations on the accessibility tree, and
+        it's cleared automatically when the tree mutates.
+        Currently accessibilityIsIgnored is cached, since it's
+        frequently called and relatively expensive to compute.
+
+        No new tests.
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore):
+        (WebCore::AXComputedObjectAttributeCache::getIgnored):
+        (WebCore::AXComputedObjectAttributeCache::setIgnored):
+        (WebCore::AXObjectCache::postNotification):
+        (WebCore::AXObjectCache::nodeTextChangeNotification):
+        (WebCore::AXObjectCache::handleScrollbarUpdate):
+        (WebCore::AXObjectCache::startCachingComputedObjectAttributesUntilTreeMutates):
+        (WebCore::AXObjectCache::stopCachingComputedObjectAttributes):
+        * accessibility/AXObjectCache.h:
+        (AXComputedObjectAttributeCache):
+        (WebCore::AXComputedObjectAttributeCache::create):
+        (WebCore::AXComputedObjectAttributeCache::AXComputedObjectAttributeCache):
+        (WebCore::AXComputedObjectAttributeCache::CachedAXObjectAttributes::CachedAXObjectAttributes):
+        (CachedAXObjectAttributes):
+        (WebCore):
+        (WebCore::AXObjectCache::computedObjectAttributeCache):
+        (AXObjectCache):
+        (WebCore::AXComputedObjectAttributeCache::getIgnored):
+        (WebCore::AXComputedObjectAttributeCache::setIgnored):
+        (WebCore::startCachingComputedObjectAttributesUntilTreeMutates):
+        (WebCore::stopCachingComputedObjectAttributes):
+        * accessibility/AccessibilityObject.cpp:
+        (WebCore::AccessibilityObject::findMatchingObjects):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore):
+        (WebCore::AccessibilityRenderObject::accessibilityIsIgnored):
+        (WebCore::AccessibilityRenderObject::computeAccessibilityIsIgnored):
+        * accessibility/AccessibilityRenderObject.h:
+        (AccessibilityRenderObject):
+
 2013-02-01  Alexey Proskuryakov  <ap@apple.com>
 
         Build fix.
