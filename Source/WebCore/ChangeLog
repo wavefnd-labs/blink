@@ -1,3 +1,44 @@
+2013-01-31  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Support implicit rows and columns
+        https://bugs.webkit.org/show_bug.cgi?id=103573
+
+        Reviewed by Ojan Vafai.
+
+        Tests: fast/css-grid-layout/implicit-columns-auto-resolution.html
+               fast/css-grid-layout/implicit-rows-auto-resolution.html
+
+        This change makes us properly initialize our GridTrack vectors's size
+        so that we can safely query any items during layout.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::gridTrackSize):
+        Added this helper function to return the track size from the grid
+        element's columns' / rows' definitions or the default value.
+
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        Added this helper function to get the maximum index in a direction
+        taking grid item's implicit indexes into account.
+
+        (WebCore::RenderGrid::computedUsedBreadthOfGridTracks):
+        Changed the funtion to not append the new tracks as we are properly
+        sized now.
+
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctions):
+        (WebCore::RenderGrid::tracksAreWiderThanMinTrackBreadth):
+        Updated these functions to use the new helper functions.
+
+        (WebCore::RenderGrid::layoutGridItems):
+        Changed this function to size both vectors when initializing them.
+        Also removed an unneeded bounds check as it shouldn't be needed anymore.
+
+        * rendering/RenderGrid.h:
+        Added the new helper functions.
+
+        * rendering/style/GridTrackSize.h:
+        (WebCore::GridTrackSize::GridTrackSize):
+        Added a constructor taking a LengthType.
+
 2013-01-31  Joanmarie Diggs  <jdiggs@igalia.com>
 
         [GTK] fast/css/relative-positioned-block-crash.html is intermittently crashing
