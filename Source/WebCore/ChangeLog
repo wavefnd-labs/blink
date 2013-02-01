@@ -1,3 +1,119 @@
+2013-02-01  Philip Rogers  <pdr@google.com>
+
+        Change hasAlpha to isKnownToBeOpaque and correct the return value for SVG images.
+        https://bugs.webkit.org/show_bug.cgi?id=106966
+
+        Reviewed by Stephen White.
+
+        Previously, Image::currentFrameHasAlpha's default implementation returned false so SVG
+        images always returned false for currentFrameHasAlpha. Additionally, currentFrameHasAlpha
+        was treated as returning whether the frame had alpha when it would actually conservatively
+        return true.
+
+        This patch renames hasAlpha and currentFrameHasAlpha to isKnownToBeOpaque and
+        currentFrameIsKnownToBeOpaque, respectively. This rename better describes the actual
+        functionality. This patch also makes Image::isKnownToBeOpaque a pure virtual function and
+        correctly implements it for SVG images.
+
+        All users of isKnownToBeOpaque access SVG images using CachedImage::imageForRenderer which
+        currently returns a cached bitmap image. Therefore, this patch will not affect existing
+        functionality. A regression test has been added that will catch if this changes in the
+        future (e.g., WK106159 which proposes not returning cached bitmaps). The now unnecessary
+        isBitmapImage() calls have been removed in this patch.
+
+        image-box-shadow.html has been modified to test SVG images.
+
+        * css/CSSCrossfadeValue.cpp:
+        (WebCore::subimageKnownToBeOpaque):
+        (WebCore::CSSCrossfadeValue::knownToBeOpaque):
+
+            Mostly straightforward rename but note the logic has been slightly altered: AND -> OR.
+
+        * css/CSSCrossfadeValue.h:
+        (CSSCrossfadeValue):
+        * css/CSSGradientValue.cpp:
+        (WebCore::CSSGradientValue::knownToBeOpaque):
+        * css/CSSGradientValue.h:
+        (CSSGradientValue):
+        * css/CSSImageGeneratorValue.cpp:
+        (WebCore::CSSImageGeneratorValue::knownToBeOpaque):
+        * css/CSSImageGeneratorValue.h:
+        (CSSImageGeneratorValue):
+        * css/CSSImageValue.cpp:
+        (WebCore::CSSImageValue::knownToBeOpaque):
+        * css/CSSImageValue.h:
+        (CSSImageValue):
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::currentFrameKnownToBeOpaque):
+        * loader/cache/CachedImage.h:
+        (CachedImage):
+        * platform/graphics/BitmapImage.cpp:
+        (WebCore::BitmapImage::currentFrameKnownToBeOpaque):
+        * platform/graphics/BitmapImage.h:
+        (BitmapImage):
+        * platform/graphics/GeneratedImage.h:
+        (GeneratedImage):
+        * platform/graphics/Image.h:
+
+            Note: now a pure virtual function!
+
+        (Image):
+        * platform/graphics/blackberry/LayerTiler.cpp:
+        (WebCore::LayerTiler::updateTextureContentsIfNeeded):
+
+            Removed unnecessary isBitmapImage() checks.
+
+        * platform/graphics/cg/GraphicsContext3DCG.cpp:
+        (WebCore::GraphicsContext3D::ImageExtractor::extractImage):
+
+            Removed unnecessary isBitmapImage() checks.
+
+        * platform/graphics/cg/PDFDocumentImage.h:
+        (PDFDocumentImage):
+        * platform/graphics/chromium/GraphicsLayerChromium.cpp:
+
+            Removed unnecessary isBitmapImage() checks.
+
+        (WebCore::GraphicsLayerChromium::setContentsToImage):
+        * platform/graphics/qt/StillImageQt.cpp:
+        (WebCore::StillImage::currentFrameKnownToBeOpaque):
+        * platform/graphics/qt/StillImageQt.h:
+        (StillImage):
+        * platform/graphics/skia/BitmapImageSingleFrameSkia.cpp:
+        (WebCore::BitmapImageSingleFrameSkia::currentFrameKnownToBeOpaque):
+        * platform/graphics/skia/BitmapImageSingleFrameSkia.h:
+        (BitmapImageSingleFrameSkia):
+        * platform/graphics/texmap/TextureMapperBackingStore.cpp:
+        (WebCore::TextureMapperTile::updateContents):
+        (WebCore::TextureMapperTiledBackingStore::updateContents):
+        * platform/graphics/texmap/coordinated/CoordinatedImageBacking.cpp:
+        (WebCore::CoordinatedImageBacking::update):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::backgroundIsObscured):
+
+            Removed unnecessary isBitmapImage() checks and slightly reworked the logic.
+
+        * rendering/style/FillLayer.cpp:
+        (WebCore::FillLayer::hasOpaqueImage):
+        * rendering/style/StyleCachedImage.cpp:
+        (WebCore::StyleCachedImage::knownToBeOpaque):
+        * rendering/style/StyleCachedImage.h:
+        (StyleCachedImage):
+        * rendering/style/StyleCachedImageSet.cpp:
+        (WebCore::StyleCachedImageSet::knownToBeOpaque):
+        * rendering/style/StyleCachedImageSet.h:
+        (StyleCachedImageSet):
+        * rendering/style/StyleGeneratedImage.cpp:
+        (WebCore::StyleGeneratedImage::knownToBeOpaque):
+        * rendering/style/StyleGeneratedImage.h:
+        (StyleGeneratedImage):
+        * rendering/style/StyleImage.h:
+        (StyleImage):
+        * rendering/style/StylePendingImage.h:
+        (WebCore::StylePendingImage::knownToBeOpaque):
+        * svg/graphics/SVGImage.h:
+        (SVGImage):
+
 2013-02-01  Brady Eidson  <beidson@apple.com>
 
         Clean up WebArchive loading with the NetworkProcess
