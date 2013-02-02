@@ -1,3 +1,29 @@
+2013-02-02  Tony Gentilcore  <tonyg@chromium.org>
+
+        Continue making XSSAuditor thread safe: Remove unsafe AtomicString compares
+        https://bugs.webkit.org/show_bug.cgi?id=108557
+
+        Reviewed by Adam Barth.
+
+        Unfortunately HTMLNames comparisons will always be false on a non-main thread
+        with our current design, so we have to use some "threadSafeMatch" helpers written
+        for the HTMLBackgroundParser.
+
+        Also factor out threadSafeMatch() methods to HTMLParserIdioms.
+
+        No new tests because no new functionality.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore):
+        * html/parser/HTMLParserIdioms.cpp:
+        (WebCore::threadSafeEqual):
+        (WebCore):
+        (WebCore::threadSafeMatch):
+        * html/parser/HTMLParserIdioms.h:
+        (WebCore):
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::eraseAttributeIfInjected):
+
 2013-02-01  James Simonsen  <simonjam@chromium.org>
 
         Add didChangePriority() to ResourceHandle
