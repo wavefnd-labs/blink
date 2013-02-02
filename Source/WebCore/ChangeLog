@@ -1,3 +1,20 @@
+2013-02-01  Yongjun Zhang  <yongjun_zhang@apple.com>
+
+        Document is never released if an image's src attribute is changed to a url blocked by content-security-policy.
+        https://bugs.webkit.org/show_bug.cgi?id=108545
+
+        If we just scheduled an error event due to an null newImage, we should not cancel it when newImage and oldImage
+        is not the same.  Otherwise we will ref the sourceElement in updateHasPendingEvent (m_hasPendingErrorEvent is true)
+        but never deref it since we already cancelled the error event.
+
+        Reviewed by Alexey Proskuryakov.
+
+        Test: fast/images/image-error-event-not-firing.html
+
+        * loader/ImageLoader.cpp:
+        (WebCore::ImageLoader::updateFromElement): don't cancel error event if newImage is null, we want the
+            error event to fire.
+
 2013-02-01  Benjamin Poulain  <bpoulain@apple.com>
 
         Clean the String->AtomicString conversion for AnimationController::pauseAnimationAtTime
