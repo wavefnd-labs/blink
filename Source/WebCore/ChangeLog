@@ -1,3 +1,39 @@
+2013-02-01  James Simonsen  <simonjam@chromium.org>
+
+        Add didChangePriority() to ResourceHandle
+        https://bugs.webkit.org/show_bug.cgi?id=107995
+
+        Reviewed by Darin Fisher.
+
+        For PLT, it's important that preloads remain a lower priority than parser requested resources.
+        This can lead to a 5% improvement.
+
+        The plan is to use this plumbing to expose the desired behavior. This patch simply allows a
+        resource's priority to change and have it propagate to the network layer. An upcoming patch will
+        lower the priority of preloads and then increase the priority when the parser officially requests
+        it.
+
+        No new tests. No visible change, because priority doesn't change yet.
+
+        * loader/cache/CachedResource.cpp:
+        (WebCore):
+        (WebCore::CachedResource::setLoadPriority):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::requestResource): Allow loads to modify priority.
+        * loader/cache/CachedResourceRequest.h:
+        (WebCore::CachedResourceRequest::setPriority): Notify when priority changes.
+        * platform/network/ResourceHandle.cpp:
+        (WebCore::ResourceHandle::didChangePriority): Added.
+        (WebCore):
+        * platform/network/ResourceHandle.h:
+        (ResourceHandle):
+        * platform/network/chromium/ResourceHandle.cpp:
+        (WebCore::ResourceHandleInternal::didChangePriority):
+        (WebCore):
+        (WebCore::ResourceHandle::didChangePriority):
+        * platform/network/chromium/ResourceHandleInternal.h:
+        (ResourceHandleInternal):
+
 2013-02-01  Roger Fong  <roger_fong@apple.com>
 
         Unreviewed. Clean up WebCore VS2010 project.
