@@ -1,3 +1,42 @@
+2013-02-02  Simon Fraser  <simon.fraser@apple.com>
+
+        Fixed and sticky nodes have no nodeID set
+        https://bugs.webkit.org/show_bug.cgi?id=108734
+
+        Reviewed by Sam Weinig.
+        
+        Push ScrollingNodeIDs onto scrolling nodes at construction time, and thereafter
+        treat them as readonly. Previously, only the root scrolling node would have a node ID.
+        
+        Node IDs aren't actually used by the scrolling tree yet, but are useful for debugging.
+
+        Not testable since we only dump the scrolling state tree, not the scrolling
+        node tree in tests.
+
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::ScrollingTree): No longer create the root node here;
+        we can only create it when we know what its ID will be.
+        (WebCore::ScrollingTree::updateTreeFromStateNode): Create the root node if
+        necessary. Pass node IDs into create methods.
+        * page/scrolling/ScrollingTreeNode.cpp:
+        (WebCore::ScrollingTreeNode::ScrollingTreeNode):
+        * page/scrolling/ScrollingTreeNode.h:
+        * page/scrolling/ScrollingTreeScrollingNode.cpp:
+        (WebCore::ScrollingTreeScrollingNode::ScrollingTreeScrollingNode):
+        * page/scrolling/ScrollingTreeScrollingNode.h:
+        * page/scrolling/mac/ScrollingTreeFixedNode.h:
+        * page/scrolling/mac/ScrollingTreeFixedNode.mm:
+        (WebCore::ScrollingTreeFixedNode::create):
+        (WebCore::ScrollingTreeFixedNode::ScrollingTreeFixedNode):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.h:
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNode::create):
+        (WebCore::ScrollingTreeScrollingNodeMac::ScrollingTreeScrollingNodeMac):
+        * page/scrolling/mac/ScrollingTreeStickyNode.h:
+        * page/scrolling/mac/ScrollingTreeStickyNode.mm:
+        (WebCore::ScrollingTreeStickyNode::create):
+        (WebCore::ScrollingTreeStickyNode::ScrollingTreeStickyNode):
+
 2013-02-02  Takashi Sakamoto  <tasak@google.com>
 
         Making -webkit-image-set() the first value of background property causes crash.
