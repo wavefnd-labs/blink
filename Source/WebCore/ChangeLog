@@ -1,3 +1,22 @@
+2013-02-02  Takashi Sakamoto  <tasak@google.com>
+
+        Making -webkit-image-set() the first value of background property causes crash.
+        https://bugs.webkit.org/show_bug.cgi?id=108409
+
+        Reviewed by Beth Dakin.
+
+        CSSParser::addFillValue should use lval->isBaseValueList() instead
+        of lval->isValueList(). If lval is -webkit-image-set, rval is appended
+        to -webkit-image-set.
+
+        Test: fast/css/image-set-value-crash-in-fillImageSet.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::addFillValue):
+        If lval is not a value list, lval is initialized by using
+        CSSValueList::createCommaSeparated(). So we have to check whether
+        lval is created by CSSValueList::createCommaSeparated() or not.
+
 2013-02-02  David Kilzer  <ddkilzer@apple.com>
 
         Upstream iOS FeatureDefines
