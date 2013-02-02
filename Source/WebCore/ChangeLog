@@ -1,5 +1,74 @@
 2013-02-02  Simon Fraser  <simon.fraser@apple.com>
 
+        Clean up the storage of dirty bits on nodes in the scrolling state tree
+        https://bugs.webkit.org/show_bug.cgi?id=108744
+
+        Reviewed by Sam Weinig.
+
+        ScrollingStateNode and its subclasses used different techniques for
+        tracking which properties changed. ScrollingStateNode tracked its layers
+        via a bool member and some layer-specific methods, but also had virtual
+        methods to allow subclasses to track properties via a bit mask.
+        
+        Clean this up by having the base class store the bit mask, and use
+        enums to specify bits for the various properties. All properties are thus
+        tracked in the same way. Bits are read and written through non-virtual member
+        functions on ScrollingStateNode. All bit checking is done via hasChangedProperty().
+
+        * page/scrolling/ScrollingStateFixedNode.cpp:
+        (WebCore::ScrollingStateFixedNode::ScrollingStateFixedNode): m_changedProperties is now on the base class.
+        (WebCore::ScrollingStateFixedNode::updateConstraints): Use setPropertyChanged()
+        * page/scrolling/ScrollingStateFixedNode.h: Remove overrides that are no longer needed.
+        * page/scrolling/ScrollingStateNode.cpp:
+        (WebCore::ScrollingStateNode::ScrollingStateNode): Initialize m_changedProperties,
+        m_scrollLayerDidChange no longer tracked separately.
+        (WebCore::ScrollingStateNode::cloneAndReset):
+        * page/scrolling/ScrollingStateNode.h:
+        (WebCore::ScrollingStateNode::hasChangedProperties):
+        (WebCore::ScrollingStateNode::hasChangedProperty): Tests the bit.
+        (WebCore::ScrollingStateNode::resetChangedProperties): Set all bits to 0.
+        (WebCore::ScrollingStateNode::setPropertyChanged): Set the bit.
+        (WebCore::ScrollingStateNode::changedProperties): Private to discourage incorrect usage
+        (changeProperties() & foo).
+        * page/scrolling/ScrollingStateScrollingNode.cpp:
+        (WebCore::ScrollingStateScrollingNode::ScrollingStateScrollingNode): Base class does the copying now.
+        (WebCore::ScrollingStateScrollingNode::setViewportRect): Use setPropertyChanged().
+        (WebCore::ScrollingStateScrollingNode::setContentsSize): Ditto.
+        (WebCore::ScrollingStateScrollingNode::setFrameScaleFactor): Etc.
+        (WebCore::ScrollingStateScrollingNode::setNonFastScrollableRegion):
+        (WebCore::ScrollingStateScrollingNode::setWheelEventHandlerCount):
+        (WebCore::ScrollingStateScrollingNode::setShouldUpdateScrollLayerPositionOnMainThread):
+        (WebCore::ScrollingStateScrollingNode::setHorizontalScrollElasticity):
+        (WebCore::ScrollingStateScrollingNode::setVerticalScrollElasticity):
+        (WebCore::ScrollingStateScrollingNode::setHasEnabledHorizontalScrollbar):
+        (WebCore::ScrollingStateScrollingNode::setHasEnabledVerticalScrollbar):
+        (WebCore::ScrollingStateScrollingNode::setHorizontalScrollbarMode):
+        (WebCore::ScrollingStateScrollingNode::setVerticalScrollbarMode):
+        (WebCore::ScrollingStateScrollingNode::setRequestedScrollPosition):
+        (WebCore::ScrollingStateScrollingNode::setScrollOrigin):
+        * page/scrolling/ScrollingStateScrollingNode.h:
+        (ScrollingStateScrollingNode):
+        * page/scrolling/ScrollingStateStickyNode.cpp:
+        (WebCore::ScrollingStateStickyNode::ScrollingStateStickyNode):
+        (WebCore::ScrollingStateStickyNode::updateConstraints):
+        * page/scrolling/ScrollingStateStickyNode.h:
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::commitNewTreeState):
+        * page/scrolling/ScrollingTreeScrollingNode.cpp:
+        (WebCore::ScrollingTreeScrollingNode::update):
+        * page/scrolling/mac/ScrollingStateNodeMac.mm:
+        (WebCore::ScrollingStateNode::setScrollLayer):
+        * page/scrolling/mac/ScrollingStateScrollingNodeMac.mm:
+        (WebCore::ScrollingStateScrollingNode::setCounterScrollingLayer):
+        * page/scrolling/mac/ScrollingTreeFixedNode.mm:
+        (WebCore::ScrollingTreeFixedNode::update):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::update):
+        * page/scrolling/mac/ScrollingTreeStickyNode.mm:
+        (WebCore::ScrollingTreeStickyNode::update):
+
+2013-02-02  Simon Fraser  <simon.fraser@apple.com>
+
         Fixed and sticky nodes have no nodeID set
         https://bugs.webkit.org/show_bug.cgi?id=108734
 
