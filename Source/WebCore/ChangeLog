@@ -1,3 +1,56 @@
+2013-02-04  Gustavo Noronha Silva  <gustavo.noronha@collabora.com>
+
+        [GStreamer][Soup] Let GStreamer provide the buffer data is downloaded to, to avoid copying
+        https://bugs.webkit.org/show_bug.cgi?id=105552
+
+        Reviewed by Philippe Normand.
+
+        Makes it possible for the GStreamer media backend to provide the buffer to which
+        the Soup networking backend will use to download data to. This makes copying
+        memory unnecessary when ResourceHandle hands data over to the media player's
+        StreamingClient. Thanks to Dan Winship for help designing the interface.
+
+        No behaviour change, covered by existing tests.
+
+        * platform/graphics/gstreamer/GStreamerVersioning.cpp:
+        (createGstBufferForData): New helper to create a GstBuffer when
+        we have a data pointer and a length.
+        (getGstBufferSize): Abstract obtaining the size of the buffer, so the code
+        is cleaner while still working for both GST 0.10 and 1.0.
+        (setGstBufferSize): Ditto, but for setting the size.
+        (getGstBufferDataPointer): Ditto, but for grabbing the data pointer.
+        (mapGstBuffer): Convenience method to take care of mapping the buffer so that
+        we can provide the data pointer to ResourceHandle.
+        (unmapGstBuffer): Convenience method which takes care of unmapping the buffer
+        and properly freeing the GstMapInfo.
+        * platform/graphics/gstreamer/GStreamerVersioning.h:
+        * platform/graphics/gstreamer/WebKitWebSourceGStreamer.cpp:
+        (StreamingClient): New methods.
+        (_WebKitWebSrcPrivate): We now store the GstBuffer we provided the data pointer from
+        so we can later unmap it and push it to the pipeline.
+        (webKitWebSrcDispose): Deal with the GstBuffer in case it exists when the source is
+        destroyed.
+        (webKitWebSrcStop): Also clear the GstBuffer in this case.
+        (StreamingClient::didReceiveData): Handle the hand-over of the buffer.
+        (StreamingClient::getBuffer): Provide ResourceHandle with a new GstBuffer's data pointer.
+        * platform/network/ResourceHandleClient.h:
+        (ResourceHandleClient):
+        (WebCore::ResourceHandleClient::ResourceHandleClient): Constructor to initialize the buffer
+        member variable to 0.
+        (WebCore::ResourceHandleClient::~ResourceHandleClient): Destructor to free the buffer if it
+        has been allocated.
+        (WebCore::ResourceHandleClient::getBuffer): Default implementation which returns a
+        newly allocated char pointer.
+        * platform/network/ResourceHandleInternal.h:
+        (WebCore::ResourceHandleInternal::ResourceHandleInternal):
+        (ResourceHandleInternal): Store actual buffer size, which is no longer a constant.
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::cleanupSoupRequestOperation): Clear the buffer pointer, the life-cycle of the
+        buffer is handled by the ResourceHandleClient.
+        (WebCore::nextMultipartResponsePartCallback): Get a new buffer from the client before reading.
+        (WebCore::sendRequestCallback): Ditto.
+        (WebCore::readCallback): Ditto.
+
 2013-02-04  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Move WorkerContextProxy to WebCore
