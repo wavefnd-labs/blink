@@ -1,3 +1,26 @@
+2013-02-03  Gustavo Noronha Silva  <gns@gnome.org>
+
+        [Soup] Do not use local variables for the client
+        https://bugs.webkit.org/show_bug.cgi?id=108714
+
+        Reviewed by Martin Robinson.
+
+        Covered by existing tests, refactoring code only.
+
+        We have had problems in the past with the client being destroyed or
+        changed inside a method or function, and we ended up with a stale
+        pointer, leading to crashes. This refactoring is an effort to minimize
+        the possibility of hitting that same issue in the future.
+
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::redirectSkipCallback): no longer use a local variable to hold
+        the client.
+        (WebCore::wroteBodyDataCallback): ditto.
+        (WebCore::nextMultipartResponsePartCallback): ditto.
+        (WebCore::sendRequestCallback): ditto.
+        (WebCore::closeCallback): ditto.
+        (WebCore::readCallback): ditto.
+
 2013-02-03  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass an Isolate to HasInstance() (part 1)
