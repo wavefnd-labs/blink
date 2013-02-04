@@ -1,3 +1,95 @@
+2013-02-03  Kent Tamura  <tkent@chromium.org>
+
+        Add FocusDirection argument to HTMLTextFormControlElement::handleFocusEvent
+        https://bugs.webkit.org/show_bug.cgi?id=108775
+
+        Reviewed by Hajime Morita.
+
+        We'd like to add a FocusDirection argument to
+        HTMLTextFormControlElement::handleFocusEvent in order to fix Bug
+        108447. This is a preparation for it.
+
+        We need to add FocusDirection arguments to some focus-related functions
+        to pass it correctly when TAB or Shift+TAB is pressed.
+
+        No new tests. This doesn't make any behavior changes.
+
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::HTMLTextFormControlElement::dispatchFocusEvent):
+        To pass the FocusDirection argument to handleFocusEvent, we need to add
+        it to dispatchFocusEvent too.
+        * html/HTMLTextFormControlElement.h:
+        (HTMLTextFormControlElement):
+        Add FocusDirection arugment to dispatchFocusEvent.
+        (WebCore::HTMLTextFormControlElement::handleFocusEvent):
+        Add FocusDirection argument.
+
+        * dom/Node.cpp:
+        (WebCore::Node::dispatchFocusEvent): Add FocusDirection argument.
+        * dom/Node.h:
+        (Node): Ditto.
+
+        * dom/Document.cpp:
+        (WebCore::Document::setFocusedNode): Add FocusDirection argument in
+        order to pass it to Node::dispatchFocusEvent.
+        * dom/Document.h:
+        (Document): Ditto.
+
+        * page/FocusController.cpp:
+        (WebCore::dispatchEventsOnWindowAndFocusedNode):
+        Adjust Node::dispatchFocusEvent argument.
+        (WebCore::FocusController::advanceFocusInDocumentOrder):
+        Pass FocusDirectio to Element::focus.
+        (WebCore::FocusController::setFocusedNode):
+        Add FocusDirection argument in order to pass it to Document::setFocusedNode.
+        (WebCore::FocusController::advanceFocusDirectionallyInContainer):
+        Pass FocusDirectio to Element::focus.
+        * page/FocusController.h:
+        (FocusController): Add FocusDirection argument to setFocusedNode.
+
+        * dom/Element.cpp:
+        (WebCore::Element::focus):
+        Add FocusDirection argument to pass it to FocusController::setFocusedNode.
+        * dom/Element.h:
+        (Element): Ditto.
+
+        * WebCore.exp.in:
+        Update FocusController::setFocusedNode and Document::setFocusedNode.
+
+        * html/HTMLLabelElement.cpp:
+        (WebCore::HTMLLabelElement::focus): Adjust FocusDirection argument.
+        * html/HTMLLabelElement.h:
+        (HTMLLabelElement): Ditto.
+        * html/HTMLLegendElement.cpp:
+        (WebCore::HTMLLegendElement::focus): Ditto.
+        * html/HTMLLegendElement.h:
+        (HTMLLegendElement): Ditto.
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::dispatchFocusEvent): Ditto.
+        * html/HTMLSelectElement.h:
+        (HTMLSelectElement): Ditto.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::defaultFocus):
+        Add FocusDirection argument in order to pass it from
+        HTMLInputElement::focus() to HTMLTextFormControlElement::focus().
+        (WebCore::HTMLInputElement::focus):
+        Pass the FocusDirection argument to InputType::focus. See above.
+        (WebCore::HTMLInputElement::handleFocusEvent):
+        Adjust FocusDirection argument.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement):
+        * html/InputType.cpp:
+        (WebCore::InputType::focus): Add FocusDirection argument.
+        * html/InputType.h:
+        (InputType): Ditto.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::focus):
+        Add FocusDirection argument to follow InputType.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType): Ditto.
+
 2013-02-03  Kassy Coan  <kassycoan@chromium.org>
 
         Adds usage instrumentation for indexedDB
