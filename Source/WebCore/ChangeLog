@@ -1,3 +1,91 @@
+2013-02-04  Vladislav Kaznacheev  <kaznacheev@chromium.org>
+
+        Web Inspector: Create a container class for SidebarPane instances
+        https://bugs.webkit.org/show_bug.cgi?id=108183
+
+        Reviewed by Pavel Feldman.
+
+        SidebarPaneStack is responsible for pane title bar and expand/collapse behavior (previously handled by SidebarPane).
+        SidebarPanes are inserted into DOM lazily and can belong to more than one container.
+        SidebarPane is ready to be displayed in other types of containers (such as tabbed pane as requested in https://bugs.webkit.org/show_bug.cgi?id=107552).
+        There should be no visible changes except for one: DOM breakpoint pane expand/collapse state is no longer
+        shared between Elements and Sources sidebars.
+
+        * inspector/front-end/AuditResultView.js:
+        (WebInspector.AuditResultView):
+        * inspector/front-end/BreakpointsSidebarPane.js:
+        (WebInspector.JavaScriptBreakpointsSidebarPane.prototype._addBreakpoint):
+        (WebInspector.XHRBreakpointsSidebarPane.prototype.highlightBreakpoint):
+        (WebInspector.EventListenerBreakpointsSidebarPane.prototype.highlightBreakpoint):
+        * inspector/front-end/DOMBreakpointsSidebarPane.js:
+        (WebInspector.DOMBreakpointsSidebarPane.prototype.highlightBreakpoint):
+        * inspector/front-end/ElementsPanel.js:
+        (WebInspector.ElementsPanel):
+        (WebInspector.ElementsPanel.prototype.wasShown):
+        (WebInspector.ElementsPanel.prototype.updateStyles):
+        (WebInspector.ElementsPanel.prototype.updateMetrics):
+        (WebInspector.ElementsPanel.prototype.updateProperties):
+        (WebInspector.ElementsPanel.prototype.updateEventListeners):
+        * inspector/front-end/ExtensionPanel.js:
+        (WebInspector.ExtensionSidebarPane):
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onCreateSidebarPane):
+        * inspector/front-end/ScriptsPanel.js:
+        (WebInspector.ScriptsPanel.prototype.wasShown):
+        * inspector/front-end/SidebarPane.js:
+        (WebInspector.SidebarPane):
+        (WebInspector.SidebarPane.prototype.title):
+        (WebInspector.SidebarPane.prototype.prepareContent):
+        (WebInspector.SidebarPane.prototype.expand):
+        (WebInspector.SidebarPane.prototype.onContentReady):
+        (WebInspector.SidebarPane.prototype.setExpandCallback):
+        (WebInspector.SidebarPane.prototype.setShowCallback):
+        (WebInspector.SidebarPane.prototype.wasShown):
+        (WebInspector.SidebarPaneStack):
+        (WebInspector.SidebarPaneStack.prototype.wasShown):
+        (WebInspector.SidebarPaneStack.prototype.addPane):
+        (WebInspector.SidebarPaneStack.prototype._addTitle):
+        (WebInspector.SidebarPaneStack.prototype._attachToPane):
+        (WebInspector.SidebarPaneStack.prototype._isExpanded):
+        (WebInspector.SidebarPaneStack.prototype._setExpanded):
+        (WebInspector.SidebarPaneStack.prototype._onPaneExpanded):
+        (WebInspector.SidebarPaneStack.prototype._collapsePane):
+        (WebInspector.SidebarPaneStack.prototype._togglePane):
+        (WebInspector.SidebarPaneStack.prototype._onTitleKeyDown):
+        * inspector/front-end/StylesSidebarPane.js:
+        (WebInspector.StylesSidebarPane.prototype._refreshUpdate):
+        (WebInspector.StylesSidebarPane.prototype._rebuildUpdate):
+        (WebInspector.StylesSidebarPane.prototype.set _createNewRule):
+        (WebInspector.ComputedStyleSidebarPane.prototype.prepareContent):
+        * inspector/front-end/WatchExpressionsSidebarPane.js:
+        (WebInspector.WatchExpressionsSidebarPane):
+        (WebInspector.WatchExpressionsSidebarPane.prototype.wasShown):
+        (WebInspector.WatchExpressionsSidebarPane.prototype.addExpression):
+        (WebInspector.WatchExpressionsSidebarPane.prototype._addButtonClicked):
+        * inspector/front-end/inspector.css:
+        (.pane-title + .pane-title, .pane:not(.visible) + .pane-title, .pane-title:first-of-type):
+        (.pane-title):
+        (.pane-title:active):
+        (.pane-title::before):
+        (.pane-title.expanded::before):
+        (.pane-title > select):
+        (.pane-title > select:hover):
+        (.pane-title > select:active):
+        (.pane-title > select.select-settings):
+        (.pane-title > select.select-filter):
+        (.pane-title > select > option, .pane-title > select > hr):
+        (.pane-title > .pane-title-button):
+        (.pane-title > .pane-title-button:hover):
+        (.pane-title > .pane-title-button:active, .pane-title > .pane-title-button.toggled):
+        (.pane-title > .pane-title-button.add):
+        (.pane-title > .pane-title-button.element-state):
+        (.pane-title > .pane-title-button.refresh):
+        (.pane.visible > .body):
+        (.pane.visible:nth-last-of-type(1)):
+        (.panel-enabler-view button:not(.status-bar-item), .pane-title-button, button.show-all-nodes):
+        (.panel-enabler-view button:active:not(.status-bar-item), .pane-title-button:active, button.show-all-nodes:active):
+        (body.inactive .panel-enabler-view button:not(.status-bar-item), .panel-enabler-view button:disabled:not(.status-bar-item), body.inactive .pane-title-button, .pane-title-button:disabled, body.inactive button.show-all-nodes):
+
 2013-02-01  Emil A Eklund  <eae@chromium.org>
 
         Remove duplicate code in RenderBoxModelObject::computedCSSPadding*
