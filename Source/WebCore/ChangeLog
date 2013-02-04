@@ -1,3 +1,54 @@
+2013-02-04  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Add parsing for grid-auto-flow
+        https://bugs.webkit.org/show_bug.cgi?id=108397
+
+        Reviewed by Ojan Vafai.
+
+        Test: fast/css-grid-layout/grid-auto-flow-get-set.html
+
+        This change adds the parsing, application and conversion back through getComputedStyle
+        for the new property -webkit-grid-auto-flow, which accpets the following:
+
+        -webkit-grid-auto-flow: none | rows | columns
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        Added code to convert the RenderStyle information back into a CSS value.
+
+        * css/CSSParser.cpp:
+        (WebCore::isValidKeywordPropertyAndValue):
+        (WebCore::isKeywordPropertyID):
+        Implemented parsing for -webkit-grid-auto-flow.
+
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::operator GridAutoFlow):
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        Added the conversion operators, used for parsing and getComputedStyle.
+
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        Added -webkit-grid-auto-flow to the list of the not inherited properties.
+
+        * css/CSSPropertyNames.in:
+        Added the new value and keywords.
+
+        * css/StyleBuilder.cpp:
+        (WebCore::StyleBuilder::StyleBuilder):
+        Added a handler for the new CSS property.
+
+        * rendering/style/RenderStyle.h:
+        Added the usual getter / setter / initial function.
+
+        * rendering/style/RenderStyleConstants.h:
+        Added a new enum GridAutoFlow to hold the parsed value.
+
+        * rendering/style/StyleGridData.cpp:
+        (WebCore::StyleGridData::StyleGridData):
+        * rendering/style/StyleGridData.h:
+        (WebCore::StyleGridData::operator==):
+        Updated after adding a new field for the GridAutoFlow value.
+
 2013-02-04  Mark Pilgrim  <pilgrim@chromium.org>
 
         [Chromium] Move IDBFactoryBackendInterface to WebCore
