@@ -1,3 +1,28 @@
+2013-02-04  Mike West  <mkwst@chromium.org>
+
+        Cleanup: Normalize usage of ExceptionCode in ContainerNode::checkXxxChild()
+        https://bugs.webkit.org/show_bug.cgi?id=108766
+
+        Reviewed by Kentaro Hara.
+
+        This patch refactors checkAddChild and checkReplaceChild to remove the
+        creation of an extra ExceptionCode that's not necessary for the
+        desired behavior, and to bring the ExceptionCode usage into line with
+        the rest of WebKit (this was the only case where ExceptionCode was
+        assigned inside an 'if' statement's condition).
+
+        After this patch, 'ec' will always be assigned a value, even if the
+        result of 'checkAcceptChild' is 0. This would only change behavior if
+        'ec' was non-zero coming into the function, and 'checkAcceptChild'
+        returned 0. Since every callsite is either directly after an explicit
+        zeroing of 'ec', or after an 'if (ec)' clause, that case should never
+        appear. This patch, therefore, shouldn't visibly change WebKit's
+        behavior.
+
+        * dom/ContainerNode.cpp:
+        (WebCore::checkAddChild):
+        (WebCore::checkReplaceChild):
+
 2013-02-03  David Kilzer  <ddkilzer@apple.com>
 
         Upstream ENABLE_PDFKIT_PLUGIN settting
