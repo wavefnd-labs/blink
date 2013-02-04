@@ -1,5 +1,30 @@
 2013-02-03  Kent Tamura  <tkent@chromium.org>
 
+        Support setLangAttributeAwareFormControlUIEnabled on Chromium Windows XP
+        https://bugs.webkit.org/show_bug.cgi?id=108791
+
+        Reviewed by Kentaro Hara.
+
+        We didn't support setLangAttributeAwareFormControlUIEnabled(true) on
+        Chromium Windows XP because of lack of LocaleNameToLCID API. This change
+        add manual mapping from locale names to LCIDs for Windows XP.
+
+        No new tests. This doesn't make any behavior changes in products, and
+        this improves some test results.
+
+        * platform/text/win/LocaleWin.cpp:
+        (WebCore): Define NameToLCIDMap.
+        (WebCore::removeLastComponent):
+        Remove the last component separated with '-'.
+        (WebCore::ensureNameToLCIDMap):
+        Add locale names used in layout tests.
+        (WebCore::convertLocaleNameToLCID):
+        Find an appropriate LCID longest matching with the specified locale name.
+        (WebCore::LCIDFromLocale):
+        Use convertLocaleNameToLCID if LocaleNameToLCID is not available.
+
+2013-02-03  Kent Tamura  <tkent@chromium.org>
+
         Add FocusDirection argument to HTMLTextFormControlElement::handleFocusEvent
         https://bugs.webkit.org/show_bug.cgi?id=108775
 
