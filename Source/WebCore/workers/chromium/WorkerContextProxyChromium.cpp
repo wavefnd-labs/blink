@@ -29,19 +29,23 @@
  */
 
 #include "config.h"
-#include "WorkerContextProxy.h"
+#include "WorkerContextProxyChromium.h"
 
-#include "WebWorkerClientImpl.h"
-
-// We are part of the WebKit implementation.
-using namespace WebKit;
+#if ENABLE(WORKERS)
 
 namespace WebCore {
 
-#if ENABLE(WORKERS)
+static WorkerContextProxyCreate* s_workerContextProxyCreateFunction = 0;
+
+void setWorkerContextProxyCreateFunction(WorkerContextProxyCreate workerContextProxyCreateFunction)
+{
+    s_workerContextProxyCreateFunction = workerContextProxyCreateFunction;
+}
+
 WorkerContextProxy* WorkerContextProxy::create(Worker* worker)
 {
-    return WebWorkerClientImpl::createWorkerContextProxy(worker);
+    ASSERT(s_workerContextProxyCreateFunction);
+    return s_workerContextProxyCreateFunction(worker);
 }
 
 } // namespace WebCore
