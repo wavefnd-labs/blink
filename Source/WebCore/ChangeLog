@@ -1,3 +1,41 @@
+2013-02-05  Anton Vayvod  <avayvod@chromium.org>
+
+        TextAutosizing: adjust the maximum difference between cluster text width and its descendant
+        width.
+        https://bugs.webkit.org/show_bug.cgi?id=108411
+
+        Currently, if a render object is more than 200 CSS units shorter than its parent cluster, it
+        becomes a separate autosizing cluster (see https://bugs.webkit.org/show_bug.cgi?id=105188).
+        This doesn't work well for layouts when narrow nodes are related, like nested comments:
+        deeper comments are all shorter than the parent cluster and become autosized differently. To
+        avoid that the difference that makes a shorter descendant a new autosizing cluster is
+        adjusted each time the width difference is not greater than 50 CSS units from the previous
+        one. This allows nested comments, for example, to remain a part of the parent cluster and be
+        autosized with the same multiplier.
+        
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Tests:
+                fast/text-autosizing/nested-child.html
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizingClusterInfo::TextAutosizingClusterInfo):
+
+            Added a new field to store the current maximum width difference for the cluster.
+
+        (WebCore::TextAutosizer::isAutosizingCluster):
+
+            Uses the new field to determine if the current node is a separate cluster,
+            updates the maximum allowed width difference between the cluster and its descendant.
+
+        (WebCore::TextAutosizer::processContainer):
+        (WebCore::TextAutosizer::clusterShouldBeAutosized):
+        (WebCore::TextAutosizer::measureDescendantTextWidth):
+
+            Non-const reference passed to the methods above.
+
+        * rendering/TextAutosizer.h: updated method parameters.
+
 2013-02-05  Tony Gentilcore  <tonyg@chromium.org>
 
         Continue making XSSAuditor thread safe: Remove dependency on parser's sourceForToken and TextResourceDecoder
