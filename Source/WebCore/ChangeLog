@@ -1,3 +1,68 @@
+2013-02-05  Mike West  <mkwst@chromium.org>
+
+        Cleanup: Use exceptionless Range::* methods rather than ignoring exceptions.
+        https://bugs.webkit.org/show_bug.cgi?id=108773
+
+        Reviewed by Darin Adler.
+
+        We often call Range::{start,end}{Container,Offset} with an ExceptionCode
+        that's completely ignored. In these cases, we should simply use the
+        exceptionless version of the method instead.
+
+        * dom/DocumentMarkerController.cpp:
+        (WebCore::DocumentMarkerController::addMarker):
+            Here, I also moved parameters onto one line to make the
+            stylebot happy.
+        (WebCore::DocumentMarkerController::addTextMatchMarker):
+        (WebCore::DocumentMarkerController::setMarkersActive):
+            Dropped ignored ExceptionCode variable entirely.
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::visiblePositionForIndex):
+            Can't drop the variable because of the selectNodeContents call.
+        * editing/Editor.cpp:
+        (WebCore::Editor::canDeleteRange):
+            Dropped ignored ExceptionCode variable entirely.
+        (WebCore::Editor::advanceToNextMisspelling):
+            Can't drop the variable because of setStart/setEnd.
+        * editing/EditorCommand.cpp:
+        (WebCore::unionDOMRanges):
+            Can't drop the variable because of compareBoundaryPoints.
+        * editing/MarkupAccumulator.cpp:
+        (WebCore::MarkupAccumulator::appendNodeValue):
+            Dropped ignored ExceptionCode variable entirely.
+        * editing/TextCheckingHelper.cpp:
+        (WebCore::TextCheckingParagraph::offsetAsRange):
+        (WebCore::TextCheckingHelper::findFirstMisspelling):
+        (WebCore::TextCheckingHelper::findFirstGrammarDetail):
+        (WebCore::TextCheckingHelper::findFirstMisspellingOrBadGrammar):
+        * editing/markup.cpp:
+        (WebCore::StyledMarkupAccumulator::renderedText):
+        (WebCore::StyledMarkupAccumulator::stringValueForRange):
+            Dropped ignored ExceptionCode variable entirely.
+        * editing/visible_units.cpp:
+        (WebCore::previousBoundary):
+            Can't drop the variable due to many other calls.
+        * page/DOMSelection.cpp:
+        (WebCore::DOMSelection::deleteFromDocument):
+        (WebCore::DOMSelection::containsNode):
+            For both these cases, the 'ASSERT(!ec)' after the statement I've
+            edited only checked the last occurance of the exception: that is,
+            if 'startXxx(ec)' threw an exception, it would be overwritten by
+            the 'setBaseAndExtend()' or 'compareBoundaryPoints()' exception.
+            Removing the exception parameters from the parameters' calls
+            shouldn't effect behavior.
+        * platform/chromium/PasteboardChromium.cpp:
+        (WebCore::Pasteboard::writeSelection):
+        * platform/mac/HTMLConverter.mm:
+        (+[WebHTMLConverter editingAttributedStringFromRange:]):
+        * platform/win/ClipboardWin.cpp:
+        (WebCore::ClipboardWin::writeRange):
+        * platform/win/PasteboardWin.cpp:
+        (WebCore::Pasteboard::writeSelection):
+        * platform/wince/PasteboardWinCE.cpp:
+        (WebCore::Pasteboard::writeSelection):
+            Dropped ignored ExceptionCode variable entirely.
+
 2013-02-05  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector:  introduce Memory.getDOMCounters
