@@ -1,3 +1,36 @@
+2013-02-05  Dominik Röttsches  <dominik.rottsches@intel.com>
+
+        [HarfBuzz][Cairo] harfBuzzGetGlyph is slow and hot
+        https://bugs.webkit.org/show_bug.cgi?id=108941
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        The text to glyph conversion using Cairo is slow
+        due to expensive text codec conversion to UTF-8.
+        Additionally, the glyph lookup itself is expensive.
+
+        Inspired by the approach taken in HarfBuzzFaceSkia.cpp
+        I suggest to implement a similar caching mechanism to
+        accelerate this conversion.
+
+        Arabic line breaking test, under review in
+        bug 108948 shows about 58% improvement on my system
+        with this patch.
+
+        * platform/graphics/harfbuzz/HarfBuzzFaceCairo.cpp:
+        (WebCore::HarfBuzzFontData::HarfBuzzFontData):
+            New container structure that keeps pointers
+            to the cairo scaled font as well as the glyph cache.
+        (HarfBuzzFontData):
+        (WebCore):
+        (WebCore::harfBuzzGetGlyph): Using the new container structure for accessing the cache.
+        (WebCore::harfBuzzGetGlyphHorizontalAdvance): Using the new container structure for accessing the scaled font.
+        (WebCore::harfBuzzGetGlyphExtents): Ditto.
+        (WebCore::destroyHarfBuzzFontData): Destroying the container that held the pointers.
+        (WebCore::HarfBuzzFace::createFont):
+            Initializing the container structure with the pointers
+            to the cache that is held in HarfBuzzFace and the cairo scaled font.
+
 2013-02-05  Tony Gentilcore  <tonyg@chromium.org>
 
         Call XSSAuditor's didBlockScript() for the threaded HTML parser
