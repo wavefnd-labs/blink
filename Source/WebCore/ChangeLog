@@ -1,3 +1,45 @@
+2013-02-05  Tony Gentilcore  <tonyg@chromium.org>
+
+        Continue making XSSAuditor thread safe: Remove dependency on parser's sourceForToken and TextResourceDecoder
+        https://bugs.webkit.org/show_bug.cgi?id=108698
+
+        Reviewed by Adam Barth.
+
+        We'd like to be able to call filterToken() from the BackgroundHTMLParser where there is no HTMLDocumentParser. So we are removing the dependencies of
+        filterToken() on the HTMLDocumentParser. This patch brings us one step closer to removing the m_parser member from XSSAuditor by passing in the
+        TextResourceDecoder and HTMLSourceTracker to filterToken. To keep the number of parameters from blowing up, this introduces a FilterTokenRequest struct
+        to hold its arguments. We expect to add one more member to this struct.
+
+
+        No new tests because no new functionality.
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+        * html/parser/HTMLDocumentParser.h:
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::filterToken):
+        (WebCore::XSSAuditor::filterStartToken):
+        (WebCore::XSSAuditor::filterCharacterToken):
+        (WebCore::XSSAuditor::filterScriptToken):
+        (WebCore::XSSAuditor::filterObjectToken):
+        (WebCore::XSSAuditor::filterParamToken):
+        (WebCore::XSSAuditor::filterEmbedToken):
+        (WebCore::XSSAuditor::filterAppletToken):
+        (WebCore::XSSAuditor::filterIframeToken):
+        (WebCore::XSSAuditor::filterMetaToken):
+        (WebCore::XSSAuditor::filterBaseToken):
+        (WebCore::XSSAuditor::filterFormToken):
+        (WebCore::XSSAuditor::eraseDangerousAttributesIfInjected):
+        (WebCore::XSSAuditor::eraseAttributeIfInjected):
+        (WebCore::XSSAuditor::decodedSnippetForName):
+        (WebCore::XSSAuditor::decodedSnippetForAttribute):
+        (WebCore::XSSAuditor::decodedSnippetForJavaScript):
+        * html/parser/XSSAuditor.h:
+        (WebCore):
+        (WebCore::FilterTokenRequest::FilterTokenRequest):
+        (FilterTokenRequest):
+        (XSSAuditor):
+
 2013-02-05  Jocelyn Turcotte  <jocelyn.turcotte@digia.com>
 
         [Qt] REGRESSION(r137436): It made all inspector tests timeout on developer builds
