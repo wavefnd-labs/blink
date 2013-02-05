@@ -1,3 +1,35 @@
+2013-02-05  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Should not move focus if the element already has focus
+        https://bugs.webkit.org/show_bug.cgi?id=108914
+
+        Reviewed by Kentaro Hara.
+
+        If timeInput.focus() is called when a sub-field of the time input
+        already has focus, we should not focus on the first sub-field of the
+        time input.
+
+        Test: fast/forms/time-multiple-fields/time-multiple-fields-focus.html
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::willCancelFocus): If
+        the input elment already has focused sub-field, we don't need to proceed
+        focus handling. FocusDirection check is required because we don't need
+        to do this in cases of sequential focus navigation.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType): Override InputType::willCancelFocus.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::focus):
+        Cancel focus if InputType::willCancelFocus returns true.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Override focus.
+        * html/InputType.cpp:
+        (WebCore::InputType::willCancelFocus):
+        Add a default implementation. It returns false.
+        * html/InputType.h:
+        (InputType): Declare willCancelFocus.
+
 2013-02-05  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] RGB -> BGR is wrong on big endian
