@@ -1,3 +1,133 @@
+2013-02-05  Mark Lam  <mark.lam@apple.com>
+
+        Introduced back-end database classes + a few small fixes.
+        https://bugs.webkit.org/show_bug.cgi?id=108759.
+
+        Reviewed by Brady Eidson.
+
+        1. Added DatabaseBackendContext, DatabaseBackendAsync, and DatabaseBackendSync.
+           These are backends for DatabaseContext, Database, and DatabaseSync
+           respectively.
+        2. Added DatabaseBase to hold common code between Database and DatabaseSync.
+        3. Renamed a few functions.
+        4. Cleaned up unneeded code in ~DatabaseSync().
+        5. Added some FIXMEs as reminders or places to clean up when we're done
+           refactoring.
+        6. Moved the calling of ScriptController::initializeThreading() from the Database
+           constructor to DatabaseManager::openDatabase(). This just moves the call
+           earlier in the same code path. System initialization work (i.e. initializing
+           script threading in this case) should be done by the manager instead of by
+           each Database instance.
+
+        No new tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase/AbstractDatabaseServer.h:
+        (AbstractDatabaseServer):
+        * Modules/webdatabase/Database.cpp:
+        (WebCore::Database::Database):
+        (WebCore::Database::backend):
+        * Modules/webdatabase/Database.h:
+        (Database):
+        * Modules/webdatabase/DatabaseBackend.cpp:
+        (WebCore::DatabaseBackend::DatabaseBackend):
+        (WebCore::DatabaseBackend::~DatabaseBackend):
+        (WebCore::DatabaseBackend::incrementalVacuumIfNeeded):
+        * Modules/webdatabase/DatabaseBackend.h:
+        (DatabaseBackend):
+        (WebCore::DatabaseBackend::databaseContext):
+        (WebCore::DatabaseBackend::setFrontend):
+        * Modules/webdatabase/DatabaseBackendAsync.cpp: Added.
+        (WebCore::DatabaseBackendAsync::DatabaseBackendAsync):
+        * Modules/webdatabase/DatabaseBackendAsync.h: Added.
+        (DatabaseBackendAsync):
+        * Modules/webdatabase/DatabaseBackendContext.cpp: Added.
+        (WebCore::DatabaseBackendContext::securityOrigin):
+        (WebCore::DatabaseBackendContext::isContextThread):
+        * Modules/webdatabase/DatabaseBackendContext.h: Added.
+        (DatabaseBackendContext):
+        (WebCore::DatabaseBackendContext::scriptExecutionContext):
+        * Modules/webdatabase/DatabaseBackendSync.cpp: Added.
+        (WebCore::DatabaseBackendSync::DatabaseBackendSync):
+        (WebCore::DatabaseBackendSync::~DatabaseBackendSync):
+        * Modules/webdatabase/DatabaseBackendSync.h: Added.
+        (DatabaseBackendSync):
+        * Modules/webdatabase/DatabaseBase.cpp: Added.
+        (WebCore::DatabaseBase::DatabaseBase):
+        (WebCore::DatabaseBase::scriptExecutionContext):
+        (WebCore::DatabaseBase::logErrorMessage):
+        * Modules/webdatabase/DatabaseBase.h: Added.
+        (DatabaseBase):
+        * Modules/webdatabase/DatabaseContext.cpp:
+        (WebCore::DatabaseContext::DatabaseContext):
+        (WebCore::DatabaseContext::backend):
+        * Modules/webdatabase/DatabaseContext.h:
+        (DatabaseContext):
+        * Modules/webdatabase/DatabaseManager.cpp:
+        (WebCore::DatabaseManager::openDatabase):
+        (WebCore::DatabaseManager::openDatabaseSync):
+        (WebCore::DatabaseManager::hasOpenDatabases):
+        (WebCore::DatabaseManager::interruptAllDatabasesForContext):
+        (WebCore::DatabaseManager::getMaxSizeForDatabase):
+        (WebCore::DatabaseManager::logErrorMessage):
+        * Modules/webdatabase/DatabaseManager.h:
+        (DatabaseManager):
+        * Modules/webdatabase/DatabaseServer.cpp:
+        (WebCore::DatabaseServer::interruptAllDatabasesForContext):
+        (WebCore::DatabaseServer::canEstablishDatabase):
+        * Modules/webdatabase/DatabaseServer.h:
+        * Modules/webdatabase/DatabaseSync.cpp:
+        (WebCore::DatabaseSync::DatabaseSync):
+        (WebCore::DatabaseSync::~DatabaseSync):
+        (WebCore::DatabaseSync::backend):
+        * Modules/webdatabase/DatabaseSync.h:
+        (DatabaseSync):
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::openTrackerDatabase):
+        (WebCore::DatabaseTracker::canEstablishDatabase):
+        (WebCore::DatabaseTracker::hasEntryForDatabase):
+        (WebCore::DatabaseTracker::interruptAllDatabasesForContext):
+        (WebCore::DatabaseTracker::populateOriginsIfNeeded):
+        (WebCore::DatabaseTracker::databaseNamesForOriginNoLock):
+        (WebCore::DatabaseTracker::detailsForNameAndOrigin):
+        (WebCore::DatabaseTracker::setDatabaseDetails):
+        (WebCore::DatabaseTracker::usageForOriginNoLock):
+        (WebCore::DatabaseTracker::setQuota):
+        (WebCore::DatabaseTracker::addDatabase):
+        (WebCore::DatabaseTracker::deleteOrigin):
+        (WebCore::DatabaseTracker::isDeletingDatabaseOrOriginFor):
+        (WebCore::DatabaseTracker::canDeleteDatabase):
+        (WebCore::DatabaseTracker::isDeletingDatabase):
+        (WebCore::DatabaseTracker::canDeleteOrigin):
+        (WebCore::DatabaseTracker::isDeletingOrigin):
+        (WebCore::DatabaseTracker::recordDeletingOrigin):
+        (WebCore::DatabaseTracker::doneDeletingOrigin):
+        (WebCore::DatabaseTracker::deleteDatabase):
+        (WebCore::DatabaseTracker::deleteDatabaseFile):
+        * Modules/webdatabase/DatabaseTracker.h:
+        (DatabaseTracker):
+        * Modules/webdatabase/SQLTransaction.cpp:
+        * Modules/webdatabase/SQLTransactionClient.cpp:
+        (WebCore::SQLTransactionClient::didExceedQuota):
+        * Modules/webdatabase/SQLTransactionSync.cpp:
+        * Modules/webdatabase/chromium/DatabaseTrackerChromium.cpp:
+        (WebCore::DatabaseTracker::canEstablishDatabase):
+        (WebCore::DatabaseTracker::removeOpenDatabase):
+        (WebCore::DatabaseTracker::prepareToOpenDatabase):
+        (WebCore::DatabaseTracker::failedToOpenDatabase):
+        (WebCore::DatabaseTracker::interruptAllDatabasesForContext):
+        (WebCore::DatabaseTracker::closeDatabasesImmediately):
+        * Modules/webdatabase/chromium/SQLTransactionClientChromium.cpp:
+        (WebCore::SQLTransactionClient::didCommitWriteTransaction):
+        (WebCore::SQLTransactionClient::didExceedQuota):
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+
 2013-02-05  Nayan Kumar K  <nayankk@motorola.com>
 
         [WEBGL] Rename WEBKIT_WEBGL_depth_texture to WEBGL_depth_texture.
