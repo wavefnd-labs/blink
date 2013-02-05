@@ -1,3 +1,58 @@
+2013-02-04  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Focus order is not controllable by tabIndex attribute on <input>
+        https://bugs.webkit.org/show_bug.cgi?id=108447
+
+        Reviewed by Hajime Morita.
+
+        We make <input> elements with the multiple-fields UI focusable.
+         - However, we don't want to change the existing focus behavior for
+           multiple-fields <input>. We'd like to focus on the last sub-field of
+           an<input> with Shift + TAB focus navigation, and focus on the first
+           sub-field of the <input> otherwise. So, we move focus immediately
+           after the <input> gets focus.
+         - We don't need the isFocusableByClickOnLabel hack any more. <input>
+           elements with the multiple-fields UI are mouse-focusable.
+
+        Test: fast/forms/time-multiple-fields/time-multiple-fields-tabindex.html
+
+        * html/InputType.h:
+        (InputType): Add FocusDirection argument to handleFocusEvent, and remove
+        unnecessary isFocusableByClickOnLabel and focus.
+        * html/InputType.cpp:
+        (WebCore::InputType::handleFocusEvent): Ditto.
+        * html/PasswordInputType.cpp:
+        (WebCore::PasswordInputType::handleFocusEvent): Follow the argument change.
+        * html/PasswordInputType.h:
+        (PasswordInputType): Ditto.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::handleFocusEvent):
+        If this element gets focus by FocusDirectionBackward (it means the focus
+        is moved from the first sub-field of the element,) move the focus
+        backward once more. Otherwise, we focus on the first sub-filed of the
+        element.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isKeyboardFocusable):
+        Make this keyboard-focusable. We have a wrong test to ensure read-only
+        input does NOT get focus. We'll address it later.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isMouseFocusable):
+        Make this mouse-focusable.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType):
+
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Remove defaultFocus, focus, and isFocusableByClickOnLabel.
+        Add missing OVERRIDE to handleFocusEvent.
+        * html/HTMLInputElement.cpp: Remove unnecessary functions.
+        (WebCore::HTMLInputElement::handleFocusEvent):
+        Pass FocusDirection value to InputTYpe::handleFocusEvent.
+
+        * html/HTMLLabelElement.cpp:
+        (WebCore::HTMLLabelElement::defaultEventHandler):
+        Use isMouseFocusable().
+        * html/HTMLElement.cpp: Remove unnecessary isFocusableByClickOnLabel.
+        * html/HTMLElement.h: Ditto.
+
 2013-02-04  Seulgi Kim  <seulgikim@company100.net>
 
         Coordinated Graphics: crash in TiledBackingStore::adjustForContentsRect
