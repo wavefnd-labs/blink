@@ -1,3 +1,35 @@
+2013-02-04  Dean Jackson  <dino@apple.com>
+
+        Default element styles are not always collected for sharing detection
+        https://bugs.webkit.org/show_bug.cgi?id=108404
+
+        Reviewed by Antti Koivisto.
+
+        The method ensureDefaultStyleSheetsForElement is run as we add elements
+        to the document. This may update the defaultStyle of the document, but
+        does not recollect any changes into the StyleResolver. This means that
+        style sharing might be overly ambitious, thinking it can share a style
+        for an element which was matched in the new rules. This showed up most
+        often in the Shadow Root for media elements, which would add a set of
+        style rules, but the shadow children would sometimes share styles even
+        when they shouldn't.
+
+        The fix is to detect if we need to collect after adding a
+        style for an element. This might cause a little more work, but
+        in my testing it doesn't happen very often.
+
+        Unfortunately it is hard to get a reproducible test for this.
+
+        * css/CSSDefaultStyleSheets.cpp:
+        (WebCore::CSSDefaultStyleSheets::ensureDefaultStyleSheetsForElement): As we load in
+            styles, keep track of whether or not we change the default style.
+        * css/CSSDefaultStyleSheets.h:
+        (CSSDefaultStyleSheets): New boolean parameter indicating if the style has changed.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::styleForElement): Collect features if the element
+            caused the default style to update.
+        (WebCore::StyleResolver::collectFeatures): Protect for null in updates.
+
 2013-02-04  Jun Jiang  <jun.a.jiang@intel.com>
 
         Fix the issue that some possible source formats are ignored for float textures in texture packing for CG port
