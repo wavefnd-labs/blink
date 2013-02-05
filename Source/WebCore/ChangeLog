@@ -1,3 +1,63 @@
+2013-02-05  Tony Gentilcore  <tonyg@chromium.org>
+
+        Call XSSAuditor's didBlockScript() for the threaded HTML parser
+        https://bugs.webkit.org/show_bug.cgi?id=108726
+
+        Reviewed by Adam Barth.
+
+        This patch causes us to call didBlockScript() on the main thread if the CompactHTML token has XSSInfo.
+        To do so, we:
+        1. Rename DidBlockScriptRequest to XSSInfo.
+        2. Add an OwnPtr<XSSInfo> field to CompactHTMLToken.
+        3. Add an isSafeToSendToAnotherThread() method to String and KURL.
+
+        We don't yet populate didBlockScriptRequest on the background thread, but this should just work once we do.
+
+        No new tests because no new functionality.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::pumpTokenizer): Update comment for rename.
+        * html/parser/CompactHTMLToken.cpp:
+        (SameSizeAsCompactHTMLToken):
+        (WebCore::CompactHTMLToken::CompactHTMLToken): Add a copy constructor used by Vector.
+        (WebCore::CompactHTMLToken::isSafeToSendToAnotherThread): Include new m_xssInfo field in safety check.
+        (WebCore):
+        (WebCore::CompactHTMLToken::xssInfo): Added.
+        (WebCore::CompactHTMLToken::setXSSInfo): Added.
+        * html/parser/CompactHTMLToken.h: Add an OwnPtr<XSSInfo> field to CompactHTMLToken.
+        (WebCore):
+        (CompactHTMLToken):
+        (WTF): Add VectorTraits necessary for copying Vector fields objects that contain an OwnPtr.
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser): Add new didBlockScript() call.
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+        * html/parser/XSSAuditor.cpp: Renaming.
+        (WebCore::XSSAuditor::filterToken):
+        * html/parser/XSSAuditor.h: Renaming.
+        (WebCore):
+        (XSSAuditor):
+        * html/parser/XSSAuditorDelegate.cpp:
+        (WebCore::XSSInfo::isSafeToSendToAnotherThread):
+        (WebCore):
+        (WebCore::XSSAuditorDelegate::didBlockScript):
+        * html/parser/XSSAuditorDelegate.h:
+        (WebCore::XSSInfo::create):
+        (XSSInfo):
+        (WebCore::XSSInfo::XSSInfo):
+        (XSSAuditorDelegate):
+        * platform/KURL.cpp:
+        (WebCore::KURL::isSafeToSendToAnotherThread): Added.
+        (WebCore):
+        * platform/KURL.h:
+        (KURL):
+        * platform/KURLGoogle.cpp:
+        (WebCore):
+        (WebCore::KURLGooglePrivate::isSafeToSendToAnotherThread): Added.
+        * platform/KURLGooglePrivate.h:
+        (KURLGooglePrivate):
+        * platform/KURLWTFURLImpl.h:
+        (WebCore::KURLWTFURLImpl::isSafeToSendToAnotherThread): Added.
+
 2013-02-05  Anton Vayvod  <avayvod@chromium.org>
 
         TextAutosizing: adjust the maximum difference between cluster text width and its descendant
