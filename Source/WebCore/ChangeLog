@@ -1,3 +1,41 @@
+2013-02-04  Dean Jackson  <dino@apple.com>
+
+        [Mac] Captions menu should indicate language and type of track
+        https://bugs.webkit.org/show_bug.cgi?id=108882
+
+        Reviewed by Eric Carlson.
+
+        On Mac, we want a specific format for menu items in a caption list. Since
+        other ports might want different formats, move the generation of the label
+        into CaptionsUserPreferences where it can be overridden.
+
+        This required CaptionsUserPreferences to become public on the PageGroup, so
+        it could be used when creating the menu. Also, since CaptionsUserPreferences
+        was hidden on Mountain Lion and below, be a little more specific about
+        which pieces can be seen on which builds.
+
+        Covered by exisiting media/video-controls-captions-trackmenu tests.
+
+        * English.lproj/Localizable.strings: Remove textTrackClosedCaptionsText.
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlClosedCaptionsTrackListElement::rebuildTrackListMenu): Build only
+            one section and get the track's display name from the user preferences.
+        * page/CaptionUserPreferences.h:
+        (WebCore::CaptionUserPreferences::displayNameForTrack): Default implementation of
+            virtual function that provides a label for a captions menu item.
+        * page/CaptionUserPreferencesMac.h: Add the new virtual function, and expose just
+            a bit of this class outside 10.9 builds.
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::CaptionUserPreferencesMac): Guard features for system version.
+        (WebCore::CaptionUserPreferencesMac::~CaptionUserPreferencesMac): Ditto.
+        (WebCore::CaptionUserPreferencesMac::displayNameForTrack): New OS X-specific method that
+            returns a string for the menu label.
+        * page/PageGroup.cpp:
+        (WebCore::PageGroup::captionPreferences): Unguard for system version.
+        * page/PageGroup.h: Make captionPreferences public.
+        * platform/LocalizedStrings.cpp: Remove textTrackClosedCaptionsText - not needed any more.
+        * platform/LocalizedStrings.h: Remove textTrackClosedCaptionsText.
+
 2013-02-04  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Pass an Isolate to V8DOMConfiguration
