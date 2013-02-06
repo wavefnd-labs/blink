@@ -1,3 +1,28 @@
+2013-02-06  Dima Gorbik  <dgorbik@apple.com>
+
+        Store the language internally instead of using lang attribute for WebVTT nodes
+        https://bugs.webkit.org/show_bug.cgi?id=108858
+
+        Reviewed by Eric Carlson.
+
+        Only language webvtt elements should have a lang attribute so we have to store
+        the language internally in the element. Refactored the code to make 
+        computeInheritedLanguage virtual.
+
+        Existing tests were modified to cover this case.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOne):
+        * html/track/WebVTTElement.cpp:
+        (WebCore::WebVTTElement::WebVTTElement):
+        (WebCore::WebVTTElement::cloneElementWithoutAttributesAndChildren):
+        (WebCore::WebVTTElement::createEquivalentHTMLElement): clone the internal language property.
+        * html/track/WebVTTElement.h:
+        (WebCore::WebVTTElement::language):
+        (WebCore::WebVTTElement::setLanguage):
+        * html/track/WebVTTParser.cpp: only set the lang attribute for language objects.
+        (WebCore::WebVTTParser::constructTreeFromToken):
+
 2013-02-06  Levi Weintraub  <leviw@chromium.org>
 
         Negative text indents can break RenderBlock's inline maximum preferred width calculation
