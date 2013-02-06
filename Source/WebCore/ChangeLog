@@ -1,3 +1,62 @@
+2013-02-06  Pravin D  <pravind.2k4@gmail.com>
+
+        When a block element is made inline positioned and has static left and right,  it does not follow inline formatting context
+        https://bugs.webkit.org/show_bug.cgi?id=91665
+
+        Reviewed by Julien Chaffraix.
+
+        Out-of-flow-positioned elements have their display overriden to BLOCK. When a static block elements 
+        changes to inline out-of-flow-positioned or vice-versa, the element current and previous display properties 
+        are same. This causes the element to follow a wrong flow context(in this case Block context) and the element
+        is laid out incorrectly. The patch fixes the issue by reattaching the renderers of the node whenever either
+        position property changes or when its floating property changes.
+        Also the cases when an out-of-flow-positioned/floating element changes to static/non-floating element where
+        being specially handled. As reattaching the renderers in the above cases correctly handles the above cases,
+        special handling for such cases is no more required and the related code can be safely removed.
+ 
+        Reattaching renderers for the afore mentioned issues takes a different(longer) code path. Performance measurements
+        summary for the same is as follows:
+                                                              % increase in time
+         Absolute-block-to-static-block                            2.00
+         Absolute-inline-to-static-block                           1.21
+         Absolute-inline-to-static-inline                          1.18
+         Static-block-to-absolute-block                            1.13
+         Static-inline-to-absolute-inline                          1.35
+         Floating-block-non-floating-block                         0.85
+         Floating-inline-non-floating-block                        0.66
+         Floating-inline-non-floating-inline                       0.57
+         Non-floating-block-floating-block                         0.12
+         Non-floating-inline-floating-inline                       1.36
+
+        Tests: fast/dynamic/absolute-positioned-to-static-positioned.html
+               fast/dynamic/floating-to-non-floating.html
+               fast/dynamic/non-floating-to-floating.html
+               fast/dynamic/static-positioned-to-absolute-positioned.html
+
+        * dom/Node.cpp:
+        (WebCore::Node::diff):
+          Return detach in the following conditions:
+             1) Element changes to out-of-flow-positioned or vice-versa.
+             2) Element becomes floating or vice-versa.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        * rendering/RenderInline.cpp:
+        (WebCore):
+        * rendering/RenderInline.h:
+        (RenderInline):
+        * rendering/RenderObject.cpp:
+        (WebCore):
+        (WebCore::RenderObject::styleWillChange):
+        (WebCore::RenderObject::styleDidChange):
+        * rendering/RenderObject.h:
+        (RenderObject):
+          The fix in Node::diff() obsoletes some code. The above deletion are part of this dead code cleanup.
+
 2013-02-06  Chris Fleizach  <cfleizach@apple.com>
 
         AX: if <html> has an ARIA attribute, it's exposed as an AXGroup
