@@ -1,3 +1,73 @@
+2013-02-06  Marja Hölttä  <marja@chromium.org>
+
+        Take referrer policy into account when clearing the referrer header
+        https://bugs.webkit.org/show_bug.cgi?id=86000
+
+        Reviewed by Alexey Proskuryakov.
+
+        The referrer should only be cleared when doing a https -> http redirect,
+        if the policy is "default". Otherwise the referrer should be left intact.
+
+        In order to do that, added a function for checking the policy in
+        NetworkingContext, and stored the NetworkingContext in ResourceHandle
+        (like some ports already did).
+
+        No new tests (unskipped old tests).
+
+        * loader/FrameNetworkingContext.h:
+        (WebCore::FrameNetworkingContext::shouldClearReferrerOnHTTPSToHTTPRedirect):
+        (FrameNetworkingContext):
+        * platform/network/BlobResourceHandle.cpp:
+        (WebCore::BlobResourceHandle::BlobResourceHandle):
+        * platform/network/NetworkingContext.h:
+        (NetworkingContext):
+        * platform/network/ResourceHandle.cpp:
+        (WebCore::ResourceHandle::ResourceHandle):
+        (WebCore::ResourceHandle::create):
+        (WebCore::ResourceHandle::context):
+        (WebCore):
+        * platform/network/ResourceHandle.h:
+        (ResourceHandle):
+        * platform/network/ResourceHandleInternal.h:
+        (WebCore::ResourceHandleInternal::ResourceHandleInternal):
+        (ResourceHandleInternal):
+        * platform/network/blackberry/ResourceHandleBlackBerry.cpp:
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::loadResourceSynchronously):
+        * platform/network/cf/ResourceHandleCFNet.cpp:
+        (WebCore::willSendRequest):
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::loadResourceSynchronously):
+        * platform/network/chromium/ResourceHandle.cpp:
+        (WebCore::ResourceHandleInternal::ResourceHandleInternal):
+        (WebCore::ResourceHandle::ResourceHandle):
+        (WebCore::ResourceHandle::create):
+        (WebCore::ResourceHandle::context):
+        (WebCore):
+        (WebCore::ResourceHandle::start):
+        * platform/network/chromium/ResourceHandleInternal.h:
+        (WebCore):
+        (ResourceHandleInternal):
+        (WebCore::ResourceHandleInternal::context):
+        * platform/network/curl/ResourceHandleCurl.cpp:
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::loadResourceSynchronously):
+        * platform/network/mac/ResourceHandleMac.mm:
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::loadResourceSynchronously):
+        (-[WebCoreResourceHandleAsDelegate connection:willSendRequest:redirectResponse:]):
+        * platform/network/qt/QNetworkReplyHandler.cpp:
+        (WebCore::QNetworkReplyHandler::redirect):
+        * platform/network/qt/ResourceHandleQt.cpp:
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::loadResourceSynchronously):
+        * platform/network/soup/ResourceHandleSoup.cpp:
+        (WebCore::doRedirect):
+        (WebCore::ResourceHandle::start):
+        * platform/network/win/ResourceHandleWin.cpp:
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::loadResourceSynchronously):
+
 2013-02-06  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: file selector list jumps as I type or move Up/Down
