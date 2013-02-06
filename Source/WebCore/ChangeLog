@@ -1,3 +1,97 @@
+2013-02-06  Mark Lam  <mark.lam@apple.com>
+
+        Split openDatabase() between front and back end work.
+        https://bugs.webkit.org/show_bug.cgi?id=107475.
+
+        Reviewed by Anders Carlsson.
+
+        The main work of splitting DatabaseManager::openDatabase() is in
+        refactoring how DatabaseTracker::canEstablishDatabase() works. It used
+        to check for adequate space quota, and if the check fails, it would call
+        back into the client from inside canEstablishDatabase(). The call back
+        allows the client to update the quota (if appropriate). Thereafter,
+        canEstablishDatabase() will retry its quota check.
+
+        In a webkit2 world, we'll want to minimize the traffic between the
+        client (script side) and the server (sqlite db side), and ideally, we
+        don't want the server to call back to the client. Note: the
+        DatabaseTracker belongs on the server side.
+
+        To achieve this, we split canEstablishDatabase() into 2 parts: the
+        checks before the call back to the client, and the checks after.
+        The first part will retain the name canEstablishDatabase(), and the
+        second part will be named retryCanEstablishDatabase().
+        We also added a DatabaseServer::openDatabase() function that can be
+        called with a retry flag.
+
+        The client side DatabaseManager::openDatabase() will call
+        DatabaseServer::openDatabase(), which then calls canEstablishDatabase()
+        to do its quota check. If there is enough quota,
+        DatabaseServer::openDatabase() will proceed to open the backend database
+        without return to the client first. The opened database will be returned
+        to the client.
+
+        If DatabaseServer::openDatabase() finds inadequate quota the first time,
+        it will return with a DatabaseSizeExceededQuota error. The DatabaseManager
+        (on the client side) will check for this error and call back to its client
+        for an opportunity to increase the quota. Thereafter, the DatabaseManager
+        will call DatabaseServer::openDatabase() again. This time,
+        DatabaseServer::openDatabase() will call retryCanEstablishDatabase() to
+        check the quota, and then open the backend database if there is enough
+        quota.
+
+        No new tests.
+
+        * Modules/webdatabase/AbstractDatabaseServer.h:
+        * Modules/webdatabase/DOMWindowWebDatabase.cpp:
+        (WebCore::DOMWindowWebDatabase::openDatabase):
+        * Modules/webdatabase/Database.cpp:
+        (WebCore::Database::create):
+        * Modules/webdatabase/Database.h:
+        (Database):
+        * Modules/webdatabase/DatabaseBackend.cpp:
+        (WebCore::DatabaseBackend::performOpenAndVerify):
+        * Modules/webdatabase/DatabaseBackend.h:
+        (DatabaseBackend):
+        * Modules/webdatabase/DatabaseBackendAsync.cpp:
+        (WebCore::DatabaseBackendAsync::openAndVerifyVersion):
+        (WebCore::DatabaseBackendAsync::performOpenAndVerify):
+        * Modules/webdatabase/DatabaseBackendAsync.h:
+        (DatabaseBackendAsync):
+        * Modules/webdatabase/DatabaseBackendSync.cpp:
+        (WebCore::DatabaseBackendSync::openAndVerifyVersion):
+        * Modules/webdatabase/DatabaseBackendSync.h:
+        (DatabaseBackendSync):
+        * Modules/webdatabase/DatabaseError.h:
+        (WebCore::ENUM_CLASS):
+        * Modules/webdatabase/DatabaseManager.cpp:
+        (WebCore::DatabaseManager::exceptionCodeForDatabaseError):
+        (WebCore::DatabaseManager::openDatabaseBackend):
+        (WebCore::DatabaseManager::openDatabase):
+        (WebCore::DatabaseManager::openDatabaseSync):
+        * Modules/webdatabase/DatabaseManager.h:
+        (DatabaseManager):
+        * Modules/webdatabase/DatabaseServer.cpp:
+        (WebCore::DatabaseServer::openDatabase):
+        (WebCore::DatabaseServer::createDatabase):
+        * Modules/webdatabase/DatabaseServer.h:
+        * Modules/webdatabase/DatabaseSync.cpp:
+        (WebCore::DatabaseSync::create):
+        * Modules/webdatabase/DatabaseSync.h:
+        (DatabaseSync):
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::hasAdequateQuotaForOrigin):
+        (WebCore::DatabaseTracker::canEstablishDatabase):
+        (WebCore::DatabaseTracker::retryCanEstablishDatabase):
+        * Modules/webdatabase/DatabaseTracker.h:
+        (DatabaseTracker):
+        * Modules/webdatabase/WorkerContextWebDatabase.cpp:
+        (WebCore::WorkerContextWebDatabase::openDatabase):
+        (WebCore::WorkerContextWebDatabase::openDatabaseSync):
+        * Modules/webdatabase/chromium/DatabaseTrackerChromium.cpp:
+        (WebCore::DatabaseTracker::canEstablishDatabase):
+        (WebCore::DatabaseTracker::retryCanEstablishDatabase):
+
 2013-02-06  Tony Gentilcore  <tonyg@chromium.org>
 
         Fix CompactHTMLToken's copy ctor to copy all fields
