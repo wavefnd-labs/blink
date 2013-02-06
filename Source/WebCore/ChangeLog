@@ -1,3 +1,29 @@
+2013-02-06  Levi Weintraub  <leviw@chromium.org>
+
+        Negative text indents can break RenderBlock's inline maximum preferred width calculation
+        https://bugs.webkit.org/show_bug.cgi?id=108973
+
+        Reviewed by Emil A Eklund.
+
+        Change two quirks about to how we calculate a block's inline preferred width with
+        text-indent.
+
+        First, re-use text-indent that's first applied to floats on text that follows it.
+        This matches Layout, as otherwise we can prematurely wrap text when there's a negative
+        margin on a block starting with a float. This also matches FireFox.
+
+        Second, correct how the max preferred width is calculated in the presence of a negative
+        text-indent. If the text-indent is more negative than the first text line break, we
+        update the value to be the remainder. Previously, we added this remaining negative value
+        to subsequent minimum and maximum preferred width calculations (until the remainder was
+        gone). This is wrong for the max preferred width, as we're adding the negative value more
+        than once, and leads to a max preferred width that's smaller than our line.
+
+        Test: fast/css/negative-text-indent-in-inline-block.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computeInlinePreferredLogicalWidths):
+
 2013-02-06  Mark Lam  <mark.lam@apple.com>
 
         Fix broken release builds, greening the bots.
