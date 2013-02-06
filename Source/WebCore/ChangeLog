@@ -1,3 +1,60 @@
+2013-02-05  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Read-only inputs should be focusable
+        https://bugs.webkit.org/show_bug.cgi?id=108795
+
+        Reviewed by Kentaro Hara.
+
+        According to the standard [1], readonly form controls should be focusable.
+
+        - Sub-fields should be focusable if they are read-only. We should check
+          isDisabled mainly.
+        - All keyboard operations should not be handled if a field is disabled,
+          and focus navigation keyboard operations should be handled even if a
+          field is read-only.
+
+        [1] http://www.whatwg.org/specs/web-apps/current-work/multipage/common-input-element-attributes.html#the-readonly-attribute
+
+        No new tests. Update
+        fast/forms/time-multiple-fields/time-multiple-fields-keyboard-events.html
+        for the new behavior.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isKeyboardFocusable):
+        Make <input> focusable even if it is read-only.
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditElement::isFieldOwnerDisabled):
+        Separate isFieldOwnerDisabledOrReadOnly into two.
+        (WebCore::DateTimeEditElement::isFieldOwnerReadOnly): Ditto.
+        (WebCore::DateTimeEditElement::updateUIState):
+        We don't need to focus out if this is read-only.
+        * html/shadow/DateTimeEditElement.h:
+        (DateTimeEditElement): Separate isFieldOwnerDisabledOrReadOnly into two.
+        * html/shadow/DateTimeFieldElement.cpp:
+        (WebCore::DateTimeFieldElement::defaultEventHandler):
+        Skip handleKeyboardEvent if the field is disabled or the owner input is
+        disabled or read-only. handleKeyboardEvent handles editing key
+        operations.
+        (WebCore::DateTimeFieldElement::defaultKeyboardEventHandler):
+        If this field is disabled or the owner input is disabled, all keyboard
+        inputs are ignored.
+        If this field is read-only, we handle only left and right arrows to
+        change focus, and skip down/up/backspace/del keys.
+        (WebCore::DateTimeFieldElement::isFieldOwnerDisabled):
+        A helper function to check disable state of the owner input.
+        (WebCore::DateTimeFieldElement::isFieldOwnerReadOnly):
+        A helper function to check read-only state of the owner input.
+        (WebCore::DateTimeFieldElement::isFocusable):
+        This field should be focusable if it is read-only and not disabled.
+        * html/shadow/DateTimeFieldElement.h:
+        (FieldOwner): Separate isFieldOwnerDisabledOrReadOnly into two.
+        (DateTimeFieldElement):
+        Declare isFieldOwnerDisabled and isFieldOwnerReadOnly.
+        * html/shadow/DateTimeNumericFieldElement.cpp:
+        (WebCore::DateTimeNumericFieldElement::handleKeyboardEvent):
+        Remove redundant isDisabled check. It is done in
+        DateTimeFieldElement::defaultEventHandler.
+
 2013-02-05  Eric Carlson  <eric.carlson@apple.com>
 
         [Mac] Complete plumbing so captions menu can indicate track type
