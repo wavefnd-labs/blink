@@ -1,3 +1,26 @@
+2013-02-06  Shawn Singh  <shawnsingh@chromium.org>
+
+        RenderLayer hasVisibleContent() has inconsistent semantics causing disappearing composited layers
+        https://bugs.webkit.org/show_bug.cgi?id=108118
+
+        Reviewed by Simon Fraser.
+
+        RenderLayerBacking::hasVisibleNonCompositingDescendantLayers was
+        only checking whether direct children had visible content. As a
+        result, composited layers had wrong visibility status if only a
+        deeper descendant RenderLayer was visible.
+
+        Test: compositing/visibility/visibility-on-distant-descendant.html
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::hasVisibleNonCompositingDescendant): copied the original
+        implementation into this function; then added the RenderLayer
+        recursion as appropriate.
+        (WebCore):
+        (WebCore::RenderLayerBacking::hasVisibleNonCompositingDescendantLayers):
+        This is now just a wrapper to the private static recursive
+        function.
+
 2013-02-06  Jonathon Jongsma  <jonathon.jongsma@collabora.com>
 
         [GStreamer] MediaPlayer's code is not easily reusable by other GStreamer-based players
