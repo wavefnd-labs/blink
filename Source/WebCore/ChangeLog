@@ -1,3 +1,49 @@
+2013-02-06  Uday Kiran  <udaykiran@motorola.com>
+
+        Implement 'vmax' from CSS3 values and units
+        https://bugs.webkit.org/show_bug.cgi?id=91440
+
+        Reviewed by Antti Koivisto.
+
+        vmax is implemented as primitive length unit.
+        New length type ViewportPercentageMax is added and included support for fetching the value
+        of this viewport percentage unit based on current viewport size.
+
+        The specification related to this implementation is
+        http://dev.w3.org/csswg/css3-values/#viewport-relative-lengths.
+
+        Tests: css3/viewport-percentage-lengths/css3-viewport-percentage-lengths-vmax-absolute.html
+               css3/viewport-percentage-lengths/css3-viewport-percentage-lengths-vmax.html
+
+        * css/CSSGrammar.y.in: Added vmax support.
+        * css/CSSParser.cpp: Parsing of vmax unit.
+        (WebCore::CSSParser::validUnit): Added vmax to valid units.
+        (WebCore::CSSParser::createPrimitiveNumericValue): Added vmax to primitive untis.
+        (WebCore::CSSParser::parseValidPrimitive): Creation of CSSPrimitive for vmax.
+        (WebCore::CSSParser::detectNumberToken): Parsing of vmax token.
+        * css/CSSParserValues.cpp:
+        (WebCore::CSSParserValue::createCSSValue): Added support for vmax.
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::isValidCSSUnitTypeForDoubleConversion): Added support for vmax.
+        (WebCore::unitCategory): Ditto.
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue): Ditto.
+        (WebCore::CSSPrimitiveValue::cleanup):
+        (WebCore::CSSPrimitiveValue::customCssText): Added support for vmax.
+        (WebCore::CSSPrimitiveValue::viewportPercentageLength): Function to create the Length structure for the viewport-percentage unit types.
+        (WebCore::CSSPrimitiveValue::cloneForCSSOM):
+        * css/CSSPrimitiveValue.h:
+        (WebCore::CSSPrimitiveValue::isViewportPercentageLength): Checks whether the primitive value is ViewportPercentage Length.
+        * css/CSSPrimitiveValue.idl: Added support for vmax.
+        * css/LengthFunctions.cpp: Calcuation of length value based on the current viewport size.
+        (WebCore::minimumValueForLength):
+        (WebCore::valueForLength):
+        (WebCore::floatValueForLength):
+        * platform/Length.h:
+        (WebCore::Length::isViewportPercentage): To check the Length is of type ViewportPercentage.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeReplacedLogicalWidthUsing):
+        (WebCore::RenderBox::computeReplacedLogicalHeightUsing):
+
 2013-02-06  Pravin D  <pravind.2k4@gmail.com>
 
         When a block element is made inline positioned and has static left and right,  it does not follow inline formatting context
