@@ -1,3 +1,85 @@
+2013-02-06  Jonathon Jongsma  <jonathon.jongsma@collabora.com>
+
+        [GStreamer] MediaPlayer's code is not easily reusable by other GStreamer-based players
+        https://bugs.webkit.org/show_bug.cgi?id=100261
+
+        Refactor the media player implementation so that more of the
+        internal functionality can be shared between the current media
+        backend and the mediastream player backend.  Common code is
+        broken out into a MediaPlayerPrivateGStreamerBase class, and
+        both MediaPlayerPrivateGStreamer and
+        StreamMediaPlayerPrivateGStreamer inherit from this base class.
+
+        Reviewed by Philippe Normand
+
+        No new tests since functionality is covered by existing media tests
+
+        * GNUmakefile.list.am:
+        * PlatformEfl.cmake:
+        * Target.pri:
+        * platform/graphics/gstreamer/FullscreenVideoControllerGStreamer.cpp:
+        (WebCore::FullscreenVideoControllerGStreamer::create):
+        (WebCore::FullscreenVideoControllerGStreamer::FullscreenVideoControllerGStreamer):
+        * platform/graphics/gstreamer/FullscreenVideoControllerGStreamer.h:
+        (WebCore):
+        (FullscreenVideoControllerGStreamer):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h:
+        (MediaPlayerPrivateGStreamer):
+        (WebCore::MediaPlayerPrivateGStreamer::isLiveStream):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp: Added.
+        (WebCore):
+        (WebCore::greatestCommonDivisor):
+        (WebCore::mediaPlayerPrivateVolumeChangedCallback):
+        (WebCore::mediaPlayerPrivateVolumeChangeTimeoutCallback):
+        (WebCore::mediaPlayerPrivateMuteChangedCallback):
+        (WebCore::mediaPlayerPrivateMuteChangeTimeoutCallback):
+        (WebCore::mediaPlayerPrivateRepaintCallback):
+        (WebCore::MediaPlayerPrivateGStreamerBase::MediaPlayerPrivateGStreamerBase):
+        (WebCore::MediaPlayerPrivateGStreamerBase::~MediaPlayerPrivateGStreamerBase):
+        (WebCore::MediaPlayerPrivateGStreamerBase::naturalSize):
+        (WebCore::MediaPlayerPrivateGStreamerBase::setVolume):
+        (WebCore::MediaPlayerPrivateGStreamerBase::volume):
+        (WebCore::MediaPlayerPrivateGStreamerBase::notifyPlayerOfVolumeChange):
+        (WebCore::MediaPlayerPrivateGStreamerBase::volumeChanged):
+        (WebCore::MediaPlayerPrivateGStreamerBase::networkState):
+        (WebCore::MediaPlayerPrivateGStreamerBase::readyState):
+        (WebCore::MediaPlayerPrivateGStreamerBase::sizeChanged):
+        (WebCore::MediaPlayerPrivateGStreamerBase::setMuted):
+        (WebCore::MediaPlayerPrivateGStreamerBase::muted):
+        (WebCore::MediaPlayerPrivateGStreamerBase::notifyPlayerOfMute):
+        (WebCore::MediaPlayerPrivateGStreamerBase::muteChanged):
+        (WebCore::MediaPlayerPrivateGStreamerBase::triggerRepaint):
+        (WebCore::MediaPlayerPrivateGStreamerBase::setSize):
+        (WebCore::MediaPlayerPrivateGStreamerBase::paint):
+        (WebCore::MediaPlayerPrivateGStreamerBase::enterFullscreen):
+        (WebCore::MediaPlayerPrivateGStreamerBase::exitFullscreen):
+        (WebCore::MediaPlayerPrivateGStreamerBase::supportsFullscreen):
+        (WebCore::MediaPlayerPrivateGStreamerBase::platformMedia):
+        (WebCore::MediaPlayerPrivateGStreamerBase::movieLoadType):
+        (WebCore::MediaPlayerPrivateGStreamerBase::createVideoSink):
+        (WebCore::MediaPlayerPrivateGStreamerBase::setStreamVolumeElement):
+        (WebCore::MediaPlayerPrivateGStreamerBase::decodedFrameCount):
+        (WebCore::MediaPlayerPrivateGStreamerBase::droppedFrameCount):
+        (WebCore::MediaPlayerPrivateGStreamerBase::audioDecodedByteCount):
+        (WebCore::MediaPlayerPrivateGStreamerBase::videoDecodedByteCount):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.h: Added.
+        (WebCore):
+        (MediaPlayerPrivateGStreamerBase):
+        (WebCore::MediaPlayerPrivateGStreamerBase::supportsMuting):
+        (WebCore::MediaPlayerPrivateGStreamerBase::setVisible):
+        (WebCore::MediaPlayerPrivateGStreamerBase::hasSingleSecurityOrigin):
+        (WebCore::MediaPlayerPrivateGStreamerBase::maxTimeLoaded):
+        (WebCore::MediaPlayerPrivateGStreamerBase::canEnterFullscreen):
+        (WebCore::MediaPlayerPrivateGStreamerBase::mediaPlayer):
+        (WebCore::MediaPlayerPrivateGStreamerBase::audioSink):
+        * platform/graphics/gtk/FullscreenVideoControllerGtk.cpp:
+        (WebCore::FullscreenVideoControllerGtk::FullscreenVideoControllerGtk):
+        * platform/graphics/gtk/FullscreenVideoControllerGtk.h:
+        (FullscreenVideoControllerGtk):
+
 2013-02-06  Tony Gentilcore  <tonyg@chromium.org>
 
         Call XSSAuditor's didBlockScript() for the threaded HTML parser
