@@ -1,3 +1,53 @@
+2013-02-07  Tony Gentilcore  <tonyg@chromium.org>
+
+        Call XSSAuditor.filterToken() from threaded HTML parser
+        https://bugs.webkit.org/show_bug.cgi?id=107603
+
+        Reviewed by Adam Barth.
+
+        With this patch we now pass 180 of 182 tests in http/tests/security/xssAuditor.
+
+        We do this by creating aan XSSAuditor on the main thread and passing ownership of them to the BackgroundHTMLParser upon its creation.
+
+        Then the background thread calls filterToken() and stores the resulting XSSInfo (if any) on the CompactHTMLToken for the main thread to handle.
+
+        This involved trimming the XSSAuditor to only depend on the TextEncoding instead of the whole TextResourceDecoder.
+
+        No new tests because covered by existing tests.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::BackgroundHTMLParser):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (WebCore::BackgroundHTMLParser::createPartial):
+        * html/parser/BackgroundHTMLParser.h:
+        (WebCore):
+        (WebCore::BackgroundHTMLParser::create):
+        (BackgroundHTMLParser):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+        (WebCore::HTMLDocumentParser::startBackgroundParser):
+        * html/parser/HTMLSourceTracker.cpp:
+        (WebCore::HTMLSourceTracker::start):
+        (WebCore::HTMLSourceTracker::end):
+        * html/parser/HTMLSourceTracker.h: Change the HTMLInputStream args to SegmentedString because the background thread only has a BackgroundHTMLInputStream.
+        (HTMLSourceTracker):
+        * html/parser/HTMLViewSourceParser.cpp:
+        (WebCore::HTMLViewSourceParser::pumpTokenizer):
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::fullyDecodeString):
+        (WebCore::XSSAuditor::XSSAuditor):
+        (WebCore::XSSAuditor::init): Copies necessary to make isSafeToSendToAnotherThread() happy.
+        (WebCore::XSSAuditor::decodedSnippetForName):
+        (WebCore::XSSAuditor::decodedSnippetForAttribute):
+        (WebCore::XSSAuditor::decodedSnippetForJavaScript):
+        (WebCore::XSSAuditor::isSafeToSendToAnotherThread): Check that all String and KURL members are safe to send to another thread.
+        (WebCore):
+        * html/parser/XSSAuditor.h:
+        (WebCore):
+        (WebCore::FilterTokenRequest::FilterTokenRequest):
+        (FilterTokenRequest):
+        (XSSAuditor):
+
 2013-02-07  ChangSeok Oh  <shivamidow@gmail.com>
 
         [GTK][AC] Implement opacity animation with clutter ac backend
