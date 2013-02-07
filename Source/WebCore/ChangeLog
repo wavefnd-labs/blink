@@ -1,3 +1,30 @@
+2013-02-07  Kent Tamura  <tkent@chromium.org>
+
+        Conversion from localized numbers to HTML numbers should accept not only localized numbers but also HTML numbers
+        https://bugs.webkit.org/show_bug.cgi?id=109160
+
+        Reviewed by Kentaro Hara.
+
+        For example, A French user needs to specify a number to a number input
+        field. He might use a local decimal point, like 3,141592, or he might
+        use the standard decimal point like 3.141592. We had better accept both
+        of them.
+
+        We accepted both last year, but we changed the behavior so that we
+        accept only localized numbers because we had some cases where an input
+        string can be recognized as both of a localized number and the standard
+        number. e.g. 3.141 is 3141 in French locale and 3.141 in the
+        standard. Now we introduce a simple rule that we don't accept group
+        separator at all. So users won't confuse even if we accept both of
+        decimal points.
+
+        Test: fast/forms/number/number-l10n-input.html
+
+        * platform/text/PlatformLocale.cpp:
+        (WebCore::Locale::convertFromLocalizedNumber):
+        If the specified string contains invalid characters including group
+        separators, just return the specified string.
+
 2013-02-07  Xiaobo Wang  <xbwang@torchmobile.com.cn>
 
         [BlackBerry] CHHW - Characters that are using 32 bits encoding get trunked to 16bits
