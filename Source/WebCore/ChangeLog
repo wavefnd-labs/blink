@@ -1,3 +1,32 @@
+2013-02-07  Stephen Chenney  <schenney@chromium.org>
+
+        GraphicsContext::drawImageBuffer is inefficient
+        https://bugs.webkit.org/show_bug.cgi?id=104367
+
+        Reviewed by Dirk Schulze.
+
+        This patch converts all of the drawImage and drawImageBuffer
+        convenience methods (those that take parameters of various types) to
+        invoke the implementing method (that takes FloatRect src and dest)
+        directly, rather than through the next-most-convenient method as was
+        done previously. This will knock some layers off the stack compared
+        to the existing code, and may remove one or two constructor invocations.
+        This may be slightly more efficient, and also makes debugging simpler.
+
+        Also removes the unused drawImage method that takes and IntRect source
+        area and IntRect destination. It is not invoked anywhere in a standard
+        WebKit checkout.
+
+        No new tests. No change in functionality, just refactoring.
+
+        * platform/graphics/GraphicsContext.cpp:
+        (WebCore::GraphicsContext::drawImage): Modify all the convenience versions to call
+        the implementing version directly.
+        (WebCore::GraphicsContext::drawImageBuffer): Modify all the convenience versions
+        to call the implementing version directly.
+        * platform/graphics/GraphicsContext.h:
+        (GraphicsContext): Remove IntRect, IntRect version of drawImage.
+
 2013-02-07  Kent Tamura  <tkent@chromium.org>
 
         Conversion from localized numbers to HTML numbers should accept not only localized numbers but also HTML numbers
