@@ -1,5 +1,41 @@
 2013-02-06  Ojan Vafai  <ojan@chromium.org>
 
+        [Chromium] table-section-overflow-clip-crash.html hits an assert
+        https://bugs.webkit.org/show_bug.cgi?id=108594
+
+        Reviewed by Levi Weintraub.
+
+        When a counter calls setNeedsLayout, it also marks it's containing blocks
+        as needing layout, so we need to clear the setNeedsLayoutIsForbidden bit on the
+        containing blocks as well as the counter itself.
+
+        Also, use RAII objects for all the places where we clear this bit and make
+        the setter/getter for it private to RenderObject.
+
+        * rendering/RenderCounter.cpp:
+        (WebCore::RenderCounter::computePreferredLogicalWidths):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::SetLayoutNeededForbiddenScope::SetLayoutNeededForbiddenScope):
+        (WebCore::RenderObject::markContainingBlocksForLayout):
+        * rendering/RenderObject.h:
+        (SetLayoutNeededForbiddenScope):
+        (RenderObject):
+        (WebCore::RenderObject::isSetNeedsLayoutForbidden):
+        (WebCore::RenderObject::setNeedsLayoutIsForbidden):
+        * rendering/RenderQuote.cpp:
+        (WebCore::RenderQuote::computePreferredLogicalWidths):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight):
+        (WebCore::RenderTableSection::layoutRows):
+        * rendering/mathml/RenderMathMLOperator.cpp:
+        (WebCore::RenderMathMLOperator::computePreferredLogicalWidths):
+        * rendering/mathml/RenderMathMLRoot.cpp:
+        (WebCore::RenderMathMLRoot::computePreferredLogicalWidths):
+        * rendering/mathml/RenderMathMLRow.cpp:
+        (WebCore::RenderMathMLRow::computePreferredLogicalWidths):
+
+2013-02-06  Ojan Vafai  <ojan@chromium.org>
+
         display:none file upload button crashes
         https://bugs.webkit.org/show_bug.cgi?id=109102
 
