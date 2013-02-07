@@ -1,3 +1,25 @@
+2013-02-07  Terry Anderson  <tdanderson@chromium.org>
+
+        Non-scrollable divs and non-scrollable iframes can scroll with touch
+        https://bugs.webkit.org/show_bug.cgi?id=109087
+
+        Reviewed by Eric Seidel.
+
+        Tests: fast/events/touch/gesture/touch-gesture-noscroll-div.html
+               fast/events/touch/gesture/touch-gesture-noscroll-iframe.html
+
+        When finding a candidate for a scrollable node in
+        EventHandler::handleGestureScrollUpdate(), select the document node
+        if it is reached before any scrollable element when walking up the DOM
+        tree. Also ensure that calling RenderLayer::scrollBy() for a document
+        node does not result in scrolling if the element is not scrollable.
+
+        * page/EventHandler.cpp:
+        (WebCore::closestScrollableNodeCandidate):
+        (WebCore::EventHandler::handleGestureScrollUpdate):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::scrollBy):
+
 2013-02-07  Mark Lam  <mark.lam@apple.com>
 
         Introduce SQLTransactionBackend and SQLTransactionBackendSync [Part 2].
