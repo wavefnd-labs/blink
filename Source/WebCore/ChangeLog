@@ -1,3 +1,63 @@
+2013-02-07  Peter Rybin  <prybin@chromium.org>
+
+        Web Inspector: support JavaScript variable mutation in protocol and V8 bindings
+        https://bugs.webkit.org/show_bug.cgi?id=107829
+
+        A new command is added to protocol description and the call is passed through
+        debugger agent through injected script and debugger script down to V8 mirror
+        API. JSC bindings got a thorw exception stub.
+
+        Only declarative JavaScript scopes are supported (local, closure, catch). Other
+        scopes (global, with) are not supported by V8 and not supported by protocol, because
+        manual approach (direct property assigment) is available for them in form of evaluate
+        commands and is more desirable because of a complex nature of operation (it can throw
+        exception in several cases such as exception in setter function).
+
+        Reviewed by Pavel Feldman.
+
+        Test: inspector-protocol/debugger-setVariableValue.html
+
+        * bindings/js/JSInjectedScriptHostCustom.cpp:
+        (WebCore::JSInjectedScriptHost::setFunctionVariableValue):
+        (WebCore):
+        * bindings/js/JSJavaScriptCallFrameCustom.cpp:
+        (WebCore::JSJavaScriptCallFrame::setVariableValue):
+        (WebCore):
+        * bindings/v8/DebuggerScript.js:
+        (.):
+        * bindings/v8/JavaScriptCallFrame.cpp:
+        (WebCore::JavaScriptCallFrame::setVariableValue):
+        (WebCore):
+        * bindings/v8/JavaScriptCallFrame.h:
+        (JavaScriptCallFrame):
+        * bindings/v8/ScriptDebugServer.cpp:
+        (WebCore::ScriptDebugServer::setFunctionVariableValue):
+        (WebCore):
+        * bindings/v8/ScriptDebugServer.h:
+        (ScriptDebugServer):
+        * bindings/v8/custom/V8InjectedScriptHostCustom.cpp:
+        (WebCore::V8InjectedScriptHost::setFunctionVariableValueCallback):
+        (WebCore):
+        * bindings/v8/custom/V8JavaScriptCallFrameCustom.cpp:
+        (WebCore::V8JavaScriptCallFrame::setVariableValueCallback):
+        (WebCore):
+        * inspector/InjectedScript.cpp:
+        (WebCore::InjectedScript::setVariableValue):
+        (WebCore):
+        * inspector/InjectedScript.h:
+        (InjectedScript):
+        * inspector/InjectedScriptHost.idl:
+        * inspector/InjectedScriptSource.js:
+        (.):
+        * inspector/Inspector.json:
+        * inspector/InspectorDebuggerAgent.cpp:
+        (WebCore::InspectorDebuggerAgent::getFunctionDetails):
+        (WebCore::InspectorDebuggerAgent::setVariableValue):
+        (WebCore):
+        * inspector/InspectorDebuggerAgent.h:
+        (InspectorDebuggerAgent):
+        * inspector/JavaScriptCallFrame.idl:
+
 2013-02-07  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
 
         [CoordinatedGraphics] Use ScrollingCoordinator to track fixed layers
