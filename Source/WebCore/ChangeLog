@@ -1,3 +1,43 @@
+2013-02-06  Mike West  <mkwst@chromium.org>
+
+        Entity-header extension headers honored on 304 responses.
+        https://bugs.webkit.org/show_bug.cgi?id=72414
+
+        Reviewed by Alexey Proskuryakov.
+
+        This patch ports Chromium's network stack logic governing header
+        updates after resource revalidation. Generally, headers sent with 304
+        responses ought to update the original cached resource's headers.
+        Certain headers should never be sent with 304 responses, and we should
+        ignore them if a misconfigured server sends them anyway.
+
+        Currently, WebCore ignores all headers prefixed with 'content-'. This
+        patch adds 'x-content-' and 'x-webkit-' to the list, as well as specific
+        headers like 'upgrade', 'trailer', and others that the Chromium network
+        stack currently ignores.
+
+        The tests verify that those headers with visible effect are correctly
+        handled: 'x-frame-options', 'content-security-policy', and
+        'x-xss-protection'.
+
+        Tests: http/tests/security/XFrameOptions/x-frame-options-cached.html
+               http/tests/security/contentSecurityPolicy/cached-frame-csp.html
+               http/tests/security/xssAuditor/cached-frame.html
+
+        * loader/cache/CachedResource.cpp:
+        (WebCore):
+        (WebCore::CachedResource::updateResponseAfterRevalidation):
+            This patch adds two arrays containing the specific headers to
+            ignore and the prefixes to ignore. These lists are processed in
+            shouldUpdateHeaderAfterRevalidation.
+            CachedResource::updateResponseAfterRevalidation relies on this new
+            method when processing revalidated resources.
+
+        * loader/cache/CachedResource.cpp:
+        (WebCore):
+        (WebCore::shouldUpdateHeaderAfterRevalidation):
+        (WebCore::CachedResource::updateResponseAfterRevalidation):
+
 2013-02-06  Tom Sepez  <tsepez@chromium.org>
 
         document.referrer leakage with XSS Auditor page block
