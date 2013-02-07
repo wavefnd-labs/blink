@@ -1,3 +1,66 @@
+2013-02-06  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: Native Memory Instrumentation: reduce native heap snapshot runtime memory footprint
+        https://bugs.webkit.org/show_bug.cgi?id=108824
+
+        Reviewed by Yury Semikhatsky.
+
+        New event was added into Memory domain addNativeSnapshotChunk.
+        The content of HeapGraphSerializer is completely rewritten according to new API.
+        Now it collects strings, nodes, edges and id2id map and pushes when the collected items count exceed a limit.
+        On the frontend side I added new method for the new event and fixed the postprocessing step.
+        MemoryInstrumentation was slightly changed. Now it reports base to real address map only after reporting the node with real address.
+
+        * inspector/HeapGraphSerializer.cpp:
+        (WebCore::HeapGraphSerializer::HeapGraphSerializer):
+        (WebCore::HeapGraphSerializer::pushUpdateIfNeed):
+        (WebCore):
+        (WebCore::HeapGraphSerializer::pushUpdate):
+        (WebCore::HeapGraphSerializer::reportNode):
+        (WebCore::HeapGraphSerializer::reportNodeImpl):
+        (WebCore::HeapGraphSerializer::reportEdge):
+        (WebCore::HeapGraphSerializer::reportEdgeImpl):
+        (WebCore::HeapGraphSerializer::reportLeaf):
+        (WebCore::HeapGraphSerializer::reportBaseAddress):
+        (WebCore::HeapGraphSerializer::finish):
+        (WebCore::HeapGraphSerializer::reportMemoryUsage):
+        (WebCore::HeapGraphSerializer::addString):
+        (WebCore::HeapGraphSerializer::toNodeId):
+        (WebCore::HeapGraphSerializer::addRootNode):
+        * inspector/HeapGraphSerializer.h:
+        (HeapGraphSerializer):
+        * inspector/Inspector.json:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::processMemoryDistribution):
+        * inspector/InspectorMemoryAgent.cpp:
+        (WebCore::InspectorMemoryAgent::getProcessMemoryDistributionMap):
+        (WebCore):
+        (WebCore::InspectorMemoryAgent::getProcessMemoryDistribution):
+        (WebCore::InspectorMemoryAgent::getProcessMemoryDistributionImpl):
+        (WebCore::InspectorMemoryAgent::setFrontend):
+        (WebCore::InspectorMemoryAgent::clearFrontend):
+        * inspector/InspectorMemoryAgent.h:
+        (InspectorMemoryAgent):
+        * inspector/front-end/NativeHeapSnapshot.js:
+        (WebInspector.NativeHeapSnapshot):
+        (WebInspector.NativeHeapSnapshotNode.prototype.classIndex):
+        (WebInspector.NativeHeapSnapshotNode.prototype.id):
+        (WebInspector.NativeHeapSnapshotNode.prototype.name):
+        (WebInspector.NativeHeapSnapshotNode.prototype.serialize):
+        * inspector/front-end/NativeMemorySnapshotView.js:
+        (WebInspector.NativeSnapshotProfileType.prototype.buttonClicked.didReceiveMemorySnapshot):
+        (WebInspector.NativeSnapshotProfileType.prototype.buttonClicked):
+        (WebInspector.NativeSnapshotProfileHeader):
+        (WebInspector.NativeSnapshotProfileHeader.prototype.startSnapshotTransfer):
+        (WebInspector.NativeSnapshotProfileHeader.prototype.addNativeSnapshotChunk):
+        (WebInspector.NativeMemoryProfileType.prototype.buttonClicked.didReceiveMemorySnapshot):
+        (WebInspector.NativeMemoryProfileType.prototype.buttonClicked):
+        (WebInspector.NativeMemoryBarChart.prototype._updateStats):
+        * inspector/front-end/ProfilesPanel.js:
+        (WebInspector.ProfilesPanel):
+        (WebInspector.MemoryDispatcher):
+        (WebInspector.MemoryDispatcher.prototype.addNativeSnapshotChunk):
+
 2013-02-03  Kentaro Hara  <haraken@chromium.org>
 
         WebKit's focus events are UIEvents (instead of FocusEvent) and thus don't expose .relatedTarget
