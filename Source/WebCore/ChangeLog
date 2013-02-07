@@ -1,3 +1,47 @@
+2013-02-03  Kentaro Hara  <haraken@chromium.org>
+
+        WebKit's focus events are UIEvents (instead of FocusEvent) and thus don't expose .relatedTarget
+        https://bugs.webkit.org/show_bug.cgi?id=76216
+
+        Reviewed by Eric Seidel.
+
+        Spec: http://www.w3.org/TR/DOM-Level-3-Events/#events-FocusEvent
+
+        This patch creates a new FocusEvent class with a relatedTarget attribute.
+        Now when focusin or focusout events are dispatched, a FocusEvent is created with
+        the relatedTarget attribute set accordingly.
+
+        Test: fast/events/related-target-focusevent.html
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/DOMAllInOne.cpp:
+        * dom/Event.cpp:
+        (WebCore::Event::isFocusEvent):
+        (WebCore):
+        * dom/Event.h:
+        (Event):
+        * dom/EventContext.cpp:
+        (WebCore::EventContext::handleLocalEvents):
+        * dom/EventNames.in:
+        * dom/FocusEvent.h: Added.
+        (WebCore):
+        (FocusEvent):
+        (WebCore::FocusEvent::create):
+        (WebCore::FocusEvent::relatedTarget):
+        (WebCore::FocusEvent::setRelatedTarget):
+        (WebCore::toFocusEvent):
+        * dom/FocusEvent.idl: Added.
+        * dom/Node.cpp:
+        (WebCore::Node::dispatchFocusInEvent):
+        (WebCore::Node::dispatchFocusOutEvent):
+
 2013-02-06  Kent Tamura  <tkent@chromium.org>
 
         Fix style of RenderTheme.cpp and RenderThemeChromiumWin.h
