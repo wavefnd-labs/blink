@@ -1,3 +1,102 @@
+2013-02-07  Mark Lam  <mark.lam@apple.com>
+
+        Introduce SQLTransactionBackend and SQLTransactionBackendSync.
+        https://bugs.webkit.org/show_bug.cgi?id=109109.
+
+        Reviewed by Anders Carlsson.
+
+        - Renamed SQLTransaction and SQLTransactionSync to SQLTransactionBackend
+          and SQLTransactionBackendSync respectively.
+        - Added back SQLTransaction and SQLTransactionSync as new files, and have
+          their classes extends their respective backends. This is a stop gap
+          measure to keep things working until the front-end and back-end can be
+          properly split.
+          Note: these files will be committed in a subsequent commit to ensure
+          that the patching goes smoothly.
+        - Where needed, I made use of new SQLTransaction::from() and
+          SQLTransactionSync::from() static methods that "get" the front-end
+          transactions from the back-ends. This is also a stop gap measure to
+          keep things working until the proper refactoring is complete.
+        - Fixed up pre-existing style checker violations that are now detected
+          on code that were touched during my renaming.
+        - Added the back-end files to all the build files.
+
+        No new tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase/Database.cpp:
+        (WebCore::Database::scheduleTransactionStep):
+        * Modules/webdatabase/Database.h:
+        (Database):
+        * Modules/webdatabase/DatabaseBackend.h:
+        (DatabaseBackend):
+        * Modules/webdatabase/DatabaseTask.cpp:
+        (WebCore::DatabaseBackendAsync::DatabaseTransactionTask::DatabaseTransactionTask):
+        * Modules/webdatabase/DatabaseTask.h:
+        (WebCore::DatabaseBackendAsync::DatabaseTransactionTask::create):
+        (WebCore::DatabaseBackendAsync::DatabaseTransactionTask::transaction):
+        (DatabaseBackendAsync::DatabaseTransactionTask):
+        * Modules/webdatabase/SQLTransaction.cpp: Removed.
+        * Modules/webdatabase/SQLTransaction.h: Removed.
+        * Modules/webdatabase/SQLTransactionBackend.cpp: Copied from Source/WebCore/Modules/webdatabase/SQLTransaction.cpp.
+        (WebCore::SQLTransactionBackend::SQLTransactionBackend):
+        (WebCore::SQLTransactionBackend::~SQLTransactionBackend):
+        (WebCore::SQLTransactionBackend::executeSQL):
+        (WebCore::SQLTransactionBackend::enqueueStatement):
+        (WebCore::SQLTransactionBackend::debugStepName):
+        (WebCore::SQLTransactionBackend::checkAndHandleClosedOrInterruptedDatabase):
+        (WebCore::SQLTransactionBackend::performNextStep):
+        (WebCore::SQLTransactionBackend::performPendingCallback):
+        (WebCore::SQLTransactionBackend::notifyDatabaseThreadIsShuttingDown):
+        (WebCore::SQLTransactionBackend::acquireLock):
+        (WebCore::SQLTransactionBackend::lockAcquired):
+        (WebCore::SQLTransactionBackend::openTransactionAndPreflight):
+        (WebCore::SQLTransactionBackend::deliverTransactionCallback):
+        (WebCore::SQLTransactionBackend::scheduleToRunStatements):
+        (WebCore::SQLTransactionBackend::runStatements):
+        (WebCore::SQLTransactionBackend::getNextStatement):
+        (WebCore::SQLTransactionBackend::runCurrentStatement):
+        (WebCore::SQLTransactionBackend::handleCurrentStatementError):
+        (WebCore::SQLTransactionBackend::deliverStatementCallback):
+        (WebCore::SQLTransactionBackend::deliverQuotaIncreaseCallback):
+        (WebCore::SQLTransactionBackend::postflightAndCommit):
+        (WebCore::SQLTransactionBackend::deliverSuccessCallback):
+        (WebCore::SQLTransactionBackend::cleanupAfterSuccessCallback):
+        (WebCore::SQLTransactionBackend::handleTransactionError):
+        (WebCore::SQLTransactionBackend::deliverTransactionErrorCallback):
+        (WebCore::SQLTransactionBackend::cleanupAfterTransactionErrorCallback):
+        * Modules/webdatabase/SQLTransactionBackend.h: Copied from Source/WebCore/Modules/webdatabase/SQLTransaction.h.
+        (SQLTransactionBackend):
+        * Modules/webdatabase/SQLTransactionBackendSync.cpp: Copied from Source/WebCore/Modules/webdatabase/SQLTransactionSync.cpp.
+        (WebCore::SQLTransactionBackendSync::SQLTransactionBackendSync):
+        (WebCore::SQLTransactionBackendSync::~SQLTransactionBackendSync):
+        (WebCore::SQLTransactionBackendSync::executeSQL):
+        (WebCore::SQLTransactionBackendSync::begin):
+        (WebCore::SQLTransactionBackendSync::execute):
+        (WebCore::SQLTransactionBackendSync::commit):
+        (WebCore::SQLTransactionBackendSync::rollback):
+        * Modules/webdatabase/SQLTransactionBackendSync.h: Copied from Source/WebCore/Modules/webdatabase/SQLTransactionSync.h.
+        (SQLTransactionBackendSync):
+        * Modules/webdatabase/SQLTransactionCoordinator.cpp:
+        (WebCore::getDatabaseIdentifier):
+        (WebCore::SQLTransactionCoordinator::processPendingTransactions):
+        (WebCore::SQLTransactionCoordinator::acquireLock):
+        (WebCore::SQLTransactionCoordinator::releaseLock):
+        (WebCore::SQLTransactionCoordinator::shutdown):
+        * Modules/webdatabase/SQLTransactionCoordinator.h:
+        (SQLTransactionCoordinator):
+        (WebCore::SQLTransactionCoordinator::SQLTransactionCoordinator):
+        (CoordinationInfo):
+        * Modules/webdatabase/SQLTransactionSync.cpp: Removed.
+        * Modules/webdatabase/SQLTransactionSync.h: Removed.
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+
 2013-02-07  Dean Jackson  <dino@apple.com>
 
         Use new speech bubble artwork for captions menu button
