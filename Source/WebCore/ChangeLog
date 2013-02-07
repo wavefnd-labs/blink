@@ -1,3 +1,26 @@
+2013-02-07  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] StringCache::m_stringCache should be HashMap<StringImpl*, Persistent<String>>
+        https://bugs.webkit.org/show_bug.cgi?id=109123
+
+        Reviewed by Adam Barth.
+
+        Currently StringCache::m_stringCache is implemented as
+        HashMap<StringImpl*, v8::String*>. Given that v8::String*
+        can change when a GC is triggered, it is dangerous to store a raw pointer.
+        We should use HashMap<StringImpl*, v8::Persistent<v8::String>> instead.
+
+        This is a possible fix for an IndexedDB crash (https://bugs.webkit.org/show_bug.cgi?id=105363),
+        although I'm not sure if this patch fixes the crash. (I couldn't reproduce the crash.)
+
+        No tests. This change highly depends on GC behavior and thus it is
+        difficult to make a reliable test case.
+
+        * bindings/v8/V8ValueCache.cpp:
+        (WebCore::makeExternalString):
+        * bindings/v8/V8ValueCache.h:
+        (StringCache):
+
 2013-01-27  Robert Hogan  <robert@webkit.org>
 
         CSS 2.1 failure: floats-149 fails
