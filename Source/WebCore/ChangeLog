@@ -1,3 +1,43 @@
+2013-02-07  Bear Travis  <betravis@adobe.com>
+
+        [CSS Exclusions] shape-inside does not properly handle padding or border
+        https://bugs.webkit.org/show_bug.cgi?id=102715
+
+        Reviewed by David Hyatt.
+
+        This patch positions the exclusion shape based on the value of the css box sizing
+        property. Geometry calculations happen in the shape coordinate space. For layout,
+        these coordinates are translated to the border-box coordinate system by adding
+        the appropriate offsets.
+
+        Test: fast/exclusions/shape-inside/shape-inside-box-sizing.html
+
+        * rendering/ExclusionShapeInfo.cpp:
+        (WebCore::::computedShape): Pass m_shapeLogicalWidth to the exclusion shape
+        geometry code.
+        * rendering/ExclusionShapeInfo.h:
+        (WebCore::ExclusionShapeInfo::setShapeSize): Adjust block layout dimensions to
+        shape dimensions when checking to see if the shape geometry must be recalculated.
+        (WebCore::ExclusionShapeInfo::shapeLogicalTop): Account for layout offsets.
+        (WebCore::ExclusionShapeInfo::shapeLogicalBottom): Ditto.
+        (WebCore::ExclusionShapeInfo::shapeLogicalLeft): Ditto.
+        (WebCore::ExclusionShapeInfo::shapeLogicalRight): Ditto.
+        (WebCore::ExclusionShapeInfo::logicalTopOffset): Return the offset from the logical
+        top of the border box to the logical top of the shape.
+        (WebCore::ExclusionShapeInfo::logicalLeftOffset): Return the offset from the logical
+        left of the border box to the logical left of the shape.
+        (ExclusionShapeInfo):
+        * rendering/ExclusionShapeInsideInfo.cpp:
+        (WebCore::ExclusionShapeInsideInfo::computeSegmentsForLine): Adjust line top to
+        be in shape coordinates.
+        (WebCore::ExclusionShapeInsideInfo::adjustLogicalLineTop): Ditto.
+        * rendering/ExclusionShapeInsideInfo.h:
+        (WebCore::ExclusionShapeInsideInfo::lineOverlapsShapeBounds): Use consistent
+        coordinate system (border box) to test for whether a line overlaps a shape.
+        (WebCore::ExclusionShapeInsideInfo::logicalLineTop): Include the logical offset
+        from the border box.
+        (WebCore::ExclusionShapeInsideInfo::logicalLineBottom): Ditto.
+
 2013-02-07  Benjamin Poulain  <bpoulain@apple.com>
 
         Upstream iOS isWebThread() and isUIThread()
