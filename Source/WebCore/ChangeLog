@@ -1,3 +1,46 @@
+2013-02-07  Vivek Galatage  <vivek.vg@samsung.com>
+
+        Web Inspector: CPU pegged when inspecting LocalStorage that mutates.
+        https://bugs.webkit.org/show_bug.cgi?id=107937
+
+        Reviewed by Yury Semikhatsky.
+
+        The DOM storage agent will fire an event to the frontend based on the action
+        performed on the storage. Based on this action, the front-end will just add/update/remove
+        the entry in the view. This enhances the front-end responsiveness as the round trip
+        for fetching the storage entries has been eliminated.
+
+        Existing test: LayoutTests/inspector/storage-panel-dom-storage-update.html should verify the change
+
+        * inspector/Inspector.json:
+        * inspector/InspectorDOMStorageAgent.cpp:
+        (WebCore::InspectorDOMStorageAgent::didDispatchDOMStorageEvent):
+        * inspector/front-end/DOMStorage.js:
+        (WebInspector.DOMStorageModel.prototype._domStorageItemsCleared):
+        (WebInspector.DOMStorageModel.prototype._domStorageItemRemoved):
+        (WebInspector.DOMStorageModel.prototype._domStorageItemAdded):
+        (WebInspector.DOMStorageModel.prototype._domStorageItemUpdated):
+        (WebInspector.DOMStorageDispatcher.prototype.domStorageItemsCleared):
+        (WebInspector.DOMStorageDispatcher.prototype.domStorageItemRemoved):
+        (WebInspector.DOMStorageDispatcher.prototype.domStorageItemAdded):
+        (WebInspector.DOMStorageDispatcher.prototype.domStorageItemUpdated):
+        * inspector/front-end/DOMStorageItemsView.js:
+        (WebInspector.DOMStorageItemsView):
+        (WebInspector.DOMStorageItemsView.prototype.wasShown):
+        (WebInspector.DOMStorageItemsView.prototype._domStorageItemsCleared):
+        (WebInspector.DOMStorageItemsView.prototype._domStorageItemRemoved):
+        (WebInspector.DOMStorageItemsView.prototype._domStorageItemAdded):
+        (WebInspector.DOMStorageItemsView.prototype._domStorageItemUpdated):
+        (WebInspector.DOMStorageItemsView.prototype._update):
+        (WebInspector.DOMStorageItemsView.prototype._showDOMStorageEntries):
+        (WebInspector.DOMStorageItemsView.prototype._refreshButtonClicked):
+        (WebInspector.DOMStorageItemsView.prototype._editingCallback):
+        (WebInspector.DOMStorageItemsView.prototype._deleteCallback):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.ResourcesPanel):
+        (WebInspector.ResourcesPanel.prototype._showDOMStorage.get if):
+        (WebInspector.ResourcesPanel.prototype._showDOMStorage):
+
 2013-02-07  Dan Carney  <dcarney@google.com>
 
         [v8] move persistent::new and ::dispose into same class
