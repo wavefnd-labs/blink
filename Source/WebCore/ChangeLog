@@ -1,3 +1,49 @@
+2013-02-07  Caio Marcelo de Oliveira Filho  <caio.oliveira@openbossa.org>
+
+        [CoordinatedGraphics] Use ScrollingCoordinator to track fixed layers
+        https://bugs.webkit.org/show_bug.cgi?id=108990
+
+        Reviewed by Noam Rosenthal.
+
+        WebCore keeps ScrollingCoordinator up-to-date about whether layers are fixed or not, so we
+        don't need to traverse the tree every frame to get this information.
+
+        The function ScrollingCoordinator::setLayerIsFixedToContainerLayer() is called when
+        RenderLayerBacking is updating its graphics layers.
+
+        The new code also works in new situations where the previous was broken: if a layer changed
+        from being fixed to not fixed (but still kept as a layer for other reasons), the layer will
+        be correctly updated. Previous implementation only had logic to mark layers as fixed, but
+        not the other way round. A manual test was added to illustrate the solved problem.
+
+        Testing was done with the existing manual tests that make use of "position:fixed". Automatic
+        tests are mostly not affected by this because usage of this information affects only the
+        UseFixedLayout mode, not used by default in WebKitTestRunner. Work to improve this situation
+        will be tracked in bug https://bugs.webkit.org/show_bug.cgi?id=109175.
+
+        * CMakeLists.txt:
+        * Target.pri:
+        * WebCore.pri:
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::create): create specific version of ScrollingCoordinator.
+        * page/scrolling/coordinatedgraphics/ScrollingCoordinatorCoordinatedGraphics.cpp: Added.
+        (WebCore):
+        (WebCore::ScrollingCoordinatorCoordinatedGraphics::ScrollingCoordinatorCoordinatedGraphics):
+        (WebCore::ScrollingCoordinatorCoordinatedGraphics::setLayerIsFixedToContainerLayer):
+        update layer information using existing hook in ScrollingCoordinator.
+        * page/scrolling/coordinatedgraphics/ScrollingCoordinatorCoordinatedGraphics.h: Added.
+        (WebCore):
+        (ScrollingCoordinatorCoordinatedGraphics):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.cpp:
+        (WebCore::CoordinatedGraphicsLayer::setFixedToViewport): now that setting viewport is not
+        embedded in the synchronization work, we need to mark the layer so it is updated in the
+        next frame.
+        (WebCore):
+        (WebCore::CoordinatedGraphicsLayer::flushCompositingState): remove call to syncFixedLayers().
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.h:
+        (CoordinatedGraphicsLayerClient): remove now unused syncFixedLayers() from client.
+        (CoordinatedGraphicsLayer):
+
 2013-02-07  Keishi Hattori  <keishi@webkit.org>
 
         REGRESSION (r140778): Calendar Picker doesn't open when the element has the required attribute
