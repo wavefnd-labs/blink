@@ -15,16 +15,19 @@ function testInvalidFilterAtRule(description, rule)
     } catch (e) {
         insertRuleException = e;
         shouldBeTrue("insertRuleException instanceof DOMException");
-        shouldEvaluateTo("insertRuleException.code", DOMException.SYNTAX_ERR)
+        shouldEvaluateTo("insertRuleException.code", "DOMException.SYNTAX_ERR")
     }
 }
 
+heading("Filter at-rule symbol tests.");
 testInvalidFilterAtRule("Unprefixed rule.", "@filter my-filter { }");
 
+heading("Filter name tests.");
 testInvalidFilterAtRule("Missing filter name identifier.", "@-webkit-filter { }");
 testInvalidFilterAtRule("Filter name as string.", "@-webkit-filter 'my-filter' { }");
 testInvalidFilterAtRule("Filter name as number.", "@-webkit-filter 123 { }");
 
+heading("Filter at-rule body tests.");
 testInvalidFilterAtRule("Missing rule body.", "@-webkit-filter my-filter");
 testInvalidFilterAtRule("Missing opening brace.", "@-webkit-filter my-filter }");
 testInvalidFilterAtRule("Missing closing brace.", "@-webkit-filter my-filter {");
