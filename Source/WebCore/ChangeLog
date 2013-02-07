@@ -1,3 +1,38 @@
+2013-02-07  Otto Derek Cheung  <otcheung@rim.com>
+
+        [BlackBerry] Cookie database isn't loaded into memory in some rare cases
+        https://bugs.webkit.org/show_bug.cgi?id=109202
+        PR 286189
+
+        Reviewed by Yong Li.
+        Internally Reviewed by Konrad Piascik.
+
+        If a get/setCookie call is made before the database is loaded, or if there's some
+        kind of error that causes the loading of the database to fail in the constructor
+        of CookieManager, the browser will get into a state where it seems like cookie is
+        permanenty disabled.
+
+        Instead of logging the errors and redispatching the setCookie, we should do a force sync
+        to load the cookie database before continuing.
+
+        Since the bug is so difficult to reproduce (I never did so myself), I did the follow test
+        to make sure the code path is correct:
+        1) Make sure original implementation is retained - open and loading done in the constructor
+        2) Removed opening and loading in constructor, the new calls in get/setcookies loaded the db just fine (although with
+        an initial lag because we are blocking WKT while performing SQLite options).
+        3) Removed loading in constructor, the new calls loaded the db just fine.
+
+        * platform/blackberry/CookieDatabaseBackingStore/CookieDatabaseBackingStore.cpp:
+        (WebCore::CookieDatabaseBackingStore::openAndLoadDatabaseSynchronously):
+        (WebCore):
+        * platform/blackberry/CookieDatabaseBackingStore/CookieDatabaseBackingStore.h:
+        (CookieDatabaseBackingStore):
+        * platform/blackberry/CookieManager.cpp:
+        (WebCore::CookieManager::setCookies):
+        (WebCore::CookieManager::getCookie):
+        (WebCore::CookieManager::generateHtmlFragmentForCookies):
+        (WebCore::CookieManager::getRawCookies):
+
 2013-02-07  Max Vujovic  <mvujovic@adobe.com>
 
         [CSS Shaders] Add WebKitCSSFilterRule to DOMWindow.idl
