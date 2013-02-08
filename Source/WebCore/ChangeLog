@@ -1,3 +1,23 @@
+2013-02-07  Adam Barth  <abarth@webkit.org>
+
+        fast/parser/document-write-noscript.html fails for threaded HTML parser
+        https://bugs.webkit.org/show_bug.cgi?id=109237
+
+        Reviewed by Eric Seidel.
+
+        If there are multiple calls to document.write in an external script, we
+        need to wait for them all to complete before invalidating the
+        speculative tokens. Instead of doing this when we unwind the
+        document.write call stack, we do this when we're about to resume
+        parsing after script execution.
+
+        Test: fast/parser/document-write-basic.html
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::insert):
+        (WebCore::HTMLDocumentParser::resumeParsingAfterScriptExecution):
+
 2013-02-07  Lamarque V. Souza  <Lamarque.Souza@basyskom.com>
 
         Fix build when compiling with css3-text and css3-conditional-rules feature flags enabled.
