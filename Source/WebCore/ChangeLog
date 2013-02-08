@@ -1,3 +1,27 @@
+2013-02-07  Elliott Sprehn  <esprehn@chromium.org>
+
+        getComputedStyle() doesn't report intermediate values during a transition of a pseudo element
+        https://bugs.webkit.org/show_bug.cgi?id=106535
+
+        Reviewed by Ojan Vafai.
+
+        Element::computedStyle and CSSComputedStyleDeclaration::getPropertyCSSValue
+        should use the PseudoElement and it's renderer if they exist so that
+        querying the computed style while an animation is running returns
+        the intermediate values.
+
+        No new tests, updated existing tests.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::styledNode): Added, returns either the PseudoElement or the Node.
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue): Updated to use styledNode.
+        * css/CSSComputedStyleDeclaration.h:
+        (CSSComputedStyleDeclaration):
+        * dom/Element.cpp:
+        (WebCore::Element::computedStyle): Check the PseudoElement, not just the cached pseudo style.
+        * dom/ElementRareData.h:
+        (WebCore::ElementRareData::pseudoElement): Remove ASSERT_NOT_REACHED so passing other pseudos returns 0.
+
 2013-02-07  Mark Lam  <mark.lam@apple.com>
 
         Add a comment about how the SQLTransaction state machine works.
