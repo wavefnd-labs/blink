@@ -1,3 +1,33 @@
+2013-02-07  Alexei Svitkine  <asvitkine@chromium.org>
+
+        Chromium: Hang parsing bidi control chars on Mac OS X 10.6
+        https://bugs.webkit.org/show_bug.cgi?id=108877
+
+        This was broken a while ago by:
+            https://bugs.webkit.org/show_bug.cgi?id=83045
+
+        On 10.6, CoreText will not produce any runs covering the
+        Unicode BiDi RTL mark control char, which causes an infinite
+        loop in ComplexTextController::indexOfCurrentRun() due to no
+        run covering the character at offset 0.
+
+        This patch fixes that issue by finding the earliest run
+        explicitly via the minimum stringBegin() index instead of
+        relying on a run existing that covers offset 0.
+
+        Fixes hang on many BiDi wikipedia pages on Chromium/Mac10.6.
+        Chromium bug: http://crbug.com/167844
+
+        New test in the same style as the harfbuzz-buffer-overrun.html
+        test (in the same folder).
+
+        Reviewed by Eric Seidel.
+
+        Test: fast/text/international/rtl-mark.html
+
+        * platform/graphics/mac/ComplexTextController.cpp:
+        (WebCore::ComplexTextController::indexOfCurrentRun):
+
 2013-02-07  Kentaro Hara  <haraken@chromium.org>
 
         Implement FocusEvent constructor
