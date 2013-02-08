@@ -1,3 +1,101 @@
+2013-02-08  Mike West  <mkwst@chromium.org>
+
+        Replace ExceptionCode assertions with ASSERT_NO_EXCEPTION macro.
+        https://bugs.webkit.org/show_bug.cgi?id=109044
+
+        Reviewed by Darin Adler.
+
+        The pattern:
+
+            ExceptionCode ec = 0;
+            methodThatGeneratesException(ec);
+            ASSERT(!ec);
+
+        is more clearly and succinctly written as:
+
+            methodThatGeneratesException(ASSERT_NO_EXCEPTION);
+
+        This patch replaces the occurances of the former that never touch 'ec'
+        again with the latter. It does the same for 'ASSERT(ec == 0);' (and, as
+        a drive-by, replaces 'ASSERT(ec == 0)' with 'ASSERT(!ec)' in places
+        where it does indeed matter that 'ec' get set properly.
+
+        No change in behavior should result from this refactoring.
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::takeAllChildrenFrom):
+        * dom/Document.cpp:
+        (WebCore::Document::setTitle):
+        * dom/MessagePort.cpp:
+        (WebCore::MessagePort::dispatchMessages):
+        (WebCore::MessagePort::disentanglePorts):
+        * editing/DeleteButtonController.cpp:
+        (WebCore::enclosingDeletableElement):
+        (WebCore::DeleteButtonController::createDeletionUI):
+            Replaced inline ASSERT with ASSERT_NO_EXCEPTION.
+        (WebCore::DeleteButtonController::show):
+            Replaced 'ASSERT(ec == 0)' with 'ASSERT(!ec)' to match the style guide.
+        * editing/EditorCommand.cpp:
+        (WebCore::unionDOMRanges):
+        * editing/ReplaceNodeWithSpanCommand.cpp:
+        (WebCore::swapInNodePreservingAttributesAndChildren):
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplacementFragment::ReplacementFragment):
+        (WebCore::ReplacementFragment::removeNode):
+        (WebCore::ReplacementFragment::insertNodeBefore):
+        (WebCore::ReplacementFragment::insertFragmentForTestRendering):
+        (WebCore::ReplacementFragment::restoreAndRemoveTestRenderingNodesToFragment):
+        (WebCore::ReplaceSelectionCommand::insertAsListItems):
+        * editing/SplitTextNodeCommand.cpp:
+        (WebCore::SplitTextNodeCommand::doUnapply):
+        * editing/TextIterator.cpp:
+        (WebCore::CharacterIterator::range):
+        (WebCore::BackwardsCharacterIterator::range):
+        (WebCore::TextIterator::rangeFromLocationAndLength):
+        (WebCore::collapsedToBoundary):
+        * editing/htmlediting.cpp:
+        (WebCore::createTabSpanElement):
+        * editing/mac/EditorMac.mm:
+        (WebCore::Editor::fontForSelection):
+        (WebCore::Editor::fontAttributesForSelectionStart):
+        * editing/markup.cpp:
+        (WebCore::createMarkup):
+        (WebCore::trimFragment):
+        (WebCore::createFragmentFromMarkupWithContext):
+        (WebCore::fillContainerFromString):
+        (WebCore::createFragmentFromText):
+        (WebCore::createFragmentFromNodes):
+        * html/ColorInputType.cpp:
+        (WebCore::ColorInputType::createShadowSubtree):
+            Replaced inline ASSERT with ASSERT_NO_EXCEPTION.
+        * html/HTMLOptionsCollection.cpp:
+        (WebCore::HTMLOptionsCollection::add):
+            Replaced 'ASSERT(ec == 0)' with 'ASSERT(!ec)' to match the style guide.
+        * html/HTMLTextAreaElement.cpp:
+        (WebCore::HTMLTextAreaElement::updatePlaceholderText):
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::HTMLTextFormControlElement::indexForVisiblePosition):
+        (WebCore::HTMLTextFormControlElement::setInnerTextValue):
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::updatePlaceholderText):
+        * html/ValidationMessage.cpp:
+        (WebCore::ValidationMessage::buildBubbleTree):
+        * html/shadow/MediaControlElementTypes.cpp:
+        (WebCore::MediaControlVolumeSliderElement::defaultEventHandler):
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::InspectorPageAgent::getCookies):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::addRule):
+        * loader/appcache/ApplicationCacheHost.cpp:
+        (WebCore::ApplicationCacheHost::dispatchDOMEvent):
+        * page/DOMSelection.cpp:
+        (WebCore::DOMSelection::deleteFromDocument):
+        * page/DragController.cpp:
+        (WebCore::prepareClipboardForImageDrag):
+        * rendering/RenderTextControl.cpp:
+        (WebCore::RenderTextControl::visiblePositionForIndex):
+            Replaced inline ASSERT with ASSERT_NO_EXCEPTION.
+
 2013-02-08  Alexei Filippov  <alph@chromium.org>
 
         Web Inspector: disable profile type switching while profile in progress
