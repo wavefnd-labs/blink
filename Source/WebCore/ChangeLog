@@ -1,3 +1,33 @@
+2013-02-07  Mike West  <mkwst@chromium.org>
+
+        <iframe seamless> should avoid vertical scrollbars during the initial layout passes.
+        https://bugs.webkit.org/show_bug.cgi?id=87707
+
+        Reviewed by Eric Seidel.
+
+        Seamless documents currently render incorrectly when their content fills
+        the width of the container into which they're placed. Because FrameView
+        assumes that the container's size is properly set before the first pass
+        of layout, vertical scrollbars are incorrectly forced onto seamless
+        content, because seamless sets the container's height to 0 before
+        handing it off to FrameView for layout. The scrollbars make the
+        available width for the seamless document ~15px smaller than it should
+        be, resulting in content getting bumped to the next line.
+
+        This patch special-cases FrameView::calculateScrollbarModesForLayout in
+        order to force scrollbars off for seamless documents with a full visible
+        height of 0px. Once the layout pass has grabbed the content height and
+        applied it to the visible height, scrollbars will again be applicable.
+
+        The change should be covered by rebaselines for the newly-passing
+        results in fast/frame/seamless-{float,inline}.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::calculateScrollbarModesForLayout):
+            If we're rendering a seamless document, and the full visible height
+            is 0, and the vertical scrollbar would otherwise be ScrollbarAuto,
+            then force ScrollbarAlwaysOff.
+
 2013-02-07  Kent Tamura  <tkent@chromium.org>
 
         document.activeElement should not return a non-focusable element
