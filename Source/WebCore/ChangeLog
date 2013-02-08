@@ -1,3 +1,178 @@
+2013-02-08  Jer Noble  <jer.noble@apple.com>
+
+        Bring WebKit up to speed with latest Encrypted Media spec.
+        https://bugs.webkit.org/show_bug.cgi?id=97037
+
+        Reviewed by Eric Carlson.
+
+        The most recent version of the Encrypted Media Extensions spec breaks functionality out of the
+        HTMLMediaElement and into new MediaKeys and MediaKeySession classes. Since the CDM functionality
+        has been pulled out of the media element, we create a proxy CDM class and factory system for
+        creating specific CDM key system implementations. The spec also breaks out MediaKeyEvent
+        into distinct event classes, MediaKeyNeededEvent and MediaKeyMessageEvent, for needkey and
+        keymessage events, respectively.
+
+        Tests: media/encrypted-media/encrypted-media-v2-events.html
+               media/encrypted-media/encrypted-media-v2-syntax.html
+
+        CDM is a proxy class (a la MediaPlayer) for a specific CDMPrivateInterface implementation. A CDM
+        implementation is registered with the CDMFactory and will be created if that implementation supports
+        the key system passed into the MediaKeys constructor. CDMSession is a pure-virtual interface exposed
+        by concrete CDMPrivate subclasses.  Its lifetime is owned by MediaKeySession.
+        * Modules/encryptedmedia/CDM.cpp: Added.
+        (WebCore::installedCDMFactories): Initialize all the known CDM subtypes. Ports will add CDM implementations here.
+        (WebCore::CDM::registerCDMFactory): Registers a new CDMFactory using the passed in function pointers.
+        (WebCore::CDMFactoryForKeySystem): Return the first CDM factory which supports the requested key system.
+        (WebCore::CDM::supportsKeySystem): Walk the installed CDMs and ask if the given key system is supported.
+        (WebCore::CDM::supportsKeySystemMIMETypeAndCodec): Ditto, with an additional MIME type and codec string.
+        (WebCore::CDM::create): Simple constructor wrapper.
+        (WebCore::CDM::CDM): Simple constructor; calls bestCDMForKeySystem() to create it's private implementation.
+        (WebCore::CDM::~CDM): Simple destructor.
+        (WebCore::CDM::createSession): Creates a new CDMSession.
+        * Modules/encryptedmedia/CDM.h: Added.
+        (WebCore::CDM::keySystem): Simple accessor for m_keySystem.
+        (WebCore::CDMSession::CDMSession): Simple constructor.
+        (WebCore::CDMSession::~CDMSession): Simple destructor.
+        * Modules/encryptedmedia/CDMPrivate.h: Added.
+        (WebCore::CDMPrivateInterface::CDMPrivateInterface): Simple constructor.
+        (WebCore::CDMPrivateInterface::~CDMPrivateInterface): Simple destructor.
+
+        The new classes, MediaKeyMessageEvent and MediaKeyNeededEvent, take distinct subsets of the initializers of
+        the original MediaKeyMessageEvent.
+        * Modules/encryptedmedia/MediaKeyMessageEvent.cpp: Copied from Source/WebCore/html/MediaKeyEvent.cpp.
+        (WebCore::MediaKeyMessageEventInit::MediaKeyMessageEventInit): Initializer now only takes message and destinationURL
+            parameters.
+        (WebCore::MediaKeyMessageEvent::MediaKeyMessageEvent): Simple constructor.
+        (WebCore::MediaKeyMessageEvent::~MediaKeyMessageEvent): Simple destructor.
+        (WebCore::MediaKeyMessageEvent::interfaceName): Standard interfaceName.
+        * Modules/encryptedmedia/MediaKeyMessageEvent.h: Copied from Source/WebCore/html/MediaKeyEvent.h.
+        (WebCore::MediaKeyMessageEvent::create): Simple construction wrapper.
+        (WebCore::MediaKeyMessageEvent::message): Simple accessor for m_message.
+        (WebCore::MediaKeyMessageEvent::destinationURL): Simple accessor for m_destinationURL.
+        * Modules/encryptedmedia/MediaKeyMessageEvent.idl: Copied from Source/WebCore/html/MediaKeyEvent.idl.
+        * Modules/encryptedmedia/MediaKeyNeededEvent.cpp: Copied from Source/WebCore/html/MediaKeyEvent.h.
+        (WebCore::MediaKeyNeededEventInit::MediaKeyNeededEventInit): Initializer now only takes initData parameter.
+        (WebCore::MediaKeyNeededEvent::MediaKeyNeededEvent): Simple constructor.
+        (WebCore::MediaKeyNeededEvent::~MediaKeyNeededEvent): Simple destructor.
+        (WebCore::MediaKeyNeededEvent::interfaceName): Standard interfaceName.
+        * Modules/encryptedmedia/MediaKeyNeededEvent.h: Copied from Source/WebCore/html/MediaKeyEvent.h.
+        (WebCore::MediaKeyNeededEvent::create): Simple construction wrapper.
+        (WebCore::MediaKeyNeededEvent::initData): Simple accessor for m_initData.
+        * Modules/encryptedmedia/MediaKeyNeededEvent.idl: Copied from Source/WebCore/html/MediaKeyEvent.idl.
+
+        MediaKeySession is a new class that maps keys and key requests to a given session ID:
+        * Modules/encryptedmedia/MediaKeySession.cpp: Added.
+        (WebCore::MediaKeySession::create): Simple construction wrapper.
+        (WebCore::MediaKeySession::MediaKeySession): Simple constructor.
+        (WebCore::MediaKeySession::~MediaKeySession): Simple destructor; calls close().
+        (WebCore::MediaKeySession::setError): Simple setter for m_error;
+        (WebCore::MediaKeySession::close): Tell the CDM to clear any saved session keys.
+        (WebCore::MediaKeySession::generateKeyRequest): Start a one-shot timer, handled in keyRequestTimerFired.
+        (WebCore::MediaKeySession::keyRequestTimerFired): Follow the steps in the spec; ask the CDM to generate a key request.
+        (WebCore::MediaKeySession::addKey): Start a one-shot timer, handled in addKeyTimerFired.
+        (WebCore::MediaKeySession::addKeyTimerFired): Follow the steps in the spec; provide the key data to the CDM.
+        * Modules/encryptedmedia/MediaKeySession.h: Added.
+        (WebCore::MediaKeySession::keySystem): Simple accessor for m_keySystem.
+        (WebCore::MediaKeySession::sessionId): Simple accessor for m_sessionId.
+        (WebCore::MediaKeySession::error): Simple accessor for m_error;
+        * Modules/encryptedmedia/MediaKeySession.idl:
+
+        MediaKeySession inherits from EventTarget, and must override the pure virtual functions in that class:
+        * Modules/encryptedmedia/MediaKeySession.cpp: Added.
+        (WebCore::MediaKeySession::interfaceName):
+        * Modules/encryptedmedia/MediaKeySession.h: Added.
+        (WebCore::MediaKeySession::refEventTarget):
+        (WebCore::MediaKeySession::derefEventTarget):
+        (WebCore::MediaKeySession::eventTargetData):
+        (WebCore::MediaKeySession::ensureEventTargetData):
+        (WebCore::MediaKeySession::scriptExecutionContext):
+
+        MediaKeys is a new class that encapsulates a CDM and a number of key sessions:
+        * Modules/encryptedmedia/MediaKeys.cpp: Added.
+        (WebCore::MediaKeys::create): Throw an exception if the key system parameter is unsupported; create a CDM object
+            and a new MediaKeys session.
+        (WebCore::MediaKeys::MediaKeys): Simple constructor.
+        (WebCore::MediaKeys::~MediaKeys): Simple destructor.
+        (WebCore::MediaKeys::createSession): Follow the spec and create a new key session.
+        * Modules/encryptedmedia/MediaKeys.h: Added.
+        * Modules/encryptedmedia/MediaKeys.idl: Copied from Source/WebCore/html/MediaError.idl.
+
+        Provide a new interface to HTMLMediaElement for MediaPlayer which does not require a sessionId or a key system:
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::mediaPlayerKeyNeeded):
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::MediaPlayer::keyNeeded):
+
+        MediaKeyError now has a systemCode parameter and member variable.
+        * html/MediaKeyError.h:
+        (WebCore::MediaKeyError::create): Take a systemCode parameter with a default (0) value.
+        (WebCore::MediaKeyError::MediaKeyError): Ditto.
+        (WebCore::MediaKeyError::systemCode): Simple accessor for m_systemCode.
+        * html/MediaKeyError.idl:
+
+        Add new methods to HTMLMediaElement to support MediaKeys. Support different initializer
+        for the MediaKeyNeededEvent.
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::setMediaKeys): Simple setter for m_mediaKeys.
+        (WebCore::HTMLMediaElement::mediaPlayerKeyNeeded): This version takes fewer parameters
+            than the deprecated version.
+        * html/HTMLMediaElement.h:
+        (WebCore::HTMLMediaElement::mediaKeys): Simple accessor for m_mediaKeys.
+        * html/HTMLMediaElement.idl: Add the mediaKeys attribute.
+
+        Add an ENABLE(ENCRYPTED_MEDIA_V2) check to the existing ENABLE(ENCRYPTED_MEDIA) one:
+        * html/MediaError.h:
+        * html/MediaError.idl:
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::bestMediaEngineForTypeAndCodecs):
+        (WebCore::MediaPlayer::supportsType):
+        * platform/graphics/MediaPlayer.h:
+        (WebCore::MediaPlayer::keyNeeded): This version takes fewer parameters than the
+            deprecated version.
+
+        Support the new version of canPlayType which takes an extra parameter:
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.h:
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm:
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::registerMediaEngine):
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::extendedSupportsType):
+        * platform/graphics/mac/MediaPlayerPrivateQTKit.h:
+        * platform/graphics/mac/MediaPlayerPrivateQTKit.mm:
+        (WebCore::MediaPlayerPrivateQTKit::registerMediaEngine):
+        (WebCore::MediaPlayerPrivateQTKit::extendedSupportsType):
+
+        Add a mock CDM for use within DRT and WKTR to test the MediaKeys and MediaKeySession
+        APIs and events:
+        * testing/Internals.cpp:
+        (WebCore::Internals::initializeMockCDM): Add the MockCDM class to the CDM factories.
+        * testing/Internals.h:
+        * testing/Internals.idl: Add the initializeMockCDM() method.
+        * testing/MockCDM.cpp: Added.
+        (WebCore::MockCDM::supportsKeySystem): Only supports the 'com.webcore.mock' key system.
+        (WebCore::MockCDM::supportsMIMEType): Only supports the 'video/mock' mime type.
+        (WebCore::initDataPrefix): Static method which returns a Uint8Array containing 'mock'.
+        (WebCore::keyPrefix): Static method which returns a Uint8Array containing 'key'.
+        (WebCore::keyRequest): Static method which returns a Uint8Array containing 'request'.
+        (WebCore::generateSessionId): Return a monotonically increasing number.
+        (WebCore::MockCDMSession::MockCDMSession): Simple constructor.
+        (WebCore::MockCDMSession::generateKeyRequest): Ignores the parameters and returns a keyRequest() array.
+        (WebCore::MockCDMSession::releaseKeys): No-op.
+        (WebCore::MockCDMSession::addKey): Checks that the key starts with the keyPrefix() array.
+        * testing/MockCDM.h: Added.
+        (WebCore::MockCDM::create):
+        (WebCore::MockCDM::~MockCDM): Simple destructor.
+        (WebCore::MockCDM::MockCDM): Simple constructor.
+
+        Add the new classes to the built system:
+        * Configurations/FeatureDefines.xcconfig:
+        * DerivedSources.make:
+        * WebCore.exp.in:
+        * WebCore.xcodeproj/project.pbxproj:
+
+        Miscelaneous changes:
+        * dom/EventNames.in: Add the two new event types, MediaKeyMessageEvent and MediaKeyNeededEvent.
+        * dom/EventTargetFactory.in: Add the new EventTarget, MediaKeySession.
+        * page/DOMWindow.idl: Add constructors for the new classes to the window object.
+
 2013-02-08  Chris Fleizach  <cfleizach@apple.com>
 
         Refactor platform-specific code in SpeechSynthesis
