@@ -1,3 +1,192 @@
+2013-02-08  Mike West  <mkwst@chromium.org>
+
+        Add a new IGNORE_EXCEPTION helper to ignore ExceptionCodes when they are expected but uninteresting
+        https://bugs.webkit.org/show_bug.cgi?id=108771
+
+        Reviewed by Eric Seidel.
+
+        In cases where the ExceptionCode passed into a function is completely
+        ignored, this patch replaces it with a new IGNORE_EXCEPTION macro. This
+        makes our expectations about possible exceptions (or lack thereof)
+        explicit, rather than relying on implicit assumptions about whether a
+        variable is intentionally uninitialized or not. It also removes
+        knowledge about the internals of ExceptionCodes (that they're currently
+        ints, for instance) from code that shouldn't care, which will help with
+        future refactorings.
+
+        The implementation is entirely based upon ASSERT_NO_EXCEPTION, and
+        shouldn't have any visible effect on the web. As long as all the
+        current tests pass, we're good.
+
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::dispatchEvent):
+        (WebCore::IDBRequest::uncaughtExceptionInEventHandler):
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::stop):
+        * Modules/websockets/WebSocketChannel.cpp:
+        (WebCore::WebSocketChannel::processBuffer):
+        * dom/Document.cpp:
+        (WebCore::Document::processHttpEquiv):
+        * dom/ExceptionCodePlaceholder.h:
+        (WebCore):
+        * dom/Node.cpp:
+        (WebCore::Node::normalize):
+        * dom/Text.cpp:
+        (WebCore::Text::replaceWholeText):
+        * editing/AlternativeTextController.cpp:
+        (WebCore::AlternativeTextController::insertDictatedText):
+        * editing/AppendNodeCommand.cpp:
+        (WebCore::AppendNodeCommand::doApply):
+        (WebCore::AppendNodeCommand::doUnapply):
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::insertNewDefaultParagraphElementAt):
+        * editing/DeleteFromTextNodeCommand.cpp:
+        (WebCore::DeleteFromTextNodeCommand::doUnapply):
+        * editing/Editor.cpp:
+        (WebCore::dispatchEditableContentChangedEvents):
+        (WebCore::Editor::applyEditingStyleToElement):
+        * editing/EditorCommand.cpp:
+        (WebCore::executeFormatBlock):
+        * editing/FormatBlockCommand.cpp:
+        (WebCore::FormatBlockCommand::elementForFormatBlockCommand):
+        * editing/InsertIntoTextNodeCommand.cpp:
+        (WebCore::InsertIntoTextNodeCommand::doApply):
+        (WebCore::InsertIntoTextNodeCommand::doUnapply):
+        * editing/InsertListCommand.cpp:
+        (WebCore::InsertListCommand::doApplyForSingleParagraph):
+        * editing/InsertNodeBeforeCommand.cpp:
+        (WebCore::InsertNodeBeforeCommand::doApply):
+        (WebCore::InsertNodeBeforeCommand::doUnapply):
+        * editing/RemoveCSSPropertyCommand.cpp:
+        (WebCore::RemoveCSSPropertyCommand::doApply):
+        (WebCore::RemoveCSSPropertyCommand::doUnapply):
+        * editing/RemoveNodeCommand.cpp:
+        (WebCore::RemoveNodeCommand::doApply):
+        (WebCore::RemoveNodeCommand::doUnapply):
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplaceSelectionCommand::removeRedundantStylesAndKeepStyleSpanInline):
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::getLocationAndLengthFromRange):
+        * editing/WrapContentsInDummySpanCommand.cpp:
+        (WebCore::WrapContentsInDummySpanCommand::executeApply):
+        (WebCore::WrapContentsInDummySpanCommand::doUnapply):
+        * editing/htmlediting.cpp:
+        (WebCore::comparePositions):
+        * editing/markup.cpp:
+        (WebCore::highestAncestorToWrapMarkup):
+        * html/FTPDirectoryDocument.cpp:
+        (WebCore::FTPDirectoryDocumentParser::appendEntry):
+        (WebCore::FTPDirectoryDocumentParser::createTDForFilename):
+        (WebCore::FTPDirectoryDocumentParser::loadDocumentTemplate):
+        (WebCore::FTPDirectoryDocumentParser::createBasicDocument):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::rewind):
+        (WebCore::HTMLMediaElement::returnToRealtime):
+        (WebCore::HTMLMediaElement::playInternal):
+        (WebCore::HTMLMediaElement::percentLoaded):
+        (WebCore::HTMLMediaElement::mediaPlayerTimeChanged):
+        (WebCore::HTMLMediaElement::mediaPlayerDurationChanged):
+        (WebCore::HTMLMediaElement::applyMediaFragmentURI):
+        * html/HTMLOutputElement.cpp:
+        (WebCore::HTMLOutputElement::setTextContentInternal):
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::remove):
+        * html/HTMLTableElement.cpp:
+        (WebCore::HTMLTableElement::createTHead):
+        (WebCore::HTMLTableElement::deleteTHead):
+        (WebCore::HTMLTableElement::createTFoot):
+        (WebCore::HTMLTableElement::deleteTFoot):
+        (WebCore::HTMLTableElement::createCaption):
+        (WebCore::HTMLTableElement::deleteCaption):
+        * html/HTMLTextAreaElement.cpp:
+        (WebCore::HTMLTextAreaElement::setDefaultValue):
+        * html/ImageDocument.cpp:
+        (WebCore::ImageDocument::createDocumentStructure):
+        * html/InputType.cpp:
+        (WebCore::InputType::stepUpFromRenderer):
+        * html/MediaController.cpp:
+        (MediaController::bringElementUpToSpeed):
+        (MediaController::asyncEventTimerFired):
+        * html/MediaDocument.cpp:
+        (WebCore::MediaDocumentParser::createDocumentStructure):
+        (WebCore::MediaDocument::replaceMediaElementTimerFired):
+        * html/PluginDocument.cpp:
+        (WebCore::PluginDocumentParser::createDocumentStructure):
+        * html/RangeInputType.cpp:
+        (WebCore::RangeInputType::handleKeydownEvent):
+        * html/TimeRanges.cpp:
+        (TimeRanges::contain):
+        (TimeRanges::nearest):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::drawImageFromRect):
+        * html/shadow/MediaControlElementTypes.cpp:
+        (WebCore::MediaControlSeekButtonElement::seekTimerFired):
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlPanelElement::setPosition):
+        (WebCore::MediaControlPanelElement::resetPosition):
+        (WebCore::MediaControlStatusDisplayElement::update):
+        (WebCore::MediaControlRewindButtonElement::defaultEventHandler):
+        (WebCore::MediaControlTimelineElement::defaultEventHandler):
+        * html/shadow/MediaControls.cpp:
+        (WebCore::MediaControls::updateCurrentTimeDisplay):
+        (WebCore::MediaControls::createTextTrackDisplay):
+        * html/shadow/MediaControlsApple.cpp:
+        (WebCore::MediaControlsApple::updateCurrentTimeDisplay):
+        * html/shadow/MediaControlsBlackBerry.cpp:
+        (WebCore::MediaControlEmbeddedPanelElement::setPosition):
+        (WebCore::MediaControlEmbeddedPanelElement::resetPosition):
+        (WebCore::MediaControlFullscreenTimelineElement::defaultEventHandler):
+        (WebCore::MediaControlsBlackBerry::updateCurrentTimeDisplay):
+        * html/shadow/MediaControlsChromium.cpp:
+        (WebCore::MediaControlsChromium::updateCurrentTimeDisplay):
+        * html/track/InbandTextTrack.cpp:
+        (WebCore::InbandTextTrack::addGenericCue):
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::buildArrayForMatchedRuleList):
+        * inspector/InspectorHistory.cpp:
+        (WebCore::InspectorHistory::markUndoableState):
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::InspectorResourceAgent::replayXHR):
+        * page/ContextMenuController.cpp:
+        (WebCore::ContextMenuController::contextMenuItemSelected):
+        * page/DOMWindow.cpp:
+        (WebCore::didAddStorageEventListener):
+        * page/DragController.cpp:
+        (WebCore::documentFragmentFromDragData):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::dispatchDragEvent):
+        (WebCore::EventHandler::keyEvent):
+        (WebCore::EventHandler::handleTextInputEvent):
+        * page/Page.cpp:
+        (WebCore::Page::findStringMatchingRanges):
+        * platform/efl/RenderThemeEfl.cpp:
+        (WebCore::RenderThemeEfl::paintMediaSliderTrack):
+        * platform/graphics/blackberry/MediaPlayerPrivateBlackBerry.cpp:
+        (WebCore::MediaPlayerPrivate::percentLoaded):
+        * platform/gtk/RenderThemeGtk.cpp:
+        (WebCore::RenderThemeGtk::paintMediaSliderTrack):
+        * platform/mac/PasteboardMac.mm:
+        (WebCore::Pasteboard::getDataSelection):
+        (WebCore::documentFragmentWithImageResource):
+        (WebCore::Pasteboard::documentFragment):
+        * platform/mac/WebVideoFullscreenHUDWindowController.mm:
+        (-[WebVideoFullscreenHUDWindowController setCurrentTime:]):
+        (-[WebVideoFullscreenHUDWindowController setVolume:]):
+        * platform/qt/RenderThemeQt.cpp:
+        (WebCore::RenderThemeQt::paintMediaSliderTrack):
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::getRanges):
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::paintMediaSliderTrack):
+        * svg/SVGTRefElement.cpp:
+        (WebCore::SVGTRefElement::detachTarget):
+        * xml/XMLTreeViewer.cpp:
+        (WebCore::XMLTreeViewer::transformDocumentToTreeView):
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::endElementNs):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::XMLDocumentParser::parseEndElement):
+
 2013-02-08  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: Introduce workspace provider/project type, encapsulate uri creation in SimpleWorkspaceProvider.
