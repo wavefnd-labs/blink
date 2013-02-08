@@ -1,3 +1,26 @@
+2013-02-07  Seulgi Kim  <seulgikim@company100.net>
+
+        [Gtk] RunLoop::run shuold run current thread's run loop.
+        https://bugs.webkit.org/show_bug.cgi?id=107887
+
+        Reviewed by Martin Robinson.
+
+        Currently, RunLoop in Gtk can use just main thread's event loop.
+        But the other ports are implemented to use RunLoop in sub threads.
+
+        This patch makes RunLoop constructor create new context, not use default
+        context.
+        But in the main thread still uses default context to use main event loop
+        since there is some codes using glib directly (e.g. in
+        LayerTreeHostGtk::scheduleLayerFlush).
+
+        No new tests. There is no case that uses RunLoop in off the main thread
+        yet.
+
+        * platform/gtk/RunLoopGtk.cpp:
+        (WebCore::RunLoop::RunLoop):
+        (WebCore::RunLoop::run):
+
 2013-02-07  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Move V8DOMWrapper::setNamedHiddenReference() to V8HiddenPropertyName.h
