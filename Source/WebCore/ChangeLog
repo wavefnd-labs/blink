@@ -1,3 +1,35 @@
+2013-02-06  Gavin Barraclough  <barraclough@apple.com>
+
+        PluginProcess should quit immediately if idle in response to low-memory notifications
+        https://bugs.webkit.org/show_bug.cgi?id=109103
+        <rdar://problem/12679827>
+
+        Reviewed by Darin Adler.
+
+        This patch allows a process to set a custom callback for low memory warnings
+        (defaulting to the current behaviour, as implemented in releaseMemory).
+
+        MemoryPressureHandler::install is currently used for two purposes - it is
+        called when first initializing a low memory handler for a process, and also
+        used to reinstall the handler (on a delay) after the notification has occured.
+        Since reinstallation doesn't change the callback, split these behaviours out -
+        MemoryPressureHandler::initialize is added to initialization, and accepts a
+        custom callback, install in made private.
+
+        * WebCore.exp.in:
+            - Added export for releaseMemory.
+        * platform/MemoryPressureHandler.cpp:
+        (WebCore::MemoryPressureHandler::releaseMemory):
+            - Added null implementation for non-Mac builds.
+        * platform/MemoryPressureHandler.h:
+        (WebCore::MemoryPressureHandler::initialize):
+            - distinguish initialization from reinstallations, allow handler to be set.
+        (MemoryPressureHandler):
+            - Added m_lowMemoryHandler function pointer member variable.
+        * platform/mac/MemoryPressureHandlerMac.mm:
+        (WebCore::MemoryPressureHandler::respondToMemoryPressure):
+            - Call m_lowMemoryHandler instead of releaseMemory.
+
 2013-02-07  Kentaro Hara  <haraken@chromium.org>
 
         [V8] #ifndef NDEBUG is redundant for assertContextHasCorrectPrototype()
