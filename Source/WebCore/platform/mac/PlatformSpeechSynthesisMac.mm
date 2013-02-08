@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2013 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +24,31 @@
  */
 
 #include "config.h"
-#include "SpeechSynthesis.h"
-
-#if ENABLE(SPEECH_SYNTHESIS)
+#include "PlatformSpeechSynthesis.h"
 
 #include "SpeechSynthesisVoice.h"
 #include "SpeechSynthesisUtterance.h"
 #include <AppKit/NSSpeechSynthesizer.h>
 
+#if ENABLE(SPEECH_SYNTHESIS)
+
 namespace WebCore {
+
+PassRefPtr<PlatformSpeechSynthesis> PlatformSpeechSynthesis::create(SpeechSynthesis* synthesis)
+{
+    return adoptRef(new PlatformSpeechSynthesis(synthesis));
+}
+
+PlatformSpeechSynthesis::PlatformSpeechSynthesis(SpeechSynthesis* synthesis)
+    : m_speechSynthesis(synthesis)
+{
+}
     
-void SpeechSynthesis::initializeVoiceList()
+void PlatformSpeechSynthesis::platformSpeak(SpeechSynthesisUtterance*)
+{
+}
+    
+void PlatformSpeechSynthesis::platformInitializeVoiceList(Vector<RefPtr<SpeechSynthesisVoice> >& voices);
 {
     NSString *defaultVoiceURI = [NSSpeechSynthesizer defaultVoice];
     NSArray *availableVoices = [NSSpeechSynthesizer availableVoices];
@@ -46,45 +60,14 @@ void SpeechSynthesis::initializeVoiceList()
         NSString *voiceURI = [attributes objectForKey:NSVoiceIdentifier];
         NSString *name = [attributes objectForKey:NSVoiceName];
         NSString *language = [attributes objectForKey:NSVoiceLocaleIdentifier];
-
+        
         // Change to BCP-47 format as defined by spec.
         language = [language stringByReplacingOccurrencesOfString:@"_" withString:@"-"];
         
         bool isDefault = [defaultVoiceURI isEqualToString:voiceURI];
         
-        m_voiceList.append(SpeechSynthesisVoice::create(voiceURI, name, language, true, isDefault));
+        voices.append(SpeechSynthesisVoice::create(voiceURI, name, language, true, isDefault));
     }
-}
-
-bool SpeechSynthesis::pending() const
-{
-    return false;
-}
-
-bool SpeechSynthesis::speaking() const
-{
-    return false;
-}
-
-bool SpeechSynthesis::paused() const
-{
-    return false;
-}
-
-void SpeechSynthesis::speak(SpeechSynthesisUtterance*)
-{
-}
-
-void SpeechSynthesis::cancel()
-{
-}
-
-void SpeechSynthesis::pause()
-{
-}
-
-void SpeechSynthesis::resume()
-{
 }
 
 } // namespace WebCore

@@ -1,3 +1,115 @@
+2013-02-08  Chris Fleizach  <cfleizach@apple.com>
+
+        Refactor platform-specific code in SpeechSynthesis
+        https://bugs.webkit.org/show_bug.cgi?id=107414
+
+        Reviewed by Sam Weinig.
+
+        Refactor WebSpeech code to use a platform mechanism to provide access to platform resources.
+
+        * Modules/speech/DOMWindowSpeechSynthesis.cpp:
+        (WebCore::DOMWindowSpeechSynthesis::from):
+        * Modules/speech/SpeechSynthesis.cpp:
+        (WebCore::SpeechSynthesis::SpeechSynthesis):
+        (WebCore):
+        (WebCore::SpeechSynthesis::voicesDidChange):
+        (WebCore::SpeechSynthesis::getVoices):
+        (WebCore::SpeechSynthesis::pending):
+        (WebCore::SpeechSynthesis::speaking):
+        (WebCore::SpeechSynthesis::paused):
+        (WebCore::SpeechSynthesis::speak):
+        (WebCore::SpeechSynthesis::cancel):
+        (WebCore::SpeechSynthesis::pause):
+        (WebCore::SpeechSynthesis::resume):
+        * Modules/speech/SpeechSynthesis.h:
+        (WebCore):
+        (SpeechSynthesis):
+        (WebCore::SpeechSynthesis::didStartSpeaking):
+        (WebCore::SpeechSynthesis::didFinishSpeaking):
+        (WebCore::SpeechSynthesis::speakingErrorOccurred):
+        * Modules/speech/SpeechSynthesisUtterance.cpp:
+        (WebCore::SpeechSynthesisUtterance::SpeechSynthesisUtterance):
+        * Modules/speech/SpeechSynthesisUtterance.h:
+        (WebCore::SpeechSynthesisUtterance::text):
+        (WebCore::SpeechSynthesisUtterance::setText):
+        (WebCore::SpeechSynthesisUtterance::lang):
+        (WebCore::SpeechSynthesisUtterance::setLang):
+        (WebCore::SpeechSynthesisUtterance::voiceURI):
+        (WebCore::SpeechSynthesisUtterance::setVoiceURI):
+        (WebCore::SpeechSynthesisUtterance::volume):
+        (WebCore::SpeechSynthesisUtterance::setVolume):
+        (WebCore::SpeechSynthesisUtterance::rate):
+        (WebCore::SpeechSynthesisUtterance::setRate):
+        (WebCore::SpeechSynthesisUtterance::pitch):
+        (WebCore::SpeechSynthesisUtterance::setPitch):
+        (SpeechSynthesisUtterance):
+        (WebCore::SpeechSynthesisUtterance::platformUtterance):
+        * Modules/speech/SpeechSynthesisVoice.cpp:
+        (WebCore::SpeechSynthesisVoice::create):
+        (WebCore::SpeechSynthesisVoice::SpeechSynthesisVoice):
+        * Modules/speech/SpeechSynthesisVoice.h:
+        (SpeechSynthesisVoice):
+        (WebCore::SpeechSynthesisVoice::voiceURI):
+        (WebCore::SpeechSynthesisVoice::name):
+        (WebCore::SpeechSynthesisVoice::lang):
+        (WebCore::SpeechSynthesisVoice::localService):
+        (WebCore::SpeechSynthesisVoice::isDefault):
+        * Modules/speech/mac/SpeechSynthesisMac.mm:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/PlatformSpeechSynthesis.h: Added.
+        (WebCore):
+        (PlatformSpeechSynthesis):
+        * platform/PlatformSpeechSynthesisUtterance.cpp: Added.
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesisUtterance::PlatformSpeechSynthesisUtterance):
+        * platform/PlatformSpeechSynthesisUtterance.h: Added.
+        (WebCore):
+        (PlatformSpeechSynthesisUtteranceClient):
+        (WebCore::PlatformSpeechSynthesisUtteranceClient::~PlatformSpeechSynthesisUtteranceClient):
+        (PlatformSpeechSynthesisUtterance):
+        (WebCore::PlatformSpeechSynthesisUtterance::text):
+        (WebCore::PlatformSpeechSynthesisUtterance::setText):
+        (WebCore::PlatformSpeechSynthesisUtterance::lang):
+        (WebCore::PlatformSpeechSynthesisUtterance::setLang):
+        (WebCore::PlatformSpeechSynthesisUtterance::voiceURI):
+        (WebCore::PlatformSpeechSynthesisUtterance::setVoiceURI):
+        (WebCore::PlatformSpeechSynthesisUtterance::volume):
+        (WebCore::PlatformSpeechSynthesisUtterance::setVolume):
+        (WebCore::PlatformSpeechSynthesisUtterance::rate):
+        (WebCore::PlatformSpeechSynthesisUtterance::setRate):
+        (WebCore::PlatformSpeechSynthesisUtterance::pitch):
+        (WebCore::PlatformSpeechSynthesisUtterance::setPitch):
+        * platform/PlatformSpeechSynthesisVoice.cpp: Added.
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesisVoice::create):
+        (WebCore::PlatformSpeechSynthesisVoice::PlatformSpeechSynthesisVoice):
+        * platform/PlatformSpeechSynthesisVoice.h: Added.
+        (WebCore):
+        (PlatformSpeechSynthesisVoice):
+        (WebCore::PlatformSpeechSynthesisVoice::voiceURI):
+        (WebCore::PlatformSpeechSynthesisVoice::name):
+        (WebCore::PlatformSpeechSynthesisVoice::lang):
+        (WebCore::PlatformSpeechSynthesisVoice::localService):
+        (WebCore::PlatformSpeechSynthesisVoice::isDefault):
+        * platform/PlatformSpeechSynthesizer.cpp: Added.
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesizer::PlatformSpeechSynthesizer):
+        * platform/PlatformSpeechSynthesizer.h: Added.
+        (WebCore):
+        (PlatformSpeechSynthesizerClient):
+        (WebCore::PlatformSpeechSynthesizerClient::~PlatformSpeechSynthesizerClient):
+        (PlatformSpeechSynthesizer):
+        (WebCore::PlatformSpeechSynthesizer::voiceList):
+        * platform/mac/PlatformSpeechSynthesisMac.mm: Added.
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesis::create):
+        (WebCore::PlatformSpeechSynthesis::PlatformSpeechSynthesis):
+        (WebCore::PlatformSpeechSynthesis::platformSpeak):
+        * platform/mac/PlatformSpeechSynthesizerMac.mm: Added.
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesizer::initializeVoiceList):
+        (WebCore::PlatformSpeechSynthesizer::speak):
+
 2013-02-08  Dean Jackson  <dino@apple.com>
 
         Put snapshotting label text into localizable strings
