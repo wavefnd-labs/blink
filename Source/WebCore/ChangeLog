@@ -1,3 +1,50 @@
+2013-02-08  Anton Vayvod  <avayvod@chromium.org>
+
+        [Text Autosizing] Split isAutosizingCluster into three independent checks
+        https://bugs.webkit.org/show_bug.cgi?id=109093
+
+        Refactoring to create more flexible version of isAutosizingCluster since there're more types
+        of autosizing cluster now: narrower than the parent cluster, wider than the parent cluster
+        and the one that doesn't depend on the parent cluster.
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Refactoring, no test changes.
+
+        * rendering/TextAutosizer.cpp:
+
+        (WebCore::TextAutosizer::isNarrowDescendant):
+
+            Separate check for the container to be of the narrow-descendant type. Was a part of
+            isAutosizingCluster().
+
+        (WebCore::TextAutosizer::isWiderDescendant):
+
+            Separate check for the container to be of the wider-descendant type. Was a part of
+            isAutosizingCluster().
+
+        (WebCore::TextAutosizer::isIndependentDescendant):
+
+            Separate check for the container to be autosized separately from the ancestor cluster.
+            Checks for conditions independent of the aforementioned cluster.
+
+        (WebCore::TextAutosizer::isAutosizingCluster):
+
+            Handy method to check all separate conditions together.
+
+        (WebCore::TextAutosizer::processSubtree):
+        (WebCore::TextAutosizer::processCluster):
+        (WebCore::TextAutosizer::processContainer):
+        (WebCore::TextAutosizer::clusterShouldBeAutosized):
+        (WebCore::TextAutosizer::measureDescendantTextWidth):
+        (WebCore::TextAutosizer::findFirstTextLeafNotInCluster):
+
+            The methods above were updated to use new functions/arguments.
+
+        * rendering/TextAutosizer.h:
+
+            Updated/added method definitions.
+
 2013-02-08  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: Extension sever should use Workspace.projectForType() instead of Workspace.project()
