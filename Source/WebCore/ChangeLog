@@ -1,3 +1,90 @@
+2013-02-09  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [EFL][Qt][WebGL] Share the common code between GraphicsSurfaceGLX and X11WindowResources.
+        https://bugs.webkit.org/show_bug.cgi?id=106666
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Covered by existing WebGL tests.
+
+        This patch removes any duplicate code in X11WindowResources and
+        GraphicsSurfaceGLX. No new functionality is added.
+
+        * PlatformEfl.cmake:
+        * Target.pri:
+        * platform/graphics/surfaces/egl/EGLConfigSelector.cpp:
+        (WebCore::EGLConfigSelector::pixmapContextConfig):
+        * platform/graphics/surfaces/egl/EGLConfigSelector.h:
+        (EGLConfigSelector):
+        * platform/graphics/surfaces/egl/EGLSurface.cpp:
+        (WebCore::EGLWindowTransportSurface::EGLWindowTransportSurface):
+        (WebCore::EGLWindowTransportSurface::destroy):
+        (WebCore::EGLWindowTransportSurface::setGeometry):
+        * platform/graphics/surfaces/egl/EGLSurface.h:
+        (WebCore):
+        (EGLWindowTransportSurface):
+        * platform/graphics/surfaces/glx/GLXConfigSelector.h:
+        (WebCore::GLXConfigSelector::GLXConfigSelector):
+        (WebCore::GLXConfigSelector::visualInfo):
+        (WebCore::GLXConfigSelector::pBufferContextConfig):
+        (WebCore::GLXConfigSelector::createSurfaceConfig):
+        (GLXConfigSelector):
+        * platform/graphics/surfaces/glx/GLXContext.cpp:
+        (WebCore::initializeARBExtensions):
+        (WebCore::GLXOffScreenContext::GLXOffScreenContext):
+        (WebCore::GLXOffScreenContext::initialize):
+        (WebCore::GLXOffScreenContext::platformReleaseCurrent):
+        (WebCore::GLXOffScreenContext::freeResources):
+        * platform/graphics/surfaces/glx/GLXContext.h:
+        (GLXOffScreenContext):
+        * platform/graphics/surfaces/glx/GLXSurface.cpp:
+        (WebCore::GLXTransportSurface::GLXTransportSurface):
+        (WebCore::GLXTransportSurface::setGeometry):
+        (WebCore::GLXTransportSurface::destroy):
+        (WebCore::GLXPBuffer::initialize):
+        * platform/graphics/surfaces/glx/GLXSurface.h:
+        (GLXTransportSurface):
+        (GLXPBuffer):
+        * platform/graphics/surfaces/glx/GraphicsSurfaceGLX.cpp:
+        (WebCore):
+        (WebCore::GraphicsSurfacePrivate::GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::initialize):
+        (GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::createSurface):
+        (WebCore::GraphicsSurfacePrivate::createPixmap):
+        (WebCore::GraphicsSurfacePrivate::display):
+        (WebCore::GraphicsSurfacePrivate::flags):
+        (WebCore::GraphicsSurfacePrivate::clear):
+        (WebCore::GraphicsSurface::platformPaintToTextureMapper):
+        No new functionality added. Made changes to take the common code into use.
+
+        * platform/graphics/surfaces/glx/X11WindowResources.h: Removed.
+        * platform/graphics/surfaces/glx/X11Helper.cpp: Renamed from Source/WebCore/platform/graphics/surfaces/glx/X11WindowResources.cpp.
+        (WebCore):
+        (WebCore::DisplayConnection::DisplayConnection):
+        (DisplayConnection):
+        (WebCore::DisplayConnection::~DisplayConnection):
+        (WebCore::DisplayConnection::display):
+        (OffScreenRootWindow):
+        (WebCore::OffScreenRootWindow::OffScreenRootWindow):
+        (WebCore::OffScreenRootWindow::~OffScreenRootWindow):
+        (WebCore::OffScreenRootWindow::rootWindow):
+        (WebCore::X11Helper::resizeWindow):
+        (WebCore::X11Helper::createOffScreenWindow):
+        (WebCore::X11Helper::destroyWindow):
+        (WebCore::X11Helper::isXRenderExtensionSupported):
+        (WebCore::X11Helper::nativeDisplay):
+        (WebCore::X11Helper::offscreenRootWindow):
+        * platform/graphics/surfaces/glx/X11Helper.h: Added.
+        (WebCore):
+        (WebCore::handleXPixmapCreationError):
+        (X11Helper):
+        (ScopedXPixmapCreationErrorHandler):
+        (WebCore::ScopedXPixmapCreationErrorHandler::ScopedXPixmapCreationErrorHandler):
+        (WebCore::ScopedXPixmapCreationErrorHandler::~ScopedXPixmapCreationErrorHandler):
+        (WebCore::ScopedXPixmapCreationErrorHandler::isValidOperation):
+        Moved common code from GraphicsSurfaceGLX to X11Helper.
+
 2013-02-09  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: show whitespace characters in DTE
