@@ -1,3 +1,48 @@
+2013-02-08  Eric Carlson  <eric.carlson@apple.com>
+
+        [Mac] respect in-band caption color
+        https://bugs.webkit.org/show_bug.cgi?id=109203
+
+        Reviewed by Dean Jackson.
+
+        Test: media/track/track-in-band-style.html
+
+        * WebCore.xcodeproj/project.pbxproj: Add HTMLDivElement.h to private headers because it is 
+            included by HTMLTextElement, which is included by HTMLMediaElement.h, which is included 
+            by files in WebKit/WebKit2.
+        * html/track/InbandTextTrack.cpp:
+        (WebCore::InbandTextTrack::addGenericCue): Set cue colors if necessary.
+
+        * html/track/TextTrackCue.h:
+        (WebCore::TextTrackCue::element): New, accessor for the cue element so it can be styled.
+
+        * html/track/TextTrackCueGeneric.cpp:
+        (WebCore::TextTrackCueGenericBoxElement::applyCSSProperties): Set container and cue background 
+            color if necessary.
+        (WebCore::TextTrackCueGeneric::operator==): Compare cue colors.
+        * html/track/TextTrackCueGeneric.h:
+        (WebCore::TextTrackCueGeneric::foregroundColor): Add color accessors.
+        (WebCore::TextTrackCueGeneric::setForegroundColor):
+        (WebCore::TextTrackCueGeneric::backgroundColor):
+        (WebCore::TextTrackCueGeneric::setBackgroundColor):
+
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::registerForCaptionPreferencesChangedCallbacks): Always
+            regenerate override CSS when an element registers for callbacks.
+        (WebCore::CaptionUserPreferencesMac::captionsWindowCSS): Drive by fix of "window color" padding.
+        (WebCore::CaptionUserPreferencesMac::captionsStyleSheetOverride): Log the stylesheet generated
+            for easier debugging.
+
+        * platform/graphics/InbandTextTrackPrivateClient.h:
+        (WebCore::GenericCueData::foregroundColor): Add color getters/setters.
+        (WebCore::GenericCueData::setForegroundColor):
+        (WebCore::GenericCueData::backgroundColor):
+        (WebCore::GenericCueData::setBackgroundColor):
+
+        * platform/graphics/avfoundation/InbandTextTrackPrivateAVF.cpp:
+        (WebCore::makeRGBA32FromARGBCFArray): Initialize a RGBA32 from a CFArray of color values.
+        (WebCore::InbandTextTrackPrivateAVF::processCueAttributes): Process cue colors.
+
 2013-02-08  Benjamin Poulain  <bpoulain@apple.com>
 
         Move workerThreadCount from TestRunner to WebCore Internals
