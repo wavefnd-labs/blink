@@ -1,3 +1,58 @@
+2013-02-09  Adam Barth  <abarth@webkit.org>
+
+        Load event fires too early with threaded HTML parser
+        https://bugs.webkit.org/show_bug.cgi?id=108984
+
+        Reviewed by Eric Seidel.
+
+        Previously, the DocumentLoader would always be on the stack when the
+        HTMLDocumentParser was processing data from the network.  The
+        DocumentLoader would then tell isLoadingInAPISense not to fire the load
+        event.  Now that we process data asynchronously with the threaded
+        parser, the DocumentLoader is not always on the stack, which means we
+        need to delay the load event using the clause that asks the parser
+        whether it is processing data.
+
+        Unfortunately, that clause is fragile because we can check for load
+        completion while we're switching parsers between the network-created
+        parser and a script-created parser. To avoid accidentially triggerin
+        the load event during these "gaps," this patch introduces a counter on
+        document to record how many parsers are active on the stack.  While
+        that numer is non-zero, we'll delay the load event. When that number
+        reaches zero, we'll check for load complete.
+
+        That last step is required because the DocumentLoader::finishLoading
+        method is no longer guarunteed to check for load complete after calling
+        finish on the parser because the finish operation might complete
+        asynchronously.
+
+        After this patch, the threaded parser passes all but four fast/parser
+        tests.
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::hasActiveParser):
+        (WebCore):
+        (WebCore::Document::decrementActiveParserCount):
+        * dom/Document.h:
+        (Document):
+        (WebCore::Document::incrementActiveParserCount):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+        * html/parser/HTMLParserScheduler.cpp:
+        (WebCore::ActiveParserSession::ActiveParserSession):
+        (WebCore):
+        (WebCore::ActiveParserSession::~ActiveParserSession):
+        (WebCore::PumpSession::PumpSession):
+        (WebCore::PumpSession::~PumpSession):
+        * html/parser/HTMLParserScheduler.h:
+        (WebCore):
+        (ActiveParserSession):
+        (PumpSession):
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::isLoadingInAPISense):
+
 2013-02-09  Mike West  <mkwst@chromium.org>
 
         Use IGNORE_EXCEPTION for initialized, but unused, ExceptionCodes.
