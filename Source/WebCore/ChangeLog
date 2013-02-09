@@ -1,3 +1,30 @@
+2013-02-09  Eric Seidel  <eric@webkit.org>
+
+        Fix TextDocumentParser to play nice with threading
+        https://bugs.webkit.org/show_bug.cgi?id=109240
+
+        Reviewed by Adam Barth.
+
+        Before the HTML5 parser re-write the text document parser
+        was completely custom.  With the HTML5 parser, we just made
+        the TextDocumentParser use the HTMLDocumentParser with an
+        artificial script tag.
+
+        However, our solution was slightly over-engineered to avoid
+        lying about the column numbers of the first line of the text document
+        during parsing. :)
+
+        This change makes us use a simpler (and threading-compatible)
+        solution by just inserting a real "<pre>" tag into the
+        input stream instead of hacking one together with the treebuilder
+        and manually setting the Tokenizer state.
+
+        fast/parser/empty-text-resource.html covers this case.
+
+        * html/parser/TextDocumentParser.cpp:
+        (WebCore::TextDocumentParser::TextDocumentParser):
+        (WebCore::TextDocumentParser::insertFakePreElement):
+
 2013-02-09  Kent Tamura  <tkent@chromium.org>
 
         Add missing copyright header
