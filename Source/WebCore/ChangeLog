@@ -1,3 +1,33 @@
+2013-02-09  Stephen White  <senorblanco@chromium.org>
+
+        [skia] Fix memory management in SkiaImageFilterBuilder and friends.
+        https://bugs.webkit.org/show_bug.cgi?id=109326
+
+        Sadly, skia has no official ref-counted pointers, so we must make do
+        with SkAutoTUnref.
+
+        Reviewed by James Robinson.
+
+        Correctness covered by existing tests in css3/filters.
+
+        * platform/graphics/filters/skia/FEBlendSkia.cpp:
+        (WebCore::FEBlend::createImageFilter):
+        * platform/graphics/filters/skia/FEComponentTransferSkia.cpp:
+        (WebCore::FEComponentTransfer::createImageFilter):
+        * platform/graphics/filters/skia/FELightingSkia.cpp:
+        (WebCore::FELighting::createImageFilter):
+        Adopt refs produced by the build() pass with SkAutoTUnref.
+        * platform/graphics/filters/skia/SkiaImageFilterBuilder.cpp:
+        (WebCore::SkiaImageFilterBuilder::~SkiaImageFilterBuilder):
+        Unref the builder's hashmap effect pointers.
+        (WebCore::SkiaImageFilterBuilder::build):
+        Ref the pointer returned to the caller, and use SkAutoTUnref
+        internally while building the tree.
+        * platform/graphics/filters/skia/SkiaImageFilterBuilder.h:
+        (SkiaImageFilterBuilder):
+        Add a destructor to SkiaImageFilterBuilder.
+
+
 2013-02-09  Dominic Mazzoni  <dmazzoni@google.com>
 
         AX: Rename AXObject::cachedIsIgnoredValue to lastKnownIsIgnoredValue
