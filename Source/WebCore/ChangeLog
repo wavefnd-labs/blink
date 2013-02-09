@@ -1,3 +1,79 @@
+2013-02-08  Dean Jackson  <dino@apple.com>
+
+        Snapshotted plug-in should use shadow root
+        https://bugs.webkit.org/show_bug.cgi?id=108284
+
+        Reviewed by Simon Fraser.
+
+        A snapshotted plugin needs to indicate to the user that it can be clicked
+        to be restarted. Previously this was done with an image that had embedded
+        text. Instead, we now use an internal shadow root to embed some markup that
+        will display instructions that can be localised.
+
+        The UA stylesheet for plug-ins provides a default styling for the label, which
+        can be overridden by ports.
+
+        In the process, RenderSnapshottedPlugIn no longer inherits from RenderEmbeddedObject,
+        since it is only responsible for drawing a paused plug-in. The snapshot creation
+        can work with the default renderer, but a shadow root requires something like
+        RenderBlock in order to draw its children. We swap from one renderer to another when
+        necessary either by creating the shadow root or by explicitly detaching and attaching
+        the plugin element.
+
+        Unfortunately this is difficult to test, because the snapshotting requires
+        time to execute, and also a PluginView to be instantiated.
+
+        * css/plugIns.css:
+        (object::-webkit-snapshotted-plugin-content): New rules for a default label style.
+
+        * platform/LocalizedStrings.cpp: Make sure all ports have plugin strings, now it is called.
+        * platform/LocalizedStrings.h:
+        * platform/blackberry/LocalizedStringsBlackBerry.cpp:
+        * platform/chromium/LocalizedStringsChromium.cpp:
+        * platform/efl/LocalizedStringsEfl.cpp:
+        * platform/gtk/LocalizedStringsGtk.cpp:
+        * platform/qt/LocalizedStringsQt.cpp:
+
+        * html/HTMLPlugInElement.cpp:
+        (WebCore::HTMLPlugInElement::defaultEventHandler): Take into account the fact
+        that RenderSnapshottedPlugIn no longer is an embedded object.
+
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::HTMLPlugInImageElement): New default values in constructor.
+        (WebCore::HTMLPlugInElement::defaultEventHandler): Make sure to call base class.
+        (WebCore::HTMLPlugInElement::willRecalcStyle): No need to reattach if we're a snapshot.
+        (WebCore::HTMLPlugInImageElement::createRenderer): If we're showing a snapshot, create such
+            a renderer, otherwise use the typical plug-in path.
+        (WebCore::HTMLPlugInImageElement::updateSnapshot): Keep a record of the snapshot, since we'll
+            need to give it to the renderer.
+        (WebCore::HTMLPlugInImageElement::didAddUserAgentShadowRoot): Build a subtree that will display a label.
+        * html/HTMLPlugInImageElement.h:
+        (HTMLPlugInImageElement): New member variable to record the snapshot image and whether the label
+            should show immediately.
+        (WebCore::HTMLPlugInImageElement::swapRendererTimerFired): The callback function triggered when we need
+            to swap to the Shadow Root.
+        (WebCore::HTMLPlugInImageElement::userDidClickSnapshot): The user has tapped on the snapshot so the plugin
+            in being recreated. Make sure we reattach so that a plugin renderer will be created.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): Make sure we set the right
+            displayState for snapshots.
+        * html/HTMLPlugInImageElement.h:
+        (HTMLPlugInImageElement): The new methods listed above.
+        (WebCore::HTMLPlugInImageElement::setShouldShowSnapshotLabelAutomatically): Indicates whether or not
+            a snapshot should be immediately labeled.
+
+        * page/ChromeClient.h: No need for plugInStartLabelImage any more.
+
+        * rendering/RenderSnapshottedPlugIn.cpp:
+        (WebCore::RenderSnapshottedPlugIn::RenderSnapshottedPlugIn): New inheritance.
+        (WebCore::RenderSnapshottedPlugIn::paint): If we're in the background paint phase, render the snapshot image.
+        (WebCore::RenderSnapshottedPlugIn::paintSnapshotImage): Rename.
+        (WebCore::RenderSnapshottedPlugIn::paintSnapshot): Rename.
+        (WebCore::RenderSnapshottedPlugIn::paintSnapshotWithLabel): Rename. No need for label sizes.
+        (WebCore::RenderSnapshottedPlugIn::getCursor):
+        (WebCore::RenderSnapshottedPlugIn::handleEvent): The renderer doesn't restart the plug-in any more. Tell the element and it will do it.
+        * rendering/RenderSnapshottedPlugIn.h:
+        (RenderSnapshottedPlugIn): New inheritance. Some method renaming.
+
 2013-02-08  Kentaro Hara  <haraken@chromium.org>
 
         {FocusIn,FocusOut,Focus,Blur}EventDispatchMediator should be in FocusEvent.cpp
