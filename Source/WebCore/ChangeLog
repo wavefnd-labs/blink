@@ -1,3 +1,116 @@
+2013-02-09  Mike West  <mkwst@chromium.org>
+
+        Use IGNORE_EXCEPTION for initialized, but unused, ExceptionCodes.
+        https://bugs.webkit.org/show_bug.cgi?id=109295
+
+        Reviewed by Darin Adler.
+
+        The monster patch in http://wkbug.com/108771 missed an entire class of
+        ignored exceptions. It only dealt with call sites that never initialized
+        the ExceptionCode variable, on the assumption that only such call sites
+        would ignore the variable's value.
+
+        That was a flawed assumption: a large number of sites that initialize the
+        ExceptionCode to 0 ignore it regardless. This patch deals with the
+        almost-as-large set of callsites that initialize the variable, pass it to
+        a function, and then never touch it again.
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::forceClose):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::ariaSelectedTextRange):
+        (WebCore::AccessibilityRenderObject::visiblePositionForIndex):
+        (WebCore::AccessibilityRenderObject::indexForVisiblePosition):
+        * accessibility/atk/WebKitAccessibleInterfaceText.cpp:
+        (getSelectionOffsetsForObject):
+        * accessibility/atk/WebKitAccessibleUtil.cpp:
+        (selectionBelongsToObject):
+        * dom/Node.cpp:
+        (WebCore::Node::textRects):
+        * editing/DeleteButtonController.cpp:
+        (WebCore::DeleteButtonController::hide):
+        * editing/EditingStyle.cpp:
+        (WebCore::EditingStyle::styleAtSelectionStart):
+        * editing/Editor.cpp:
+        (WebCore::Editor::canDeleteRange):
+        (WebCore::Editor::pasteAsPlainText):
+        (WebCore::Editor::pasteAsFragment):
+        (WebCore::Editor::shouldDeleteRange):
+        (WebCore::Editor::dispatchCPPEvent):
+        (WebCore::Editor::setComposition):
+        (WebCore::Editor::advanceToNextMisspelling):
+        (WebCore::isFrameInRange):
+        * editing/EditorCommand.cpp:
+        (WebCore::expandSelectionToGranularity):
+        * editing/MergeIdenticalElementsCommand.cpp:
+        (WebCore::MergeIdenticalElementsCommand::doApply):
+        * editing/SplitElementCommand.cpp:
+        (WebCore::SplitElementCommand::doUnapply):
+        * editing/SplitTextNodeCommand.cpp:
+        (WebCore::SplitTextNodeCommand::doApply):
+        * editing/TextCheckingHelper.cpp:
+        (WebCore::expandToParagraphBoundary):
+        (WebCore::TextCheckingHelper::findFirstMisspellingOrBadGrammar):
+        (WebCore::TextCheckingHelper::isUngrammatical):
+        (WebCore::TextCheckingHelper::guessesForMisspelledOrUngrammaticalRange):
+        * editing/TextInsertionBaseCommand.cpp:
+        (WebCore::dispatchBeforeTextInsertedEvent):
+        (WebCore::canAppendNewLineFeedToSelection):
+        * editing/TextIterator.cpp:
+        (WebCore::findPlainText):
+        * editing/htmlediting.cpp:
+        (WebCore::extendRangeToWrappingNodes):
+        (WebCore::isNodeVisiblyContainedWithin):
+        * editing/visible_units.cpp:
+        (WebCore::nextBoundary):
+        * html/FileInputType.cpp:
+        (WebCore::FileInputType::createShadowSubtree):
+        * html/HTMLKeygenElement.cpp:
+        (WebCore::HTMLKeygenElement::HTMLKeygenElement):
+        * html/HTMLScriptElement.cpp:
+        (WebCore::HTMLScriptElement::setText):
+        * html/HTMLTitleElement.cpp:
+        (WebCore::HTMLTitleElement::setText):
+        * html/HTMLTrackElement.cpp:
+        (WebCore::HTMLTrackElement::didCompleteLoad):
+        * html/RangeInputType.cpp:
+        (WebCore::RangeInputType::createShadowSubtree):
+        * html/SearchInputType.cpp:
+        (WebCore::SearchInputType::createShadowSubtree):
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::createShadowSubtree):
+        * html/track/TextTrackList.cpp:
+        (TextTrackList::asyncEventTimerFired):
+        * inspector/DOMPatchSupport.cpp:
+        (WebCore::DOMPatchSupport::patchDocument):
+        * inspector/InspectorDatabaseAgent.cpp:
+        (WebCore):
+        * inspector/InspectorFileSystemAgent.cpp:
+        (WebCore):
+        * page/DOMSelection.cpp:
+        (WebCore::DOMSelection::addRange):
+        * page/DragController.cpp:
+        (WebCore::DragController::dispatchTextInputEventFor):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::dispatchMouseEvent):
+        (WebCore::EventHandler::handleTouchEvent):
+        * page/FrameActionScheduler.cpp:
+        (WebCore::EventFrameAction::fire):
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm:
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::shouldWaitForLoadingOfResource):
+        * svg/SVGDocument.cpp:
+        (WebCore::SVGDocument::dispatchZoomEvent):
+        (WebCore::SVGDocument::dispatchScrollEvent):
+        * svg/SVGLength.cpp:
+        (WebCore::SVGLength::SVGLength):
+        (WebCore::SVGLength::value):
+        * xml/parser/XMLDocumentParser.cpp:
+        (WebCore::XMLDocumentParser::exitText):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::XMLDocumentParser::parse):
+        (WebCore::XMLDocumentParser::startDocument):
+        (WebCore::XMLDocumentParser::parseCharacters):
+
 2013-02-09  Stephen White  <senorblanco@chromium.org>
 
         [skia] Fix memory management in SkiaImageFilterBuilder and friends.
