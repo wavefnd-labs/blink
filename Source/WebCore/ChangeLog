@@ -1,3 +1,37 @@
+2013-02-10  Philippe Normand  <pnormand@igalia.com>
+
+        [GStreamer] media/video-controls-fullscreen-volume.html crashes
+        https://bugs.webkit.org/show_bug.cgi?id=108682
+
+        Reviewed by Martin Robinson.
+
+        Clean up various signal handlers and avoid bad interaction between
+        the FullscreenVideoControllerGStreamer and its subclasses,
+        especially when the platform video window is created.
+
+        * platform/graphics/gstreamer/FullscreenVideoControllerGStreamer.cpp:
+        (WebCore::FullscreenVideoControllerGStreamer::enterFullscreen):
+        Initialize the window before connecting to the volume/mute
+        signals. This ensures that the signals won't ever interfere with
+        an inexisting window.
+        * platform/graphics/gstreamer/GStreamerGWorld.cpp:
+        (WebCore::GStreamerGWorld::~GStreamerGWorld): Remove GstBus
+        synchronous handler function.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp:
+        (WebCore::MediaPlayerPrivateGStreamerBase::~MediaPlayerPrivateGStreamerBase):
+        Disconnect from volume/mute signals.
+        (WebCore::MediaPlayerPrivateGStreamerBase::setStreamVolumeElement):
+        Keep a trace of volume/mute signal handlers.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.h:
+        Various forward type declarations to avoid un-necessary header includes.
+        (MediaPlayerPrivateGStreamerBase):
+        * platform/graphics/gtk/FullscreenVideoControllerGtk.cpp:
+        (WebCore::FullscreenVideoControllerGtk::FullscreenVideoControllerGtk):
+        (WebCore::FullscreenVideoControllerGtk::volumeChanged): Bail out
+        if volume button hasn't been created yet.
+        (WebCore::FullscreenVideoControllerGtk::muteChanged): Ditto.
+
 2013-02-10  Andreas Kling  <akling@apple.com>
 
         RenderStyle should use copy-on-write inheritance for NinePieceImage.
