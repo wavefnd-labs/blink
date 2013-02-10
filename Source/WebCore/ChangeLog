@@ -1,3 +1,29 @@
+2013-02-10  Andreas Kling  <akling@apple.com>
+
+        RenderText: Access characters through m_text instead of caching data pointers separately.
+        <http://webkit.org/b/109357>
+
+        Reviewed by Antti Koivisto.
+
+        Go through RenderText::m_text.impl() instead of caching the character data pointer.
+        RenderText should never have a null String in m_text so it's safe to access impl() directly.
+        We have assertions for this since before.
+
+        Removing this pointer shrinks RenderText by 8 bytes, allowing it to fit into a snugger size class.
+        749 KB progression on Membuster3.
+
+        * rendering/RenderText.cpp:
+        (SameSizeAsRenderText):
+        (WebCore::RenderText::RenderText):
+        (WebCore::RenderText::setTextInternal):
+        * rendering/RenderText.h:
+        (WebCore::RenderText::is8Bit):
+        (WebCore::RenderText::characters8):
+        (WebCore::RenderText::characters16):
+        (WebCore::RenderText::characterAt):
+        (WebCore::RenderText::operator[]):
+        (RenderText):
+
 2013-02-10  Jae Hyun Park  <jae.park08@gmail.com>
 
         Rename ENABLE(GLIB_SUPPORT) to USE(GLIB)
