@@ -1,3 +1,26 @@
+2013-02-09  Dominic Mazzoni  <dmazzoni@google.com>
+
+        fast/encoding/parser-tests-*.html tests sometimes crash
+        https://bugs.webkit.org/show_bug.cgi?id=108058
+
+        Reviewed by Chris Fleizach.
+
+        To avoid calling accessibilityIsIgnored while the render
+        tree is unstable, call accessibilityIsIgnored in the
+        notification timer handler, only for childrenChanged
+        notifications.
+
+        This exposed a problem where notifications queued on
+        objects can fire after the object has been deleted; fix that
+        by checking the object's id, which is always set to 0 when
+        removed from the tree.
+
+        Covered by existing tests.
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore::AXObjectCache::childrenChanged):
+        (WebCore::AXObjectCache::notificationPostTimerFired):
+
 2013-02-09  Eric Carlson  <eric.carlson@apple.com>
 
         [Mac] Do not assume MediaAccessibility framework is installed
