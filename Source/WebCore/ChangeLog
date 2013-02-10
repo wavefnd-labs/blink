@@ -1,3 +1,59 @@
+2013-02-10  Andreas Kling  <akling@apple.com>
+
+        RenderStyle should use copy-on-write inheritance for NinePieceImage.
+        <http://webkit.org/b/109366>
+
+        Reviewed by Antti Koivisto.
+
+        Refactor NinePieceImage to hold a copy-on-write DataRef like other RenderStyle substructures.
+        This allows us to avoids copying the NinePieceImageData when one RenderStyle inherits from another
+        but modifies something in the substructure holding the NinePieceImage (typically StyleSurroundData.)
+
+        Also made RenderStyle not copy-on-write its StyleSurroundData prematurely when doing a no-op write
+        to a border-image related value.
+
+        1.23 MB progression on Membuster3.
+
+        * rendering/style/NinePieceImage.cpp:
+        (WebCore::defaultData):
+        (WebCore::NinePieceImage::NinePieceImage):
+        (WebCore::NinePieceImageData::NinePieceImageData):
+        (WebCore::NinePieceImageData::operator==):
+        * rendering/style/NinePieceImage.h:
+        (WebCore::NinePieceImageData::create):
+        (WebCore::NinePieceImageData::copy):
+        (NinePieceImageData):
+        (NinePieceImage):
+        (WebCore::NinePieceImage::operator==):
+        (WebCore::NinePieceImage::operator!=):
+        (WebCore::NinePieceImage::hasImage):
+        (WebCore::NinePieceImage::image):
+        (WebCore::NinePieceImage::setImage):
+        (WebCore::NinePieceImage::imageSlices):
+        (WebCore::NinePieceImage::setImageSlices):
+        (WebCore::NinePieceImage::fill):
+        (WebCore::NinePieceImage::setFill):
+        (WebCore::NinePieceImage::borderSlices):
+        (WebCore::NinePieceImage::setBorderSlices):
+        (WebCore::NinePieceImage::outset):
+        (WebCore::NinePieceImage::setOutset):
+        (WebCore::NinePieceImage::horizontalRule):
+        (WebCore::NinePieceImage::setHorizontalRule):
+        (WebCore::NinePieceImage::verticalRule):
+        (WebCore::NinePieceImage::setVerticalRule):
+        (WebCore::NinePieceImage::copyImageSlicesFrom):
+        (WebCore::NinePieceImage::copyBorderSlicesFrom):
+        (WebCore::NinePieceImage::copyOutsetFrom):
+        (WebCore::NinePieceImage::copyRepeatFrom):
+        (WebCore::NinePieceImage::setMaskDefaults):
+        (WebCore::NinePieceImage::computeOutset):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::setBorderImageSource):
+        (WebCore::RenderStyle::setBorderImageSlices):
+        (WebCore::RenderStyle::setBorderImageWidth):
+        (WebCore::RenderStyle::setBorderImageOutset):
+        * rendering/style/RenderStyle.h:
+
 2013-02-10  Kent Tamura  <tkent@chromium.org>
 
         Unreviewed, rolling out r142343.
