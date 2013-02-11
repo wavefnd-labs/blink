@@ -1,3 +1,104 @@
+2013-02-10  Eric Seidel  <eric@webkit.org>
+
+        Make the existing HTMLPreloadScanner threading-aware
+        https://bugs.webkit.org/show_bug.cgi?id=107807
+
+        Reviewed by Adam Barth.
+
+        The HTMLPreloadScanner and CSSPreloadScanner do a number of things.
+        CSSPreloadScanner is mostly just a helper class for HTMLPreloadScanner.
+        HTMLPreloadScanner runs its own copy of the HTMLTokenizer and uses
+        HTMLTokenizer::updateStateFor to emulate enough of the TreeBuilder
+        to get a realistic stream of tokens.  It does some additional TreeBuilder
+        emulation, including tracking template tags and base tags, but mostly
+        just scans the token stream for start-tags and looks for URLs in them.
+        It tracks when it has seen a <style> tag and starts sending all character tokens
+        to the CSSPreloadScanner until a </style> tag is seen.
+        It also (unfortunately) knows some about the loader guts and how to construct
+        a proper CachedResourcRequest and issue a preload.
+
+        This patch changes the model so that the preload scanners only know how to produce
+        PreloadRequest objects and append them to a passed-in vector.
+
+        This changes the preload-scanner behavior so that preloads are now all issued in one large
+        batch at the end of scanning, instead of as we hit each resource.  It's possible that
+        we'll wait to instead check for preload requests more often, at a possible tradeoff
+        to tokenizing speed.
+
+        An alternate approach might be to pass in a preload-delegate of sorts which knew how
+        to either build a vector, or send requests immediately.  For now the build-a-vector-always
+        approach seems clean, and does not seem to slow down our PerformanceTest microbenchmarks at least.
+
+        This patch has 2 main pieces:
+        - Remove Document and (and loader) dependencies from HTMLPreloadScanner/CSSPreloadScanner
+          This is done through introduction of a new HTMLResourcePreloader class which holds
+          a Document* and knows how to talk to the CachedResourceLoader.
+        - Clean-up HTMLPreloadScanners token-loop to not be tied to having a Tokenizer.
+          (On a background thead, the HTMLPreloadScanner won't own the tokenizer, it will just
+           be passed in tokens and expected to issue loads if necessary.)
+
+        This passes all of the LayoutTests using the main thread parser.
+
+        This patch does not make the HTMLPreloadScanner 100% ready for threading
+        (it still uses AtomicString which is currently not-OK on the parser thread)
+        but it's very close.  Two further (already written) patches will complete this.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * html/parser/CSSPreloadScanner.cpp:
+        (WebCore::CSSPreloadScanner::CSSPreloadScanner):
+        (WebCore::CSSPreloadScanner::scan):
+        (WebCore::CSSPreloadScanner::emitRule):
+        * html/parser/CSSPreloadScanner.h:
+        (CSSPreloadScanner):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::HTMLDocumentParser):
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+        (WebCore::HTMLDocumentParser::insert):
+        (WebCore::HTMLDocumentParser::append):
+        (WebCore::HTMLDocumentParser::appendCurrentInputStreamToPreloadScannerAndScan):
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::isStartTag):
+        (WebCore):
+        (WebCore::isStartOrEndTag):
+        (WebCore::PreloadTask::processAttributes):
+        (WebCore::PreloadTask::charset):
+        (PreloadTask):
+        (WebCore::PreloadTask::resourceType):
+        (WebCore::PreloadTask::shouldPreload):
+        (WebCore::PreloadTask::createPreloadRequest):
+        (WebCore::HTMLPreloadScanner::HTMLPreloadScanner):
+        (WebCore::HTMLPreloadScanner::scan):
+        (WebCore::HTMLPreloadScanner::processPossibleTemplateTag):
+        (WebCore::HTMLPreloadScanner::processPossibleStyleTag):
+        (WebCore::HTMLPreloadScanner::processPossibleBaseTag):
+        (WebCore::HTMLPreloadScanner::processToken):
+        * html/parser/HTMLPreloadScanner.h:
+        (HTMLPreloadScanner):
+        * html/parser/HTMLResourcePreloader.cpp: Added.
+        (WebCore):
+        (WebCore::isStringSafeToSendToAnotherThread):
+        (WebCore::PreloadRequest::isSafeToSendToAnotherThread):
+        (WebCore::PreloadRequest::completeURL):
+        (WebCore::PreloadRequest::resourceRequest):
+        (WebCore::HTMLResourcePreloader::preload):
+        * html/parser/HTMLResourcePreloader.h: Added.
+        (WebCore):
+        (PreloadRequest):
+        (WebCore::PreloadRequest::create):
+        (WebCore::PreloadRequest::PreloadRequest):
+        (HTMLResourcePreloader):
+        (WebCore::HTMLResourcePreloader::HTMLResourcePreloader):
+        (WebCore::HTMLResourcePreloader::createWeakPtr):
+        * loader/cache/CachedResourceRequest.h:
+
 2013-02-06  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Rename isolated() to getWorld(), rename worldForEnteredContextIfIsolated() to worldForEnteredContext()
