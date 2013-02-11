@@ -1,3 +1,30 @@
+2013-02-11  Anton Vayvod  <avayvod@chromium.org>
+
+        [Text Autosizing] Collect narrow descendants and process them separately. Refactoring for
+        a change to follow.
+        https://bugs.webkit.org/show_bug.cgi?id=109054
+
+        Preparational change to combine narrow descendants of the same autosizing cluster into
+        groups by the width difference between the descendant and the block containing all text of
+        the parent autosizing cluster. The groups will be autosized with the same multiplier.
+
+        For example, on sites with a sidebar, sometimes the paragraphs next to the sidebar will have
+        a large margin individually applied (via a CSS selector), causing them all to individually
+        appear narrower than their enclosing blockContainingAllText. Rather than making each of
+        these paragraphs into a separate cluster, we eventually want to be able to merge them back
+        together into one (or a few) descendant clusters.
+
+        Reviewed by Julien Chaffraix.
+
+        No behavioral changes thus no new tests or test changes.
+
+        * rendering/TextAutosizer.cpp:
+        (TextAutosizingClusterInfo): Vector of narrow descendants.
+        (WebCore::TextAutosizer::processCluster): Process narrow descendants separately.
+        (WebCore::TextAutosizer::processContainer):
+
+            Remember narrow descendants of the parent cluster for later processing.
+
 2013-02-11  Enrica Casucci  <enrica@apple.com>
 
         Add ENABLE_DELETION_UI to control the use of the deletion UI.
