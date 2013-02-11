@@ -1,3 +1,114 @@
+2013-02-11  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: WebInspector.Project refactorings.
+        https://bugs.webkit.org/show_bug.cgi?id=109433
+
+        Reviewed by Alexander Pavlov.
+
+        This change prepares Workspace and Project to migration to project-per-domain mode for network based projects.
+        Renamed WebInspector.WorkspaceProvider to WebInspector.ProjectDelegate.
+        Renamed Project.name() to Project.id() and delegated it to project delegate.
+        Added Project.displayName() method that is delegated to project delegate.
+        SimpleWorkspaceProvider is now responsible for creation of SimpleWorkspaceDelegates and
+        isolates various mappings from Project/ProjectDelegate concept.
+        UISourceCode is now created based on path in the project.
+        UISourceCode uri is now calculated based on project and path (right now uri is equal to path).
+
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * inspector/compile-front-end.py:
+        * inspector/front-end/FileSystemProjectDelegate.js: Renamed from Source/WebCore/inspector/front-end/FileSystemWorkspaceProvider.js.
+        (WebInspector.FileSystemProjectDelegate):
+        (WebInspector.FileSystemProjectDelegate.prototype.id):
+        (WebInspector.FileSystemProjectDelegate.prototype.type):
+        (WebInspector.FileSystemProjectDelegate.prototype.displayName):
+        (WebInspector.FileSystemProjectDelegate.prototype.innerCallback):
+        (WebInspector.FileSystemProjectDelegate.prototype.requestFileContent):
+        (WebInspector.FileSystemProjectDelegate.prototype.setFileContent):
+        (WebInspector.FileSystemProjectDelegate.prototype.contentCallback):
+        (WebInspector.FileSystemProjectDelegate.prototype.searchInFileContent):
+        (WebInspector.FileSystemProjectDelegate.prototype._contentTypeForPath):
+        (WebInspector.FileSystemProjectDelegate.prototype._populate.filesLoaded):
+        (WebInspector.FileSystemProjectDelegate.prototype._populate):
+        (WebInspector.FileSystemProjectDelegate.prototype._addFile):
+        (WebInspector.FileSystemProjectDelegate.prototype._removeFile):
+        (WebInspector.FileSystemProjectDelegate.prototype.reset):
+        (WebInspector.FileSystemUtils):
+        (WebInspector.FileSystemUtils.errorHandler):
+        (WebInspector.FileSystemUtils.requestFileSystem):
+        (.fileSystemLoaded):
+        (.innerCallback):
+        (WebInspector.FileSystemUtils.requestFilesRecursive):
+        (.fileEntryLoaded):
+        (.fileLoaded):
+        (.readerLoadEnd):
+        (WebInspector.FileSystemUtils.requestFileContent):
+        (.fileWriterCreated.fileTruncated):
+        (.fileWriterCreated):
+        (.writerEnd):
+        (WebInspector.FileSystemUtils.setFileContent):
+        (WebInspector.FileSystemUtils._getDirectory):
+        (.toArray):
+        (WebInspector.FileSystemUtils._readDirectory):
+        (WebInspector.FileSystemUtils._requestEntries):
+        * inspector/front-end/IsolatedFileSystemModel.js:
+        (WebInspector.IsolatedFileSystemModel.prototype._innerAddFileSystem):
+        * inspector/front-end/SimpleWorkspaceProvider.js:
+        (WebInspector.SimpleProjectDelegate):
+        (WebInspector.SimpleProjectDelegate.prototype.id):
+        (WebInspector.SimpleProjectDelegate.prototype.displayName):
+        (WebInspector.SimpleProjectDelegate.prototype.requestFileContent):
+        (WebInspector.SimpleProjectDelegate.prototype.setFileContent):
+        (WebInspector.SimpleProjectDelegate.prototype.searchInFileContent):
+        (WebInspector.SimpleProjectDelegate.prototype.addFile):
+        (WebInspector.SimpleProjectDelegate.prototype._uniquePath):
+        (WebInspector.SimpleProjectDelegate.prototype.removeFile):
+        (WebInspector.SimpleProjectDelegate.prototype.reset):
+        (WebInspector.SimpleWorkspaceProvider):
+        (WebInspector.SimpleWorkspaceProvider.uriForURL):
+        (WebInspector.SimpleWorkspaceProvider.prototype.addFileForURL):
+        (WebInspector.SimpleWorkspaceProvider.prototype.addUniqueFileForURL):
+        (WebInspector.SimpleWorkspaceProvider.prototype._innerAddFileForURL):
+        (WebInspector.SimpleWorkspaceProvider.prototype.removeFile):
+        (WebInspector.SimpleWorkspaceProvider.prototype.reset):
+        * inspector/front-end/UISourceCode.js:
+        (WebInspector.UISourceCode):
+        (WebInspector.UISourceCode.prototype.path):
+        (WebInspector.UISourceCode.prototype.uri):
+        * inspector/front-end/WebKit.qrc:
+        * inspector/front-end/Workspace.js:
+        (WebInspector.FileDescriptor):
+        (WebInspector.ProjectDelegate):
+        (WebInspector.ProjectDelegate.prototype.id):
+        (WebInspector.ProjectDelegate.prototype.displayName):
+        (WebInspector.ProjectDelegate.prototype.requestFileContent):
+        (WebInspector.ProjectDelegate.prototype.setFileContent):
+        (WebInspector.ProjectDelegate.prototype.searchInFileContent):
+        (WebInspector.Project):
+        (WebInspector.Project.prototype.id):
+        (WebInspector.Project.prototype.type):
+        (WebInspector.Project.prototype.displayName):
+        (WebInspector.Project.prototype.isServiceProject):
+        (WebInspector.Project.prototype._fileAdded):
+        (WebInspector.Project.prototype._fileRemoved):
+        (WebInspector.Project.prototype._reset):
+        (WebInspector.Project.prototype.uiSourceCode):
+        (WebInspector.Project.prototype.uiSourceCodeForOriginURL):
+        (WebInspector.Project.prototype.uiSourceCodeForURI):
+        (WebInspector.Project.prototype.uiSourceCodes):
+        (WebInspector.Project.prototype.requestFileContent):
+        (WebInspector.Project.prototype.setFileContent):
+        (WebInspector.Project.prototype.searchInFileContent):
+        (WebInspector.Project.prototype.dispose):
+        (WebInspector.Workspace.prototype.uiSourceCode):
+        (WebInspector.Workspace.prototype.uiSourceCodeForURI):
+        (WebInspector.Workspace.prototype.addProject):
+        (WebInspector.Workspace.prototype.removeProject):
+        (WebInspector.Workspace.prototype.project):
+        (WebInspector.Workspace.prototype.uiSourceCodes):
+        (WebInspector.Workspace.prototype.projectForUISourceCode):
+        * inspector/front-end/inspector.html:
+
 2013-02-11  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: fix closure compiler warnings in the profiler code
