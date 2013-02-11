@@ -1,3 +1,62 @@
+2013-02-04  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Remove V8GCController::m_edenNodes and make minor DOM GC more precise
+        https://bugs.webkit.org/show_bug.cgi?id=108579
+
+        Reviewed by Adam Barth.
+
+        Currently V8GCController::m_edenNodes stores a list of nodes whose
+        wrappers have been created since the latest GC. The reason why we
+        needed m_edenNodes is that there was no way to know a list of wrappers
+        in the new space of V8. By using m_edenNodes, we had been approximating
+        'wrappers in the new space' by 'wrappers that have been created since
+        the latest GC'.
+
+        Now V8 provides VisitHandlesForPartialDependence(), with which WebKit
+        can know a list of wrappers in the new space. By using the API, we can
+        remove V8GCController::m_edenNodes. The benefit is that (1) we no longer
+        need to keep m_edenNodes and that (2) it enables more precise minor
+        DOM GC (Remember that m_edenNodes was just an approximation).
+
+        Performance benchmark: https://bugs.webkit.org/attachment.cgi?id=185940
+        The benchmark runs 300 iterations, each of which creates 100000 elements.
+        The benchmark measures average, min, median, max and stdev of execution times
+        of the 300 iterations. This will tell us the worst-case overhead of this change.
+
+        Before:
+          mean=59.91ms, min=39ms, median=42ms, max=258ms, stdev=47.48ms
+
+        After:
+          mean=58.75ms, min=35ms, median=41ms, max=250ms, stdev=47.32ms
+
+        As shown above, I couldn't observe any performance regression.
+
+        No tests. No change in behavior.
+
+        * bindings/v8/DOMDataStore.h:
+        (WebCore::DOMDataStore::setWrapperInObject):
+        * bindings/v8/DOMWrapperWorld.h:
+        (DOMWrapperWorld):
+        (WebCore::DOMWrapperWorld::getWorldWithoutContextCheck):
+        * bindings/v8/V8Binding.h:
+        (WebCore):
+        (WebCore::worldForEnteredContextIfIsolated):
+        (WebCore::worldForEnteredContextWithoutContextCheck):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::initializeIfNeeded):
+        * bindings/v8/V8GCController.cpp:
+        (WebCore::gcTree):
+        (WebCore):
+        (MinorGCWrapperVisitor):
+        (WebCore::MinorGCWrapperVisitor::MinorGCWrapperVisitor):
+        (WebCore::MinorGCWrapperVisitor::notifyFinished):
+        (WebCore::MajorGCWrapperVisitor::MajorGCWrapperVisitor):
+        (WebCore::V8GCController::gcPrologue):
+        (WebCore::V8GCController::minorGCPrologue):
+        (WebCore::V8GCController::majorGCPrologue):
+        * bindings/v8/V8GCController.h:
+        (V8GCController):
+
 2013-02-10  Tim Horton  <timothy_horton@apple.com>
 
         REGRESSION (r132422): Page content and scrollbars are incorrectly offset after restoring a page from the page cache
