@@ -1,3 +1,79 @@
+2013-02-11  Bem Jones-Bey  <bjonesbe@adobe.com>
+
+        [CSS Exclusions] Handle shape-outside changing a float's overhang behavior
+        https://bugs.webkit.org/show_bug.cgi?id=106927
+
+        Reviewed by Julien Chaffraix.
+
+        When the position on a shape outside causes a float to spill out into
+        another block than it's container, it was not being drawn correctly. It
+        became apparent that in order to fix this properly, the approach to
+        positioning shape outsides and floats needed to be changed. The new
+        approach also fixes some other outstanding issues, like hit detection.
+
+        When a float has a shape outside, inline and float layout happens
+        using the exclusion shape bounds instead of the float's box.  The
+        effect of this is that the float itself no longer has any effect on
+        layout, both with respect to positioning of the float's siblings as
+        well as positioning the float's box. This means that when the float is
+        positioned, it is the shape's box that must obey the positioning rules
+        for floats. When the shape is given a position relative to the float's
+        box, the rules for float positioning determine where the shape sits
+        in the parent, causing the float's box to be offset by the position of
+        the shape. Since the float's box does not affect layout (due to the
+        shape), this is similar to relative positioning in that the offset is
+        a paint time occurrence.
+
+        So the new approach is to implement positioning of shape outside on
+        floats similar to how relative positioning is implemented, using a
+        RenderLayer.
+
+        This is also tested by the existing tests for shape outside on floats positioning.
+
+        Test: fast/exclusions/shape-outside-floats/shape-outside-floats-overhang.html
+
+        * rendering/ExclusionShapeOutsideInfo.h:
+        (WebCore::ExclusionShapeOutsideInfo::shapeLogicalOffset): Utility method to create a LayoutSize for computing the layer offset.
+        (ExclusionShapeOutsideInfo):
+        * rendering/LayoutState.cpp:
+        (WebCore::LayoutState::LayoutState): Check for floats with shape outside as well as in flow positioning.
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::flipFloatForWritingModeForChild): Remove old positioning implementation.
+        (WebCore::RenderBlock::paintFloats): Remove old positioning implementation.
+        (WebCore::RenderBlock::blockSelectionGaps): Check for floats with shape outside as well as in flow positioning.
+        (WebCore::RenderBlock::positionNewFloats): Remove old positioning implementation.
+        (WebCore::RenderBlock::addOverhangingFloats): Remove FIXME.
+        (WebCore::positionForPointRespectingEditingBoundaries): Check for floats with shape outside as well as in flow positioning.
+        * rendering/RenderBlock.h:
+        (RenderBlock): Remove old positioning implementation.
+        (WebCore::RenderBlock::xPositionForFloatIncludingMargin): Remove old positioning implementation.
+        (WebCore::RenderBlock::yPositionForFloatIncludingMargin): Remove old positioning implementation.
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::mapLocalToContainer): Check for floats with shape outside as well as in flow positioning.
+        (WebCore::RenderBox::offsetFromContainer): Check for floats with shape outside as well as in flow positioning.
+        (WebCore::RenderBox::computeRectForRepaint): Check for floats with shape outside as well as in flow positioning.
+        (WebCore::RenderBox::layoutOverflowRectForPropagation): Check for floats with shape outside as well as in flow positioning.
+        * rendering/RenderBox.h: Make floats with shape outside get a layer.
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::paintOffset): Method to return in flow
+            positioning offset + offset from shape outside on floats.
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject): Add paintOffset method.
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::clippedOverflowRectForRepaint): Check for floats with shape outside as well as in flow positioning.
+        (WebCore::RenderInline::computeRectForRepaint): Check for floats with shape outside as well as in flow positioning.
+        (WebCore::RenderInline::mapLocalToContainer): Check for floats with shape outside as well as in flow positioning.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPosition): Check for floats with shape outside as well as in flow positioning.
+        (WebCore::RenderLayer::calculateClipRects): Check for floats with shape outside as well as in flow positioning.
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::paintOffset): Rename offsetForInFlowPosition to reflect that it's not just for
+            in flow positioning, it also reflects shape outside position on floats.
+        (RenderLayer):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::hasPaintOffset): Determines if this object is in flow positioined or is a float with shape outside.
+        * rendering/style/RenderStyle.h: Add hasPaintOffset method, analagous to method with same name on RenderObject.
+
 2013-02-11  Tim Horton  <timothy_horton@apple.com>
 
         FrameView::setScrollPosition should clamp scroll position before handing it to
