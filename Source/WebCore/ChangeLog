@@ -1,3 +1,62 @@
+2013-02-11  Eric Seidel  <eric@webkit.org>
+
+        Make WebVTTTokenizer stop inheriting from MarkupTokenizerBase
+        https://bugs.webkit.org/show_bug.cgi?id=109411
+
+        Reviewed by Adam Barth.
+
+        Moved InputStreamPreprocessor into its own header file so it can be
+        used by both WebVTTTokenizer and HTMLTokenizer.
+
+        Also split out kEndOfFileMarker from InputStreamPreprocessor<T> so that
+        it can be used w/o a specific instantiation of the template class.
+        This also made it possible to fix three old fixmes about wanting to share
+        that constant.
+
+        Again, separating WebVTT code from Markup* base classes made it simpler
+        at the cost of a little copy/paste code.  WebVTT tokenization is remarkably
+        simple compared to HTML.
+
+        This will make it immediately possible to pull MarkupTokenizerBase up into
+        HTMLTokenizer and further simplify the code.
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::markEndOfFile):
+        * html/parser/HTMLInputStream.h:
+        (WebCore::HTMLInputStream::markEndOfFile):
+        * html/parser/HTMLTokenizer.cpp:
+        (WebCore::HTMLTokenizer::nextToken):
+        * html/parser/InputStreamPreprocessor.h: Added.
+        (WebCore):
+        (InputStreamPreprocessor):
+        (WebCore::InputStreamPreprocessor::InputStreamPreprocessor):
+        (WebCore::InputStreamPreprocessor::nextInputCharacter):
+        (WebCore::InputStreamPreprocessor::peek):
+        (WebCore::InputStreamPreprocessor::advance):
+        (WebCore::InputStreamPreprocessor::skipNextNewLine):
+        (WebCore::InputStreamPreprocessor::reset):
+        (WebCore::InputStreamPreprocessor::shouldTreatNullAsEndOfFileMarker):
+        * html/track/WebVTTTokenizer.cpp:
+        (WebCore::WebVTTTokenizer::WebVTTTokenizer):
+        (WebCore::WebVTTTokenizer::nextToken):
+        * html/track/WebVTTTokenizer.h:
+        (WebVTTTokenizer):
+        (WebCore::WebVTTTokenizer::haveBufferedCharacterToken):
+        (WebCore::WebVTTTokenizer::bufferCharacter):
+        (WebCore::WebVTTTokenizer::emitAndResumeIn):
+        (WebCore::WebVTTTokenizer::emitEndOfFile):
+        (WebCore::WebVTTTokenizer::shouldSkipNullCharacters):
+        * xml/parser/MarkupTokenizerBase.h:
+        (MarkupTokenizerBase):
+        (WebCore::MarkupTokenizerBase::bufferCharacter):
+
 2013-02-11  Adam Barth  <abarth@webkit.org>
 
         document.write during window.onload can trigger DumpRenderTree to dump the render tree
