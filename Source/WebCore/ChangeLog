@@ -1,3 +1,27 @@
+2013-02-11  Adam Barth  <abarth@webkit.org>
+
+        The threaded HTML parser should pass all the fast/parser tests
+        https://bugs.webkit.org/show_bug.cgi?id=109486
+
+        Reviewed by Tony Gentilcore.
+
+        This patch fixes the last two test failures in fast/parser, which were
+        crashes caused by not having a tokenizer when document.close() was
+        called. (The tokenizer is created lazily by calls to document.write,
+        which might not happen before document.close).
+
+        fast/parser/document-close-iframe-load.html
+        fast/parser/document-close-nested-iframe-load.html
+
+        In addition, I've added a new test to make sure we flush the tokenizer
+        properly in these cases.
+
+        Test: fast/parser/document-close-iframe-load-partial-entity.html
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::prepareToStopParsing):
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+
 2013-02-11  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
 
         [texmap] Implement frames-per-second debug counter
