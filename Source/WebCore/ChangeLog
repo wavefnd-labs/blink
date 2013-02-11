@@ -1,3 +1,25 @@
+2013-02-11  Joshua Bell  <jsbell@chromium.org>
+
+        [V8] IndexedDB: Minor GC can collect IDBDatabase wrapper with versionchange handler
+        https://bugs.webkit.org/show_bug.cgi?id=108670
+
+        Reviewed by Kentaro Hara.
+
+        Prevent IDBDatabase's wrapper from being GC'd while the database is open if it has
+        listeners, as those listeners may close the database in response to events.
+
+        Also, removed extraneous super-calls from hasPendingActivity() overrides.
+
+        Test: storage/indexeddb/database-wrapper.html
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::hasPendingActivity): Implemented.
+        * Modules/indexeddb/IDBDatabase.h: Declared.
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::hasPendingActivity): Simplified.
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::hasPendingActivity): Simplified.
+
 2013-02-11  Eric Seidel  <eric@webkit.org>
 
         Remove AttributeBase now that NEW_XML is gone
