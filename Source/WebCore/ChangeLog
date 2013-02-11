@@ -1,3 +1,90 @@
+2013-02-11  Alexei Filippov  <alph@chromium.org>
+
+        Web Inspector: Split Profiler domain in protocol into Profiler and HeapProfiler
+        https://bugs.webkit.org/show_bug.cgi?id=108653
+
+        Reviewed by Yury Semikhatsky.
+
+        Currently CPU and heap profilers share the same domain 'Profiler' in the protocol.
+        In fact these two profile types have not too much in common. So put each into its own domain.
+        It should also help when Profiles panel gets split into several tools.
+        This is the phase 1 which adds InspectorHeapProfilerAgent but doesn't
+        change the original InspectorProfilerAgent.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * inspector/Inspector.json:
+        * inspector/InspectorAllInOne.cpp:
+        * inspector/InspectorController.cpp:
+        (WebCore::InspectorController::InspectorController):
+        * inspector/InspectorHeapProfilerAgent.cpp: Added.
+        (WebCore):
+        (WebCore::InspectorHeapProfilerAgent::create):
+        (WebCore::InspectorHeapProfilerAgent::InspectorHeapProfilerAgent):
+        (WebCore::InspectorHeapProfilerAgent::~InspectorHeapProfilerAgent):
+        (WebCore::InspectorHeapProfilerAgent::resetState):
+        (WebCore::InspectorHeapProfilerAgent::resetFrontendProfiles):
+        (WebCore::InspectorHeapProfilerAgent::setFrontend):
+        (WebCore::InspectorHeapProfilerAgent::clearFrontend):
+        (WebCore::InspectorHeapProfilerAgent::restore):
+        (WebCore::InspectorHeapProfilerAgent::collectGarbage):
+        (WebCore::InspectorHeapProfilerAgent::createSnapshotHeader):
+        (WebCore::InspectorHeapProfilerAgent::hasHeapProfiler):
+        (WebCore::InspectorHeapProfilerAgent::getProfileHeaders):
+        (WebCore::InspectorHeapProfilerAgent::getHeapSnapshot):
+        (WebCore::InspectorHeapProfilerAgent::removeProfile):
+        (WebCore::InspectorHeapProfilerAgent::takeHeapSnapshot):
+        (WebCore::InspectorHeapProfilerAgent::getObjectByHeapObjectId):
+        (WebCore::InspectorHeapProfilerAgent::getHeapObjectId):
+        (WebCore::InspectorHeapProfilerAgent::reportMemoryUsage):
+        * inspector/InspectorHeapProfilerAgent.h: Added.
+        (WebCore):
+        (InspectorHeapProfilerAgent):
+        (WebCore::InspectorHeapProfilerAgent::clearProfiles):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::didCommitLoadImpl):
+        * inspector/InstrumentingAgents.h:
+        (WebCore):
+        (InstrumentingAgents):
+        (WebCore::InstrumentingAgents::inspectorHeapProfilerAgent):
+        (WebCore::InstrumentingAgents::setInspectorHeapProfilerAgent):
+        * inspector/WorkerInspectorController.cpp:
+        (WebCore::WorkerInspectorController::WorkerInspectorController):
+        * inspector/front-end/HeapSnapshotDataGrids.js:
+        * inspector/front-end/HeapSnapshotGridNodes.js:
+        (WebInspector.HeapSnapshotGenericObjectNode.prototype.queryObjectContent):
+        * inspector/front-end/HeapSnapshotView.js:
+        (WebInspector.HeapProfileHeader.prototype.startSnapshotTransfer):
+        (WebInspector.HeapProfileHeader.prototype.saveToFile.onOpen):
+        (WebInspector.HeapProfileHeader.prototype.saveToFile):
+        * inspector/front-end/ProfilesPanel.js:
+        (WebInspector.ProfilesPanel):
+        (WebInspector.ProfilesPanel.prototype._clearProfiles):
+        (WebInspector.ProfilesPanel.prototype._garbageCollectButtonClicked):
+        (WebInspector.ProfilesPanel.prototype._removeProfileHeader):
+        (WebInspector.ProfilesPanel.prototype._populateProfiles.var):
+        (WebInspector.ProfilesPanel.prototype._populateProfiles.populateCallback):
+        (WebInspector.ProfilesPanel.prototype._populateProfiles):
+        (WebInspector.ProfilesPanel.prototype.takeHeapSnapshot):
+        (WebInspector.ProfilesPanel.prototype.revealInView):
+        (WebInspector.HeapProfilerDispatcher):
+        (WebInspector.HeapProfilerDispatcher.prototype.addProfileHeader):
+        (WebInspector.HeapProfilerDispatcher.prototype.addHeapSnapshotChunk):
+        (WebInspector.HeapProfilerDispatcher.prototype.finishHeapSnapshot):
+        (WebInspector.HeapProfilerDispatcher.prototype.resetProfiles):
+        (WebInspector.HeapProfilerDispatcher.prototype.reportHeapSnapshotProgress):
+        * inspector/front-end/TimelinePanel.js:
+        (WebInspector.TimelinePanel.prototype._garbageCollectButtonClicked):
+        * inspector/front-end/inspector.js:
+        (WebInspector.doLoadedDone):
+
 2013-02-11  Mike West  <mkwst@chromium.org>
 
         Use IGNORE_EXCEPTION for Editor::countMatchesForText's ignored exceptions.
