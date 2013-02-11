@@ -1,3 +1,42 @@
+2013-02-11  Simon Fraser  <simon.fraser@apple.com>
+
+        Move m_stateNodeMap from ScrollingCoordinatorMac to ScrollingStateTree
+        https://bugs.webkit.org/show_bug.cgi?id=109361
+
+        Reviewed by Sam Weinig.
+        
+        The map of scrolling node IDs to ScollingStateNodes was maintained by
+        ScrollingCoordinatorMac, rather than ScrollingStateTree. This is different
+        from the ScrollingTree (which owns its node map), and added some amount
+        of to-and-fro between ScrollingStateTree and ScrollingCoordinatorMac.
+        
+        Having ScrollingCoordinatorMac maintain the map of IDs to state nodes
+        simplifies things.
+
+        No behavior change.
+
+        * page/scrolling/ScrollingStateTree.cpp:
+        (WebCore::ScrollingStateTree::attachNode):
+        (WebCore::ScrollingStateTree::detachNode):
+        (WebCore::ScrollingStateTree::clear):
+        (WebCore::ScrollingStateTree::removeNode):
+        (WebCore::ScrollingStateTree::stateNodeForID):
+        * page/scrolling/ScrollingStateTree.h:
+        (ScrollingStateTree): Remove some stale comments.
+        (WebCore::ScrollingStateTree::removedNodes):
+        * page/scrolling/mac/ScrollingCoordinatorMac.h:
+        (ScrollingCoordinatorMac):
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::frameViewLayoutUpdated):
+        (WebCore::ScrollingCoordinatorMac::recomputeWheelEventHandlerCountForFrameView):
+        (WebCore::ScrollingCoordinatorMac::frameViewRootLayerDidChange):
+        (WebCore::ScrollingCoordinatorMac::requestScrollPositionUpdate):
+        (WebCore::ScrollingCoordinatorMac::attachToStateTree):
+        (WebCore::ScrollingCoordinatorMac::detachFromStateTree):
+        (WebCore::ScrollingCoordinatorMac::clearStateTree):
+        (WebCore::ScrollingCoordinatorMac::updateScrollingNode):
+        (WebCore::ScrollingCoordinatorMac::updateViewportConstrainedNode):
+
 2013-02-11  Mark Rowe  <mrowe@apple.com>
 
         Build fix.
