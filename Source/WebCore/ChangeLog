@@ -1,3 +1,25 @@
+2013-02-11  Mike West  <mkwst@chromium.org>
+
+        CSP reports for blocked 'data:' URLs should report the scheme only.
+        https://bugs.webkit.org/show_bug.cgi?id=109429
+
+        Reviewed by Adam Barth.
+
+        https://dvcs.w3.org/hg/content-security-policy/rev/001dc8e8bcc3 changed
+        the CSP 1.1 spec to require that blocked URLs that don't refer to
+        generally resolvable schemes (e.g. 'data:', 'javascript:', etc.) be
+        stripped down to their scheme in violation reports.
+
+        Test: http/tests/security/contentSecurityPolicy/report-blocked-data-uri.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::ContentSecurityPolicy::reportViolation):
+            If the blocked URL is a web-resolvable scheme, apply the current
+            stripping logic to it, otherwise, strip it to the scheme only.
+        * platform/KURL.h:
+        (KURL):
+            Move KURL::isHierarchical() out into KURL's public API.
+
 2013-02-11  Simon Fraser  <simon.fraser@apple.com>
 
         ScrollingTree node maps keep getting larger
