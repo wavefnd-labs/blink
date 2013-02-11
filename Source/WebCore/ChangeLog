@@ -1,3 +1,30 @@
+2013-02-11  Gavin Barraclough  <barraclough@apple.com>
+
+        PluginProcess should quit immediately if idle in response to low-memory notifications
+        https://bugs.webkit.org/show_bug.cgi?id=109103
+        <rdar://problem/12679827>
+
+        Reviewed by Brady Eidson.
+
+        This patch allows a process to set a custom callback for low memory warnings
+        (defaulting to the current behaviour, as implemented in releaseMemory).
+
+        * platform/MemoryPressureHandler.cpp:
+        (WebCore::MemoryPressureHandler::MemoryPressureHandler):
+            - Initialize m_lowMemoryHandler to releaseMemory.
+        (WebCore::MemoryPressureHandler::install):
+        (WebCore::MemoryPressureHandler::uninstall):
+        (WebCore::MemoryPressureHandler::holdOff):
+            - Cleaned up spacing.
+        (WebCore::MemoryPressureHandler::releaseMemory):
+            - Added null implementation for non-Mac builds.
+        * platform/MemoryPressureHandler.h:
+        (WebCore::MemoryPressureHandler::setLowMemoryHandler):
+            - Added method to set m_lowMemoryHandler.
+        * platform/mac/MemoryPressureHandlerMac.mm:
+        (WebCore::MemoryPressureHandler::respondToMemoryPressure):
+            - Changed to call releaseMemory via m_lowMemoryHandler.
+
 2013-02-11  Simon Fraser  <simon.fraser@apple.com>
 
         REGRESSION (r133807): Sticky-position review bar on bugzilla review page is jumpy
