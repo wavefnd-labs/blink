@@ -1,3 +1,54 @@
+2013-02-11  Simon Fraser  <simon.fraser@apple.com>
+
+        REGRESSION (r133807): Sticky-position review bar on bugzilla review page is jumpy
+        https://bugs.webkit.org/show_bug.cgi?id=104276
+        <rdar://problem/12827187>
+
+        Reviewed by Tim Horton.
+
+        When committing new scrolling tree state, if the root node has a scroll
+        position update, we would handle that before updating the state of child
+        nodes (with possibly new viewport constraints). That would cause incorrect
+        child layer updates.
+        
+        Fix by adding a second 'update' phase that happens after child nodes,
+        and moving the scroll position update into that.
+
+        Scrolling tests only dump the state tree, so cannot test the bug.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::setScrollPosition): If the scroll position didn't
+        actually change, don't request a scroll position update from the ScrollingCoordinator.
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::updateTreeFromStateNode): Keep track of the scrolling node so
+        that we can call updateAfterChildren() on it.
+        * page/scrolling/ScrollingTreeNode.h:
+        (ScrollingTreeNode):
+        (WebCore::ScrollingTreeNode::updateAfterChildren):
+        * page/scrolling/ScrollingTreeScrollingNode.cpp:
+        (WebCore::ScrollingTreeScrollingNode::updateBeforeChildren):
+        * page/scrolling/ScrollingTreeScrollingNode.h:
+        (ScrollingTreeScrollingNode):
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::updateViewportConstrainedNode):
+        In the current bug the scrolling tree was scheduled for commit because of a
+        scroll position request, but if only the viewport constraints change, we also need
+        to commit the tree.
+        * page/scrolling/mac/ScrollingTreeFixedNode.h:
+        (ScrollingTreeFixedNode):
+        * page/scrolling/mac/ScrollingTreeFixedNode.mm:
+        (WebCore::ScrollingTreeFixedNode::updateBeforeChildren):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.h:
+        (ScrollingTreeScrollingNodeMac):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::updateBeforeChildren):
+        (WebCore::ScrollingTreeScrollingNodeMac::updateAfterChildren): Move code here
+        that updates things that have to happen after children.
+        * page/scrolling/mac/ScrollingTreeStickyNode.h:
+        (ScrollingTreeStickyNode):
+        * page/scrolling/mac/ScrollingTreeStickyNode.mm:
+        (WebCore::ScrollingTreeStickyNode::updateBeforeChildren):
+
 2013-02-11  Roger Fong  <roger_fong@apple.com>
 
         Unreviewed. Build fix for Win7 Release.
