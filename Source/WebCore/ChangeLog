@@ -1,3 +1,70 @@
+2013-02-10  Chris Fleizach  <cfleizach@apple.com>
+
+        WebSpeech: Implement basic speaking/finished speaking behavior
+        https://bugs.webkit.org/show_bug.cgi?id=107135
+
+        Reviewed by Sam Weinig.
+
+        Implements the basic functionality of speaking utterances.
+
+        In the WebCore side, it manages the speech queue the way the spec defines
+        (that is, new jobs are appended to a queue and wait for other jobs to finish).
+
+        On the Mac side, it instantiates a synthesizer and handles the callbacks for when
+        jobs are finished. It sends those jobs back to WebCore to dispatch the right events.
+
+        Test: platform/mac/fast/speechsynthesis/speech-synthesis-speak.html
+
+        * Modules/speech/SpeechSynthesis.cpp:
+        (WebCore::SpeechSynthesis::SpeechSynthesis):
+        (WebCore::SpeechSynthesis::paused):
+        (WebCore::SpeechSynthesis::startSpeakingImmediately):
+        (WebCore::SpeechSynthesis::speak):
+        (WebCore):
+        (WebCore::SpeechSynthesis::fireEvent):
+        (WebCore::SpeechSynthesis::handleSpeakingCompleted):
+        (WebCore::SpeechSynthesis::didStartSpeaking):
+        (WebCore::SpeechSynthesis::didFinishSpeaking):
+        (WebCore::SpeechSynthesis::speakingErrorOccurred):
+        * Modules/speech/SpeechSynthesis.h:
+        (WebCore):
+        (WebCore::SpeechSynthesis::speaking):
+        (SpeechSynthesis):
+        * Modules/speech/SpeechSynthesisEvent.cpp:
+        (WebCore::SpeechSynthesisEvent::create):
+        (WebCore):
+        (WebCore::SpeechSynthesisEvent::SpeechSynthesisEvent):
+        * Modules/speech/SpeechSynthesisEvent.h:
+        (SpeechSynthesisEvent):
+        (WebCore::SpeechSynthesisEvent::interfaceName):
+        * Modules/speech/SpeechSynthesisUtterance.h:
+        (WebCore::SpeechSynthesisUtterance::startTime):
+        (WebCore::SpeechSynthesisUtterance::setStartTime):
+        (SpeechSynthesisUtterance):
+        * platform/PlatformSpeechSynthesisUtterance.cpp:
+        (WebCore::PlatformSpeechSynthesisUtterance::PlatformSpeechSynthesisUtterance):
+        * platform/PlatformSpeechSynthesisUtterance.h:
+        (PlatformSpeechSynthesisUtterance):
+        (WebCore::PlatformSpeechSynthesisUtterance::setVolume):
+        (WebCore::PlatformSpeechSynthesisUtterance::setRate):
+        (WebCore::PlatformSpeechSynthesisUtterance::setPitch):
+        (WebCore::PlatformSpeechSynthesisUtterance::startTime):
+        (WebCore::PlatformSpeechSynthesisUtterance::setStartTime):
+        (WebCore::PlatformSpeechSynthesisUtterance::client):
+        * platform/PlatformSpeechSynthesizer.cpp:
+        (WebCore::PlatformSpeechSynthesizer::PlatformSpeechSynthesizer):
+        * platform/PlatformSpeechSynthesizer.h:
+        (PlatformSpeechSynthesizerClient):
+        (WebCore::PlatformSpeechSynthesizer::client):
+        (PlatformSpeechSynthesizer):
+        * platform/mac/PlatformSpeechSynthesizerMac.mm:
+        (-[WebSpeechSynthesisWrapper initWithSpeechSynthesizer:WebCore::]):
+        (-[WebSpeechSynthesisWrapper dealloc]):
+        (-[WebSpeechSynthesisWrapper convertRateToWPM:]):
+        (-[WebSpeechSynthesisWrapper speakUtterance:WebCore::]):
+        (-[WebSpeechSynthesisWrapper speechSynthesizer:didFinishSpeaking:]):
+        (WebCore::PlatformSpeechSynthesizer::speak):
+
 2013-02-10  Eric Seidel  <eric@webkit.org>
 
         Make the existing HTMLPreloadScanner threading-aware
