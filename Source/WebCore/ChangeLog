@@ -1,3 +1,64 @@
+2013-02-11  Hayato Ito  <hayato@chromium.org>
+
+        Factor EventContext and introduces MouseOrFocusEventContext.
+        https://bugs.webkit.org/show_bug.cgi?id=109278
+
+        Reviewed by Dimitri Glazkov.
+
+        To supoort Touch event retargeting (bug 107800), we have to factor
+        event retargeting code so that it can support not only MouseEvent or FocusEvent,
+        but also other events.
+
+        This is the first attempt to refactor event retargeting code, a
+        separated patch from bug 109156.  EventContext is now factored and
+        MouseOrFocusEventContext was introduced to support MouseEvent or
+        FocusEvent separately.
+
+        In following patches, I'll introduce TouchEventContext and
+        TouchEventDispatchMediator to support Touch event retargeting.
+
+        No new tests. No change in functionality.
+
+        * dom/EventContext.cpp:
+        (WebCore::EventContext::EventContext): Factor relatedTarget out from EventContext into MouseOrFocusEventContext.
+        (WebCore::EventContext::~EventContext):
+        (WebCore):
+        (WebCore::EventContext::handleLocalEvents):
+        (WebCore::EventContext::isMouseOrFocusEventContext):
+        (WebCore::MouseOrFocusEventContext::MouseOrFocusEventContext):  New. Handles MouseEvent's (or FocusEvent's) relatedTarget retargeting.
+        (WebCore::MouseOrFocusEventContext::~MouseOrFocusEventContext):
+        (WebCore::MouseOrFocusEventContext::handleLocalEvents):
+        (WebCore::MouseOrFocusEventContext::isMouseOrFocusEventContext):
+        * dom/EventContext.h:
+        (EventContext):
+        (WebCore::EventContext::node):
+        (WebCore::EventContext::target):
+        (WebCore::EventContext::currentTargetSameAsTarget):
+        (WebCore):
+        (MouseOrFocusEventContext):
+        (WebCore::MouseOrFocusEventContext::relatedTarget):
+        (WebCore::MouseOrFocusEventContext::setRelatedTarget):
+        * dom/EventDispatcher.cpp:
+        (WebCore::EventRelatedTargetAdjuster::adjust):
+        (WebCore::EventDispatcher::adjustRelatedTarget):
+        (WebCore::EventDispatcher::ensureEventPath):  Renamad from ensureEventAncestors. Use the DOM Core terminology.
+        (WebCore::EventDispatcher::dispatchEvent):
+        (WebCore::EventDispatcher::dispatchEventAtCapturing):
+        (WebCore::EventDispatcher::dispatchEventAtTarget):
+        (WebCore::EventDispatcher::dispatchEventAtBubbling):
+        (WebCore::EventDispatcher::dispatchEventPostProcess):
+        (WebCore::EventDispatcher::topEventContext):
+        * dom/EventDispatcher.h:
+        (EventRelatedTargetAdjuster):
+        (EventDispatcher):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::eventHasListeners):
+        (WebCore::InspectorInstrumentation::willDispatchEventImpl):
+        * inspector/InspectorInstrumentation.h:
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::willDispatchEvent):
+
 2013-02-11  peavo@outlook.com  <peavo@outlook.com>
 
         [Curl] setCookiesFromDOM function does not save cookies to disk.
