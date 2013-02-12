@@ -1,5 +1,36 @@
 2013-02-11  Huang Dongsung  <luxtella@company100.net>
 
+        Coordinated Graphics: Make CoordinatedGraphicsScene not know contents size.
+        https://bugs.webkit.org/show_bug.cgi?id=108922
+
+        Reviewed by Noam Rosenthal.
+
+        Currently, CoordinatedGraphicsScene has two methods to know contents
+        size: setContentsSize() and setVisibleContentsRect(). Contents size is
+        used when adjusting a scroll position, but adjustment is not needed
+        because EFL and Qt platform code (currently PageViewportController)
+        already adjusts a scroll position, and it is natural for each platform
+        to be in charge of adjusting. So this patch makes CoordinatedGraphicsScene
+        not know contents size.
+
+        In addition, now DrawingAreaProxy::coordinatedLayerTreeHostProxy() is only used
+        to get CoordinatedGraphicsScene.
+
+        This patch can only be tested manually since there is no automated
+        testing facilities for in-motion touch.
+        Test: ManualTests/fixed-position.html
+              ManualTests/nested-fixed-position.html
+
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::setScrollPositionDeltaIfNeeded):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.cpp:
+        (WebCore::CoordinatedGraphicsScene::setScrollPosition):
+        (WebCore::CoordinatedGraphicsScene::adjustPositionForFixedLayers):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.h:
+        (CoordinatedGraphicsScene):
+
+2013-02-11  Huang Dongsung  <luxtella@company100.net>
+
         Coordinated Graphics: remove the DidChangeScrollPosition message.
         https://bugs.webkit.org/show_bug.cgi?id=108051
 
