@@ -1,3 +1,65 @@
+2013-02-11  Hayato Ito  <hayato@chromium.org>
+
+        Split each RuleSet and feature out from StyleResolver into its own class.
+        https://bugs.webkit.org/show_bug.cgi?id=107777
+
+        Reviewed by Dimitri Glazkov.
+
+        Re-landing r141964, which was reverted in r141973, since r141964 seem to be innocent.
+
+        No tests. No change in behavior.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/CSSAllInOne.cpp:
+        * css/DocumentRuleSets.cpp: Added.
+        (WebCore):
+        (WebCore::DocumentRuleSets::DocumentRuleSets):
+        (WebCore::DocumentRuleSets::~DocumentRuleSets):
+        (WebCore::DocumentRuleSets::initUserStyle): New helper to initialize each RuleSets.
+        (WebCore::DocumentRuleSets::collectRulesFromUserStyleSheets): Factored out from StyleResolver.
+        (WebCore::makeRuleSet): Ditto.
+        (WebCore::DocumentRuleSets::resetAuthorStyle): Ditto.
+        (WebCore::DocumentRuleSets::appendAuthorStyleSheets): Ditto.
+        (WebCore::DocumentRuleSets::collectFeatures): Ditto.
+        (WebCore::DocumentRuleSets::reportMemoryUsage): New methods to report memory usage. Factored out from StyleResolver.
+        * css/DocumentRuleSets.h: Added.
+        (WebCore):
+        (DocumentRuleSets):
+        (WebCore::DocumentRuleSets::authorStyle): Moved from StyleResolver.
+        (WebCore::DocumentRuleSets::userStyle): Ditto.
+        (WebCore::DocumentRuleSets::features): Ditto.
+        (WebCore::DocumentRuleSets::sibling): Ditto.
+        (WebCore::DocumentRuleSets::uncommonAttribute): Ditto.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::StyleResolver):
+        (WebCore::StyleResolver::appendAuthorStyleSheets): Now calls DocumentRuleSets::appendAuthorStyleSheets.
+        (WebCore::StyleResolver::matchAuthorRules): Use m_ruleSets.
+        (WebCore::StyleResolver::matchUserRules): Ditto.
+        (WebCore::StyleResolver::classNamesAffectedByRules): Ditto.
+        (WebCore::StyleResolver::locateCousinList): Ditto.
+        (WebCore::StyleResolver::canShareStyleWithElement): Ditto.
+        (WebCore::StyleResolver::locateSharedStyle): Ditto.
+        (WebCore::StyleResolver::styleForPage): Ditto.
+        (WebCore::StyleResolver::checkRegionStyle): Ditto.
+        (WebCore::StyleResolver::applyProperty): Ditto.
+        (WebCore::StyleResolver::reportMemoryUsage): Now calls DocumentRuleSets::reportMemoryUsage.
+        * css/StyleResolver.h:
+        (WebCore::StyleResolver::scopeResolver):
+        (StyleResolver):
+        (WebCore::StyleResolver::ruleSets): accessor r to DocumentRuleSets.
+        (WebCore::StyleResolver::usesSiblingRules): Use m_ruleSets.
+        (WebCore::StyleResolver::usesFirstLineRules): Ditto.
+        (WebCore::StyleResolver::usesBeforeAfterRules): Ditto.
+        (WebCore::StyleResolver::hasSelectorForAttribute): Ditto.
+        (WebCore::StyleResolver::hasSelectorForClass): Ditto.
+        (WebCore::StyleResolver::hasSelectorForId): Ditto.
+        * dom/DocumentStyleSheetCollection.cpp:
+        (WebCore::DocumentStyleSheetCollection::updateActiveStyleSheets):
+
 2013-02-11  Keishi Hattori  <keishi@webkit.org>
 
         REGRESSION (r140778):Calendar Picker buttons are wrong when rtl
