@@ -1,3 +1,65 @@
+2013-02-12  Elliott Sprehn  <esprehn@chromium.org>
+
+        rootRenderer in FrameView is really RenderView
+        https://bugs.webkit.org/show_bug.cgi?id=109510
+
+        Reviewed by Eric Seidel.
+
+        The global function rootRenderer(FrameView*) is really just a way
+        to get the RenderView from the Frame so replace it with a renderView()
+        method and replace usage of the word "root" with renderView so it's
+        obvious the root we're talking about is the renderView. This is an
+        important distinction to make since we also have rootRenderer in the code
+        for the documentElement()'s renderer and we also have a "layout root" which
+        is entirely different.
+
+        No new tests, just refactoring.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::rootRenderer): Removed.
+        (WebCore::FrameView::setFrameRect):
+        (WebCore::FrameView::adjustViewSize):
+        (WebCore::FrameView::updateCompositingLayersAfterStyleChange):
+        (WebCore::FrameView::updateCompositingLayersAfterLayout):
+        (WebCore::FrameView::clearBackingStores):
+        (WebCore::FrameView::restoreBackingStores):
+        (WebCore::FrameView::usesCompositedScrolling):
+        (WebCore::FrameView::layerForHorizontalScrollbar):
+        (WebCore::FrameView::layerForVerticalScrollbar):
+        (WebCore::FrameView::layerForScrollCorner):
+        (WebCore::FrameView::tiledBacking):
+        (WebCore::FrameView::scrollLayerID):
+        (WebCore::FrameView::layerForOverhangAreas):
+        (WebCore::FrameView::flushCompositingStateForThisFrame):
+        (WebCore::FrameView::hasCompositedContent):
+        (WebCore::FrameView::enterCompositingMode):
+        (WebCore::FrameView::isSoftwareRenderable):
+        (WebCore::FrameView::didMoveOnscreen):
+        (WebCore::FrameView::willMoveOffscreen):
+        (WebCore::FrameView::layout):
+        (WebCore::FrameView::embeddedContentBox):
+        (WebCore::FrameView::contentsInCompositedLayer):
+        (WebCore::FrameView::scrollContentsFastPath):
+        (WebCore::FrameView::scrollContentsSlowPath):
+        (WebCore::FrameView::maintainScrollPositionAtAnchor):
+        (WebCore::FrameView::scrollPositionChanged):
+        (WebCore::FrameView::repaintFixedElementsAfterScrolling):
+        (WebCore::FrameView::updateFixedElementsAfterScrolling):
+        (WebCore::FrameView::visibleContentsResized):
+        (WebCore::FrameView::scheduleRelayoutOfSubtree):
+        (WebCore::FrameView::needsLayout):
+        (WebCore::FrameView::setNeedsLayout):
+        (WebCore::FrameView::performPostLayoutTasks):
+        (WebCore::FrameView::updateControlTints):
+        (WebCore::FrameView::paintContents):
+        (WebCore::FrameView::forceLayoutForPagination):
+        (WebCore::FrameView::adjustPageHeightDeprecated):
+        (WebCore::FrameView::resetTrackedRepaints):
+        (WebCore::FrameView::isVerticalDocument):
+        (WebCore::FrameView::isFlippedDocument):
+        * page/FrameView.h:
+        (WebCore::FrameView::renderView): Added.
+
 2013-02-12  Tomas Popela  <tpopela@redhat.com>
 
         [GTK][Introspection] GObject bindings for DataTransferItemList - one add() method must be removed from .idl
