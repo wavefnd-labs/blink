@@ -1,3 +1,24 @@
+2013-02-12  Antti Koivisto  <antti@apple.com>
+
+        Cache timer heap pointer to timers
+        https://bugs.webkit.org/show_bug.cgi?id=109597
+
+        Reviewed by Andreas Kling.
+
+        Accessing timer heap through thread global storage is slow (~0.1% in PLT3). We can cache the heap pointer to
+        each TimerBase. There are not huge numbers of timers around so memory is not an issue and many timers are heavily reused.
+
+        * platform/Timer.cpp:
+        (WebCore::threadGlobalTimerHeap):
+        (WebCore::TimerHeapReference::operator=):
+        (WebCore::TimerHeapIterator::checkConsistency):
+        (WebCore::TimerBase::TimerBase):
+        (WebCore::TimerBase::checkHeapIndex):
+        (WebCore::TimerBase::setNextFireTime):
+        * platform/Timer.h:
+        (WebCore::TimerBase::timerHeap):
+        (TimerBase):
+
 2013-02-12  Adam Barth  <abarth@webkit.org>
 
         BackgroundHTMLParser::resumeFrom should take a struct
