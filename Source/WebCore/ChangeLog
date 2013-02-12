@@ -1,3 +1,24 @@
+2013-02-11  Viatcheslav Ostapenko  <sl.ostapenko@samsung.com>
+
+        [EFL][WebGL] WebGL content is not painted after resizing the viewport.
+        https://bugs.webkit.org/show_bug.cgi?id=106358
+
+        Reviewed by Noam Rosenthal.
+
+        When page size changes and layer parameters get updated LayerTreeRenderer::setLayerState
+        clears the layer backing store and detaches the canvas surface from the layer. If the layer
+        size is not changed then the canvas is not recreated. This leaves the canvas detached from
+        the layer, but still referenced from m_surfaceBackingStores.
+        Don't assign layer backing store to layer in assignImageBackingToLayer if there is a canvas
+        surface already attached to the layer.
+
+        Test: fast/canvas/webgl/webgl-layer-update.html
+
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.cpp:
+        (WebCore::CoordinatedGraphicsScene::setLayerState):
+        (WebCore::CoordinatedGraphicsScene::assignImageBackingToLayer):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.h:
+
 2013-02-11  Eric Carlson  <eric.carlson@apple.com>
 
         [Mac] Track language selection should be sticky
