@@ -1,3 +1,35 @@
+2013-02-11  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] ScheduledAction::m_context can be empty, so we shouldn't
+        retrieve an Isolate by using m_context->GetIsolate()
+        https://bugs.webkit.org/show_bug.cgi?id=109523
+
+        Reviewed by Adam Barth.
+
+        Chromium bug: https://code.google.com/p/chromium/issues/detail?id=175307#makechanges
+
+        Currently ScheduledAction is retrieving an Isolate by using m_context->GetIsolate().
+        This can crash because ScheduledAction::m_context can be empty. Specifically,
+        ScheduledAction::m_context is set to ScriptController::currentWorldContext(),
+        which can return an empty handle when a frame does not exist. In addition,
+        'if(context.IsEmpty())' in ScheduledAction.cpp implies that it can be empty.
+
+        Alternately, we should pass an Isolate explicitly when a ScheduledAction is instantiated.
+
+        No tests. The Chromium crash report doesn't provide enough information
+        to reproduce the bug.
+
+        * bindings/v8/ScheduledAction.cpp:
+        (WebCore::ScheduledAction::ScheduledAction):
+        (WebCore):
+        (WebCore::ScheduledAction::~ScheduledAction):
+        * bindings/v8/ScheduledAction.h:
+        (ScheduledAction):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::WindowSetTimeoutImpl):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::SetTimeoutOrInterval):
+
 2013-02-11  Adenilson Cavalcanti  <cavalcantii@gmail.com>
 
         Build fix: r142549 broke EFL build
