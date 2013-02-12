@@ -1,3 +1,45 @@
+2013-02-12  Emil A Eklund  <eae@chromium.org>
+
+        TransformState::move should not round offset to int
+        https://bugs.webkit.org/show_bug.cgi?id=108266
+
+        Reviewed by Simon Fraser.
+        
+        Currently TransformState::move rounds the offset to the nearest
+        integer values, this results in operations using TransformState
+        to compute a position to misreport the location, specifically
+        Element:getBoundingClientRect and repaint rects. Sizes are
+        handled correctly and do not have the same problem.
+
+        Tests: fast/sub-pixel/boundingclientrect-subpixel-margin.html
+               fast/sub-pixel/clip-rect-box-consistent-rounding.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::convertFromRenderer):
+        Change to use pixel snapping instead of enclosing box. All other
+        code paths use pixelSnappedIntRect to align the rects to device
+        pixels however this used enclosingIntRect (indirectly through
+        the FloatQuad::enclosingBoundingBox call).
+        Without the rounding in TransformState this causes repaint rects
+        for elements on subpixel bounds to be too large by up to one
+        pixel on each axis. For normal repaints this isn't really a
+        problem but in scrollContentsSlowPath it can result in moving
+        too large a rect.
+
+        * platform/graphics/transforms/TransformState.cpp:
+        (WebCore::TransformState::translateTransform):
+        (WebCore::TransformState::translateMappedCoordinates):
+        Change to take a LayoutSize instead of an IntSize.
+
+        (WebCore::TransformState::move):
+        (WebCore::TransformState::applyAccumulatedOffset):
+        * platform/graphics/transforms/TransformState.h:
+        Remove rounding logic and use original, more precise, value.
+
+        * rendering/RenderGeometryMap.cpp:
+        (WebCore::RenderGeometryMap::mapToContainer):
+        Remove rounding logic and use original, more precise, value.
+
 2013-02-12  Jessie Berlin  <jberlin@apple.com>
 
         Rollout r142618, it broke all the Mac builds.
