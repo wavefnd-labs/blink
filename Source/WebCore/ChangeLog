@@ -1,3 +1,162 @@
+2013-02-12  Eric Seidel  <eric@webkit.org>
+
+        Remove HTMLTokenTypes header (and split out AtomicHTMLToken.h from HTMLToken.h)
+        https://bugs.webkit.org/show_bug.cgi?id=109525
+
+        Reviewed by Adam Barth.
+
+        We no longer need a separate HTMLTokenTypes class now that NEW_XML is gone.
+        However, to remove HTMLTokenTypes, I had to split AtomicHTMLToken.h from
+        HTMLToken.h (to fix a circular dependancy).
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * html/HTMLViewSourceDocument.cpp:
+        (WebCore::HTMLViewSourceDocument::addSource):
+        * html/parser/AtomicHTMLToken.h: Added.
+        (WebCore):
+        (AtomicHTMLToken):
+        (WebCore::AtomicHTMLToken::create):
+        (WebCore::AtomicHTMLToken::forceQuirks):
+        (WebCore::AtomicHTMLToken::type):
+        (WebCore::AtomicHTMLToken::name):
+        (WebCore::AtomicHTMLToken::setName):
+        (WebCore::AtomicHTMLToken::selfClosing):
+        (WebCore::AtomicHTMLToken::getAttributeItem):
+        (WebCore::AtomicHTMLToken::attributes):
+        (WebCore::AtomicHTMLToken::characters):
+        (WebCore::AtomicHTMLToken::charactersLength):
+        (WebCore::AtomicHTMLToken::isAll8BitData):
+        (WebCore::AtomicHTMLToken::comment):
+        (WebCore::AtomicHTMLToken::publicIdentifier):
+        (WebCore::AtomicHTMLToken::systemIdentifier):
+        (WebCore::AtomicHTMLToken::clearExternalCharacters):
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        (WebCore::AtomicHTMLToken::initializeAttributes):
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::simulateTreeBuilder):
+        * html/parser/CompactHTMLToken.cpp:
+        (WebCore::CompactHTMLToken::CompactHTMLToken):
+        * html/parser/CompactHTMLToken.h:
+        (WebCore::CompactHTMLToken::type):
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::insertDoctype):
+        (WebCore::HTMLConstructionSite::insertComment):
+        (WebCore::HTMLConstructionSite::insertCommentOnDocument):
+        (WebCore::HTMLConstructionSite::insertCommentOnHTMLHtmlElement):
+        (WebCore::HTMLConstructionSite::insertSelfClosingHTMLElement):
+        (WebCore::HTMLConstructionSite::insertForeignElement):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::constructTreeFromHTMLToken):
+        * html/parser/HTMLDocumentParser.h:
+        * html/parser/HTMLMetaCharsetParser.cpp:
+        (WebCore::HTMLMetaCharsetParser::checkForMetaCharset):
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::isStartTag):
+        (WebCore::isStartOrEndTag):
+        (WebCore::HTMLPreloadScanner::processToken):
+        * html/parser/HTMLSourceTracker.cpp:
+        (WebCore::HTMLSourceTracker::start):
+        (WebCore::HTMLSourceTracker::sourceForToken):
+        * html/parser/HTMLStackItem.h:
+        (WebCore::HTMLStackItem::HTMLStackItem):
+        * html/parser/HTMLToken.h:
+        (WebCore::HTMLToken::clear):
+        (WebCore::HTMLToken::isUninitialized):
+        (WebCore::HTMLToken::type):
+        (WebCore::HTMLToken::makeEndOfFile):
+        (WebCore::HTMLToken::data):
+        (WebCore::HTMLToken::name):
+        (WebCore::HTMLToken::appendToName):
+        (WebCore::HTMLToken::forceQuirks):
+        (WebCore::HTMLToken::setForceQuirks):
+        (WebCore::HTMLToken::beginDOCTYPE):
+        (WebCore::HTMLToken::publicIdentifier):
+        (WebCore::HTMLToken::systemIdentifier):
+        (WebCore::HTMLToken::setPublicIdentifierToEmptyString):
+        (WebCore::HTMLToken::setSystemIdentifierToEmptyString):
+        (WebCore::HTMLToken::appendToPublicIdentifier):
+        (WebCore::HTMLToken::appendToSystemIdentifier):
+        (WebCore::HTMLToken::selfClosing):
+        (WebCore::HTMLToken::setSelfClosing):
+        (WebCore::HTMLToken::beginStartTag):
+        (WebCore::HTMLToken::beginEndTag):
+        (WebCore::HTMLToken::addNewAttribute):
+        (WebCore::HTMLToken::appendToAttributeName):
+        (WebCore::HTMLToken::appendToAttributeValue):
+        (WebCore::HTMLToken::attributes):
+        (WebCore::HTMLToken::eraseValueOfAttribute):
+        (WebCore::HTMLToken::ensureIsCharacterToken):
+        (WebCore::HTMLToken::characters):
+        (WebCore::HTMLToken::appendToCharacter):
+        (WebCore::HTMLToken::comment):
+        (WebCore::HTMLToken::beginComment):
+        (WebCore::HTMLToken::appendToComment):
+        (WebCore::HTMLToken::eraseCharacters):
+        (HTMLToken):
+        * html/parser/HTMLTokenTypes.h: Removed.
+        * html/parser/HTMLTokenizer.cpp:
+        (WebCore::AtomicHTMLToken::usesName):
+        (WebCore::AtomicHTMLToken::usesAttributes):
+        (WebCore::HTMLTokenizer::flushBufferedEndTag):
+        (WebCore::HTMLTokenizer::nextToken):
+        * html/parser/HTMLTokenizer.h:
+        (WebCore::HTMLTokenizer::saveEndTagNameIfNeeded):
+        (WebCore::HTMLTokenizer::haveBufferedCharacterToken):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processToken):
+        (WebCore::HTMLTreeBuilder::processDoctypeToken):
+        (WebCore::HTMLTreeBuilder::processFakeStartTag):
+        (WebCore::HTMLTreeBuilder::processFakeEndTag):
+        (WebCore::HTMLTreeBuilder::processFakePEndTagIfPInButtonScope):
+        (WebCore::HTMLTreeBuilder::processIsindexStartTagForInBody):
+        (WebCore):
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody):
+        (WebCore::HTMLTreeBuilder::processStartTagForInTable):
+        (WebCore::HTMLTreeBuilder::processStartTag):
+        (WebCore::HTMLTreeBuilder::processBodyEndTagForInBody):
+        (WebCore::HTMLTreeBuilder::processAnyOtherEndTagForInBody):
+        (WebCore::HTMLTreeBuilder::processEndTagForInTableBody):
+        (WebCore::HTMLTreeBuilder::processEndTagForInRow):
+        (WebCore::HTMLTreeBuilder::processEndTagForInCell):
+        (WebCore::HTMLTreeBuilder::processEndTagForInBody):
+        (WebCore::HTMLTreeBuilder::processEndTagForInTable):
+        (WebCore::HTMLTreeBuilder::processEndTag):
+        (WebCore::HTMLTreeBuilder::processComment):
+        (WebCore::HTMLTreeBuilder::processCharacter):
+        (WebCore::HTMLTreeBuilder::defaultForBeforeHTML):
+        (WebCore::HTMLTreeBuilder::defaultForBeforeHead):
+        (WebCore::HTMLTreeBuilder::defaultForInHead):
+        (WebCore::HTMLTreeBuilder::defaultForInHeadNoscript):
+        (WebCore::HTMLTreeBuilder::defaultForAfterHead):
+        (WebCore::HTMLTreeBuilder::processStartTagForInHead):
+        (WebCore::HTMLTreeBuilder::processGenericRCDATAStartTag):
+        (WebCore::HTMLTreeBuilder::processGenericRawTextStartTag):
+        (WebCore::HTMLTreeBuilder::processScriptStartTag):
+        (WebCore::HTMLTreeBuilder::shouldProcessTokenInForeignContent):
+        (WebCore::HTMLTreeBuilder::processTokenInForeignContent):
+        * html/parser/HTMLViewSourceParser.cpp:
+        (WebCore::HTMLViewSourceParser::updateTokenizerState):
+        * html/parser/TextDocumentParser.cpp:
+        (WebCore::TextDocumentParser::insertFakePreElement):
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::filterToken):
+        (WebCore::XSSAuditor::filterScriptToken):
+        (WebCore::XSSAuditor::filterObjectToken):
+        (WebCore::XSSAuditor::filterParamToken):
+        (WebCore::XSSAuditor::filterEmbedToken):
+        (WebCore::XSSAuditor::filterAppletToken):
+        (WebCore::XSSAuditor::filterIframeToken):
+        (WebCore::XSSAuditor::filterMetaToken):
+        (WebCore::XSSAuditor::filterBaseToken):
+        (WebCore::XSSAuditor::filterFormToken):
+
 2013-02-12  Pablo Flouret  <pablof@motorola.com>
 
         Handle error recovery in @supports
