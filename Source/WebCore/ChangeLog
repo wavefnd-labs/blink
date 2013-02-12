@@ -1,3 +1,82 @@
+2013-02-11  Eric Carlson  <eric.carlson@apple.com>
+
+        [Mac] Track language selection should be sticky
+        https://bugs.webkit.org/show_bug.cgi?id=109466
+
+        Reviewed by Dean Jackson.
+
+        Choosing a text track from the caption menu should make that track's language the
+        preferred caption language. Turning captions off from the menu should disable captions
+        in videos loaded subsequently.
+
+        OS X has system support for these settings, so changes made by DRT should not change the
+        settings on the user's system. Add support for all other ports in DRT only.
+
+        Test: media/track/track-user-preferences.html
+
+        * WebCore.exp.in: Export PageGroup::captionPreferences().
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement): Use page()->group().captionPreferences().
+        (WebCore::HTMLMediaElement::attach): Ditto.
+        (WebCore::HTMLMediaElement::detach): Ditto.
+        (WebCore::HTMLMediaElement::userPrefersCaptions): Ditto.
+        (WebCore::HTMLMediaElement::configureTextTrackGroup): Ditto. Update for 
+            preferredLanguageFromList change.
+        (WebCore::HTMLMediaElement::toggleTrackAtIndex): Set user prefs for captions visible and
+            caption language as appropriate.
+
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlClosedCaptionsTrackListElement::defaultEventHandler): Remove unneeded comment.
+        (WebCore::MediaControlTextTrackContainerElement::updateSizes):  Use page()->group().captionPreferences().
+
+        * html/shadow/MediaControlsApple.cpp:
+        (WebCore::MediaControlsApple::closedCaptionTracksChanged): Update caption menu button visibility.
+
+        * page/CaptionUserPreferences.h:
+        (WebCore::CaptionUserPreferences::userPrefersCaptions): Support "testing" mode.
+        (WebCore::CaptionUserPreferences::setUserPrefersCaptions): Ditto.
+        (WebCore::CaptionUserPreferences::registerForPreferencesChangedCallbacks): Ditto.
+        (WebCore::CaptionUserPreferences::unregisterForPreferencesChangedCallbacks): Ditto.
+        (WebCore::CaptionUserPreferences::setPreferredLanguage): Ditto.
+        (WebCore::CaptionUserPreferences::preferredLanguages): Ditto.
+        (WebCore::CaptionUserPreferences::testingMode): Ditto.
+        (WebCore::CaptionUserPreferences::setTestingMode): Ditto.
+        (WebCore::CaptionUserPreferences::CaptionUserPreferences): Ditto.
+
+        * page/CaptionUserPreferencesMac.h:
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::userPrefersCaptions): Support "testing" mode.
+        (WebCore::CaptionUserPreferencesMac::setUserPrefersCaptions): Ditto.
+        (WebCore::CaptionUserPreferencesMac::userHasCaptionPreferences): Ditto.
+        (WebCore::CaptionUserPreferencesMac::registerForPreferencesChangedCallbacks): Change name from
+            registerForCaptionPreferencesChangedCallbacks. Support "testing" mode.
+        (WebCore::CaptionUserPreferencesMac::unregisterForPreferencesChangedCallbacks):  Change name from
+            unregisterForCaptionPreferencesChangedCallbacks. Support "testing" mode.
+        (WebCore::CaptionUserPreferencesMac::captionsStyleSheetOverride): Support "testing" mode.
+        (WebCore::CaptionUserPreferencesMac::captionFontSizeScale): Ditto.
+        (WebCore::CaptionUserPreferencesMac::setPreferredLanguage): Ditto.
+        (WebCore::CaptionUserPreferencesMac::preferredLanguages): Ditto. Return the platform override when set.
+
+        * page/PageGroup.cpp:
+        (WebCore::PageGroup::registerForCaptionPreferencesChangedCallbacks): Remove because it is already
+            available from the caption preference object.
+        (WebCore::PageGroup::unregisterForCaptionPreferencesChangedCallbacks): Ditto.
+        (WebCore::PageGroup::userPrefersCaptions): Ditto.
+        (WebCore::PageGroup::userHasCaptionPreferences): Ditto.
+        (WebCore::PageGroup::captionFontSizeScale): Ditto.
+        * page/PageGroup.h:
+
+        * platform/Language.cpp:
+        (WebCore::preferredLanguageFromList): Take the list of preferred languages instead of assuming
+            the system list.
+        * platform/Language.h:
+
+        * testing/Internals.cpp:
+        (WebCore::Internals::resetToConsistentState): Disable caption testing mode.
+        (WebCore::Internals::Internals): Enable caption testing mode so the user's system
+            preferences are not modified.
+
 2013-02-11  Huang Dongsung  <luxtella@company100.net>
 
         Coordinated Graphics: Make CoordinatedGraphicsScene not know contents size.
