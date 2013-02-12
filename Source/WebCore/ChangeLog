@@ -1,3 +1,65 @@
+2013-02-12  Mike West  <mkwst@chromium.org>
+
+        Implement script MIME restrictions for X-Content-Type-Options: nosniff
+        https://bugs.webkit.org/show_bug.cgi?id=71851
+
+        Reviewed by Adam Barth.
+
+        This patch adds support for 'X-Content-Type-Options: nosniff' when
+        deciding whether or not to execute a given chunk of JavaScript. If the
+        header is present, script will only execute if it matches a predefined
+        set of MIME types[1] that are deemed "executable". Scripts served with
+        types that don't match the list will not execute.
+
+        IE introduced this feature, and Gecko is working on an implementation[2]
+        now. There's been some discussion on the WHATWG list about formalizing
+        the specification for this feature[3], but nothing significant has been
+        decided.
+
+        This implementation's list of acceptible MIME types differs from IE's:
+        it matches the list of supported JavaScript MIME types defined in
+        MIMETypeRegistry::initializeSupportedJavaScriptMIMETypes()[4]. In
+        particular, the VBScript types are not accepted, and
+        'text/javascript1.{1,2,3}' are accepted, along with 'text/livescript'.
+
+        This feature is locked tightly behind the ENABLE_NOSNIFF flag, which is
+        currently only enabled on the Chromium port.
+
+        [1]: http://msdn.microsoft.com/en-us/library/gg622941(v=vs.85).aspx
+        [2]: https://bugzilla.mozilla.org/show_bug.cgi?id=471020
+        [3]: http://lists.whatwg.org/htdig.cgi/whatwg-whatwg.org/2012-November/037974.html
+        [4]: http://trac.webkit.org/browser/trunk/Source/WebCore/platform/MIMETypeRegistry.cpp?rev=142086#L307
+
+        Tests: http/tests/security/contentTypeOptions/invalid-content-type-options-allowed.html
+               http/tests/security/contentTypeOptions/nosniff-script-allowed.html
+               http/tests/security/contentTypeOptions/nosniff-script-blocked.html
+               http/tests/security/contentTypeOptions/nosniff-script-without-content-type-allowed.html
+
+        * dom/ScriptElement.cpp:
+        (WebCore::ScriptElement::executeScript):
+            Before executing script, ensure that it shouldn't be blocked due to
+            its MIME type. If it is blocked, write an error message to the
+            console.
+        * loader/cache/CachedScript.cpp:
+        (WebCore::CachedScript::mimeType):
+            Make scripts' MIME type available outside the context of
+            CachedScript in order to correctly populate error messages we write
+            to the console in ScriptElement::executeScript
+        (WebCore):
+        (WebCore::CachedScript::mimeTypeAllowedByNosniff):
+        * loader/cache/CachedScript.h:
+        (CachedScript):
+            A new method which checks the resource's HTTP headers to set the
+            'nosniff' disposition, and compares the resource's MIME type against
+            the list of allowed executable types. Returns true iff the script
+            is allowed.
+        * platform/network/HTTPParsers.cpp:
+        (WebCore):
+        (WebCore::parseContentTypeOptionsHeader):
+        * platform/network/HTTPParsers.h:
+            Adds a new enum which relates the sniffable status of the resource,
+            and a method to parse the HTTP header.
+
 2013-02-12  Adam Barth  <abarth@webkit.org>
 
         Threaded HTML parser should pass the remaining fast/tokenizer tests
