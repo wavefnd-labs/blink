@@ -1,3 +1,33 @@
+2013-02-12  Adam Barth  <abarth@webkit.org>
+
+        Threaded HTML parser should pass the remaining fast/tokenizer tests
+        https://bugs.webkit.org/show_bug.cgi?id=109607
+
+        Reviewed by Eric Seidel.
+
+        This patch fixes some edge cases involving document.write. Previously,
+        we would drop input characters on the floor if the tokenizer wasn't
+        able to consume them synchronously. In this patch, we send the unparsed
+        characters to the background thread for consumption after rewinding the
+        input stream.
+
+        * html/parser/BackgroundHTMLInputStream.cpp:
+        (WebCore::BackgroundHTMLInputStream::rewindTo):
+        * html/parser/BackgroundHTMLInputStream.h:
+        (BackgroundHTMLInputStream):
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::resumeFrom):
+        * html/parser/BackgroundHTMLParser.h:
+        (Checkpoint):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::canTakeNextToken):
+        (WebCore::HTMLDocumentParser::didFailSpeculation):
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+        (WebCore::HTMLDocumentParser::finish):
+        * html/parser/HTMLInputStream.h:
+        (WebCore::HTMLInputStream::closeWithoutMarkingEndOfFile):
+        (HTMLInputStream):
+
 2013-02-12  Csaba Osztrogonác  <ossy@webkit.org>
 
         Unreviewed buildfix for !ENABLE(INSPECTOR) platforms after r142654.
