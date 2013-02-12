@@ -1,3 +1,65 @@
+2013-02-12  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Mouse click not on sub-fields in multiple fields input  should not move focus
+        https://bugs.webkit.org/show_bug.cgi?id=109544
+
+        Reviewed by Kentaro Hara.
+
+        This is similar to Bug 108914, "Should not move focus if the element
+        already has focus." We fixed a focus() case in Bug 108914. However we
+        still have the problem in a case of focusing by mouse click.
+
+        The fix for Bug 108914 intercepted focus() function to change the
+        behavior. However focus-by-click doesn't call focus(), but calls
+        FocusController::setFocusedNode. To fix this problem, we introduce
+        oldFocusedNode argument to handleFocusEvent, and
+        BaseMultipleFieldsDateAndTimeInputType::handleFocusEvent restores the
+        focus to oldFocusedNode if oldFocusedNode is one of sub-fields.
+        handleFocusEvent is called whenever the focused node is changed.
+
+        We don't need InputType::willCancelFocus any more because the new code
+        in handleFocusEvent covers it.
+
+        Tests: Update fast/forms/time-multiple-fields/time-multiple-fields-focus.html.
+
+        * html/HTMLTextFormControlElement.h:
+        (WebCore::HTMLTextFormControlElement::handleFocusEvent):
+        Add oldFocusedNode argument.
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::HTMLTextFormControlElement::dispatchFocusEvent):
+        Pass oldFocusedNode to handleFocusEvent.
+
+        * html/HTMLInputElement.h:
+        (HTMLInputElement):
+         - Add oldFocusedNode argument to handleFocusEvent.
+         - Remove focus() override.
+        * html/HTMLInputElement.cpp: Remove focus() override.
+        (WebCore::HTMLInputElement::handleFocusEvent):
+        Pass oldFocusedNode to InputType::handleFocusEvent.
+        * html/InputType.cpp: Remove willCancelFocus.
+        (WebCore::InputType::handleFocusEvent):
+        Add oldFocusedNode argument.
+        * html/InputType.h:
+        (InputType): Ditto.
+        * html/PasswordInputType.cpp:
+        (WebCore::PasswordInputType::handleFocusEvent): Ditto.
+        * html/PasswordInputType.h:
+        (PasswordInputType): Ditto.
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType):
+        Remove willCancelFocus, and add oldFocusedNode argument to handleFocusEvent.
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::handleFocusEvent):
+        Pass oldFocusedNode to DateTimeEditElement::focusByOwner if the
+        direction is FocusDirectionNone.
+
+        * html/shadow/DateTimeEditElement.h:
+        (DateTimeEditElement): Add oldFocusedNode argument to focusByOwner.
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditElement::focusByOwner):
+        If oldFocusedNode is one of sub-fields, focus on it again.
+
 2013-02-12  Takashi Sakamoto  <tasak@google.com>
 
         [Refactoring] Make m_selectorChecker in StyleResolver an on-stack object.
