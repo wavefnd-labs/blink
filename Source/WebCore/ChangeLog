@@ -1,3 +1,25 @@
+2013-02-12  Andreas Kling  <akling@apple.com>
+
+        Remove Element::ensureAttributeData().
+        <http://webkit.org/b/109643>
+
+        Reviewed by Anders Carlsson.
+
+        * dom/Element.h:
+        * dom/Element.cpp:
+        (WebCore::Element::classAttributeChanged):
+        (WebCore::Element::shouldInvalidateDistributionWhenAttributeChanged):
+
+            Use attributeData() instead of ensureAttributeData(), it's already guaranteed to exist in
+            both these functions as they are called in response to attribute changes.
+
+        * svg/SVGElement.h:
+        (WebCore::SVGElement::invalidateSVGAttributes):
+
+            Use mutableAttributeData() instead of ensureAttributeData() when invalidating animated
+            SVG attributes. While I can't find any bugs caused by this, an element with property animations
+            shouldn't share attribute data with other elements.
+
 2013-02-12  Hayato Ito  <hayato@chromium.org>
 
         Make {FocusIn,FocusOut,Focus,Blur}EventDispatchMediator type safe.
