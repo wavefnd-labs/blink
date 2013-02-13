@@ -1,3 +1,46 @@
+2013-02-13  Eric Carlson  <eric.carlson@apple.com>
+
+        [Mac] Caption menu should have only one item selected
+        https://bugs.webkit.org/show_bug.cgi?id=109730
+
+        Reviewed by Dean Jackson.
+
+        No new tests, media/track/track-user-preferences.html was modified to test the changes.
+
+        * CMakeLists.txt: Add CaptionUserPreferences.cpp.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.vcxproj/WebCore.vcxproj: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement): Initialize m_processingPreferenceChange.
+        (WebCore::HTMLMediaElement::configureTextTrackGroup): Only end up with one selected track when
+            called because of a preferences change.
+        (WebCore::HTMLMediaElement::captionPreferencesChanged): Call setClosedCaptionsVisible instead
+            of calling markCaptionAndSubtitleTracksAsUnconfigured directly.
+        (WebCore::HTMLMediaElement::markCaptionAndSubtitleTracksAsUnconfigured): Process all tracks, 
+            not just track elements.
+        * html/HTMLMediaElement.h:
+
+        * page/CaptionUserPreferences.cpp: Added so the functionality can be tested in DRT.
+        (WebCore::CaptionUserPreferences::registerForPreferencesChangedCallbacks):
+        (WebCore::CaptionUserPreferences::unregisterForPreferencesChangedCallbacks):
+        (WebCore::CaptionUserPreferences::setUserPrefersCaptions):
+        (WebCore::CaptionUserPreferences::captionPreferencesChanged):
+        (WebCore::CaptionUserPreferences::preferredLanguages):
+        (WebCore::CaptionUserPreferences::setPreferredLanguage):
+        (WebCore::CaptionUserPreferences::displayNameForTrack):
+        * page/CaptionUserPreferences.h:
+
+        * page/CaptionUserPreferencesMac.h:
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::registerForPreferencesChangedCallbacks): Moved some logic
+            to base class.
+        (WebCore::CaptionUserPreferencesMac::captionPreferencesChanged): Ditto.
+
 2013-02-13  Hans Muller  <hmuller@adobe.com>
 
         [CSS Exclusions] ExclusionPolygon reflex vertices should constrain the first fit location.
