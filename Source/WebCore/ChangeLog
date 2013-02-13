@@ -1,3 +1,22 @@
+2013-02-13  Shawn Singh  <shawnsingh@chromium.org>
+
+        Fix debug assertion being triggered because we may access dirty normalFlowList.
+        https://bugs.webkit.org/show_bug.cgi?id=109740
+
+        A debug assertion in RenderLayer.h is being hit when trying to
+        access the normalFlowList when it is dirty.  This is caused by a
+        new recursion that I added in RenderLayerBacking::hasVisibleNonCompositingDescendant(),
+        but I overlooked the need to call updateLayerListsIfNeeded()
+        recursively as well.
+
+        Reviewed by Simon Fraser.
+
+        No test, because there's no reliable way to test this (same as bug 85512).
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::hasVisibleNonCompositingDescendant):
+        (WebCore::RenderLayerBacking::hasVisibleNonCompositingDescendantLayers):
+
 2013-02-13  Antti Koivisto  <antti@apple.com>
 
         Don't restart shared timer if both the current and the new fire time are in the past
