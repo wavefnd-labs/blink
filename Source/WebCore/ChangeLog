@@ -1,3 +1,61 @@
+2013-02-13  Pablo Flouret  <pablof@motorola.com>
+
+        Implement css-conditional's CSS.supports()
+        https://bugs.webkit.org/show_bug.cgi?id=100324
+
+        Reviewed by Antti Koivisto.
+
+        http://dev.w3.org/csswg/css3-conditional/#the-css-interface
+
+        The supports() method provides the css @supports rule's corresponding
+        dom api.
+        The patch also adds the CSS interface on DOMWindow, which holds "useful
+        CSS-related functions that do not belong elsewhere". This is where
+        supports() lives.
+
+        Test: css3/supports-dom-api.html
+
+        * CMakeLists.txt:
+        * DerivedSources.cpp:
+        * DerivedSources.make:
+        * DerivedSources.pri:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/gobject/GNUmakefile.am:
+        * bindings/scripts/CodeGeneratorGObject.pm:
+        (SkipFunction):
+            Add DOMWindowCSS.* to the build systems.
+
+        * bindings/scripts/CodeGenerator.pm:
+        (WK_lcfirst):
+            Handle CSS prefixes correctly (s/cSS/css/).
+
+        * css/CSSGrammar.y.in:
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::CSSParser):
+        (WebCore::CSSParser::parseSupportsCondition):
+        (WebCore::CSSParser::detectAtToken):
+        * css/CSSParser.h:
+            webkit_supports_condition parses just the condition part of an
+            @supports rule and evaluates it, outputting whether the condition
+            is supported or not.
+
+        * css/CSSAllInOne.cpp:
+        * css/DOMWindowCSS.cpp: Added.
+        * css/DOMWindowCSS.h: Added.
+        * css/DOMWindowCSS.idl: Added.
+            The CSS interface object.
+
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::css):
+        * page/DOMWindow.h:
+        * page/DOMWindow.idl:
+            window.CSS
+
 2013-02-13  Vladislav Kaznacheev  <kaznacheev@chromium.org>
 
         Web Inspector: Simplify SplitView to rely more on CSS
