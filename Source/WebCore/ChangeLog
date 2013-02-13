@@ -1,3 +1,37 @@
+2013-02-13  Mike West  <mkwst@chromium.org>
+
+        location.href does not throw SECURITY_ERR when accessed across origins with JSC bindings
+        https://bugs.webkit.org/show_bug.cgi?id=43891
+
+        Reviewed by Adam Barth.
+
+        Other browsers (IE, Firefox, and Opera) throw an exception when accessing
+        properties of a Location object across origins, as the spec suggests[1].
+        WebKit is currently the outlier.
+
+        This has a few negative effects: developers are forced to hack around
+        access violations in two ways rather than having a single code path, and
+        (more annoyingly) developers are unable to avoid generating the error
+        message. See every ad on the internet for the effect on the console. :)
+
+        This patch adds a SECURITY_ERR exception to these access violations,
+        which is the first step towards getting rid of the console spam. Getting
+        rid of the message entirely will require a solution to
+        http://wkbug.com/98050.
+
+        A fairly inconclusive thread[2] on webkit-dev popped up in 2010 and
+        trailed off without reaching conclusion. A more recent thread reached
+        agreement that this patch seems like a reasonable thing to do[3].
+
+        This is the JSC half of the patch. V8 is coming in http://wkbug.com/43892
+
+        [1]: http://www.whatwg.org/specs/web-apps/current-work/multipage/history.html#security-location
+        [2]: https://lists.webkit.org/pipermail/webkit-dev/2010-August/013880.html
+        [2]: https://lists.webkit.org/pipermail/webkit-dev/2012-February/023636.html
+
+        * bindings/js/JSLocationCustom.cpp:
+        (WebCore::JSLocation::getOwnPropertySlotDelegate):
+
 2013-02-13  Andrew Wilson  <atwilson@chromium.org>
 
         Unreviewed Chromium gyp-file cleanup after glib backend removal.
