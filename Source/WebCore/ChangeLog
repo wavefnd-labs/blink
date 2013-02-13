@@ -1,3 +1,39 @@
+2013-02-13  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Adding or removing grid items doesn't properly recompute the track sizes
+        https://bugs.webkit.org/show_bug.cgi?id=109100
+
+        Reviewed by Ojan Vafai.
+
+        Test: fast/css-grid-layout/grid-item-removal-track-breadth-update.html
+
+        The test uncovered several bugs in our implementation that is fixed as part
+        of this change. They will be detailed below.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::logicalContentHeightForChild):
+        Added this function to share the code between minContentForChild and maxContentForChild.
+        Also forced a relayout in this case to avoid getting a wrong answer (e.g. the logical height
+        constrained by the previous layout's grid breadth).
+
+        (WebCore::RenderGrid::minContentForChild):
+        (WebCore::RenderGrid::maxContentForChild):
+        Updated to use logicalContentHeightForChild.
+
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctions):
+        Updated to match the specification and set max breadth to current breadth per the specification.
+        This made us over-grow some cases in the test.
+
+        (WebCore::RenderGrid::distributeSpaceToTracks):
+        Updated to match the specification and use an extra variable to do the intermediate spreading. Also removed
+        a now unneeded max. This fixes the case of multiple grid items in the same grid area that was completely broken.
+
+        (WebCore::RenderGrid::layoutGridItems):
+        Added a FIXME about always relaying out content sized tracks' children.
+
+        * rendering/RenderGrid.h:
+        Added logicalContentHeightForChild.
+
 2013-02-13  Adam Barth  <abarth@webkit.org>
 
         Clean up some style nits in HTMLPreloadScanner
