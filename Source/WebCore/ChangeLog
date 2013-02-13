@@ -1,3 +1,26 @@
+2013-02-12  Hajime Morrita  <morrita@google.com>
+
+        [Internals] setShadowDOMEnabled() shouldn't be used except a few tests.
+        https://bugs.webkit.org/show_bug.cgi?id=109642
+
+        Reviewed by Kent Tamura.
+
+        InternalSettings.setShadowDOMEnabled() shouldn't be called after
+        any relevant DOM bindings are touched. However for fuzzers, it
+        isn't trivial to regulate its behavior.
+
+        This change whitelists the URL of running test for prevent
+        unintended API calls. This doesn't hurt the Internals usability
+        since the API is called from just a couple of tests and the number
+        isn't expected to grow.
+
+        Test: fast/dom/shadow/shadow-dom-enabled-flag-whitelist.html
+
+        * testing/InternalSettings.cpp:
+        (WebCore::urlIsWhitelisted):
+        (WebCore):
+        (WebCore::InternalSettings::setShadowDOMEnabled):
+
 2013-02-12  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: Introduce version controller to migrate settings versions.
