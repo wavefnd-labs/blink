@@ -1,3 +1,147 @@
+2013-02-13  Andreas Kling  <akling@apple.com>
+
+        Better names for ElementAttributeData & subclasses.
+        <http://webkit.org/b/109529>
+
+        Reviewed by Antti Koivisto.
+
+        - ElementAttributeData => ElementData
+
+            Because ElementAttributeData won't be a good name once we move some non-attribute related
+            things to this structure.
+
+        - ImmutableElementAttributeData => ShareableElementData
+
+            These objects can be shared with other Elements that have the same attribute name/value pairs.
+
+        - MutableElementAttributeData => UniqueElementData
+
+            These objects contain data that is unique to a specific Element, and cannot be shared with
+            other Elements. This is what's important about it, not that its underlying storage is mutable.
+
+        - attributeData() -> elementData()
+        - updatedAttributeData() -> elementDataWithSynchronizedAttributes()
+        - ensureUpdatedAttributeData() -> ensureElementDataWithSynchronizedAttributes()
+        - mutableAttributeData() -> ensureUniqueElementData()
+
+            Ride-along renames. Much less vague than previous names IMO.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::canShareStyleWithControl):
+        (WebCore::StyleResolver::sharingCandidateHasIdenticalStyleAffectingAttributes):
+        * dom/Attr.cpp:
+        (WebCore::Attr::elementAttribute):
+        * dom/DocumentSharedObjectPool.cpp:
+        (WebCore::ShareableElementDataCacheKey::ShareableElementDataCacheKey):
+        (WebCore::ShareableElementDataCacheKey::operator!=):
+        (WebCore::ShareableElementDataCacheEntry::ShareableElementDataCacheEntry):
+        (ShareableElementDataCacheEntry):
+        (WebCore::DocumentSharedObjectPool::cachedShareableElementDataWithAttributes):
+        * dom/DocumentSharedObjectPool.h:
+        (DocumentSharedObjectPool):
+        * dom/Element.cpp:
+        (WebCore::Element::detachAttribute):
+        (WebCore::Element::removeAttribute):
+        (WebCore::Element::attributes):
+        (WebCore::Element::getAttribute):
+        (WebCore::Element::setAttribute):
+        (WebCore::Element::setSynchronizedLazyAttribute):
+        (WebCore::Element::setAttributeInternal):
+        (WebCore::Element::attributeChanged):
+        (WebCore::Element::classAttributeChanged):
+        (WebCore::Element::shouldInvalidateDistributionWhenAttributeChanged):
+        (WebCore::Element::parserSetAttributes):
+        (WebCore::Element::hasAttributes):
+        (WebCore::Element::hasEquivalentAttributes):
+        (WebCore::Element::setAttributeNode):
+        (WebCore::Element::removeAttributeNode):
+        (WebCore::Element::removeAttributeInternal):
+        (WebCore::Element::addAttributeInternal):
+        (WebCore::Element::getAttributeNode):
+        (WebCore::Element::getAttributeNodeNS):
+        (WebCore::Element::hasAttribute):
+        (WebCore::Element::hasAttributeNS):
+        (WebCore::Element::computeInheritedLanguage):
+        (WebCore::Element::getURLAttribute):
+        (WebCore::Element::getNonEmptyURLAttribute):
+        (WebCore::Element::cloneAttributesFromElement):
+        (WebCore::Element::createUniqueElementData):
+        (WebCore::Element::reportMemoryUsage):
+        (WebCore::ElementData::deref):
+        (WebCore::ElementData::ElementData):
+        (WebCore::sizeForShareableElementDataWithAttributeCount):
+        (WebCore::ElementData::createShareableWithAttributes):
+        (WebCore::ElementData::createUnique):
+        (WebCore::ShareableElementData::ShareableElementData):
+        (WebCore::ShareableElementData::~ShareableElementData):
+        (WebCore::UniqueElementData::UniqueElementData):
+        (WebCore::ElementData::makeMutableCopy):
+        (WebCore::ElementData::makeImmutableCopy):
+        (WebCore::ElementData::setPresentationAttributeStyle):
+        (WebCore::ElementData::addAttribute):
+        (WebCore::ElementData::removeAttribute):
+        (WebCore::ElementData::isEquivalent):
+        (WebCore::ElementData::reportMemoryUsage):
+        (WebCore::ElementData::getAttributeItemIndexSlowCase):
+        * dom/Element.h:
+        (ElementData):
+        (WebCore::ElementData::isUnique):
+        (ShareableElementData):
+        (UniqueElementData):
+        (WebCore::Element::getAttributeItemIndex):
+        (WebCore::Element::elementData):
+        (Element):
+        (WebCore::Element::elementDataWithSynchronizedAttributes):
+        (WebCore::Element::ensureElementDataWithSynchronizedAttributes):
+        (WebCore::Element::fastHasAttribute):
+        (WebCore::Element::fastGetAttribute):
+        (WebCore::Element::hasAttributesWithoutUpdate):
+        (WebCore::Element::idForStyleResolution):
+        (WebCore::Element::classNames):
+        (WebCore::Element::attributeCount):
+        (WebCore::Element::attributeItem):
+        (WebCore::Element::getAttributeItem):
+        (WebCore::Element::updateInvalidAttributes):
+        (WebCore::Element::hasID):
+        (WebCore::Element::hasClass):
+        (WebCore::Element::ensureUniqueElementData):
+        (WebCore::ElementData::mutableAttributeVector):
+        (WebCore::ElementData::immutableAttributeArray):
+        (WebCore::ElementData::length):
+        (WebCore::ElementData::presentationAttributeStyle):
+        (WebCore::ElementData::getAttributeItem):
+        (WebCore::ElementData::getAttributeItemIndex):
+        (WebCore::ElementData::attributeItem):
+        * dom/Node.cpp:
+        (WebCore::Node::dumpStatistics):
+        (WebCore::Node::compareDocumentPosition):
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::updateStyleAttribute):
+        (WebCore::StyledElement::ensureMutableInlineStyle):
+        (WebCore::StyledElement::attributeChanged):
+        (WebCore::StyledElement::inlineStyleCSSOMWrapper):
+        (WebCore::StyledElement::setInlineStyleFromString):
+        (WebCore::StyledElement::styleAttributeChanged):
+        (WebCore::StyledElement::inlineStyleChanged):
+        (WebCore::StyledElement::addSubresourceAttributeURLs):
+        (WebCore::StyledElement::rebuildPresentationAttributeStyle):
+        * dom/StyledElement.h:
+        (WebCore::StyledElement::inlineStyle):
+        (WebCore::StyledElement::invalidateStyleAttribute):
+        (WebCore::StyledElement::presentationAttributeStyle):
+        * html/ClassList.cpp:
+        (WebCore::ClassList::classNames):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::updateType):
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::mergeAttributesFromTokenIntoElement):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::updateAnimatedSVGAttribute):
+        * svg/SVGElement.h:
+        (WebCore::SVGElement::invalidateSVGAttributes):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+
 2013-02-13  Christian Biesinger  <cbiesinger@chromium.org>
 
         Crash when encountering <object style="resize:both;">
