@@ -1,3 +1,21 @@
+2013-02-13  Levi Weintraub  <leviw@chromium.org>
+
+        Bidi-Isolated inlines can cause subsequent content to not be rendered
+        https://bugs.webkit.org/show_bug.cgi?id=108137
+
+        Reviewed by Eric Seidel.
+
+        First step in fixing how inline isolates behave with collapsed spaces.
+        webkit.org/b/109624 tracks the overarching issue.
+
+        Test: fast/text/content-following-inline-isolate-with-collapsed-whitespace.html
+
+        * rendering/InlineIterator.h:
+        (WebCore::IsolateTracker::addFakeRunIfNecessary): If we enter an isolate while
+        ignoring spaces, ensure we leave it considering them again. This can result in
+        including spaces that should be ignored following the isolate on the line, but
+        failing to do so results in those contents not being rendered at all.
+
 2013-02-13  Andreas Kling  <akling@apple.com>
 
         Better names for ElementAttributeData & subclasses.
