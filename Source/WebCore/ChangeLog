@@ -1,3 +1,165 @@
+2013-02-13  Takashi Sakamoto  <tasak@google.com>
+
+        [Refactoring] StyleResolver::State should have methods to access its member variables.
+        https://bugs.webkit.org/show_bug.cgi?id=108563
+
+        Reviewed by Antti Koivisto.
+
+        Made all member variables private and added methods to access the
+        variables, because most of the member variables are read-only.
+        We don't need to update those read-only variables while resolving
+        styles.
+
+        No new tests, because just refactoring.
+
+        * css/SVGCSSStyleSelector.cpp:
+        (WebCore::StyleResolver::applySVGProperty):
+        * css/StyleResolver.cpp:
+        (WebCore):
+        (WebCore::StyleResolver::collectMatchingRules):
+        (WebCore::StyleResolver::collectMatchingRulesForRegion):
+        (WebCore::StyleResolver::sortAndTransferMatchedRules):
+        (WebCore::StyleResolver::matchScopedAuthorRules):
+        (WebCore::StyleResolver::styleSharingCandidateMatchesHostRules):
+        (WebCore::StyleResolver::matchHostRules):
+        (WebCore::StyleResolver::matchAuthorRules):
+        (WebCore::StyleResolver::matchUserRules):
+        (WebCore::StyleResolver::matchUARules):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        (WebCore::StyleResolver::sortMatchedRules):
+        (WebCore::StyleResolver::matchAllRules):
+        (WebCore::StyleResolver::State::initElement):
+        (WebCore::StyleResolver::initElement):
+        Modified to invoke m_state.initElement if a given element is
+        different from current m_state's element.
+        (WebCore::StyleResolver::State::initForStyleResolve):
+        Moved from StyleResolver.
+        (WebCore::StyleResolver::styleSharingCandidateMatchesRuleSet):
+        (WebCore::StyleResolver::canShareStyleWithControl):
+        (WebCore::StyleResolver::sharingCandidateHasIdenticalStyleAffectingAttributes):
+        (WebCore::StyleResolver::canShareStyleWithElement):
+        (WebCore::StyleResolver::locateSharedStyle):
+        (WebCore::StyleResolver::styleForElement):
+        (WebCore::StyleResolver::styleForKeyframe):
+        (WebCore::StyleResolver::keyframeStylesForAnimation):
+        (WebCore::StyleResolver::pseudoStyleForElement):
+        Changed ASSERT in the first line. ASSERT(m_state.parentStyle) would be
+        wrong, because it depends on previous resolving. However,
+        initForStyleResolve will also update m_state.parentStyle. No code in
+        pseudoStyleForElement depends on previous resolving state.
+        (WebCore::StyleResolver::styleForPage):
+        (WebCore::StyleResolver::defaultStyleForElement):
+        (WebCore::StyleResolver::adjustRenderStyle):
+        (WebCore::StyleResolver::updateFont):
+        (WebCore::StyleResolver::pseudoStyleRulesForElement):
+        (WebCore::StyleResolver::ruleMatches):
+        Added one more parameter, dynamicPseudo, because dynamicPseudo in
+        State class is just used for returning matched pseudo style from
+        this ruleMatches to collectMatchingRulesForList. No need to keep
+        dynamicPseudo while resolving styles.
+        (WebCore::StyleResolver::checkRegionSelector):
+        Removed m_pseudoStyle = NOPSEUDO, because this method uses just
+        SelectorChecker::matched. SelectorChecker doesn't see StyleResolver's
+        m_pseudoStyle directly. Need to use SelectorCheckerContext. So no
+        need to set m_pseudoStyle to be NOPSEUDO.
+        (WebCore::StyleResolver::applyProperties):
+        (WebCore::StyleResolver::applyMatchedProperties):
+        (WebCore::StyleResolver::isLeftPage):
+        (WebCore::StyleResolver::applyPropertyToStyle):
+        (WebCore::StyleResolver::useSVGZoomRules):
+        (WebCore::createGridTrackBreadth):
+        (WebCore::StyleResolver::resolveVariables):
+        (WebCore::StyleResolver::applyProperty):
+        (WebCore::StyleResolver::cachedOrPendingFromValue):
+        (WebCore::StyleResolver::generatedOrPendingFromValue):
+        (WebCore::StyleResolver::setOrPendingFromValue):
+        (WebCore::StyleResolver::cursorOrPendingFromValue):
+        (WebCore::StyleResolver::checkForTextSizeAdjust):
+        (WebCore::StyleResolver::initializeFontStyle):
+        (WebCore::StyleResolver::setFontSize):
+        (WebCore::StyleResolver::colorFromPrimitiveValue):
+        (WebCore::StyleResolver::loadPendingSVGDocuments):
+        (WebCore::StyleResolver::cachedOrPendingStyleShaderFromValue):
+        (WebCore::StyleResolver::loadPendingShaders):
+        (WebCore::StyleResolver::parseCustomFilterTransformParameter):
+        (WebCore::StyleResolver::createFilterOperations):
+        (WebCore::StyleResolver::loadPendingImage):
+        (WebCore::StyleResolver::loadPendingImages):
+        * css/StyleResolver.h:
+        (WebCore::StyleResolver::style):
+        (WebCore::StyleResolver::parentStyle):
+        (WebCore::StyleResolver::rootElementStyle):
+        (WebCore::StyleResolver::element):
+        (WebCore::StyleResolver::hasParentNode):
+        (StyleResolver):
+        (WebCore::StyleResolver::State::State):
+        (State):
+        (WebCore::StyleResolver::State::clear):
+        Modified to use clear at the end of styleForElement.
+        (WebCore::StyleResolver::State::document):
+        (WebCore::StyleResolver::State::element):
+        (WebCore::StyleResolver::State::styledElement):
+        (WebCore::StyleResolver::State::setStyle):
+        (WebCore::StyleResolver::State::style):
+        (WebCore::StyleResolver::State::takeStyle):
+        (WebCore::StyleResolver::State::ensureRuleList):
+        (WebCore::StyleResolver::State::takeRuleList):
+        (WebCore::StyleResolver::State::parentNode):
+        (WebCore::StyleResolver::State::setParentStyle):
+        (WebCore::StyleResolver::State::parentStyle):
+        (WebCore::StyleResolver::State::rootElementStyle):
+        (WebCore::StyleResolver::State::regionForStyling):
+        (WebCore::StyleResolver::State::setSameOriginOnly):
+        (WebCore::StyleResolver::State::isSameOriginOnly):
+        (WebCore::StyleResolver::State::pseudoStyle):
+        (WebCore::StyleResolver::State::elementLinkState):
+        (WebCore::StyleResolver::State::distributedToInsertionPoint):
+        (WebCore::StyleResolver::State::setElementAffectedByClassRules):
+        (WebCore::StyleResolver::State::elementAffectedByClassRules):
+        (WebCore::StyleResolver::State::setApplyPropertyToRegularStyle):
+        (WebCore::StyleResolver::State::setApplyPropertyToVisitedLinkStyle):
+        (WebCore::StyleResolver::State::applyPropertyToRegularStyle):
+        (WebCore::StyleResolver::State::applyPropertyToVisitedLinkStyle):
+        (WebCore::StyleResolver::State::pendingImageProperties):
+        (WebCore::StyleResolver::State::pendingSVGDocuments):
+        (WebCore::StyleResolver::State::setHasPendingShaders):
+        (WebCore::StyleResolver::State::hasPendingShaders):
+        (WebCore::StyleResolver::State::setLineHeightValue):
+        (WebCore::StyleResolver::State::lineHeightValue):
+        (WebCore::StyleResolver::State::setFontDirty):
+        (WebCore::StyleResolver::State::fontDirty):
+        (WebCore::StyleResolver::State::cacheBorderAndBackground):
+        (WebCore::StyleResolver::State::hasUAAppearance):
+        (WebCore::StyleResolver::State::borderData):
+        (WebCore::StyleResolver::State::backgroundData):
+        (WebCore::StyleResolver::State::backgroundColor):
+        (WebCore::StyleResolver::State::fontDescription):
+        (WebCore::StyleResolver::State::parentFontDescription):
+        (WebCore::StyleResolver::State::setFontDescription):
+        (WebCore::StyleResolver::State::setZoom):
+        (WebCore::StyleResolver::State::setEffectiveZoom):
+        (WebCore::StyleResolver::State::setTextSizeAdjust):
+        (WebCore::StyleResolver::State::setWritingMode):
+        (WebCore::StyleResolver::State::setTextOrientation):
+        fontDescription, ... and setTextOrientation were moved from
+        StyleResolver.
+        (WebCore::StyleResolver::State::matchedRules):
+        (WebCore::StyleResolver::State::addMatchedRule):
+        Moved from StyleResolver.
+        (WebCore::StyleResolver::applyPropertyToRegularStyle):
+        (WebCore::StyleResolver::applyPropertyToVisitedLinkStyle):
+        (WebCore::StyleResolver::fontDescription):
+        (WebCore::StyleResolver::parentFontDescription):
+        (WebCore::StyleResolver::setFontDescription):
+        (WebCore::StyleResolver::setZoom):
+        (WebCore::StyleResolver::setEffectiveZoom):
+        (WebCore::StyleResolver::setTextSizeAdjust):
+        (WebCore::StyleResolver::setWritingMode):
+        (WebCore::StyleResolver::setTextOrientation):
+        These fontDescription, ..., setTextOrientation are wrappers to
+        invoke State's methods. StyleBuilder still depends on StyleResolver
+        and invokes these methods. So we need these wrappers.
+
 2013-02-13  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] window.open passes height and width parameters even if not defined in a page
