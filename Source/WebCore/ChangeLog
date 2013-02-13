@@ -1,3 +1,21 @@
+2013-02-12  Chris Fleizach  <cfleizach@apple.com>
+
+         AX: crash when accessing AccessibilityScrollbar after page has been unloaded
+         https://bugs.webkit.org/show_bug.cgi?id=109524
+
+         Reviewed by Ryosuke Niwa.
+
+         AX clients can hold onto AccesibilityScrollbar references that reference parent
+         AccessibilityScrollViews that have already gone away.
+
+         AccessibilityScrollView is not calling detachFromParent after it is removed, which
+         leads to a crash. The fix is to clearChildren() when an object is deallocated.
+
+         I could not create a test because the crash only manifests over multiple page loads.
+
+         * accessibility/AccessibilityObject.cpp:
+         (WebCore::AccessibilityObject::detach):
+
 2013-02-12  Hayato Ito  <hayato@chromium.org>
 
         Use FocusEvent.relatedTarget in {FocusIn,FocusOut,Focus,Blur}EventDispatchMediator.
