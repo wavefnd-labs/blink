@@ -1,3 +1,35 @@
+2013-02-12  Antti Koivisto  <antti@apple.com>
+
+        Avoid updating timer heap when nothing changes
+        https://bugs.webkit.org/show_bug.cgi?id=109630
+
+        Reviewed by Andreas Kling.
+
+        When the fire time of a Timer is changed we remove it from the timer heap and reinsert it. This is pretty slow. 
+        Turns out that in ~80% of cases we are already in the heap and the insertion position is the same as the 
+        original position. We can check if anything is actually going to change before doing this work.
+        
+        This makes starting a timer ~30% faster in average, ~0.1% progression in PLT3.
+        
+        * platform/Timer.cpp:
+        (TimerHeapLessThanFunction):
+        (WebCore::TimerHeapLessThanFunction::operator()):
+        (WebCore::parentHeapPropertyHolds):
+        (WebCore):
+        (WebCore::childHeapPropertyHolds):
+        (WebCore::TimerBase::hasValidHeapPosition):
+        
+            The code here assumes that STL heap is a normal binary heap. If there is a different implementation
+            somewhere the assertions will catch it.
+
+        (WebCore::TimerBase::updateHeapIfNeeded):
+        
+            Skip updating the heap if it is already valid.
+
+        (WebCore::TimerBase::setNextFireTime):
+        * platform/Timer.h:
+        (TimerBase):
+
 2013-02-13  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] Remove remaining dead code from the GLib unicode backend
