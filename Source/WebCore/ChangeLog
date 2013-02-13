@@ -1,3 +1,68 @@
+2013-02-12  Eric Seidel  <eric@webkit.org>
+
+        Fix HTMLToken::Attribute member naming and update callsites to use Vector-based String functions
+        https://bugs.webkit.org/show_bug.cgi?id=109638
+
+        Reviewed by Adam Barth.
+
+        Darin Adler noted in:
+        https://bugs.webkit.org/show_bug.cgi?id=109408#c4
+        that HTMLToken::Attribute (then MarkupTokenBase::Attribute)
+        was a struct, yet incorrectly used m_ for its public members.
+
+        This patch fixes the members to not have the m_, and since I was
+        touching all callers, I also updated all callers to use modern
+        Vector-based String creation/append functions instead of manually
+        calling UChar*, size_t versions.
+
+        There should be no behavior change to this patch.  Where I saw
+        performance/memory bugs, I noted them with FIXMEs to keep
+        this change simple.
+
+        * html/HTMLViewSourceDocument.cpp:
+        (WebCore::HTMLViewSourceDocument::processTagToken):
+        * html/parser/AtomicHTMLToken.h:
+        (WebCore::AtomicHTMLToken::publicIdentifier):
+        (WebCore::AtomicHTMLToken::systemIdentifier):
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        (WebCore::AtomicHTMLToken::initializeAttributes):
+        * html/parser/CompactHTMLToken.cpp:
+        (WebCore::CompactHTMLToken::CompactHTMLToken):
+        * html/parser/HTMLMetaCharsetParser.cpp:
+        (WebCore::HTMLMetaCharsetParser::processMeta):
+        (WebCore::HTMLMetaCharsetParser::checkForMetaCharset):
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::StartTagScanner::processAttributes):
+        (WebCore::HTMLPreloadScanner::scan):
+        (WebCore::HTMLPreloadScanner::processPossibleBaseTag):
+        (WebCore::HTMLPreloadScanner::processToken):
+        * html/parser/HTMLToken.h:
+        (Range):
+        (Attribute):
+        (WebCore::HTMLToken::clear):
+        (WebCore::HTMLToken::startIndex):
+        (WebCore::HTMLToken::endIndex):
+        (WebCore::HTMLToken::end):
+        (WebCore::HTMLToken::nameString):
+        (WebCore::HTMLToken::addNewAttribute):
+        (WebCore::HTMLToken::beginAttributeName):
+        (WebCore::HTMLToken::endAttributeName):
+        (WebCore::HTMLToken::beginAttributeValue):
+        (WebCore::HTMLToken::endAttributeValue):
+        (WebCore::HTMLToken::appendToAttributeName):
+        (WebCore::HTMLToken::appendToAttributeValue):
+        (WebCore::HTMLToken::eraseValueOfAttribute):
+        * html/parser/HTMLTokenizer.cpp:
+        (WebCore::AtomicHTMLToken::nameForAttribute):
+        * html/parser/HTMLViewSourceParser.cpp:
+        (WebCore::HTMLViewSourceParser::updateTokenizerState):
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::findAttributeWithName):
+        (WebCore::XSSAuditor::filterParamToken):
+        (WebCore::XSSAuditor::eraseDangerousAttributesIfInjected):
+        (WebCore::XSSAuditor::eraseAttributeIfInjected):
+        (WebCore::XSSAuditor::decodedSnippetForAttribute):
+
 2013-02-12  Ryosuke Niwa  <rniwa@webkit.org>
 
         Build fix.
