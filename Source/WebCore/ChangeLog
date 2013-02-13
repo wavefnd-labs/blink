@@ -1,3 +1,23 @@
+2013-02-13  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exclusions] ExclusionPolygon reflex vertices should constrain the first fit location.
+        https://bugs.webkit.org/show_bug.cgi?id=107568
+
+        Reviewed by Dirk Schulze.
+
+        The ExclusionPolygon::firstIncludedIntervalLogicalTop() method now includes offset edges
+        for each of the polygon's reflex vertices. The motivation for this change is explained
+        here: http://hansmuller-webkit.blogspot.com/2013/01/getting-to-point-reflex-vertices.html.
+
+        Test: fast/exclusions/shape-inside/shape-inside-first-fit-reflex.html
+
+        * rendering/ExclusionPolygon.cpp:
+        (WebCore::isReflexVertex): Given three vertices that represent a pair of connected polygon edges, return true if the second vertex is a reflex vertex.
+        (WebCore::ExclusionPolygon::firstIncludedIntervalLogicalTop): This method now includes offset edges for reflex vertices.
+        * rendering/ExclusionPolygon.h:
+        (WebCore::OffsetPolygonEdge::OffsetPolygonEdge): Added a constructor for creating an OffsetPolygonEdge given a reflex vertex.
+        (WebCore::OffsetPolygonEdge::edgeIndex): Changed this property from unsigned to int. Now using -1 to indicate that the offset edge doesn't correspond to a single polygon edge.
+
 2013-02-13  Adam Barth  <abarth@webkit.org>
 
         CSSPreloadScanner should not depend on HTMLToken
