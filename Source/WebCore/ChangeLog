@@ -1,3 +1,33 @@
+2013-02-12  Simon Fraser  <simon.fraser@apple.com>
+
+        Crash when scrolling soon after page starts loading
+        https://bugs.webkit.org/show_bug.cgi?id=109631
+        <rdar://problem/13157533&13159627&13196727>
+        
+        Reviewed by Anders Carlsson.
+        
+        Make the scrolling tree more robust when the root state node,
+        and/or scrolling node are null. This can happen if we try to
+        handle a wheel event before we've done the first scrolling
+        tree commit.
+
+        * page/scrolling/ScrollingStateTree.cpp:
+        (WebCore::ScrollingStateTree::commit): Handle the case where
+        m_rootStateNode is null. We'll still commit, but the state tree
+        will have no state nodes.
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::handleWheelEvent): Null-check m_rootNode.
+        (WebCore::ScrollingTree::commitNewTreeState): Handle a null root node.
+        (WebCore::ScrollingTree::updateTreeFromStateNode): If the rood state node
+        is null, just clear the map and null out the root scrolling node.
+        * page/scrolling/ScrollingTree.h: m_debugInfoLayer was unused.
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::ensureRootStateNodeForFrameView): It may be possible
+        to get here before we've registered the root scroll layer, in which case scrollLayerID()
+        will be 0. Assert to see if this can ever happen.
+        (WebCore::ScrollingCoordinatorMac::scrollingStateTreeAsText): Handle case of rootStateNode()
+        being null.
+
 2013-02-12  Raymond Toy  <rtoy@google.com>
 
         Synchronize setting of panner node model and processing
