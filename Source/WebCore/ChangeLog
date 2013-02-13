@@ -1,3 +1,146 @@
+2013-02-13  Philip Rogers  <pdr@google.com>
+
+        Replace SVG bitmap cache with directly-rendered SVG
+        https://bugs.webkit.org/show_bug.cgi?id=106159
+
+        Reviewed by Tim Horton.
+
+        This patch removes the caching of SVG bitmaps so SVG images are rendered directly. This
+        enables WebKit to pass the IE Chalkboard demo in 10s on a Z620:
+        http://ie.microsoft.com/testdrive/Performance/Chalkboard/
+
+        On a simple scaled SVG benchmark similar to the IE10 Chalkboard demo
+        (http://philbit.com/SvgImagePerformance/viewport.html):
+            without patch: ~20FPS
+            with patch: ~55FPS
+
+        The bitmap SVG image cache had several shortcomings:
+            - The bitmap cache prevented viewport rendering. (WK104693)
+            - Bitmap memory usage was high. (WK106484)
+            - Caching animating images was expensive.
+
+        This change removes almost all of the SVGImageCache implementation, replacing it with
+        directly-rendered SVG. Instead of caching bitmaps, an SVGImageForContainer is cached which
+        is a thin wrapper around an SVG image with the associated container size and scale.
+        When rendering patterns (e.g., tiled backgrounds), a temporary bitmap is used for
+        performance. This change also removes the redraw timer of the old cache, instead relying
+        on the SVG image to notify clients if the image changes (e.g., during animations).
+
+        This patch fixes two existing bugs (WK99481 and WK104189) that were due to caching bitmaps
+        at a fixed size. A test has been added for each of these bugs.
+
+        Tests: svg/as-image/svg-image-scaled.html
+               svg/as-image/svg-image-viewbox.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::lookupOrCreateImageForRenderer):
+        (WebCore::CachedImage::setContainerSizeForRenderer):
+        (WebCore::CachedImage::clear):
+        (WebCore::CachedImage::changedInRect):
+
+            SVG images are no longer special-cased here. When the SVG image changes, users are
+            notified through this function, and users can then request their content to be redrawn.
+
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::setContainerSize):
+        (WebCore::SVGImage::drawForContainer):
+
+            drawForContainer lays out the SVG content for a specific container size and renders it.
+            The logic is fairly straightforward but a note about the scales and zooms here:
+                the destination rect parameter is zoomed but not scaled
+                the source rect parameter is zoomed but not scaled
+                the context is scaled but not zoomed
+            SVGImage::draw(...) only accepts a source and destination rect but does not consider
+            scale or zoom. Therefore, drawForContainer removes the zoom component from the source
+            so SVGImage::draw(...) will draw from the pre-zoom source to the post-zoom destination.
+
+        (WebCore::SVGImage::drawPatternForContainer):
+
+            For performance, drawPatternForContainer renders the SVG content onto a bitmap, then
+            has the bitmap image draw the pattern. This is necessary because drawPattern is used
+            for tiling.
+
+        (WebCore):
+        (WebCore::SVGImage::startAnimation):
+        (WebCore::SVGImage::stopAnimation):
+        (WebCore::SVGImage::resetAnimation):
+        (WebCore::SVGImage::reportMemoryUsage):
+        * svg/graphics/SVGImage.h:
+        (WebCore):
+        (SVGImage):
+        * svg/graphics/SVGImageCache.cpp:
+
+            Instead of storing a SizeAndScales values for each renderer, a SVGImageForContainer
+            is stored which is just a thin wrapper around an SVG image that contains container
+            sizing information. By combining the image and size information, the two maps of
+            SVGImageCache have been merged into one.
+
+            To make this patch easier to review, SVGImageCache still exists and works similar to
+            how it did before the patch. Now, SVGImageCache simply stores the SVGImageForContainers.
+            In a followup patch it will be removed.
+
+            Note: the redraw timer of SVGImageCache has been removed because animation
+            invalidation is now properly propagated back to the image clients.
+
+        (WebCore):
+        (WebCore::SVGImageCache::SVGImageCache):
+        (WebCore::SVGImageCache::~SVGImageCache):
+        (WebCore::SVGImageCache::removeClientFromCache):
+        (WebCore::SVGImageCache::setContainerSizeForRenderer):
+        (WebCore::SVGImageCache::imageSizeForRenderer):
+
+            Previously, this function returned the scaled image size which was incorrect. The image
+            size is used by clients such as GraphicsContext2D to determine the source size
+            for drawing the image. draw() accepts zoomed but not scaled values, so this has been
+            changed.
+
+        (WebCore::SVGImageCache::imageForRenderer):
+
+            A FIXME has been added here to not set the scale on every lookup. This can be improved
+            by setting the page scale factor in setContainerSizeForRenderer() in a future patch.
+
+        * svg/graphics/SVGImageCache.h:
+        (WebCore):
+        (SVGImageCache):
+        * svg/graphics/SVGImageForContainer.cpp: Added.
+        (WebCore):
+
+            SVGImageForContainer is a thin wrapper around an SVG image. The lifetime of the
+            SVGImage will be longer than the image cache.
+
+        (WebCore::SVGImageForContainer::size):
+
+            This is the only logic in SVGImageForContainer. The size returned needs to be zoomed
+            but not scaled because it is used (e.g., by RenderImage) to pass back into draw() which
+            takes zoomed but not scaled values.
+
+        (WebCore::SVGImageForContainer::draw):
+        (WebCore::SVGImageForContainer::drawPattern):
+        * svg/graphics/SVGImageForContainer.h: Added.
+        (WebCore):
+        (SVGImageForContainer):
+
+            In a future patch SVGImageForContainer can be made immutable but without a refactoring
+            for not setting the page scale factor in SVGImageCache::lookupOrCreateImageForRenderer,
+            setters are needed.
+
+        (WebCore::SVGImageForContainer::create):
+        (WebCore::SVGImageForContainer::containerSize):
+        (WebCore::SVGImageForContainer::pageScale):
+        (WebCore::SVGImageForContainer::zoom):
+        (WebCore::SVGImageForContainer::setSize):
+        (WebCore::SVGImageForContainer::setZoom):
+        (WebCore::SVGImageForContainer::setPageScale):
+        (WebCore::SVGImageForContainer::SVGImageForContainer):
+        (WebCore::SVGImageForContainer::destroyDecodedData):
+        (WebCore::SVGImageForContainer::decodedSize):
+
 2013-02-12  Antti Koivisto  <antti@apple.com>
 
         Avoid updating timer heap when nothing changes
