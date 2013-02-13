@@ -1,3 +1,137 @@
+2013-02-13  Zan Dobersek  <zdobersek@igalia.com>
+
+        The 'global isinf/isnan' compiler quirk required when using clang with libstdc++
+        https://bugs.webkit.org/show_bug.cgi?id=109325
+
+        Reviewed by Anders Carlsson.
+
+        Prefix calls to the isinf and isnan methods with std::, declaring we want to use the
+        two methods as they're provided by the C++ standard library being used.
+
+        No new tests as there's no change in functionality.
+
+        * Modules/mediasource/MediaSource.cpp:
+        (WebCore::MediaSource::setDuration):
+        * Modules/webaudio/AudioBufferSourceNode.cpp:
+        (WebCore::AudioBufferSourceNode::totalPitchRate):
+        * Modules/webaudio/AudioParam.cpp:
+        (WebCore::AudioParam::setValue):
+        * Modules/webaudio/AudioParamTimeline.cpp:
+        (WebCore::isValidNumber):
+        * Modules/webaudio/PannerNode.cpp:
+        (WebCore::fixNANs):
+        * bindings/js/IDBBindingUtilities.cpp:
+        (WebCore::createIDBKeyFromValue):
+        * bindings/js/JSDataViewCustom.cpp:
+        (WebCore::getDataViewMember):
+        * bindings/js/JSGeolocationCustom.cpp:
+        (WebCore::setTimeout):
+        (WebCore::setMaximumAge):
+        * bindings/js/JSHTMLOptionsCollectionCustom.cpp:
+        (WebCore::JSHTMLOptionsCollection::setLength):
+        * bindings/js/JSWebKitPointCustom.cpp:
+        (WebCore::JSWebKitPointConstructor::constructJSWebKitPoint):
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateImplementation):
+        (GenerateParametersCheck):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateParametersCheck):
+        * bindings/scripts/test/JS/JSFloat64Array.cpp:
+        (WebCore::JSFloat64Array::getByIndex):
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore::jsTestObjPrototypeFunctionClassMethodWithClamp):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::classMethodWithClampCallback):
+        * bindings/v8/IDBBindingUtilities.cpp:
+        (WebCore::createIDBKeyFromValue):
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::toInt32):
+        (WebCore::toUInt32):
+        * bindings/v8/custom/V8GeolocationCustom.cpp:
+        (WebCore::createPositionOptions):
+        * bindings/v8/custom/V8HTMLOptionsCollectionCustom.cpp:
+        (WebCore::V8HTMLOptionsCollection::lengthAccessorSetter):
+        * bindings/v8/custom/V8WebKitPointCustom.cpp:
+        (WebCore::V8WebKitPoint::constructorCallbackCustom):
+        * bridge/qt/qt_runtime.cpp:
+        (JSC::Bindings::convertValueToQVariant):
+        * css/WebKitCSSMatrix.cpp:
+        (WebCore::WebKitCSSMatrix::translate):
+        (WebCore::WebKitCSSMatrix::scale):
+        (WebCore::WebKitCSSMatrix::rotate):
+        (WebCore::WebKitCSSMatrix::rotateAxisAngle):
+        (WebCore::WebKitCSSMatrix::skewX):
+        (WebCore::WebKitCSSMatrix::skewY):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::percentLoaded):
+        (WebCore::HTMLMediaElement::mediaPlayerTimeChanged):
+        (WebCore::HTMLMediaElement::endedPlayback):
+        * html/MediaController.cpp:
+        (MediaController::duration):
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore):
+        (WebCore::WebGLRenderingContext::clearColor):
+        * html/track/TextTrack.cpp:
+        (WebCore::TextTrack::addCue):
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::setStartTime):
+        (WebCore::TextTrackCue::setEndTime):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::adjustWindowRect):
+        * page/WindowFeatures.cpp:
+        (WebCore::WindowFeatures::floatFeature): Also include an opportunistic style fix.
+        * platform/CalculationValue.cpp:
+        (WebCore::CalculationValue::evaluate):
+        * platform/Decimal.cpp:
+        (WebCore::Decimal::fromDouble):
+        * platform/Length.cpp:
+        (WebCore::Length::nonNanCalculatedValue):
+        * platform/audio/AudioResampler.cpp:
+        (WebCore::AudioResampler::setRate):
+        * platform/audio/DynamicsCompressorKernel.cpp:
+        (WebCore::DynamicsCompressorKernel::process):
+        * platform/audio/Reverb.cpp:
+        (WebCore::calculateNormalizationScale):
+        * platform/graphics/Font.cpp:
+        (WebCore::Font::width):
+        * platform/graphics/avfoundation/MediaPlayerPrivateAVFoundation.h:
+        (WebCore::MediaPlayerPrivateAVFoundation::isLiveStream):
+        * platform/graphics/gpu/LoopBlinnMathUtils.cpp:
+        (LoopBlinnMathUtils):
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore::MediaPlayerPrivateGStreamer::buffered):
+        (WebCore::MediaPlayerPrivateGStreamer::maxTimeSeekable):
+        * platform/graphics/mac/MediaPlayerPrivateQTKit.mm:
+        (WebCore::MediaPlayerPrivateQTKit::maxTimeSeekable):
+        * platform/graphics/opentype/OpenTypeVerticalData.cpp:
+        (WebCore::OpenTypeVerticalData::getVerticalTranslationsForGlyphs):
+        * platform/graphics/transforms/TransformationMatrix.cpp:
+        (WebCore::clampEdgeValue):
+        (WebCore::TransformationMatrix::clampedBoundsOfProjectedQuad):
+        * platform/network/ResourceResponseBase.cpp:
+        (WebCore::ResourceResponseBase::parseCacheControlDirectives):
+        * rendering/RenderMediaControlsChromium.cpp:
+        (WebCore::paintMediaSlider):
+        (WebCore::paintMediaVolumeSlider):
+        * rendering/RenderThemeMac.mm:
+        (WebCore::RenderThemeMac::paintMediaSliderTrack):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::beginElementAt):
+        (WebCore::SVGAnimationElement::endElementAt):
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::setCurrentTime):
+        * svg/animation/SMILTime.h:
+        (WebCore::SMILTime::SMILTime):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::addBeginTime):
+        (WebCore::SVGSMILElement::addEndTime):
+        * xml/XPathFunctions.cpp:
+        (WebCore::XPath::FunSubstring::evaluate):
+        (WebCore::XPath::FunRound::round):
+        * xml/XPathValue.cpp:
+        (WebCore::XPath::Value::toBoolean): Also include an opportunistic style fix.
+        (WebCore::XPath::Value::toString):
+
 2013-02-13  Eric Carlson  <eric.carlson@apple.com>
 
         [Mac] Caption menu should have only one item selected
