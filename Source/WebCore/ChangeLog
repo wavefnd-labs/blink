@@ -1,3 +1,22 @@
+2013-02-14  Philip Rogers  <pdr@google.com>
+
+        Prevent inconsistent firstChild during document destruction
+        https://bugs.webkit.org/show_bug.cgi?id=106530
+
+        Reviewed by Abhishek Arya.
+
+        During document destruction, addChildNodesToDeletionQueue can allow a container
+        node to have an invalid first child, causing a crash. This patch updates
+        addChildNodesToDeletionQueue to maintain a valid value for firstChild() even
+        while updating its children.
+
+        Test: svg/custom/animateMotion-path-change-crash.svg
+
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore::Private::addChildNodesToDeletionQueue):
+            To ensure prevoiusSibling() is also valid, this code was slightly refactored
+            to call setPreviousSibling(0) on the next node instead of the current node.
+
 2013-02-14  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Add an internal 2D grid representation to RenderGrid
