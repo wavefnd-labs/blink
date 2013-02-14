@@ -1,3 +1,44 @@
+2013-02-14  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Add an internal 2D grid representation to RenderGrid
+        https://bugs.webkit.org/show_bug.cgi?id=109714
+
+        Reviewed by Ojan Vafai.
+
+        This change introduces a 2D grid representation of the grid areas. Our implementation
+        is a straight Vector of Vectors for the grid areas, each grid area able to hold an
+        arbitrary number of RenderBox* so they hold a Vector of RenderBoxes. As an optimization,
+        each grid area has enough inline storage to hold one grid item which should cover
+        most cases.
+
+        In order to keep the code readable, a GridIterator was introduced to hide the new grid.
+
+        Refactoring, covered by existing tests.
+
+        * rendering/RenderGrid.cpp:
+        (RenderGrid::GridIterator):
+        (WebCore::RenderGrid::GridIterator::GridIterator):
+        (WebCore::RenderGrid::GridIterator::nextGridItem):
+        Added a mono-directional iterator. In order to be more aligned with the rest of the code,
+        this iterator actually walks orthogonally to the |direction| (ie fixing the |direction|'s track).
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::computePreferredLogicalWidths):
+        (WebCore::RenderGrid::layoutGridItems):
+        Updated these 2 functions to place the items on the grid and clear it at the end.
+
+        (WebCore::RenderGrid::computePreferredTrackWidth):
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctionsForItems):
+        Updated to use the GridIterator to walk over the rows / columns.
+
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        Added this function that inserts the grid items into the right grid area.
+
+        * rendering/RenderGrid.h:
+        (WebCore::RenderGrid::gridColumnCount):
+        (WebCore::RenderGrid::gridRowCount):
+        Added these helper functions.
+
 2013-02-14  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r141990.
