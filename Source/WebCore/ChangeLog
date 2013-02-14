@@ -1,3 +1,40 @@
+2013-02-14  Cosmin Truta  <ctruta@rim.com>
+
+        Numeric identifiers of events are not guaranteed to be unique
+        https://bugs.webkit.org/show_bug.cgi?id=103259
+
+        Reviewed by Alexey Proskuryakov.
+
+        The results of setTimeout, setInterval and navigator.geolocation.watchPosition
+        are positive integer values extracted from a simple circular sequential number
+        generator, whose uniqueness can be guaranteed for no more than 2^31 calls to
+        any of these functions. In order to provide this guarantee beyond this limit,
+        we repeatedly ask for the next sequential id until we get one that's not used
+        already.
+
+        This solution works instantly under normal circumstances, when there are few
+        live timeout ids or geolocation ids at any given moment. Handling millions of
+        live ids will require another solution.
+
+        No new tests. Brief tests of uniqueness already exist.
+        Moreover, reproducing this particular issue would require 2^31 set/clear
+        function calls, which is prohibitively expensive.
+
+        * Modules/geolocation/Geolocation.cpp:
+        (WebCore::Geolocation::Watchers::add): Rename from Watchers::set; return false if watch id already exists.
+        (WebCore::Geolocation::watchPosition): Repeat until the new watch id is unique.
+        * Modules/geolocation/Geolocation.h:
+        (Watchers): Rename Watchers::set to Watchers::add.
+        * Modules/geolocation/Geolocation.idl: Rename the argument of Geolocation::clearWatch to WatchID.
+        * dom/ScriptExecutionContext.cpp:
+        (WebCore::ScriptExecutionContext::ScriptExecutionContext): Update initialization.
+        (WebCore::ScriptExecutionContext::circularSequentialID): Rename from newUniqueID; remove FIXME note.
+        * dom/ScriptExecutionContext.h:
+        (ScriptExecutionContext): Rename ScriptExecutionContext::newUniqueID to ScriptExecutionContext::circularSequentialID.
+        (WebCore::ScriptExecutionContext::addTimeout): Return false (do not assert) if timeout id already exists.
+        * page/DOMTimer.cpp:
+        (WebCore::DOMTimer::DOMTimer): Repeat until the new timeout id is unique.
+
 2013-02-14  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r142825.
