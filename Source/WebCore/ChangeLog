@@ -1,5 +1,29 @@
 2013-02-13  Andreas Kling  <akling@apple.com>
 
+        Remove Element::getAttributeItem() overload that returned a mutable Attribute*.
+        <http://webkit.org/b/109756>
+
+        Reviewed by Antti Koivisto.
+
+        Remove this to prevent callers from accidentally causing elements to convert to UniqueElementData.
+        There are two call sites (Attr and HTMLSelectElement) that legitimately need to mutate Attribute
+        objects in-place, they now use Element::ensureUniqueElementData()->getAttributeItem() directly instead.
+
+        Small progression on Membuster3, mostly for peace of mind.
+
+        * dom/Attr.cpp:
+        (WebCore::Attr::elementAttribute):
+        * dom/Element.h:
+        (Element):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::updateType):
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::parseAttribute):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::getPresentationAttribute):
+
+2013-02-13  Andreas Kling  <akling@apple.com>
+
         Stronger ElementData pointer typing.
         <http://webkit.org/b/109752>
 
