@@ -1,3 +1,29 @@
+2013-02-14  Ojan Vafai  <ojan@chromium.org>
+
+        Intrinsic and preferred widths on replaced elements are wrong in many cases
+        https://bugs.webkit.org/show_bug.cgi?id=109859
+
+        Reviewed by Levi Weintraub.
+
+        * fast/replaced/preferred-widths-expected.txt: Added.
+        * fast/replaced/preferred-widths.html: Added.
+        These results match Gecko and Opera except for the 3rd container div.
+        Talking to dbaron and bz and Mozilla they sound likely to match our behavior there.
+        See https://bugzilla.mozilla.org/show_bug.cgi?id=823483 for example.
+
+        The width of the containers is wrong in some of these cases because our
+        computePreferredLogicalWidths methods don't currently account for
+        intrinsic sizes (e.g. min-content, max-content, etc).
+
+        * platform/chromium-linux/fast/replaced/width100percent-image-expected.png:
+        * platform/chromium-linux/tables/mozilla_expected_failures/bugs/bug85016-expected.png:
+        * platform/chromium-win/fast/replaced/width100percent-image-expected.txt:
+        * platform/chromium-win/tables/mozilla_expected_failures/bugs/bug85016-expected.txt:
+        These new results are more correct. The width100percent-image case now
+        matches other browsers and is due to not setting the minPreferrredLogicalWidth to
+        0 if the height is a percentage. The bugs85016 case is different because we
+        now correctly add the border and padding width to the preferred width of the image.
+
 2013-02-14  Ryosuke Niwa  <rniwa@webkit.org>
 
         Add a crash test expectation to media/media-captions.html on Mac per bug 109869.

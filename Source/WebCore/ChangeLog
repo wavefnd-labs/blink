@@ -1,3 +1,37 @@
+2013-02-14  Ojan Vafai  <ojan@chromium.org>
+
+        Intrinsic and preferred widths on replaced elements are wrong in many cases
+        https://bugs.webkit.org/show_bug.cgi?id=109859
+
+        Reviewed by Levi Weintraub.
+
+        Test: fast/replaced/preferred-widths.html
+
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::computeIntrinsicLogicalWidths):
+        Separate out computing the intrinsic widths. Eventually,
+        we should be able to share computePreferredLogicalWidth implementations
+        for all replaced elements and form controls since only the intrinsic width
+        changes.
+
+        (WebCore::RenderReplaced::computePreferredLogicalWidths):
+        -Apply min-width and max-width constraints and then add borderAndPaddingLogicalWidth
+        at the end to make sure it's always applied. This matches all our other
+        computePreferredLogicalWidths override and makes use match Gecko's/Opera's rendering.
+        -Only set the minPreferredLogicalWidth to 0 if the width or max-width is a percent value.
+        Doing it for height values and for min-width doesn't make any sense and doesn't
+        match other browsers. Doing this for max-width still doesn't match other browsers,
+        but it sounds like Gecko at least would like to change that.
+
+        * rendering/RenderReplaced.h:
+        (WebCore::RenderReplaced::hasRelativeIntrinsicLogicalWidth):
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::hasRelativeIntrinsicLogicalWidth):
+        Add a way to check if the logicalWidth is relative so that we only check
+        the width in computePreferredLogicalWidths instead of also checking the height.
+
+        * rendering/svg/RenderSVGRoot.h:
+
 2013-02-14  Stephen Chenney  <schenney@chromium.org>
 
         Crash when selecting a HarfBuzz text run with SVG fonts included
