@@ -1,3 +1,26 @@
+2013-02-14  Stephen Chenney  <schenney@chromium.org>
+
+        Crash when selecting a HarfBuzz text run with SVG fonts included
+        https://bugs.webkit.org/show_bug.cgi?id=109833
+
+        Reviewed by Tony Chang.
+
+        There is an assert in SimpleFontData::applyTransforms that should not
+        be there, as the code is valid for SVG fonts. If we get past this,
+        then the HarfBuzz text run shaping code assumes that font data has a
+        SkTypeface member, and SVG fonts do not. So we crash there too.
+
+        For now, we fix the crashes. This still leaves incorrect selection
+        rectangles in this situation, on all platforms, tracked in
+        https://bugs.webkit.org/show_bug.cgi?id=108133
+
+        Test: svg/css/font-face-crash.html
+
+        * platform/graphics/SimpleFontData.h:
+        (WebCore::SimpleFontData::applyTransforms): Remove ASSERT_NOT_REACHED as the code can legally be reached for SVG fonts.
+        * platform/graphics/harfbuzz/HarfBuzzShaper.cpp:
+        (WebCore::HarfBuzzShaper::shapeHarfBuzzRuns): Check for SVG fonts in the text run, and abort if we find them.
+
 2013-02-13 Joe Mason <jmason@rim.com>
 
         [BlackBerry] Notify platform layer of failing to get authentication credentials
