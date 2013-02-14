@@ -1,3 +1,42 @@
+2013-02-13  Adam Barth  <abarth@webkit.org>
+
+        StartTagScanner should be thread-safe
+        https://bugs.webkit.org/show_bug.cgi?id=109750
+
+        Reviewed by Eric Seidel.
+
+        This patch weens the StartTagScanner off AtomicString using two
+        techniques:
+
+        1) This patch creates an enum to represent the four tag names that the
+           StartTagScanner needs to understand. Using an enum is better than
+           using an AtomicString because we can use the enum on both the main
+           thread and on the background thread.
+
+        2) For attributes, this patch uses threadSafeMatch. We're not able to
+           use threadSafeMatch everywhere due to performance, but using it for
+           attributes appears to be ok becaues we only call threadSafeMatch on
+           the attributes of "interesting" tags.
+
+        I tested the performance of this patch using
+        PerformanceTests/Parser/html-parser.html and did not see any slowdown.
+        (There actually appeared to be a <1% speedup, but I'm attributing that
+        to noise.)
+
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::identifierFor):
+        (WebCore):
+        (WebCore::inititatorFor):
+        (WebCore::StartTagScanner::StartTagScanner):
+        (WebCore::StartTagScanner::processAttributes):
+        (StartTagScanner):
+        (WebCore::StartTagScanner::createPreloadRequest):
+        (WebCore::StartTagScanner::processAttribute):
+        (WebCore::StartTagScanner::charset):
+        (WebCore::StartTagScanner::resourceType):
+        (WebCore::StartTagScanner::shouldPreload):
+        (WebCore::HTMLPreloadScanner::processToken):
+
 2013-02-13  Huang Dongsung  <luxtella@company100.net>
 
         Coordinated Graphics: a long page is scaled vertically while loading.
