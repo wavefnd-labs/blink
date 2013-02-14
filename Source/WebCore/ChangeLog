@@ -1,3 +1,52 @@
+2013-02-14  Anton Vayvod  <avayvod@chromium.org>
+
+        [Text Autosizing] Process narrow descendants with the same multiplier for the font size.
+        https://bugs.webkit.org/show_bug.cgi?id=109573
+
+        Reviewed by Julien Chaffraix.
+
+        Combine narrow descendants of the same autosizing cluster into a group that is autosized
+        with the same multiplier.
+
+        For example, on sites with a sidebar, sometimes the paragraphs next to the sidebar will have
+        a large margin individually applied (via a CSS selector), causing them all to individually
+        appear narrower than their enclosing blockContainingAllText. Rather than making each of
+        these paragraphs into a separate cluster, we want them all to share the same multiplier, as
+        if they were a single cluster.
+
+        Test: fast/text-autosizing/narrow-descendants-combined.html
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::processClusterInternal):
+
+            Common implementation for processCluster() and processCompositeCluster that accepts the
+            text width and whether the cluster should be autosized as parameters instead of
+            calculating it inline.
+
+        (WebCore::TextAutosizer::processCluster):
+
+            Calculates the text width for a single cluster and whether it should be autosized, then
+            calls processClusterInternal() to apply the multiplier and process the cluster's
+            descendants.
+
+        (WebCore::TextAutosizer::processCompositeCluster):
+
+            Calculates the text width for a group of renderers and if the group should be autosized,
+            then calls processClusterInternal() repeatedly with the same multiplier to apply it and
+            process all the descendants of the group.
+
+        (WebCore::TextAutosizer::clusterShouldBeAutosized):
+
+            Calls the multiple renderers version to avoid code duplication.
+
+        (WebCore::TextAutosizer::compositeClusterShouldBeAutosized):
+
+            The multiple renderers version of clusterShouldBeAutosized.
+
+        * rendering/TextAutosizer.h:
+
+            Updated method declarations.
+
 2013-02-14  Andrey Adaikin  <aandrey@chromium.org>
 
         Look into possibilities of typedef in webkit idl files
