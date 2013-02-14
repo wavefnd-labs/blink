@@ -1,3 +1,33 @@
+2013-02-14  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        Add addHTTPHeaderField() method to ResourceResponse
+        https://bugs.webkit.org/show_bug.cgi?id=109844
+
+        Reviewed by Adam Barth.
+
+        ResourceRequestBase provides both setHTTPHeaderField() and addHTTPHeaderField(). However,
+        ResourceResponseBase only provides setHTTPHeaderField(). This is a bit inconsistent. As a
+        result, the addHTTPHeaderField() functionality's implementation is duplicated in several
+        ports (at least chromium and soup).
+
+        This patch introduces addHTTPHeaderField() to ResourceResponseBase and makes use of it
+        in Chromium and Soup backends.
+
+        No new tests, no behavior change.
+
+        * platform/chromium/support/WebURLResponse.cpp:
+        (WebKit::WebURLResponse::addHTTPHeaderField): Use ResourceResponseBase::addHTTPHeaderField().
+        * platform/network/ResourceResponseBase.cpp:
+        (WebCore::ResourceResponseBase::updateHeaderParsedState): Move headers' parsed state update code
+        from setHTTPHeaderField() to a new updateHeaderParsedState() method to avoid code duplication.
+        (WebCore):
+        (WebCore::ResourceResponseBase::setHTTPHeaderField):
+        (WebCore::ResourceResponseBase::addHTTPHeaderField):
+        * platform/network/ResourceResponseBase.h:
+        (ResourceResponseBase):
+        * platform/network/soup/ResourceResponseSoup.cpp:
+        (WebCore::ResourceResponse::updateFromSoupMessageHeaders): Use ResourceResponseBase::addHTTPHeaderField().
+
 2013-02-14  Philip Rogers  <pdr@google.com>
 
         Prevent inconsistent firstChild during document destruction
