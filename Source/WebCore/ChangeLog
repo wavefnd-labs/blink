@@ -1,3 +1,208 @@
+2013-02-13  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Generate wrapper methods for custom methods
+        https://bugs.webkit.org/show_bug.cgi?id=109678
+
+        Reviewed by Adam Barth.
+
+        Currently V8 directly calls back custom methods written
+        in custom binding files. This makes it impossible for code
+        generators to hook custom methods (e.g. Code generators cannot
+        insert a code for FeatureObservation into custom methods).
+        To solve the problem, we should generate wrapper methods for
+        custom methods.
+
+        No tests. No change in behavior.
+
+        * page/DOMWindow.idl: Removed overloaded methods. The fact that methods in an IDL
+        file are overloaded but they are not overloaded in custom bindings confuses code
+        generators. (For some reason, this problem hasn't appeared before this change.)
+        * xml/XMLHttpRequest.idl: Ditto.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        (GenerateDomainSafeFunctionGetter):
+        (GenerateEventListenerCallback):
+        (GenerateFunctionCallback):
+        (GenerateNonStandardFunction):
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalMethod3Callback):
+        (TestInterfaceV8Internal):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::customMethodCallback):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::customMethodWithArgsCallback):
+        (WebCore::TestObjV8Internal::classMethod2Callback):
+        (WebCore):
+        (WebCore::ConfigureV8TestObjTemplate):
+        * bindings/scripts/test/V8/V8TestObj.h:
+        (V8TestObj):
+        * bindings/v8/custom/V8ClipboardCustom.cpp:
+        (WebCore::V8Clipboard::clearDataCallbackCustom):
+        (WebCore::V8Clipboard::setDragImageCallbackCustom):
+        * bindings/v8/custom/V8ConsoleCustom.cpp:
+        (WebCore::V8Console::traceCallbackCustom):
+        (WebCore::V8Console::assertCallbackCustom):
+        (WebCore::V8Console::profileCallbackCustom):
+        (WebCore::V8Console::profileEndCallbackCustom):
+        * bindings/v8/custom/V8CryptoCustom.cpp:
+        (WebCore::V8Crypto::getRandomValuesCallbackCustom):
+        * bindings/v8/custom/V8DOMFormDataCustom.cpp:
+        (WebCore::V8DOMFormData::appendCallbackCustom):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::V8DOMWindow::addEventListenerCallbackCustom):
+        (WebCore::V8DOMWindow::removeEventListenerCallbackCustom):
+        (WebCore::V8DOMWindow::postMessageCallbackCustom):
+        (WebCore::V8DOMWindow::toStringCallbackCustom):
+        (WebCore::V8DOMWindow::releaseEventsCallbackCustom):
+        (WebCore::V8DOMWindow::captureEventsCallbackCustom):
+        (WebCore::V8DOMWindow::showModalDialogCallbackCustom):
+        (WebCore::V8DOMWindow::openCallbackCustom):
+        (WebCore::V8DOMWindow::setTimeoutCallbackCustom):
+        (WebCore::V8DOMWindow::setIntervalCallbackCustom):
+        * bindings/v8/custom/V8DataViewCustom.cpp:
+        (WebCore::V8DataView::getInt8CallbackCustom):
+        (WebCore::V8DataView::getUint8CallbackCustom):
+        (WebCore::V8DataView::setInt8CallbackCustom):
+        (WebCore::V8DataView::setUint8CallbackCustom):
+        * bindings/v8/custom/V8DedicatedWorkerContextCustom.cpp:
+        (WebCore::V8DedicatedWorkerContext::postMessageCallbackCustom):
+        * bindings/v8/custom/V8DeviceMotionEventCustom.cpp:
+        (WebCore::V8DeviceMotionEvent::initDeviceMotionEventCallbackCustom):
+        * bindings/v8/custom/V8DeviceOrientationEventCustom.cpp:
+        (WebCore::V8DeviceOrientationEvent::initDeviceOrientationEventCallbackCustom):
+        * bindings/v8/custom/V8DocumentCustom.cpp:
+        (WebCore::V8Document::evaluateCallbackCustom):
+        (WebCore::V8Document::createTouchListCallbackCustom):
+        * bindings/v8/custom/V8GeolocationCustom.cpp:
+        (WebCore::V8Geolocation::getCurrentPositionCallbackCustom):
+        (WebCore::V8Geolocation::watchPositionCallbackCustom):
+        * bindings/v8/custom/V8HTMLAllCollectionCustom.cpp:
+        (WebCore::V8HTMLAllCollection::itemCallbackCustom):
+        (WebCore::V8HTMLAllCollection::namedItemCallbackCustom):
+        * bindings/v8/custom/V8HTMLCanvasElementCustom.cpp:
+        (WebCore::V8HTMLCanvasElement::getContextCallbackCustom):
+        (WebCore::V8HTMLCanvasElement::toDataURLCallbackCustom):
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::V8HTMLDocument::writeCallbackCustom):
+        (WebCore::V8HTMLDocument::writelnCallbackCustom):
+        (WebCore::V8HTMLDocument::openCallbackCustom):
+        * bindings/v8/custom/V8HTMLFormControlsCollectionCustom.cpp:
+        (WebCore::V8HTMLFormControlsCollection::namedItemCallbackCustom):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.cpp:
+        (WebCore::v8HTMLImageElementConstructorCallbackCustom):
+        (WebCore::V8HTMLImageElementConstructor::GetTemplate):
+        * bindings/v8/custom/V8HTMLInputElementCustom.cpp:
+        (WebCore::V8HTMLInputElement::setSelectionRangeCallbackCustom):
+        * bindings/v8/custom/V8HTMLOptionsCollectionCustom.cpp:
+        (WebCore::V8HTMLOptionsCollection::namedItemCallbackCustom):
+        (WebCore::V8HTMLOptionsCollection::removeCallbackCustom):
+        (WebCore::V8HTMLOptionsCollection::addCallbackCustom):
+        * bindings/v8/custom/V8HTMLSelectElementCustom.cpp:
+        (WebCore::V8HTMLSelectElement::removeCallbackCustom):
+        * bindings/v8/custom/V8HistoryCustom.cpp:
+        (WebCore::V8History::pushStateCallbackCustom):
+        (WebCore::V8History::replaceStateCallbackCustom):
+        * bindings/v8/custom/V8InjectedScriptHostCustom.cpp:
+        (WebCore::V8InjectedScriptHost::inspectedObjectCallbackCustom):
+        (WebCore::V8InjectedScriptHost::internalConstructorNameCallbackCustom):
+        (WebCore::V8InjectedScriptHost::isHTMLAllCollectionCallbackCustom):
+        (WebCore::V8InjectedScriptHost::typeCallbackCustom):
+        (WebCore::V8InjectedScriptHost::functionDetailsCallbackCustom):
+        (WebCore::V8InjectedScriptHost::getInternalPropertiesCallbackCustom):
+        (WebCore::V8InjectedScriptHost::getEventListenersCallbackCustom):
+        (WebCore::V8InjectedScriptHost::inspectCallbackCustom):
+        (WebCore::V8InjectedScriptHost::databaseIdCallbackCustom):
+        (WebCore::V8InjectedScriptHost::storageIdCallbackCustom):
+        (WebCore::V8InjectedScriptHost::evaluateCallbackCustom):
+        (WebCore::V8InjectedScriptHost::setFunctionVariableValueCallbackCustom):
+        * bindings/v8/custom/V8InspectorFrontendHostCustom.cpp:
+        (WebCore::V8InspectorFrontendHost::platformCallbackCustom):
+        (WebCore::V8InspectorFrontendHost::portCallbackCustom):
+        (WebCore::V8InspectorFrontendHost::showContextMenuCallbackCustom):
+        (WebCore::V8InspectorFrontendHost::recordActionTakenCallbackCustom):
+        (WebCore::V8InspectorFrontendHost::recordPanelShownCallbackCustom):
+        (WebCore::V8InspectorFrontendHost::recordSettingChangedCallbackCustom):
+        * bindings/v8/custom/V8JavaScriptCallFrameCustom.cpp:
+        (WebCore::V8JavaScriptCallFrame::evaluateCallbackCustom):
+        (WebCore::V8JavaScriptCallFrame::restartCallbackCustom):
+        (WebCore::V8JavaScriptCallFrame::setVariableValueCallbackCustom):
+        (WebCore::V8JavaScriptCallFrame::scopeTypeCallbackCustom):
+        * bindings/v8/custom/V8LocationCustom.cpp:
+        (WebCore::V8Location::reloadAccessorGetter):
+        (WebCore::V8Location::replaceAccessorGetter):
+        (WebCore::V8Location::assignAccessorGetter):
+        (WebCore::V8Location::reloadCallbackCustom):
+        (WebCore::V8Location::replaceCallbackCustom):
+        (WebCore::V8Location::assignCallbackCustom):
+        (WebCore::V8Location::valueOfCallbackCustom):
+        (WebCore::V8Location::toStringCallbackCustom):
+        * bindings/v8/custom/V8MessageEventCustom.cpp:
+        (WebCore::V8MessageEvent::initMessageEventCallbackCustom):
+        (WebCore::V8MessageEvent::webkitInitMessageEventCallbackCustom):
+        * bindings/v8/custom/V8MessagePortCustom.cpp:
+        (WebCore::V8MessagePort::postMessageCallbackCustom):
+        * bindings/v8/custom/V8NodeCustom.cpp:
+        (WebCore::V8Node::insertBeforeCallbackCustom):
+        (WebCore::V8Node::replaceChildCallbackCustom):
+        (WebCore::V8Node::removeChildCallbackCustom):
+        (WebCore::V8Node::appendChildCallbackCustom):
+        * bindings/v8/custom/V8NotificationCenterCustom.cpp:
+        (WebCore::V8NotificationCenter::requestPermissionCallbackCustom):
+        * bindings/v8/custom/V8NotificationCustom.cpp:
+        (WebCore::V8Notification::requestPermissionCallbackCustom):
+        * bindings/v8/custom/V8SQLResultSetRowListCustom.cpp:
+        (WebCore::V8SQLResultSetRowList::itemCallbackCustom):
+        * bindings/v8/custom/V8SQLTransactionCustom.cpp:
+        (WebCore::V8SQLTransaction::executeSqlCallbackCustom):
+        * bindings/v8/custom/V8SQLTransactionSyncCustom.cpp:
+        (WebCore::V8SQLTransactionSync::executeSqlCallbackCustom):
+        * bindings/v8/custom/V8SVGLengthCustom.cpp:
+        (WebCore::V8SVGLength::convertToSpecifiedUnitsCallbackCustom):
+        * bindings/v8/custom/V8WebGLRenderingContextCustom.cpp:
+        (WebCore::V8WebGLRenderingContext::getAttachedShadersCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getBufferParameterCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getExtensionCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getFramebufferAttachmentParameterCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getParameterCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getProgramParameterCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getRenderbufferParameterCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getShaderParameterCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getSupportedExtensionsCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getTexParameterCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getUniformCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::getVertexAttribCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform1fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform1ivCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform2fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform2ivCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform3fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform3ivCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform4fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniform4ivCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniformMatrix2fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniformMatrix3fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::uniformMatrix4fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib1fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib2fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib3fvCallbackCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib4fvCallbackCustom):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::V8WorkerContext::importScriptsCallbackCustom):
+        (WebCore::V8WorkerContext::setTimeoutCallbackCustom):
+        (WebCore::V8WorkerContext::setIntervalCallbackCustom):
+        * bindings/v8/custom/V8WorkerCustom.cpp:
+        (WebCore::V8Worker::postMessageCallbackCustom):
+        * bindings/v8/custom/V8XMLHttpRequestCustom.cpp:
+        (WebCore::V8XMLHttpRequest::openCallbackCustom):
+        (WebCore::V8XMLHttpRequest::sendCallbackCustom):
+        * bindings/v8/custom/V8XSLTProcessorCustom.cpp:
+        (WebCore::V8XSLTProcessor::setParameterCallbackCustom):
+        (WebCore::V8XSLTProcessor::getParameterCallbackCustom):
+        (WebCore::V8XSLTProcessor::removeParameterCallbackCustom):
+
 2013-02-13  Praveen R Jadhav  <praveen.j@samsung.com>
 
         JSObject for ChannelSplitterNode and ChannelMergerNode are not created.
