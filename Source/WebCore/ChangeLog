@@ -1,3 +1,64 @@
+2013-02-13  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Filters] Refactor filter outsets into a class
+        https://bugs.webkit.org/show_bug.cgi?id=109330
+
+        Reviewed by Dean Jackson.
+
+        In filters related code, we're often operating on 4 ints representing the top, right,
+        bottom, and left filter outsets. These outsets come from a filter like blur or drop-shadow.
+        This patch packages those ints and their related operations into a class called
+        IntRectExtent.
+
+        Here are some signs that we should make a class to hold those 4 ints:
+        1) In RenderLayer.cpp, we have a expandRectForFilterOutsets function, which looks like
+           feature envy.
+        2) RenderStyle and other classes have methods like getFilterOutsets which set the 4 ints by
+           reference. The calling code has to define 4 ints, which looks bloated.
+        3) To fix bug 109098, we will need to check if filter outsets changed, which sounds like a
+           nice job for an inequality operator. (https://bugs.webkit.org/show_bug.cgi?id=109098)
+
+        No new tests. No change in behavior. Just refactoring.
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/IntRectExtent.h: Added.
+        (WebCore):
+        (IntRectExtent):
+        (WebCore::IntRectExtent::IntRectExtent):
+        (WebCore::IntRectExtent::top):
+        (WebCore::IntRectExtent::setTop):
+        (WebCore::IntRectExtent::right):
+        (WebCore::IntRectExtent::setRight):
+        (WebCore::IntRectExtent::bottom):
+        (WebCore::IntRectExtent::setBottom):
+        (WebCore::IntRectExtent::left):
+        (WebCore::IntRectExtent::setLeft):
+        (WebCore::IntRectExtent::expandRect):
+        (WebCore::IntRectExtent::isZero):
+        (WebCore::operator==):
+        (WebCore::operator!=):
+        (WebCore::operator+=):
+        * platform/graphics/filters/FilterOperations.cpp:
+        (WebCore::FilterOperations::outsets):
+        * platform/graphics/filters/FilterOperations.h:
+        (FilterOperations):
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::intermediateSurfaceRect):
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::FilterEffectRenderer):
+        (WebCore::FilterEffectRenderer::build):
+        (WebCore::FilterEffectRenderer::computeSourceImageRectForDirtyRect):
+        * rendering/FilterEffectRenderer.h:
+        (FilterEffectRenderer):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::setFilterBackendNeedsRepaintingInRect):
+        (WebCore::transparencyClipBox):
+        (WebCore::RenderLayer::calculateLayerBounds):
+        * rendering/style/RenderStyle.h:
+
 2013-02-13  Adam Barth  <abarth@webkit.org>
 
         Factor HTMLTokenScanner out of HTMLPreloadScanner
