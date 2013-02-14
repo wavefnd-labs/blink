@@ -1,3 +1,222 @@
+2013-02-14  Mark Lam  <mark.lam@apple.com>
+
+        Split SQLTransaction work between the frontend and backend.
+        https://bugs.webkit.org/show_bug.cgi?id=104750.
+
+        Reviewed by Sam Weinig.
+
+        This is part of the webdatabase refactoring for webkit2.
+
+        1. Changed how transactions are created.
+
+           - Database::runTransaction() first creates a SQLTransaction frontend
+             which encapsulates the 3 script callbacks. It then passes the
+             SQLTransaction to the backend database to create the
+             SQLTransactionBackend.
+           - The SQLTransactionBackend manages all SQLiteTransaction work.
+
+        2. Introduced SQLTransactionState and SQLTransactionStateMachine.
+
+           - Instead of tracking the transaction phases as "steps" in m_nextStep,
+             we now use m_nextState which is of enum class SQLTransactionState.
+             Unlike m_nextStep which is a pointer to a "step" function,
+             m_nextState is a state variable which is used to index into a
+             state dispatch table.
+
+           - Both SQLTransaction and SQLTransactionBackend now extends
+             SQLTransactionStateMachine, and uses its dispatch mechanism based on
+             the SQLTransactionState.
+
+           - Instead of having 1 state machine instances, there are 2: 1 in the
+             frontend, and 1 in the backend. The 2 have mirrored states, and
+             transfers work to the other state machine when needed.
+
+           - Previously, state functions can be called inline from other states.
+             They are now only called from the state machines runStateMachine()
+             method. This makes it possible to isolate the state transition
+             mechanism going between the sides (frontend and backend) to 2
+             functions only: SQLTransaction::sendToBackendState() and
+             SQLTransactionBackend::sendToFrontendState().
+
+        3. Consolidated cleanup work (mostly) to a unified cleanup function.
+
+        4. Changed the frontend Database::runTransaction() to use a
+           ChangeVersionData* (instead of a ChangeVersionWrapper ref ptr).
+
+           - This is necessary because ChangeVersionWrapper contains functionality
+             used in processing a transaction (to be invoked in the backend).
+             Instead, what we want is to simply pass the 2 old and new version
+             strings to the backend. The new ChangeVersionData simply packages up
+             these 2 strings.
+           - This makes ChangeVersionData easy to serialize for IPC messaging later.
+
+        5. Moved some transaction functions back to the frontend SQLTransaction
+           because they belong there.
+
+        6. Moved some Database functions to its DatabaseBackendAsync backend
+           now that the transaction has been split up.
+
+           - This is driven naturally by those functions being used exclusively
+             in the backend for transaction work.
+           - SQLTransactionClient, SQLTransactionCoordinator, and
+             SQLTransactionWrapper are now exclusively backend data structures.
+             SQLTransactionClient still has some frontend "pollution" that I'll
+             fix later.
+
+        7. Made the few database report functions used only by Chromium conditional
+           on PLATFORM(chromium).
+
+           - The report functions gets re-routed to Chromium's DatabaseObserver
+             which further routes them elsewhere. It is unclear how Chromium uses
+             these routed messages, and I am therefore not able to determine how
+             they should work in a frontend/backend world. So, I'm #ifdef'ing
+             them out. They still work like in the old way for Chromium.
+
+        8. Added new files to the build / project files.
+
+        9. Updated / added comments about how the transaction and its states work.
+
+        No new tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase/AbstractDatabaseServer.h:
+        * Modules/webdatabase/ChangeVersionData.h: Added.
+        (ChangeVersionData):
+        (WebCore::ChangeVersionData::ChangeVersionData):
+        (WebCore::ChangeVersionData::oldVersion):
+        (WebCore::ChangeVersionData::newVersion):
+        * Modules/webdatabase/ChangeVersionWrapper.cpp:
+        (WebCore::ChangeVersionWrapper::performPreflight):
+        (WebCore::ChangeVersionWrapper::performPostflight):
+        (WebCore::ChangeVersionWrapper::handleCommitFailedAfterPostflight):
+        * Modules/webdatabase/ChangeVersionWrapper.h:
+        (ChangeVersionWrapper):
+        * Modules/webdatabase/Database.cpp:
+        (WebCore::Database::Database):
+        (WebCore::Database::close):
+        (WebCore::Database::changeVersion):
+        (WebCore::Database::transaction):
+        (WebCore::Database::readTransaction):
+        (WebCore::Database::runTransaction):
+        (WebCore::Database::reportStartTransactionResult):
+        (WebCore::Database::reportCommitTransactionResult):
+        (WebCore::Database::reportExecuteStatementResult):
+        * Modules/webdatabase/Database.h:
+        (WebCore::Database::databaseContext):
+        (Database):
+        (WebCore::Database::reportStartTransactionResult):
+        (WebCore::Database::reportCommitTransactionResult):
+        (WebCore::Database::reportExecuteStatementResult):
+        * Modules/webdatabase/DatabaseBackend.cpp:
+        * Modules/webdatabase/DatabaseBackend.h:
+        (DatabaseBackend):
+        (WebCore::DatabaseBackend::reportOpenDatabaseResult):
+        (WebCore::DatabaseBackend::reportChangeVersionResult):
+        (WebCore::DatabaseBackend::reportStartTransactionResult):
+        (WebCore::DatabaseBackend::reportCommitTransactionResult):
+        (WebCore::DatabaseBackend::reportExecuteStatementResult):
+        (WebCore::DatabaseBackend::reportVacuumDatabaseResult):
+        * Modules/webdatabase/DatabaseBackendAsync.cpp:
+        (WebCore::DatabaseBackendAsync::DatabaseBackendAsync):
+        (WebCore::DatabaseBackendAsync::runTransaction):
+        (WebCore::DatabaseBackendAsync::inProgressTransactionCompleted): Moved from frontend.
+        (WebCore::DatabaseBackendAsync::scheduleTransaction): Moved from frontend.
+        (WebCore::DatabaseBackendAsync::scheduleTransactionStep): Moved from frontend.
+        (WebCore::DatabaseBackendAsync::transactionClient): Moved from frontend.
+        (WebCore::DatabaseBackendAsync::transactionCoordinator): Moved from frontend.
+        * Modules/webdatabase/DatabaseBackendAsync.h:
+        (DatabaseBackendAsync):
+        * Modules/webdatabase/DatabaseBackendContext.cpp:
+        (WebCore::DatabaseBackendContext::frontend):
+        * Modules/webdatabase/DatabaseBackendContext.h:
+        (DatabaseBackendContext):
+        * Modules/webdatabase/DatabaseManager.cpp:
+        * Modules/webdatabase/DatabaseManager.h:
+        (DatabaseManager):
+        * Modules/webdatabase/DatabaseServer.cpp:
+        * Modules/webdatabase/DatabaseServer.h:
+        * Modules/webdatabase/DatabaseTask.cpp:
+        (WebCore::DatabaseBackendAsync::DatabaseTransactionTask::doPerformTask):
+        * Modules/webdatabase/SQLTransaction.cpp:
+        (WebCore::SQLTransaction::create):
+        (WebCore::SQLTransaction::SQLTransaction):
+        (WebCore::SQLTransaction::setBackend):
+        (WebCore::SQLTransaction::stateFunctionFor):
+        (WebCore::SQLTransaction::requestTransitToState):
+        (WebCore::SQLTransaction::nextStateForTransactionError):
+            - was handleTransactionError(). There's also a backend version.
+        (WebCore::SQLTransaction::deliverTransactionCallback): Moved from backend.
+        (WebCore::SQLTransaction::deliverTransactionErrorCallback): Moved from backend.
+        (WebCore::SQLTransaction::deliverStatementCallback): Moved from backend.
+        (WebCore::SQLTransaction::deliverQuotaIncreaseCallback): Moved from backend.
+        (WebCore::SQLTransaction::deliverSuccessCallback): Moved from backend.
+        (WebCore::SQLTransaction::unreachableState):
+        (WebCore::SQLTransaction::sendToBackendState):
+        (WebCore::SQLTransaction::performPendingCallback): Moved from backend.
+        (WebCore::SQLTransaction::executeSQL): Moved from backend.
+        (WebCore::SQLTransaction::checkAndHandleClosedOrInterruptedDatabase):
+        (WebCore::SQLTransaction::clearCallbackWrappers):
+        * Modules/webdatabase/SQLTransaction.h:
+        (SQLTransaction):
+        (WebCore::SQLTransaction::database):
+        (WebCore::SQLTransaction::hasCallback):
+        (WebCore::SQLTransaction::hasSuccessCallback):
+        (WebCore::SQLTransaction::hasErrorCallback):
+        * Modules/webdatabase/SQLTransactionBackend.cpp:
+        (WebCore::SQLTransactionBackend::create):
+        (WebCore::SQLTransactionBackend::SQLTransactionBackend):
+        (WebCore::SQLTransactionBackend::doCleanup):
+        (WebCore::SQLTransactionBackend::transactionError):
+        (WebCore::SQLTransactionBackend::setShouldRetryCurrentStatement):
+        (WebCore::SQLTransactionBackend::stateFunctionFor):
+        (WebCore::SQLTransactionBackend::enqueueStatement):
+        (WebCore::SQLTransactionBackend::checkAndHandleClosedOrInterruptedDatabase):
+        (WebCore::SQLTransactionBackend::performNextStep):
+        (WebCore::SQLTransactionBackend::notifyDatabaseThreadIsShuttingDown):
+        (WebCore::SQLTransactionBackend::acquireLock):
+        (WebCore::SQLTransactionBackend::lockAcquired):
+        (WebCore::SQLTransactionBackend::openTransactionAndPreflight):
+        (WebCore::SQLTransactionBackend::runStatements):
+        (WebCore::SQLTransactionBackend::runCurrentStatementAndGetNextState):
+            - was runCurrentStatement().
+        (WebCore::SQLTransactionBackend::nextStateForCurrentStatementError):
+            - was handleCurrentStatementError().
+        (WebCore::SQLTransactionBackend::postflightAndCommit):
+        (WebCore::SQLTransactionBackend::cleanupAndTerminate):
+        (WebCore::SQLTransactionBackend::nextStateForTransactionError):
+            - was handleTransactionError(). There's also a frontend version.
+        (WebCore::SQLTransactionBackend::cleanupAfterTransactionErrorCallback):
+        (WebCore::SQLTransactionBackend::requestTransitToState):
+        (WebCore::SQLTransactionBackend::unreachableState):
+        (WebCore::SQLTransactionBackend::sendToFrontendState):
+        * Modules/webdatabase/SQLTransactionBackend.h:
+        (SQLTransactionWrapper):
+        (SQLTransactionBackend):
+        (WebCore::SQLTransactionBackend::database):
+        * Modules/webdatabase/SQLTransactionClient.cpp:
+        (WebCore::SQLTransactionClient::didCommitWriteTransaction):
+        (WebCore::SQLTransactionClient::didExecuteStatement):
+        * Modules/webdatabase/SQLTransactionCoordinator.cpp:
+        (WebCore::getDatabaseIdentifier):
+        * Modules/webdatabase/SQLTransactionState.h: Added.
+        * Modules/webdatabase/SQLTransactionStateMachine.cpp: Added.
+        (WebCore::nameForSQLTransactionState):
+            - was debugStepName().
+        * Modules/webdatabase/SQLTransactionStateMachine.h: Added.
+        (SQLTransactionStateMachine):
+        (WebCore::SQLTransactionStateMachine::~SQLTransactionStateMachine):
+        (WebCore::::SQLTransactionStateMachine):
+        (WebCore::::setStateToRequestedState):
+        (WebCore::::runStateMachine):
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * inspector/InspectorDatabaseAgent.cpp:
+
 2013-02-14  Jer Noble  <jer.noble@apple.com>
 
         EME: replace MediaKeySession.addKey() -> update()
