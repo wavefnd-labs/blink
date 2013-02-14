@@ -1,3 +1,31 @@
+2013-02-13  Elliott Sprehn  <esprehn@chromium.org>
+
+        ASSERT(!renderer()->needsLayout()) when calling Element::focus() with generated content
+        https://bugs.webkit.org/show_bug.cgi?id=109616
+
+        Reviewed by Julien Chaffraix.
+
+        Test: fast/css-generated-content/quote-layout-focus-crash.html
+
+        In some cases RenderQuote may mark itself and containing blocks as needing layout
+        during a layout, but then one of it's containing blocks will mark itself as having
+        finished layout so the RenderQuote and potentially some of it's ancestor renderers
+        needLayout(), but the ancestors above those do not.
+
+        Until we have proper pre-layout tasks we should just walk the list of quotes
+        right before layout and mark all their ancestors as needing layout if the quote
+        needs layout.
+
+        * dom/Document.cpp:
+        (WebCore::Document::updateLayout): Call markQuoteContainingBlocksForLayoutIfNeeded.
+        (WebCore::Document::implicitClose): Call markQuoteContainingBlocksForLayoutIfNeeded.
+        * rendering/RenderQuote.h:
+        (WebCore::RenderQuote::next): Added.
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::markQuoteContainingBlocksForLayoutIfNeeded): Added.
+        * rendering/RenderView.h:
+        (RenderView):
+
 2013-02-13  Jer Noble  <jer.noble@apple.com>
 
         EME: MediaPlayer::keyNeede() should return a bool indicating whether an event listener was triggered.
