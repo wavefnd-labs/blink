@@ -1,3 +1,32 @@
+2013-02-13  Tony Gentilcore  <tonyg@chromium.org>
+
+        Fix svg/in-html/script-write.html with threaded HTML parser
+        https://bugs.webkit.org/show_bug.cgi?id=109495
+
+        Reviewed by Eric Seidel.
+
+        This patch makes the background parser's simulateTreeBuilder() more realistic.
+        1. The HTMLTreeBuilder does not call the updateStateFor() setState()s when in foreign content mode so we shouldn't do it when simulating the tree builder.
+        2. HTMLTreeBuilder::processTokenInForeignContent has a list of tags which exit foreign content mode. We need to respect those.
+        3. Support the <foreignObject> tag which enters and leaves foreign content mode.
+        4. The tree builder sets state to DataState upon a </script> tag when not in foreign content mode. We need to do the same.
+
+        This involved creating a namespace stack where we push upon entering each namespace and pop upon leaving.
+        We are in foreign content if the topmost namespace is SVG or MathML.
+
+        This fixes svg/in-html/script-write.html and likely others.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::simulateTreeBuilder):
+        * html/parser/BackgroundHTMLParser.h:
+        (BackgroundHTMLParser):
+        * html/parser/CompactHTMLToken.cpp:
+        (WebCore::CompactHTMLToken::getAttributeItem): Returns the attribute of the given name. Necessary to test for <font> attributes in simulateTreeBuilder.
+        (WebCore):
+        * html/parser/CompactHTMLToken.h:
+        (WebCore):
+        (CompactHTMLToken):
+
 2013-02-13  Andreas Kling  <akling@apple.com>
 
         Remove Element::getAttributeItem() overload that returned a mutable Attribute*.
