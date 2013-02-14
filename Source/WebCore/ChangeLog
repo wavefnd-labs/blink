@@ -1,3 +1,37 @@
+2013-02-13  Adam Barth  <abarth@webkit.org>
+
+        Factor HTMLTokenScanner out of HTMLPreloadScanner
+        https://bugs.webkit.org/show_bug.cgi?id=109754
+
+        Reviewed by Eric Seidel.
+
+        This patch is just a mechanical separation of the per-token "scanning"
+        logic from HTMLPreloadScanner into a separate class.
+        HTMLPreloadScanner's job is now to keep track of the input stream and
+        to pump the tokenizer.
+
+        This factorization class will let us use HTMLTokenScanner on the
+        background thread (once we finish making it thread-safe). In a follow
+        up patch, I'll move HTMLTokenScanner to its own file.
+
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::HTMLTokenScanner::HTMLTokenScanner):
+        (WebCore::HTMLTokenScanner::~HTMLTokenScanner):
+        (WebCore::HTMLTokenScanner::processPossibleTemplateTag):
+        (WebCore::HTMLTokenScanner::processPossibleStyleTag):
+        (WebCore::HTMLTokenScanner::processPossibleBaseTag):
+        (WebCore::HTMLTokenScanner::scan):
+        (WebCore::HTMLPreloadScanner::HTMLPreloadScanner):
+        (WebCore):
+        (WebCore::HTMLPreloadScanner::~HTMLPreloadScanner):
+        (WebCore::HTMLPreloadScanner::appendToEnd):
+        (WebCore::HTMLPreloadScanner::scan):
+        * html/parser/HTMLPreloadScanner.h:
+        (HTMLTokenScanner):
+        (WebCore::HTMLTokenScanner::setPredictedBaseElementURL):
+        (HTMLPreloadScanner):
+        (WebCore):
+
 2013-02-13  Elliott Sprehn  <esprehn@chromium.org>
 
         ASSERT(!renderer()->needsLayout()) when calling Element::focus() with generated content
