@@ -1,3 +1,161 @@
+2013-02-13  Hayato Ito  <hayato@chromium.org>
+
+        [Shadow DOM] Implements a '::distributed()' pseudo element.
+        https://bugs.webkit.org/show_bug.cgi?id=82169
+
+        Reviewed by Dimitri Glazkov.
+
+        Implements a '::distributed()' pseudo element.
+        See the Shadow DOM specification and the filed bug for the detail.
+
+        - http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html#selecting-nodes-distributed-to-insertion-points
+        - https://www.w3.org/Bugs/Public/show_bug.cgi?id=19684
+
+        For example, suppose we are given the following DOM tree and shadow tree:
+
+        - <A>
+          - <B>
+            - <C>
+
+        [A's ShadowRoot]
+          <D>
+          - <style>
+              E content::distributed(B C) { color: green; }
+          - <E>
+            - <content>  (Node B is distributed to this insertion point.)
+
+        In this case, the style rule defined in the shadow tree matches node 'C'.
+
+        A '::distributed()' pseudo element can not be a pseudo class since
+        an intersection between matched_elements(some_selector) and
+        matched_elements(some_selector::distributed(...)) is always an
+        empty set. A '::distributed()' pseudo element is the first-ever
+        *functional* pseudo element which takes a parameter, which can be
+        a selector.
+
+        This rule crosses the shadow boundary from a shadow tree to the
+        tree of its shadow host. That means a rule which includes
+        '::distributed()' pseudo element is defined in shadow tree, but
+        the node which is matched in the rule, the subject of the
+        selector, is outside of the shadow tree. Therefore, we cannot
+        predict where the subject of the selector will be beforehand.
+        Current CSS implementation assumes the subject of the selector
+        must exist in the current scope.
+
+        To overcome this issue, DocumentRuleSets now has a instance of
+        ShadowDistributedRules class.  A style rule will be stored in this
+        instance if the rule includes a '::distributed()' pseudo element.
+        This class also keeps track of each RuleSet by mapping it with a
+        scope where the rule was originally defined. In the example, the
+        scope is A's ShadowRoot.  The scope is used to check whether the
+        left-most matched element (in the example, it's a node 'E') exists
+        in the scope.
+
+        Internally, a '::distributed' pseudo element is represented by a
+        newly introduced 'ShadowDistributed' relation.  That makes an
+        implementation of SelectorChecker::checkSelector() much simpler.
+        A transformation from a distributed pseudo element to a
+        ShadowDistributed is done in parsing stage of CSS.
+
+        Since '::distributed()' is an experimental feature, it's actually
+        prefixed with '-webkit-' and guarded by SHADOW_DOM flag.
+
+        Tests: fast/dom/shadow/distributed-pseudo-element-for-shadow-element.html
+               fast/dom/shadow/distributed-pseudo-element-match-all.html
+               fast/dom/shadow/distributed-pseudo-element-match-descendant.html
+               fast/dom/shadow/distributed-pseudo-element-nested.html
+               fast/dom/shadow/distributed-pseudo-element-no-match.html
+               fast/dom/shadow/distributed-pseudo-element-reprojection.html
+               fast/dom/shadow/distributed-pseudo-element-scoped.html
+               fast/dom/shadow/distributed-pseudo-element-support-selector.html
+               fast/dom/shadow/distributed-pseudo-element-used-in-selector-list.html
+               fast/dom/shadow/distributed-pseudo-element-with-any.html
+               fast/dom/shadow/distributed-pseudo-element.html
+
+        * css/CSSGrammar.y.in:
+        CSS Grammar was updated to support '::distrbuted(selector)'.
+        This pseudo element is the first pseudo element which can take a selector as a parameter.
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::detectDashToken):
+        (WebCore::CSSParser::rewriteSpecifiersWithNamespaceIfNeeded):
+        (WebCore::CSSParser::rewriteSpecifiersWithElementName):
+        Here we are converting a '::distributed' pseudo element into a
+        ShadowDistributed relation internally.  To support the conversion,
+        these rewriteSpecifiersXXX functions (formally called
+        updateSpecifiersXXX) now return the specifiers which may be
+        converted.
+        (WebCore::CSSParser::rewriteSpecifiers):
+        * css/CSSParser.h:
+        * css/CSSParserValues.cpp:
+        (WebCore::CSSParserSelector::CSSParserSelector):
+        * css/CSSParserValues.h:
+        (CSSParserSelector):
+        (WebCore::CSSParserSelector::functionArgumentSelector):
+        To hold an intermediate selector which appears at the position of an argument in
+        functional pseudo element when parsing CSS.
+        (WebCore::CSSParserSelector::setFunctionArgumentSelector):
+        (WebCore::CSSParserSelector::isDistributedPseudoElement):
+        * css/CSSSelector.cpp:
+        Add new pseudo element, PseudoDistributed, and its internal representation, ShadowDistributed relation.
+        (WebCore::CSSSelector::pseudoId):
+        (WebCore::nameToPseudoTypeMap):
+        (WebCore::CSSSelector::extractPseudoType):
+        (WebCore::CSSSelector::selectorText):
+        * css/CSSSelector.h:
+        (CSSSelector):
+        (WebCore):
+        (WebCore::CSSSelector::isDistributedPseudoElement):
+        (WebCore::CSSSelector::isShadowDistributed):
+        * css/CSSSelectorList.cpp:
+        (WebCore):
+        (SelectorHasShadowDistributed):
+        (WebCore::SelectorHasShadowDistributed::operator()):
+        (WebCore::CSSSelectorList::hasShadowDistributedAt):
+        * css/CSSSelectorList.h:
+        (CSSSelectorList):
+        * css/DocumentRuleSets.cpp:
+        (WebCore):
+        (WebCore::ShadowDistributedRules::addRule):
+        Every CSS rule which includes '::distributed(...)' should be managed by calling this function.
+        (WebCore::ShadowDistributedRules::collectMatchRequests):
+        (WebCore::DocumentRuleSets::resetAuthorStyle):
+        * css/DocumentRuleSets.h:
+        (WebCore):
+        (ShadowDistributedRules):
+        (WebCore::ShadowDistributedRules::clear):
+        (DocumentRuleSets):
+        (WebCore::DocumentRuleSets::shadowDistributedRules)
+        DocumentRuleSets owns an instance of ShadowDistributedRules.
+        * css/RuleSet.cpp:
+        (WebCore::RuleSet::addChildRules):
+        Updated to check whether the rule contains '::distributed()' or not.
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::match):
+        Support ShadowDistributed relation. Check all possible insertion points where a node is distributed.
+        * css/SelectorChecker.h:
+        (WebCore::SelectorChecker::SelectorCheckingContext::SelectorCheckingContext):
+        Adds enum of BehaviorAtBoundary. '::distributed()' is the only
+        rule which uses 'CrossedBoundary' since it is the only rule which
+        crosses shadow boundaries.
+        (SelectorCheckingContext):
+        * css/SelectorFilter.cpp:
+        (WebCore::SelectorFilter::collectIdentifierHashes):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRules):
+        (WebCore::StyleResolver::matchAuthorRules):
+        (WebCore::StyleResolver::collectMatchingRulesForList):
+        (WebCore::StyleResolver::ruleMatches):
+        * css/StyleResolver.h:
+        (MatchRequest):
+        (WebCore::MatchRequest::MatchRequest): Add behaviorAtBoundary field.
+        (WebCore):
+        (StyleResolver):
+        * html/shadow/InsertionPoint.cpp:
+        (WebCore::collectInsertionPointsWhereNodeIsDistributed):
+        (WebCore):
+        * html/shadow/InsertionPoint.h:
+        (WebCore):
+
 2013-02-13  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Generate wrapper methods for custom methods
