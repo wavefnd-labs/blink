@@ -1,3 +1,72 @@
+2013-02-15  Adam Barth  <abarth@webkit.org>
+
+        Enable the preload scanner on the background parser thread
+        https://bugs.webkit.org/show_bug.cgi?id=108027
+
+        Reviewed by Tony Gentilcore.
+
+        The patch causes us to pass all the fast/preloader tests with the
+        threaded parser enabled.
+
+        This patch wires up the BackgroundHTMLParser to the
+        TokenPreloadScanner.  Currently, we bail out of preload scanning if we
+        encounter a document.write becaues we don't know how to rewind the
+        preload scanner, but that's something we can tune in the future.
+
+        The BackgroundHTMLParser delivers the preloads to the
+        HTMLDocumentParser together with the token stream. If the
+        HTMLDocumentParser isn't able to use the token stream immediately, it
+        kicks off the preloads.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::checkThatPreloadsAreSafeToSendToAnotherThread):
+        (WebCore::BackgroundHTMLParser::BackgroundHTMLParser):
+        (WebCore::BackgroundHTMLParser::resumeFrom):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+        * html/parser/BackgroundHTMLParser.h:
+        (Configuration):
+            - We need to add a struct for the create function because the
+              number of arguments exceeds the limits of Functional.h.
+        (BackgroundHTMLParser):
+        (WebCore::BackgroundHTMLParser::create):
+        * html/parser/CSSPreloadScanner.cpp:
+        (WebCore::CSSPreloadScanner::scanCommon):
+        (WebCore::CSSPreloadScanner::scan):
+        (WebCore::CSSPreloadScanner::emitRule):
+            - We need to use a new string here so that the string is safe to
+              send to another thread.
+        * html/parser/CSSPreloadScanner.h:
+        (CSSPreloadScanner):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::startBackgroundParser):
+            - Following the example of the XSSAuditor, we create the
+              TokenPreloadScanner on the main thread and then send it to the
+              background thread for operation.
+        * html/parser/HTMLDocumentParser.h:
+        (WebCore):
+        (ParsedChunk):
+        * html/parser/HTMLParserOptions.h:
+        (HTMLParserOptions):
+            - We need to add a default constructor so that the
+              HTMLDocumentParser can create an empty
+              BackgroundHTMLParser::Configuration struct.
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::TokenPreloadScanner::scan):
+        (WebCore::TokenPreloadScanner::scanCommon):
+        (WebCore::HTMLPreloadScanner::scan):
+        * html/parser/HTMLPreloadScanner.h:
+        (TokenPreloadScanner):
+        (WebCore::TokenPreloadScanner::isSafeToSendToAnotherThread):
+        * html/parser/HTMLResourcePreloader.cpp:
+        (WebCore::HTMLResourcePreloader::takeAndPreload):
+        (WebCore):
+        * html/parser/HTMLResourcePreloader.h:
+        (WebCore::PreloadRequest::PreloadRequest):
+        (WebCore):
+        (HTMLResourcePreloader):
+
 2013-02-15  Ryosuke Niwa  <rniwa@webkit.org>
 
         Build fix after r143030. We need to keep updatedRange around until createMarkupInternal returns.
