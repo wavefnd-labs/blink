@@ -1,3 +1,45 @@
+2013-02-15  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSS Regions] RenderRegion should inherit from RenderBlock
+        https://bugs.webkit.org/show_bug.cgi?id=74132
+
+        Reviewed by Julien Chaffraix.
+
+        Change the base class for RenderRegion to be RenderBlock instead of RenderReplaced.
+        Per spec http://dev.w3.org/csswg/css3-regions/#the-flow-from-property, a region is a non-replaced block container.
+        This change is covered by the existing regions tests (in fast/region and fast/repaint).
+
+        The RenderFlowThread object is a self-painting layer (it requires layer and is positioned).
+        Because of that, the RenderFlowThread object is responsible for painting its children,
+        the collected objects. When the RenderRegion::paintObject is called during paint, it delegates painting
+        of content collected inside the flow thread to the associated RenderFlowThread object.
+        Since we do not want to paint the flow thread content multiple times (for each paint phase
+        in which the RenderRegion::paintObject is called), we allow RenderFlowThread painting only for
+        selection and foreground paint phases.
+
+        * rendering/RenderBox.cpp: Clean-up the code from regions specific stuff, now that the regions are render blocks.
+        (WebCore::RenderBox::computePositionedLogicalWidth):
+        (WebCore::RenderBox::computePositionedLogicalHeight):
+        * rendering/RenderLayerBacking.cpp: A region should always render content from its associated flow thread,
+        even when it does not have children of its own.
+        (WebCore::RenderLayerBacking::isSimpleContainerCompositingLayer):
+        * rendering/RenderMultiColumnSet.cpp: Make changes to match the new inheritance for RenderRegion.
+        (WebCore::RenderMultiColumnSet::paint):
+        (WebCore::RenderMultiColumnSet::paintColumnRules):
+        * rendering/RenderMultiColumnSet.h:
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::RenderRegion):
+        (WebCore::RenderRegion::paintObject):
+        (WebCore::RenderRegion::styleDidChange):
+        (WebCore::RenderRegion::layoutBlock):
+        (WebCore::RenderRegion::insertedIntoTree):
+        (WebCore::RenderRegion::willBeRemovedFromTree):
+        (WebCore::RenderRegion::computePreferredLogicalWidths): Use this method instead of min/maxPreferredLogicalWidth.
+        (WebCore::RenderRegion::updateLogicalHeight):
+        * rendering/RenderRegion.h: For now, assume the region is not allowed to have children.
+        When we will implement the processing model for pseudo-elements http://dev.w3.org/csswg/css3-regions/#processing-model,
+        we will have to remove this function. By having this function return false i was able to leave some tests unchanged.
+
 2013-02-15  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: implement smart braces functionality
