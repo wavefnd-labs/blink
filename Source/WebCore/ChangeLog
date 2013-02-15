@@ -1,3 +1,41 @@
+2013-02-15  Andrei Bucur  <abucur@adobe.com>
+
+        [CSS Regions][Mac] fast/regions/full-screen-video-from-region.html hits an assertion in RenderFlowThread::removeRenderBoxRegionInfo
+        https://bugs.webkit.org/show_bug.cgi?id=106075
+
+        Reviewed by Tony Chang.
+
+        The crash is caused by two issues.
+
+        The first problem is how a block inside a flow thread determines if the children needs relayout or not.
+        When the region chain is invalidated, the information is lost so we need to return true, even for the
+        enclosing RenderFlowThread. Because the video renderer is the first child of the flow thread this doesn't
+        happen.
+
+        The patch implements this behaviour by inspecting both if the region chain has changed and
+        if the block has no range computed yet.
+
+        The second problem is RenderMedia not inheriting from RenderBlock. The logic of child relayout doesn't apply
+        to it. In the test case, when the full screen button is pressed, the region changes width to fill the viewport,
+        the chain is invalidated and the box info hash map is cleared. When the video is laid out again (after fixing
+        the first issue) it has the same size so the controls don't do a layout. They remain without box info inside
+        the flow thread, thus causing the assertion.
+
+        The patch forces the controls to relayout if the region chain was invalidated. We can't use the
+        logicalWidthChangedInRegions method because it is block specific. This will be fixed in a later patch.
+
+        Tests: No new tests. fast/regions/full-screen-video-from-region.html no longer crashes.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::checkForPaginationLogicalHeightChange):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        (WebCore::RenderFlowThread::layout):
+        (WebCore::RenderFlowThread::logicalWidthChangedInRegions):
+        * rendering/RenderFlowThread.h: Renamed pageLogicalHeightChanged to pageLogicalSizeChanged.
+        * rendering/RenderMedia.cpp:
+        (WebCore::RenderMedia::layout):
+
 2013-02-13  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [CoordGfx] Regression from r135212: big layers with transform animations sometime fail to render tiles
