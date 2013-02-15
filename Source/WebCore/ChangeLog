@@ -1,3 +1,36 @@
+2013-02-15  Andreas Kling  <akling@apple.com>
+
+        ElementData: Move leafy things out of the base class.
+        <http://webkit.org/b/109888>
+
+        Reviewed by Antti Koivisto.
+
+        - Moved functions for mutating/adding/removing attributes into UniqueElementData.
+          Attempts to modify shared element data will now fail at compile-time.
+
+        - Removed mutableAttributeVector() and have call sites access the vector directly.
+
+        - Move immutableAttributeArray() to ShareableElementData.
+
+        - Move some function bodies from Element.h to Element.cpp since all clients are in there.
+
+        * dom/Element.cpp:
+        (WebCore::Element::addAttributeInternal):
+        (WebCore::ShareableElementData::ShareableElementData):
+        (WebCore::UniqueElementData::makeShareableCopy):
+        (WebCore::UniqueElementData::addAttribute):
+        (WebCore::UniqueElementData::removeAttribute):
+        (WebCore::ElementData::reportMemoryUsage):
+        (WebCore::UniqueElementData::getAttributeItem):
+        (WebCore::UniqueElementData::attributeItem):
+        * dom/Element.h:
+        (ElementData):
+        (WebCore::ShareableElementData::immutableAttributeArray):
+        (ShareableElementData):
+        (UniqueElementData):
+        (WebCore::ElementData::length):
+        (WebCore::ElementData::attributeItem):
+
 2013-02-15  Hans Muller  <hmuller@adobe.com>
 
         [CSS Exclusions] Enable shape-inside support for circles
