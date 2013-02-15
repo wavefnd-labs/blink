@@ -1,3 +1,26 @@
+2013-02-15  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        [Soup] Leverage new soup_cookie_jar_get_cookie_list() API
+        https://bugs.webkit.org/show_bug.cgi?id=109931
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        In several cases, the CookieJarSoup implementation was retrieving / copying ALL the
+        cookies using soup_cookie_jar_all_cookies() and then using soup_cookie_applies_to_uri()
+        to filter out cookies it is not interested in. This was inefficient.
+
+        In libsoup 2.40, soup_cookie_jar_get_cookie_list() was introduced to retrieve only the
+        cookies that apply to a given URI. This patch leverages this new API in CookieJarSoup's
+        getRawCookies() and deleteCookie(). This way, only the cookies we are interested in
+        are retrieved and copied. Libsoup does not need to iterate over all the cookies itself
+        because it keeps the cookies in a hash table using the host names as key.
+
+        No new tests, no behavior change.
+
+        * platform/network/soup/CookieJarSoup.cpp:
+        (WebCore::getRawCookies):
+        (WebCore::deleteCookie):
+
 2013-02-15  Vladislav Kaznacheev  <kaznacheev@chromium.org>
 
         Web Inspector: Added an option to split Elements and Sources sidebars in two panes.
