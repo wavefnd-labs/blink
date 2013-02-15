@@ -1,3 +1,87 @@
+2013-02-15  Andrei Bucur  <abucur@adobe.com>
+
+        Implement the -webkit-margin-collapse properties correct rendering
+        https://bugs.webkit.org/show_bug.cgi?id=108168
+
+        Reviewed by David Hyatt.
+
+        The patch implements the correct behavior for the -webkit-margin-collapse properties:
+        - a value of "discard" on a margin will truncate all the margins collapsing with it;
+        - a value of "separate" will prevent the margin to collapse;
+        - a value of "collapse" is the default collapse behavior.
+
+        The implementation is aware of multiple writing-modes:
+        - if the writing mode of a child is parallel with the writing mode of the container and has the same direction,
+        the -webkit-margin-collapse properties on the child are left as is;
+        - if the writing mode of a child is parallel with the writing mode of the container but has a different direction,
+        the -webkit-margin-collapse properties on the child are reversed;
+        - if the writing mode of a child is perpendicular on the writing mode of the container,
+        the -webkit-margin-collapse properties on the child are ignored;
+
+        I. The "discard" value implementation
+        There are two new bits (before and after) added on the RenderBlockRareData structure specifying if the margins
+        of the block will be discarded or not. We can't rely only on the value from style() because
+        it's possible a block to discard it's margins because it has collapsed with a children that
+        specified "discard" for -webkit-margin-collapse. However, the bits are set only if it is
+        required.
+        Another bit is added on the MarginInfo structure specifying if the margin has to be discarded or not. When
+        collapsing at the before side of a block it will hold information if the container block needs to discard
+        or not. If the collapsing happens between siblings/with after side of the container it will tell if the previous
+        child discards the margin or not. The self collapsing blocks are a special case. If any of its margins
+        discards then both its margins discard and all the other margins collapsing with it.
+        To ensure an optimal behavior it is asserted margin values can't be set on the MarginInfo object if the
+        discard flag is active. If this happens it may indicate someone ignored the possibility of the margin being
+        discarded altogether and incorrectly updated the margin values.
+        Float clearing also needs to change because it may force margins to stop collapsing. If this happens the discard
+        flags and margins needs to be restored to their values before the collapse.
+
+        II. The "separate" value implementation
+        The implementation for separate was not changed too much. I've added new accessor methods for the property
+        that take writing mode into consideration and I've removed some code that didn't work correctly in layoutBlockChild.
+        The problem was the marginInfo structure was cleared if the child was specifying the "separate" value for before.
+        This is wrong because you lose the margin information of the previous child/before side.
+
+        Tests: fast/block/margin-collapse/webkit-margin-collapse-container.html
+               fast/block/margin-collapse/webkit-margin-collapse-floats.html
+               fast/block/margin-collapse/webkit-margin-collapse-siblings-bt.html
+               fast/block/margin-collapse/webkit-margin-collapse-siblings.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::MarginInfo::MarginInfo):
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::collapseMargins):
+        (WebCore::RenderBlock::clearFloatsIfNeeded):
+        (WebCore::RenderBlock::marginBeforeEstimateForChild):
+        (WebCore::RenderBlock::estimateLogicalTopPosition):
+        (WebCore::RenderBlock::setCollapsedBottomMargin):
+        (WebCore::RenderBlock::handleAfterSideOfBlock):
+        (WebCore::RenderBlock::layoutBlockChild):
+        (WebCore::RenderBlock::setMustDiscardMarginBefore):
+        (WebCore):
+        (WebCore::RenderBlock::setMustDiscardMarginAfter):
+        (WebCore::RenderBlock::mustDiscardMarginBefore):
+        (WebCore::RenderBlock::mustDiscardMarginAfter):
+        (WebCore::RenderBlock::mustDiscardMarginBeforeForChild):
+        (WebCore::RenderBlock::mustDiscardMarginAfterForChild):
+        (WebCore::RenderBlock::mustSeparateMarginBeforeForChild):
+        (WebCore::RenderBlock::mustSeparateMarginAfterForChild):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        (WebCore::RenderBlock::initMaxMarginValues):
+        (MarginInfo):
+        (WebCore::RenderBlock::MarginInfo::setPositiveMargin):
+        (WebCore::RenderBlock::MarginInfo::setNegativeMargin):
+        (WebCore::RenderBlock::MarginInfo::setPositiveMarginIfLarger):
+        (WebCore::RenderBlock::MarginInfo::setNegativeMarginIfLarger):
+        (WebCore::RenderBlock::MarginInfo::setMargin):
+        (WebCore::RenderBlock::MarginInfo::setCanCollapseMarginAfterWithChildren):
+        (WebCore::RenderBlock::MarginInfo::setDiscardMargin):
+        (WebCore::RenderBlock::MarginInfo::discardMargin):
+        (WebCore::RenderBlock::RenderBlockRareData::RenderBlockRareData):
+        (WebCore::RenderBlock::RenderBlockRareData::positiveMarginBeforeDefault):
+        (RenderBlockRareData):
+        * rendering/style/RenderStyle.h:
+
 2013-02-14  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: always show memory size in Mb on the native memory graph
