@@ -1,3 +1,37 @@
+2013-02-15  Elliott Sprehn  <esprehn@chromium.org>
+
+        RenderQuote should not mark renderers as needing layout during layout
+        https://bugs.webkit.org/show_bug.cgi?id=109876
+
+        Reviewed by Ojan Vafai.
+
+        Marking RenderQuotes as needing pref width recalcs and layouts during a
+        layout is dangerous since an ancestor may mark itself as having completed
+        layout, but then some subtree still thinks it needs layout.
+
+        Instead, since the only time we create RenderQuote instances is inside
+        PseudoElement, we can call attachQuote inside PseudoElement::attach during
+        the regular tree mutating cycle. We can then use RenderQuote::styleDidChange
+        to update the kind of quotes on normal style changes.
+
+        This makes RenderQuote behave much more similarly to DOM nodes and means
+        we no longer need to set dirty bits during layout.
+
+        Test: fast/css-generated-content/quote-layout-focus-crash.html
+
+        * dom/PseudoElement.cpp:
+        (WebCore::PseudoElement::attach): Now call attachQuote().
+        * rendering/RenderQuote.cpp:
+        (WebCore::RenderQuote::~RenderQuote):
+        (WebCore::RenderQuote::willBeRemovedFromTree):
+        (WebCore::RenderQuote::styleDidChange):
+        (WebCore::RenderQuote::updateText):
+        (WebCore::RenderQuote::attachQuote):
+        (WebCore::RenderQuote::detachQuote):
+        (WebCore::RenderQuote::updateDepth):
+        * rendering/RenderQuote.h:
+        (RenderQuote):
+
 2013-02-15  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r143044.
