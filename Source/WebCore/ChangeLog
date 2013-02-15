@@ -1,3 +1,61 @@
+2013-02-14  Hayato Ito  <hayato@chromium.org>
+
+        Factor Event retargeting code.
+        https://bugs.webkit.org/show_bug.cgi?id=109156
+
+        Reviewed by Dimitri Glazkov.
+
+        To supoort Touch event retargeting (bug 107800), we have to factor
+        event retargeting code so that it can support not only MouseEvent,
+        but also other events.
+
+        New class, EventRetargeter, was introduced. From now,
+        EventDispatchMediator (and its subclasses) should call, if event
+        retargeting is required, an appropriate function provided in
+        EventRetargeter rather than calling
+        EventDispatcher::adjustRelatedTarget(), which was removed in this
+        patch.
+
+        No tests. No change in behavior.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * dom/EventDispatchMediator.cpp:
+        * dom/EventDispatcher.cpp:
+        (WebCore):
+        (WebCore::EventDispatcher::ensureEventPath): Changed to return an EventPath, which will be used by EventRetargeter.
+        (WebCore::EventDispatcher::dispatchScopedEvent):
+        (WebCore::EventDispatcher::dispatchEvent):
+        (WebCore::EventDispatcher::dispatchEventPostProcess):
+        * dom/EventDispatcher.h:
+        (WebCore):
+        (EventDispatcher):
+        * dom/EventRetargeter.cpp: Added.
+        (WebCore):
+        (WebCore::inTheSameScope):
+        (WebCore::determineDispatchBehavior):
+        (WebCore::EventRetargeter::calculateEventPath): Factored out from EventDispatcher::ensureEventPath().
+        (WebCore::EventRetargeter::adjustForMouseEvent):
+        (WebCore::EventRetargeter::adjustForFocusEvent):
+        (WebCore::EventRetargeter::adjustForRelatedTarget):
+        (WebCore::EventRetargeter::calculateAdjustedNodes): Factored out from EventRelatedTargetAjuster::adjustRelatedTarget().
+        (WebCore::EventRetargeter::buildRelatedNodeMap): Factored out from EventRelatedTargetAjuster::adjustRelatedTarget().
+        (WebCore::EventRetargeter::findRelatedNode):
+        * dom/EventRetargeter.h: Added.
+        (WebCore):
+        (EventRetargeter):
+        (WebCore::EventRetargeter::eventTargetRespectingTargetRules):
+        * dom/FocusEvent.cpp:
+        (WebCore::FocusEventDispatchMediator::dispatchEvent): Changed to call EventRetargeter::adjustForFocusEvent().
+        (WebCore::BlurEventDispatchMediator::dispatchEvent): Ditto.
+        (WebCore::FocusInEventDispatchMediator::dispatchEvent): Ditto.
+        (WebCore::FocusOutEventDispatchMediator::dispatchEvent): Ditto.
+        * dom/MouseEvent.cpp:
+        (WebCore::MouseEventDispatchMediator::dispatchEvent): Changed to call EventRetargeter::adjustForMouseEvent().
+
 2013-02-14  Simon Fraser  <simon.fraser@apple.com>
 
         Reverting r142861. Hit testing inside of style recalc is fundamentally wrong
