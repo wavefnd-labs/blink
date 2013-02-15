@@ -1,3 +1,34 @@
+2013-02-14  Arpita Bahuguna  <arpitabahuguna@gmail.com>
+
+        Caret positioned at the end of a text line (followed by an empty block) in vertical writing mode disappears when pressing the right/down arrow key.
+        https://bugs.webkit.org/show_bug.cgi?id=106452
+
+        Reviewed by Ryosuke Niwa.
+
+        Pressing the down or the right arrow key at the end of a text line in
+        vertical writing mode would make the caret dissapear. This occurs only
+        when the text line is followed by an empty block.
+
+        When trying to compute the next position for placing the caret (for
+        down/right key), we try to ascertain whether the renderer (in this
+        case the empty block) is a valid candidate or not. For blockFlow
+        elements we check against their height.
+        In vertical writing mode though we would fail such a check since we
+        should instead be comparing against the renderer's width and not
+        it's height. Thus, a valid position for the placement of the caret
+        was not found in such a case.
+
+        Test: editing/selection/caret-at-end-of-text-line-followed-by-empty-block-in-vertical-mode.html
+
+        * dom/Position.cpp:
+        (WebCore::Position::isCandidate):
+        * dom/PositionIterator.cpp:
+        (WebCore::PositionIterator::isCandidate):
+        Instead of checking against the height(), check against the
+        logicalHeight() of the renderer has been added. logicalHeight()
+        on blockFlow renderer's returns a value in accordance with
+        the writing mode.
+
 2013-02-14  Ryosuke Niwa  <rniwa@webkit.org>
 
         Windows build fix after r142957.
