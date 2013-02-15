@@ -1,3 +1,41 @@
+2013-02-14  Alexey Proskuryakov  <ap@apple.com>
+
+        <rdar://problem/13210723> CORS preflight broken with NetworkProcess
+        https://bugs.webkit.org/show_bug.cgi?id=109753
+
+        Reviewed by Brady Eidson.
+
+        * loader/DocumentThreadableLoader.h:
+        * loader/DocumentThreadableLoader.cpp:
+        (WebCore::DocumentThreadableLoader::DocumentThreadableLoader):
+        (WebCore::DocumentThreadableLoader::cancel):
+        (WebCore::DocumentThreadableLoader::didReceiveResponse):
+        (WebCore::DocumentThreadableLoader::dataReceived):
+        (WebCore::DocumentThreadableLoader::didReceiveData):
+        (WebCore::DocumentThreadableLoader::notifyFinished):
+        (WebCore::DocumentThreadableLoader::didFinishLoading):
+        (WebCore::DocumentThreadableLoader::didFail):
+        (WebCore::DocumentThreadableLoader::preflightFailure): Notify InspectorInstrumentation
+        immediately. In addition to keeping up eith other changes, this means that an accurate
+        error will be passed now, not a cancellation.
+        (WebCore::DocumentThreadableLoader::loadRequest):
+        Get rid of m_preflightRequestIdentifier. Every loader has an identifier, and tracking
+        identifiers twice is wrong.
+        Pass identifier explicitly to more internal functions, so that they would not have to
+        second-guess callers.
+
+        * loader/ResourceLoader.cpp: (WebCore::ResourceLoader::willSendRequest):
+        Create an identifier for all loaders, not just those that we expect to have client
+        callbacks about. Both Inspector and NetworkProcess need identifiers everywhere.
+
+        * loader/TextTrackLoader.cpp: (WebCore::TextTrackLoader::deprecatedDidReceiveCachedResource):
+        * loader/TextTrackLoader.h:
+        * loader/cache/CachedResourceClient.h:
+        (WebCore::CachedResourceClient::deprecatedDidReceiveCachedResource):
+        * loader/cache/CachedTextTrack.cpp: (WebCore::CachedTextTrack::data):
+        Renamed didReceiveData to avoid conflict with the new DocumentThreadableLoader::didReceiveData.
+        And we should really get rid of this CachedResourceClient function anyway.
+
 2013-02-14  Kentaro Hara  <haraken@chromium.org>
 
         Replace 'DOMObject' with 'any'
