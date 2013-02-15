@@ -1,3 +1,33 @@
+2013-02-14  Florin Malita  <fmalita@chromium.org>
+
+        [SVG] Cached filter results are not invalidated on repaint rect change
+        https://bugs.webkit.org/show_bug.cgi?id=106221
+
+        Reviewed by Dean Jackson.
+
+        Since the cached filter results are not invalidated for different repaint rects, we need
+        to render the content of the whole filter region upfront (otherwise elements not visible
+        during the initial paint due to scrolling/window size/etc. are never redrawn).
+
+        Tests: svg/filters/filter-hidden-content-expected.svg
+               svg/filters/filter-hidden-content.svg
+
+        * rendering/svg/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::applyResource):
+        (WebCore::RenderSVGResourceFilter::drawingRegion):
+        (WebCore):
+        * rendering/svg/RenderSVGResourceFilter.h:
+        (FilterData):
+        (RenderSVGResourceFilter):
+        Track the filter drawing region in FilterData.
+
+        * rendering/svg/SVGRenderingContext.cpp:
+        (WebCore::SVGRenderingContext::~SVGRenderingContext):
+        (WebCore::SVGRenderingContext::prepareToRenderSVGContent):
+        * rendering/svg/SVGRenderingContext.h:
+        Update paintInfo.rect to cover the whole drawing region while rendering filter content, and
+        restore it when done.
+
 2013-02-14  Jinwoo Song  <jinwoo7.song@samsung.com>
 
         [EFL] Correct the mismatched cursor map
