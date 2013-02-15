@@ -1,3 +1,62 @@
+2013-02-15  Max Vujovic  <mvujovic@adobe.com>
+
+        Add code from other branch.
+
+        [CSS Shaders] Parse src property in @-webkit-filter at-rules
+        https://bugs.webkit.org/show_bug.cgi?id=109770
+
+        Reviewed by Dean Jackson.
+
+        This patch implements the parsing for the CSS src property in @-webkit-filter at-rules.
+
+        The Filter Effects spec [1] specifies its syntax:
+            src: [ <uri> [format(<string>)]?]#
+
+        In practice, it can look like:
+            src: url(shader.vs) format('x-shader/x-vertex'),
+                 url(shader.fs) format('x-shader/x-fragment');
+
+        This src property is similar to the src property in CSS font-face rules, but a little
+        different. The CSS Fonts spec [2] specifies:
+            src: [ <uri> [format(<string>#)]? | <font-face-name> ]#
+            The syntax for a <font-face-name> is a unique font face name enclosed by "local("
+            and ")".
+
+        Unlike the filter src property, the font face src property accepts the local function
+        [e.g. src: local("SomeFont");]. Also, the font face src property accepts a list of strings
+        instead of just one string in its format function.
+
+        [1]: https://dvcs.w3.org/hg/FXTF/raw-file/tip/filters/index.html#custom-filter-src
+        [2]: http://www.w3.org/TR/css3-fonts/#src-desc
+
+        Tests: css3/filters/custom-with-at-rule-syntax/parsing-src-property-invalid.html
+               css3/filters/custom-with-at-rule-syntax/parsing-src-property-valid.html
+
+        * css/CSSGrammar.y.in:
+            Set (and unset) a flag called "m_inFilterRule", which tells us if we are in a
+            @-webkit-filter at-rule or in a @font-face at-rule when we encounter a src property.
+            We parse the two variants of the src property separately so that we can create different
+            objects (WebKitCSSShaderValue vs. CSSFontFaceSrcValue) and because their syntax is a
+            little different.
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::CSSParser):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseFilterRuleSrcUriAndFormat):
+            Parses a URI and format pair found in the @-webkit-filter src property.
+        (WebCore::CSSParser::parseFilterRuleSrc):
+            Parse the @-webkit-filter src property.
+        * css/CSSParser.h:
+        (CSSParser):
+        * css/WebKitCSSShaderValue.cpp:
+        (WebCore::WebKitCSSShaderValue::customCssText):
+            WebKitCSSShaderValue now has an m_format member, which needs to be included in its
+            cssText.
+        (WebCore::WebKitCSSShaderValue::reportDescendantMemoryUsage):
+        * css/WebKitCSSShaderValue.h:
+        (WebCore::WebKitCSSShaderValue::format):
+        (WebCore::WebKitCSSShaderValue::setFormat):
+        (WebKitCSSShaderValue):
+
 2013-02-15  Eric Carlson  <eric.carlson@apple.com>
 
         Crash occurs at WebCore::TextTrackList::length() when enabling closed captions in movie
