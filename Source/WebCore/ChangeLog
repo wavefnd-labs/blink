@@ -1,3 +1,64 @@
+2013-02-14  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: Implement tracking of active stylesheets in the frontend
+        https://bugs.webkit.org/show_bug.cgi?id=105828
+
+        Reviewed by Pavel Feldman.
+
+        - This change introduces the CSS.styleSheetAdded() and CSS.styleSheetRemoved() events
+        that update the frontend with all active stylesheet changes in the inspected page.
+        As such, fetching stylesheet headers from the backend manually is no longer needed,
+        and many asynchronous methods have been turned into normal accessors.
+        - One notable change to the stylesheet binding process is that when a via-inspector stylesheet
+        is created, it is instantly reported through the instrumentation, and the viaInspectorStyleSheet() method
+        is [indirectly] called recursively from bindStyleSheet(). Thus, the actual creation and registration
+        of the respective InspectorStyleSheet have been moved into bindStyleSheet(),
+        which relies upon the m_creatingViaInspectorStyleSheet flag.
+
+        Test: inspector/styles/stylesheet-tracking.html
+
+        * dom/DocumentStyleSheetCollection.cpp:
+        (WebCore::DocumentStyleSheetCollection::updateActiveStyleSheets): Instrumented.
+        * inspector/Inspector.json: Add events, update the CSS domain description.
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::InspectorCSSAgent):
+        (WebCore::InspectorCSSAgent::clearFrontend):
+        (WebCore::InspectorCSSAgent::enable): Push all existing stylesheet headers into the frontend.
+        (WebCore::InspectorCSSAgent::activeStyleSheetsUpdated): Push added/removed stylesheet into the frontend.
+        (WebCore::InspectorCSSAgent::getAllStyleSheets): Slightly refactored to make use of collectAllStyleSheets().
+        (WebCore::InspectorCSSAgent::collectAllStyleSheets): Added to collect InspectorStyleSheets rather than headers.
+        (WebCore::InspectorCSSAgent::collectStyleSheets):
+        (WebCore::InspectorCSSAgent::bindStyleSheet): Binds via-inspector stylesheets, too.
+        (WebCore::InspectorCSSAgent::unbindStyleSheet): Now we can unbind stylesheets upon their removal from the document.
+        (WebCore::InspectorCSSAgent::viaInspectorStyleSheet): Modifies m_creatingViaInspectorStyleSheet when necessary.
+        (WebCore::InspectorCSSAgent::detectOrigin): Modified to make use of m_creatingViaInspectorStyleSheet.
+        (WebCore::InspectorCSSAgent::buildObjectForRule): Removed extraneous bound InspectorStyleSheet 0-check.
+        * inspector/InspectorCSSAgent.h:
+        * inspector/InspectorInstrumentation.cpp: Instrumentation of active stylesheet set updates.
+        (WebCore::InspectorInstrumentation::activeStyleSheetsUpdatedImpl):
+        * inspector/InspectorInstrumentation.h: Ditto.
+        (WebCore::InspectorInstrumentation::activeStyleSheetsUpdated):
+        * inspector/front-end/CSSStyleModel.js:
+        (WebInspector.CSSStyleModel.prototype.styleSheetHeaders):
+        (WebInspector.CSSStyleModel.prototype._styleSheetAdded): Added.
+        (WebInspector.CSSStyleModel.prototype._styleSheetRemoved): Added.
+        (WebInspector.CSSStyleModel.prototype.viaInspectorResourceForRule):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._setHeaderForStyleSheetId):
+        (WebInspector.CSSStyleModelResourceBinding.prototype.resourceURLForStyleSheetId):
+        (WebInspector.CSSStyleModelResourceBinding.prototype.styleSheetIdForResource):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._headerKey): Calculate the (frameID + URL) key for CSSStyleSheetHeader.
+        (WebInspector.CSSStyleModelResourceBinding.prototype._createInspectorResource):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._inspectorResource):
+        (WebInspector.CSSStyleModelResourceBinding.prototype._reset):
+        (WebInspector.CSSDispatcher.prototype.styleSheetAdded): Added.
+        (WebInspector.CSSDispatcher.prototype.styleSheetRemoved): Added.
+        * inspector/front-end/SASSSourceMapping.js: Get rid of async implementations.
+        (WebInspector.SASSSourceMapping.prototype._styleSheetChanged):
+        * inspector/front-end/StylesSidebarPane.js: Ditto.
+        (WebInspector.StylePropertiesSection.prototype._createRuleOriginNode):
+        * inspector/front-end/StylesSourceMapping.js: Ditto.
+        (WebInspector.StyleContentBinding.prototype._innerStyleSheetChanged):
+
 2013-02-15  Andrei Bucur  <abucur@adobe.com>
 
         Implement the -webkit-margin-collapse properties correct rendering
