@@ -1,3 +1,41 @@
+2013-02-15  Alexis Menard  <alexis@webkit.org>
+
+        WebKit shouldn't accept "none, none" in transition shorthand property.
+        https://bugs.webkit.org/show_bug.cgi?id=108751
+
+        Reviewed by Dean Jackson.
+
+        http://dev.w3.org/csswg/css3-transitions/#transition-shorthand-property
+        specifies that if there is more than one transition defined in the
+        shorthand and any of them has a value of 'none' then the declaration is
+        invalid. This patch fixes the problem by passing a parsing context to
+        track if a keyword has been set for the transition-property and if so
+        then use it to invalidate or not the declaration.
+
+        Test: transitions/transitions-parsing.html
+
+        * css/CSSParser.cpp:
+        (AnimationParseContext):
+        (WebCore::AnimationParseContext::AnimationParseContext):
+        (WebCore::AnimationParseContext::commitFirstAnimation): track whether
+        it's the first <single-transition/animation> or not defined in the
+        shorthand.
+        (WebCore::AnimationParseContext::hasCommittedFirstAnimation):
+        (WebCore::AnimationParseContext::commitAnimationPropertyKeywordInShorthand):
+        In the shorthand as soon as a keyword has been found then the parsing
+        is 'finished', if any other animation/transition declaration part of
+        the shorthand are with a keyword then it's invalid.
+        (WebCore::AnimationParseContext::animationPropertyKeywordInShorthandAllowed):
+        (WebCore::AnimationParseContext::hasSeenAnimationPropertyKeyword):
+        (WebCore::AnimationParseContext::sawAnimationPropertyKeyword):
+        (WebCore):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseAnimationShorthand):
+        (WebCore::CSSParser::parseTransitionShorthand):
+        (WebCore::CSSParser::parseAnimationProperty):
+        * css/CSSParser.h:
+        (WebCore):
+
 2013-02-15  Andreas Kling  <akling@apple.com>
 
         ElementData: Move leafy things out of the base class.
