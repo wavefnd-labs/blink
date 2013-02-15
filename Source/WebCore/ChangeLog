@@ -1,3 +1,17 @@
+2013-02-14  Simon Fraser  <simon.fraser@apple.com>
+
+        Reverting r142861. Hit testing inside of style recalc is fundamentally wrong
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::selectCursor):
+        (WebCore::EventHandler::handleMouseMoveEvent):
+        * page/EventHandler.h:
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::setStyle):
+        (WebCore::areNonIdenticalCursorListsEqual):
+        (WebCore::areCursorsEqual):
+        (WebCore::RenderObject::styleDidChange):
+
 2013-02-14  Florin Malita  <fmalita@chromium.org>
 
         [SVG] Cached filter results are not invalidated on repaint rect change
@@ -1719,56 +1733,6 @@
         (WebInspector.NativeMemoryGraph.prototype._draw):
         * inspector/front-end/TimelinePanel.js:
         * inspector/front-end/WebKit.qrc:
-
-2013-02-14  Aivo Paas  <aivopaas@gmail.com>
-
-        Updating mouse cursor on style changes without emitting fake mousemove event
-        https://bugs.webkit.org/show_bug.cgi?id=101857
-
-        Reviewed by Allan Sandfeld Jensen.
-
-        Mouse cursor changes in styles used to be reflected in UI through dispatching a fake
-        mousemove event. The old approach has some flaws: it emits a mousemove event in
-        javascript when there is no mouse movement involved (bug 85343); the fake mousemove
-        event is cancelled while there is a mouse button held down - cursor won't change
-        until mouse is moved or the button released (bug 53341); it has extra overhead of
-        using a timer which was introduced to make scrolling smoother.
-
-        The new approach does not use the fake mousemove event. Instead, it uses only the logic
-        needed for the actual cursor change to happen. This bypasses all the mousemove event related
-        overhead. The remaining code is a stripped version of what was run through the mousemove
-        event path. Everything that was not needed for changing a cursor is stripped off, everything
-        that is needed, remains the same.
-
-        The call to update cursor was moved up in the call tree from RenderObject::StyleDidChange
-        to RenderObject::SetStyle right after the StyleDidChange call. This allows to any updates
-        and style propagations in StyleDidChange to happen and makes sure that a cursor change is
-        not missed. Previous place was at the end of RenderObject::StyleDidChange, where it could
-        have been missed because of an early exit. For example, cursor change on mousedown/up on
-        a text node missed the correct cursor in the first pass.
-
-        Refactored EventHandler::selectCursor to not take a whole mouse event but instead work with
-        HitTestResult so that EventHandler::updateCursor must not create a useless PlatformEvent.
-
-        Fixes: https://bugs.webkit.org/show_bug.cgi?id=85343 (mousemove event on cursor change)
-               https://bugs.webkit.org/show_bug.cgi?id=53341 (no cursor change when mouse button down)
-
-        Tests: fast/events/mouse-cursor-change.html
-               fast/events/mouse-cursor-no-mousemove.html
-
-        * page/EventHandler.cpp:
-        (WebCore::EventHandler::updateCursor): Newly added method for updating mouse cursor
-        (WebCore):
-        (WebCore::EventHandler::selectCursor):
-        (WebCore::EventHandler::handleMouseMoveEvent):
-        * page/EventHandler.h:
-        (EventHandler):
-        * rendering/RenderObject.cpp:
-        (WebCore::areNonIdenticalCursorListsEqual):
-        (WebCore):
-        (WebCore::areCursorsEqual):
-        (WebCore::RenderObject::setStyle):
-        (WebCore::RenderObject::styleDidChange):
 
 2013-02-13  Ilya Tikhonovsky  <loislo@chromium.org>
 
