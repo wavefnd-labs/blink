@@ -1,3 +1,23 @@
+2013-02-15  Andreas Kling  <akling@apple.com>
+
+        Calling DOM Element.attributes shouldn't force creation of ElementData.
+        <http://webkit.org/b/109976>
+
+        Reviewed by Darin Adler.
+
+        Don't create ElementData for an Element unnecessarily just because someone calls .attributes on it.
+        Previously, JS like this would create empty ElementData when 'element' has no attributes:
+
+            for (i = 0; i < element.attributes.length; ++i)
+                doStuff(element.attributes[i]);
+
+        Make NamedNodeMap::length() short-circuit and return 0 if !Element::hasAttributes().
+
+        * dom/Element.cpp:
+        (WebCore::Element::attributes):
+        * dom/NamedNodeMap.cpp:
+        (WebCore::NamedNodeMap::length):
+
 2013-02-15  Kentaro Hara  <haraken@chromium.org>
 
         [V8] An "EvenTarget" type in IDL should be converted to EventTarget*, not to Node*
