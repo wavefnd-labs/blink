@@ -1,3 +1,116 @@
+2013-02-15  Chris Fleizach  <cfleizach@apple.com>
+
+        AX: Split WebAccessibilityObjectWrapper so code can be shared with iOS
+        https://bugs.webkit.org/show_bug.cgi?id=109849
+
+        Reviewed by David Kilzer.
+
+        Split up the WebAccessibilityObjectWrapper so that iOS can share more 
+        code with MacOS. I imagine over time, more code will move into this base class,
+        but for now this will be a good start.
+
+        A base class called WebAccessibilityObjectWrapper now exists, and Mac has a subclass
+        of that. iOS will be able to do the same.
+
+        * WebCore.xcodeproj/project.pbxproj:
+        * accessibility/mac/AXObjectCacheMac.mm:
+        (WebCore::AXObjectCache::attachWrapper):
+        * accessibility/mac/WebAccessibilityObjectWrapper.h:
+        * accessibility/mac/WebAccessibilityObjectWrapper.mm:
+        (-[WebAccessibilityObjectWrapper detach]):
+        (-[WebAccessibilityObjectWrapper attachmentView]):
+        (-[WebAccessibilityObjectWrapper accessibilityObject]):
+        (-[WebAccessibilityObjectWrapper accessibilityPostedNotification:]):
+        (-[WebAccessibilityObjectWrapper titleTagShouldBeUsedInDescriptionField]):
+        (-[WebAccessibilityObjectWrapper accessibilityTitle]):
+        (-[WebAccessibilityObjectWrapper accessibilityDescription]):
+        (-[WebAccessibilityObjectWrapper accessibilityHelpText]):
+        * accessibility/mac/WebAccessibilityObjectWrapperMac.h: Added.
+        * accessibility/mac/WebAccessibilityObjectWrapperMac.mm: Added.
+        (std):
+        (-[WebAccessibilityObjectWrapperMac detach]):
+        (-[WebAccessibilityObjectWrapperMac attachmentView]):
+        (CFAutoreleaseHelper):
+        (AXObjectIsTextMarker):
+        (AXObjectIsTextMarkerRange):
+        (AXTextMarkerRange):
+        (AXTextMarkerRangeStart):
+        (AXTextMarkerRangeEnd):
+        (SearchKeyEntry):
+        (createAccessibilitySearchKeyMap):
+        (accessibilitySearchKeyForString):
+        (textMarkerForVisiblePosition):
+        (-[WebAccessibilityObjectWrapperMac textMarkerForVisiblePosition:]):
+        (visiblePositionForTextMarker):
+        (-[WebAccessibilityObjectWrapperMac visiblePositionForTextMarker:]):
+        (visiblePositionForStartOfTextMarkerRange):
+        (visiblePositionForEndOfTextMarkerRange):
+        (textMarkerRangeFromMarkers):
+        (AXAttributedStringRangeIsValid):
+        (AXAttributeStringSetFont):
+        (CreateCGColorIfDifferent):
+        (AXAttributeStringSetColor):
+        (AXAttributeStringSetNumber):
+        (AXAttributeStringSetStyle):
+        (AXAttributeStringSetBlockquoteLevel):
+        (AXAttributeStringSetSpelling):
+        (AXAttributeStringSetHeadingLevel):
+        (AXAttributeStringSetElement):
+        (AXAttributedStringAppendText):
+        (nsStringForReplacedNode):
+        (-[WebAccessibilityObjectWrapperMac doAXAttributedStringForTextMarkerRange:]):
+        (textMarkerRangeFromVisiblePositions):
+        (-[WebAccessibilityObjectWrapperMac textMarkerRangeFromVisiblePositions:endPosition:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityActionNames]):
+        (-[WebAccessibilityObjectWrapperMac additionalAccessibilityAttributeNames]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityAttributeNames]):
+        (-[WebAccessibilityObjectWrapperMac visiblePositionRangeForTextMarkerRange:]):
+        (-[WebAccessibilityObjectWrapperMac renderWidgetChildren]):
+        (-[WebAccessibilityObjectWrapperMac remoteAccessibilityParentObject]):
+        (convertToVector):
+        (convertToNSArray):
+        (-[WebAccessibilityObjectWrapperMac textMarkerRangeForSelection]):
+        (-[WebAccessibilityObjectWrapperMac position]):
+        (createAccessibilityRoleMap):
+        (roleValueToNSString):
+        (-[WebAccessibilityObjectWrapperMac role]):
+        (-[WebAccessibilityObjectWrapperMac subrole]):
+        (-[WebAccessibilityObjectWrapperMac roleDescription]):
+        (-[WebAccessibilityObjectWrapperMac scrollViewParent]):
+        (-[WebAccessibilityObjectWrapperMac titleTagShouldBeUsedInDescriptionField]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityTitle]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityDescription]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityHelpText]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityAttributeValue:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityFocusedUIElement]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityHitTest:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityIsAttributeSettable:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityIsIgnored]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityParameterizedAttributeNames]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityPerformPressAction]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityPerformIncrementAction]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityPerformDecrementAction]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityPerformShowMenuAction]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityShowContextMenu]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityPerformAction:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilitySetValue:forAttribute:]):
+        (rendererForView):
+        (-[WebAccessibilityObjectWrapperMac _accessibilityParentForSubview:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityActionDescription:]):
+        (-[WebAccessibilityObjectWrapperMac doAXAttributedStringForRange:]):
+        (-[WebAccessibilityObjectWrapperMac _convertToNSRange:]):
+        (-[WebAccessibilityObjectWrapperMac _indexForTextMarker:]):
+        (-[WebAccessibilityObjectWrapperMac _textMarkerForIndex:]):
+        (-[WebAccessibilityObjectWrapperMac doAXRTFForRange:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityAttributeValue:forParameter:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilitySupportsOverriddenAttributes]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityShouldUseUniqueId]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityIndexOfChild:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityArrayAttributeCount:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityArrayAttributeValues:index:maxCount:]):
+        ([WebAccessibilityObjectWrapperMac accessibilitySetShouldRepostNotifications:]):
+        (-[WebAccessibilityObjectWrapperMac accessibilityPostedNotification:]):
+
 2013-02-15  Eric Carlson  <eric.carlson@apple.com>
 
         [Mac] remove wkCaptionAppearance from WebKitSystemInterface
