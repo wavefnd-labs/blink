@@ -1,3 +1,64 @@
+2013-02-15  Elliott Sprehn  <esprehn@chromium.org>
+
+        Rename HasCustomCallbacks to HasCustomStyleCallbacks
+        https://bugs.webkit.org/show_bug.cgi?id=109982
+
+        Reviewed by Eric Seidel.
+
+        Now that inside ChildFrameDisconnector we only call isFrameOwnerElement()
+        on elements that report having descendants (or themselves) have connected
+        frames we don't need to be as agressive about avoiding the virtual call
+        to isFrameOwnerElement() which lets us rename hasCustomCallbacks to
+        hasCustomStyleCallbacks to better reflect it's purpose.
+
+        * dom/ContainerNodeAlgorithms.h:
+        (WebCore::ChildFrameDisconnector::collectFrameOwners):
+        * dom/Element.cpp:
+        (WebCore::Element::styleForRenderer):
+        (WebCore::Element::recalcStyle):
+        (WebCore::Element::willRecalcStyle):
+        (WebCore::Element::didRecalcStyle):
+        (WebCore::Element::customStyleForRenderer):
+        * dom/Node.h:
+        (WebCore::Node::pseudoId):
+        (WebCore::Node::hasCustomStyleCallbacks):
+        (WebCore::Node::customPseudoId):
+        (WebCore::Node::setHasCustomStyleCallbacks):
+        * dom/PseudoElement.cpp:
+        (WebCore::PseudoElement::PseudoElement):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::recalcStyle):
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::HTMLFormControlElement):
+        * html/HTMLFrameOwnerElement.cpp:
+        (WebCore::HTMLFrameOwnerElement::HTMLFrameOwnerElement):
+        (WebCore::HTMLFrameOwnerElement::disconnectContentFrame):
+        * html/HTMLFrameSetElement.cpp:
+        (WebCore::HTMLFrameSetElement::HTMLFrameSetElement):
+        * html/HTMLIFrameElement.cpp:
+        (WebCore::HTMLIFrameElement::HTMLIFrameElement):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::HTMLInputElement):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement):
+        * html/HTMLOptGroupElement.cpp:
+        (WebCore::HTMLOptGroupElement::HTMLOptGroupElement):
+        * html/HTMLOptionElement.cpp:
+        (WebCore::HTMLOptionElement::HTMLOptionElement):
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::HTMLPlugInImageElement):
+        * html/shadow/DateTimeEditElement.cpp:
+        (WebCore::DateTimeEditElement::DateTimeEditElement):
+        * html/shadow/TextControlInnerElements.cpp:
+        (WebCore::TextControlInnerElement::TextControlInnerElement):
+        (WebCore::TextControlInnerTextElement::TextControlInnerTextElement):
+        * html/shadow/TextFieldDecorationElement.cpp:
+        (WebCore::TextFieldDecorationElement::TextFieldDecorationElement):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::SVGElement):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::SVGUseElement):
+
 2013-02-15  Eric Carlson  <eric.carlson@apple.com>
 
         [Mac] remove wkCaptionAppearance from WebKitSystemInterface
