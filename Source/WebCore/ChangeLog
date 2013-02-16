@@ -1,3 +1,35 @@
+2013-02-13  Jer Noble  <jer.noble@apple.com>
+
+        Add a CDMClient class which allows the CDM to query for the currently attached MediaPlayer.
+        https://bugs.webkit.org/show_bug.cgi?id=109702
+
+        Reviewed by Eric Carlson.
+
+        Some CDM implementations will need to work closely with an associated
+        MediaPlayer in order to generate key requests and provide keys. Add a
+        client protocol to be implemented by the MediaKeys object which can
+        provide access to the associated MediaPlayer if present.
+
+        * Modules/encryptedmedia/CDM.cpp:
+        (WebCore::CDM::CDM): Initialize the m_client ivar.
+        (WebCore::CDM::mediaPlayer): Pass to the client, if present.
+        * Modules/encryptedmedia/CDM.h:
+        (WebCore::CDM::client): Simple getter.
+        (WebCore::CDM::setClient): Simple setter.
+        * Modules/encryptedmedia/MediaKeys.cpp:
+        (WebCore::MediaKeys::MediaKeys): Initialize the m_mediaElement ivar
+            and call setClient() on the passed in CDM.
+        (WebCore::MediaKeys::setMediaElement): Simple setter.
+        (WebCore::MediaKeys::cdmMediaPlayer): Retrieve the MediaPlayer from
+            the m_mediaElement if present.
+        * Modules/encryptedmedia/MediaKeys.h:
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::~HTMLMediaElement): Call setMediaKeys(0)
+            to clear the mediaElement in any associated MediaKeys.
+        (WebCore::HTMLMediaElement::setMediaKeys): Clear the mediaElement on
+            any associated MediaKeys, and set the mediaElement on the newly
+            associated MediaKeys.
+
 2013-02-15  Simon Fraser  <simon.fraser@apple.com>
 
         drop-shadow filter with overflow:hidden child misbehaves
