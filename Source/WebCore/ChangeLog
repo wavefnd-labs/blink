@@ -1,3 +1,25 @@
+2013-02-15  Simon Fraser  <simon.fraser@apple.com>
+
+        drop-shadow filter with overflow:hidden child misbehaves
+        https://bugs.webkit.org/show_bug.cgi?id=109783
+
+        Reviewed by Dean Jackson.
+        
+        The change in r112745 was not sufficient; it failed to account
+        for descendant layers that needed to not clipping to avoid artefacts
+        with filters like drop-shadow.
+
+        Test: css3/filters/filter-repaint-shadow-layer-child.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayerContents): Remove the useClipRect bool.
+        Replace it with a clipToDirtyRect member on the LayerPaintingInfo, which
+        gets passed to descendants. Remove some "Restore the clip" comments that added
+        nothing.
+        * rendering/RenderLayer.h:
+        (WebCore::RenderLayer::LayerPaintingInfo::LayerPaintingInfo):
+        (LayerPaintingInfo):
+
 2013-02-15  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r143066.
