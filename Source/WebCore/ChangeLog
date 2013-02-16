@@ -1,3 +1,27 @@
+2013-02-15  Tony Chang  <tony@chromium.org>
+
+        Padding and border changes doesn't trigger relayout of children
+        https://bugs.webkit.org/show_bug.cgi?id=109639
+
+        Reviewed by Kent Tamura.
+
+        In RenderBlock::layoutBlock, we only relayout our children if our logical width
+        changes. This misses cases where our logical width doesn't change (i.e., padding
+        or border changes), but our content width does change.
+
+        Also convert the needsLayout ASSERT into the if statement. This is because
+        RenderScrollbarPart can change border widths and not need a layout if the scrollbar
+        doesn't have a parent. In this case, we don't need to set any children for layout.
+
+        This is a more general case of bug 104997.
+
+        Test: fast/block/dynamic-padding-border.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::borderOrPaddingLogicalWidthChanged): Only check if the logical width changed.
+        (WebCore::RenderBox::styleDidChange): Drop the border-box condition since this can happen
+        even without border-box box sizing.
+
 2013-02-15  Mark Lam  <mark.lam@apple.com>
 
         Split SQLStatement work between the frontend and backend.
