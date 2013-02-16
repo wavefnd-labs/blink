@@ -1,3 +1,87 @@
+2013-02-15  Mark Lam  <mark.lam@apple.com>
+
+        Split SQLStatement work between the frontend and backend.
+        https://bugs.webkit.org/show_bug.cgi?id=104751.
+
+        Reviewed by Geoffrey Garen.
+
+        This is part of the webdatabase refactoring for webkit2.
+
+        1. Copied SQLTransaction to SQLTransactionBackend, and then reduce the
+           2 to only handle frontend and backend work respectively.
+
+        2. Changed how statements are created.
+
+           - SQLTransaction::executeSQL() first creates a SQLStatement frontend
+             which encapsulates the 2 script callbacks. It then passes the
+             SQLStatement to the backend database to create the
+             SQLStatementBackend.
+           - The SQLStatementBackend manages all sqlite work.
+
+        3. Remove the Database::reportExecuteStatementResult() wrapper because
+           it is only needed in the backend now.
+
+        4. Added new files to the build / project files.
+
+        5. Updated / added comments about how the SQLStatement life-cycle works.
+
+        No new tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase/Database.cpp:
+        * Modules/webdatabase/Database.h:
+        (Database):
+        (WebCore::Database::reportCommitTransactionResult):
+        * Modules/webdatabase/DatabaseBackend.h:
+        (DatabaseBackend):
+        * Modules/webdatabase/SQLStatement.cpp:
+        (WebCore::SQLStatement::create):
+        (WebCore::SQLStatement::SQLStatement):
+        (WebCore::SQLStatement::setBackend):
+        (WebCore::SQLStatement::hasCallback):
+        (WebCore::SQLStatement::hasErrorCallback):
+        (WebCore::SQLStatement::performCallback):
+        * Modules/webdatabase/SQLStatement.h:
+        (SQLStatement):
+        * Modules/webdatabase/SQLStatementBackend.cpp: Copied from Source/WebCore/Modules/webdatabase/SQLStatement.cpp.
+        (WebCore::SQLStatementBackend::create):
+        (WebCore::SQLStatementBackend::SQLStatementBackend):
+        (WebCore::SQLStatementBackend::frontend):
+        (WebCore::SQLStatementBackend::sqlError):
+        (WebCore::SQLStatementBackend::sqlResultSet):
+        (WebCore::SQLStatementBackend::execute):
+        (WebCore::SQLStatementBackend::setDatabaseDeletedError):
+        (WebCore::SQLStatementBackend::setVersionMismatchedError):
+        (WebCore::SQLStatementBackend::setFailureDueToQuota):
+        (WebCore::SQLStatementBackend::clearFailureDueToQuota):
+        (WebCore::SQLStatementBackend::lastExecutionFailedDueToQuota):
+        * Modules/webdatabase/SQLStatementBackend.h: Copied from Source/WebCore/Modules/webdatabase/SQLStatement.h.
+        (SQLStatementBackend):
+        (WebCore::SQLStatementBackend::hasStatementCallback):
+        (WebCore::SQLStatementBackend::hasStatementErrorCallback):
+        * Modules/webdatabase/SQLTransaction.cpp:
+        (WebCore::SQLTransaction::deliverStatementCallback):
+        (WebCore::SQLTransaction::deliverQuotaIncreaseCallback):
+        (WebCore::SQLTransaction::executeSQL):
+        * Modules/webdatabase/SQLTransactionBackend.cpp:
+        (WebCore::SQLTransactionBackend::doCleanup):
+        (WebCore::SQLTransactionBackend::currentStatement):
+        (WebCore::SQLTransactionBackend::enqueueStatementBackend):
+        (WebCore::SQLTransactionBackend::executeSQL):
+        (WebCore::SQLTransactionBackend::runStatements):
+        (WebCore::SQLTransactionBackend::getNextStatement):
+        (WebCore::SQLTransactionBackend::runCurrentStatementAndGetNextState):
+        (WebCore::SQLTransactionBackend::nextStateForCurrentStatementError):
+        * Modules/webdatabase/SQLTransactionBackend.h:
+        (SQLTransactionBackend):
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+
 2013-02-15  Elliott Sprehn  <esprehn@chromium.org>
 
         Rename HasCustomCallbacks to HasCustomStyleCallbacks
