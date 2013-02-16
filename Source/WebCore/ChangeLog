@@ -1,3 +1,22 @@
+2013-02-15  Simon Fraser  <simon.fraser@apple.com>
+
+        Constrain fixed layers to the viewport, not the document
+        https://bugs.webkit.org/show_bug.cgi?id=109646
+
+        Reviewed by Beth Dakin.
+        
+        It's bad to constrain position:fixed compositing layers to the
+        document rect, because their bounds will change every time the scroll
+        position changes, and we're not good currently at synchronizing scrolling
+        thread layer updates with main thread layer updates, so jiggles ensue.
+        
+        Fix by constraining position:fixed layers to the viewport.
+
+        Test: compositing/geometry/limit-layer-bounds-fixed.html
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateCompositedBounds):
+
 2013-02-13  Jer Noble  <jer.noble@apple.com>
 
         Add a CDMClient class which allows the CDM to query for the currently attached MediaPlayer.
