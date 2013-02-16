@@ -1,3 +1,36 @@
+2013-02-16  Robert Hogan  <robert@webkit.org>
+
+        percentage top value of position:relative element not calculated using parent's min-height unless height set
+        https://bugs.webkit.org/show_bug.cgi?id=14762
+
+        Reviewed by Julien Chaffraix.
+
+        Percentage height "is calculated with respect to the height of the generated box's containing block" says  
+        http://www.w3.org/TR/CSS21/visudet.html#the-height-property and "If the height of the containing block is not 
+        specified explicitly (i.e., it depends on content height), and this element is not absolutely positioned, the
+        value computes to 'auto'." So when calculating the used height of a replaced element do not crawl through ancestor 
+        blocks except when traversing anonymous blocks. Ensure that anonymous table cells are not skipped through though.
+
+        http://www.w3.org/TR/CSS21/tables.html#height-layout adds "In CSS 2.1, the height of a cell box is the minimum 
+        height required by the content." This height is decided by allowing table cells to report their height as auto.
+        It's not clear why http://trac.webkit.org/changeset/91242 decided it should no longer do this - doing so caused
+        us to regress in our rendering of computed-image-width-with-percent-height-inside-table-cell-and-fixed-ancestor.html.
+
+        Tests: fast/block/percent-top-parent-respects-min-height.html
+               fast/replaced/computed-image-width-with-percent-height-and-fixed-ancestor-vertical-lr.html
+               fast/replaced/computed-image-width-with-percent-height-and-fixed-ancestor.html
+               fast/replaced/computed-image-width-with-percent-height-inside-table-cell-and-fixed-ancestor-vertical-lr.html
+               fast/replaced/computed-image-width-with-percent-height-inside-table-cell-and-fixed-ancestor.html
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::hasAutoHeightOrContainingBlockWithAutoHeight):
+        (WebCore):
+        (WebCore::RenderBoxModelObject::relativePositionOffset):
+        * rendering/RenderBoxModelObject.h:
+        (RenderBoxModelObject):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::hasReplacedLogicalHeight):
+
 2013-02-16  Stephen White  <senorblanco@chromium.org>
 
         [skia] FEOffset should have a Skia implementation.
