@@ -1,3 +1,57 @@
+2013-02-16  Andreas Kling  <akling@apple.com>
+
+        Element: Avoid unrelated attribute synchronization on other attribute access.
+        <http://webkit.org/b/110025>
+
+        Reviewed by Darin Adler.
+
+        We've been extremely trigger happy with re-serializing the style attribute (and SVG animatables)
+        whenever any Element attribute API was used. This patch narrows this down to (almost always)
+        only synchronizing an attribute when someone specifically wants to read/update it.
+
+        Also removed two more confusing ElementData accessors:
+
+            - Element::elementDataWithSynchronizedAttributes()
+            - Element::ensureElementDataWithSynchronizedAttributes()
+
+        * dom/Element.h:
+        * dom/Element.cpp:
+        (WebCore::Element::hasAttributes):
+        (WebCore::Element::hasEquivalentAttributes):
+        (WebCore::Element::cloneAttributesFromElement):
+        (WebCore::Element::synchronizeAllAttributes):
+
+            Renamed updateInvalidAttributes() to synchronizeAllAttributes().
+            This function should only be used when we need every single attribute to be up-to-date.
+
+        (WebCore::Element::synchronizeAttribute):
+
+            Broke out logic for synchronizing a specific attribute, given either a full QualifiedName
+            or a localName.
+
+        (WebCore::Element::setSynchronizedLazyAttribute):
+
+            Don't call ensureUniqueElementData() indisciminately here. This avoids converting the attribute
+            storage when re-serializing the inline style yields the same CSS text that was already in the
+            style attribute.
+
+        (WebCore::Element::hasAttribute):
+        (WebCore::Element::hasAttributeNS):
+        (WebCore::Element::getAttribute):
+        (WebCore::Element::getAttributeNode):
+        (WebCore::Element::getAttributeNodeNS):
+        (WebCore::Element::setAttribute):
+        (WebCore::Element::setAttributeNode):
+        (WebCore::Element::removeAttributeNode):
+
+            Only synchronize the attribute in question.
+
+        * dom/Node.cpp:
+        (WebCore::Node::compareDocumentPosition):
+
+            Call synchronizeAllAttributes() when comparing two Attr nodes on the same Element instead
+            of relying on the side-effects of another function doing this.
+
 2013-02-16  Seokju Kwon  <seokju.kwon@gmail.com>
 
         Fix build warnings after r139853
