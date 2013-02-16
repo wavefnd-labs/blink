@@ -1,5 +1,31 @@
 2013-02-15  Simon Fraser  <simon.fraser@apple.com>
 
+        REGRESSION (r142505?): Crashes in WebCore::ScrollingStateNode::appendChild when using back/forward buttons
+        https://bugs.webkit.org/show_bug.cgi?id=109826
+        <rdar://problem/13216100>
+
+        Reviewed by Beth Dakin.
+
+        Fix a crash when going Back on some pages with fixed position elements.
+        
+        When a page was being restored from the page cache, and a layout from
+        FrameLoader::commitProvisionalLoad() caused us to try to register the fixed
+        position layer before the main scrolling layer, we'd crash trying to dereference
+        the root node.
+        
+        Fix by bailing from ScrollingStateTree::attachNode() if we can't find the parent
+        node.
+
+        Test: platform/mac-wk2/tiled-drawing/null-parent-back-crash.html
+
+        * page/scrolling/ScrollingStateTree.cpp:
+        (WebCore::ScrollingStateTree::attachNode):
+        (WebCore::ScrollingStateTree::stateNodeForID):
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::updateViewportConstrainedNode):
+
+2013-02-15  Simon Fraser  <simon.fraser@apple.com>
+
         Constrain fixed layers to the viewport, not the document
         https://bugs.webkit.org/show_bug.cgi?id=109646
 
