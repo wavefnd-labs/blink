@@ -1,3 +1,59 @@
+2013-02-17  Andreas Kling  <akling@apple.com>
+
+        Optimize GlyphPage for case where all glyphs are available in the same font.
+        <http://webkit.org/b/108835>
+        <rdar://problem/13157042>
+
+        Reviewed by Antti Koivisto.
+
+        Let GlyphPage begin optimistically assuming that all its glyphs will be represented in
+        the same SimpleFontData*. In this (very common) case, only keep a single SimpleFontData*.
+
+        If glyphs from multiple fonts are mixed in one page, an array of per-glyph SimpleFontData*
+        is allocated transparently.
+
+        This was landed before with some bogus branch prediction hints and didn't fare well on
+        page cyclers (intl2 specifically.) These have been removed this time around, and will
+        hopefully be regression-free.
+
+        4.98 MB progression on Membuster3.
+
+        * platform/graphics/GlyphPageTreeNode.cpp:
+        (WebCore::GlyphPageTreeNode::initializePage):
+        * platform/graphics/GlyphPage.h:
+        (WebCore::GlyphPage::createUninitialized):
+        (WebCore::GlyphPage::createZeroedSystemFallbackPage):
+        (WebCore::GlyphPage::createCopiedSystemFallbackPage):
+
+            There are now three ways of constructing a GlyphPage, two of them are only used for
+            creating system fallback pages.
+
+        (WebCore::GlyphPage::setGlyphDataForIndex):
+
+            Hold off creating a SimpleFontData* array until we're sure there are two different
+            SimpleFontData* backing the glyphs in this page.
+            We don't store font data for glyph #0, instead we let the getters always return null for it.
+
+        (WebCore::GlyphPage::~GlyphPage):
+
+            Free the SimpleFontData* array if needed.
+
+        (WebCore::GlyphPage::glyphDataForCharacter):
+        (WebCore::GlyphPage::glyphDataForIndex):
+        (WebCore::GlyphPage::fontDataForCharacter):
+
+            The font data for glyph #0 is always a null pointer now.
+
+        (WebCore::GlyphPage::clearForFontData):
+
+            Updated for new storage format.
+
+        * rendering/svg/SVGTextRunRenderingContext.cpp:
+        (WebCore::SVGTextRunRenderingContext::glyphDataForCharacter):
+
+            Fix bug where non-zero glyph was temporarily associated with null font data,
+            which triggered the new assertion in setGlyphDataForIndex().
+
 2013-02-16  Andreas Kling  <akling@apple.com>
 
         Remove multi-threading gunk from WebKit2's PluginInfoStore.
