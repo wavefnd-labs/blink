@@ -1,3 +1,23 @@
+2013-02-17  Andreas Kling  <akling@apple.com>
+
+        REGRESSION(r143125): ~5% performance hit on Chromium's intl2 page cycler.
+        <http://webkit.org/b/108835>
+
+        Reviewed by Ojan Vafai.
+
+        Streamline the case where GlyphPage has a per-glyph SimpleFontData* lookup table to allow
+        taking earlier branches on pages with lots of mixed-font text.
+        We accomplish this by explicitly storing a null SimpleFontData* for glyph #0 in the per-glyph
+        lookup table instead of relying on "if (!glyph)" checks in getters.
+
+        This is a speculative optimization, I can't get stable enough numbers locally to tell if this
+        will resolve the issue on the bots.
+
+        * platform/graphics/GlyphPage.h:
+        (WebCore::GlyphPage::glyphDataForIndex):
+        (WebCore::GlyphPage::fontDataForCharacter):
+        (WebCore::GlyphPage::setGlyphDataForIndex):
+
 2013-02-17  Chris Fleizach  <cfleizach@apple.com>
 
         WebSpeech: plumb through a method to generate fake speech jobs for testing
