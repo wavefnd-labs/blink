@@ -1,3 +1,21 @@
+2013-02-17  Chris Fleizach  <cfleizach@apple.com>
+
+        WebSpeech: plumb through a method to generate fake speech jobs for testing
+        https://bugs.webkit.org/show_bug.cgi?id=107351
+
+        Reviewed by Adam Barth.
+
+        We can't reliably use the platforms synthesizer to test speech synthesis internals.
+        This patch adds an Internals method to enable a mock synthesizer, which is inherits
+        from the PlatformSpeechSythesizer.
+
+        The fake synthesizer goes through all the motions of a real synthesizer but doesn't do anything.
+        A bunch of changes were needed here to make PlatformSpeechSynthesizer subclassable so that the
+        right virtual are used.
+
+        The Mock synthesizer only lives in WebCoreTestSupport. Because PlatformSpeechSynthesizer uses
+        a RetainPtr, I needed to make WebCoreTestSupport link CoreFoundation
+
 2013-02-17  Csaba Osztrogonác  <ossy@webkit.org>
 
         [Qt] Unreviewed buildfix for !USE(LIBXML) builds after r143112.
