@@ -1,3 +1,26 @@
+2013-02-17  Philip Rogers  <pdr@google.com>
+
+        Fix non-root SVG viewport under zoom
+        https://bugs.webkit.org/show_bug.cgi?id=99453
+
+        Reviewed by Dirk Schulze.
+
+        The root SVG element handles zoom differently than other SVG nodes because it needs
+        to translate between CSS (where zoom is applied to all units) and SVG (where zoom is only
+        applied at the top level). A good description of this difference can be found here:
+        http://trac.webkit.org/browser/trunk/Source/WebCore/css/StyleResolver.cpp?rev=142855#L2598
+
+        SVG elements can appear as children in the SVG tree as well, and in this mode
+        SVGSVGElement should not consider the current zoom level. This patch fixes a bug
+        where non-root viewport calculations were removing zoom.
+
+        Test: svg/custom/symbol-zoom.html
+
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::currentViewportSize):
+            This change removes the unnecessary zoom calculation for non-root nodes. This is similar
+            to how zoom is handled elsewhere, e.g., SVGSVGElement::localCoordinateSpaceTransform.
+
 2013-02-17  Chris Fleizach  <cfleizach@apple.com>
 
         AX: Upstream iOS Accessibility files
