@@ -1,3 +1,22 @@
+2013-02-18  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        [Soup] CookieJarSoup::deleteCookie() should stop looking for the cookie after it is removed
+        https://bugs.webkit.org/show_bug.cgi?id=110100
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        CookieJarSoup::deleteCookie() retrieves the list of cookies that apply to a given URL, then
+        iterates through the cookies to find the one with the right name and delete it. However, the
+        current implementation keeps on comparing cookie names after the cookie was removed. This
+        patch introduces a "wasDeleted" boolean to stop comparing cookie names after the cookie was
+        deleted. Note that we cannot break as soon as the cookie is found as we need to keep iterating
+        so that the cookies get freed by GOwnPtr.
+
+        No new tests, no behavior change.
+
+        * platform/network/soup/CookieJarSoup.cpp:
+        (WebCore::deleteCookie):
+
 2013-02-18  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: Create separate project for each domain for UISourceCode based on browser resources.
