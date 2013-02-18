@@ -1,3 +1,26 @@
+2013-02-18  Stephen Chenney  <schenney@chromium.org>
+
+        feFlood incorrectly applied color-interpolation-filters
+        https://bugs.webkit.org/show_bug.cgi?id=109985
+
+        Reviewed by Dirk Schulze.
+
+        The SVG spec defines the color-interpolation-filters property for all
+        filter effect elements in order to control cases where a color is
+        based on some arithmetic computation on other colors. For example,
+        when computing gradients or blending colors. feFlood simply fills a
+        region with the given color, and that given color is always defined to
+        be in sRGB space, so the feFlood result should always be sRGB.
+
+        The new behavior matches both Opera and Firefox.
+
+        Tests: svg/filters/feFlood-color-interpolation-expected.svg
+               svg/filters/feFlood-color-interpolation.svg
+
+        * platform/graphics/filters/FEFlood.cpp:
+        (WebCore::FEFlood::platformApplySoftware): Force the color mode to be
+        sRGB before returning.
+
 2013-02-18  Mark Lam  <mark.lam@apple.com>
 
         Introduced AbstractSQLStatement and AbstractSQLStatementBackend.
