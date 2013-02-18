@@ -1,3 +1,47 @@
+2013-02-18  Jer Noble  <jer.noble@apple.com>
+
+        EME: Add a CDMPrivate implementation using AVFoundation.
+        https://bugs.webkit.org/show_bug.cgi?id=109739
+
+        Reviewed by Eric Carlson.
+
+        Add a CDMPrivate implementation using AVFoundation, similar to the EME v1 implementation
+        in MediaPlayerPrivateAVFoundationObjC. This requires passing the AVAssetResourceLoadingRequest
+        from the MediaPlayerPrivateAVFoundationObjC instance to CDMSessionAVFoundation. To do so
+        without adding platform-specific API to MediaPlayer, add a static map from MediaPlayer ->
+        MediaPlayerPrivateAVFoundationObjC instances to be used to vend the AVAssetResourceLoadingRequest
+        to CDMSessionAVFoundation.
+
+        * Modules/encryptedmedia/CDM.cpp:
+        (WebCore::installedCDMFactories): Add the factory for CDMPrivateAVFoundation.
+        * Modules/encryptedmedia/CDM.h:
+        * Modules/encryptedmedia/CDMPrivateAVFoundation.h: Added.
+        (WebCore::CDMPrivateAVFoundation::create): Simple factory method.
+        (WebCore::CDMPrivateAVFoundation::~CDMPrivateAVFoundation): Simple virtual destructor.
+        (WebCore::CDMPrivateAVFoundation::cdm): Simple getter.
+        (WebCore::CDMPrivateAVFoundation::CDMPrivateAVFoundation): Simple constructor.
+        * Modules/encryptedmedia/CDMPrivateAVFoundation.mm: Added.
+        (WebCore::CDMSessionAVFoundation::~CDMSessionAVFoundation): Simple destructor.
+        (WebCore::CDMPrivateAVFoundation::supportsKeySytem): Check whether the given key system is supported.
+        (WebCore::CDMPrivateAVFoundation::supportsMIMEType): Check whether the given MIME type is supported.
+        (WebCore::CDMPrivateAVFoundation::createSession): Return a new CDMSessionAVFoundation.
+        (WebCore::CDMSessionAVFoundation::CDMSessionAVFoundation): Simple constructor.
+        (WebCore::CDMSessionAVFoundation::generateKeyRequest): Retrieve the AVAssetResourceLoadingRequest
+            from the MediaPlayer, and use it to generate a key request.
+        (WebCore::CDMSessionAVFoundation::releaseKeys): No-op.
+        (WebCore::CDMSessionAVFoundation::update): Add the passed in key to the AVAssetResourceLoadingRequest.
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.h:
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm:
+        (WebCore::playerToPrivateMap): Lazily instantiate static map.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::MediaPlayerPrivateAVFoundationObjC): Register with the playerToPrivateMap.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::~MediaPlayerPrivateAVFoundationObjC): Unregister from same.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::shouldWaitForLoadingOfResource): Also send keyNeeded event in ENCRYPTED_MEDIA_V2.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::extractKeyURIKeyIDAndCertificateFromInitData): Convert this 
+            method from file-static to class static.
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::takeRequestForPlayerAndKeyURI): Pull the AVAssetResourceLoadingRequest
+            from m_keyURIToRequestMap and return it, if present.
+
 2013-02-18  Philip Rogers  <pdr@google.com>
 
         Fix scaling of tiled SVG backgrounds on high-dpi displays
