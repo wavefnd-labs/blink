@@ -1,3 +1,75 @@
+2013-02-17  Mark Lam  <mark.lam@apple.com>
+
+        Fix SQLTransaction leak.
+        https://bugs.webkit.org/show_bug.cgi?id=110052.
+
+        Reviewed by Geoffrey Garen.
+
+        With https://bugs.webkit.org/show_bug.cgi?id=104750, there is now a circular
+        reference between SQLTransaction and its backend. The clean up process needs
+        to be fixed to explicitly break this reference cycle.
+
+        The 5 phases of the SQLTransaction (and backend) phases and their clean up
+        actions are:
+
+        Phase 1. After Birth, before scheduling
+        - During shutdown, DatabaseThread::databaseThread() calls
+          DatabaseBackendAsync::close(). DatabaseBackendAsync::close() iterates
+          DatabaseBackendAsync::m_transactionQueue and calls
+          SQLtransactionBackend::notifyDatabaseThreadIsShuttingDown() on each
+          transaction there.
+
+        Phase 2. After scheduling, before state AcquireLock
+        - ~DatabaseTask() calls SQLtransactionBackend's
+          notifyDatabaseThreadIsShuttingDown().
+
+        Phase 3. After state AcquireLock, before "lockAcquired"
+        - During shutdown, DatabaseThread::databaseThread() calls
+          SQLTransactionCoordinator::shutdown(), which calls
+          SQLTransactionBackend::notifyDatabaseThreadIsShuttingDown().
+
+        Phase 4: After "lockAcquired", before state CleanupAndTerminate
+        - Same as Phase 3.
+
+        Phase 5: After state CleanupAndTerminate
+        - state CleanupAndTerminate calls SQLTransactionBackend::doCleanup().
+
+        See comment at the top of SQLTransactionBackend.cpp for more details.
+
+        Other supporting changes:
+        - Moved Database::close() to the DatabaseBackendAsync.
+        - Moved the "if already cleaned up" check from SQLTransactionBackend's
+          notifyDatabaseThreadIsShuttingDown() to doCleanup().
+        - Added a check to prevent SQLTransactionCoordinator's releaseLock()
+          from running when it's shutting down.
+
+        No new tests.
+
+        * Modules/webdatabase/Database.cpp:
+        * Modules/webdatabase/Database.h:
+        * Modules/webdatabase/DatabaseBackendAsync.cpp:
+        (WebCore::DatabaseBackendAsync::close): Move from Database.cpp.
+        * Modules/webdatabase/DatabaseBackendAsync.h:
+        * Modules/webdatabase/DatabaseTask.cpp:
+        (WebCore::DatabaseBackendAsync::DatabaseTransactionTask::DatabaseTransactionTask):
+        (WebCore::DatabaseBackendAsync::DatabaseTransactionTask::~DatabaseTransactionTask):
+        (WebCore::DatabaseBackendAsync::DatabaseTransactionTask::doPerformTask):
+        * Modules/webdatabase/DatabaseTask.h:
+        (DatabaseBackendAsync::DatabaseTransactionTask):
+        * Modules/webdatabase/DatabaseThread.cpp:
+        (WebCore::DatabaseThread::databaseThread):
+        * Modules/webdatabase/SQLTransactionBackend.cpp:
+        (WebCore::SQLTransactionBackend::doCleanup):
+        (WebCore::SQLTransactionBackend::notifyDatabaseThreadIsShuttingDown):
+        (WebCore::SQLTransactionBackend::cleanupAndTerminate):
+        * Modules/webdatabase/SQLTransactionCoordinator.cpp:
+        (WebCore::SQLTransactionCoordinator::SQLTransactionCoordinator):
+        (WebCore::SQLTransactionCoordinator::acquireLock):
+        (WebCore::SQLTransactionCoordinator::releaseLock):
+        (WebCore::SQLTransactionCoordinator::shutdown):
+        * Modules/webdatabase/SQLTransactionCoordinator.h:
+        (SQLTransactionCoordinator):
+
 2013-02-18  David Kilzer  <ddkilzer@apple.com>
 
         Fix WebCore Xcode project
