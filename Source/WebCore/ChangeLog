@@ -1,3 +1,28 @@
+2013-02-18  Mike West  <mkwst@chromium.org>
+
+        compareDocumentPosition reports disconnected nodes as following each other
+        https://bugs.webkit.org/show_bug.cgi?id=108274
+
+        Reviewed by Dimitri Glazkov.
+
+        jQuery has had to implement their own sorting mechanism in Sizzle[1] due
+        to Node::compareDocumentPosition always reporting disconnected nodes
+        as following each other. According to spec[2], we should instead be
+        indicating that the result is (a) disconnected, (b) implementation
+        specific, and (c) deterministically ordered.
+
+        [1]: https://github.com/jquery/sizzle/commit/1c8aec91284af8d8c14447976235d5dd72b0d75e
+        [2]: http://dom.spec.whatwg.org/#dom-node-comparedocumentposition
+
+        Test: fast/dom/compare-document-position-disconnected-nodes.html
+
+        * dom/Node.cpp:
+        (WebCore::Node::compareDocumentPosition):
+            After walking the parentNode chain of both Nodes, compare the root.
+            If the Nodes don't share a root, they're in distinct trees, and
+            should return as described above. We determine which element
+            "preceeds" the other in an arbitrary fashion via pointer comparison.
+
 2013-02-18  Andrey Adaikin  <aandrey@chromium.org>
 
         Web Inspector: [Canvas] fix replay log grouping by frames
