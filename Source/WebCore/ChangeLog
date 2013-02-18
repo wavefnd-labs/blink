@@ -1,3 +1,80 @@
+2013-02-18  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [WebGL][EFL] Refactor GraphicsContext3DPrivate to add support for SharedContext.
+        https://bugs.webkit.org/show_bug.cgi?id=109988
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Covered by existing WebGL tests.
+
+        This patch refactors PlatformContext and GraphicsContext3DPrivate to
+        add support for Shared Context. This would help share GL resources
+        between transport surface and offscreen surface without having to worry
+        about the context state. So far, we used the same drawable as transport
+        surface and offscreen surface. After this patch we use pixmap surface as
+        offscreen surface and use shared context to render texture content to
+        transport surface. This would also align as to how shared surface is implemented
+        on EFL and Qt ports.
+
+        * platform/graphics/efl/GraphicsContext3DEfl.cpp:
+        (WebCore::GraphicsContext3D::GraphicsContext3D):
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::GraphicsContext3DPrivate):
+        (WebCore):
+        (WebCore::GraphicsContext3DPrivate::initialize):
+        (WebCore::GraphicsContext3DPrivate::makeSharedContextCurrent):
+        (WebCore::GraphicsContext3DPrivate::copyToGraphicsSurface):
+        * platform/graphics/efl/GraphicsContext3DPrivate.h:
+        (GraphicsContext3DPrivate):
+        * platform/graphics/opengl/GLPlatformContext.cpp:
+        (WebCore::GLPlatformContext::initialize):
+        * platform/graphics/opengl/GLPlatformContext.h:
+        Needed changes to take shared context into use.
+
+        * platform/graphics/opengl/GLPlatformSurface.cpp:
+        (WebCore::GLPlatformSurface::createOffScreenSurface):
+        (WebCore::GLPlatformSurface::updateContents):
+        * platform/graphics/opengl/GLPlatformSurface.h:
+        (GLPlatformSurface):
+        * platform/graphics/surfaces/glx/GLXConfigSelector.h:
+        (WebCore::GLXConfigSelector::GLXConfigSelector):
+        (WebCore::GLXConfigSelector::visualInfo):
+        (WebCore::GLXConfigSelector::pixmapContextConfig):
+        (GLXConfigSelector):
+        (WebCore::GLXConfigSelector::reset):
+        * platform/graphics/surfaces/glx/GLXContext.cpp:
+        Added support to query configiration supporting
+        pixmap surface.
+
+        (WebCore::GLXOffScreenContext::initialize):
+        * platform/graphics/surfaces/glx/GLXContext.h:
+        (GLXOffScreenContext):
+        * platform/graphics/surfaces/glx/GLXSurface.cpp:
+        (WebCore::GLXTransportSurface::GLXTransportSurface):
+        (WebCore::GLXTransportSurface::swapBuffers):
+        (WebCore::GLXOffScreenSurface::GLXOffScreenSurface):
+        (WebCore::GLXOffScreenSurface::~GLXOffScreenSurface):
+        (WebCore::GLXOffScreenSurface::initialize):
+        (WebCore::GLXOffScreenSurface::configuration):
+        (WebCore::GLXOffScreenSurface::destroy):
+        (WebCore::GLXOffScreenSurface::freeResources):
+        (WebCore::GLXOffScreenSurface::setGeometry):
+        Renamed GLXPBuffer surface as GLXOffScreenSurface.
+
+        * platform/graphics/surfaces/glx/GLXSurface.h:
+        (GLXTransportSurface):
+        (GLXOffScreenSurface):
+        * platform/graphics/surfaces/glx/GraphicsSurfaceGLX.cpp:
+        (WebCore::GraphicsSurfacePrivate::createSurface):
+        * platform/graphics/surfaces/glx/X11Helper.cpp:
+        (WebCore::X11Helper::createPixmap):
+        (WebCore):
+        (WebCore::X11Helper::destroyPixmap):
+        (WebCore::X11Helper::createOffScreenWindow):
+        * platform/graphics/surfaces/glx/X11Helper.h:
+        (X11Helper):
+        Added functions to create and destroy pixmap.
+
 2013-02-18  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: Native Memory Instrumentation: Generate meta information for HeapSnapshot parser.
