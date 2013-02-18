@@ -1,3 +1,24 @@
+2013-02-18  Huang Dongsung  <luxtella@company100.net>
+
+        [EFL][WK2] compositing/layer-creation/fixed-position-out-of-view-scaled.html is flaky
+        https://bugs.webkit.org/show_bug.cgi?id=110059
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Remove the ASSERT check in TextureMapperLayer. This assertion seems
+        valid because CoordinatedGraphicsScene::adjustPositionForFixedLayers() calls
+        TextureMapperLayer::setScrollPositionDeltaIfNeeded() when the graphics
+        layer is a fixed position layer. However, the assertion can be failed
+        because it is possible that TextureMapperLayer is a non-fixed position
+        layer when the graphics layer that holds the TextureMapperLayer is a
+        fixed position layer. When CoordinatedGraphicsScene flushes,
+        TextureMapperLayer becomes a fixed position layer.
+
+        No new tests. No change in behavior.
+
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::setScrollPositionDeltaIfNeeded):
+
 2013-02-18  Grzegorz Czajkowski  <g.czajkowski@samsung.com>
 
         [WK2][EFL] Unified text checker implementation
