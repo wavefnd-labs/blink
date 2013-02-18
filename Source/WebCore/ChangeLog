@@ -1,3 +1,29 @@
+2013-02-18  Philip Rogers  <pdr@google.com>
+
+        Fix scaling of tiled SVG backgrounds on high-dpi displays
+        https://bugs.webkit.org/show_bug.cgi?id=110047
+
+        Reviewed by Dirk Schulze.
+
+        This patch fixes the scaling of SVG when used for drawing patterns. Tiled/patterend SVG
+        images are first drawn into an image buffer and then the image buffer is used to stamp
+        out tiles. Because it is a raster source, the size of the image buffer needs to
+        be scaled to the final resolution of the device. After scaling the image buffer, the
+        source rect and pattern transforms need to be adjusted so they align in device pixel
+        coordinates. This adjustment was not done before this patch, causing pixelated rendering.
+
+        Additionally, a FIXME has been added due to webkit.org/b/110065 and the image buffer
+        has been manually scaled (using "zoomedAndScaledContainerRect") instead of relying
+        on the ImageBuffer's resolutionScale parameter.
+
+        Test: svg/as-background-image/tiled-background-image.html
+
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::drawPatternForContainer):
+
+            Note that fixing the FIXME does not change that the source rect and transform need
+            to be adjusted for page scale.
+
 2013-02-18  David Hyatt  <hyatt@apple.com>
 
         Make seamless iframes paginate properly in their enclosing document's pagination context.
