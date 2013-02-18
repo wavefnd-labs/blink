@@ -32,10 +32,10 @@
  * @constructor
  * @param {WebInspector.Workspace} workspace
  */
-WebInspector.IsolatedFileSystemModel = function(workspace)
+WebInspector.IsolatedFileSystemManager = function(workspace)
 {
     this._workspace = workspace;
-    /** @type {!Object.<string, WebInspector.IsolatedFileSystemModel.FileSystem>} */
+    /** @type {!Object.<string, WebInspector.IsolatedFileSystemManager.FileSystem>} */
     this._fileSystems = {};
     /** @type {Object.<string, Array.<function(DOMFileSystem)>>} */
     this._pendingFileSystemRequests = {};
@@ -46,9 +46,9 @@ WebInspector.IsolatedFileSystemModel = function(workspace)
 }
 
 /** @typedef {{fileSystemName: string, rootURL: string, fileSystemPath: string}} */
-WebInspector.IsolatedFileSystemModel.FileSystem;
+WebInspector.IsolatedFileSystemManager.FileSystem;
 
-WebInspector.IsolatedFileSystemModel.prototype = {
+WebInspector.IsolatedFileSystemManager.prototype = {
     /**
      * @return {WebInspector.FileSystemMapping}
      */
@@ -90,7 +90,7 @@ WebInspector.IsolatedFileSystemModel.prototype = {
     },
 
     /**
-     * @param {Array.<WebInspector.IsolatedFileSystemModel.FileSystem>} fileSystems
+     * @param {Array.<WebInspector.IsolatedFileSystemManager.FileSystem>} fileSystems
      */
     _fileSystemsLoaded: function(fileSystems)
     {
@@ -101,7 +101,7 @@ WebInspector.IsolatedFileSystemModel.prototype = {
     },
 
     /**
-     * @param {WebInspector.IsolatedFileSystemModel.FileSystem} fileSystem
+     * @param {WebInspector.IsolatedFileSystemManager.FileSystem} fileSystem
      */
     _innerAddFileSystem: function(fileSystem)
     {
@@ -109,7 +109,8 @@ WebInspector.IsolatedFileSystemModel.prototype = {
         this._fileSystems[fileSystemPath] = fileSystem;
         var fileSystemId = this._fileSystemMapping.addFileSystemMapping(fileSystemPath);
         console.assert(!this._workspace.project(fileSystemId));
-        this._workspace.addProject(new WebInspector.FileSystemProjectDelegate(this, fileSystemId, fileSystemPath));
+        var isolatedFileSystem = new WebInspector.IsolatedFileSystem(this, fileSystemId, fileSystemPath);
+        this._workspace.addProject(new WebInspector.FileSystemProjectDelegate(isolatedFileSystem));
     },
 
     /**
@@ -132,7 +133,7 @@ WebInspector.IsolatedFileSystemModel.prototype = {
 
     /**
      * @param {string} errorMessage
-     * @param {WebInspector.IsolatedFileSystemModel.FileSystem} fileSystem
+     * @param {WebInspector.IsolatedFileSystemManager.FileSystem} fileSystem
      */
     _fileSystemAdded: function(errorMessage, fileSystem)
     {
@@ -197,26 +198,26 @@ WebInspector.IsolatedFileSystemModel.prototype = {
 }
 
 /**
- * @type {?WebInspector.IsolatedFileSystemModel}
+ * @type {?WebInspector.IsolatedFileSystemManager}
  */
-WebInspector.isolatedFileSystemModel = null;
+WebInspector.isolatedFileSystemManager = null;
 
 /**
  * @constructor
- * @param {WebInspector.IsolatedFileSystemModel} isolatedFileSystemModel
+ * @param {WebInspector.IsolatedFileSystemManager} IsolatedFileSystemManager
  */
-WebInspector.IsolatedFileSystemDispatcher = function(isolatedFileSystemModel)
+WebInspector.IsolatedFileSystemDispatcher = function(IsolatedFileSystemManager)
 {
-    this._isolatedFileSystemModel = isolatedFileSystemModel;
+    this._IsolatedFileSystemManager = IsolatedFileSystemManager;
 }
 
 WebInspector.IsolatedFileSystemDispatcher.prototype = {
     /**
-     * @param {Array.<WebInspector.IsolatedFileSystemModel.FileSystem>} fileSystems
+     * @param {Array.<WebInspector.IsolatedFileSystemManager.FileSystem>} fileSystems
      */
     fileSystemsLoaded: function(fileSystems)
     {
-        this._isolatedFileSystemModel._fileSystemsLoaded(fileSystems);
+        this._IsolatedFileSystemManager._fileSystemsLoaded(fileSystems);
     },
 
     /**
@@ -224,16 +225,16 @@ WebInspector.IsolatedFileSystemDispatcher.prototype = {
      */
     fileSystemRemoved: function(fileSystemPath)
     {
-        this._isolatedFileSystemModel._fileSystemRemoved(fileSystemPath);
+        this._IsolatedFileSystemManager._fileSystemRemoved(fileSystemPath);
     },
 
     /**
      * @param {string} errorMessage
-     * @param {WebInspector.IsolatedFileSystemModel.FileSystem} fileSystem
+     * @param {WebInspector.IsolatedFileSystemManager.FileSystem} fileSystem
      */
     fileSystemAdded: function(errorMessage, fileSystem)
     {
-        this._isolatedFileSystemModel._fileSystemAdded(errorMessage, fileSystem);
+        this._IsolatedFileSystemManager._fileSystemAdded(errorMessage, fileSystem);
     }
 }
 
