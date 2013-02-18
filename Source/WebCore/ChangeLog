@@ -1,3 +1,55 @@
+2013-02-18  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Refactor grid position resolution code to support an internal grid representation
+        https://bugs.webkit.org/show_bug.cgi?id=109718
+
+        Reviewed by Ojan Vafai.
+
+        In order to support auto placement (where we can't infer a grid item's position from its style),
+        we need to have 2 code paths:
+        - One that places the elements on the grid representation.
+        - One that reuse the grid representation to return the position.
+
+        This code path implements this split so that we can add auto placement in a follow-up patch(es).
+        Also in order to avoid a O(n^2) behavior [walking over our grid to find a grid item's position],
+        the cached position code path needed an efficient way to find the grid items -> position mapping.
+
+        Refactoring, covered by existing tests.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::cachedGridCoordinate):
+        (WebCore::RenderGrid::resolveGridPositionFromStyle):
+        These methods implements the above split. The first one
+        reuses our cached information whereas the other one is
+        used to build the cache.
+
+        (WebCore::RenderGrid::computeIntrinsicLogicalWidths):
+        (WebCore::RenderGrid::layoutGridItems):
+        Added some code to clear the grid items' position.
+
+        (WebCore::RenderGrid::findChildLogicalPosition):
+        (WebCore::RenderGrid::logicalContentHeightForChild):
+        Updated these functions to use cachedGridPosition.
+
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        Added a comment about why we don't use cachedGridPosition.
+
+        (WebCore::RenderGrid::insertItemIntoGrid):
+        Added this helper function to insert into the grid and
+        cache the position in the reverse lookup map.
+
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        Updated to call insertItemIntoGrid. Also added an ASSERT
+        similar to m_grid.
+
+        (WebCore::RenderGrid::clearGrid):
+        Added this helper function to clear our grid structure.
+
+        * rendering/RenderGrid.h:
+        (GridCoordinate):
+        (WebCore::RenderGrid::GridCoordinate::GridCoordinate):
+        Added this POD to hold the coordinates in our reverse map.
+
 2013-02-18  Stephen Chenney  <schenney@chromium.org>
 
         feFlood incorrectly applied color-interpolation-filters
