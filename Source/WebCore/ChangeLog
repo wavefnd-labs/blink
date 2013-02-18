@@ -1,3 +1,154 @@
+2013-02-18  Zan Dobersek  <zdobersek@igalia.com>
+
+        Stop placing std::isfinite and std::signbit inside the global scope
+        https://bugs.webkit.org/show_bug.cgi?id=109817
+
+        Reviewed by Darin Adler.
+
+        Prefix calls to the isfinite and signbit methods with std:: as the two
+        methods are no longer being imported into the global scope.
+
+        No new tests as there's no change in functionality.
+
+        * bindings/js/JSCanvasRenderingContext2DCustom.cpp:
+        (WebCore::JSCanvasRenderingContext2D::setWebkitLineDash):
+        * bindings/js/JSDOMBinding.cpp:
+        (WebCore::jsDateOrNull):
+        * bindings/js/JSDOMBinding.h:
+        (WebCore::finiteInt32Value):
+        * bindings/v8/V8Binding.h:
+        (WebCore::v8DateOrNull):
+        * css/CSSPrimitiveValue.cpp:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        * html/BaseDateAndTimeInputType.cpp:
+        (WebCore::BaseDateAndTimeInputType::parseToNumber):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::setValueAsNumber):
+        * html/HTMLMeterElement.cpp:
+        (WebCore::HTMLMeterElement::setMin):
+        (WebCore::HTMLMeterElement::setMax):
+        (WebCore::HTMLMeterElement::setValue):
+        (WebCore::HTMLMeterElement::setLow):
+        (WebCore::HTMLMeterElement::setHigh):
+        (WebCore::HTMLMeterElement::setOptimum):
+        * html/HTMLProgressElement.cpp:
+        (WebCore::HTMLProgressElement::value):
+        (WebCore::HTMLProgressElement::setValue):
+        (WebCore::HTMLProgressElement::max):
+        (WebCore::HTMLProgressElement::setMax):
+        * html/MonthInputType.cpp:
+        (WebCore::MonthInputType::valueAsDate):
+        (WebCore::MonthInputType::defaultValueForStepUp):
+        (WebCore::MonthInputType::parseToNumber):
+        * html/NumberInputType.cpp:
+        (WebCore::NumberInputType::typeMismatchFor):
+        (WebCore::NumberInputType::sanitizeValue):
+        (WebCore::NumberInputType::hasBadInput):
+        * html/RangeInputType.cpp:
+        (WebCore::RangeInputType::typeMismatchFor):
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::defaultValueForStepUp):
+        * html/canvas/CanvasPathMethods.cpp:
+        (WebCore::CanvasPathMethods::moveTo):
+        (WebCore::CanvasPathMethods::lineTo):
+        (WebCore::CanvasPathMethods::quadraticCurveTo):
+        (WebCore::CanvasPathMethods::bezierCurveTo):
+        (WebCore::CanvasPathMethods::arcTo):
+        (WebCore::CanvasPathMethods::arc):
+        (WebCore::CanvasPathMethods::rect):
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::setLineWidth):
+        (WebCore::CanvasRenderingContext2D::setMiterLimit):
+        (WebCore::CanvasRenderingContext2D::setShadowOffsetX):
+        (WebCore::CanvasRenderingContext2D::setShadowOffsetY):
+        (WebCore::CanvasRenderingContext2D::setShadowBlur):
+        (WebCore::lineDashSequenceIsValid):
+        (WebCore::CanvasRenderingContext2D::setLineDashOffset):
+        (WebCore::CanvasRenderingContext2D::scale):
+        (WebCore::CanvasRenderingContext2D::rotate):
+        (WebCore::CanvasRenderingContext2D::translate):
+        (WebCore::CanvasRenderingContext2D::transform):
+        (WebCore::CanvasRenderingContext2D::setTransform):
+        (WebCore::validateRectForCanvas):
+        (WebCore::CanvasRenderingContext2D::isPointInPath):
+        (WebCore::CanvasRenderingContext2D::isPointInStroke):
+        (WebCore::CanvasRenderingContext2D::drawImage):
+        (WebCore::CanvasRenderingContext2D::createLinearGradient):
+        (WebCore::CanvasRenderingContext2D::createRadialGradient):
+        (WebCore::CanvasRenderingContext2D::createImageData):
+        (WebCore::CanvasRenderingContext2D::getImageData):
+        (WebCore::CanvasRenderingContext2D::putImageData):
+        (WebCore::CanvasRenderingContext2D::drawTextInternal):
+        * html/parser/HTMLParserIdioms.cpp:
+        (WebCore::parseToDoubleForNumberType):
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlTimelineElement::setDuration):
+        * html/shadow/MediaControls.cpp:
+        (WebCore::MediaControls::reset):
+        * html/shadow/MediaControlsApple.cpp:
+        (WebCore::MediaControlsApple::reset):
+        * html/shadow/MediaControlsBlackBerry.cpp:
+        (WebCore::MediaControlFullscreenTimelineElement::setDuration):
+        (WebCore::MediaControlsBlackBerry::reset):
+        * inspector/InspectorValues.cpp:
+        (WebCore::InspectorBasicValue::writeJSON):
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::currentAge):
+        (WebCore::CachedResource::freshnessLifetime):
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::adjustWindowRect):
+        * platform/DateComponents.cpp:
+        (WebCore::DateComponents::setMillisecondsSinceEpochForDate):
+        (WebCore::DateComponents::setMillisecondsSinceEpochForDateTime):
+        (WebCore::DateComponents::setMillisecondsSinceEpochForMonth):
+        (WebCore::DateComponents::setMillisecondsSinceMidnight):
+        (WebCore::DateComponents::setMonthsSinceEpoch):
+        (WebCore::DateComponents::setMillisecondsSinceEpochForWeek):
+        * platform/Decimal.cpp:
+        (WebCore::Decimal::fromDouble):
+        * platform/FileSystem.h:
+        (WebCore::isValidFileTime):
+        * platform/LocalizedStrings.cpp:
+        (WebCore::localizedMediaTimeDescription):
+        * platform/graphics/cairo/CairoUtilities.cpp:
+        (WebCore::drawPatternToCairoContext):
+        * platform/graphics/cairo/PathCairo.cpp:
+        (WebCore::Path::addArc):
+        (WebCore::Path::contains):
+        * platform/graphics/cg/PathCG.cpp:
+        (WebCore::Path::addArc):
+        * platform/graphics/gstreamer/FullscreenVideoControllerGStreamer.cpp:
+        (WebCore::FullscreenVideoControllerGStreamer::timeToString):
+        * platform/graphics/openvg/PathOpenVG.cpp:
+        (WebCore::Path::addArc):
+        * platform/graphics/skia/SkiaUtils.h:
+        (WebCore::WebCoreFloatToSkScalar):
+        (WebCore::WebCoreDoubleToSkScalar):
+        * platform/graphics/win/MediaPlayerPrivateQuickTimeVisualContext.cpp:
+        (WebCore::MediaPlayerPrivateQuickTimeVisualContext::maxTimeSeekable):
+        * platform/gtk/LocalizedStringsGtk.cpp:
+        (WebCore::localizedMediaTimeDescription):
+        * platform/mac/WebVideoFullscreenHUDWindowController.mm:
+        (timeToString):
+        * platform/network/ResourceResponseBase.cpp:
+        (WebCore::parseDateValueInHeader):
+        * platform/qt/LocalizedStringsQt.cpp:
+        (WebCore::localizedMediaTimeDescription):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::resolveFlexibleLengths):
+        * rendering/RenderMediaControlsChromium.cpp:
+        (WebCore::formatChromiumMediaControlsTime):
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::formatMediaControlsTime):
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::setFontSize):
+        * svg/SVGPathParser.cpp:
+        (WebCore::SVGPathParser::decomposeArcToCubic):
+        * xml/XPathFunctions.cpp:
+        (WebCore::XPath::FunRound::round):
+        * xml/XPathValue.cpp:
+        (WebCore::XPath::Value::toString):
+
 2013-02-18  Chris Fleizach  <cfleizach@apple.com>
 
         AX: Make iOS wrapper use the WebAccessibilityObjectBase wrapper
