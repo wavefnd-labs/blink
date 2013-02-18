@@ -1,3 +1,45 @@
+2013-02-18  David Hyatt  <hyatt@apple.com>
+
+        Make seamless iframes paginate properly in their enclosing document's pagination context.
+        https://bugs.webkit.org/show_bug.cgi?id=106125
+        <rdar://problem/12922720> Text in iframe is clipped while printing
+
+        Reviewed by Simon Fraser.
+
+        Added new tests in fast/multicol and fast/region.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::clampToStartAndEndRegions):
+        Don't clamp when the RenderView is the containing block of an object in a RenderFlowThread.
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::containerForRepaint):
+        Don't attempt any repaint container antics when we're in a seamless iframe, since the ancestor
+        document will actually do the handoff into the flow thread.
+
+        * rendering/RenderView.cpp:
+        (WebCore::enclosingSeamlessRenderer):
+        Heper function to test for an enclosing seamless iframe.
+        
+        (WebCore::RenderView::addChild):
+        Subclass addChild on RenderView to properly set the inRenderFlowThread state for a seamless
+        child document so thta it will check regions.
+
+        (WebCore::RenderView::initializeLayoutState):
+        New helper method for setting up the initial layout state of a RenderView. If inside a seamless
+        paginated ancestor, set up the appropriate pagination information so the child document
+        knows about it. This method will expand to inherit info about line grids and exclusions eventually
+        also.
+
+        (WebCore::RenderView::layout):
+        Now calls initializeLayoutState to set up the layout state.
+
+        * rendering/RenderView.h:
+        (WebCore::RenderView::pageLogicalHeight):
+        (WebCore::RenderView::setPageLogicalHeight):
+        (RenderView):
+        Fix the type of the page logical height methods to be LayoutUnit instead of unsigned.
+
 2013-02-18  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r143145.
