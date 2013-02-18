@@ -1,3 +1,51 @@
+2013-02-18  David Kilzer  <ddkilzer@apple.com>
+
+        BUILD FIX (r143230): Fix renamed header and implementation of -[WebAccessibilityObjectWrapper accessibilityPostedNotification:]
+        <http://webkit.org/b/110077>
+
+        Fixes the following build failures:
+
+            AccessibilityObjectIOS.mm:35:9: fatal error: 'AccessibilityObjectWrapperIOS.h' file not found
+            #import "AccessibilityObjectWrapperIOS.h"
+                    ^
+            1 error generated.
+
+            WebAccessibilityObjectWrapperIOS.mm:2051:35: error: use of undeclared identifier 'notificationString'; did you mean 'notificationType'?
+                if (AXNotificationCallback && notificationString)
+                                              ^~~~~~~~~~~~~~~~~~
+                                              notificationType
+            WebAccessibilityObjectWrapperIOS.mm:2049:81: note: 'notificationType' declared here
+            - (void)accessibilityPostedNotification:(WebCore::AXObjectCache::AXNotification)notificationType
+                                                                                            ^
+            WebAccessibilityObjectWrapperIOS.mm:2052:38: error: use of undeclared identifier 'notificationString'; did you mean 'notificationType'?
+                    AXNotificationCallback(self, notificationString, AXPostedNotificationContext);
+                                                 ^~~~~~~~~~~~~~~~~~
+                                                 notificationType
+            WebAccessibilityObjectWrapperIOS.mm:2049:81: note: 'notificationType' declared here
+            - (void)accessibilityPostedNotification:(WebCore::AXObjectCache::AXNotification)notificationType
+                                                                                            ^
+            WebAccessibilityObjectWrapperIOS.mm:2052:38: error: cannot initialize a parameter of type 'NSString *' with an lvalue of type 'WebCore::AXObjectCache::AXNotification'
+                    AXNotificationCallback(self, notificationString, AXPostedNotificationContext);
+                                                 ^~~~~~~~~~~~~~~~~~
+            WebAccessibilityObjectWrapperIOS.mm:2049:81: error: conflicting parameter types in implementation of 'accessibilityPostedNotification:': 'NSString *' vs 'WebCore::AXObjectCache::AXNotification' [-Werror,-Wmismatched-parameter-types]
+            - (void)accessibilityPostedNotification:(WebCore::AXObjectCache::AXNotification)notificationType
+                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^
+            WebAccessibilityObjectWrapperBase.h:48:53: note: previous definition is here
+            - (void)accessibilityPostedNotification:(NSString *)notificationName;
+                                                     ~~~~~~~~~~ ^
+            4 errors generated.
+
+        * accessibility/ios/AccessibilityObjectIOS.mm: Fix name of
+        included header.
+        * accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:
+        (-[WebAccessibilityObjectWrapper accessibilityPostedNotification:]):
+        Fix implementation to match declaration.
+
+        * accessibility/ios/WebAccessibilityObjectWrapperIOS.h:
+        * accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:
+        * accessibility/ios/AXObjectCacheIOS.mm:
+        - Clean up #endif comments.
+
 2013-02-18  Jer Noble  <jer.noble@apple.com>
 
         EME: Add a CDMPrivate implementation using AVFoundation.
