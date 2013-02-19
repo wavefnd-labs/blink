@@ -1,3 +1,30 @@
+2013-02-19  Andrei Bucur  <abucur@adobe.com>
+
+        [CSS Regions] Assertion in RenderFlowThread::removeRenderBoxRegionInfo
+        https://bugs.webkit.org/show_bug.cgi?id=109914
+
+        Reviewed by David Hyatt.
+
+        This patch moves a part of the invalidation operations inside the RenderFlowThread::invalidateRegions call. The maps
+        are cleared anyway at layout time but doing this earlier makes sure the flow thread is in a more consistent state
+        (the RenderFlowThread object has both the region chain invalidated and the regions information cleared).
+
+        RenderFlowThread::removeRenderBoxRegionInfo will check if the region chain is invalidated. If true, it means the
+        flow thread has a layout scheduled and the regions information is not yet reliable. In this case we just return from the
+        function and wait for the layout to cleanup the box information.
+
+        Test: fast/regions/remove-box-info-assert.html
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::removeRegionFromThread):
+        (WebCore::RenderFlowThread::invalidateRegions):
+        (WebCore):
+        (WebCore::RenderFlowThread::layout):
+        (WebCore::RenderFlowThread::removeRenderBoxRegionInfo):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::removeRegionFromThread):
+
 2013-02-19  Alberto Garcia  <agarcia@igalia.com>
 
         Fix build broekn by r142988.

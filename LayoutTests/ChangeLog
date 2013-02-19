@@ -1,3 +1,19 @@
+2013-02-19  Andrei Bucur  <abucur@adobe.com>
+
+        [CSS Regions] Assertion in RenderFlowThread::removeRenderBoxRegionInfo
+        https://bugs.webkit.org/show_bug.cgi?id=109914
+
+        Reviewed by David Hyatt.
+
+        The test creates a flow thread with two regions and a content node. We remove the region and the node from the flow thread
+        at the same time. When the style is updated, the region is first removed from the chain and range information for boxes
+        is cleared from the flow thread. When the node is removed from the flow thread it tries to delete its region box information.
+        The range information on the flow thread is gone so the range for the node's box is zero - nothing gets deleted. Afterwards,
+        an ASSERT is triggered because there's leftover box information inside the region chain.
+
+        * fast/regions/remove-box-info-assert-expected.txt: Added.
+        * fast/regions/remove-box-info-assert.html: Added.
+
 2013-02-19  Stephen White  <senorblanco@chromium.org>
 
         [chromium] Unreviewed gardening.
