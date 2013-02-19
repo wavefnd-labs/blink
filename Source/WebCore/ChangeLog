@@ -1,3 +1,24 @@
+2013-02-19  Branimir Lambov  <blambov@google.com>
+
+        Fix 'slice' aspect ratio calculation
+        https://bugs.webkit.org/show_bug.cgi?id=99984
+
+        Reviewed by Dirk Schulze.
+
+        Previously the calculation for the 'slice' aspect ratio would incorrectly calculate the
+        source rect location based on the destination rect offset. This caused our source rect to be
+        incorrect, and sometimes render outside the visible area completely. After this patch
+        our implementation matches the implementation of both Gecko and Presto.
+
+        The relevant spec section:
+        http://www.w3.org/TR/SVG/single-page.html#coords-PreserveAspectRatioAttribute
+
+        Tests: svg/as-image/image-preserveAspectRatio-all.svg
+               svg/filters/feImage-preserveAspectRatio-all.svg
+
+        * svg/SVGPreserveAspectRatio.cpp:
+        (WebCore::SVGPreserveAspectRatio::transformRect):
+
 2013-02-19  Kentaro Hara  <haraken@google.com>
 
         [V8] ScriptRunner::runCompiledScript() should return Handle<Value>() when OOM occurs
