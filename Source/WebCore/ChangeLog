@@ -1,3 +1,49 @@
+2013-02-18  Hayato Ito  <hayato@chromium.org>
+
+        Make EventDispatcher take an Event object in its constructor.
+        https://bugs.webkit.org/show_bug.cgi?id=109898
+
+        Reviewed by Dimitri Glazkov.
+
+        Re-landing r143145, which caused a crash when deltaX and deltaY of a PlatformWheelEvent are both zero.
+
+        Fixed a crash by early exiting in EventDispatcher::dispatchEvent(Node*, PassRefPtr<EventDispatcher*>)
+        if mediator's event() returns null.
+
+        Also Added a layout test to catch this kind of crash in the future.
+
+        Test: fast/events/platform-wheelevent-with-delta-zero-crash.html
+
+        * dom/EventDispatchMediator.cpp:
+        (WebCore::EventDispatchMediator::dispatchEvent):
+        * dom/EventDispatcher.cpp:
+        (WebCore::EventDispatcher::dispatchEvent):
+        (WebCore::EventDispatcher::EventDispatcher):
+        (WebCore::EventDispatcher::ensureEventPath):
+        (WebCore::EventDispatcher::dispatchSimulatedClick):
+        (WebCore::EventDispatcher::dispatch):
+        (WebCore::EventDispatcher::dispatchEventPreProcess):
+        (WebCore::EventDispatcher::dispatchEventAtCapturing):
+        (WebCore::EventDispatcher::dispatchEventAtTarget):
+        (WebCore::EventDispatcher::dispatchEventAtBubbling):
+        (WebCore::EventDispatcher::dispatchEventPostProcess):
+        * dom/EventDispatcher.h:
+        (EventDispatcher):
+        (WebCore::EventDispatcher::node):
+        (WebCore::EventDispatcher::event):
+        * dom/FocusEvent.cpp:
+        (WebCore::FocusEventDispatchMediator::dispatchEvent):
+        (WebCore::BlurEventDispatchMediator::dispatchEvent):
+        (WebCore::FocusInEventDispatchMediator::dispatchEvent):
+        (WebCore::FocusOutEventDispatchMediator::dispatchEvent):
+        * dom/GestureEvent.cpp:
+        (WebCore::GestureEventDispatchMediator::dispatchEvent):
+        * dom/MouseEvent.cpp:
+        (WebCore::MouseEventDispatchMediator::dispatchEvent):
+        * dom/WheelEvent.cpp:
+        (WebCore::WheelEventDispatchMediator::dispatchEvent):
+        Assert event() rather than an early exit since this code path should be hit only when event() is non-null.
+
 2013-02-18  Takashi Sakamoto  <tasak@google.com>
 
         :before/:after pseudo elements do not always apply to the proper element
