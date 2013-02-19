@@ -1,3 +1,29 @@
+2013-02-19  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Refactor the code in preparation of auto placement support
+        https://bugs.webkit.org/show_bug.cgi?id=110244
+
+        Reviewed by Ojan Vafai.
+
+        Test: fast/css-grid-layout/grid-auto-flow-resolution.html
+
+        In order to support auto placement, we need to iterate over the grid items with
+        auto row / column several times. This changes makes us do that in a very simple,
+        not-yet-conformant way. While touching this code, the distinction between grid-auto-flow
+        none and row / column was better drawn (and enforced).
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::resolveGridPositionFromStyle):
+        Made it illegal to call resolveGridPositionFromStyle if the grid track is auto and
+        grid-auto-flow is not none. This would catch bad use of the function.
+
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        Updated to bail out if the grid track is auto. Also improved the comment.
+
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        Updated the function to do several iterations. Also handled the grid-auto-flow: none
+        case differently as it shouldn't need the extra iteration(s).
+
 2013-02-19  David Hyatt  <hyatt@apple.com>
 
         [New Multicolumn] REGRESSION: RenderMultiColumnSets broken by the RenderRegion -> RenderBlock subclassing.
