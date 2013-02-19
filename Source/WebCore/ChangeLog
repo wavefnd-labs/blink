@@ -1,3 +1,34 @@
+2013-02-19  Tim Volodine  <timvolodine@chromium.org>
+
+        Text Autosizing: prevent oscillation of font sizes during autosizing
+        https://bugs.webkit.org/show_bug.cgi?id=108205
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        On some websites autosized font-sizes oscillate due to layouts caused by
+        hovering or incremental page loading (and on other sites font sizes do
+        eventually stabilize, but it takes many layouts before they reach a steady
+        size). To prevent all these cases, we no longer allow the autosizing
+        multiplier to change after it has been set (to a value other than 1).
+
+        This won't always give exactly the same results, but testing on 2000 top
+        sites shows that this makes little difference in practice, and it prevents
+        these very jarring cases. As a happy side-effect, this speeds up layouts
+        as font sizes change less.
+
+        Test: fast/text-autosizing/oscillation-javascript-fontsize-change.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::setFrameRect):
+        * page/Settings.cpp:
+        (WebCore::Settings::setTextAutosizingFontScaleFactor):
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::recalculateMultipliers):
+        (WebCore):
+        (WebCore::TextAutosizer::processContainer):
+        * rendering/TextAutosizer.h:
+        (TextAutosizer):
+
 2013-02-19  Youenn Fablet  <youennf@gmail.com>
 
         [EFL][DRT] http/tests/loading/307-after-303-after-post.html times out
