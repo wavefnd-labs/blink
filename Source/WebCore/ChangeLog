@@ -1,3 +1,44 @@
+2013-02-19  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        RenderGrid::computedUsedBreadthOfGridTracks can read past m_grid's size
+        https://bugs.webkit.org/show_bug.cgi?id=110126
+
+        Reviewed by Ojan Vafai.
+
+        The issue comes from how we store the column information inside m_grid.
+        Because m_grid is a Vector of rows, we could lose the column information
+        if we had no row, no grid item but some columns defined in CSS. As the
+        logic would assume that our row / column size would be greater than what
+        the style defines explicitely, we would access past our Vector's boundary.
+
+        The fix is to ensure that we have at least a row so that we can store the
+        column information in every case. This fix is overly broad as it also forces
+        the grid to have one column, which shouldn't be an issue.
+
+        Test: fast/css-grid-layout/grid-element-empty-row-column.html
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        Forced this function to return at least one as the maximum index so that
+        m_grid has at least one row / column.
+
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        Added a ASSERT that m_grid is bigger than the explicit grid-rows / grid-columns.
+        Also changed an existing ASSERT to use gridWasPopulated for consistency and changed
+        the code not to call gridRowCount as it would ASSERT (we are in the middle of populating
+        the grid).
+
+        * rendering/RenderGrid.h:
+        (WebCore::RenderGrid::gridWasPopulated):
+        Added this helper function.
+
+        (WebCore::RenderGrid::gridColumnCount):
+        Replaced a now unneeded branch with an ASSERT. As placeItemsOnGrid should be called
+        prior to read m_grid, this change should be fine.
+
+        (WebCore::RenderGrid::gridRowCount):
+        Added an ASSERT.
+
 2013-02-19  Sergio Villar Senin  <svillar@igalia.com>
 
         [Soup] Use synchronous calls to close completely processed streams
