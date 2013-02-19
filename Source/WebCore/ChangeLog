@@ -1,3 +1,31 @@
+2013-02-19  Arpita Bahuguna  <a.bah@samsung.com>
+
+        Caret is not displayed when trying to focus inside a contenteditable element containing an empty block.
+        https://bugs.webkit.org/show_bug.cgi?id=108053
+
+        Reviewed by Ryosuke Niwa.
+
+        Test: editing/selection/caret-in-div-containing-empty-block.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::localCaretRect):
+        When trying to compute the caret rect for the contenteditable div, the
+        border and the padding were not considered. Because of this, for the
+        given test case, which had a border defined on the containing div, the
+        caret was being painted just atop the border, thereby masking it.
+
+        Have modified the code to ensure that the computed caret rect takes
+        into account the border and padding (if any) specified on the box, but only
+        if the node doesn't have content that shall be skipped for editing.
+
+        We do not add border and padding while computing the caret rect for any
+        element that either has no content or has content that shall be skipped
+        for editing purposes. This holds true for table elements as well.
+
+        This helps avoid the caret displacement previsouly observed before/after
+        any controls placed within the contenteditable box, when considering
+        border and padding in computation of the caret rect.
+
 2013-02-19  Mihnea Ovidenie  <mihnea@adobe.com>
 
         CSSRegions: crash positioned object with inline containing block in flow thread
