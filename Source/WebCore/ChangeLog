@@ -1,3 +1,36 @@
+2013-02-19  ChangSeok Oh  <changseok.oh@collabora.com>
+
+        [GTK][AC] Implement matrix transform animation with clutter ac backend
+        https://bugs.webkit.org/show_bug.cgi?id=109848
+
+        Reviewed by Gustavo Noronha Silva.
+
+        Clutter 1.12 doesn't support additive transform animations yet, so the combination
+        of two or more transformations(such as rotation after translation) runs unexpectedly.
+        So we use a matrix transformation instead for the case.
+
+        Covered by existing animation tests.
+
+        * platform/graphics/clutter/GraphicsLayerClutter.cpp:
+        (WebCore::getValueFunctionNameForTransformOperation):
+        (WebCore::GraphicsLayerClutter::createTransformAnimationsFromKeyframes):
+        * platform/graphics/clutter/PlatformClutterAnimation.cpp:
+        (WebCore::toClutterActorPropertyString): Add actor property "transform"
+        (WebCore::clutterMatrixProgress): Handle interpolation between two matrices instead of default clutter_matrix_progress.
+        (WebCore):
+        (WebCore::PlatformClutterAnimation::supportsAdditiveValueFunction):
+        (WebCore::PlatformClutterAnimation::setFromValue): for TransformationMatrix.
+        (WebCore::PlatformClutterAnimation::setToValue): ditto.
+        (WebCore::PlatformClutterAnimation::addClutterTransitionForProperty):
+        (WebCore::PlatformClutterAnimation::addTransformTransition):
+        * platform/graphics/clutter/PlatformClutterAnimation.h:
+        (PlatformClutterAnimation):
+        * platform/graphics/clutter/TransformationMatrixClutter.cpp: Add copy constructor for CoglMatrix.
+        (WebCore::TransformationMatrix::TransformationMatrix):
+        (WebCore):
+        * platform/graphics/transforms/TransformationMatrix.h:
+        (TransformationMatrix):
+
 2013-02-19  Kassy Coan  <kassycoan@chromium.org>
 
         Update FeatureObserver on top level navigation in addition to page destruction.
