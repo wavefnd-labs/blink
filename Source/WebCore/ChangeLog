@@ -1,5 +1,109 @@
 2013-02-19  Kentaro Hara  <haraken@chromium.org>
 
+        [V8] Remove redundant usage of MAYBE_MISSING_PARAMETER() macro
+        https://bugs.webkit.org/show_bug.cgi?id=109899
+
+        Reviewed by Adam Barth.
+
+        Currently:
+
+        - MAYBE_MISSING_PARAMETER(args, index, DefaultIsUndefined) returns args[index].
+        - MAYBE_MISSING_PARAMETER(args, index, DefaultIsNullString) returns Local<Value>()
+        if args[index] is missing (i.e. the length of |args| is less than |index|).
+        It returns args[index] otherwise.
+
+        No one other than CodeGeneratorV8.pm uses
+        MAYBE_MISSING_PARAMETER(args, index, DefaultIsUndefined). Instead, we simply use
+        args[index]. We should remove the redundant usage from CodeGeneratorV8.pm too.
+        The long-name macro has been making generated code less readable.
+
+        In addition, we can rename MAYBE_MISSING_PARAMETER() to argumentOrNull().
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateParametersCheck):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore::Float64ArrayV8Internal::fooCallback):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore::TestActiveDOMObjectV8Internal::excitingFunctionCallback):
+        (WebCore::TestActiveDOMObjectV8Internal::postMessageCallback):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore::TestCustomNamedGetterV8Internal::anotherFunctionCallback):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore::TestEventTargetV8Internal::itemCallback):
+        (WebCore::TestEventTargetV8Internal::dispatchEventCallback):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalMethod2Callback):
+        (WebCore::V8TestInterface::constructorCallback):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore::TestMediaQueryListListenerV8Internal::methodCallback):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        (WebCore::V8TestNamedConstructorConstructorCallback):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::voidMethodWithArgsCallback):
+        (WebCore::TestObjV8Internal::longMethodWithArgsCallback):
+        (WebCore::TestObjV8Internal::objMethodWithArgsCallback):
+        (WebCore::TestObjV8Internal::methodWithSequenceArgCallback):
+        (WebCore::TestObjV8Internal::methodReturningSequenceCallback):
+        (WebCore::TestObjV8Internal::methodThatRequiresAllArgsAndThrowsCallback):
+        (WebCore::TestObjV8Internal::optionsObjectCallback):
+        (WebCore::TestObjV8Internal::methodWithOptionalArgCallback):
+        (WebCore::TestObjV8Internal::methodWithNonOptionalArgAndOptionalArgCallback):
+        (WebCore::TestObjV8Internal::methodWithNonOptionalArgAndTwoOptionalArgsCallback):
+        (WebCore::TestObjV8Internal::methodWithOptionalStringCallback):
+        (WebCore::TestObjV8Internal::methodWithOptionalStringIsUndefinedCallback):
+        (WebCore::TestObjV8Internal::methodWithOptionalStringIsNullStringCallback):
+        (WebCore::TestObjV8Internal::methodWithNonCallbackArgAndCallbackArgCallback):
+        (WebCore::TestObjV8Internal::overloadedMethod1Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod2Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod3Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod4Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod6Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod7Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod8Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod9Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod10Callback):
+        (WebCore::TestObjV8Internal::overloadedMethod11Callback):
+        (WebCore::TestObjV8Internal::classMethodWithOptionalCallback):
+        (WebCore::TestObjV8Internal::overloadedMethod12Callback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeMethod1Callback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeMethod2Callback):
+        (WebCore::TestObjV8Internal::enabledPerContextMethod1Callback):
+        (WebCore::TestObjV8Internal::enabledPerContextMethod2Callback):
+        (WebCore::TestObjV8Internal::stringArrayFunctionCallback):
+        (WebCore::TestObjV8Internal::domStringListFunctionCallback):
+        (WebCore::TestObjV8Internal::convert1Callback):
+        (WebCore::TestObjV8Internal::convert2Callback):
+        (WebCore::TestObjV8Internal::convert4Callback):
+        (WebCore::TestObjV8Internal::convert5Callback):
+        (WebCore::TestObjV8Internal::strictFunctionCallback):
+        (WebCore::TestObjV8Internal::variadicStringMethodCallback):
+        (WebCore::TestObjV8Internal::variadicDoubleMethodCallback):
+        (WebCore::TestObjV8Internal::variadicNodeMethodCallback):
+        * bindings/scripts/test/V8/V8TestOverloadedConstructors.cpp:
+        (WebCore::V8TestOverloadedConstructors::constructor1Callback):
+        (WebCore::V8TestOverloadedConstructors::constructor2Callback):
+        (WebCore::V8TestOverloadedConstructors::constructor3Callback):
+        (WebCore::V8TestOverloadedConstructors::constructor4Callback):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::V8TestSerializedScriptValueInterface::constructorCallback):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore::TestTypedefsV8Internal::funcCallback):
+        (WebCore::TestTypedefsV8Internal::setShadowCallback):
+        (WebCore::TestTypedefsV8Internal::methodWithSequenceArgCallback):
+        (WebCore::TestTypedefsV8Internal::nullableArrayArgCallback):
+        (WebCore::TestTypedefsV8Internal::stringArrayFunctionCallback):
+        (WebCore::TestTypedefsV8Internal::stringArrayFunction2Callback):
+        (WebCore::V8TestTypedefs::constructorCallback):
+        * bindings/v8/V8BindingMacros.h:
+        (WebCore):
+        * bindings/v8/custom/V8HistoryCustom.cpp:
+        (WebCore::V8History::pushStateCallbackCustom):
+        (WebCore::V8History::replaceStateCallbackCustom):
+
+2013-02-19  Kentaro Hara  <haraken@chromium.org>
+
         [JSC] MAYBE_MISSING_PARAMETER(..., DefaultIsNullString) macro is redundant
         https://bugs.webkit.org/show_bug.cgi?id=109902
 
