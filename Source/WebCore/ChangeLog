@@ -1,3 +1,36 @@
+2013-02-19  Anton Vayvod  <avayvod@chromium.org>
+
+        [Text Autosizing] Combine narrow descendants of a cluster into groups that should be autosized with the same multiplier.
+        https://bugs.webkit.org/show_bug.cgi?id=109825
+
+        Enhancement of the approach introduced in https://bugs.webkit.org/show_bug.cgi?id=109573.
+        Instead of using the same text size multiplier for all narrow descendants of any autosizing
+        cluster, group the descendants by how much narrower they are than the cluster's
+        |blockContainingAllText| and process each group separately with a different multiplier for
+        each one.
+        For example, we want nested comments on the page to be autosized as a group but separately
+        from a sidebar on the same page.
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Updated the existing test to verify the patch.
+
+        * rendering/TextAutosizer.cpp:
+        (WebCore::TextAutosizer::processClusterInternal):
+
+            Splits the narrow descendants of the autosizing cluster into groups before processing
+            each group individually.
+
+        (WebCore::TextAutosizer::getNarrowDescendantsGroupedByWidth):
+
+            Sorts the narrow descendants of the given cluster into groups, combining them by the
+            difference between their content widths. If sorted by width, two consecutive nodes
+            belong to the same group if their width difference is no greater than 100 CSS units.
+
+        * rendering/TextAutosizer.h:
+
+            New method definitions.
+
 2013-02-18  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: Native Memory Instrumentation: show user provided name property of the heap snapshot node.
