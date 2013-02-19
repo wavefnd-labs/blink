@@ -1,3 +1,45 @@
+2013-02-18  David Hyatt  <hyatt@apple.com>
+
+        Padding and border changes don't trigger the relayout of children in some cases.
+        https://bugs.webkit.org/show_bug.cgi?id=109639.
+
+        Reviewed by Ryosuke Niwa.
+
+        The fix for this bug was way too general and involved putting code into RenderBox. Since
+        RenderBox makes no assumptions about what kind of layout system might derive from it, it
+        was incorrect to just mark all children as needing layout whenever borders and padding
+        changed widths.
+        
+        This patch takes the two cases handled by the original code and makes them more
+        specialized down in subclasses, i.e., RenderBlock and RenderTableRow. RenderBlock has
+        been refined to only check if children aren't inline and to also not invalidate
+        floats or irrelevant positioned objects that might not even have this block as their
+        containing block.
+        
+        The RenderTableRow code is specialized to only care about collapsing borders and
+        to only check borders rather than padding. It also requires that a child be a cell
+        in order to do the invalidation.
+
+        Covered by existing tests, since this is just specializing the code to more precisely
+        cover the test cases that have already been written.
+
+        Longer term, it should be layout code that figures this stuff out rather than style
+        change code, but that involves more dramatic changes that can wait.
+
+        Test: fast/block/positioning/border-change-relayout-test.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::borderOrPaddingLogicalWidthChanged):
+        (WebCore):
+        (WebCore::RenderBlock::styleDidChange):
+        * rendering/RenderBox.cpp:
+        (WebCore):
+        (WebCore::RenderBox::styleDidChange):
+        * rendering/RenderTableRow.cpp:
+        (WebCore::borderLogicalWidthChanged):
+        (WebCore):
+        (WebCore::RenderTableRow::styleDidChange):
+
 2013-02-18  Mark Lam  <mark.lam@apple.com>
 
         Small follow up to r143271: Fix SQLTransaction leak.
