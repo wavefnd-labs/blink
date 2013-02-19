@@ -1,3 +1,39 @@
+2013-02-19  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] REGRESSION: RenderMultiColumnSets broken by the RenderRegion -> RenderBlock subclassing.
+        https://bugs.webkit.org/show_bug.cgi?id=110239.
+
+        Reviewed by Simon Fraser.
+
+        Test: fast/multicol/newmulticol/column-rules-fixed-height.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::columnRectAt):
+        Make sure the columnGap() in the old multicolumn code is always expressed as a LayoutUnit. This was the
+        one place where it was still an int.
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::paintFlowThreadPortionInRegion):
+        Rework the painting of flow thread portions to account for the fact that regions paint at an integral
+        translation. This means you have to construct clipping around that integral destination. Subpixel layout
+        regions did not clip correctly as a result of this issue.
+
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::columnRectAt):
+        Fix the same bug with columnGap() that the old column code has, i.e., one spot where it was an int.
+
+        (WebCore::RenderMultiColumnSet::paintObject):
+        RenderMultiColumnSet should be using paintObject and not paint and it needs to check for visibility
+        and phases now that it is a RenderBlock subclass.
+
+        (WebCore::RenderMultiColumnSet::paintColumnRules):
+        Fix the bug that Opera guys fixed in the old multi-column code. They didn't patch the new code, so this
+        takes care of that.
+
+        * rendering/RenderMultiColumnSet.h:
+        (RenderMultiColumnSet):
+        Change to use paintObject instead of paint.
+
 2013-02-19  Branimir Lambov  <blambov@google.com>
 
         Fix 'slice' aspect ratio calculation
