@@ -1,3 +1,49 @@
+2013-02-18  Andy Estes  <aestes@apple.com>
+
+        Focusing a new frame (via window.focus()) should blur the active element in the current frame
+        https://bugs.webkit.org/show_bug.cgi?id=110172
+
+        Reviewed by Ryosuke Niwa.
+
+        When a change in the focused node crosses a frame boundary, WebKit
+        doesn't always succeed in blurring the old focused node before focusing
+        the new one.
+
+        Each document remembers its focused node, and a Page-scoped
+        FocusController remembers the focused frame. If a new focused node is
+        in a different frame than the focused frame, FocusController tells the
+        old frame's document to clear its focused node before focusing the new
+        one (and remembering the new frame).
+
+        Unfortunately, web content can confuse FocusController by calling
+        window.focus() at the wrong time. Since window.focus() changes
+        FocusController's focused frame without focusing a new node,
+        FocusController won't think that a frame boundary is being crossed if a
+        node in this frame is later focused. Therefore it won't clear the old
+        frame's focused node (it won't even know which frame contained the old
+        focused node), causing at least two bugs:
+
+        1) The node in the old frame will not receive a blur event.
+        2) Calling document.activeElement on the main frame will return the
+           previously focused node, but the HTML5 spec says it should return
+           the frame owner element if a subframe has focus.
+
+        Fix both of these bugs by explicitly clearing the current frame's
+        focused node if window.focus() changes the focused frame. This fix
+        carries some compatibility risk by changing a long-standing behavior
+        of the engine (we've had this bug since the beginning of the project,
+        AFAICT). On the upside, it matches the behavior of both Firefox and IE,
+        matches what HTML5 says about subframe focus, and fixes at least one
+        well-known enterprise web app.
+
+        Tests: fast/dom/HTMLDocument/active-element-frames.html
+               fast/frames/frame-focus-blurs-active-element.html
+
+        * page/DOMWindow.cpp:
+        (WebCore::DOMWindow::focus): If the frame being focused is not the same
+        as the currently focused frame, clear the currently focused frame's
+        focused node.
+
 2013-02-18  Simon Fraser  <simon.fraser@apple.com>
 
         Clean up the boolean argument to visibleContentRect
