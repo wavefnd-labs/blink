@@ -1,3 +1,32 @@
+2013-02-19  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        CSSRegions: crash positioned object with inline containing block in flow thread
+        https://bugs.webkit.org/show_bug.cgi?id=108307
+
+        Reviewed by David Hyatt.
+
+        The fix for https://bugs.webkit.org/show_bug.cgi?id=69896 allowed positioned blocks work
+        with variable width regions. However, the information needed for that is available only
+        when the container used for positioning is a block.
+
+        This patch ensures we are using this solution only when the container used for positioning
+        is a block. This needs to be revisited when we will extend support for other types of boxes
+        as mentioned in RenderBox::renderBoxRegionInfo.
+
+        Test: fast/regions/positioned-object-inline-cb-crash.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::renderBoxRegionInfo):
+        (WebCore::RenderBox::containingBlockLogicalWidthForPositioned):
+        (WebCore::RenderBox::computePositionedLogicalWidth): Make sure we are using containerBlocks
+        that are blocks. Add an assert that the type of containerBlock we are using can have
+        computed RenderBoxRegionInfo.
+        (WebCore::RenderBox::computePositionedLogicalHeight):
+        * rendering/RenderBoxModelObject.h:
+        (WebCore::RenderBoxModelObject::canHaveBoxInfoInRegion): This helper method
+        will return the boxes that may have computed RenderBoxRegionInfo. Currently,
+        returns true for blocks only.
+
 2013-02-19  Ryosuke Niwa  <rniwa@webkit.org>
 
         Yet anther JSC build fix after r143304.
