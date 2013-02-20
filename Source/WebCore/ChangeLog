@@ -1,3 +1,28 @@
+2013-02-19  Tony Gentilcore  <tonyg@chromium.org>
+
+        Disable ASSERT(!hasInsertionPoint()) for background parser
+        https://bugs.webkit.org/show_bug.cgi?id=110251
+
+        Reviewed by Adam Barth.
+
+        The background parser crashes about 10 layout tests by hitting ASSERT(!hasInsertionPoint()).
+        Now, finish() is the thing that closes the HTMLInputStream which removes the insertion point.
+        In these tests, a document.open() calls insert() which clears the HTMLInputStream which causes
+        there to be an insertion point again.
+
+        With the main thread parser, insert() is called before finish() so the ASSERT passes.
+        However, with the threaded parser, finish() is called before insert(), so we fail the ASSERT.
+
+        This patch disables the ASSERT for the background parser because m_input isn't really relevant.
+        This causes us to pass the tests. However, there is a risk that now hasInsertionPoint() may be incorrect
+        and Document has a non-debug branch that tests hasInsertionPoint().
+
+        No new tests because covered by existing tests.
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::prepareToStopParsing):
+        (WebCore::HTMLDocumentParser::attemptToRunDeferredScriptsAndEnd):
+
 2013-02-19  Simon Fraser  <simon.fraser@apple.com>
 
         Separate constraining for overhang from fixed-position zooming behavior in scrollOffsetForFixedPosition()
