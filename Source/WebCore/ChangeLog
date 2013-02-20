@@ -1,3 +1,32 @@
+2013-02-19  Simon Fraser  <simon.fraser@apple.com>
+
+        Separate constraining for overhang from fixed-position zooming behavior in scrollOffsetForFixedPosition()
+        https://bugs.webkit.org/show_bug.cgi?id=110267
+
+        Reviewed by Beth Dakin.
+
+        The static scrollOffsetForFixedPosition() function in ScrollingCoordinator did two things;
+        it constrained the scroll position when rubber-banding, and applied the special scaling for
+        fixed position when zoomed.
+        
+        Separate these out so that we can use the rubber-banding constrained elsewhere.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::scrollOffsetForFixedPosition): The static function is here now.
+        * page/FrameView.h:
+        * page/scrolling/ScrollingCoordinator.cpp: Code moved to FrameView.
+        * page/scrolling/ScrollingCoordinator.h:
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::setScrollLayerPosition): scrollOffsetForFixedPosition()
+        is now on FrameView.
+        * platform/ScrollableArea.cpp:
+        (WebCore::constrainedScrollPosition): Helper to constrain one axis for overhang.
+        (WebCore::ScrollableArea::constrainScrollPositionForOverhang): Static function that
+        can be called by FrameView::scrollOffsetForFixedPosition().
+        * platform/ScrollableArea.h: Static function constrainScrollPositionForOverhang()
+        so we can call it from another thread. Also a member fuction of the same name, which takes
+        the scrollPosition as input (so we can feed it a layer position in a later patch).
+
 2013-02-19  Tony Gentilcore  <tonyg@chromium.org>
 
         Fix checkThatTokensAreSafeToSendToAnotherThread() now that the preload scanner is enabled
