@@ -1,3 +1,49 @@
+2013-02-19  Tony Gentilcore  <tonyg@chromium.org>
+
+        Fix crash in preloading scanning base tags with no href attribute for background parser
+        https://bugs.webkit.org/show_bug.cgi?id=110276
+
+        Reviewed by Eric Seidel.
+
+        Previously a <base> tag without an href attribute (like the one in fast/dom/HTMLAnchorElement/set-href-attribute-rebase.html)
+        would crash the background parser's preload scanner.
+
+        To fix that, we only call stripLeadingAndTrailingHTMLSpaces() if the href attribute is non-null. This matches the main thread parser.
+
+        Along with this, I decided to templatize updatePredictedBaseURL() so that the main and background parser can share the same impl.
+
+        This required making CompactHTMLToken and HTMLToken a little more similar:
+        1. Give HTMLToken a getAttributeItem() method.
+        2. Move CompactAttribute to CompactHTMLToken::Attribute and make it a struct.
+
+        No new tests because covered by existing tests.
+
+        * html/parser/AtomicHTMLToken.h:
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        * html/parser/CompactHTMLToken.cpp:
+        (SameSizeAsCompactHTMLToken):
+        (WebCore::CompactHTMLToken::CompactHTMLToken):
+        (WebCore::CompactHTMLToken::getAttributeItem):
+        (WebCore::CompactHTMLToken::isSafeToSendToAnotherThread):
+        * html/parser/CompactHTMLToken.h:
+        (WebCore::CompactHTMLToken::Attribute::Attribute):
+        (Attribute):
+        (WebCore::CompactHTMLToken::attributes):
+        (CompactHTMLToken):
+        (WebCore::CompactHTMLToken::publicIdentifier):
+        (WebCore::CompactHTMLToken::systemIdentifier):
+        * html/parser/HTMLParserIdioms.h:
+        (WebCore):
+        (WebCore::stripLeadingAndTrailingHTMLSpaces):
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::TokenPreloadScanner::StartTagScanner::processAttributes):
+        (WebCore):
+        (WebCore::TokenPreloadScanner::updatePredictedBaseURL):
+        * html/parser/HTMLPreloadScanner.h:
+        * html/parser/HTMLToken.h:
+        (WebCore::HTMLToken::getAttributeItem):
+        (HTMLToken):
+
 2013-02-19  Mark Lam  <mark.lam@apple.com>
 
         Introducing AbstractSQLTransaction and AbstractSQLTransactionBackend.
