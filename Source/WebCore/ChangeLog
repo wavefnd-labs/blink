@@ -1,3 +1,93 @@
+2013-02-20  Xabier Rodriguez Calvar  <calvaris@igalia.com>  and  Martin Robinson  <mrobinson@igalia.com>
+
+        [Gtk] HTML5 Media controls require a design refresh
+        https://bugs.webkit.org/show_bug.cgi?id=83869
+
+        Created new controls that depend less on Gtk and more in CSS.
+
+        Reviewed by Philippe Normand.
+
+        * GNUmakefile.list.am: Added compilation for MediaControlsGtk.cpp
+        and MediaControlsGtk.h
+        * css/mediaControlsGtk.css: Taken from Chromium and adapted for
+        WebKitGtk+.
+        * html/shadow/MediaControlsGtk.cpp: Added.
+        (WebCore): Added MediaControlsGtk class.
+        (WebCore::MediaControlsGtk::MediaControlsGtk): Class constructor
+        (WebCore::MediaControls::create): Creates the Gtk+ controls
+        components.
+        (WebCore::MediaControlsGtk::createControls): Creates the Gtk+
+        controls components.
+        (WebCore::MediaControlsGtk::initializeControls): Initializes all
+        media controls.
+        (WebCore::MediaControlsGtk::setMediaController): Sets the media
+        controller.
+        (WebCore::MediaControlsGtk::reset): Resets the controllers.
+        (WebCore::MediaControlsGtk::playbackStarted): Invoked when the
+        playback starts
+        (WebCore::MediaControlsGtk::updateCurrentTimeDisplay): Updates the
+        controls when the current time shall be updated.
+        (WebCore::MediaControlsGtk::changedMute): Updates the controls
+        then the mute changes.
+        (WebCore::MediaControlsGtk::showVolumeSlider): Invoked when the
+        volume slider is meant to be shown.
+        (WebCore::MediaControlsGtk::createTextTrackDisplay): Creates the
+        track display. Though it is not used by us, it needs to be created
+        to prevent immediate crashes when loading a video.
+        * html/shadow/MediaControlsGtk.h: Added.
+        (WebCore): Added the MediaControlsGtk class.
+        (MediaControlsGtk): Added the MediaControlsGtk class.
+        * platform/gtk/RenderThemeGtk.cpp:
+        (WebCore): Added getStockSymbolicIconForWidgetType function
+        signature to load symbolic icons.
+        (WebCore::supportsFocus): Added media control widgets to support
+        focus so that the focus ring is not painted by WebCore.
+        (WebCore::RenderThemeGtk::paintMediaButton): Added the symbolic
+        icon support. It supports now normal and symbolic icons at the
+        same time.
+        (WebCore::RenderThemeGtk::paintMediaFullscreenButton): Added the
+        symbolic icon support.
+        (WebCore::RenderThemeGtk::paintMediaMuteButton): Added the
+        symbolic icon support.
+        (WebCore::RenderThemeGtk::paintMediaPlayButton): Added the
+        symbolic icon support.
+        (WebCore::RenderThemeGtk::paintMediaSeekBackButton): Added the
+        symbolic icon support.
+        (WebCore::RenderThemeGtk::paintMediaSeekForwardButton): Added the
+        symbolic icon support.
+        (WebCore::borderRadiiFromStyle): Created the radii info from the
+        style.
+        (WebCore::RenderThemeGtk::paintMediaSliderTrack): Removed the
+        background and the Gtk widget support as it is painted with
+        CSS. Also paint the time ranges with the CSS style.
+        (WebCore::RenderThemeGtk::paintMediaSliderThumb): Paint slider
+        thumb according to the CSS parameters.
+        (WebCore::RenderThemeGtk::paintMediaVolumeSliderContainer):
+        Delegates in the CSS.
+        (WebCore::RenderThemeGtk::paintMediaVolumeSliderTrack): Fills the
+        track up to the volume level and delegates the border in the CSS.
+        (WebCore::RenderThemeGtk::paintMediaVolumeSliderThumb): Delegates
+        in the paintMediaSliderThumb method so the thumb is painted the
+        same with the CSS parameters.
+        (WebCore::RenderThemeGtk::paintMediaCurrentTime): Removed the Gtk
+        background to use only CSS.
+        * platform/gtk/RenderThemeGtk.h:
+        (RenderThemeGtk): Changed paintMediaButton to support the symbolic
+        and normal icons at the same time.
+        * platform/gtk/RenderThemeGtk2.cpp:
+        (WebCore::RenderThemeGtk::adjustSliderThumbSize): Not adjusting
+        the thumb size and letting the CSS decide that for media slider.
+        (WebCore::getStockSymbolicIconForWidgetType): Implemented as a
+        fallback to the normal stock icons.
+        * platform/gtk/RenderThemeGtk3.cpp:
+        (WebCore):
+        (WebCore::RenderThemeGtk::adjustSliderThumbSize): Not adjusting
+        the thumb size and letting the CSS decide that for the media
+        sliders.
+        (WebCore::getStockSymbolicIconForWidgetType): Added this function
+        to load symbolic icons. It falls back to normal icons if the
+        symbolic is not found.
+
 2013-02-20  Andras Becsi  <andras.becsi@digia.com>
 
         [Qt] Rename AncestorChainWalker.h to EventPathWalker.h in the project file.
