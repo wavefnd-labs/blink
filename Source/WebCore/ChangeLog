@@ -1,3 +1,32 @@
+2013-02-20  Ojan Vafai  <ojan@chromium.org>
+
+        Make intrinsic width values work for positioned elements
+        https://bugs.webkit.org/show_bug.cgi?id=110264
+
+        Reviewed by Tony Chang.
+
+        Tests: fast/css-intrinsic-dimensions/intrinsic-sized-absolutes.html
+               fast/css-intrinsic-dimensions/width-shrinks-avoid-floats.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeIntrinsicLogicalWidthUsing):
+        (WebCore::RenderBox::computeLogicalWidthInRegionUsing):
+        Move the computation of intrinsic widths out into a helper function so that
+        computePositionedLogicalWidthUsing can use it. As per the current spec,
+        fill-available measures shrink to avoid floats. http://dev.w3.org/csswg/css3-sizing/
+
+        (WebCore::RenderBox::computePositionedLogicalWidth):
+        Compute intrinsic min-widths in addition to non-zero ones. Intrinsic widths
+        return true for isZero. width and max-width don't need modifying since they already
+        call computePositionedLogicalWidthUsing for intrinsic widths.
+
+        (WebCore::RenderBox::computePositionedLogicalWidthUsing):
+        Compute intrinsic widths and use a Fixed length for the rest of the positioned width
+        computation. Doesn't include bordersPlusPadding because the caller, expected the content
+        width and adds in the bordersPlusPadding later.
+
+        * rendering/RenderBox.h:
+
 2013-02-20  Robert Hogan  <robert@webkit.org>
 
         input element with placeholder text and width set to 100% on focus causes overflow even after losing focus
