@@ -1,3 +1,31 @@
+2013-02-20  Florin Malita  <fmalita@chromium.org>
+
+        [SVG] Update of element referenced by multiple 'use' nodes is absurdly slow
+        https://bugs.webkit.org/show_bug.cgi?id=97905
+
+        Reviewed by Dirk Schulze.
+
+        Rebuilding the shadow and instance trees of dependent use nodes recursively can be
+        extremely inefficient with non-trivial dependency graphs (the trees are not constructed
+        in topological order).
+
+        To avoid redundant buildShadowAndInstanceTree() invokations, separate the invalidation
+        phase from the actual tree (re)building phase, and only descend into the dependency DAG
+        during the invalidation phase (recursion also stops at nodes that have been previously
+        invalidated).
+
+        No new tests: functional coverage provided by existing tests, perfomance tracked by
+        PerformanceTests/SVG/SvgNestedUse.html.
+
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::buildPendingResource):
+        (WebCore::SVGUseElement::buildShadowAndInstanceTree):
+        (WebCore::SVGUseElement::invalidateShadowTree):
+        (WebCore):
+        (WebCore::SVGUseElement::invalidateDependentShadowTrees):
+        * svg/SVGUseElement.h:
+        (SVGUseElement):
+
 2013-02-20  Tim Horton  <timothy_horton@apple.com>
 
         RenderLayerBacking should initialize TiledBacking's isInWindow state with Page's isInWindow, not isOnscreen
