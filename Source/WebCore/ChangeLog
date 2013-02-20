@@ -1,3 +1,43 @@
+2013-02-19  Tim Horton  <timothy_horton@apple.com>
+
+        Clarify isInWindow vs. isVisible path through to RenderLayerCompositor
+        https://bugs.webkit.org/show_bug.cgi?id=110261
+        <rdar://problem/13196122>
+
+        Reviewed by Simon Fraser.
+
+        Remove RenderLayerCompositor::willMoveOffscreen/didMoveOnscreen.
+        Add RenderLayerCompositor::setIsInWindow, and pipe in-window changes through from Page::setIsInWindow.
+        Adjust a few Document functions that previously called RenderView::didMoveOnscreen/willMoveOffscreen to use setIsInWindow instead, since in-window state changes are occurring when attaching and detaching documents.
+
+        * WebCore.exp.in: Export Page::setIsInWindow.
+        * dom/Document.cpp:
+        (WebCore::Document::attach): Use setIsInWindow instead of didMoveOnscreen.
+        (WebCore::Document::documentWillBecomeInactive): Use setIsInWindow instead of willMoveOffscreen.
+        (WebCore::Document::documentDidResumeFromPageCache): Use setIsInWindow instead of didMoveOnscreen.
+        * page/FrameView.cpp:
+        (WebCore::FrameView::didMoveOnscreen):
+        (WebCore::FrameView::willMoveOffscreen):
+        RenderView doesn't care about moving on/offscreen, just in-window state.
+        (WebCore::FrameView::setIsInWindow): Added. Forward isInWindow changes to our RenderView.
+        * page/FrameView.h:
+        (FrameView): Add setIsInWindow.
+        * page/Page.cpp:
+        (WebCore::Page::setIsInWindow): Added. Forward isInWindow changes to the Page's FrameViews.
+        * page/Page.h:
+        (Page): Add setIsInWindow.
+        (WebCore::Page::isInWindow):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::setIsInWindow): Added. Replace willMoveOffscreen/didMoveOnscreen with setIsInWindow,
+        since that's the only change we actually care about.
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor): Add setIsInWindow.
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::setIsInWindow): Added. Replace willMoveOffscreen/didMoveOnscreen with setIsInWindow,
+        since that's the only change RenderLayerCompositor actually cares about.
+        * rendering/RenderView.h:
+        (RenderView): Add setIsInWindow.
+
 2013-02-19  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: Cleanup and add JSDocs to SuggestBox
