@@ -1,3 +1,30 @@
+2013-02-19  Simon Fraser  <simon.fraser@apple.com>
+
+        Rubber-banding should not affect the visibleRect of the TileCache
+        https://bugs.webkit.org/show_bug.cgi?id=110278
+
+        Reviewed by Beth Dakin.
+        
+        When rubber-banding a slow-scrolling page, or image document, we would constantly re-create
+        the bottom tile because of the logic that adapts the tile size to the visible rect when slow
+        scrolling.
+        
+        Avoid that by ensuring that the visibleRect is not affected by rubber-banding. This is done
+        via a GraphicsLayerClient function that allows RenderLayerCompositor to provide a custom
+        position for the scroll layer. We constrain that scroll position to remove the overhang that
+        results from rubber-banding.
+
+        I wasn't able to make a test for this, even with internals.setScrollViewPosition().
+
+        * platform/graphics/GraphicsLayerClient.h:
+        (GraphicsLayerClient):
+        (WebCore::GraphicsLayerClient::customPositionForVisibleRectComputation):
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::computeVisibleRect):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::customPositionForVisibleRectComputation):
+        * rendering/RenderLayerCompositor.h:
+
 2013-02-19  Tony Gentilcore  <tonyg@chromium.org>
 
         Fix crash in preloading scanning base tags with no href attribute for background parser
