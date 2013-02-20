@@ -1,3 +1,27 @@
+2013-02-20  Mike West  <mkwst@chromium.org>
+
+        Use EventPathWalker rather than parentNode() to normalize event targets in EventHandler.
+        https://bugs.webkit.org/show_bug.cgi?id=110037
+
+        Reviewed by Ryosuke Niwa.
+
+        We need to teach EventHandler about Shadow DOM in a few places in order
+        to ensure that we properly target events dispatched upon text nodes.
+        Rather than naively grabbing the text node's direct parent via
+        parentNode(), we need to account for the case in which the text node is
+        distributed[1] to an insertion point inside a shadow host.
+        EventPathWalker::parent understands these relationships, and should
+        be used when dealing with mouse, drag, and touch events.
+
+        [1]: http://www.w3.org/TR/shadow-dom/#dfn-distribution
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleMouseDraggedEvent):
+        (WebCore::EventHandler::handleTouchEvent):
+        (WebCore::EventHandler::passGestureEventToWidgetIfPossible):
+        (WebCore::EventHandler::updateDragAndDrop):
+            Refactor parentNode callsites to use EventPathWalker::parent().
+
 2013-02-20  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: [Regression] Search in ProfilesPanel is broken
