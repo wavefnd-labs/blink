@@ -1,3 +1,40 @@
+2013-02-20  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Resize RenderMultiColumnSets around their columns.
+        https://bugs.webkit.org/show_bug.cgi?id=110378.
+
+        Reviewed by Dirk Schulze.
+
+        Test: fast/multicol/newmulticol/positioned-with-constrained-height.html.
+
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        Make computeOverflow public so that RenderMultiColumnFlowThread can
+        access it.
+
+        * rendering/RenderMultiColumnFlowThread.cpp:
+        (WebCore::RenderMultiColumnFlowThread::layout):
+        Subclass layout to recompute the overflow for RenderMultiColumnBlock
+        after the flow thread has finished layout. This way it can account
+        for changes in RenderMultiColumnSets without having to do a second
+        layout pass.
+
+        * rendering/RenderMultiColumnFlowThread.h:
+        (RenderMultiColumnFlowThread):
+        Override layout().
+
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::columnCount):
+        Clean up a comment that referred to portions as region rects still.
+
+        (WebCore::RenderMultiColumnSet::setFlowThreadPortionRect):
+        * rendering/RenderMultiColumnSet.h:
+        * rendering/RenderRegion.h:
+        (WebCore::RenderRegion::setFlowThreadPortionRect):
+        Make setFlowThreadPortionRect virtual and actually mutate the size
+        and position of RenderMultiColumnSets so that they enclose their
+        column rects.
+
 2013-02-20  Dirk Schulze  <krit@webkit.org>
 
         Enable CANVAS_PATH flag
