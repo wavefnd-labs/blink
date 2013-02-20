@@ -1,3 +1,21 @@
+2013-02-20  Levi Weintraub  <leviw@chromium.org>
+
+        Line layout (but not pref widths) double-counts word spacing when between inlines
+        https://bugs.webkit.org/show_bug.cgi?id=110381
+
+        Reviewed by Emil A Eklund.
+
+        When a word break with a space occurs between inlines and word-spacing is non-zero,
+        line layout incorrectly committed the word-spacing value to the line twice, causing
+        wrapping in inline-blocks. To fix this, clear the word-spacing value when between
+        words and ignoring spaces, as we will already have added the word-spacing to the
+        line.
+
+        Test: fast/text/word-space-between-inlines.html
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::LineBreaker::nextSegmentBreak):
+
 2013-02-20  Nate Chapin  <japhet@chromium.org>
 
         Crash in WebCore::FrameLoader::checkCompleted()
