@@ -1,3 +1,82 @@
+2013-02-19  Conrad Shultz  <conrad_shultz@apple.com>
+
+        Allow UI clients to handle vertical wheel events.
+        https://bugs.webkit.org/show_bug.cgi?id=110006
+
+        Reviewed by Tim Horton.
+
+        Add API to allow matching changes in WebKit2 to control rubber-banding behavior at vertical page extrema.
+        If rubber-banding is disabled during a scroll event that would otherwise trigger rubber-banding, dispatch
+        didNotHandleWheelEvent() to the page UI client.
+
+        * WebCore.exp.in:
+        Export new rubber-banding API.
+
+        * page/Page.cpp:
+        (WebCore):
+        (WebCore::Page::rubberBandsAtBottom):
+        Proxy for the corresponding function in ScrollingCoordinator.
+        (WebCore::Page::setRubberBandsAtBottom):
+        Ditto.
+        (WebCore::Page::rubberBandsAtTop):
+        Ditto.
+        (WebCore::Page::setRubberBandsAtTop):
+        Ditto.
+
+        * page/Page.h:
+        (Page):
+        Declare new rubber-banding API (above).
+
+        * page/scrolling/ScrollingCoordinator.h:
+        (WebCore::ScrollingCoordinator::rubberBandsAtBottom):
+        Stub API implementation.
+        (WebCore::ScrollingCoordinator::setRubberBandsAtBottom):
+        Ditto.
+        (WebCore::ScrollingCoordinator::rubberBandsAtTop):
+        Ditto.
+        (WebCore::ScrollingCoordinator::setRubberBandsAtTop):
+        Ditto.
+
+        * page/scrolling/ScrollingTree.cpp:
+        (WebCore::ScrollingTree::ScrollingTree):
+        Initialize new member variables.
+        (WebCore::ScrollingTree::setMainFramePinState):
+        Set top/bottom pinned states.
+        (WebCore::ScrollingTree::rubberBandsAtBottom):
+        New accessor function.
+        (WebCore::ScrollingTree::setRubberBandsAtBottom):
+        New mutator function.
+        (WebCore::ScrollingTree::rubberBandsAtTop):
+        New accessor function.
+        (WebCore::ScrollingTree::setRubberBandsAtTop):
+        New mutator function.
+        (WebCore::ScrollingTree::willWheelEventStartSwipeGesture):
+        Start a vertical swipe event if the frame is pinned at the top or bottom and associated rubber-banding is disabled.
+
+        * page/scrolling/ScrollingTree.h:
+        (ScrollingTree):
+        Declare new rubber-banding API and associated member variables.
+
+        * page/scrolling/mac/ScrollingCoordinatorMac.h:
+        (ScrollingCoordinatorMac):
+        Declare API overrides.
+
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::rubberBandsAtBottom):
+        Method override; proxy to corresponding function in ScrollingTree.
+        (WebCore::ScrollingCoordinatorMac::setRubberBandsAtBottom):
+        Ditto.
+        (WebCore::ScrollingCoordinatorMac::rubberBandsAtTop):
+        Ditto.
+        (WebCore::ScrollingCoordinatorMac::setRubberBandsAtTop):
+        Ditto.
+
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::pinnedInDirection):
+        Remove trailing whitespace.
+        (WebCore::ScrollingTreeScrollingNodeMac::updateMainFramePinState):
+        Calculate and pass vertical pinning state to ScrollingTree::setMainFramePinState().
+
 2013-02-19  Simon Fraser  <simon.fraser@apple.com>
 
         Rubber-banding should not affect the visibleRect of the TileCache
