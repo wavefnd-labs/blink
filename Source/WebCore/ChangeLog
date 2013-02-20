@@ -1,3 +1,42 @@
+2013-02-19  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Make layers paint properly in columns.
+        https://bugs.webkit.org/show_bug.cgi?id=110296.
+
+        Reviewed by Sam Weinig.
+
+        Construct the style for the RenderMultiColumnFlowThread such that it
+        establishes a stacking context (by being position:relative
+        with a z-index of 0). This causes the layer collection code
+        to correctly ignore the RenderFlowThread layers during normal
+        painting.
+        
+        Fix more clipping bugs to eliminate subpixel layout differences
+        between old and new multicolumn.
+
+        Test: fast/multicol/newmulticol/layers-in-multicol.html
+
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::createMultiColumnFlowThreadStyle):
+        (WebCore):
+        (WebCore::RenderMultiColumnBlock::addChild):
+        Use a custom style (similar to what normal RenderFlowThreads do)
+        for the RenderMultiColumnFlowThread that makes it a stacking
+        context.
+        
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::flowThreadPortionOverflowRect):
+        Fix the overflow calculations out the leftmost and rightmost
+        columns to actually look at the physical placement of the columns.
+        The old code was backwards for RTL.
+        
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::overflowRectForFlowThreadPortion):
+        Fix the clipping done by overflowRectForFlowThreadPortion to min
+        and max with the passed-in portion rect so that subclasses that
+        inflate the rect prior to passing it into the method don't have that
+        inflation discarded.
+
 2013-02-20  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: CSSProperty.status defaults to "style" not "active"
