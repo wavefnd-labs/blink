@@ -1,3 +1,22 @@
+2013-02-20  David Grogan  <dgrogan@chromium.org>
+
+        IndexedDB: Limit LevelDB's max open files
+        https://bugs.webkit.org/show_bug.cgi?id=109993
+
+        Reviewed by Tony Chang.
+
+        LevelDB keeps up to 1000 (by default) data files open at a time to
+        avoid having to open() them. This has caused chromium to hit the
+        process-wide open file limit. This patch changes max_open_files to 20,
+        as that's the minimum permitted by LevelDB and we have no reason to
+        think that performance will suffer because of the extra open calls.
+
+        No new tests - a chromium browser test that tracks the open LevelDB
+        files is plausible but is blocked on http://crbug.com/177249/.
+
+        * platform/leveldb/LevelDBDatabase.cpp:
+        (WebCore::openDB):
+
 2013-02-20  David Hyatt  <hyatt@apple.com>
 
         [New Multicolumn] Resize RenderMultiColumnSets around their columns.
