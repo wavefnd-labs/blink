@@ -1,3 +1,31 @@
+2013-02-21  Andreas Kling  <akling@apple.com>
+
+        GlyphPage: Bake per-glyph font data array into same allocation as GlyphPage.
+
+        A hopeful fix for REGRESSION(r143125): ~5% performance hit on Chromium's intl2 page cycler
+        <http://webkit.org/b/108835>
+
+        Reviewed by Antti Koivisto.
+
+        Rewire GlyphPage so that we have to decide at creation time whether there will be a per-glyph
+        array of SimpleFontData* or not. This removes one allocation and one step of indirection for
+        pages with glyphs from mixed fonts.
+
+        * platform/graphics/GlyphPage.h:
+        (WebCore::GlyphPage::createForMixedFontData):
+        (WebCore::GlyphPage::createForSingleFontData):
+        (WebCore::GlyphPage::createCopiedSystemFallbackPage):
+        (WebCore::GlyphPage::~GlyphPage):
+        (WebCore::GlyphPage::glyphDataForIndex):
+        (WebCore::GlyphPage::fontDataForCharacter):
+        (WebCore::GlyphPage::setGlyphDataForIndex):
+        (WebCore::GlyphPage::removeFontDataFromSystemFallbackPage):
+        (WebCore::GlyphPage::GlyphPage):
+        (WebCore::GlyphPage::hasPerGlyphFontData):
+        (GlyphPage):
+        * platform/graphics/GlyphPageTreeNode.cpp:
+        (WebCore::GlyphPageTreeNode::initializePage):
+
 2013-02-21  Xan Lopez  <xlopez@rim.com>
 
         [BlackBerry] MediaPlayerPrivateBlackBerry: include Logging.h
