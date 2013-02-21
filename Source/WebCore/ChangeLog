@@ -1,3 +1,31 @@
+2013-02-20  Mike West  <mkwst@chromium.org>
+
+        Mouseup event does not fire on Scroll Bar
+        https://bugs.webkit.org/show_bug.cgi?id=25811
+
+        Reviewed by Tony Chang.
+
+        Currently, clicking on a scrollbar fires a mousedown event, but not a
+        mouseup event. This causes problems for code like jQuery UI's
+        draggable[1], as the drag starts, but is never cancelled. Other use
+        cases are noted in the slightly old Chromium bug[2].
+
+        If a mouseup event is received after a mousedown event on a scrollbar,
+        this patch dispatches a mouseup event on the same node the mousedown
+        event dispatched on. This matches Gecko's behavior.
+
+        [1]: http://bugs.jqueryui.com/ticket/6925
+        [2]: http://crbug.com/14204
+
+        Tests: fast/scrolling/scrollbar-mousedown-mouseup.html
+               fast/scrolling/scrollbar-mousedown-move-mouseup.html
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleMouseReleaseEvent):
+            If a mouseup event follow a mousedown event on a scrollbar,
+            dispatch an event on the same node from which the mousedown event
+            was triggered.
+
 2013-02-20  Takashi Sakamoto  <tasak@google.com>
 
         [Refactoring] Make m_state an on-stack object
