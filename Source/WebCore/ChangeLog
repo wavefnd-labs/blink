@@ -1,3 +1,45 @@
+2013-02-20  Alexey Proskuryakov  <ap@apple.com>
+
+        Stop hardcoding knowledge about blob protocol in ResourceHandle
+        https://bugs.webkit.org/show_bug.cgi?id=110382
+
+        Reviewed by Anders Carlsson.
+
+        * platform/network/BlobRegistry.h:
+        * platform/network/chromium/BlobRegistryProxy.h:
+        Removed loadResourceSynchronously(). Chromium did not even implement it, and
+        cross-platform code doesn't need it any more either.
+
+        * platform/network/BlobRegistryImpl.cpp:
+        (WebCore::loadResourceSynchronously): A function to load a blob synchronously,
+        suitable for being in a ResourceHandle map.
+        (WebCore::registerBlobResourceHandleConstructor): Register loadResourceSynchronously too.
+        (WebCore::BlobRegistryImpl::createResourceHandle): Don't make policy decisions here,
+        it's just a registry. Moved code for checking request method down to BlobResourceHandle.
+
+        * platform/network/BlobRegistryImpl.h: Removed BlobRegistryImpl::loadResourceSynchronously().
+        A registry shouldn't load resources, and it already has enough accessors to implement
+        this externally.
+
+        * platform/network/BlobResourceHandle.h:
+        * platform/network/BlobResourceHandle.cpp:
+        (WebCore::BlobResourceHandle::createAsync): Renamed from create(), to make it clear
+        that it's not OK to call from synchronous loader. Moved method check here.
+        (WebCore::BlobResourceHandle::loadResourceSynchronously): Moved method check here.
+        We used to fall through to NSURLConnection based loader when method was not GET,
+        which of course resulted in an error eventually, but was just wrong.
+
+        * platform/network/ResourceHandle.cpp:
+        (WebCore::builtinResourceHandleSynchronousLoaderMap): Added a map for synchronous case.
+        (WebCore::ResourceHandle::registerBuiltinSynchronousLoader): Ditto.
+        (WebCore::ResourceHandle::loadResourceSynchronously): We no longer need to hardcode
+        knowledge about blobRegistry and blobs here.
+
+        * platform/network/ResourceHandle.h: Added registerBuiltinSynchronousLoader().
+
+        * platform/network/chromium/ResourceHandle.h: Removed loadResourceSynchronously(),
+        which was not implemented for Chromium.
+
 2013-02-20  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: TabbedEditorContainer and OpenResourceDialog should show uiSourceCode path and name instead of parsedURL
