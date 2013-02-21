@@ -1,3 +1,40 @@
+2013-02-21  Alok Priyadarshi  <alokp@chromium.org>
+
+        Mark GraphicsLayers as opaque when possible
+        https://bugs.webkit.org/show_bug.cgi?id=70634
+
+        Reviewed by Simon Fraser.
+
+        Mark layers as opaque in a very simple case - the main renderer has an
+        opaque background and covers the entire composited bounds.
+        RenderLayer::contentsOpaqueInRect has been implemented conservatively,
+        i.e. it errs towards returning false negative.
+
+        Tests: compositing/contents-opaque/contents-opaque-background-clip.html
+               compositing/contents-opaque/contents-opaque-background-color.html
+               compositing/contents-opaque/contents-opaque-layer-opacity.html
+               compositing/contents-opaque/contents-opaque-layer-transform.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::backgroundIsOpaqueInRect):
+        (WebCore):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderBoxModelObject.h:
+        (WebCore::RenderBoxModelObject::backgroundIsOpaqueInRect):
+        (WebCore::RenderBoxModelObject::foregroundIsOpaqueInRect):
+        (RenderBoxModelObject):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::contentsOpaqueInRect):
+        (WebCore):
+        (WebCore::RenderLayer::listContentsOpaqueInRect):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+        * rendering/RenderLayerModelObject.h:
+        (RenderLayerModelObject):
+
 2013-02-21  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Implement grid growth during auto placement
