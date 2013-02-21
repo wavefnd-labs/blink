@@ -1,3 +1,35 @@
+2013-02-21  Robert Hogan  <robert@webkit.org>
+
+        Overflow can be cleared just before it is computed
+        https://bugs.webkit.org/show_bug.cgi?id=110361
+
+        Reviewed by David Hyatt.
+
+        Overflow can be cleared just before it is computed in a lot of places because overflow computation happens all at once
+        now rather than cumulatively during layout. Any object that doesn't use computeOverflow() will still need to clear it manually
+        though.
+
+        No new tests, refactoring.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::computeOverflow):
+        (WebCore::RenderBlock::simplifiedLayout):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutInlineChildren):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutBlock):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock):
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::layoutBlock):
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::layout):
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::layout):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::layout):
+
 2013-02-21  Alok Priyadarshi  <alokp@chromium.org>
 
         Mark GraphicsLayers as opaque when possible
