@@ -1,3 +1,40 @@
+2013-02-20  Simon Fraser  <simon.fraser@apple.com>
+
+        Zoomed, slow-scrolling pages keep recreating tiles when scrolled
+        https://bugs.webkit.org/show_bug.cgi?id=110379
+
+        Reviewed by Tim Horton.
+
+        On slow-scrolling pages the TileCache makes the tiles the size of
+        the visible rect to minimize per-tile painting overhead. If the size
+        of that rect changes, the TileCache re-creates all the tiles.
+        
+        This was a problem whem zoomed, because mapping the visible rect
+        through the scale transform and then rounding it would cause the
+        size to keep changing, causing lots of tile re-creation.
+        
+        Fix by carrying the visibleRect around as a FloatRect, and doing
+        the same for the exposedRect. We then only expand to integers
+        when computing the tile size. This also fixes an issue where we could
+        sometimes make extra tiles because of fractional bits of tiles at the edges,
+        as shown by the test result change.
+
+        * platform/graphics/TiledBacking.h:
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::updateVisibleRect):
+        * platform/graphics/ca/mac/TileCache.h:
+        * platform/graphics/ca/mac/TileCache.mm:
+        (WebCore::TileCache::setVisibleRect):
+        (WebCore::TileCache::setExposedRect):
+        (WebCore::TileCache::prepopulateRect):
+        (WebCore::TileCache::computeTileCoverageRect):
+        (WebCore::TileCache::tileSizeForCoverageRect):
+        (WebCore::TileCache::blankPixelCountForTiles):
+        (WebCore::TileCache::revalidateTiles):
+        (WebCore::TileCache::ensureTilesForRect):
+        * platform/graphics/ca/mac/WebTileLayer.mm:
+        (-[WebTileLayer logFilledFreshTile]):
+
 2013-02-20  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Implement the auto-placement algorithm without grid growth
