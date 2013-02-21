@@ -1,3 +1,46 @@
+2013-02-21  Christian Biesinger  <cbiesinger@chromium.org>
+
+        Convert buttons from DeprecatedFlexBox to nondeprecated FlexibleBox
+        https://bugs.webkit.org/show_bug.cgi?id=109994
+
+        Reviewed by Ojan Vafai.
+
+        Covered by existing tests for <button> and <input
+        type="button|submit|reset">
+
+        * css/html.css:
+        (input[type="button"], input[type="submit"], input[type="reset"], input[type="file"]::-webkit-file-upload-button, button):
+        Convert from box-align to align-items. We are using flex-start here in
+        conjunction with an auto margin for correct centering. See
+        RenderButton.cpp below for the margin & more explanation.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::createAnonymousWithParentRendererAndDisplay):
+        Add a case for creating a non-deprecated flex box.
+
+        * rendering/RenderButton.cpp:
+        (WebCore::RenderButton::RenderButton):
+        (WebCore::RenderButton::addChild):
+        (WebCore::RenderButton::removeChild):
+        Forward to new base class
+        (WebCore::RenderButton::styleWillChange):
+        (WebCore::RenderButton::setupInnerStyle):
+        We are now using flexbox properties.
+        - min-width is needed for correct shrinking of the contents
+        - margin-top and margin-bottom are used for correct centering. We
+        can't use align-items: center because results are incorrect when the
+        content overflows. See LayoutTests/fast/forms/control-clip.html
+
+        * rendering/RenderButton.h:
+        Inherit from RenderFlexibleBox
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::createAnonymous):
+        (WebCore):
+        * rendering/RenderFlexibleBox.h:
+        (RenderFlexibleBox):
+        Add a createAnonymous function to RenderFlexibleBox.
+
 2013-02-21  John Mellor  <johnme@chromium.org>
 
         [chromium] Simplify computation of screenRect/windowRect.
