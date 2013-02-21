@@ -1,3 +1,27 @@
+2013-02-21  Philip Rogers  <pdr@google.com>
+
+        Stop starting animations when leaving a page
+        https://bugs.webkit.org/show_bug.cgi?id=110257
+
+        Reviewed by Stephen Chenney.
+
+        SVGImage::resetAnimation() incorrectly started animations which could cause a crash
+        when leaving the page. This patch fixes resetAnimation to only stop the animation,
+        similar to BitmapImage::resetAnimation().
+
+        Additionally, this patch removes an unneeded call to Document::updateStyleForAllDocuments()
+        that was present in the animation loop. This makes the animation code more resistant to
+        similar bugs in the future.
+
+        Both of these changes are functionally covered with existing tests.
+
+        Test: svg/animations/reset-animation-crash.html
+
+        * svg/animation/SMILTimeContainer.cpp:
+        (WebCore::SMILTimeContainer::updateAnimations):
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::resetAnimation):
+
 2013-02-19  Mark Hahnenberg  <mhahnenberg@apple.com>
 
         Objective-C API: Need a way to use the Objective-C JavaScript API with WebKit
