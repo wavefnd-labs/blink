@@ -1,3 +1,32 @@
+2013-02-21  Tony Chang  <tony@chromium.org>
+
+        Autogenerate Settings that call setNeedsRecalcStyleInAllFrames when set
+        https://bugs.webkit.org/show_bug.cgi?id=109989
+
+        Reviewed by Ryosuke Niwa.
+
+        Start generating the code for settings that call m_page->setNeedsRecalcStyleInAllFrames()
+        when the value is changed. This allows us to generate 10 more settings. As a follow up, we
+        can remove some methods from DRT/WTR after this.
+
+        No new tests, this is a build refactor and should not impact any test results.
+
+        * page/Settings.cpp:
+        (WebCore::Settings::Settings): Remove member variables. Add SETTINGS_SETTER_BODIES macro that
+        has the generated setter bodies.
+        * page/Settings.h:
+        (Settings): Remove code that is now generated.
+        * page/Settings.in: Add new entries with setNeedsStyleRecalcWhenSetting=1
+        * page/make_settings.pl:
+        (defaultItemFactory): Add setNeedsStyleRecalcWhenSetting flag.
+        (generateSettingsMacrosHeader): Print macro for setter bodies.
+        (printConditionalMacros): Add setter body code.
+        (printGettersAndSetters): Pass in setNeedsStyleRecalcWhenSetting so we know whether to inline the
+        setter in the header or not.
+        (printGetterAndSetter): Ditto.
+        (printSetterBodies): Print macro for setter bodies.
+        (printSetterBody): Print setter body for a single setting.
+
 2013-02-21  Dean Jackson  <dino@apple.com>
 
         Plug-in snapshotting code always accepts first snapshot
