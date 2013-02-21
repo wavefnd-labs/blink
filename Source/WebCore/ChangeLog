@@ -1,3 +1,53 @@
+2013-02-21  Pan Deng  <pan.deng@intel.com>
+
+        [Web Inspector]Add WebSocket networking events in Timeline panel.
+        https://bugs.webkit.org/show_bug.cgi?id=105527.
+
+        Reviewed by Pavel Feldman.
+
+        This patch add four WebSocket networking events in Timeline panel. The Events
+        are CreateWebSocket, SendWebSocketHandshakeRequest, ReceiveWebSocketHandShakeResponse
+        and DestoryWebSocket. Thanks to Kitamura san's previous work.
+
+        Test: http/tests/inspector/websocket/timeline-websocket-event.html
+
+        * English.lproj/localizedStrings.js:
+        * Modules/websockets/WebSocketChannel.cpp: Add protocol information
+        (WebCore::WebSocketChannel::connect):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::didCreateWebSocketImpl): Add Timeline agent instrumentation for websocket
+        (WebCore::InspectorInstrumentation::willSendWebSocketHandshakeRequestImpl): Ditto
+        (WebCore::InspectorInstrumentation::didReceiveWebSocketHandshakeResponseImpl): Ditto
+        (WebCore::InspectorInstrumentation::didCloseWebSocketImpl): Ditto
+        * inspector/InspectorInstrumentation.h:
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::didCreateWebSocket):
+        (WebCore::InspectorInstrumentation::willSendWebSocketHandshakeRequest):
+        (WebCore::InspectorInstrumentation::didReceiveWebSocketHandshakeResponse):
+        (WebCore::InspectorInstrumentation::didCloseWebSocket):
+        * inspector/InspectorTimelineAgent.cpp:
+        (TimelineRecordType):
+        (WebCore):
+        (WebCore::InspectorTimelineAgent::didCreateWebSocket): Add Timeline record for websocket create
+        (WebCore::InspectorTimelineAgent::addWebSocketRecord): Add general websocket record
+        (WebCore::InspectorTimelineAgent::willSendWebSocketHandshakeRequest): Add Timeline record for websocket handshake request send
+        (WebCore::InspectorTimelineAgent::didReceiveWebSocketHandshakeResponse): Add Timeline record for websocket handshake response receive
+        (WebCore::InspectorTimelineAgent::didDestroyWebSocket): Add Timeline record for websocket destroy
+        * inspector/InspectorTimelineAgent.h:
+        (WebCore):
+        (InspectorTimelineAgent):
+        * inspector/TimelineRecordFactory.h:
+        (TimelineRecordFactory):
+        (WebCore::TimelineRecordFactory::createWebSocketCreateData):
+        (WebCore::TimelineRecordFactory::createGenericWebSocketData):
+        * inspector/front-end/TimelineModel.js: Add Timeline record type for websocket
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel._initRecordStyles):
+        (WebInspector.TimelinePresentationModel.prototype.reset): Add slot to store WebSocket Create record
+        (WebInspector.TimelinePresentationModel.Record):
+        (WebInspector.TimelinePresentationModel.Record.prototype._generatePopupContentWithImagePreview): Add PopupContent for websocket record, including url and protocol
+
 2013-02-21  Oswald Buddenhagen  <oswald.buddenhagen@digia.com>
 
         [Qt] Fix pkg-config dependencies of QtWebKit itself
