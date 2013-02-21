@@ -1,3 +1,51 @@
+2013-02-20  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Implement the auto-placement algorithm without grid growth
+        https://bugs.webkit.org/show_bug.cgi?id=110277
+
+        Reviewed by Tony Chang.
+
+        Tests: fast/css-grid-layout/grid-item-addition-auto-placement-update.html
+               fast/css-grid-layout/grid-item-removal-auto-placement-update.html
+               fast/css-grid-layout/grid-auto-flow-resolution.html (extended to cover more cases)
+
+        This change implements most of the auto-placement algorithm per
+        http://dev.w3.org/csswg/css3-grid-layout/#auto-placement-algo
+
+        To limit the size of the code change, it doesn't implement growing the grid if there
+        are no empty grid areas. If we don't find any empty grid areas, we just insert in the first
+        one, like what grid-auto-flow: none would do (which explains the test failures).
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::GridIterator::nextEmptyGridArea):
+        Added this function to return the GridCoordinate of the next empty grid area along
+        the iterator's direction.
+
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        Split this function into the different steps below. For efficiency, collect the auto vs specified
+        major axis grid items in different Vectors.
+
+        (WebCore::RenderGrid::placeSpecifiedMajorAxisItemsOnGrid):
+        Added this function that implements part of step 1 of the algorithm (the grid items without
+        auto row / column are already handled in placeItemsOnGrid).
+
+        (WebCore::RenderGrid::placeAutoMajorAxisItemsOnGrid):
+        Added this function that iterates over the auto grid items and call placeAutoMajorAxisItemOnGrid.
+
+        (WebCore::RenderGrid::placeAutoMajorAxisItemOnGrid):
+        Added this method to handle the step 4 of the algorithm. Based on the minor axis's position,
+        it either walks along the major axis once or several times until it finds an empty grid area
+        for the grid item.
+
+        (WebCore::RenderGrid::autoPlacementMajorAxisPositionForChild):
+        (WebCore::RenderGrid::autoPlacementMinorAxisPositionForChild):
+        (WebCore::RenderGrid::autoPlacementMajorAxisDirection):
+        (WebCore::RenderGrid::autoPlacementMinorAxisDirection):
+        Added these helper functions that return minor / major axis positions & direction.
+
+        * rendering/RenderGrid.h:
+        Added the previous new RenderGrid functions.
+
 2013-02-20  Vincent Scheib  <scheib@chromium.org>
 
         Accept 'allowfullscreen' in addition to 'webkitallowfullscreen'.
