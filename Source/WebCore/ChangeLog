@@ -1,3 +1,67 @@
+2013-02-20  Philip Rogers  <pdr@google.com>
+
+        Account for transform in SVG background images
+        https://bugs.webkit.org/show_bug.cgi?id=110295
+
+        Reviewed by Dirk Schulze.
+
+        Tiled SVG background images are rendererd by drawing the SVG content into a temporary
+        image buffer, then stamping out a tiled pattern using this buffer. Previously the
+        image buffer did not account for CSS transforms which could result in pixelated backgrounds.
+
+        This patch takes advantage of the context's transform when sizing the temporary tiling
+        image buffer. Because the context's transform also includes scale, this patch simplifies
+        the SVG image code to no longer track scale.
+
+        Test: svg/as-background-image/svg-transformed-background.html
+
+        * loader/cache/CachedImage.cpp:
+        (WebCore):
+        (WebCore::CachedImage::imageForRenderer):
+
+            CachedImage::lookupOrCreateImageForRenderer no longer creates images so it has been
+            refactored into just "imageForRenderer". Previously there were two versions of
+            lookupOrCreateImageForRenderer; these have been folded into imageForRenderer.
+
+        * loader/cache/CachedImage.h:
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::drawPatternForContainer):
+
+            To create the temporary tiling image buffer, the final size in screen coordinates is
+            needed. This is now computed using the current context's CTM. Because the CTM
+            already includes the page scale, all page scale tracking can be removed.
+
+            The adjustments to srcRect and the pattern transform are the same as before, just
+            refactored to use imageBufferScale which has x and y components.
+
+        * svg/graphics/SVGImage.h:
+        * svg/graphics/SVGImageCache.cpp:
+        (WebCore::SVGImageCache::setContainerSizeForRenderer):
+
+            Because the page scale needed to be cached between calls to
+            setContainerSizeForRenderer, this function was written to modify an existing cache
+            entry. Because the page scale no longer needs to be tracked, this code has been
+            simplified to re-write any existing cache entry.
+
+        (WebCore::SVGImageCache::imageSizeForRenderer):
+
+            This function has been simplified by calling SVGImageForContainer::size() instead
+            of computing this value manually. The value returned remains the same, containing
+            the container size multiplied by zoom.
+
+        (WebCore::SVGImageCache::imageForRenderer):
+
+            Previously we set the page scale on every call to imageForRenderer. Because page scale
+            no longer needs to be tracked, this function has been simplified to simply return
+            the cached SVGImageForContainer.
+
+        * svg/graphics/SVGImageForContainer.cpp:
+        (WebCore::SVGImageForContainer::drawPattern):
+        * svg/graphics/SVGImageForContainer.h:
+        (WebCore::SVGImageForContainer::create):
+        (WebCore::SVGImageForContainer::SVGImageForContainer):
+        (SVGImageForContainer):
+
 2013-02-20  Jer Noble  <jer.noble@apple.com>
 
         Crash in com.apple.WebKit2.WebProcessService at com.apple.avfoundation: __73-[AVAssetResourceLoader _attemptDelegateHandlingOfRequestWithDictionary:]_block_invoke + 51
