@@ -1,3 +1,24 @@
+2013-02-21  Simon Fraser  <simon.fraser@apple.com>
+
+        [Safari] Crash with opacity + drop shadow filter + child element extending beyond filter outsets
+        https://bugs.webkit.org/show_bug.cgi?id=107467
+
+        Reviewed by Dean Jackson.
+        
+        The filter code plays games with the current GraphicsContext, replacing the current
+        context with one which will get filtered.
+        
+        This doesn't play nicely with the RenderLayer code which lazily starts transparency
+        layers. If we don't start a transparency layer until painting a child of the filtered
+        layer, then the transparency layer is started using the wrong context.
+        
+        Fix by eagerly starting transparency layers if we have both a filter and opacity.
+
+        Test: css3/filters/filter-with-opacity-and-children.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintLayerContents):
+
 2013-02-21  Tony Chang  <tony@chromium.org>
 
         Autogenerate Settings that call setNeedsRecalcStyleInAllFrames when set
