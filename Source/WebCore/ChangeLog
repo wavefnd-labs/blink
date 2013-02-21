@@ -1,3 +1,29 @@
+2013-02-21  Dean Jackson  <dino@apple.com>
+
+        Plug-in snapshotting code always accepts first snapshot
+        https://bugs.webkit.org/show_bug.cgi?id=110495
+
+        Reviewed by Tim Horton.
+
+        When we detect a plugin that can be snapshotted we start capturing
+        images until we find one that we believe isn't blank, or we timeout.
+        I introduced a regression recently where we swap renderers as
+        soon as the snapshot arrives, whether or not is is blank.
+
+        The fix was to have the embedder (currently only WK2) be the one
+        who tells the HTMLPlugInElement to start displaying snapshots.
+
+        I also reduced the number of snapshot attempts we will make before
+        giving up. We don't want to sit around for 66 seconds displaying nothing.
+
+        * html/HTMLPlugInElement.h:
+        (WebCore::HTMLPlugInElement::setDisplayState): Make this a virtual function.
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::setDisplayState): Override to call the
+            base class version, but swap renderers if we should move to the snapshot.
+        (WebCore::HTMLPlugInImageElement::updateSnapshot): Don't swap renderers here any more.
+        * html/HTMLPlugInImageElement.h: New virtual version of setDisplayState.
+
 2013-02-21  Tony Gentilcore  <tonyg@chromium.org>
 
         Tune BackgroundHTMLParser's pendingTokenLimit based on a benchmark
