@@ -1,5 +1,27 @@
 2013-02-21  Simon Fraser  <simon.fraser@apple.com>
 
+        Don't make an overhang shadow layer when the WKView has a transparent background
+        https://bugs.webkit.org/show_bug.cgi?id=110429
+
+        Reviewed by Anders Carlsson.
+
+        When in coordinated scrolling mode, RenderLayerCompositor makes a layer to show
+        the shadow around the content when rubber-banding. However, if the view is
+        transparent, we don't want to make this layer, since it darkens the entire view.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateRootLayerConfiguration): Code was moved
+        into viewHasTransparentBackground(), so just call that here.
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::requiresContentShadowLayer): Don't make
+        a shadow layer when the view is transparent.
+        (WebCore::RenderLayerCompositor::viewHasTransparentBackground): Return
+        true if the view is transparent or has a non-opaque background color,
+        and optionally return that color.
+        * rendering/RenderLayerCompositor.h:
+
+2013-02-21  Simon Fraser  <simon.fraser@apple.com>
+
         [Safari] Crash with opacity + drop shadow filter + child element extending beyond filter outsets
         https://bugs.webkit.org/show_bug.cgi?id=107467
 
