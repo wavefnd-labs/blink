@@ -1,3 +1,27 @@
+2013-02-20  Ojan Vafai  <ojan@chromium.org>
+
+        Positioned, replaced elements with intrinsic width keywords compute the wrong width
+        https://bugs.webkit.org/show_bug.cgi?id=110393
+
+        Reviewed by Emil A Eklund.
+
+        Test: fast/css-intrinsic-dimensions/intrinsic-sized-replaced-absolutes.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeReplacedLogicalWidthUsing):
+        Add the intrinsic size keywords to the switch. Confusingly, we have to
+        subtract the border and padding since the callers expect the content width.
+
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::computeReplacedLogicalWidth):
+        Don't do the intrinsic ratio calculation if the width is an
+        intrinsic width keyword, as per, http://dev.w3.org/csswg/css3-sizing/#replaced-intrinsic.
+
+        (WebCore::RenderReplaced::computeIntrinsicLogicalWidths):
+        (WebCore::RenderReplaced::computePreferredLogicalWidths):
+        The old code was trying to apply the intrinsic ratio calculation to
+        the intrinsic width, which is wrong per spec.
+
 2013-02-20  Alec Flett  <alecflett@chromium.org>
 
         LevelDB: Remove excess vector copy
