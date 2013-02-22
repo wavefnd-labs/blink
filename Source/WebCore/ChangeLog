@@ -1,3 +1,52 @@
+2013-02-21  Eric Seidel  <eric@webkit.org>
+
+        LayoutTests/fast/encoding/parser-tests-*.html timeout with threaded HTML parser
+        https://bugs.webkit.org/show_bug.cgi?id=109995
+
+        Reviewed by Adam Barth.
+
+        In the case where during main document onload, we
+        load a new iframe, and then from within that iframe
+        we run script to remove the iframe and call testRunner.notifyDone()
+        the notifyDone() will not correctly dump because
+        the testRunner does not yet realize that the main resource
+        has completed loading.
+
+        In the main-thread parser, the testRunner does correctly know
+        that the main thread has completed, because removing the iframe
+        causes a didFailLoad callback to the embedder, because when
+        the iframe is being removed, the DocumentLoader for that iframe
+        is still on the stack and believe's its loading
+        (because it has a MainResourceLoader which is also on the stack
+        delivering us the bytes which contain this inline script).
+
+        In the threaded-parser case, the DocumentLoader and MainResourceLoader
+        are no longer on the stack, as we are parsing the iframe asynchronously
+        after all the bytes have been delivered, and the MainResourceLoader destroyed.
+        Thus when DocumentLoader::stopLoading() is called, loading() returns
+        false, and it returns early.  One might argue that we should remove that
+        early return entirely, but it seemed safer to extend the idea of
+        when we're loading to include the time when the parser is active.
+
+        This patch solves this by teaching the DocumentLoader that it is still
+        "loading" so long as the parser is still active.
+
+        Also added a call to DocumentLoader::checkLoadComplete from
+        Document::decrementActiveParserCount which seemed to cause
+        http/tests/multipart/policy-ignore-crash.php to pass.
+
+        This causes http/tests/security/feed-urls-from-remote.html to timeout
+        on chromium (but no other platforms that I'm aware of).  I believe this
+        is due to a bug in our DRT implementation in the policyDelegate case
+        (which AFAIK is not a codepath which Chromium actually uses in the wild).
+        The test already times out on TOT if you remove the setCustomPolicyDelegate calls!
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::isLoading):
+        (WebCore):
+        * loader/DocumentLoader.h:
+        (DocumentLoader):
+
 2013-02-21  Erik Arvidsson  <arv@chromium.org>
 
         Nodes should not have attributes property
