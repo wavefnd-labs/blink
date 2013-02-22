@@ -1,3 +1,20 @@
+2013-02-22  James Simonsen  <simonjam@chromium.org>
+
+        Preloads should be cleared when JavaScript cancels loading prematurely.
+        https://bugs.webkit.org/show_bug.cgi?id=110388
+
+        Reviewed by Antti Koivisto.
+
+        If a page preloads a resource, but JavaScript aborts parsing for any reason (for example, a
+        redirect or document.write()), the resource is forever marked a preload and won't be reloaded
+        even if it's explicitly marked no-cache and the page is reloaded.
+
+        Test: http/tests/cache/preload-cleared-after-parrsing-canceled-by-js.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::implicitClose):
+        (WebCore::Document::finishedParsing):
+
 2013-02-22  Antoine Quint  <graouts@apple.com>
 
         Expose a list of all reasons that qualify a RenderLayer to be composited
