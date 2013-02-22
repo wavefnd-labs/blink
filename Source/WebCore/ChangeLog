@@ -1,3 +1,24 @@
+2013-02-21  Tony Gentilcore  <tonyg@chromium.org>
+
+        Invalidate outstanding checkpoints for the background input stream and preload scanner
+        https://bugs.webkit.org/show_bug.cgi?id=110537
+
+        Reviewed by Adam Barth.
+
+        fast/tokenizer/write-before-load.html caused duplicate didFailSpeculation() calls for the same checkpoint.
+        One was triggered by processParsedChunkFromBackgroundParser and the other by resumeParsingAfterScriptExecution.
+        This change ensures that after we send a checkpoint, it is cleared so it won't be sent again until the next
+        processParsedChunkFromBackgroundParser().
+
+        No new tests because no new functionality.
+
+        * html/parser/BackgroundHTMLInputStream.cpp:
+        (WebCore::BackgroundHTMLInputStream::rewindTo):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::didFailSpeculation):
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::TokenPreloadScanner::rewindTo):
+
 2013-02-21  Dean Jackson  <dino@apple.com>
 
         Followup commit for https://bugs.webkit.org/show_bug.cgi?id=110541
