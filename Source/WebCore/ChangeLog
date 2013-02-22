@@ -1,3 +1,22 @@
+2013-02-21  Eric Seidel  <eric@webkit.org>
+
+        tables/mozilla/bugs/bug8950.html fails with threaded parser due to attribute duplication
+        https://bugs.webkit.org/show_bug.cgi?id=110532
+
+        Reviewed by Adam Barth.
+
+        This is a very basic failure which we should have caught earlier with the html5lib parser
+        tests, except those use document.write and thus avoid the threaded parser.
+
+        AtomicHTMLToken expects its attributes to be unique.  We were not doing that for the
+        CompactHTMLToken path, and this ancient mozilla table test caught that.
+
+        Fixes tables/mozilla/bugs/bug8950.html.
+
+        * html/parser/AtomicHTMLToken.h:
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        (WebCore::AtomicHTMLToken::initializeAttributes):
+
 2013-02-21  Adam Barth  <abarth@webkit.org>
 
         Threaded HTML Parser fails fast/dom/Document/readystate.html
