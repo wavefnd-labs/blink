@@ -1,3 +1,62 @@
+2013-02-22  Allan Sandfeld Jensen  <allan.jensen@digia.com>
+
+        Allow child-frame content in hit-tests.
+        https://bugs.webkit.org/show_bug.cgi?id=95204
+
+        Reviewed by Julien Chaffraix.
+
+        Refactors how EventHandler::hitTestResultAtPoint handles child-frame content,
+        it is now handled by the hit test itself controlled by the AllowChildFrameContent
+        flag in HitTestRequest.
+
+        This means that area-based hit-tests can now return elements from all the child frames
+        they intersect instead of just the one frame containing the center point. The improved
+        results from area-based hit-tests will among other things also improve touch adjustment
+        near frame boundaries.
+
+        Tests: fast/dom/nodesFromRect/nodesFromRect-child-frame-content.html
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::hitTestResultAtPoint):
+            Recursion into child-frames have been moved to RenderFrameBase::nodeAtPoint, so
+            now hitTestResultAtPoint just needs to set AllowChildFrameContent.
+        * page/TouchAdjustment.cpp:
+        (WebCore::TouchAdjustment::parentShadowHostOrOwner):
+            New function to iterate up across frame boundaries.
+        (WebCore::TouchAdjustment::compileSubtargetList):
+            We need to iterate up across frame boundaries to avoid iframes competing with their
+            own content for touch adjustment.
+        * rendering/HitTestRequest.h:
+        (WebCore::HitTestRequest::allowsChildFrameContent):
+        (WebCore::HitTestRequest::isChildFrameHitTest):
+        * rendering/HitTestResult.cpp:
+        (WebCore::HitTestResult::HitTestResult):
+        (WebCore::HitTestResult::operator=):
+        (WebCore::HitTestResult::append):
+        (WebCore::HitTestResult::dictationAlternatives):
+        * rendering/HitTestResult.h:
+        (WebCore::HitTestResult::pointInMainFrame):
+        (WebCore::HitTestResult::pointInInnerNodeFrame):
+        (HitTestResult):
+            m_hitTestLocation is now in main frame coordinates, which make m_pointInMainFrame
+            unnecessary, but requires the introduction of m_pointInInnerFrame, to remember
+            the coordinates of inner-node in its own frame.
+        * rendering/RenderFrameBase.cpp:
+        (WebCore::RenderFrameBase::nodeAtPoint):
+            The recursion into child-frames is now handled here instead of in hitTestResultAtPoint, this
+            allows us to recurse into multiple frames, instead of just one.
+        * rendering/RenderFrameBase.h:
+        (RenderFrameBase):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::hitTest):
+            RenderLayer should not lie about being hit if the request is child-frame request.
+        * testing/Internals.cpp:
+        (WebCore::Internals::nodesFromRect):
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+            Extended so nodesFromRect with child-frame content can be tested.
+
 2013-02-22  Andreas Kling  <akling@apple.com>
 
         ShareableElementData should use zero-length array for storage.
