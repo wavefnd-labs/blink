@@ -1,3 +1,39 @@
+2013-02-21  Grzegorz Czajkowski  <g.czajkowski@samsung.com>
+
+        Allow to retrieve the request data from abstract TextCheckingRequest to be accessible for WK2
+        https://bugs.webkit.org/show_bug.cgi?id=110208
+
+        Reviewed by Hajime Morrita.
+
+        The WebCore changes are required to implement asynchronous spell checking in WK2.
+        The idea of asynchronous spell checking in WK1 is to pass the pointer to the abstract object
+        to the client who is able to verify the given text and notify the WebCore about results.
+        WK2 will extract the request data and pass it (with additional information) to the UIProcess.
+
+        No new tests, covered by editing/spelling tests.
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::markAndReplaceFor):
+        Extract the request data as it is the member of 'TextCheckingRequest'.
+
+        * editing/SpellChecker.cpp:
+        (WebCore):
+        (WebCore::SpellCheckRequest::didCancel):
+        (WebCore::SpellCheckRequest::setCheckerAndSequence):
+        (WebCore::SpellChecker::requestCheckingFor):
+        (WebCore::SpellChecker::enqueueRequest):
+        (WebCore::SpellChecker::didCheck):
+        (WebCore::SpellChecker::didCheckSucceed):
+        * platform/text/TextChecking.h:
+        (WebCore):
+        (TextCheckingRequestData):
+        Introduce a new 'TextCheckingRequestData' class to keep the request data and to
+        easy extract it from the 'TextCheckingRequest'.
+
+        (WebCore::TextCheckingRequestData::TextCheckingRequestData):
+        (TextCheckingRequest):
+        (WebCore::TextCheckingRequest::~TextCheckingRequest):
+
 2013-02-21  Brady Eidson  <beidson@apple.com>
 
         Move fastlog2() to WTF/MathExtras.h so it can be used from multiple projects.
