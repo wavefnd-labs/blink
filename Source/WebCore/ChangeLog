@@ -1,3 +1,21 @@
+2013-02-22  Kunihiko Sakamoto  <ksakamoto@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Unable to enter "24" to hour field
+        https://bugs.webkit.org/show_bug.cgi?id=110431
+
+        Reviewed by Kent Tamura.
+
+        Fixed a bug that hour-field does not accept "24" as a valid input when hour format is 1-24.
+        To test <input> against different time formats, added "pattern" attribute to DateTimeEditElement.
+
+        Test: fast/forms/time-multiple-fields/time-multiple-fields-stepup-stepdown-from-renderer.html
+
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::updateInnerTextValue): Overwrites layoutParameters.dateTimeFormat by pattern attribute of DateTimeEditElement (if exists).
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeHourFieldElement::populateDateTimeFieldsState): Fixed a bug where AM/PM value was passed to setHour().
+        (WebCore::DateTimeHourFieldElement::setValueAsInteger): Clamps the given value to 0-24 when the range of the field is 1-12 or 1-24. Renamed the parameter as it may not be an hour23 value (0-23).
+
 2013-02-21  Zoltan Horvath  <zoltan@webkit.org>
 
         [CSS Regions] Region boxes should respect -shape-inside CSS property
