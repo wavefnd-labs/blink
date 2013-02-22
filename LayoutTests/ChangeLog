@@ -1,3 +1,38 @@
+2013-02-21  Benjamin Poulain  <benjamin@webkit.org>
+
+        Add support for testing states changing asynchronously. Apply it to state-url-sets-links-visited.html.
+        https://bugs.webkit.org/show_bug.cgi?id=109883
+
+        Reviewed by Antti Koivisto.
+
+        Some tests depends on state change happening asynchronously. This is typically solved by using
+        timers with a long enough interval.
+
+        Timers have the general pitfalls of causing unreliable tests, and forcing unnecessary delays
+        in the tests.
+
+        This patch introduces new testing helpers, shouldBecomeEqual and shouldBecomeEqualToString, to
+        test a change of state repetively until it succeed (or timeout). Those test functions execute
+        the condition every 5ms until the test succeed.
+
+        The helper shouldBecomeEqualToString is applied on state-url-sets-links-visited.html to illustrate
+        the concept.
+
+        * fast/js/resources/js-test-pre.js:
+        (_waitForCondition): Generic helper function for the familly shouldBecomeXXX.
+        (.condition):
+        (.failureHandler):
+        (shouldBecomeEqual):
+        (shouldBecomeEqualToString):
+
+        * fast/loader/stateobjects/state-url-sets-links-visited.html:
+        * platform/wk2/TestExpectations:
+        state-url-sets-links-visited.html fails on WebKit2 because the visited links table is updated
+        asynchronously, and the style is only updated after 1 IPC message + 1 timer + 1 IPC message.
+
+        The test is changed to use shouldBecomeEqualToString in order to become reliable. If the UIProcess
+        does not update the style in a reasonable amount of time, the test fails.
+
 2013-02-21  Adam Barth  <abarth@webkit.org>
 
         Threaded HTML Parser fails fast/dom/Document/readystate.html
