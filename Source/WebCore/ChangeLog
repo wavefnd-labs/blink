@@ -1,3 +1,60 @@
+2013-02-22  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Correctly track whether or not a layer is paginated.
+        https://bugs.webkit.org/show_bug.cgi?id=110625.
+
+        Taking the first step towards implementing the correct spec-compliant painting
+        model for the new multi-column layout. Add code to make sure the paginated
+        bits in RenderLayer get propagated correctly for the new layout.
+        
+        The main difference in bit propagation between the old multicolumn layout and
+        the new multicolumn layout is that the old layout only tracked pagination "roots",
+        since it has a broken layer painting model. It incorrectly treats a pagination
+        "root" inside a multi-column block as establishing a stacking context in each
+        column. This is incorrect.
+        
+        The new multicolumn code is going to paint each paginated layer individually,
+        and this means the bits can't just be about roots. Instead they have to be set
+        on every layer that may be split across columns, without regard for whether parent
+        layers are also split or not. This is actually a simpler bit propagation model
+        than the old code.
+
+        Reviewed by Beth Dakin.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateLayerPositions):
+        Add code to set the m_isPaginated bit for in-flow RenderFlowThreads. This includes
+        only RenderMultiColumnFlowThread for now, but eventually it will also include
+        RenderPageFlowThread.
+
+        (WebCore::RenderLayer::useRegionBasedColumns):
+        Add a helper method to check if region-based columns are turned on, since we're
+        not attempting to alter the old column pagination model.
+
+        (WebCore::RenderLayer::updatePagination):
+        Added the code to propagate bits under the new model. Whether or not you're paginated
+        just depends on whether or not your enclosing layer along the containing block chain
+        is paginated.
+
+        (WebCore::RenderLayer::paintList):
+        (WebCore::RenderLayer::hitTestList):
+        Add code that avoids the old multi-column pagination model when the new column model
+        is enabled. For now there is no code in the new model that does anything with the bits,
+        but we're avoiding calling the old code, since it is broken for the new columns.
+
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        Added the useRegionBasedColumns method to check the Setting.
+
+        * rendering/RenderMultiColumnFlowThread.h:
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isInFlowRenderFlowThread):
+        (RenderObject):
+        Implement isInFlowRenderFlowThread, a virtual function for asking if a renderer is
+        an in-flow RenderFlowThread, which means that it is going to need paginated layers
+        because the flow thread has to split across "pages" that do not establish stacking
+        contexts.
+
 2013-02-22  Bem Jones-Bey  <bjonesbe@adobe.com>
 
         text-overflow:ellipsis is not applied when the block contains nested blocks
