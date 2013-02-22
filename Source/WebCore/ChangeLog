@@ -1,3 +1,29 @@
+2013-02-21  Dean Jackson  <dino@apple.com>
+
+        Better sizing model for Snapshotted plugins
+        https://bugs.webkit.org/show_bug.cgi?id=110541
+
+        Reviewed by Simon Fraser.
+
+        Clarify the way we apply sizing rules to snapshotted plug-ins. In
+        testing we've found that plug-ins smaller than 40px in either
+        dimension should never be frozen. Also, larger plugins should
+        be explicitly marked, because often they are the single dominant
+        element on the page.
+
+        As a drive-by, I removed the flag that indicated whether or not
+        the label should show automatically. It wasn't being used. This is
+        all determined from the shadow root and its CSS now.
+
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::HTMLPlugInImageElement): New values for size thresholds.
+        (WebCore::HTMLPlugInImageElement::createRenderer): Remove call to setShouldShowSnapshotLabelAutomatically.
+        (WebCore::classNameForShadowRoot): Remove logging and clearly assign sizing classes.
+        (WebCore::HTMLPlugInImageElement::updateSnapshotInfo): We don't need the page size any more.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): Use new constant names.
+        * html/HTMLPlugInImageElement.h:
+        (HTMLPlugInImageElement): Remove setShouldShowSnapshotLabelAutomatically.
+
 2013-02-21  Benjamin Poulain  <benjamin@webkit.org>
 
         Fix the build after r143664.
