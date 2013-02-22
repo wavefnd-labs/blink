@@ -1,3 +1,46 @@
+2013-02-22  Chris Rogers  <crogers@google.com>
+
+        AudioDestination::create() needs extra device identification information for live/local input streams
+        https://bugs.webkit.org/show_bug.cgi?id=109494
+
+        Reviewed by James Robinson.
+
+        AudioDestination::create() supports live/local audio input.  But, since there may be multiple
+        audio input devices available, an identifier for the requested input device needs to be
+        passed in.  The embedder may then use this information so that the proper audio hardware is
+        accessed.
+
+        * Modules/webaudio/AudioContext.cpp:
+        (WebCore::AudioContext::createMediaStreamSource):
+        * Modules/webaudio/AudioDestinationNode.h:
+        (AudioDestinationNode):
+        * Modules/webaudio/DefaultAudioDestinationNode.cpp:
+        (WebCore::DefaultAudioDestinationNode::initialize):
+        (WebCore::DefaultAudioDestinationNode::createDestination):
+        (WebCore::DefaultAudioDestinationNode::enableInput):
+        * Modules/webaudio/DefaultAudioDestinationNode.h:
+        (DefaultAudioDestinationNode):
+        * Modules/webaudio/OfflineAudioDestinationNode.h:
+        * platform/audio/AudioDestination.h:
+        (AudioDestination):
+        * platform/audio/chromium/AudioDestinationChromium.cpp:
+        (WebCore::AudioDestination::create):
+        (WebCore::AudioDestinationChromium::AudioDestinationChromium):
+        * platform/audio/chromium/AudioDestinationChromium.h:
+        (AudioDestinationChromium):
+        * platform/audio/gstreamer/AudioDestinationGStreamer.cpp:
+        (WebCore::AudioDestination::create):
+        * platform/audio/mac/AudioDestinationMac.cpp:
+        (WebCore::AudioDestination::create):
+        * platform/chromium/support/WebMediaStreamSource.cpp:
+        (WebKit::WebMediaStreamSource::deviceId):
+        (WebKit):
+        (WebKit::WebMediaStreamSource::setDeviceId):
+        * platform/mediastream/MediaStreamSource.h:
+        (WebCore::MediaStreamSource::deviceId):
+        (WebCore::MediaStreamSource::setDeviceId):
+        (MediaStreamSource):
+
 2013-02-22  Ryosuke Niwa  <rniwa@webkit.org>
 
         Binding tests rebaseline after r143737.
