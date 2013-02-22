@@ -1,3 +1,40 @@
+2013-02-22  Adam Barth  <abarth@webkit.org>
+
+        Threaded HTML parser should pass fast/parser/iframe-sets-parent-to-javascript-url.html
+        https://bugs.webkit.org/show_bug.cgi?id=110637
+
+        Reviewed by Eric Seidel.
+
+        With the main thread parser, we always parse the first chunk of content
+        returned as the result of evaluating a JavaScript URL synchronously. In
+        particular, if the first chunk has an inline script, we'll execute it
+        synchronously.
+
+        Previous to this patch, the threaded parser would always parse this
+        content asynchronously. It's conceivable that there could be some
+        content relying on the synchronous behavior, so this patch introduces
+        the notion of "pinning" a parser to the main thread and uses that
+        concept to force the result of JavaScript URLs to be parsed on the main
+        thread (which is probably desirable anyway because they're likely to be
+        quite short).
+
+        This patch fixes fast/parser/iframe-sets-parent-to-javascript-url.html
+        and fast/dom/javascript-url-crash-function.html with the threaded
+        parser with --enable-threaded-html-parser.
+
+        * dom/DocumentParser.h:
+        (WebCore::DocumentParser::pinToMainThread):
+        (DocumentParser):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::HTMLDocumentParser):
+        (WebCore):
+        (WebCore::HTMLDocumentParser::pinToMainThread):
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+        (WebCore::HTMLDocumentParser::shouldUseThreading):
+        * loader/DocumentWriter.cpp:
+        (WebCore::DocumentWriter::replaceDocument):
+
 2013-02-22  Joe Mason  <jmason@rim.com>
 
         [BlackBerry] Reread cookies when retrying a request with new auth credentials
