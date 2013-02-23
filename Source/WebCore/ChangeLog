@@ -1,3 +1,22 @@
+2013-02-22  Tony Gentilcore  <tonyg@chromium.org>
+
+        Correct InspectorInstrumentation for background HTML parser
+        https://bugs.webkit.org/show_bug.cgi?id=110678
+
+        Reviewed by Adam Barth.
+
+        resumeParsingAfterScriptExecution potentially calls processParsedChunkFromBackgroundParser multiple times
+        without yielding. So it is not correct to count each of those as a separate ParseHTML event.
+
+        This patch moves the instrumentation outside of the loop.
+
+        No new tests because no new functionality.
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::resumeParsingAfterScriptExecution):
+
 2013-02-22  Aaron Colwell  <acolwell@chromium.org>
 
         Factor MediaSource methods out of MediaPlayer & MediaPlayerPrivate and into a new MediaSourcePrivate interface.
