@@ -1,3 +1,317 @@
+2013-02-23  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Rename xxxCallback() to xxxMethod(), and xxxCallbackCustom() to xxxMethodCustom()
+        https://bugs.webkit.org/show_bug.cgi?id=110669
+
+        Reviewed by Adam Barth.
+
+        This is one of steps to insert TRACE_EVENT_STATE()
+        macros into DOM bindings.
+        See https://bugs.webkit.org/show_bug.cgi?id=110667#c0
+
+        In the new world, "Callback" is used to refer that it
+        is a function called back by V8. Currently "Callback" is
+        used for both V8 callbacks, DOM methods and DOM constructors.
+        This patch fixes the inconsistency.
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        (GenerateDomainSafeFunctionGetter):
+        (GenerateOverloadedFunctionCallback):
+        (GenerateFunctionCallback):
+        (GenerateNonStandardFunction):
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore::Float64ArrayV8Internal::fooMethod):
+        (WebCore::Float64ArrayV8Internal::setMethod):
+        (WebCore):
+        (WebCore::ConfigureV8Float64ArrayTemplate):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore::TestActiveDOMObjectV8Internal::excitingFunctionMethod):
+        (WebCore::TestActiveDOMObjectV8Internal::postMessageMethod):
+        (WebCore::TestActiveDOMObjectV8Internal::postMessageAttrGetter):
+        (WebCore::ConfigureV8TestActiveDOMObjectTemplate):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore::TestCustomNamedGetterV8Internal::anotherFunctionMethod):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore::TestEventTargetV8Internal::itemMethod):
+        (WebCore::TestEventTargetV8Internal::addEventListenerMethod):
+        (WebCore::TestEventTargetV8Internal::removeEventListenerMethod):
+        (WebCore::TestEventTargetV8Internal::dispatchEventMethod):
+        (WebCore):
+        (WebCore::ConfigureV8TestEventTargetTemplate):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalMethod1Method):
+        (WebCore::TestInterfaceV8Internal::supplementalMethod2Method):
+        (WebCore::TestInterfaceV8Internal::supplementalMethod3Method):
+        (WebCore::TestInterfaceV8Internal::supplementalMethod4Method):
+        (WebCore):
+        (WebCore::ConfigureV8TestInterfaceTemplate):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore::TestMediaQueryListListenerV8Internal::methodMethod):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::voidMethodMethod):
+        (WebCore::TestObjV8Internal::voidMethodWithArgsMethod):
+        (WebCore::TestObjV8Internal::longMethodMethod):
+        (WebCore::TestObjV8Internal::longMethodWithArgsMethod):
+        (WebCore::TestObjV8Internal::objMethodMethod):
+        (WebCore::TestObjV8Internal::objMethodWithArgsMethod):
+        (WebCore::TestObjV8Internal::methodWithSequenceArgMethod):
+        (WebCore::TestObjV8Internal::methodReturningSequenceMethod):
+        (WebCore::TestObjV8Internal::methodThatRequiresAllArgsAndThrowsMethod):
+        (WebCore::TestObjV8Internal::serializedValueMethod):
+        (WebCore::TestObjV8Internal::optionsObjectMethod):
+        (WebCore::TestObjV8Internal::methodWithExceptionMethod):
+        (WebCore::TestObjV8Internal::customMethodMethod):
+        (WebCore::TestObjV8Internal::customMethodWithArgsMethod):
+        (WebCore::TestObjV8Internal::addEventListenerMethod):
+        (WebCore::TestObjV8Internal::removeEventListenerMethod):
+        (WebCore::TestObjV8Internal::withScriptStateVoidMethod):
+        (WebCore::TestObjV8Internal::withScriptStateObjMethod):
+        (WebCore::TestObjV8Internal::withScriptStateVoidExceptionMethod):
+        (WebCore::TestObjV8Internal::withScriptStateObjExceptionMethod):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextMethod):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateMethod):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateObjExceptionMethod):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesMethod):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackMethod):
+        (WebCore::TestObjV8Internal::methodWithOptionalArgMethod):
+        (WebCore::TestObjV8Internal::methodWithNonOptionalArgAndOptionalArgMethod):
+        (WebCore::TestObjV8Internal::methodWithNonOptionalArgAndTwoOptionalArgsMethod):
+        (WebCore::TestObjV8Internal::methodWithOptionalStringMethod):
+        (WebCore::TestObjV8Internal::methodWithOptionalStringIsUndefinedMethod):
+        (WebCore::TestObjV8Internal::methodWithOptionalStringIsNullStringMethod):
+        (WebCore::TestObjV8Internal::methodWithCallbackArgMethod):
+        (WebCore::TestObjV8Internal::methodWithNonCallbackArgAndCallbackArgMethod):
+        (WebCore::TestObjV8Internal::methodWithCallbackAndOptionalArgMethod):
+        (WebCore::TestObjV8Internal::conditionalMethod1Method):
+        (WebCore::TestObjV8Internal::conditionalMethod2Method):
+        (WebCore::TestObjV8Internal::conditionalMethod3Method):
+        (WebCore::TestObjV8Internal::overloadedMethod1Method):
+        (WebCore::TestObjV8Internal::overloadedMethod2Method):
+        (WebCore::TestObjV8Internal::overloadedMethod3Method):
+        (WebCore::TestObjV8Internal::overloadedMethod4Method):
+        (WebCore::TestObjV8Internal::overloadedMethod5Method):
+        (WebCore::TestObjV8Internal::overloadedMethod6Method):
+        (WebCore::TestObjV8Internal::overloadedMethod7Method):
+        (WebCore::TestObjV8Internal::overloadedMethod8Method):
+        (WebCore::TestObjV8Internal::overloadedMethod9Method):
+        (WebCore::TestObjV8Internal::overloadedMethod10Method):
+        (WebCore::TestObjV8Internal::overloadedMethod11Method):
+        (WebCore::TestObjV8Internal::overloadedMethodMethod):
+        (WebCore::TestObjV8Internal::classMethodMethod):
+        (WebCore::TestObjV8Internal::classMethodWithOptionalMethod):
+        (WebCore::TestObjV8Internal::classMethod2Method):
+        (WebCore::TestObjV8Internal::overloadedMethod12Method):
+        (WebCore::TestObjV8Internal::classMethodWithClampMethod):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeMethod1Method):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeMethod2Method):
+        (WebCore::TestObjV8Internal::enabledPerContextMethod1Method):
+        (WebCore::TestObjV8Internal::enabledPerContextMethod2Method):
+        (WebCore::TestObjV8Internal::stringArrayFunctionMethod):
+        (WebCore::TestObjV8Internal::domStringListFunctionMethod):
+        (WebCore::TestObjV8Internal::getSVGDocumentMethod):
+        (WebCore::TestObjV8Internal::convert1Method):
+        (WebCore::TestObjV8Internal::convert2Method):
+        (WebCore::TestObjV8Internal::convert4Method):
+        (WebCore::TestObjV8Internal::convert5Method):
+        (WebCore::TestObjV8Internal::mutablePointFunctionMethod):
+        (WebCore::TestObjV8Internal::immutablePointFunctionMethod):
+        (WebCore::TestObjV8Internal::orangeMethod):
+        (WebCore::TestObjV8Internal::strictFunctionMethod):
+        (WebCore::TestObjV8Internal::variadicStringMethodMethod):
+        (WebCore::TestObjV8Internal::variadicDoubleMethodMethod):
+        (WebCore::TestObjV8Internal::variadicNodeMethodMethod):
+        (WebCore):
+        (WebCore::ConfigureV8TestObjTemplate):
+        (WebCore::V8TestObj::installPerContextPrototypeProperties):
+        * bindings/scripts/test/V8/V8TestObj.h:
+        (V8TestObj):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::acceptTransferListMethod):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::multiTransferListMethod):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore::TestTypedefsV8Internal::funcMethod):
+        (WebCore::TestTypedefsV8Internal::multiTransferListMethod):
+        (WebCore::TestTypedefsV8Internal::setShadowMethod):
+        (WebCore::TestTypedefsV8Internal::methodWithSequenceArgMethod):
+        (WebCore::TestTypedefsV8Internal::nullableArrayArgMethod):
+        (WebCore::TestTypedefsV8Internal::funcWithClampMethod):
+        (WebCore::TestTypedefsV8Internal::immutablePointFunctionMethod):
+        (WebCore::TestTypedefsV8Internal::stringArrayFunctionMethod):
+        (WebCore::TestTypedefsV8Internal::stringArrayFunction2Method):
+        (WebCore::TestTypedefsV8Internal::methodWithExceptionMethod):
+        (WebCore):
+        (WebCore::ConfigureV8TestTypedefsTemplate):
+        * bindings/v8/custom/V8ClipboardCustom.cpp:
+        (WebCore::V8Clipboard::clearDataMethodCustom):
+        (WebCore::V8Clipboard::setDragImageMethodCustom):
+        * bindings/v8/custom/V8ConsoleCustom.cpp:
+        (WebCore::V8Console::traceMethodCustom):
+        (WebCore::V8Console::assertMethodCustom):
+        (WebCore::V8Console::profileMethodCustom):
+        (WebCore::V8Console::profileEndMethodCustom):
+        * bindings/v8/custom/V8CryptoCustom.cpp:
+        (WebCore::V8Crypto::getRandomValuesMethodCustom):
+        * bindings/v8/custom/V8DOMFormDataCustom.cpp:
+        (WebCore::V8DOMFormData::appendMethodCustom):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::V8DOMWindow::addEventListenerMethodCustom):
+        (WebCore::V8DOMWindow::removeEventListenerMethodCustom):
+        (WebCore::V8DOMWindow::postMessageMethodCustom):
+        (WebCore::V8DOMWindow::toStringMethodCustom):
+        (WebCore::V8DOMWindow::releaseEventsMethodCustom):
+        (WebCore::V8DOMWindow::captureEventsMethodCustom):
+        (WebCore::V8DOMWindow::showModalDialogMethodCustom):
+        (WebCore::V8DOMWindow::openMethodCustom):
+        (WebCore::V8DOMWindow::setTimeoutMethodCustom):
+        (WebCore::V8DOMWindow::setIntervalMethodCustom):
+        * bindings/v8/custom/V8DataViewCustom.cpp:
+        (WebCore::V8DataView::getInt8MethodCustom):
+        (WebCore::V8DataView::getUint8MethodCustom):
+        (WebCore::V8DataView::setInt8MethodCustom):
+        (WebCore::V8DataView::setUint8MethodCustom):
+        * bindings/v8/custom/V8DedicatedWorkerContextCustom.cpp:
+        (WebCore::V8DedicatedWorkerContext::postMessageMethodCustom):
+        * bindings/v8/custom/V8DeviceMotionEventCustom.cpp:
+        (WebCore::V8DeviceMotionEvent::initDeviceMotionEventMethodCustom):
+        * bindings/v8/custom/V8DeviceOrientationEventCustom.cpp:
+        (WebCore::V8DeviceOrientationEvent::initDeviceOrientationEventMethodCustom):
+        * bindings/v8/custom/V8DocumentCustom.cpp:
+        (WebCore::V8Document::evaluateMethodCustom):
+        (WebCore::V8Document::createTouchListMethodCustom):
+        * bindings/v8/custom/V8GeolocationCustom.cpp:
+        (WebCore::V8Geolocation::getCurrentPositionMethodCustom):
+        (WebCore::V8Geolocation::watchPositionMethodCustom):
+        * bindings/v8/custom/V8HTMLAllCollectionCustom.cpp:
+        (WebCore::V8HTMLAllCollection::itemMethodCustom):
+        (WebCore::V8HTMLAllCollection::namedItemMethodCustom):
+        * bindings/v8/custom/V8HTMLCanvasElementCustom.cpp:
+        (WebCore::V8HTMLCanvasElement::getContextMethodCustom):
+        (WebCore::V8HTMLCanvasElement::toDataURLMethodCustom):
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::V8HTMLDocument::writeMethodCustom):
+        (WebCore::V8HTMLDocument::writelnMethodCustom):
+        (WebCore::V8HTMLDocument::openMethodCustom):
+        * bindings/v8/custom/V8HTMLFormControlsCollectionCustom.cpp:
+        (WebCore::V8HTMLFormControlsCollection::namedItemMethodCustom):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.cpp:
+        (WebCore::v8HTMLImageElementConstructorMethodCustom):
+        (WebCore::V8HTMLImageElementConstructor::GetTemplate):
+        * bindings/v8/custom/V8HTMLInputElementCustom.cpp:
+        (WebCore::V8HTMLInputElement::setSelectionRangeMethodCustom):
+        * bindings/v8/custom/V8HTMLOptionsCollectionCustom.cpp:
+        (WebCore::V8HTMLOptionsCollection::namedItemMethodCustom):
+        (WebCore::V8HTMLOptionsCollection::removeMethodCustom):
+        (WebCore::V8HTMLOptionsCollection::addMethodCustom):
+        * bindings/v8/custom/V8HTMLSelectElementCustom.cpp:
+        (WebCore::V8HTMLSelectElement::removeMethodCustom):
+        * bindings/v8/custom/V8HistoryCustom.cpp:
+        (WebCore::V8History::pushStateMethodCustom):
+        (WebCore::V8History::replaceStateMethodCustom):
+        * bindings/v8/custom/V8InjectedScriptHostCustom.cpp:
+        (WebCore::V8InjectedScriptHost::inspectedObjectMethodCustom):
+        (WebCore::V8InjectedScriptHost::internalConstructorNameMethodCustom):
+        (WebCore::V8InjectedScriptHost::isHTMLAllCollectionMethodCustom):
+        (WebCore::V8InjectedScriptHost::typeMethodCustom):
+        (WebCore::V8InjectedScriptHost::functionDetailsMethodCustom):
+        (WebCore::V8InjectedScriptHost::getInternalPropertiesMethodCustom):
+        (WebCore::V8InjectedScriptHost::getEventListenersMethodCustom):
+        (WebCore::V8InjectedScriptHost::inspectMethodCustom):
+        (WebCore::V8InjectedScriptHost::databaseIdMethodCustom):
+        (WebCore::V8InjectedScriptHost::storageIdMethodCustom):
+        (WebCore::V8InjectedScriptHost::evaluateMethodCustom):
+        (WebCore::V8InjectedScriptHost::setFunctionVariableValueMethodCustom):
+        * bindings/v8/custom/V8InspectorFrontendHostCustom.cpp:
+        (WebCore::V8InspectorFrontendHost::platformMethodCustom):
+        (WebCore::V8InspectorFrontendHost::portMethodCustom):
+        (WebCore::V8InspectorFrontendHost::showContextMenuMethodCustom):
+        (WebCore::V8InspectorFrontendHost::recordActionTakenMethodCustom):
+        (WebCore::V8InspectorFrontendHost::recordPanelShownMethodCustom):
+        (WebCore::V8InspectorFrontendHost::recordSettingChangedMethodCustom):
+        * bindings/v8/custom/V8JavaScriptCallFrameCustom.cpp:
+        (WebCore::V8JavaScriptCallFrame::evaluateMethodCustom):
+        (WebCore::V8JavaScriptCallFrame::restartMethodCustom):
+        (WebCore::V8JavaScriptCallFrame::setVariableValueMethodCustom):
+        (WebCore::V8JavaScriptCallFrame::scopeTypeMethodCustom):
+        * bindings/v8/custom/V8LocationCustom.cpp:
+        (WebCore::V8Location::reloadAttrGetterCustom):
+        (WebCore::V8Location::replaceAttrGetterCustom):
+        (WebCore::V8Location::assignAttrGetterCustom):
+        (WebCore::V8Location::reloadMethodCustom):
+        (WebCore::V8Location::replaceMethodCustom):
+        (WebCore::V8Location::assignMethodCustom):
+        (WebCore::V8Location::valueOfMethodCustom):
+        (WebCore::V8Location::toStringMethodCustom):
+        * bindings/v8/custom/V8MessageEventCustom.cpp:
+        (WebCore::V8MessageEvent::initMessageEventMethodCustom):
+        (WebCore::V8MessageEvent::webkitInitMessageEventMethodCustom):
+        * bindings/v8/custom/V8MessagePortCustom.cpp:
+        (WebCore::V8MessagePort::postMessageMethodCustom):
+        * bindings/v8/custom/V8NodeCustom.cpp:
+        (WebCore::V8Node::insertBeforeMethodCustom):
+        (WebCore::V8Node::replaceChildMethodCustom):
+        (WebCore::V8Node::removeChildMethodCustom):
+        (WebCore::V8Node::appendChildMethodCustom):
+        * bindings/v8/custom/V8NotificationCenterCustom.cpp:
+        (WebCore::V8NotificationCenter::requestPermissionMethodCustom):
+        * bindings/v8/custom/V8NotificationCustom.cpp:
+        (WebCore::V8Notification::requestPermissionMethodCustom):
+        * bindings/v8/custom/V8SQLResultSetRowListCustom.cpp:
+        (WebCore::V8SQLResultSetRowList::itemMethodCustom):
+        * bindings/v8/custom/V8SQLTransactionCustom.cpp:
+        (WebCore::V8SQLTransaction::executeSqlMethodCustom):
+        * bindings/v8/custom/V8SQLTransactionSyncCustom.cpp:
+        (WebCore::V8SQLTransactionSync::executeSqlMethodCustom):
+        * bindings/v8/custom/V8SVGLengthCustom.cpp:
+        (WebCore::V8SVGLength::convertToSpecifiedUnitsMethodCustom):
+        * bindings/v8/custom/V8WebGLRenderingContextCustom.cpp:
+        (WebCore::V8WebGLRenderingContext::getAttachedShadersMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getBufferParameterMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getExtensionMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getFramebufferAttachmentParameterMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getParameterMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getProgramParameterMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getRenderbufferParameterMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getShaderParameterMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getSupportedExtensionsMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getTexParameterMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getUniformMethodCustom):
+        (WebCore::V8WebGLRenderingContext::getVertexAttribMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform1fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform1ivMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform2fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform2ivMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform3fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform3ivMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform4fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniform4ivMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniformMatrix2fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniformMatrix3fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::uniformMatrix4fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib1fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib2fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib3fvMethodCustom):
+        (WebCore::V8WebGLRenderingContext::vertexAttrib4fvMethodCustom):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::V8WorkerContext::importScriptsMethodCustom):
+        (WebCore::V8WorkerContext::setTimeoutMethodCustom):
+        (WebCore::V8WorkerContext::setIntervalMethodCustom):
+        * bindings/v8/custom/V8WorkerCustom.cpp:
+        (WebCore::V8Worker::postMessageMethodCustom):
+        * bindings/v8/custom/V8XMLHttpRequestCustom.cpp:
+        (WebCore::V8XMLHttpRequest::openMethodCustom):
+        (WebCore::V8XMLHttpRequest::sendMethodCustom):
+        * bindings/v8/custom/V8XSLTProcessorCustom.cpp:
+        (WebCore::V8XSLTProcessor::setParameterMethodCustom):
+        (WebCore::V8XSLTProcessor::getParameterMethodCustom):
+        (WebCore::V8XSLTProcessor::removeParameterMethodCustom):
+
 2013-02-23  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Scrollbar style resolution arguments should not passed via statics.
