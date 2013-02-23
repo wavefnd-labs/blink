@@ -1,3 +1,31 @@
+2013-02-22  Levi Weintraub  <leviw@chromium.org>
+
+        Add descriptive names for different addMidpoint use cases
+        https://bugs.webkit.org/show_bug.cgi?id=110644
+
+        Reviewed by Ryosuke Niwa.
+
+        Midpoints are used to delineate ranges where we don't add line boxes for contents (collapsed spaces),
+        and to explicitly split a RenderText into multiple text runs so that text paragraph seperators get
+        their own line boxes. This patch encapsulates the different cases where midpoints are added to
+        lineMidpointState into 4 helper functions to make it clearer what's going on in each case.
+
+        No new tests. No change in functionality.
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::deprecatedAddMidpoint): Original function simply adds a midpoint to the lineMidpointState.
+        Renaming to deprecated to discourage callers.
+        (WebCore::startIgnoringSpaces): Adds a midpoint to start collapsing subsequent spaces. Asserts that
+        we have an even number of midpoints.
+        (WebCore::stopIgnoringSpaces): Adds the corresponding midpoint from startIgnoringSpaces and asserts
+        that it's an odd number.
+        (WebCore::ensureLineBoxInsideIgnoredSpaces): When ignoring spaces and we come across a RenderInline
+        that needs a line box, this function adds a pair of midpoints which ensures we'll later add a line
+        box for it.
+        (WebCore::ensureCharacterGetsLineBox): Adds a pair of midpoints in a text renderer to mark that
+        the current character needs its own line box. This is used by svg for absolutely positioned
+        characters, or for text paragraph seperators.
+
 2013-02-22  Justin Schuh  <jschuh@chromium.org>
 
         RenderArena masking has low entropy
