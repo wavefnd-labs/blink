@@ -1,3 +1,49 @@
+2013-02-23  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        Scrollbar style resolution arguments should not passed via statics.
+        https://bugs.webkit.org/show_bug.cgi?id=110690
+
+        Use PseudoStyleRequest to pass scrollbar params for style resolve.
+
+        Reviewed by Eric Seidel.
+
+        No change in functionality, covered by existing tests.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::match): Changed to use context params, rather than statics.
+        (WebCore::SelectorChecker::checkOne): Changed to pass context to checkScrollbarPseudoClass.
+        (WebCore::SelectorChecker::checkScrollbarPseudoClass): Changed to use context params, rather than statics.
+        * css/SelectorChecker.h:
+        (WebCore::SelectorChecker::SelectorCheckingContext::SelectorCheckingContext): Added scrollbar style args.
+        (SelectorCheckingContext): Ditto.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::collectMatchingRulesForList): Changed to use PseudoStyleRequest.
+        (WebCore::StyleResolver::State::initForStyleResolve): Ditto.
+        (WebCore::StyleResolver::pseudoStyleForElement): Ditto.
+        (WebCore::StyleResolver::ruleMatches): Ditto and added stuffing scrollbar style resolve args into SelectorCheckingContext.
+        * css/StyleResolver.h:
+        (PseudoStyleRequest): Added.
+        (State): Changed to hold and use PseudoStyleRequest instead of just PseudoId
+        * dom/Element.cpp:
+        (WebCore::Element::pseudoStyleCacheIsInvalid): Changed to use PseudoStyleRequest.
+        * page/FrameView.cpp: Ditto.
+        (WebCore::FrameView::updateScrollCorner): Ditto.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateScrollCornerStyle): Ditto.
+        (WebCore::RenderLayer::updateResizerStyle): Ditto.
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::selectionBackgroundColor): Ditto.
+        (WebCore::RenderObject::selectionColor): Ditto.
+        (WebCore::firstLineStyleForCachedUncachedType): Ditto.
+        (WebCore::RenderObject::getCachedPseudoStyle): Ditto.
+        (WebCore::RenderObject::getUncachedPseudoStyle): Ditto.
+        * rendering/RenderObject.h:
+        (RenderObject): Ditto.
+        * rendering/RenderScrollbar.cpp:
+        (WebCore::RenderScrollbar::getScrollbarPseudoStyle): Ditto.
+        * rendering/RenderScrollbar.h:
+        (RenderScrollbar): Removed static members that are now obsolete.
+
 2013-02-23  Adam Barth  <abarth@webkit.org>
 
         Threaded HTML parser should pass fast/parser/parser-yield-timing.html
