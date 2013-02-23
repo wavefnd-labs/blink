@@ -1,3 +1,37 @@
+2013-02-22  Andreas Kling  <akling@apple.com>
+
+        Attr: Simplify modification callbacks.
+        <http://webkit.org/b/110598>
+
+        Reviewed by Antti Koivisto.
+
+        Instead of Attr being a friend of Element and grabbing at various internal storage and callbacks,
+        let Attr simply call Element::setAttribute() when its value is changed, and do all that business
+        from Element.
+
+        * dom/Element.h:
+        * dom/Element.cpp:
+        (WebCore::Element::setAttributeInternal):
+
+            Call Attr::recreateTextChildAfterAttributeValueChanged() after modifying an attribute value instead
+            of doing the modification through the Attr node.
+
+        * dom/Attr.h:
+        * dom/Attr.cpp:
+        (WebCore::Attr::Attr):
+        (WebCore::Attr::childrenChanged):
+
+            Added an m_inChildrenChanged flag so we can prevent infinite callback recursion in childrenChanged().
+
+        (WebCore::Attr::setValue):
+
+            Call Element::setAttribute() instead of modifying the attribute storage directly.
+
+        (WebCore::Attr::recreateTextChildAfterAttributeValueChanged):
+
+            Factored out the "remove all children / create a new text child with attribute value" logic into
+            a separate function.
+
 2013-02-22  Gyuyoung Kim  <gyuyoung.kim@samsung.com>
 
         [EFL] Use EINA_LOG instead of fprintf 
