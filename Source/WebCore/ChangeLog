@@ -1,3 +1,59 @@
+2013-02-22  Aaron Colwell  <acolwell@chromium.org>
+
+        Factor MediaSource methods out of MediaPlayer & MediaPlayerPrivate and into a new MediaSourcePrivate interface.
+        https://bugs.webkit.org/show_bug.cgi?id=109857
+
+        Reviewed by Adam Barth.
+
+        This is a simple refactor that moves MediaSource related methods out of MediaPlayer & MediaPlayerPrivate
+        so that the MediaSource implementation can be updated without further polluting these interfaces.
+        MediaSourcePrivate is the new WebCore interface that ports must implement to support the MediaSource API.
+
+        No new tests. No user visible behavior has changed.
+
+        * Modules/mediasource/MediaSource.cpp:
+        (WebCore::MediaSource::MediaSource):
+        (WebCore::MediaSource::duration):
+        (WebCore::MediaSource::setDuration):
+        (WebCore::MediaSource::addSourceBuffer):
+        (WebCore::MediaSource::removeSourceBuffer):
+        (WebCore::MediaSource::setReadyState):
+        (WebCore::MediaSource::endOfStream):
+        (WebCore::MediaSource::buffered):
+        (WebCore::MediaSource::append):
+        (WebCore::MediaSource::abort):
+        (WebCore::MediaSource::setTimestampOffset):
+        (WebCore::MediaSource::setPrivateAndOpen):
+        (WebCore):
+        (WebCore::MediaSource::hasPendingActivity):
+        (WebCore::MediaSource::stop):
+        * Modules/mediasource/MediaSource.h:
+        (MediaSource):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement):
+        (WebCore::HTMLMediaElement::loadResource):
+        (WebCore::HTMLMediaElement::createMediaPlayer):
+        (WebCore::HTMLMediaElement::reportMemoryUsage):
+        * html/HTMLMediaElement.h:
+        (HTMLMediaElement):
+        * platform/graphics/MediaPlayer.cpp:
+        (NullMediaPlayerPrivate):
+        (WebCore::NullMediaPlayerPrivate::load):
+        (WebCore::MediaPlayer::load):
+        (WebCore):
+        (WebCore::MediaPlayer::loadWithNextMediaEngine):
+        * platform/graphics/MediaPlayer.h:
+        (WebCore):
+        (MediaPlayerClient):
+        (MediaPlayer):
+        * platform/graphics/MediaPlayerPrivate.h:
+        (MediaPlayerPrivateInterface):
+        * platform/graphics/MediaSourcePrivate.h: Added.
+        (WebCore):
+        (MediaSourcePrivate): Contains the MediaSource methods extracted from MediaPlayer.
+        (WebCore::MediaSourcePrivate::MediaSourcePrivate):
+        (WebCore::MediaSourcePrivate::~MediaSourcePrivate):
+
 2013-02-22  Beth Dakin  <bdakin@apple.com>
 
         RenderLayer::scrollTo() should call FrameLoaderClient::didChangeScrollOffset()
