@@ -1,3 +1,37 @@
+2013-02-22  Ryosuke Niwa  <rniwa@webkit.org>
+
+        WebKit can erroneously strip font-size CSS property from font element with size attribute
+        https://bugs.webkit.org/show_bug.cgi?id=110657
+
+        Reviewed by Justin Garcia.
+
+        The bug was caused by ReplaceSelectionCommand::removeRedundantStylesAndKeepStyleSpanInline
+        erroneously removing style attributes even on an element such as font that implicitly adds
+        editing style.
+
+        Fixed the bug by removing these elements or attributes when they conflict with the inline
+        style of the element. This is always safe because implicit style of an element is always
+        overridden by that of inline style.
+
+        Note that when the font element becomes "empty" (i.e. doesn't have any attributes), then
+        we also want to delete this font element as it doesn't contribute anything to the style.
+
+        Test: editing/pasteboard/insert-u-with-text-decoration-none.html
+              editing/pasteboard/insert-font-with-size-and-css.html
+
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::isEmptyFontTag): Added ShouldStyleAttributeBeEmpty as an argument. This will
+        allow removeRedundantStylesAndKeepStyleSpanInline to ignore style attribute when we know
+        the attribute can be removed.
+
+        * editing/ApplyStyleCommand.h: Expose isEmptyFontTag and ShouldStyleAttributeBeEmpty.
+
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplaceSelectionCommand::InsertedNodes::didReplaceNode): Added.
+        (WebCore::ReplaceSelectionCommand::removeRedundantStylesAndKeepStyleSpanInline): See above.
+        * editing/ReplaceSelectionCommand.h:
+        (InsertedNodes): Added a declaration of didReplaceNode.
+
 2013-02-22  Laszlo Gombos  <l.gombos@samsung.com>
 
         Remove unused make variable from DerivedSources.make
