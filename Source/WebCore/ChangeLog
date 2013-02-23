@@ -1,3 +1,52 @@
+2013-02-23  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [EFL][WebGL] Refactor GLPlatformSurface.
+        https://bugs.webkit.org/show_bug.cgi?id=110616
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Covered by existing WebGL tests.
+ 
+        With recent changes, there is a clear separation between 
+        transport surface and off-screen surface. PlatformSurface 
+        has the logic to render content to transport surface. 
+        We currently rely on EXT_framebuffer_blit for this. This 
+        extension is not exposed on GLES2.0. PlatformSurface was 
+        supposed to be an abstraction layer without any knowledge 
+        of the type of surface. This patch addresses the issues 
+        in PlatformSurface class. We use shaders to draw texture 
+        content to the surface. Any transport surface related 
+        code in PlatformSurface is moved to GLTransportSurface class.
+
+        * PlatformEfl.cmake:
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::didResizeCanvas):
+        * platform/graphics/surfaces/GLTransportSurface.cpp: Added.
+        (WebCore):
+        (WebCore::GLTransportSurface::GLTransportSurface):
+        (WebCore::GLTransportSurface::~GLTransportSurface):
+        (WebCore::GLTransportSurface::updateContents):
+        (WebCore::GLTransportSurface::setGeometry):
+        (WebCore::GLTransportSurface::destroy):
+        (WebCore::GLTransportSurface::draw):
+        (WebCore::GLTransportSurface::bindArrayBuffer):
+        (WebCore::GLTransportSurface::updateTransformationMatrix):
+        (WebCore::GLTransportSurface::initializeShaderProgram):
+        * platform/graphics/surfaces/GLTransportSurface.h:
+        (WebCore):
+        (GLTransportSurface):
+        * platform/graphics/surfaces/egl/EGLSurface.cpp:
+        (WebCore::EGLWindowTransportSurface::EGLWindowTransportSurface):
+        (WebCore::EGLWindowTransportSurface::destroy):
+        (WebCore::EGLWindowTransportSurface::setGeometry):
+        * platform/graphics/surfaces/egl/EGLSurface.h:
+        * platform/graphics/surfaces/glx/GLXSurface.cpp:
+        (WebCore::GLXTransportSurface::GLXTransportSurface):
+        (WebCore::GLXTransportSurface::setGeometry):
+        (WebCore::GLXTransportSurface::destroy):
+        (WebCore::GLXOffScreenSurface::freeResources):
+        * platform/graphics/surfaces/glx/GLXSurface.h:
+
 2013-02-23  Hajime Morrita  <morrita@google.com>
 
         ShadowRoot needs guardRef() and guardDeref()
