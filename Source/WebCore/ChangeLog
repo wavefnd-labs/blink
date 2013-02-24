@@ -1,3 +1,27 @@
+2013-02-23  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        SelectorChecker should not know about SelectorCheckerFastPath.
+        https://bugs.webkit.org/show_bug.cgi?id=110663
+
+        Both SelectorChecker and it's speedy cousin unfortunately include each other.
+        Luckily, the particular way in which SelectorQuery uses SelectorChecker yields
+        to a fairly simple decoupling. Now only the cousin knows of SelectorChecker.
+
+        Reviewed by Antti Koivisto.
+
+        No new functionality, covered by existing tests.
+
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::matches): Removed.
+        * css/SelectorChecker.h:
+        (SelectorChecker): Updated the decls to remove fast-path flag.
+        * dom/SelectorQuery.cpp:
+        (WebCore::SelectorDataList::selectorMatches): Added a helper just for SelectorQuery.
+        (WebCore::SelectorDataList::matches): Changed the callsite to use new helper.
+        (WebCore::SelectorDataList::execute): Ditto.
+        * dom/SelectorQuery.h:
+        (SelectorDataList): Updated decls.
+
 2013-02-23  Eric Carlson  <eric.carlson@apple.com>
 
         [Mac] user preference caption style applied incorrectly
