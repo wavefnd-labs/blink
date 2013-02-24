@@ -1,3 +1,33 @@
+2013-02-24  Andreas Kling  <akling@apple.com>
+
+        StyledElement: Don't expose a mutable direct interface to the inline style.
+        <http://webkit.org/b/110711>
+
+        Reviewed by Antti Koivisto.
+
+        Remove the ability to grab at a mutable StylePropertySet* for a StyledElement's inline style
+        from the outside world. It's now private and returns MutableStylePropertySet* for future convenience.
+
+        Three paths to changing the inline style remain:
+
+            - Setting the "style" attribute
+            - Via CSSOM (element.style)
+            - setInlineStyleProperty/removeInlineStyleProperty helpers
+
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::ensureMutableInlineStyle):
+        * dom/StyledElement.h:
+        (StyledElement):
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::copyStyleOrCreateEmpty):
+        (WebCore::ApplyStyleCommand::applyRelativeFontStyleChange):
+        (WebCore::ApplyStyleCommand::removeEmbeddingUpToEnclosingBlock):
+        (WebCore::ApplyStyleCommand::applyInlineStyleToNodeRange):
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::ReplaceSelectionCommand::handleStyleSpans):
+        * html/canvas/CanvasStyle.cpp:
+        (WebCore::currentColor):
+
 2013-02-24  Keishi Hattori  <keishi@webkit.org>
 
         Add methods to date types for new calendar picker
