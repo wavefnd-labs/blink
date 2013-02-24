@@ -1,3 +1,139 @@
+2013-02-22  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Generate xxxAttrGetterCallback()
+        https://bugs.webkit.org/show_bug.cgi?id=110676
+
+        Reviewed by Adam Barth.
+
+        This is one of steps to insert TRACE_EVENT_STATE() macros
+        into DOM bindings. This patch introduces an indirection
+        function for xxxAttrGetter(), like this:
+
+        // For non-custom getters
+        Handle<Value> xxxAttrGetterCallback(...) {
+          return xxxAttrGetter(...);
+        }
+
+        // For custom getters.
+        Handle<Value> xxxAttrGetterCallback(...) {
+          return xxxAttrGetterCustom(...);
+        }
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateDomainSafeFunctionGetter):
+        (GenerateNormalAttrGetterCallback):
+        (GenerateNormalAttrGetter):
+        (GenerateSingleBatchedAttribute):
+        (GenerateNonStandardFunction):
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore::TestActiveDOMObjectV8Internal::excitingAttrAttrGetterCallback):
+        (TestActiveDOMObjectV8Internal):
+        (WebCore::TestActiveDOMObjectV8Internal::postMessageAttrGetterCallback):
+        (WebCore):
+        (WebCore::ConfigureV8TestActiveDOMObjectTemplate):
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp:
+        (WebCore::TestEventConstructorV8Internal::attr1AttrGetterCallback):
+        (TestEventConstructorV8Internal):
+        (WebCore::TestEventConstructorV8Internal::attr2AttrGetterCallback):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestException.cpp:
+        (WebCore::TestExceptionV8Internal::nameAttrGetterCallback):
+        (TestExceptionV8Internal):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalStaticReadOnlyAttrAttrGetterCallback):
+        (TestInterfaceV8Internal):
+        (WebCore::TestInterfaceV8Internal::supplementalStaticAttrAttrGetterCallback):
+        (WebCore::TestInterfaceV8Internal::supplementalStr1AttrGetterCallback):
+        (WebCore::TestInterfaceV8Internal::supplementalStr2AttrGetterCallback):
+        (WebCore::TestInterfaceV8Internal::supplementalStr3AttrGetterCallback):
+        (WebCore::TestInterfaceV8Internal::supplementalNodeAttrGetterCallback):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::readOnlyLongAttrAttrGetterCallback):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::readOnlyStringAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::readOnlyTestObjAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::staticReadOnlyLongAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::staticStringAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::enumAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::shortAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::unsignedShortAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::longAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::longLongAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::unsignedLongLongAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::stringAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::testObjAttrAttrGetter):
+        (WebCore::TestObjV8Internal::testObjAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::XMLObjAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::createAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedStringAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedIntegralAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedUnsignedIntegralAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedBooleanAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedURLAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedCustomIntegralAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedCustomBooleanAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::reflectedCustomURLAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::typedArrayAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::attrWithGetterExceptionAttrGetterCallback):
+        (WebCore::TestObjV8Internal::attrWithSetterExceptionAttrGetterCallback):
+        (WebCore::TestObjV8Internal::stringAttrWithGetterExceptionAttrGetterCallback):
+        (WebCore::TestObjV8Internal::stringAttrWithSetterExceptionAttrGetterCallback):
+        (WebCore::TestObjV8Internal::customAttrAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeRaisesAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::conditionalAttr1AttrGetterCallback):
+        (WebCore::TestObjV8Internal::conditionalAttr2AttrGetterCallback):
+        (WebCore::TestObjV8Internal::conditionalAttr3AttrGetterCallback):
+        (WebCore::TestObjV8Internal::cachedAttribute1AttrGetterCallback):
+        (WebCore::TestObjV8Internal::cachedAttribute2AttrGetterCallback):
+        (WebCore::TestObjV8Internal::anyAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr1AttrGetterCallback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr2AttrGetterCallback):
+        (WebCore::TestObjV8Internal::enabledPerContextAttr1AttrGetterCallback):
+        (WebCore::TestObjV8Internal::enabledPerContextAttr2AttrGetterCallback):
+        (WebCore::TestObjV8Internal::floatArrayAttrGetterCallback):
+        (WebCore::TestObjV8Internal::doubleArrayAttrGetterCallback):
+        (WebCore::TestObjV8Internal::contentDocumentAttrGetterCallback):
+        (WebCore::TestObjV8Internal::mutablePointAttrGetterCallback):
+        (WebCore::TestObjV8Internal::immutablePointAttrGetterCallback):
+        (WebCore::TestObjV8Internal::strawberryAttrGetterCallback):
+        (WebCore::TestObjV8Internal::strictFloatAttrGetterCallback):
+        (WebCore::TestObjV8Internal::descriptionAttrGetterCallback):
+        (WebCore::TestObjV8Internal::idAttrGetterCallback):
+        (WebCore::TestObjV8Internal::hashAttrGetterCallback):
+        (WebCore::TestObjV8Internal::replaceableAttributeAttrGetterCallback):
+        (WebCore):
+        (WebCore::ConfigureV8TestObjTemplate):
+        (WebCore::V8TestObj::installPerContextProperties):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::valueAttrGetterCallback):
+        (TestSerializedScriptValueInterfaceV8Internal):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::readonlyValueAttrGetterCallback):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrGetterCallback):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::portsAttrGetterCallback):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedReadonlyValueAttrGetterCallback):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore::TestTypedefsV8Internal::unsignedLongLongAttrAttrGetterCallback):
+        (TestTypedefsV8Internal):
+        (WebCore::TestTypedefsV8Internal::immutableSerializedScriptValueAttrGetterCallback):
+        (WebCore::TestTypedefsV8Internal::attrWithGetterExceptionAttrGetterCallback):
+        (WebCore::TestTypedefsV8Internal::attrWithSetterExceptionAttrGetterCallback):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithGetterExceptionAttrGetterCallback):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithSetterExceptionAttrGetterCallback):
+        (WebCore):
+
 2013-02-23  Kentaro Hara  <haraken@chromium.org>
 
         WebCore fails to link in Chromium official build
