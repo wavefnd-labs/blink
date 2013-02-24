@@ -1,3 +1,160 @@
+2013-02-24  Hajime Morrita  <morrita@google.com>
+
+        [Custom Elements] Implement bare-bone document.register()
+        https://bugs.webkit.org/show_bug.cgi?id=100229
+
+        Reviewed by Adam Barth.
+
+        This change implements a prefixed version of document.register(), with minimal feature support.
+        - The feature is guarded by ENABLE(CUSTOM_ELEMENTS) and RuntimeEnabledFeatures::customDOMElementsEnabled().
+        - This bare-bone version only recognizes "name" and "prototype" parameters. It doesn't support default value of "prototype" parameter.
+        - Currently only V8 is supported. JSC binding needs its own binding implementation.
+
+        = Major new classes under dom/:
+
+        The dom module gets two new classes:
+        - CustomElementConstructor: A return value of document.register()
+          which holds the custom element definition.
+        - CustomElementRegistry: A collection of CustomElementConstructor objects.
+          CustomElementRegistry instance is created per Document and is owned by the Document.
+
+        CustomElementConstructor knows the definition of each custom
+        element, which is registered by document.register(). The name and
+        other options are held by this object. CustomElementRegistry owns a set
+        of the registered constructors. The registry guarantees invariants
+        like validity and uniqueness of the element names.
+
+        = A change on make_names.pl
+
+        This change tweaks make_names.pl (or generated HTMLElementFactory)
+        to hook the creations of unknown elements. Some of element names
+        which come to the fallback path can be one of registered custom
+        element.
+
+        = [V8WrapAsFunction] extended attribute:
+
+        The document.register() API returns a constructor
+        function. However, the V8 binding currently doesn't support it. To
+        make it possible, this change introduces "V8WrapAsFunction"
+        extended attribute for annotating CustomElementConstructor IDL
+        interface.
+
+        V8WrapAsFunction wraps the annotated interface with a JavaScript
+        function, which calls the original object as a function, or as a
+        constructor depends on the context.
+
+        With this wrapper function, there are two levels of indirection
+        between native C++ object and author-visible JS function:
+
+        [JS Adaptor Function] <-(hidden property)-> [JS Wrapper Object] -(internal field)-> [C++ Native object]
+
+        The code generator generates the binding code which deals with
+        this indirection.  Also, there is a set of helper functions in
+        V8AdaptorFunction.h/cpp which takes care of this indirection.
+        V8DOMWrapper.cpp/h works as a facade for these APIs and is used from
+        the generated code.
+
+        This redundancy comes from limitations of both V8 bindings and V8
+        embedding API. See bug 108138 for details.
+
+        = V8HTMLCustomElement
+
+        Unlike built-in HTML elements, any custom element has no
+        corresponding C++ class. Instead, document.register() should allow
+        passing a prototype object for the elements being registered.
+
+        V8HTMLCustomElement handles this lack of native class.  It behaves
+        like a native side proxy of non-native HTMLElement subclasses.  It
+        connects each custom element to an appropriate native element,
+        which is HTMLElement at this time. This restriction will be
+        relaxed later. See Bug 110436 for details.
+
+        = Custom DOM elements and multiple worlds
+
+        In this patch, custom element registration and instantiation is not allowed
+        in non-main world and document.register() API just fails there.
+
+        Reviewed by Adam Barth.
+
+        Tests: fast/dom/custom/document-register-basic.html
+               fast/dom/custom/document-register-reentrant-null-constructor.html
+               fast/dom/custom/document-register-reentrant-returning-fake.html
+               fast/dom/custom/document-register-reentrant-throwing-constructor.html
+
+        * DerivedSources.make:
+        * WebCore.gypi:
+        * bindings/generic/RuntimeEnabledFeatures.cpp:
+        * bindings/generic/RuntimeEnabledFeatures.h:
+        (RuntimeEnabledFeatures):
+        (WebCore::RuntimeEnabledFeatures::customDOMElementsEnabled):
+        (WebCore::RuntimeEnabledFeatures::setCustomDOMElements):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        * bindings/scripts/IDLAttributes.txt:
+        * bindings/v8/CustomElementHelpers.cpp: Added.
+        (WebCore::CustomElementHelpers::initializeConstructorWrapper):
+        (WebCore::hasNoBuiltinsInPrototype):
+        (WebCore::CustomElementHelpers::isValidPrototypeParameter):
+        (WebCore::CustomElementHelpers::isFeatureAllowed):
+        * bindings/v8/CustomElementHelpers.h: Copied from Source/WebCore/bindings/v8/V8HiddenPropertyName.h.
+        (CustomElementHelpers):
+        * bindings/v8/V8AdaptorFunction.cpp: Added.
+        (WebCore::V8AdaptorFunction::getTemplate):
+        (WebCore::V8AdaptorFunction::configureTemplate):
+        (WebCore::V8AdaptorFunction::invocationCallback):
+        (WebCore::V8AdaptorFunction::wrap):
+        * bindings/v8/V8AdaptorFunction.h: Added.
+        (V8AdaptorFunction):
+        (WebCore::V8AdaptorFunction::unwrap):
+        (WebCore::V8AdaptorFunction::get):
+        * bindings/v8/V8DOMConfiguration.cpp:
+        (WebCore::V8DOMConfiguration::configureTemplate):
+        * bindings/v8/V8DOMWrapper.cpp:
+        (WebCore::V8DOMWrapper::toFunction):
+        (WebCore::V8DOMWrapper::fromFunction):
+        * bindings/v8/V8DOMWrapper.h:
+        (V8DOMWrapper):
+        * bindings/v8/V8HTMLCustomElement.cpp: Added.
+        (WebCore::V8HTMLCustomElement::createWrapper):
+        * bindings/v8/V8HTMLCustomElement.h: Copied from Source/WebCore/bindings/v8/V8HiddenPropertyName.h.
+        (V8HTMLCustomElement):
+        (WebCore::V8HTMLCustomElement::toV8):
+        (WebCore::HTMLCustomElement::toV8):
+        * bindings/v8/V8HiddenPropertyName.h:
+        * bindings/v8/custom/V8CustomElementConstructorCustom.cpp: Added.
+        (WebCore::V8CustomElementConstructor::callAsFunctionCallback):
+        * dom/CustomElementConstructor.cpp: Copied from Source/WebCore/bindings/v8/V8HiddenPropertyName.h.
+        (WebCore::CustomElementConstructor::create):
+        (WebCore::CustomElementConstructor::CustomElementConstructor):
+        (WebCore::CustomElementConstructor::~CustomElementConstructor):
+        (WebCore::CustomElementConstructor::createElement):
+        * dom/CustomElementConstructor.h: Copied from Source/WebCore/bindings/v8/V8HiddenPropertyName.h.
+        (CustomElementConstructor):
+        (WebCore::CustomElementConstructor::document):
+        (WebCore::CustomElementConstructor::tagName):
+        (WebCore::CustomElementConstructor::name):
+        * dom/CustomElementConstructor.idl: Added.
+        * dom/CustomElementRegistry.cpp: Added.
+        (WebCore::CustomElementRegistry::CustomElementRegistry):
+        (WebCore::CustomElementRegistry::~CustomElementRegistry):
+        (WebCore::CustomElementRegistry::constructorOf):
+        (WebCore::CustomElementRegistry::isValidName):
+        (WebCore::CustomElementRegistry::registerElement):
+        (WebCore::CustomElementRegistry::find):
+        (WebCore::CustomElementRegistry::createElement):
+        (WebCore::CustomElementRegistry::document):
+        * dom/CustomElementRegistry.h: Added.
+        (CustomElementRegistry):
+        * dom/Document.cpp:
+        (WebCore::Document::removedLastRef):
+        (WebCore::Document::registerElement):
+        (WebCore::Document::registry):
+        * dom/Document.h:
+        (Document):
+        * dom/make_names.pl:
+        (printWrapperFactoryCppFile):
+        * html/HTMLDocument.idl:
+
 2013-02-24  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [Timeline] Shrink CPU bars to make it easier to see frame information popup.
