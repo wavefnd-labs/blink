@@ -1,3 +1,95 @@
+2013-02-24  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Experiment with 'reflected-xss' directive.
+        https://bugs.webkit.org/show_bug.cgi?id=104479
+
+        Reviewed by Adam Barth.
+
+        Content Security Policy 1.1 defines a 'reflected-xss' directive that
+        works in much the same way as WebKit's current 'X-XSS-Protection'
+        header[1]. This patch implements the new directive by parsing it
+        inside ContentSecurityPolicy, and exposing that state to XSSAuditor.
+
+        XSSAuditor now grabs the CSP directive's state, and mixes it with the
+        X-XSS-Protection header's state to determine how the page should be
+        handled. Moreover, both headers' states are now expressed in terms of
+        ContentSecurityPolicy::ReflectedXSSDisposition.
+
+        [1]: https://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-specification.dev.html#reflected-xss--experimental
+
+        Tests: http/tests/security/contentSecurityPolicy/1.1/reflected-xss-allow.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-allow-allow.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-allow-block.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-allow-filter.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-allow-invalid.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-allow-unset.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-block-allow.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-block-block.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-block-filter.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-block-invalid.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-block-unset.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-filter-allow.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-filter-block.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-filter-filter.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-filter-invalid.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-filter-unset.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-invalid-allow.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-invalid-block.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-invalid-filter.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-invalid-invalid.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-invalid-unset.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-unset-allow.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-unset-block.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-unset-filter.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-unset-invalid.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-and-xss-protection-unset-unset.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-block.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-empty.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-filter.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-invalid.html
+               http/tests/security/contentSecurityPolicy/1.1/reflected-xss-parsing.html
+
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::combineXSSProtectionHeaderAndCSP):
+            Given both headers' states, return the state which the XSSAuditor
+            should use when parsing a page. Blocking overrides filtering, which
+            overrides disabling.
+        (WebCore):
+        (WebCore::XSSAuditor::init):
+            Process the 'X-XSS-Protection' header before grabbing the CSP
+            header's state. Both are passed into the new
+            combineXSSProtectionHeaderAndCSP method to generate the final
+            state that ought to be used.
+        (WebCore::XSSAuditor::XSSAuditor):
+        (WebCore::XSSAuditor::filterToken):
+        * html/parser/XSSAuditor.h:
+            Switch to ContentSecurityPolicy::ReflectedXSSDisposition internally
+            in XSSAuditor.
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPDirectiveList::reflectedXSSDisposition):
+            Enum defining the possible state of the 'reflected-xss' CSP directive.
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::CSPDirectiveList):
+        (WebCore::CSPDirectiveList::parseReflectedXSS):
+            Given a 'reflected-xss' directive's value, set the
+            ReflectedXSSDisposition into a new property on the CSPDirectiveList.
+        (WebCore):
+        (WebCore::CSPDirectiveList::addDirective):
+            Accept 'reflected-xss' as a valid directive if we're in
+            experimental mode.
+        (WebCore::ContentSecurityPolicy::reflectedXSSDisposition):
+            Expose the directive's state via the public API.
+        (WebCore::ContentSecurityPolicy::reportInvalidReflectedXSS):
+            Generate console errors when invalid reflected-xss directive values
+            are encounted during parsing.
+        * page/ContentSecurityPolicy.h:
+        * platform/network/HTTPParsers.cpp:
+        (WebCore::parseXSSProtectionHeader):
+        * platform/network/HTTPParsers.h:
+        (WebCore):
+            Start using ContentSecurityPolicy::ReflectedXSSDisposition rather
+            than the XSSProtectionDisposition enum.
+
 2013-02-24  Zan Dobersek  <zdobersek@igalia.com>
 
         Updating GObject bindings baselines after r143863.
