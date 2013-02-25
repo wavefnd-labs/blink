@@ -1,3 +1,78 @@
+2013-02-25  Mike West  <mkwst@chromium.org>
+
+        XSSAuditor tests shouldn't depend on IFrames's load order.
+        https://bugs.webkit.org/show_bug.cgi?id=110737
+
+        Reviewed by Jochen Eisinger.
+
+        Various tests under http/tests/security/xssAuditor actually wrap up
+        multiple test cases under a single HTML file by loading a variety of
+        IFrames. Currently, the error messages that these tests expect aren't
+        detailed enough to distinguish between the order in which the IFrames
+        load: they all generate the same error, so the ordering is irrelevant.
+
+        Before we increase the error message detail in webkit.org/b/110733, we
+        need to ensure that these tests don't rely on load order. One option
+        is to serialize the IFrame loading by chaining onload events, but that
+        seems like a slow way of doing things. This patch takes a different
+        approach, breaking the multiple-IFrame tests into many single-IFrame
+        tests (which should be more shardable, and actually execute more quickly
+        in the long run).
+
+        * http/tests/security/xssAuditor/open-iframe-src-expected.txt: Removed.
+        * http/tests/security/xssAuditor/open-iframe-src.html: Removed.
+        * http/tests/security/xssAuditor/open-script-src-expected.txt: Removed.
+        * http/tests/security/xssAuditor/open-script-src.html: Removed.
+        * http/tests/security/xssAuditor/property-escape-comment-expected.txt: Removed.
+        * http/tests/security/xssAuditor/property-escape-comment.html: Removed.
+        * http/tests/security/xssAuditor/property-escape-entity-expected.txt: Removed.
+        * http/tests/security/xssAuditor/property-escape-entity.html: Removed.
+        * http/tests/security/xssAuditor/property-escape-quote-expected.txt: Removed.
+        * http/tests/security/xssAuditor/property-escape-quote.html: Removed.
+        * http/tests/security/xssAuditor/script-tag-with-comma-expected.txt: Removed.
+        * http/tests/security/xssAuditor/script-tag-with-comma.html: Removed.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated-expected.txt: Removed.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated.html: Removed.
+            Removed these tests, breaking them into multiple single-IFrame HTML files.
+        * http/tests/security/xssAuditor/open-iframe-src-01.html: Added.
+        * http/tests/security/xssAuditor/open-iframe-src-02.html: Added.
+        * http/tests/security/xssAuditor/open-script-src-01-expected.txt: Added.
+        * http/tests/security/xssAuditor/open-script-src-01.html: Added.
+        * http/tests/security/xssAuditor/open-script-src-02-expected.txt: Added.
+        * http/tests/security/xssAuditor/open-script-src-02.html: Added.
+        * http/tests/security/xssAuditor/open-script-src-03-expected.txt: Added.
+        * http/tests/security/xssAuditor/open-script-src-03.html: Added.
+        * http/tests/security/xssAuditor/open-script-src-04-expected.txt: Added.
+        * http/tests/security/xssAuditor/open-script-src-04.html: Added.
+        * http/tests/security/xssAuditor/property-escape-comment-01-expected.txt: Added.
+        * http/tests/security/xssAuditor/property-escape-comment-01.html: Added.
+        * http/tests/security/xssAuditor/property-escape-comment-02-expected.txt: Added.
+        * http/tests/security/xssAuditor/property-escape-comment-02.html: Added.
+        * http/tests/security/xssAuditor/property-escape-comment-03-expected.txt: Added.
+        * http/tests/security/xssAuditor/property-escape-comment-03.html: Added.
+        * http/tests/security/xssAuditor/property-escape-entity-01-expected.txt: Added.
+        * http/tests/security/xssAuditor/property-escape-entity-01.html: Added.
+        * http/tests/security/xssAuditor/property-escape-entity-02-expected.txt: Added.
+        * http/tests/security/xssAuditor/property-escape-entity-02.html: Added.
+        * http/tests/security/xssAuditor/property-escape-entity-03-expected.txt: Added.
+        * http/tests/security/xssAuditor/property-escape-entity-03.html: Added.
+        * http/tests/security/xssAuditor/property-escape-quote-01.html: Added.
+        * http/tests/security/xssAuditor/property-escape-quote-02.html: Added.
+        * http/tests/security/xssAuditor/property-escape-quote-03.html: Added.
+        * http/tests/security/xssAuditor/script-tag-with-comma-01-expected.txt: Added.
+        * http/tests/security/xssAuditor/script-tag-with-comma-01.html: Added.
+        * http/tests/security/xssAuditor/script-tag-with-comma-02-expected.txt: Added.
+        * http/tests/security/xssAuditor/script-tag-with-comma-02.html: Added.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated-01-expected.txt: Added.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated-01.html: Added.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated-02-expected.txt: Added.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated-02.html: Added.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated-03-expected.txt: Added.
+        * http/tests/security/xssAuditor/script-tag-with-source-unterminated-03.html: Added.
+        * http/tests/security/xssAuditor/script-tag-with-trailing-comment5.html: Added.
+            These tests perform the same validation as the combined tests, they
+            simply do it without introducing load-order dependencies.
+
 2013-02-25  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Unreviewed chromium test expectations update.
