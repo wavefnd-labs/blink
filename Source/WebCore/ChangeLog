@@ -1,3 +1,20 @@
+2013-02-25  Tim Horton  <timothy_horton@apple.com>
+
+        Page::m_isInWindow is uninitialized
+        https://bugs.webkit.org/show_bug.cgi?id=110807
+
+        Reviewed by Simon Fraser.
+
+        Ideally m_isInWindow and m_isOnscreen would default to false, and be flipped to true
+        when the Page is put in-window or on-screen. However, only the Mac port seems to ever
+        call setIsInWindow/didMoveOnscreen. So, we have to default to true and flip it to false
+        immediately after construction on Mac.
+
+        This is just matching the behaviour of the existing m_isOnscreen.
+
+        * page/Page.cpp:
+        (WebCore::Page::Page): Initialize m_isInWindow to true.
+
 2013-02-25  Kentaro Hara  <haraken@chromium.org>
 
         Unreviewed build fix after r143965.
