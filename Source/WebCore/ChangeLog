@@ -1,3 +1,61 @@
+2013-02-25  Alpha Lam  <hclam@chromium.org>
+
+        GIFImageReader to read from source data directly
+        https://bugs.webkit.org/show_bug.cgi?id=109662
+
+        Reviewed by Stephen White.
+
+        This is the first patch to improve GIF image decoding.
+
+        GIFImageReader has an internal 256 bytes buffer to saving incoming
+        bytes. This mechanism is out-dated because WebKit holds the entire
+        file in memory and it is not necessary to hold data in an intermediate
+        buffer.
+
+        This is also a blocker for later work to parse and decode GIF
+        incrementally.
+
+        This change removed the imtermediate 'hold' buffer and uses an index
+        for data position to keep track of parsing of the GIF file. Buffer for
+        global colormap and local colormap are also removed because they can be
+        referenced from the data stream.
+
+        This change is tested by:
+
+        Layout tests
+        All tests passed under fast/images.
+
+        Unit tests
+        Added GIFImageDecoderTest for Chromium.
+
+        Local testing
+        I tested this implementation against a set of 50k GIF images and
+        there's no crashes and produces bit-exact results as previous code.
+
+        * platform/image-decoders/gif/GIFImageDecoder.cpp:
+        (WebCore::GIFImageDecoder::setData):
+        (WebCore::GIFImageDecoder::frameCount):
+        (WebCore::GIFImageDecoder::haveDecodedRow):
+        (WebCore::GIFImageDecoder::decode):
+        * platform/image-decoders/gif/GIFImageReader.cpp:
+        (GIFImageReader::doLZW):
+        (GIFImageReader::decode):
+        (GIFImageReader::decodeInternal):
+        (GIFImageReader::setRemainingBytes):
+        * platform/image-decoders/gif/GIFImageReader.h:
+        (GIFFrameContext):
+        (GIFFrameContext::GIFFrameContext):
+        (GIFFrameContext::~GIFFrameContext):
+        (GIFImageReader::GIFImageReader):
+        (GIFImageReader::~GIFImageReader):
+        (GIFImageReader::setData):
+        (GIFImageReader):
+        (GIFImageReader::globalColormap):
+        (GIFImageReader::localColormap):
+        (GIFImageReader::localColormapSize):
+        (GIFImageReader::data):
+        (GIFImageReader::colormap):
+
 2013-02-25  Sergio Villar Senin  <svillar@igalia.com>
 
         [soup] "Too many redirects" error loading chat in plus.google.com
