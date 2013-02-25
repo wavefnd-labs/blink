@@ -1,3 +1,25 @@
+2013-02-25  Jer Noble  <jer.noble@apple.com>
+
+        AVFoundation.framework and QTKit.framework are lazy-loaded on every WebProcess launch
+        https://bugs.webkit.org/show_bug.cgi?id=110725
+
+        Reviewed by Eric Carlson.
+
+        When settings are changed, do not re-query the media engines (which causes their respective
+        frameworks to load). Instead, merely clear any previously loaded media engines so that
+        the media engine list will be re-queried the next time installedMediaEngines() is called.
+
+        (WebCore::MediaPlayer::resetMediaEngines): Renamed from requeryMediaEngines.
+        * platform/graphics/MediaPlayer.h:
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::resetMediaEngines): Ditto.
+        * html/HTMLMediaElement.h:
+        * page/Settings.cpp:
+        (WebCore::Settings::setAVFoundationEnabled): Call renamed method.
+        (WebCore::Settings::setQTKitEnabled):  Ditto.
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::installedMediaEngines): Only clear out previously queried engines.
+
 2013-02-25  Martin Robinson  <mrobinson@igalia.com>
 
         Try to fix the Windows gyp build after r143937
