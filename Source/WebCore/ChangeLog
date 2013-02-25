@@ -1,3 +1,83 @@
+2013-02-25  Andreas Kling  <akling@apple.com>
+
+        Reduce amount of code that includes StylePropertySet.h
+        <http://webkit.org/b/101149>
+
+        Reviewed by Antti Koivisto.
+
+        StylePropertySet.h and dependents were getting included by the majority of WebKit
+        through either StyledElement.h or CSSStyleDeclaration.h. This change removes those includes
+        and moves inclusion to .cpp files instead. After this change, it's possible to hack most
+        of WebCore/css/ and rebuild <100 files instead of >1000.
+
+        The only real code change in here is changing CSSStyleDeclaration::cssPropertyMatches()
+        to take a CSSPropertyID/CSSValue* combo instead of a StylePropertySet::Reference.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::cssPropertyMatches):
+        * css/CSSComputedStyleDeclaration.h:
+        (CSSComputedStyleDeclaration):
+        * css/CSSStyleDeclaration.h:
+        (CSSStyleDeclaration):
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::cssPropertyMatches):
+        * css/PropertySetCSSStyleDeclaration.h:
+        * css/SelectorChecker.h:
+        * css/SelectorCheckerFastPath.cpp:
+        * css/SelectorFilter.cpp:
+        * css/SelectorFilter.h:
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::propertyMatches):
+        (WebCore::StylePropertySet::removeEquivalentProperties):
+        * css/StylePropertySet.h:
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::MatchedProperties::MatchedProperties):
+        (WebCore::StyleResolver::MatchedProperties::~MatchedProperties):
+        * css/StyleResolver.h:
+        (MatchedProperties):
+        * css/StyleRule.cpp:
+        * css/ViewportStyleResolver.cpp:
+        (WebCore::ViewportStyleResolver::~ViewportStyleResolver):
+        * css/ViewportStyleResolver.h:
+        (ViewportStyleResolver):
+        * css/WebKitCSSKeyframeRule.cpp:
+        (WebCore::StyleKeyframe::StyleKeyframe):
+        (WebCore::StyleKeyframe::~StyleKeyframe):
+        * css/WebKitCSSKeyframeRule.h:
+        (StyleKeyframe):
+        * dom/Attr.cpp:
+        * dom/Document.cpp:
+        * dom/Element.cpp:
+        * dom/StyledElement.cpp:
+        (WebCore::StyledElement::addPropertyToPresentationAttributeStyle):
+        * dom/StyledElement.h:
+        (StyledElement):
+        * editing/FrameSelection.cpp:
+        * editing/RemoveCSSPropertyCommand.cpp:
+        (WebCore::RemoveCSSPropertyCommand::~RemoveCSSPropertyCommand):
+        * editing/RemoveCSSPropertyCommand.h:
+        (RemoveCSSPropertyCommand):
+        * editing/RemoveFormatCommand.cpp:
+        * html/HTMLBodyElement.cpp:
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::addHTMLLengthToStyle):
+        (WebCore::HTMLElement::addHTMLColorToStyle):
+        * html/HTMLElement.h:
+        (HTMLElement):
+        * html/HTMLFontElement.cpp:
+        * html/HTMLHRElement.cpp:
+        * html/HTMLPreElement.cpp:
+        * html/HTMLTableElement.cpp:
+        * html/HTMLTablePartElement.cpp:
+        * html/canvas/CanvasStyle.cpp:
+        * html/shadow/MediaControlElementTypes.cpp:
+        * inspector/InspectorStyleSheet.cpp:
+        * page/PageSerializer.cpp:
+        * rendering/RenderTableCell.cpp:
+        * svg/SVGAnimateElement.cpp:
+        * svg/SVGElementRareData.h:
+        * svg/SVGFontFaceElement.cpp:
+
 2013-02-25  Alexei Filippov  <alph@chromium.org>
 
         Web Inspector: Remove CPU profile from a group causes exception
