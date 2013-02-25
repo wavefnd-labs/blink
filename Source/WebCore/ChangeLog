@@ -1,3 +1,50 @@
+2013-02-25  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Refactor RenderStyle's grid position storage in preparation to supporting spanning
+        https://bugs.webkit.org/show_bug.cgi?id=110651
+
+        Reviewed by Ojan Vafai.
+
+        The current code stores grid-{row|column} as a single GridPosition value. While this works well currently,
+        we want to be able to handle 2 GridPosition as this enables row / column spanning.
+
+        That's what this refactoring achieves: it replaces the internal storage by a GridPositions that contains a 
+        single GridPosition for now. The rest is mechanical updates.
+
+        Refactoring covered by existing tests.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::valueForGridPositions):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        Added the simple wrapper valueForGridPositions and updated the rest of the code.
+
+        * css/StyleResolver.cpp:
+        (WebCore::createGridPositions):
+        (WebCore::StyleResolver::applyProperty):
+        Ditto with createGridPositions.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        (WebCore::RenderGrid::placeSpecifiedMajorAxisItemsOnGrid):
+        (WebCore::RenderGrid::placeAutoMajorAxisItemsOnGrid):
+        (WebCore::RenderGrid::placeAutoMajorAxisItemOnGrid):
+        (WebCore::RenderGrid::autoPlacementMajorAxisPositionsForChild):
+        (WebCore::RenderGrid::autoPlacementMinorAxisPositionsForChild):
+        Updated the code after adding the indirection: s/GridPosition/GridPositions/ and
+        use the firstPosition helper.
+
+        * rendering/RenderGrid.h:
+        * rendering/style/GridPosition.h:
+        (WebCore::GridPositions::GridPositions):
+        (WebCore::GridPositions::firstPosition):
+        (WebCore::GridPositions::operator==):
+        Added this class to add the indirection. For now, it only wraps the single GridPosition.
+
+        * rendering/style/RenderStyle.h:
+        * rendering/style/StyleGridItemData.h:
+        Updated to store / take / return a GridPositions.
+
 2013-02-25  Dimitri Glazkov  <dglazkov@chromium.org>
 
         Revert r143840 because it caused flaky crashes.
