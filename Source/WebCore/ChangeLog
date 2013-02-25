@@ -1,3 +1,106 @@
+2013-02-24  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Generate xxxAttrSetterCallback()
+        https://bugs.webkit.org/show_bug.cgi?id=110726
+
+        Reviewed by Adam Barth.
+
+        This is one of steps to insert TRACE_EVENT_STATE() macros into DOM bindings.
+        This patch introduces an indirection function for xxxAttrSetter(), like this:
+
+        // For non-custom setters
+        void xxxAttrSetterCallback(...) {
+          xxxAttrSetter(...);
+        }
+
+        // For custom setters.
+        void xxxAttrSetterCallback(...) {
+          return xxxAttrSetterCustom(...);
+        }
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNormalAttrSetterCallback):
+        (GenerateNormalAttrSetter):
+        (GenerateSingleBatchedAttribute):
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalStaticAttrAttrSetterCallback):
+        (TestInterfaceV8Internal):
+        (WebCore::TestInterfaceV8Internal::supplementalStr2AttrSetterCallback):
+        (WebCore::TestInterfaceV8Internal::supplementalStr3AttrSetterCallback):
+        (WebCore::TestInterfaceV8Internal::supplementalNodeAttrSetterCallback):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::staticStringAttrAttrSetterCallback):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::enumAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::shortAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::unsignedShortAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::longAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::longLongAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::unsignedLongLongAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::stringAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::testObjAttrAttrSetter):
+        (WebCore::TestObjV8Internal::testObjAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::XMLObjAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::createAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedStringAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedIntegralAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedUnsignedIntegralAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedBooleanAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedURLAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedCustomIntegralAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedCustomBooleanAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::reflectedCustomURLAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::typedArrayAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::attrWithGetterExceptionAttrSetterCallback):
+        (WebCore::TestObjV8Internal::attrWithSetterExceptionAttrSetterCallback):
+        (WebCore::TestObjV8Internal::stringAttrWithGetterExceptionAttrSetterCallback):
+        (WebCore::TestObjV8Internal::stringAttrWithSetterExceptionAttrSetterCallback):
+        (WebCore::TestObjV8Internal::customAttrAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeRaisesAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::conditionalAttr1AttrSetterCallback):
+        (WebCore::TestObjV8Internal::conditionalAttr2AttrSetterCallback):
+        (WebCore::TestObjV8Internal::conditionalAttr3AttrSetterCallback):
+        (WebCore::TestObjV8Internal::anyAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr1AttrSetterCallback):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr2AttrSetterCallback):
+        (WebCore::TestObjV8Internal::enabledPerContextAttr1AttrSetterCallback):
+        (WebCore::TestObjV8Internal::enabledPerContextAttr2AttrSetterCallback):
+        (WebCore::TestObjV8Internal::floatArrayAttrSetterCallback):
+        (WebCore::TestObjV8Internal::doubleArrayAttrSetterCallback):
+        (WebCore::TestObjV8Internal::mutablePointAttrSetterCallback):
+        (WebCore::TestObjV8Internal::immutablePointAttrSetterCallback):
+        (WebCore::TestObjV8Internal::strawberryAttrSetterCallback):
+        (WebCore::TestObjV8Internal::strictFloatAttrSetterCallback):
+        (WebCore::TestObjV8Internal::idAttrSetterCallback):
+        (WebCore):
+        (WebCore::ConfigureV8TestObjTemplate):
+        (WebCore::V8TestObj::installPerContextProperties):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::valueAttrSetterCallback):
+        (TestSerializedScriptValueInterfaceV8Internal):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrSetterCallback):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore::TestTypedefsV8Internal::unsignedLongLongAttrAttrSetterCallback):
+        (TestTypedefsV8Internal):
+        (WebCore::TestTypedefsV8Internal::immutableSerializedScriptValueAttrSetterCallback):
+        (WebCore::TestTypedefsV8Internal::attrWithGetterExceptionAttrSetterCallback):
+        (WebCore::TestTypedefsV8Internal::attrWithSetterExceptionAttrSetterCallback):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithGetterExceptionAttrSetterCallback):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithSetterExceptionAttrSetterCallback):
+        (WebCore):
+
 2013-02-25  Adam Barth  <abarth@webkit.org>
 
         Build fix for Debug.
