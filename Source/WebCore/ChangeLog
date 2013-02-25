@@ -1,3 +1,28 @@
+2013-02-24  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: Improve speed of Linkifier.reset operation.
+        https://bugs.webkit.org/show_bug.cgi?id=110696
+
+        Reviewed by Yury Semikhatsky.
+
+        Linkifier calls Location.dispose N times and each dispose method calls Array.remove
+        which scans entire array and does splice. So the complexity of Linkifier.reset
+        is O(N^2). I replaced the arrays with Set and got O(N) complexity.
+
+        Drive by fix: The identifier generator was slightly changed.
+        Now it produces identifiers that couldn't be converted into a number.
+        So the engine will never convert Set/Map object into an array.
+
+        * inspector/front-end/Script.js:
+        (WebInspector.Script):
+        (WebInspector.Script.prototype.updateLocations):
+        (WebInspector.Script.prototype.createLiveLocation):
+        * inspector/front-end/UISourceCode.js:
+        (WebInspector.UISourceCode):
+        (WebInspector.UISourceCode.prototype.addLiveLocation):
+        (WebInspector.UISourceCode.prototype.updateLiveLocations):
+        * inspector/front-end/utilities.js:
+
 2013-02-24  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r143797.
