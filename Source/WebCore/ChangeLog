@@ -1,3 +1,27 @@
+2013-02-25  Alexey Proskuryakov  <ap@apple.com>
+
+        Remove an obsolete workaround for relaxing 3rd party cookie policy
+        https://bugs.webkit.org/show_bug.cgi?id=110664
+
+        Reviewed by Benjamin Poulain.
+
+        Removed shouldRelaxThirdPartyCookiePolicy(). This workaround is no longer needed,
+        because CFNetwork performs the same check starting with 10.6.8.
+
+        Also, the workaround was not quite correct and harmful for performance, as it
+        was always changing main document URL to an untrue value, which caused ResourceRequest
+        regeneration.
+
+        * platform/network/ResourceHandle.h:
+        * platform/network/cf/ResourceHandleCFNet.cpp:
+        (WebCore::ResourceHandle::createCFURLConnection):
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::platformLoadResourceSynchronously):
+        * platform/network/mac/ResourceHandleMac.mm:
+        (WebCore::ResourceHandle::createNSURLConnection):
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::platformLoadResourceSynchronously):
+
 2013-02-25  Vsevolod Vlasov  <vsevik@chromium.org>
 
         WebInspector: Do not keep track of resources unless they have a valid loader identifier.
