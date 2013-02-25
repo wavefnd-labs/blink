@@ -1,3 +1,33 @@
+2013-02-23  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: Native Memory Instrumentation: replace String with const char* in MemoryObjectInfo
+        https://bugs.webkit.org/show_bug.cgi?id=110599
+
+        Reviewed by Yury Semikhatsky.
+
+        Due to potentially dynamic nature of names and classNames we need to make a copy of the strings
+        that were given us via MemoryInstrumentation calls.
+        So I extended client api with registerString method that pushes the strings
+        down to the serializer.
+
+        * css/InspectorCSSOMWrappers.h:
+        * inspector/HeapGraphSerializer.cpp:
+        (WebCore::HeapGraphSerializer::HeapGraphSerializer):
+        (WebCore::HeapGraphSerializer::reportNodeImpl):
+        (WebCore::HeapGraphSerializer::reportEdgeImpl):
+        (WebCore::HeapGraphSerializer::registerString):
+        (WebCore::HeapGraphSerializer::registerTypeString):
+        (WebCore::HeapGraphSerializer::addRootNode):
+        * inspector/HeapGraphSerializer.h:
+        (HeapGraphSerializer):
+        * inspector/MemoryInstrumentationImpl.cpp:
+        (WebCore::MemoryInstrumentationClientImpl::registerString):
+        (WebCore):
+        * inspector/MemoryInstrumentationImpl.h:
+        (MemoryInstrumentationClientImpl):
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::reportMemoryUsage):
+
 2013-02-25  Keishi Hattori  <keishi@webkit.org>
 
         Add a scrollbar class for the new calendar picker
