@@ -1,3 +1,30 @@
+2013-02-25  Mark Lam  <mark.lam@apple.com>
+
+        Changed DatabaseTracker::getMaxSizeForDatabase() to return the previous
+        database size instead of 0 when the quota limit has been reached.
+        https://bugs.webkit.org/show_bug.cgi?id=110557.
+
+        Reviewed by Geoffrey Garen.
+
+        Testing of concurrent multi-process consumption of database quota shows that
+        returning a value of 0 when the quota is exceeded still allows some databases
+        to run away with unbounded growth. However, if getMaxSizeForDatabase() returns
+        the existing database size, the underlying sqlite3 database will successfully
+        reject new growth.
+
+        The value returned by DatabaseTracker::getMaxSizeForDatabase() is used to set
+        the SQLite3 database size using a sql command "PRAGMA max_page_count = <size>".
+        The SQLite3 documentation on this pragma says, "The maximum page count cannot
+        be reduced below the current database size."
+
+        It is undefined what setting it to a reduced size will do. So, we're changing
+        getMaxSizeForDatabase() to return the existing size instead.
+
+        No new tests.
+
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::getMaxSizeForDatabase):
+
 2013-02-25  Tony Chang  <tony@chromium.org>
 
         Refactor logic for relaying out children out of RenderBlock::styleDidChange
