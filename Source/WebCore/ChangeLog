@@ -1,3 +1,27 @@
+2013-02-25  Tony Chang  <tony@chromium.org>
+
+        Refactor logic for relaying out children out of RenderBlock::styleDidChange
+        https://bugs.webkit.org/show_bug.cgi?id=110661
+
+        Reviewed by David Hyatt.
+
+        Instead of having styleDidChange need to know which children to mark as needing layout,
+        use a bool to keep track of border and padding width changes so at layout time, we know
+        we need to set relayoutChildren=true.
+
+        We steal a bit from m_lineHeight reducing the possible line height from around 500 million pixels
+        to 250 million pixels.
+
+        No new tests, this should be covered by fast/block/positioning/border-change-relayout-test.html and
+        fast/block/dynamic-padding-border.html.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::RenderBlock): Fix indent and initialize m_hasBorderOrPaddingLogicalWidthChanged.
+        (WebCore::RenderBlock::styleDidChange): Remove logic for setting children as needing layout.
+        (WebCore::RenderBlock::updateLogicalWidthAndColumnWidth): Return true if border or padding width changed.
+        * rendering/RenderBlock.h:
+        (RenderBlock): Steal a bit from m_lineHeight and give it to m_hasBorderOrPaddingLogicalWidthChanged.
+
 2013-02-25  Alexis Menard  <alexis@webkit.org>
 
         transition-property property doesn't accept "all, <IDENT>".
