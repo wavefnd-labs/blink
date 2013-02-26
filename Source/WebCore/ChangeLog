@@ -1,3 +1,67 @@
+2013-02-26  Stephen Chenney  <schenney@chromium.org>
+
+        feDisplacementMap filter gets color space wrong
+        https://bugs.webkit.org/show_bug.cgi?id=105929
+
+        Reviewed by Dirk Schulze.
+
+        Tests: svg/filters/feDisplacementMap-color-interpolation-filters-expected.svg
+               svg/filters/feDisplacementMap-color-interpolation-filters.svg
+               svg/filters/feDisplacementMap-filterUnits-expected.svg
+               svg/filters/feDisplacementMap-filterUnits.svg
+
+        According to the spec, the SVG feDisplacementMap filter should not
+        change the color space on its first input, and other vendors seem to
+        agree that this also means that the output should be in the first
+        input's color space. That makes sense: we are displacing the input,
+        not otherwise manipulating colors.
+
+        This change improves color space handling for filters by more
+        explicitly tracking which color space is used for the filter's
+        operation and which is used for the filter's result. It provides a
+        means for filter effects to override the color-interpolation-filters
+        property as defined by the spec. feFlood and feDisplacementMap use
+        this new feature to enforce the spec requirements.
+
+        * platform/graphics/filters/FEDisplacementMap.cpp:
+        (WebCore::FEDisplacementMap::setResultColorSpace): Override the default color space with the
+            same color space as the first input filter.
+        (WebCore):
+        (WebCore::FEDisplacementMap::transformResultColorSpace): Only transform the color space on
+            the second filter input.
+        (WebCore::FEDisplacementMap::platformApplySoftware): Make the application code more efficient,
+            and give slightly better numerical accuracy.
+        * platform/graphics/filters/FEDisplacementMap.h:
+        (FEDisplacementMap): Declare setResultColorSpace.
+        * platform/graphics/filters/FEFlood.cpp:
+        (WebCore::FEFlood::platformApplySoftware): Remove the call that forces
+            the result color space. We do it now in the setResultColorSpace.
+        * platform/graphics/filters/FEFlood.h:
+        (FEFlood): Add setResultColorSPace override that enforces sRGB color space. But not if using
+            CG, which apparently does this this already internally.
+        * platform/graphics/filters/FilterEffect.cpp:
+        (WebCore::FilterEffect::FilterEffect): Rename m_colorSpace to m_operatingColorSpace.
+        (WebCore::FilterEffect::apply): Allow filter effects to
+            override the color space conversion of their inputs.
+        (WebCore::FilterEffect::createImageBufferResult): Always create the
+            image buffer with the result color space.
+        * platform/graphics/filters/FilterEffect.h:
+        (WebCore::FilterEffect::operatingColorSpace): New accessor.
+        (WebCore::FilterEffect::setOperatingColorSpace): New accessor.
+        (WebCore::FilterEffect::resultColorSpace): New accessor.
+        (WebCore::FilterEffect::setResultColorSpace): New accessor.
+        (FilterEffect):
+        (WebCore::FilterEffect::transformResultColorSpace): A new virtual
+            method that allows filter effects individual control over the color
+            space conversion of their inputs.
+        * platform/graphics/filters/SourceGraphic.h:
+        (WebCore::SourceGraphic::SourceGraphic): Variable rename.
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::build): Use accessors to set color
+            space to enable per-effect overrides.
+        * rendering/svg/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::buildPrimitives): Use accessors to set color.
+
 2013-02-26  Mike West  <mkwst@chromium.org>
 
         X-Frame-Options should accept ALLOWALL as a valid value.
