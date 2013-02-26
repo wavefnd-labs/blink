@@ -1,3 +1,95 @@
+2013-02-26  Tien-Ren Chen  <trchen@chromium.org>
+
+        Implement coordinated scrollbar for subframes and overflow:scroll
+        https://bugs.webkit.org/show_bug.cgi?id=109560
+
+        Reviewed by James Robinson.
+
+        This patch obsoletes ScrollingCoordinatorPrivate for the Chromium
+        implementation. Also removes the concept of a single main scrolling
+        layer. Should use HashMap to keep track resources for multiple
+        scrollable objects.
+
+        Many of the callbacks are extended to support ScrollableArea instead
+        of just FrameView. Now ScrollingCoordinatorChromium coordinates
+        scrollbars for both subframes and overflow:scroll.
+
+        Some drive-by change:
+        1. Remove the GraphicsLayer parameter for layer change callbacks.
+           Should be able to get the latest layer from the ScrollableArea anyway.
+        2. Should start from main frame document when updating touch event target rects.
+
+        New chromium test: ScrollingCoordinatorChromiumTest.iframeScrolling
+
+        * page/Frame.cpp:
+        (WebCore::Frame::willDetachPage):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::prepareForDetach):
+        (WebCore::FrameView::layerForScrolling):
+        (WebCore):
+        * page/FrameView.h:
+        (FrameView):
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::scrollLayerForScrollableArea):
+        (WebCore):
+        (WebCore::ScrollingCoordinator::horizontalScrollbarLayerForScrollableArea):
+        (WebCore::ScrollingCoordinator::verticalScrollbarLayerForScrollableArea):
+        * page/scrolling/ScrollingCoordinator.h:
+        (WebCore::ScrollingCoordinator::willDestroyScrollableArea):
+        (WebCore::ScrollingCoordinator::scrollableAreaScrollLayerDidChange):
+        (WebCore::ScrollingCoordinator::scrollableAreaScrollbarLayerDidChange):
+        (ScrollingCoordinator):
+        * page/scrolling/chromium/ScrollingCoordinatorChromium.cpp:
+        (WebCore::scrollingWebLayerForGraphicsLayer):
+        (WebCore::ScrollingCoordinatorChromium::scrollingWebLayerForScrollableArea):
+        (WebCore::ScrollingCoordinatorChromium::ScrollingCoordinatorChromium):
+        (WebCore::ScrollingCoordinatorChromium::~ScrollingCoordinatorChromium):
+        (WebCore::ScrollingCoordinatorChromium::frameViewLayoutUpdated):
+        (WebCore::ScrollingCoordinatorChromium::touchEventTargetRectsDidChange):
+        (WebCore::createScrollbarLayer):
+        (WebCore::detachScrollbarLayer):
+        (WebCore::setupScrollbarLayer):
+        (WebCore::ScrollingCoordinatorChromium::willDestroyScrollableArea):
+        (WebCore::ScrollingCoordinatorChromium::scrollableAreaScrollbarLayerDidChange):
+        (WebCore::ScrollingCoordinatorChromium::setNonFastScrollableRegion):
+        (WebCore::ScrollingCoordinatorChromium::setTouchEventTargetRects):
+        (WebCore::ScrollingCoordinatorChromium::setWheelEventHandlerCount):
+        (WebCore::ScrollingCoordinatorChromium::setShouldUpdateScrollLayerPositionOnMainThread):
+        (WebCore::ScrollingCoordinatorChromium::setLayerIsContainerForFixedPositionLayers):
+        (WebCore::ScrollingCoordinatorChromium::setLayerIsFixedToContainerLayer):
+        (WebCore::ScrollingCoordinatorChromium::scrollableAreaScrollLayerDidChange):
+        (WebCore::ScrollingCoordinatorChromium::addWebScrollbarLayer):
+        (WebCore):
+        (WebCore::ScrollingCoordinatorChromium::getWebScrollbarLayer):
+        (WebCore::ScrollingCoordinatorChromium::removeWebScrollbarLayer):
+        * page/scrolling/chromium/ScrollingCoordinatorChromium.h:
+        (WebCore):
+        (ScrollingCoordinatorChromium):
+        * page/scrolling/mac/ScrollingCoordinatorMac.h:
+        (ScrollingCoordinatorMac):
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::scrollableAreaScrollbarLayerDidChange):
+        * platform/ScrollableArea.h:
+        (ScrollableArea):
+        (WebCore::ScrollableArea::layerForScrolling):
+        * platform/graphics/GraphicsLayer.h:
+        (GraphicsLayer):
+        (WebCore::GraphicsLayer::setContentsToPlatformLayer):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::~RenderLayer):
+        (WebCore::RenderLayer::layerForScrolling):
+        (WebCore):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateOverflowControlsLayers):
+        (WebCore::RenderLayerBacking::positionOverflowControlsLayers):
+        (WebCore::RenderLayerBacking::updateScrollingLayers):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::frameViewDidScroll):
+        (WebCore::RenderLayerCompositor::scrollingLayerDidChange):
+        (WebCore::RenderLayerCompositor::updateOverflowControlsLayers):
+
 2013-02-26  Kentaro Hara  <haraken@chromium.org>
 
         [V8] Overloaded constructors don't need header declarations

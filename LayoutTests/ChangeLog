@@ -1,3 +1,68 @@
+2013-02-26  Tien-Ren Chen  <trchen@chromium.org>
+
+        Implement coordinated scrollbar for subframes and overflow:scroll
+        https://bugs.webkit.org/show_bug.cgi?id=109560
+
+        Reviewed by James Robinson.
+
+        Coordinated scrollbars changes drawsContent flag on scrollbar GraphicsLayers,
+        test expectation are updated.
+
+        * platform/chromium-linux/compositing/iframes/become-overlapped-iframe-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/composited-parent-iframe-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/connect-compositing-iframe-delayed-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/connect-compositing-iframe-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/connect-compositing-iframe2-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/connect-compositing-iframe3-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/enter-compositing-iframe-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/iframe-resize-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/iframe-size-from-zero-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/invisible-nested-iframe-show-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/overlapped-iframe-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/resizer-expected.txt: Added.
+        * platform/chromium-linux/compositing/iframes/scrolling-iframe-expected.txt: Added.
+        * platform/chromium-linux/compositing/overflow/composited-scrolling-creates-a-stacking-container-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/compositing/overflow/scrolling-content-clip-to-viewport-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt:
+        * platform/chromium-linux/compositing/overflow/textarea-scroll-touch-expected.txt: Added.
+        * platform/chromium-linux/compositing/overflow/updating-scrolling-content-expected.txt:
+        * platform/chromium-linux/compositing/rtl/rtl-iframe-absolute-overflow-expected.txt: Added.
+        * platform/chromium-linux/compositing/rtl/rtl-iframe-absolute-overflow-scrolled-expected.txt: Added.
+        * platform/chromium-linux/compositing/rtl/rtl-iframe-fixed-overflow-expected.txt: Added.
+        * platform/chromium-linux/compositing/rtl/rtl-iframe-fixed-overflow-scrolled-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/compositing/force-compositing-mode/overflow-iframe-enter-compositing-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/composited-scrolling-creates-a-stacking-container-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/overflow-auto-with-touch-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/overflow-auto-with-touch-toggle-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/overflow-overlay-with-touch-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/scrolling-content-clip-to-viewport-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/scrolling-without-painting-expected.txt:
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/textarea-scroll-touch-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/gpu/compositedscrolling/overflow/updating-scrolling-content-expected.txt:
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/become-overlapped-iframe-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/composited-parent-iframe-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/connect-compositing-iframe-delayed-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/connect-compositing-iframe-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/connect-compositing-iframe2-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/connect-compositing-iframe3-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/enter-compositing-iframe-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/iframe-resize-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/iframe-size-from-zero-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/invisible-nested-iframe-show-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/overlapped-iframe-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/resizer-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/iframes/scrolling-iframe-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/overflow/composited-scrolling-creates-a-stacking-container-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/overflow/scrolling-content-clip-to-viewport-expected.txt: Copied from LayoutTests/platform/chromium-linux/compositing/overflow/scrolling-without-painting-expected.txt.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/overflow/scrolling-without-painting-expected.txt:
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/overflow/textarea-scroll-touch-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/overflow/updating-scrolling-content-expected.txt:
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/rtl/rtl-iframe-absolute-overflow-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/rtl/rtl-iframe-absolute-overflow-scrolled-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/rtl/rtl-iframe-fixed-overflow-expected.txt: Added.
+        * platform/chromium-linux/platform/chromium/virtual/softwarecompositing/rtl/rtl-iframe-fixed-overflow-scrolled-expected.txt: Added.
+        * platform/chromium/TestExpectations:
+
 2013-02-26  Glenn Adams  <glenn@skynav.com>
 
         CSS3: line-break property support
