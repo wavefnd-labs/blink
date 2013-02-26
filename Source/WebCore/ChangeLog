@@ -1,3 +1,35 @@
+2013-02-26  Christian Biesinger  <cbiesinger@chromium.org>
+
+        Empty <button>s should collapse; empty <input type="button"> should not collapse
+        https://bugs.webkit.org/show_bug.cgi?id=110654
+
+        Reviewed by Ojan Vafai.
+
+        This patch also fixes other height computation issues with flex boxes
+        related to scroll bars and hasLineIfEmpty()=true. See below for
+        details.
+
+        Tests: css3/flexbox/button.html
+               css3/flexbox/position-absolute-child-with-contenteditable.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock): Add a FIXME to make
+        border/padding/scrollbar inclusion more consistent with other
+        renderers.
+        * rendering/RenderButton.h:
+        (WebCore::RenderButton::hasLineIfEmpty): We only want a line for
+        <input type=button|submit|reset>, for consistency with Firefox.
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock): Start out layoutBlock by
+        setting the logical height to border + padding + scrollbar height to
+        ensure that we have space for the scrollbar even without children. The
+        layoutFlexItems change below is not enough because we also need this
+        when hasLineIfEmpty() is false.
+        (WebCore::RenderFlexibleBox::layoutFlexItems): Ensure we have a line
+        when hasLineIfEmpty() is true by calling setLogicalHeight(border+
+        padding+scrollbar+lineHeight()) if we don't have a flex line.
+
 2013-02-26  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r143941.
