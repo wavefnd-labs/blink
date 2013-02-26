@@ -1,3 +1,21 @@
+2013-02-26  Takashi Sakamoto  <tasak@google.com>
+
+        Shadow DOM styles appear to be over-eagerly shared
+        https://bugs.webkit.org/show_bug.cgi?id=110797
+
+        Reviewed by Dimitri Glazkov.
+
+        A style of a distributed node should not be shared, because the node
+        might be affected by styles in a shadow dom tree, i.e. :distributed
+        or something.
+
+        Test: fast/dom/shadow/no-style-sharing-with-distributed-nodes.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::locateCousinList):
+        Skip shadow hosts, because children of shadow hosts are distributed
+        nodes and cannot share their styles.
+
 2013-02-26  Adam Klein  <adamk@chromium.org>
 
         Remove unused conditional includes of {MathML,SVG}Names.h
