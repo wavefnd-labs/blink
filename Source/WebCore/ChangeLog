@@ -1,3 +1,86 @@
+2013-02-21  Jeffrey Pfau  <jpfau@apple.com>
+
+        Optionally partition cache to prevent using cache for tracking
+        https://bugs.webkit.org/show_bug.cgi?id=110269
+
+        Reviewed by Maciej Stachowiak.
+
+        Implement memory cache partitioning by passing the cache name through
+        resource requests into a new version of resourceForURL.
+
+        Test: http/tests/cache/partitioned-cache.html
+
+        * Configurations/FeatureDefines.xcconfig: Add defines for cache partitioning and public suffix list usage
+        * WebCore.exp.in: Export new functions for WKSI and test suite
+        * WebCore.xcodeproj/project.pbxproj:
+        * html/DOMURL.cpp:
+        (WebCore::DOMURL::revokeObjectURL): Retrofit for new resourceForRequest function
+        * inspector/InspectorPageAgent.cpp:
+        (WebCore::InspectorPageAgent::cachedResource): Retrofit for new resourceForRequest function
+        * inspector/InspectorResourceAgent.cpp:
+        (WebCore::InspectorResourceAgent::replayXHR): Retrofit for new resourceForRequest function
+        * loader/DocumentLoader.h:
+        (DocumentLoader):
+        (WebCore::DocumentLoader::recordMemoryCacheLoadForFutureClientNotification): Retrofit for new resourceForRequest function
+        (WebCore::DocumentLoader::takeMemoryCacheLoadsForClientNotification): Retrofit for new resourceForRequest function
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::loadedResourceFromMemoryCache): Retrofit for new resourceForRequest function
+        (WebCore::FrameLoader::tellClientAboutPastMemoryCacheLoads): Retrofit for new resourceForRequest function
+        * loader/archive/cf/LegacyWebArchive.cpp:
+        (WebCore::LegacyWebArchive::create): Retrofit for new resourceForRequest function
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::~CachedResource):
+        * loader/cache/CachedResource.h: Retrofit for new resourceForRequest function
+        (CachedResource):
+        (WebCore::CachedResource::cachePartition):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::requestUserCSSStyleSheet): Retrofit for new resourceForRequest function
+        (WebCore::CachedResourceLoader::requestResource): Retrofit for new resourceForRequest function
+        (WebCore::CachedResourceLoader::loadResource): Retrofit for new resourceForRequest function
+        * loader/cache/MemoryCache.cpp:
+        (WebCore):
+        (WebCore::partitionName): Add function for determining absolute partition name
+        (WebCore::MemoryCache::add): Retrofit for partition mapping
+        (WebCore::MemoryCache::revalidationSucceeded): Retrofit for partition mapping
+        (WebCore::MemoryCache::resourceForURL): Call into new resourceForRequest
+        (WebCore::MemoryCache::resourceForRequest): Retrofit for partition mapping
+        (WebCore::MemoryCache::evict): Retrofit for partition mapping
+        (WebCore::MemoryCache::removeResourcesWithOrigin): Retrofit for partition mapping
+        (WebCore::MemoryCache::getOriginsWithCache): Retrofit for partition mapping
+        (WebCore::MemoryCache::removeUrlFromCache): Retrofit for partition mapping
+        (WebCore::MemoryCache::removeRequestFromCache): Retrofit for partition mapping
+        (WebCore::MemoryCache::removeRequestFromCacheImpl): Retrofit for partition mapping
+        (WebCore::MemoryCache::crossThreadRemoveRequestFromCache): Add function for calling removeRequestFromCacheImpl that takes a CrossThreadResourceRequestData
+        (WebCore::MemoryCache::getStatistics): Retrofit for partition mapping
+        (WebCore::MemoryCache::setDisabled): Retrofit for partition mapping
+        * loader/cache/MemoryCache.h:
+        (MemoryCache):
+        * page/SecurityOrigin.cpp:
+        (WebCore):
+        (WebCore::SecurityOrigin::cachePartition): Add function for determining the cache partition name
+        * page/SecurityOrigin.h:
+        (SecurityOrigin):
+        * platform/PublicSuffix.h: Added.
+        (WebCore):
+        * platform/mac/PublicSuffixMac.mm: Added.
+        (WebCore):
+        (WebCore::isPublicSuffix):
+        (WebCore::topPrivatelyControlledDomain):
+        * platform/mac/WebCoreSystemInterface.h:
+        * platform/mac/WebCoreSystemInterface.mm:
+        * platform/network/cf/ResourceRequest.h:
+        (ResourceRequest):
+        (WebCore::ResourceRequest::cachePartition):
+        (WebCore::ResourceRequest::setCachePartition):
+        (CrossThreadResourceRequestData):
+        * platform/network/cf/ResourceRequestCFNet.cpp:
+        (WebCore::ResourceRequest::doPlatformCopyData): Pass through cache partition name
+        (WebCore):
+        (WebCore::ResourceRequest::doPlatformAdopt): Pass through cache partition name
+        * platform/network/mac/ResourceRequestMac.mm:
+        (WebCore::ResourceRequest::doUpdateResourceRequest): Pass through cache partition name
+        (WebCore::ResourceRequest::doUpdatePlatformRequest): Pass through cache partition name
+
 2013-02-25  Jer Noble  <jer.noble@apple.com>
 
         Normalize ENABLE_ENCRYPTED_MEDIA definitions across all FeatureDefines files.
