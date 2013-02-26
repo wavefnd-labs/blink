@@ -1,5 +1,78 @@
 2013-02-01  Andrey Kosyakov  <caseq@chromium.org>
 
+        Web Inspector: plumb trace events to Timeline agent
+        https://bugs.webkit.org/show_bug.cgi?id=105796
+
+        Reviewed by Pavel Feldman.
+
+        - plumb trace events to Timeline;
+        - add TimelineTraceEventProcessor to process selected trace events;
+        - emit timeline events from TimelineTraceEventProcessor.
+
+        Note that actual event processing logic is a separate change.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * inspector/Inspector.json:
+        * inspector/InspectorAllInOne.cpp:
+        * inspector/InspectorClient.h:
+        (InspectorClient):
+        (WebCore::InspectorClient::setTraceEventCallback):
+        * inspector/InspectorTimelineAgent.cpp:
+        (WebCore::InspectorTimelineAgent::start):
+        (WebCore::InspectorTimelineAgent::stop):
+        (WebCore::InspectorTimelineAgent::InspectorTimelineAgent):
+        (WebCore::InspectorTimelineAgent::appendBackgroundThreadRecord):
+        (WebCore):
+        (WebCore::InspectorTimelineAgent::page):
+        * inspector/InspectorTimelineAgent.h:
+        (WebCore):
+        (InspectorTimelineAgent):
+        * inspector/TimelineTraceEventProcessor.cpp: Added.
+        (WebCore::TimelineTraceEventProcessor::TimelineTraceEventProcessor):
+        (WebCore):
+        (WebCore::TimelineTraceEventProcessor::~TimelineTraceEventProcessor):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::parameter):
+        (WebCore::TimelineTraceEventProcessor::processEventOnAnyThread):
+        (WebCore::TimelineTraceEventProcessor::processEvent):
+        (WebCore::TimelineTraceEventProcessor::sendTimelineRecord):
+        (WebCore::TimelineTraceEventProcessor::processBackgroundEvents):
+        * inspector/TimelineTraceEventProcessor.h: Added.
+        (WebCore):
+        (TimelineTraceEventProcessor):
+        (TraceEvent):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::TraceEvent):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::timestamp):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::phase):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::name):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::threadIdentifier):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::argumentCount):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::asBool):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::asInt):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::asUInt):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::asDouble):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::asString):
+        (WebCore::TimelineTraceEventProcessor::EventTypeEntry::EventTypeEntry):
+        (EventTypeEntry):
+        * inspector/front-end/TimelineFrameController.js:
+        (WebInspector.TimelineFrameController.prototype._addRecord):
+        * inspector/front-end/TimelinePanel.js:
+        (WebInspector.TimelineRecordListRow.prototype.update):
+        (WebInspector.TimelineRecordGraphRow.prototype.update):
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel.Record):
+        (WebInspector.TimelinePresentationModel.insertRetrospecitveRecord):
+        (WebInspector.TimelinePresentationModel.Record.prototype.get isBackground):
+        * inspector/front-end/timelinePanel.css:
+        (.timeline-tree-item.background .timeline-tree-icon):
+        (.timeline-graph-side.background .timeline-graph-bar):
+
+2013-02-01  Andrey Kosyakov  <caseq@chromium.org>
+
         Web Inspector: display background events on Timeline
         https://bugs.webkit.org/show_bug.cgi?id=108599
 
