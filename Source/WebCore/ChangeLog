@@ -1,3 +1,83 @@
+2013-02-25  Mark Lam  <mark.lam@apple.com>
+
+        Need a more robust WebSQL disk usage computation.
+        https://bugs.webkit.org/show_bug.cgi?id=110805.
+
+        Reviewed by Geoffrey Garen.
+
+        - Changed DatabaseTracker::usageForOrigin() to compute the disk usage
+          for a specified origin by fetching database sizes from the file system
+          instead of using cached file size values.
+
+        - The OriginQuotaManager and OriginUsageRecord are no longer needed.
+          Updated build files to reflect this.
+
+        - Removed getMaxSizeForDatabase() from DatabaseManager, DatabaseServer,
+          and AbstractDatabaseServer since it is only needed in the backend.
+
+        - DatabaseTracker::getMaxSizeForDatabase() now calls usageForOrigin()
+          to get the disk usage for its computation.
+
+        - The performance difference for this changes is a 1.6% degradation
+          per additional database whose size needs to be fetched. This is a
+          worst case estimated based on the disk-stat-speed-test.html benchmark
+          (attached to bugzilla). The benchmark writes an average of 16 bytes per
+          transaction. Most real-world transactions will likely write more
+          content than that. Since disk write IO time will dominate over memory
+          read time for fetching the file size, the degradation ratio will only
+          reduce with larger workloads.
+
+        No layout test, but there is a quota-test.html attached to bugzilla.
+        The test is a webpage that can be loaded into multiple tabs to
+        consuming storage space. While the test is running, we can run a
+        "du -k; du -k *" on the database directory to verify that the total
+        disk usage does not far exceed the allowed quota (some small error
+        is expected). Without this change, each database from each tab may
+        exceed the quota by that same maginitude of error.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase/AbstractDatabaseServer.h:
+        * Modules/webdatabase/Database.cpp:
+        * Modules/webdatabase/Database.h:
+        * Modules/webdatabase/DatabaseBackendBase.cpp:
+        (WebCore::DatabaseBackendBase::maximumSize):
+        * Modules/webdatabase/DatabaseManager.cpp:
+        * Modules/webdatabase/DatabaseManager.h:
+        * Modules/webdatabase/DatabaseServer.cpp:
+        * Modules/webdatabase/DatabaseServer.h:
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::hasAdequateQuotaForOrigin):
+        (WebCore::DatabaseTracker::canEstablishDatabase):
+        (WebCore::DatabaseTracker::retryCanEstablishDatabase):
+        (WebCore::DatabaseTracker::getMaxSizeForDatabase):
+        (WebCore::DatabaseTracker::fullPathForDatabaseNoLock):
+        (WebCore::DatabaseTracker::fullPathForDatabase):
+        (WebCore::DatabaseTracker::addOpenDatabase):
+        (WebCore::DatabaseTracker::removeOpenDatabase):
+        (WebCore::DatabaseTracker::usageForOrigin):
+        (WebCore::DatabaseTracker::deleteOrigin):
+        (WebCore::DatabaseTracker::deleteDatabase):
+        * Modules/webdatabase/DatabaseTracker.h:
+        * Modules/webdatabase/OriginQuotaManager.cpp: Removed.
+        * Modules/webdatabase/OriginQuotaManager.h: Removed.
+        * Modules/webdatabase/OriginUsageRecord.cpp: Removed.
+        * Modules/webdatabase/OriginUsageRecord.h: Removed.
+        * Modules/webdatabase/SQLTransactionBackend.cpp:
+        (WebCore::SQLTransactionBackend::runCurrentStatementAndGetNextState):
+        * Modules/webdatabase/SQLTransactionBackendSync.cpp:
+        (WebCore::SQLTransactionBackendSync::executeSQL):
+        * Modules/webdatabase/SQLTransactionClient.cpp:
+        * Modules/webdatabase/SQLTransactionClient.h:
+        * Modules/webdatabase/chromium/SQLTransactionClientChromium.cpp:
+        * Target.pri:
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+
 2013-02-25  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
 
         [texmap] Rename TextureMapperGL::ClipStack::init to reset
