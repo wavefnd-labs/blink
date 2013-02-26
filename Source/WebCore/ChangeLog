@@ -1,3 +1,22 @@
+2013-02-26  Jocelyn Turcotte  <jocelyn.turcotte@digia.com>
+
+        Work around a MSVC 2012 Update 1 bug causing a crash on x86
+        https://bugs.webkit.org/show_bug.cgi?id=110488
+
+        Reviewed by Anders Carlsson.
+
+        The crash happens when building with /O2, where TextEncodingNameHash::equal is
+        incorrectly optimized with the inlined toASCIILower and uses a register already in use.
+        The function returns false incorrectly, causing a mismatch of text encoding name which
+        then results in a null pointer access.
+
+        Slightly rewording the use of the inline function lets the compiler produce correct code.
+
+        The bug has already been reported and should be fixed in the next release of MSVS later this year.
+        https://connect.microsoft.com/VisualStudio/feedback/details/777533/vs2012-c-optimizing-bug-when-using-inline-and-char-return-type-x86-target-only
+
+        * platform/text/TextEncodingRegistry.cpp:
+
 2013-02-01  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: plumb trace events to Timeline agent
