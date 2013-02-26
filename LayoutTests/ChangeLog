@@ -1,3 +1,269 @@
+2013-02-26  Eric Seidel  <eric@webkit.org>
+
+        Layout Test Multiple html5lib/ tests are too slow and should be split.
+        https://bugs.webkit.org/show_bug.cgi?id=110734
+
+        Reviewed by Adam Barth.
+
+        Split all of the html5lib tests into write and data variants
+        instead of running both in sequence in each test.
+        I added a script to autogenerate all of the test harness files
+        from the *.dat files in resources/ (which we sync with the
+        upstream html5lib tests.
+
+        I removed all the old tests and expectations as well as TestExpectation entries.
+        All of these tests should now be fast enough to avoid timeout on all platforms.
+        I set the expectations from my chromium-linux (v8) machine, thus someone
+        from a jsc port will need to rebaseline appropriately from their machine.
+
+        * TestExpectations:
+        * html5lib/generate-test-wrappers.py: Added.
+        (WrapperGenerator):
+        (_files_in_directory_with_suffix):
+        (_last_path_component_removing_suffix):
+        (_remove_harness_prefix):
+        (_remove_harness_type):
+        (_test_name_from_harness_name):
+        (_remove_stale_tests):
+        (_input_path):
+        (_harness_path):
+        (_harness_content):
+        (_write_harness):
+        (main):
+        * html5lib/generated/run-adoption01-data-expected.txt: Added.
+        * html5lib/generated/run-adoption01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-adoption01-write-expected.txt: Added.
+        * html5lib/generated/run-adoption01-write.html: Renamed from LayoutTests/html5lib/generated/run-template.html.
+        * html5lib/generated/run-adoption02-data-expected.txt: Added.
+        * html5lib/generated/run-adoption02-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-adoption02-write-expected.txt: Added.
+        * html5lib/generated/run-adoption02-write.html: Renamed from LayoutTests/html5lib/generated/run-tests11.html.
+        * html5lib/generated/run-comments01-data-expected.txt: Added.
+        * html5lib/generated/run-comments01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-comments01-write-expected.txt: Added.
+        * html5lib/generated/run-comments01-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-doctype01-data-expected.txt: Added.
+        * html5lib/generated/run-doctype01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-doctype01-write-expected.txt: Added.
+        * html5lib/generated/run-doctype01-write.html: Renamed from LayoutTests/html5lib/generated/run-tests10.html.
+        * html5lib/generated/run-domjs-unsafe-data-expected.txt: Added.
+        * html5lib/generated/run-domjs-unsafe-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-domjs-unsafe-write-expected.txt: Added.
+        * html5lib/generated/run-domjs-unsafe-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-entities01-data-expected.txt: Added.
+        * html5lib/generated/run-entities01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-entities01-write-expected.txt: Added.
+        * html5lib/generated/run-entities01-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-entities02-data-expected.txt: Added.
+        * html5lib/generated/run-entities02-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-entities02-write-expected.txt: Added.
+        * html5lib/generated/run-entities02-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-html5test-com-data-expected.txt: Added.
+        * html5lib/generated/run-html5test-com-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-html5test-com-write-expected.txt: Added.
+        * html5lib/generated/run-html5test-com-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-inbody01-data-expected.txt: Added.
+        * html5lib/generated/run-inbody01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-inbody01-write-expected.txt: Added.
+        * html5lib/generated/run-inbody01-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-isindex-data-expected.txt: Added.
+        * html5lib/generated/run-isindex-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-isindex-write-expected.txt: Added.
+        * html5lib/generated/run-isindex-write.html: Renamed from LayoutTests/html5lib/generated/run-tests2.html.
+        * html5lib/generated/run-pending-spec-changes-data-expected.txt: Added.
+        * html5lib/generated/run-pending-spec-changes-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-pending-spec-changes-plain-text-unsafe-data-expected.txt: Added.
+        * html5lib/generated/run-pending-spec-changes-plain-text-unsafe-data.html: Added.
+        * html5lib/generated/run-pending-spec-changes-plain-text-unsafe-write-expected.txt: Added.
+        * html5lib/generated/run-pending-spec-changes-plain-text-unsafe-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-pending-spec-changes-write-expected.txt: Added.
+        * html5lib/generated/run-pending-spec-changes-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-plain-text-unsafe-data-expected.txt: Added.
+        * html5lib/generated/run-plain-text-unsafe-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-plain-text-unsafe-write-expected.txt: Added.
+        * html5lib/generated/run-plain-text-unsafe-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-scriptdata01-data-expected.txt: Added.
+        * html5lib/generated/run-scriptdata01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-scriptdata01-write-expected.txt: Added.
+        * html5lib/generated/run-scriptdata01-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tables01-data-expected.txt: Added.
+        * html5lib/generated/run-tables01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tables01-write-expected.txt: Added.
+        * html5lib/generated/run-tables01-write.html: Renamed from LayoutTests/html5lib/generated/run-tests22.html.
+        * html5lib/generated/run-template-data-expected.txt: Added.
+        * html5lib/generated/run-template-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-template-expected.txt: Removed.
+        * html5lib/generated/run-template-write-expected.txt: Added.
+        * html5lib/generated/run-template-write.html: Renamed from LayoutTests/html5lib/generated/run-tests3.html.
+        * html5lib/generated/run-tests1-data-expected.txt: Added.
+        * html5lib/generated/run-tests1-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests1-expected.txt: Removed.
+        * html5lib/generated/run-tests1-write-expected.txt: Added.
+        * html5lib/generated/run-tests1-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests10-data-expected.txt: Added.
+        * html5lib/generated/run-tests10-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests10-expected.txt: Removed.
+        * html5lib/generated/run-tests10-write-expected.txt: Added.
+        * html5lib/generated/run-tests10-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests11-data-expected.txt: Added.
+        * html5lib/generated/run-tests11-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests11-expected.txt: Removed.
+        * html5lib/generated/run-tests11-write-expected.txt: Added.
+        * html5lib/generated/run-tests11-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests12-data-expected.txt: Added.
+        * html5lib/generated/run-tests12-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests12-expected.txt: Removed.
+        * html5lib/generated/run-tests12-write-expected.txt: Added.
+        * html5lib/generated/run-tests12-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests12.html: Removed.
+        * html5lib/generated/run-tests14-data-expected.txt: Added.
+        * html5lib/generated/run-tests14-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests14-expected.txt: Removed.
+        * html5lib/generated/run-tests14-write-expected.txt: Added.
+        * html5lib/generated/run-tests14-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests14.html: Removed.
+        * html5lib/generated/run-tests15-data-expected.txt: Added.
+        * html5lib/generated/run-tests15-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests15-expected.txt: Removed.
+        * html5lib/generated/run-tests15-write-expected.txt: Added.
+        * html5lib/generated/run-tests15-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests15.html: Removed.
+        * html5lib/generated/run-tests16-data-expected.txt: Added.
+        * html5lib/generated/run-tests16-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests16-expected.txt: Removed.
+        * html5lib/generated/run-tests16-write-expected.txt: Added.
+        * html5lib/generated/run-tests16-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests16.html: Removed.
+        * html5lib/generated/run-tests17-data-expected.txt: Added.
+        * html5lib/generated/run-tests17-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests17-expected.txt: Removed.
+        * html5lib/generated/run-tests17-write-expected.txt: Added.
+        * html5lib/generated/run-tests17-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests17.html: Removed.
+        * html5lib/generated/run-tests18-data-expected.txt: Added.
+        * html5lib/generated/run-tests18-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests18-expected.txt: Removed.
+        * html5lib/generated/run-tests18-write-expected.txt: Added.
+        * html5lib/generated/run-tests18-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests18.html: Removed.
+        * html5lib/generated/run-tests19-data-expected.txt: Added.
+        * html5lib/generated/run-tests19-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests19-expected.txt: Removed.
+        * html5lib/generated/run-tests19-write-expected.txt: Added.
+        * html5lib/generated/run-tests19-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests19.html: Removed.
+        * html5lib/generated/run-tests2-data-expected.txt: Added.
+        * html5lib/generated/run-tests2-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests2-expected.txt: Removed.
+        * html5lib/generated/run-tests2-write-expected.txt: Added.
+        * html5lib/generated/run-tests2-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests20-data-expected.txt: Added.
+        * html5lib/generated/run-tests20-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests20-expected.txt: Removed.
+        * html5lib/generated/run-tests20-write-expected.txt: Added.
+        * html5lib/generated/run-tests20-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests20.html: Removed.
+        * html5lib/generated/run-tests21-data-expected.txt: Added.
+        * html5lib/generated/run-tests21-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests21-expected.txt: Removed.
+        * html5lib/generated/run-tests21-write-expected.txt: Added.
+        * html5lib/generated/run-tests21-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests21.html: Removed.
+        * html5lib/generated/run-tests22-data-expected.txt: Added.
+        * html5lib/generated/run-tests22-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests22-expected.txt: Removed.
+        * html5lib/generated/run-tests22-write-expected.txt: Added.
+        * html5lib/generated/run-tests22-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests23-data-expected.txt: Added.
+        * html5lib/generated/run-tests23-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests23-expected.txt: Removed.
+        * html5lib/generated/run-tests23-write-expected.txt: Added.
+        * html5lib/generated/run-tests23-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests23.html: Removed.
+        * html5lib/generated/run-tests24-data-expected.txt: Added.
+        * html5lib/generated/run-tests24-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests24-expected.txt: Removed.
+        * html5lib/generated/run-tests24-write-expected.txt: Added.
+        * html5lib/generated/run-tests24-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests24.html: Removed.
+        * html5lib/generated/run-tests25-data-expected.txt: Added.
+        * html5lib/generated/run-tests25-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests25-expected.txt: Removed.
+        * html5lib/generated/run-tests25-write-expected.txt: Added.
+        * html5lib/generated/run-tests25-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests25.html: Removed.
+        * html5lib/generated/run-tests26-data-expected.txt: Added.
+        * html5lib/generated/run-tests26-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests26-expected.txt: Removed.
+        * html5lib/generated/run-tests26-write-expected.txt: Added.
+        * html5lib/generated/run-tests26-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests26.html: Removed.
+        * html5lib/generated/run-tests3-data-expected.txt: Added.
+        * html5lib/generated/run-tests3-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests3-expected.txt: Removed.
+        * html5lib/generated/run-tests3-write-expected.txt: Added.
+        * html5lib/generated/run-tests3-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests4-data-expected.txt: Added.
+        * html5lib/generated/run-tests4-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests4-expected.txt: Removed.
+        * html5lib/generated/run-tests4-write-expected.txt: Added.
+        * html5lib/generated/run-tests4-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests4.html: Removed.
+        * html5lib/generated/run-tests5-data-expected.txt: Added.
+        * html5lib/generated/run-tests5-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests5-expected.txt: Removed.
+        * html5lib/generated/run-tests5-write-expected.txt: Added.
+        * html5lib/generated/run-tests5-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests5.html: Removed.
+        * html5lib/generated/run-tests6-data-expected.txt: Added.
+        * html5lib/generated/run-tests6-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests6-expected.txt: Removed.
+        * html5lib/generated/run-tests6-write-expected.txt: Added.
+        * html5lib/generated/run-tests6-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests6.html: Removed.
+        * html5lib/generated/run-tests7-data-expected.txt: Added.
+        * html5lib/generated/run-tests7-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests7-expected.txt: Removed.
+        * html5lib/generated/run-tests7-write-expected.txt: Added.
+        * html5lib/generated/run-tests7-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests7.html: Removed.
+        * html5lib/generated/run-tests8-data-expected.txt: Added.
+        * html5lib/generated/run-tests8-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests8-expected.txt: Removed.
+        * html5lib/generated/run-tests8-write-expected.txt: Added.
+        * html5lib/generated/run-tests8-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests8.html: Removed.
+        * html5lib/generated/run-tests9-data-expected.txt: Added.
+        * html5lib/generated/run-tests9-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests9-expected.txt: Removed.
+        * html5lib/generated/run-tests9-write-expected.txt: Added.
+        * html5lib/generated/run-tests9-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests9.html: Removed.
+        * html5lib/generated/run-tests_innerHTML_1-data-expected.txt: Added.
+        * html5lib/generated/run-tests_innerHTML_1-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tests_innerHTML_1-write-expected.txt: Added.
+        * html5lib/generated/run-tests_innerHTML_1-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tricky01-data-expected.txt: Added.
+        * html5lib/generated/run-tricky01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-tricky01-write-expected.txt: Added.
+        * html5lib/generated/run-tricky01-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-webkit01-data-expected.txt: Added.
+        * html5lib/generated/run-webkit01-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-webkit01-write-expected.txt: Added.
+        * html5lib/generated/run-webkit01-write.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-webkit02-data-expected.txt: Added.
+        * html5lib/generated/run-webkit02-data.html: Copied from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/generated/run-webkit02-write-expected.txt: Added.
+        * html5lib/generated/run-webkit02-write.html: Renamed from LayoutTests/html5lib/generated/run-tests1.html.
+        * html5lib/resources/runner.js:
+        (window.onload):
+        * html5lib/runner-expected.txt: Removed.
+        * html5lib/runner.html: Removed.
+        * platform/chromium/TestExpectations:
+        * platform/chromium/html5lib/generated/run-tests1-expected.txt: Removed.
+        * platform/chromium/html5lib/generated/run-tests18-expected.txt: Removed.
+        * platform/chromium/html5lib/generated/run-tests7-expected.txt: Removed.
+
 2013-02-26  Takashi Sakamoto  <tasak@google.com>
 
         Shadow DOM styles appear to be over-eagerly shared
