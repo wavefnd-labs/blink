@@ -1,3 +1,22 @@
+2013-02-26  Tony Chang  <tony@chromium.org>
+
+        CSS Flexbox: dynamically applied align-items doesn't affect item alignment
+        https://bugs.webkit.org/show_bug.cgi?id=110341
+
+        Reviewed by Ojan Vafai.
+
+        If flex items don't change width, we don't lay them out again. This causes problems
+        when an item goes from stretch to non-stretch since we need to relayout to get the
+        smaller height. Fix this by marking flex items that were stretch as needing layout.
+
+        Test: css3/flexbox/relayout-align-items.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::resolveAlignment): Pull out common code for computing flex item style.
+        (WebCore::RenderFlexibleBox::styleDidChange): Mark children as needing layout.
+        (WebCore::RenderFlexibleBox::alignmentForChild): Use resolveAlignment.
+        * rendering/RenderFlexibleBox.h:
+
 2013-02-26  Anders Carlsson  <andersca@apple.com>
 
         StorageMap can just import an entire map of items at once
