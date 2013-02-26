@@ -1,3 +1,43 @@
+2013-02-26  Dean Jackson  <dino@apple.com>
+
+        Draw intermediate snapshots if possible
+        https://bugs.webkit.org/show_bug.cgi?id=110811
+
+        Reviewed by Simon Fraser.
+
+        After http://webkit.org/b/110495 we delayed snapshotting until we've
+        received a nice image, but this made the page look like it is broken.
+        We should draw any intermediate snapshots that we find, which might
+        include content such as progress bars/spinners.
+
+        * html/HTMLPlugInElement.h:
+        (WebCore::HTMLPlugInElement::isPlugInImageElement): Expose virtual method
+        to indicate if this is a HTMLPlugInImageElement or not.
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::updateSnapshot): If we have
+        a RenderEmbeddedObject renderer, then tell it to repaint.
+        * html/HTMLPlugInImageElement.h:
+        (WebCore::HTMLPlugInImageElement::snapshotImage): Expose an
+        accessor for snapshot images.
+        * rendering/RenderEmbeddedObject.cpp:
+        (WebCore::RenderEmbeddedObject::paintSnapshotImage): New helper
+        method to render an image directly. This code is similar to
+        that in RenderSnapshottedPlugIn.
+        (WebCore::RenderEmbeddedObject::paintContents): The virtual implementation
+        of this method for use when we have a snapshot to paint. If we are a plugin that is
+        in the process of being snapshotted, ask our HTMLPlugInImageElement for a
+        snapshot and paint that instead. In the case where we are not snapshotting,
+        or we do not yet have a snapshot, this will call back into the RenderWidget code.
+        * rendering/RenderEmbeddedObject.h:
+        (RenderEmbeddedObject): New methods paintSnapshotImage and paintContents
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::paintContents): New method called in the middle
+        of paint() that can be overridden by RenderEmbeddedObject. The code here was
+        simply moved out of the previous paint().
+        (WebCore::RenderWidget::paint): Call paintContents at the appropriate time.
+        * rendering/RenderWidget.h:
+        (RenderWidget): New virtual method paintContents.
+
 2013-02-26  Levi Weintraub  <leviw@chromium.org>
 
         Add support for 8 bit TextRuns for Chromium/HarfBuzz
