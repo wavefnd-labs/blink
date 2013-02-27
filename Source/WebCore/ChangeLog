@@ -1,3 +1,24 @@
+2013-02-27  Mihai Maerean  <mmaerean@adobe.com>
+
+        [CSS Regions] Region overset property is not properly computed when there is a region break
+        https://bugs.webkit.org/show_bug.cgi?id=92497
+
+        Reviewed by David Hyatt.
+
+        For "paginated" content in regions that has -webkit-region-break-after:always, the bottom margin was being passed
+        along for the next region in the chain, which shouldn't happen.
+
+        The fix is, at layout, to clear the bottom margin for the nodes (inside paginated contexts) that have
+        -webkit-region-break-after:always.
+
+        Tests: fast/multicol/break-after-always-bottom-margin.html
+               fast/regions/overset-break-nested.html
+               fast/regions/overset-break-with-sibling.html
+               fast/regions/overset-break.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::applyAfterBreak):
+
 2013-02-27  Stephen Chenney  <schenney@chromium.org>
 
         Bindings test results update after r144126
