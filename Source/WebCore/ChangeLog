@@ -1,3 +1,128 @@
+2013-02-27  No'am Rosenthal  <noam@webkit.org>
+
+        [Texmap] TextureMapper is too eager to use intermediate surfaces
+        https://bugs.webkit.org/show_bug.cgi?id=110762
+
+        Reviewed by Allan Sandfeld Jensen.
+
+        Refactor the way intermediate surfaces are handled in TextureMapperLayer.
+        Beforehand, we would create an intermediate surface whenever there is a chance of overlap, and
+        the intermediate surface would be the largest possible. The result would then be drawn to the
+        target surface with the layer's opacity and mask.
+
+        This would make it so that (1) surfaces are created even when they're not needed, i.e. when there
+        is no actual overlap, and (2) mask wouldn't be applied correctly.
+
+        In this patch the behavior is changed so that the area to be painted is divided to "overlapping"
+        and "non overlapping" regions. The non-overlapping regions are painted directly, while the overlapping
+        regions are tiled to smaller rectangles painted using an intermediate surface.
+        Masks are applied to those intermediate surfaces based on the transform of the actual mask, not drawn
+        together with the content texture like before.
+
+        This optimizes for the more common case of opacity animations on a large tree, while making the quite
+        rare case of composited masks slightly less optimized but always correct.
+
+        Tests: compositing/overlap-blending/children-opacity-huge.html
+               compositing/overlap-blending/reflection-opacity-huge.html
+               compositing/overlap-blending/children-opacity-no-overlap.html
+
+        * platform/graphics/cairo/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        * platform/graphics/cairo/GraphicsContext3DPrivate.h:
+        (GraphicsContext3DPrivate):
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        * platform/graphics/efl/GraphicsContext3DPrivate.h:
+        (GraphicsContext3DPrivate):
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (GraphicsContext3DPrivate):
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        * platform/graphics/qt/MediaPlayerPrivateQt.cpp:
+        (WebCore::MediaPlayerPrivateQt::paintToTextureMapper):
+        * platform/graphics/qt/MediaPlayerPrivateQt.h:
+        (MediaPlayerPrivateQt):
+        * platform/graphics/surfaces/GraphicsSurface.cpp:
+        (WebCore::GraphicsSurface::paintToTextureMapper):
+        * platform/graphics/surfaces/GraphicsSurface.h:
+        (GraphicsSurface):
+        * platform/graphics/surfaces/glx/GraphicsSurfaceGLX.cpp:
+        (WebCore::GraphicsSurface::platformPaintToTextureMapper):
+        * platform/graphics/surfaces/mac/GraphicsSurfaceMac.cpp:
+        (WebCore::GraphicsSurface::platformPaintToTextureMapper):
+        * platform/graphics/surfaces/win/GraphicsSurfaceWin.cpp:
+        (WebCore::GraphicsSurface::platformPaintToTextureMapper):
+        * platform/graphics/texmap/TextureMapperBackingStore.h:
+        (TextureMapperBackingStore):
+        * platform/graphics/texmap/TextureMapperPlatformLayer.h:
+        (TextureMapperPlatformLayer):
+        * platform/graphics/texmap/TextureMapperSurfaceBackingStore.cpp:
+        (WebCore::TextureMapperSurfaceBackingStore::paintToTextureMapper):
+        * platform/graphics/texmap/TextureMapperSurfaceBackingStore.h:
+        (TextureMapperSurfaceBackingStore):
+        * platform/graphics/texmap/TextureMapperTile.cpp:
+        (WebCore::TextureMapperTile::paint):
+        * platform/graphics/texmap/TextureMapperTile.h:
+        (TextureMapperTile):
+        * platform/graphics/texmap/TextureMapperTiledBackingStore.cpp:
+        (WebCore::TextureMapperTiledBackingStore::paintToTextureMapper):
+        * platform/graphics/texmap/TextureMapperTiledBackingStore.h:
+        (TextureMapperTiledBackingStore):
+        * platform/graphics/texmap/coordinated/CoordinatedBackingStore.cpp:
+        (WebCore::CoordinatedBackingStore::paintTilesToTextureMapper):
+        (WebCore::CoordinatedBackingStore::paintToTextureMapper):
+        * platform/graphics/texmap/coordinated/CoordinatedBackingStore.h:
+        (CoordinatedBackingStore):
+                Removed the "mask" parameter from TextureMapperPlatformLayer and overrides, since
+                we no longer paint the contents and the mask in the same pass.
+
+        * platform/graphics/texmap/TextureMapper.cpp:
+        (WebCore::TextureMapper::TextureMapper):
+        * platform/graphics/texmap/TextureMapper.h:
+        (WebCore::TextureMapper::setMaskMode):
+        (TextureMapper):
+        (WebCore::TextureMapper::isInMaskMode):
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::drawNumber):
+        (WebCore::TextureMapperGL::drawTexture):
+        (WebCore::TextureMapperGL::draw):
+        (WebCore):
+        (WebCore::TextureMapperGL::drawTexturedQuadWithProgram):
+        (WebCore::TextureMapperGL::drawFiltered):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (TextureMapperGL):
+        * platform/graphics/texmap/TextureMapperImageBuffer.cpp:
+        (WebCore::TextureMapperImageBuffer::drawTexture):
+        (WebCore::TextureMapperImageBuffer::drawSolidColor):
+        * platform/graphics/texmap/TextureMapperImageBuffer.h:
+        (TextureMapperImageBuffer):
+                Instead of painting the mask together with the texture/color, paint the mask
+                by drawing with DestinationIn to an existing surface.
+
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (TextureMapperPaintOptions):
+        (WebCore::TextureMapperLayer::paintSelf):
+        (WebCore::TextureMapperLayer::shouldBlend):
+        (WebCore::TextureMapperLayer::paintSelfAndChildrenWithReplica):
+        (WebCore::TextureMapperLayer::replicaTransform):
+        (WebCore):
+        (WebCore::applyFilters):
+        (WebCore::resolveOverlaps):
+        (WebCore::TextureMapperLayer::computeOverlapRegions):
+        (WebCore::TextureMapperLayer::paintUsingOverlapRegions):
+        (WebCore::TextureMapperLayer::applyMask):
+        (WebCore::TextureMapperLayer::paintIntoSurface):
+        (WebCore::commitSurface):
+        (WebCore::TextureMapperLayer::paintWithIntermediateSurface):
+        (WebCore::TextureMapperLayer::paintRecursive):
+        * platform/graphics/texmap/TextureMapperLayer.h:
+        (WebCore):
+        (TextureMapperLayer):
+        (WebCore::TextureMapperLayer::hasFilters):
+        * platform/graphics/texmap/TextureMapperShaderProgram.cpp:
+        (WebCore):
+        (WebCore::TextureMapperShaderProgram::create):
+        * platform/graphics/texmap/TextureMapperShaderProgram.h:
+
 2013-02-27  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: [REGRESSION] [Audits] Disabled "Run" button styling is the same as the enabled one
