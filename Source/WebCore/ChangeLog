@@ -1,3 +1,30 @@
+2013-02-26  Adam Klein  <adamk@chromium.org>
+
+        Parsing of HTML tags in MathML Text Insertion Points leads to bogus parser behavior
+        https://bugs.webkit.org/show_bug.cgi?id=110808
+
+        Reviewed by Adam Barth.
+
+        When looking for various table tags in the HTMLElementStack, compare
+        QualifiedNames rather than just local names, where necessary.
+
+        Note that not all uses have been "fixed"; I've only changed for which
+        I could write a test with differing behavior. A followup patch to
+        rationalize the use of QualifiedName vs local names would be ideal.
+
+        Tests: html5lib/generated/run-math-data.html
+               html5lib/generated/run-math-write.html
+
+        * html/parser/HTMLElementStack.cpp:
+        (WebCore::inScopeCommon): Added a version of inScopeCommon that
+        handles QualifiedNames instead of just localNames.
+        (WebCore::HTMLElementStack::inTableScope): When given a QualifiedName,
+        call the new version of inScopeCommon().
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processStartTag):
+        (WebCore::HTMLTreeBuilder::processEndTagForInTableBody):
+        (WebCore::HTMLTreeBuilder::processTrEndTagForInRow):
+
 2013-02-26  Kaustubh Atrawalkar  <kaustubh@motorola.com>
 
         Notification.requestPermission callback should be optional
