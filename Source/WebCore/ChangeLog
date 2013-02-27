@@ -1,3 +1,19 @@
+2013-02-26  Dimitri Glazkov  <dglazkov@chromium.org>
+
+        SelectorQuery should not ever use ResolvingStyle mode.
+        https://bugs.webkit.org/show_bug.cgi?id=110843
+
+        It looks like we accidentally used ResolvingStyle mode for webkitMatchesSelector, and I exacerbated the problem
+        in r143858 by switching all of SelectorQuery to use it. There aren't any visible effects, but the style bits
+        of elements are unnecessarily twiddled when if we do that. Let's not do it.
+
+        Reviewed by Eric Seidel.
+
+        No public-facing behavior change, covered by existing tests.
+
+        * dom/SelectorQuery.cpp:
+        (WebCore::SelectorDataList::selectorMatches): Switched to always use QueryingRules mode.
+
 2013-02-26  Adam Barth  <abarth@webkit.org>
 
         Silence this ASSERT. It is triggered by the threaded HTML parser.
