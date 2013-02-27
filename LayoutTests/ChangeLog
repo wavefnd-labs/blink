@@ -1,3 +1,34 @@
+2013-02-26  Benjamin Poulain  <benjamin@webkit.org>
+
+        Fix the tests based on computedStyleIncludingVisitedInfo for asynchronous update of the visited style
+        https://bugs.webkit.org/show_bug.cgi?id=110708
+
+        Reviewed by Ryosuke Niwa.
+
+        The tests using computedStyleIncludingVisitedInfo were using the asumption that visited style
+        is updated synchronously with the loading of resources.
+        This assumption is valid for Mac WebKit1, but does not hold for multiprocess
+        WebKit because the list of visited URLs is maintained outside the WebProcess.
+
+        This patch changes the tests to use the 'shouldBecomeXXX' test functions in order to wait
+        for the asynchronous update. With the change, all the tests succeed reliably on WebKit2.
+
+        * fast/history/multiple-classes-visited-expected.txt:
+        * fast/history/multiple-classes-visited.html:
+        * fast/history/nested-visited-test-expected.txt:
+        * fast/history/nested-visited-test.html:
+        * fast/history/self-is-visited-expected.txt:
+        * fast/history/self-is-visited.html:
+        * fast/history/sibling-visited-test-expected.txt:
+        * fast/history/sibling-visited-test.html:
+        * fast/js/resources/js-test-pre.js:
+        (.condition):
+        (.failureHandler):
+        (shouldBecomeDifferent):
+        * platform/wk2/TestExpectations:
+        * platform/chromium/TestExpectations: The tests can now also timeout due to
+        computedStyleIncludingVisitedInfo missing from Chromium's DRT.
+
 2013-02-27  Zan Dobersek  <zdobersek@igalia.com>
 
         Unreviewed gardening.
