@@ -1,3 +1,41 @@
+2013-02-25  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Generate a wrapper function for ReplaceableAttrSetter()
+        https://bugs.webkit.org/show_bug.cgi?id=110781
+
+        Reviewed by Adam Barth.
+
+        This is one of steps to insert TRACE_EVENT_STATE() macros
+        into DOM bindings. This patch introduces an indirection function
+        for xxxReplaceableAttrSetter(), like this:
+
+        // For non-custom replaceable setters (Note: One implementation
+        is enough for all replaceable setters in one interface.)
+        void V8XXX:::ReplaceableAttrSetterCallback(...) {
+          V8XXX::ReplaceableAttrSetter(...);
+        }
+
+        // For custom replaceable setters. (Note: This is treated as
+        a normal custom setter.)
+        void xxxAttrSetterCallback(...) {
+          return xxxAttrSetterCustom(...);
+        }
+
+        No tests. No change in behavior.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateReplaceableAttrSetterCallback):
+        (GenerateReplaceableAttrSetter):
+        (GenerateSingleBatchedAttribute):
+        (GenerateImplementation):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::TestObjReplaceableAttrSetterCallback):
+        (TestObjV8Internal):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore::TestTypedefsV8Internal::TestTypedefsReplaceableAttrSetterCallback):
+        (TestTypedefsV8Internal):
+
 2013-02-27  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] Flash objects won't load until scrolling page
