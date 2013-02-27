@@ -1,3 +1,85 @@
+2013-02-26  Alexey Proskuryakov  <ap@apple.com>
+
+        Don't add a body to platform request until necessary
+        https://bugs.webkit.org/show_bug.cgi?id=110900
+
+        Reviewed by Brady Eidson.
+
+        ResourceRequest now has more state for syncing between resource and platform parts.
+        In addition to tracking which is up to date, we also track which has up to date
+        HTTP Body.
+
+        The reason is that we don't need the body on request before it's actually sent,
+        and we actually cannot build it when networking is out of process.
+
+        * WebCore.exp.in: Updated exports.
+
+        * platform/network/ResourceRequestBase.h:
+        * platform/network/ResourceRequestBase.cpp:
+        (WebCore::ResourceRequestBase::setHTTPBody): Update HTTP body before returning it.
+        (WebCore::ResourceRequestBase::updatePlatformRequest): Update according to HTTPBodyUpdatePolicy.
+        (WebCore::ResourceRequestBase::updateResourceRequest): Ditto.
+
+        * platform/network/cf/FormDataStreamCFNet.cpp:
+        (WebCore::formDataStreamLengthPropertyName):
+        (WebCore::formCopyProperty):
+        (WebCore::setHTTPBody):
+        Changed to not update Content-Length in platform request directly. We need to keep it
+        in sync with resource request, and it's easier to do in a caller. Exposed computed
+        length as a property do avoid duplicating the work.
+
+        * platform/network/cf/FormDataStreamCFNet.h: Removed unnecessary httpBodyFromStream().
+
+        * platform/network/cf/ResourceHandleCFNet.cpp:
+        (WebCore::willSendRequest):
+        (WebCore::didReceiveResponse):
+        (WebCore::ResourceHandle::createCFURLConnection):
+        Update body when necessary.
+
+        (WebCore::ResourceRequest::nsURLRequest):
+        (WebCore::ResourceRequest::doUpdateResourceRequest):
+        (WebCore::ResourceRequest::doUpdateResourceHTTPBody):
+        (WebCore):
+        (WebCore::ResourceRequest::doUpdatePlatformRequest):
+        (WebCore::ResourceRequest::doUpdatePlatformHTTPBody):
+        (WebCore::ResourceRequest::updateFromDelegatePreservingOldHTTPBody):
+        (WebCore::ResourceRequest::applyWebArchiveHackForMail):
+        Ditto.
+
+        * platform/network/cf/ResourceRequest.h: Track body up-to-date state.
+
+        * platform/network/cf/ResourceRequestCFNet.cpp:
+        (WebCore::ResourceRequest::cfURLRequest): Honor HTTPBodyUpdatePolicy.
+        (WebCore::ResourceRequest::doUpdatePlatformRequest): Don't update body here.
+        (WebCore::ResourceRequest::doUpdatePlatformHTTPBody): Update the body, and make sure
+        that Content-Length is correct.
+        (WebCore::ResourceRequest::doUpdateResourceRequest): Don't update body here.
+        (WebCore::ResourceRequest::doUpdateResourceHTTPBody): Update the body, fixing a bug
+        where body stream was lost if this function got called.
+        (WebCore::ResourceRequest::applyWebArchiveHackForMail): No need to update body for this one.
+
+        * platform/network/mac/ResourceRequestMac.mm: Ditto (but this didn't have a bug
+        with streams in doUpdateResourceRequest()).
+
+        * platform/network/mac/FormDataStreamMac.h: Forward declare formDataStreamLengthPropertyName().
+
+        * platform/network/mac/ResourceHandleMac.mm:
+        (WebCore::ResourceHandle::createNSURLConnection):
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::platformLoadResourceSynchronously):
+        (-[WebCoreResourceHandleAsDelegate connection:willSendRequest:redirectResponse:]):
+        (-[WebCoreResourceHandleAsDelegate connection:didReceiveResponse:]):
+        Update body when necessary.
+
+        * platform/network/blackberry/ResourceRequest.h:
+        * platform/network/chromium/ResourceRequest.h:
+        * platform/network/curl/ResourceRequest.h:
+        * platform/network/qt/ResourceRequest.h:
+        * platform/network/soup/ResourceRequest.h:
+        * platform/network/win/ResourceRequest.h:
+        Added stubs for new functions. These ports don't keep a platform request in ResourceRequest,
+        and don't need updating.
+
 2013-02-27  Glenn Adams  <glenn@skynav.com>
 
         Add ENABLE_CSS3_TEXT_LINE_BREAK flag.
