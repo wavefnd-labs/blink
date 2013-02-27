@@ -1,3 +1,22 @@
+2013-02-26  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Add temporary diagnostic code to IDBRequest.result getter
+        https://bugs.webkit.org/show_bug.cgi?id=110916
+
+        Reviewed by Kentaro Hara.
+
+        Implement a custom getter for IDBRequest.result that does one additional hidden
+        property set, to try and isolate the flaky crash seen in wkbug.com/105363 which is
+        difficult to repro locally. If the crash moves to the new line it will point
+        the investigation in a new direction. Also add an assertion that probes string
+        wrappers (the expected type).
+
+        * Modules/indexeddb/IDBRequest.idl: Mark attribute as [Custom]
+        * WebCore.gypi: New file.
+        * bindings/v8/custom/V8IDBRequestCustom.cpp: Added.
+        (WebCore::V8IDBRequest::resultAttrGetterCustom): Implementation - copy/paste from
+        generated code, plus extra setNamedHiddenReference call and string ASSERT.
+
 2013-02-26  Anders Carlsson  <andersca@apple.com>
 
         Add a couple of symbols needed by WebKit2.
