@@ -1,3 +1,24 @@
+2013-02-27  James Simonsen  <simonjam@chromium.org>
+
+        [chromium] Lower priority of preloaded images
+        https://bugs.webkit.org/show_bug.cgi?id=110527
+
+        Reviewed by Nate Chapin.
+
+        This improves Speed Index by ~5%, because it encourages us to load images that are needed for
+        painting over speculative preloads. Ideally, all embedders would use this, but it relies on
+        ResourceHandle::didChangePriority being implemented. Currently, only Chrome does that.
+
+        Test: http/tests/loading/promote-img-preload-priority.html
+
+        * loader/FrameLoaderClient.h:
+        (FrameLoaderClient):
+        (WebCore::FrameLoaderClient::dispatchDidChangeResourcePriority): Added callback to enable testing.
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::setLoadPriority): Signal callback.
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::preload): Actual behavior change.
+
 2013-02-27  Csaba Osztrogonác  <ossy@webkit.org>
 
         Unreviewed trivial buildfix after r144190.
