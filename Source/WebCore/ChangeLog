@@ -1,3 +1,42 @@
+2013-02-27  Lianghui Chen  <liachen@rim.com>
+
+        [BlackBerry] User credentials is not correctly handled
+        https://bugs.webkit.org/show_bug.cgi?id=110994
+
+        Internal PR: 280990
+        Internal reviewed by Leo Yang.
+
+        Reviewed by Yong Li.
+
+        Following changes are made:
+            Remove url from generating the hash to index user credential.
+            Remove url from database.
+            Use new CertMgrWrapper API to remove password from CertMgr.
+            Handle encrypted password as binary data, instead of normal text string.
+            When authentication fails, remove the saved user credential only when they match.
+            Remove some url related API from CredentialBackingStore, as they are obsolete now.
+
+        No new tests as this is platform specific change about user credential.
+
+        * platform/network/blackberry/CredentialBackingStore.cpp:
+        (WebCore::hashCredentialInfo):
+        (WebCore::CredentialBackingStore::CredentialBackingStore):
+        (WebCore::CredentialBackingStore::~CredentialBackingStore):
+        (WebCore::CredentialBackingStore::open):
+        (WebCore::CredentialBackingStore::addLogin):
+        (WebCore::CredentialBackingStore::updateLogin):
+        (WebCore::CredentialBackingStore::hasLogin):
+        (WebCore::CredentialBackingStore::getLogin):
+        (WebCore::CredentialBackingStore::removeLogin):
+        (WebCore::CredentialBackingStore::addNeverRemember):
+        (WebCore::CredentialBackingStore::encryptedString):
+        (WebCore::CredentialBackingStore::decryptedString):
+        * platform/network/blackberry/CredentialBackingStore.h:
+        (CredentialBackingStore):
+        * platform/network/blackberry/NetworkJob.cpp:
+        (WebCore::NetworkJob::sendRequestWithCredentials):
+        (WebCore::NetworkJob::purgeCredentials):
+
 2013-02-27  David Hyatt  <hyatt@apple.com>
 
         Refactor transform painting/hit testing code in RenderLayer.
