@@ -1,3 +1,63 @@
+2013-02-26  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: show raster tasks on Timeline
+        https://bugs.webkit.org/show_bug.cgi?id=105851
+
+        - add DeferPaint, Paint & RasterTask trace events handling to trace event processor;
+        - upon begin frame, emit aggregated background event for all raster tasks related to inspected page.
+
+        Reviewed by Pavel Feldman.
+
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::willPaintImpl):
+        (InstrumentationEvents):
+        (InstrumentationEventArguments):
+        * inspector/InspectorInstrumentation.h:
+        (InstrumentationEvents):
+        (WebCore):
+        (InstrumentationEventArguments):
+        * inspector/InspectorTimelineAgent.cpp:
+        (TimelineRecordType):
+        (WebCore::InspectorTimelineAgent::stop):
+        (WebCore::InspectorTimelineAgent::didBeginFrame):
+        * inspector/InspectorTimelineAgent.h:
+        (TimelineRecordType):
+        (WebCore):
+        * inspector/TimelineRecordFactory.cpp:
+        (WebCore::TimelineRecordFactory::createRasterData):
+        (WebCore):
+        * inspector/TimelineRecordFactory.h:
+        (TimelineRecordFactory):
+        * inspector/TimelineTraceEventProcessor.cpp:
+        (WebCore::TimelineTraceEventProcessor::TimelineTraceEventProcessor):
+        (WebCore::TimelineTraceEventProcessor::~TimelineTraceEventProcessor):
+        (WebCore):
+        (WebCore::TimelineTraceEventProcessor::registerHandler):
+        (WebCore::TimelineTraceEventProcessor::shutdown):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::findParameter):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::parameter):
+        (WebCore::TimelineTraceEventProcessor::processEventOnAnyThread):
+        (WebCore::TimelineTraceEventProcessor::onBeginFrame):
+        (WebCore::TimelineTraceEventProcessor::onPaintLayerBegin):
+        (WebCore::TimelineTraceEventProcessor::onPaintLayerEnd):
+        (WebCore::TimelineTraceEventProcessor::onRasterTaskBegin):
+        (WebCore::TimelineTraceEventProcessor::onRasterTaskEnd):
+        (WebCore::TimelineTraceEventProcessor::onLayerDeleted):
+        (WebCore::TimelineTraceEventProcessor::onPaint):
+        (WebCore::TimelineTraceEventProcessor::flushRasterizerStatistics):
+        (WebCore::TimelineTraceEventProcessor::sendTimelineRecord):
+        (WebCore::TimelineTraceEventProcessor::processBackgroundEvents):
+        * inspector/TimelineTraceEventProcessor.h:
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::TraceEvent):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::id):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::asInt):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::asUInt):
+        (TimelineTraceEventProcessor):
+        * inspector/front-end/TimelineModel.js:
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel._initRecordStyles):
+
 2013-02-26  Uday Kiran  <udaykiran@motorola.com>
 
         getPropertyValue for -webkit-column-rule returns null, should compute the shorthand value
