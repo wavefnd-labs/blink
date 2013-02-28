@@ -1,3 +1,25 @@
+2013-02-28  Mike West  <mkwst@chromium.org>
+
+        XSSAuditor should strip formaction attributes from input and button elements.
+        https://bugs.webkit.org/show_bug.cgi?id=110975
+
+        Reviewed by Daniel Bates.
+
+        The 'formaction' attribute of 'input' and 'button' elements is just as
+        dangerous as the 'action' attribute of 'form' elements. This patch
+        teaches the XSSAuditor how to avoid them.
+
+        Tests: http/tests/security/xssAuditor/formaction-on-button.html
+               http/tests/security/xssAuditor/formaction-on-input.html
+
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::filterStartToken):
+        (WebCore::XSSAuditor::filterInputToken): Added.
+        (WebCore::XSSAuditor::filterButtonToken): Added.
+        * html/parser/XSSAuditor.h:
+            Create filters for 'input' and 'button' elements, which currently
+            only have the effect of filtering the 'formaction' attribute.
+
 2013-02-28  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         REGRESSION(r144169): It broke clipping
