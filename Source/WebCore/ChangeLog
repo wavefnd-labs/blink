@@ -1,3 +1,26 @@
+2013-02-28  Joe Mason  <jmason@rim.com>
+
+        [BlackBerry] Handle Set-Cookie immediately even when loading is deferred
+        https://bugs.webkit.org/show_bug.cgi?id=111083
+
+        Reviewed by Yong Li.
+
+        Internal PR: 298805
+        Internally Reviewed By: Leo Yang
+
+        Handle Set-Cookie headers immediately, even if loading is being deferred, since any request
+        created while loading is deferred should include all cookies received. (This especially
+        affects Set-Cookie headers sent with a 401 response - often this causes an auth dialog to be
+        opened, which defers loading, but the followup request using the credentials from the dialog
+        needs to include the cookie.)
+
+        This is safe because handleSetCookieHeader only updates the cookiejar, it doesn't call back
+        into the loader.
+
+        * platform/network/blackberry/NetworkJob.cpp:
+        (WebCore::NetworkJob::notifyHeadersReceived):
+        (WebCore::NetworkJob::handleNotifyHeaderReceived):
+
 2013-02-28  David Grogan  <dgrogan@chromium.org>
 
         IndexedDB: IO error when checking schema should destroy LevelDB directory
