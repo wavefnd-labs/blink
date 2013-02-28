@@ -1,3 +1,63 @@
+2013-02-27  Kunihiko Sakamoto  <ksakamoto@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Step-up/-down of hour field should respect min/max attributes
+        https://bugs.webkit.org/show_bug.cgi?id=109555
+
+        Reviewed by Kent Tamura.
+
+        Make step-up/-down of the hour field respect the min/max attributes of the element.
+        Note that it still accepts any keyboard inputs (the element
+        becomes 'invalid' state when out-of-range values entered).
+        Also, disable the hour field and/or the AMPM field when there is only single possible value.
+
+        Test: fast/forms/datetimelocal-multiple-fields/datetimelocal-multiple-fields-readonly-subfield.html
+              fast/forms/datetimelocal-multiple-fields/datetimelocal-multiple-fields-stepup-stepdown-from-renderer.html
+              fast/forms/time-multiple-fields/time-multiple-fields-readonly-subfield.html
+              fast/forms/time-multiple-fields/time-multiple-fields-stepup-stepdown-from-renderer.html
+
+        * html/TimeInputType.cpp:
+        (WebCore::TimeInputType::setupLayoutParameters): Populates layoutParameters.{minimum,maximum}.
+        * html/shadow/DateTimeEditElement.cpp:
+        (DateTimeEditBuilder): Add data fields for min/max of day and hour fields.
+        (WebCore::DateTimeEditBuilder::DateTimeEditBuilder): Set newly added data members.
+        (WebCore::DateTimeEditBuilder::visitField): Pass minimum/maximum value to the month field constructors.
+        (WebCore::DateTimeEditBuilder::shouldAMPMFieldDisabled): Added.
+        (WebCore::DateTimeEditBuilder::shouldDayOfMonthFieldDisabled):
+        (WebCore::DateTimeEditBuilder::shouldHourFieldDisabled):
+        Disables the hour field when min, max, and value have the same hour, except when the minute
+        field is disabled (by step attribute), because we need to leave at least one field editable.
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeHourFieldElementBase::DateTimeHourFieldElementBase):
+        (WebCore::DateTimeHourFieldElementBase::initialize):
+        (WebCore::DateTimeHourFieldElementBase::setValueAsDate):
+        (WebCore::DateTimeHourFieldElementBase::setValueAsDateTimeFieldsState):
+        (WebCore::DateTimeHour11FieldElement::DateTimeHour11FieldElement):
+        (WebCore::DateTimeHour11FieldElement::create):
+        (WebCore::DateTimeHour11FieldElement::populateDateTimeFieldsState):
+        (WebCore::DateTimeHour11FieldElement::setValueAsInteger):
+        (WebCore::DateTimeHour11FieldElement::clampValueForHardLimits):
+        (WebCore::DateTimeHour12FieldElement::DateTimeHour12FieldElement):
+        (WebCore::DateTimeHour12FieldElement::create):
+        (WebCore::DateTimeHour12FieldElement::populateDateTimeFieldsState):
+        (WebCore::DateTimeHour12FieldElement::setValueAsInteger):
+        (WebCore::DateTimeHour12FieldElement::clampValueForHardLimits):
+        (WebCore::DateTimeHour23FieldElement::DateTimeHour23FieldElement):
+        (WebCore::DateTimeHour23FieldElement::create):
+        (WebCore::DateTimeHour23FieldElement::populateDateTimeFieldsState):
+        (WebCore::DateTimeHour23FieldElement::setValueAsInteger):
+        (WebCore::DateTimeHour23FieldElement::clampValueForHardLimits):
+        (WebCore::DateTimeHour24FieldElement::DateTimeHour24FieldElement):
+        (WebCore::DateTimeHour24FieldElement::create):
+        (WebCore::DateTimeHour24FieldElement::populateDateTimeFieldsState):
+        (WebCore::DateTimeHour24FieldElement::setValueAsInteger):
+        (WebCore::DateTimeHour24FieldElement::clampValueForHardLimits):
+        * html/shadow/DateTimeFieldElements.h: Splitted DateTimeHourFieldElement into a base class and four derived classes that represents different hour formats.
+        (DateTimeHourFieldElementBase): Added.
+        (DateTimeHour11FieldElement): Added. Represents 0-11 hour format.
+        (DateTimeHour12FieldElement): Added. Represents 1-12 hour format.
+        (DateTimeHour23FieldElement): Added. Represents 0-23 hour format.
+        (DateTimeHour24FieldElement): Added. Represents 1-24 hour format.
+
 2013-02-27  Tien-Ren Chen  <trchen@chromium.org>
 
         Need to re-layout fixed position elements after scale when using settings()->fixedElementsLayoutRelativeToFrame()
