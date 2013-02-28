@@ -1,3 +1,51 @@
+2013-02-27  Keishi Hattori  <keishi@webkit.org>
+
+        Add month popup for new calendar picker
+        https://bugs.webkit.org/show_bug.cgi?id=110830
+
+        Reviewed by Kent Tamura.
+
+        Adding month popup view for use in the new calendar picker (Bug 109439).
+        YearListCell will grow in height when selected to reveal the buttons for
+        selecting the month.
+
+        No new tests. Code is not used yet.
+
+        * Resources/pagepopups/calendarPicker.js:
+        (YearListCell): A row inside the month popup. Contains buttons for choosing a month.
+        (YearListCell.prototype._recycleBin):
+        (YearListCell.prototype.reset): Resets a thrown away cell for reuse at the given row.
+        (YearListCell.prototype.height):
+        (YearListCell.prototype.setHeight):
+        (YearListView): List view showing YearListCells.
+        (YearListView.prototype.onMouseOver): If the mouse is over a month button, highlights it.
+        (YearListView.prototype.onMouseOut): De-highlights the month button.
+        (YearListView.prototype.setWidth): Set scroll view width to leave space for the scroll bar.
+        (YearListView.prototype.setHeight): Sets the scroll bar height as well.
+        (YearListView.prototype._animateRow): Animates the row height to open/close the YearListCell.
+        (YearListView.prototype.onCellHeightAnimatorDidStop): Keep this._runningAnimators and this._animatingRows up to date.
+        (YearListView.prototype.onCellHeightAnimatorStep): Update the cell height and position.
+        (YearListView.prototype.onClick): If this is a click on a month button, select the month.
+        (YearListView.prototype.rowAtScrollOffset): Calculates the row currently at the given offset.
+        (YearListView.prototype.scrollOffsetForRow): Calculates the current scroll offset of the given row.
+        (YearListView.prototype.prepareNewCell): Prepares a new or recycled YearListCell.
+        (YearListView.prototype.updateCells): Updates the position of the visible cells.
+        (YearListView.prototype.deselect): Deselects a row.
+        (YearListView.prototype.deselectWithoutAnimating): Deselects a row without the closing animation.
+        (YearListView.prototype.select): Selects a row.
+        (YearListView.prototype.selectWithoutAnimating): Deselects a row without the opening animation.
+        (YearListView.prototype.buttonForMonth): Returns the month button for a given month. Returns null if the cell is not visible.
+        (YearListView.prototype.dehighlightMonth): Dehighlights the month button.
+        (YearListView.prototype.highlightMonth): Highlights the month button.
+        (YearListView.prototype.show): Call when showing the year list view. Shows the given month as highlighted.
+        (YearListView.prototype.hide): Dispatches a did hide event which will be picked up by the CalendarPicker and the MonthPopupView will close.
+        (YearListView.prototype._moveHighlightTo): Used to move the month highlight in response to a key event.
+        (YearListView.prototype.onKeyDown): Arrow keys and PageUp/PageDown keys work.
+        (MonthPopupView): The popup view to be overlayed over the calendar picker.
+        (MonthPopupView.prototype.show): Takes the initialMonth to show and the calendarTableRect so we can overlay the year list view right on top of it.
+        (MonthPopupView.prototype.hide):
+        (MonthPopupView.prototype.onClick): Hides itself if the use clicks outside the year list view.
+
 2013-02-27  Adam Barth  <abarth@webkit.org>
 
         Use FeatureObserver to see how often web sites use multipart main documents
