@@ -1,3 +1,49 @@
+2013-02-28  Alexey Proskuryakov  <ap@apple.com>
+
+        Create BlobRegistry through a strategy
+        https://bugs.webkit.org/show_bug.cgi?id=111100
+
+        Reviewed by Sam Weinig.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        Added BlobRegistry.cpp.
+
+        * WebCore.exp.in:
+        * loader/LoaderStrategy.cpp:
+        (WebCore::LoaderStrategy::createBlobRegistry):
+        * loader/LoaderStrategy.h:
+        Addxed a function to create BlobRegistry, with default implementation being
+        in-process WebKit1 one.
+
+        * platform/network/BlobData.h: Added ENABLE(BLOB).
+
+        * platform/network/BlobRegistry.cpp: Added. Moved singleton to a separate file.
+        * platform/network/BlobRegistry.h: Made destructor non-inline. Cleaned up includes.
+
+        * platform/network/BlobRegistryImpl.cpp:
+        * platform/network/BlobRegistryImpl.h:
+        Cleaned up includes, made functions that are only called through base class private.
+        Added ENABLE(BLOB).
+
+        * platform/network/BlobStorageData.h: Added ENABLE(BLOB).
+
+        * platform/network/FormData.cpp:
+        (WebCore::appendBlobResolved): Check blob registry type before upcasting. It's a
+        public function, and we should not depend on high level understanding of process
+        model to prove that the cast is safe.
+
+        * platform/network/ResourceHandle.cpp:
+        * platform/network/cf/FormDataStreamCFNet.cpp:
+        * platform/network/mac/ResourceHandleMac.mm:
+        Cleaned up includes.
+
 2013-02-28  Kent Tamura  <tkent@chromium.org>
 
         REGRESSION: INPUT_MULTIPLE_FIELDS_UI: Changing CSS display property on input[type=date] unexpectedly makes another line for ::-webkit-calendar-picker-indicator
