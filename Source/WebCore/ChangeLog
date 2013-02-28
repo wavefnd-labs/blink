@@ -1,3 +1,41 @@
+2013-02-28  Kentaro Hara  <haraken@chromium.org>
+
+        [V8] Remove the world->isMainWorld() check from minorGCPrologue()
+        https://bugs.webkit.org/show_bug.cgi?id=111114
+
+        Reviewed by Adam Barth.
+
+        A couple of weeks ago, I introduced the following check to minorGCPrologue() in r142419.
+
+          void minorGCPrologue() {
+            // A minor GC can handle the main world only.
+            DOMWrapperWorld* world = worldForEnteredContextWithoutContextCheck();
+            if (world && world->isMainWorld()) {
+              MinorGCWrapperVisitor visitor(isolate);
+              v8::V8::VisitHandlesForPartialDependence(isolate, &visitor);
+              visitor.notifyFinished();
+            }
+          }
+
+        - The check makes no sense. A GC should not care about what world we are in.
+        There is no concept of worlds in GC.
+
+        - worldForEnteredContextWithoutContextCheck() returns 0 for the main world.
+        So if a GC runs in the main world, the minor DOM GC is skipped.
+
+        - worldForEnteredContextWithoutContextCheck() caused a Chromium crash
+        (https://code.google.com/p/chromium/issues/detail?id=177587)
+
+        We should remove the check.
+
+        No tests. No change in behavior.
+
+        * bindings/v8/DOMWrapperWorld.h:
+        (WebCore::DOMWrapperWorld::getWorld):
+        * bindings/v8/V8Binding.h:
+        * bindings/v8/V8GCController.cpp:
+        (WebCore::V8GCController::minorGCPrologue):
+
 2013-02-28  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
 
         Create GraphicsContext3DState to aggregate state objects
