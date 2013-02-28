@@ -1,3 +1,62 @@
+2013-02-28  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
+
+        Create GraphicsContext3DState to aggregate state objects
+        https://bugs.webkit.org/show_bug.cgi?id=110817
+
+        Reviewed by Kenneth Russell.
+
+        Aggregate context state-related objects on a GraphicsContext3DState
+        struct, in a similar fashion as GraphicsContext does. This is useful to
+        avoid duplicated values for platform-specific initialization lists.
+
+        No behavior changes, thus covered by existing tests.
+
+        * platform/graphics/GraphicsContext3D.h:
+        (WebCore::GraphicsContext3D::GraphicsContext3DState::GraphicsContext3DState):
+        (GraphicsContext3DState):
+        (GraphicsContext3D):
+        Moved m_boundFBO, m_activeTexture and m_boundTexture0 to GraphicsContext3DState.
+
+        * platform/graphics/blackberry/GraphicsContext3DBlackBerry.cpp:
+        (WebCore::GraphicsContext3D::GraphicsContext3D):
+        (WebCore::GraphicsContext3D::reshapeFBOs):
+        * platform/graphics/cairo/GraphicsContext3DCairo.cpp:
+        (WebCore::GraphicsContext3D::GraphicsContext3D):
+        * platform/graphics/cairo/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        * platform/graphics/efl/GraphicsContext3DEfl.cpp:
+        (WebCore::GraphicsContext3D::GraphicsContext3D):
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::copyToGraphicsSurface):
+        * platform/graphics/mac/GraphicsContext3DMac.mm:
+        (WebCore::GraphicsContext3D::GraphicsContext3D):
+        * platform/graphics/opengl/GraphicsContext3DOpenGL.cpp:
+        (WebCore::GraphicsContext3D::reshapeFBOs):
+        (WebCore::GraphicsContext3D::readPixels):
+        * platform/graphics/opengl/GraphicsContext3DOpenGLCommon.cpp:
+        (WebCore::GraphicsContext3D::prepareTexture):
+        (WebCore::GraphicsContext3D::readRenderingResults):
+        (WebCore::GraphicsContext3D::reshape):
+        (WebCore::GraphicsContext3D::activeTexture):
+        (WebCore::GraphicsContext3D::bindFramebuffer):
+        (WebCore::GraphicsContext3D::bindTexture):
+        (WebCore::GraphicsContext3D::copyTexImage2D):
+        (WebCore::GraphicsContext3D::copyTexSubImage2D):
+        (WebCore::GraphicsContext3D::deleteFramebuffer):
+        (WebCore::GraphicsContext3D::deleteTexture):
+        * platform/graphics/opengl/GraphicsContext3DOpenGLES.cpp:
+        (WebCore::GraphicsContext3D::readPixels):
+        (WebCore::GraphicsContext3D::readPixelsAndConvertToBGRAIfNecessary):
+        (WebCore::GraphicsContext3D::reshapeFBOs):
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (WebCore::GraphicsContext3DPrivate::createOffscreenBuffers):
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        (WebCore::GraphicsContext3DPrivate::blitMultisampleFramebuffer):
+        (WebCore::GraphicsContext3D::GraphicsContext3D):
+        Removed initialization list values not needed anymore and reassigned
+        calls to m_boundFBO, m_boundTexture0 and m_activeTexture to m_state
+        respectives.
+
 2013-02-28  David Hyatt  <hyatt@apple.com>
 
         Unreviewed build fix. A merge error led to a duplication of a single line.
