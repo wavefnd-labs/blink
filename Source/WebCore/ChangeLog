@@ -1,3 +1,41 @@
+2013-02-27  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exclusions] Enable shape-inside rectangle support for shape-padding
+        https://bugs.webkit.org/show_bug.cgi?id=110500
+
+        Reviewed by Dirk Schulze.
+
+        Added support for CSS shape-padding for shapes defined with shape-inside.
+
+        Tests: fast/exclusions/shape-inside/shape-inside-circle-padding.html
+               fast/exclusions/shape-inside/shape-inside-ellipse-padding.html
+               fast/exclusions/shape-inside/shape-inside-rectangle-padding.html
+               fast/exclusions/shape-inside/shape-inside-rounded-rectangle-padding.html
+
+        * rendering/ExclusionRectangle.cpp:
+        (WebCore::FloatRoundedRect::paddingBounds): Inset the rounded rectangle to reflect the padding parameter.
+        (WebCore::FloatRoundedRect::marginBounds): Expand the rounded rectangle to reflect the margin parameter.
+        (WebCore::FloatRoundedRect::cornerInterceptForWidth): Moved this method from ExclusionRectangle to FloatRoundedRect.
+        (WebCore::ExclusionRectangle::shapePaddingBounds): Lazily compute the bounds of the padding box.
+        (WebCore::ExclusionRectangle::shapeMarginBounds): Lazily compute the bounds of the margin box.
+        (WebCore::ExclusionRectangle::getExcludedIntervals): This computuation is now based on the (new) margin box.
+        (WebCore::ExclusionRectangle::getIncludedIntervals): This computation is now base don the (new) padding box.
+        (WebCore::ExclusionRectangle::firstIncludedIntervalLogicalTop): This computation is now base don the (new) padding box.
+        * rendering/ExclusionRectangle.h:
+        (FloatRoundedRect): A subclass of FloatRect that includes corner radii specified as CSS shapes do.
+        (WebCore::FloatRoundedRect::FloatRoundedRect):
+        (WebCore::FloatRoundedRect::rx):
+        (WebCore::FloatRoundedRect::ry):
+        (WebCore::ExclusionRectangle::ExclusionRectangle):
+        * rendering/ExclusionShape.cpp:
+        (WebCore::ExclusionShape::createExclusionShape): Initialize the new shapeMargin and shapePadding properties.
+        * rendering/ExclusionShape.h:
+        (ExclusionShape):
+        (WebCore::ExclusionShape::shapeMargin): Added a public read-only property for shapeMargin.
+        (WebCore::ExclusionShape::shapePadding): Added a public read-only property for shapePadding.
+        * rendering/ExclusionShapeInfo.cpp:
+        (WebCore::::computedShape): Pass the values of the CSS shape-margin and shapp-padding properties to createExclusionShape().
+
 2013-02-25  Alpha Lam  <hclam@chromium.org>
 
         More style cleanup in GIFImageReader
