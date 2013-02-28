@@ -1,3 +1,44 @@
+2013-02-28  Kent Tamura  <tkent@chromium.org>
+
+        REGRESSION: INPUT_MULTIPLE_FIELDS_UI: Changing CSS display property on input[type=date] unexpectedly makes another line for ::-webkit-calendar-picker-indicator
+        https://bugs.webkit.org/show_bug.cgi?id=110974
+
+        Reviewed by Kentaro Hara.
+
+        Input elements with the multiple fields UI require flexible box
+        layout.
+        - If display:inline or display:inline-block is specified, we
+          replace it with display:inline-flex.
+        - If display:block is specified, we replace it with
+          display:flex.
+        - If other display value is specified, we use it as is, but it
+          won't wrap inside an input element because we have
+          display:inline-block for ::-webkit-calendar-pixker-indicaotor.
+
+        r144184 was incomplete. It avoided the wrapping issue, but it
+        didn't make spin buttons and calendar arrows right-aligned.
+
+        Tests: Update fast/forms/date/date-apparance-basic.html
+
+        * css/html.css:
+        (input::-webkit-calendar-picker-indicator):
+        Add display:inline-block in orde to avoid line-wrapping.
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::customStyleForRenderer):
+        Move the code to BaseMultipleFieldsDateAndTimeInputType::customStyleForRenderer.
+        * html/InputType.cpp:
+        (WebCore::InputType::customStyleForRenderer): Added.
+        * html/InputType.h:
+        (InputType): Add customStyleForRenderer, and remove
+        shouldApplyLocaleDirection.
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::customStyleForRenderer):
+        Moved the code from HTMLInputElement::customStyleForRenderer, and
+        add display property updatting code.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType):
+        Add customStyleForRenderer, and remove shouldApplyLocaleDirection.
+
 2013-02-28  Anders Carlsson  <andersca@apple.com>
 
         Implement more StorageAreaProxy member functions
