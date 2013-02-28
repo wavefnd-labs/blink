@@ -1,3 +1,41 @@
+2013-02-28  Xianzhu Wang  <wangxianzhu@chromium.org>
+
+        Focus ring for a child layer is incorrectly offset by ancestor composited layer's position
+        https://bugs.webkit.org/show_bug.cgi?id=110895
+
+        Reviewed by Simon Fraser.
+
+        Test: compositing/sub-layer-focus-ring.html
+
+        The problem occurs in RenderBlock::addFocusRingRects() where the absolute position of a sub-layer is used to calculate the focus ring rect of the layer.
+        Should use the relative position to the current paintContainer instead.
+
+        To fix the issue:
+        - RenderLayer passes LayerPaintingInfo.rootLayer to PaintInfo.paintContainer
+        - Let RenderObject::paintFocusRing() and RenderObject::paintOutline() take PaintInfo instead of GraphicsContext* so that the paintContainer can be passed
+        - RenderBlock::addFocusRingRects() uses localToContainerPoint(FloatPoint(), paintContainer) instead of localToAbsolute() to calculate the focus ring rect of a sublayer.
+
+        * rendering/PaintInfo.h:
+        (WebCore):
+        (WebCore::PaintInfo::PaintInfo): Add a field paintContainer (the RenderLayerModelObject which originates the current painting)
+        (PaintInfo):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::paintObject):
+        (WebCore::RenderBlock::paintContinuationOutlines):
+        (WebCore::RenderBlock::addFocusRingRects): Use the added paintContainer parameter to calculate the relative offset of the child layer.
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::paintBackgroundForFragments): Pass LayerPaintingInfo.rootLayer to PaintInfo.paintContainer.
+        (WebCore::RenderLayer::paintForegroundForFragmentsWithPhase): Ditto.
+        (WebCore::RenderLayer::paintOutlineForFragments): Ditto.
+        (WebCore::RenderLayer::paintMaskForFragments): Ditto.
+        * rendering/RenderLayer.cpp:
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::paintFocusRing): Now takes PaintInfo instead of GraphicsContext*. Pass paintInfo.paintContainer to addFocusRingRects().
+        (WebCore::RenderObject::paintOutline): Now takes PaintInfo instead of GraphicsContext*.
+        (WebCore::RenderObject::absoluteFocusRingQuads):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::addFocusRingRects): Add paintContainer parameter.
+
 2013-02-28  David Hyatt  <hyatt@apple.com>
 
         Remove the quirk margin bits from RenderObject and put them back in RenderBlock.
