@@ -1,3 +1,175 @@
+2013-02-26  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Rewrite the painting/stacking model to be spec compliant.
+        https://bugs.webkit.org/show_bug.cgi?id=110624.
+
+        Reviewed by Simon Fraser.
+
+        This patch implements a new painting and hit testing model for columns that is
+        spec-compliant with Section 3.5 of the multicolumn specification, which states:
+        
+        "All column boxes in a multi-column element are in the same stacking context and
+        the drawing order of their contents is as specified in CSS 2.1. Column boxes do
+        not establish new stacking contexts."
+        
+        What this statement means is that you cannot paint a layer and all its stacking
+        context descendants in a strip in each column, since some of those descendants
+        might actually "break out" of the pagination (like fixed positioned descendants)
+        and overlap multiple columns. In addition clips may apply across pagination
+        boundaries, and any overlap caused by opacity has to do the right thing and
+        treat the paginated and unpaginated components together as a single unit.
+        
+        The solution to this problem is to introduce the concept of a LayerFragment. Now
+        all layers when painting or hit testing compute a fragment list, and that list
+        is then walked in order to do painting and hit testing of layers. In the simple
+        unpaginated case, a layer has one LayerFragment, but in the case of columns the
+        layer may be broken up into multiple fragments representing boxes in separate
+        columns.
+        
+        Much of this patch consists of refactoring all of the painting and hit testing
+        code to operate on these fragments.
+
+        Test: fast/multicol/mixed-positioning-stacking-order.html.
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::collectLayerFragments):
+        This method is called by the RenderLayer code to fetch the layer fragments from
+        the regions of a flow thread. The flow thread just turns around and calls into
+        each of its regions one by one to get the fragments from each region.
+
+        (WebCore::RenderFlowThread::fragmentsBoundingBox):
+        A new function that collects LayerFragments and then determines the bounding
+        box that encloses all of the fragments.
+
+        * rendering/RenderFlowThread.h:
+        Declarations of the new methods for obtaining layer fragments and bounding
+        box information for fragments.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::RenderLayer):
+        (WebCore::RenderLayer::updateLayerPositions):
+        (WebCore::RenderLayer::updatePagination):
+        RenderLayers now track an enclosing pagination layer. If this is set, then the layer knows it
+        needs to check with the enclosing pagination layer's flow thread renderer to
+        obtain layer fragments.
+        
+        (WebCore::transparencyClipBox):
+        Modified to obtain a fragments bounding box so that opacity can operate correctly on
+        column boxes.
+
+        (WebCore::accumulateOffsetTowardsAncestor):
+        This method has been patched to allow for fixed positioned objects to escape
+        in-flow RenderFlowThreads. Our in-flow RenderFlowThreads behave differently from
+        CSS Regions flow threads in that they aren't necesssarily acting as the containing
+        block for all of their descendants. Content is allowed to "escape" from the flow
+        thread.
+
+        (WebCore::RenderLayer::collectFragments):
+        A new method that collects fragments from the flow thread and sets up the appropriate
+        clips and translations on each fragment.
+
+        (WebCore::RenderLayer::paintLayer):
+        (WebCore::RenderLayer::paintLayerContents):
+        (WebCore::RenderLayer::paintList):
+        (WebCore::RenderLayer::updatePaintingInfoForFragments):
+        (WebCore::RenderLayer::paintTransformedLayerIntoFragments):
+        (WebCore::RenderLayer::paintBackgroundForFragments):
+        (WebCore::RenderLayer::paintForegroundForFragments):
+        (WebCore::RenderLayer::paintForegroundForFragmentsWithPhase):
+        (WebCore::RenderLayer::paintOutlineForFragments):
+        (WebCore::RenderLayer::paintMaskForFragments):
+        (WebCore::RenderLayer::paintOverflowControlsForFragments):
+        Refactoring of painting to break all individual painting steps out into methods that walk over
+        fragment boxes. This actually had the side effect of making the main painting function,
+        paintLayerContents, much cleaner and easier to read. :)
+        
+        (WebCore::RenderLayer::hitTest):
+        (WebCore::RenderLayer::createLocalTransformState):
+        (WebCore::RenderLayer::hitTestLayer):
+        (WebCore::RenderLayer::hitTestContentsForFragments):
+        (WebCore::RenderLayer::hitTestResizerInFragments):
+        (WebCore::RenderLayer::hitTestTransformedLayerInFragments):
+        (WebCore::RenderLayer::hitTestContents):
+        (WebCore::RenderLayer::hitTestList):
+        Refactoring of hit testing to break all individual hit testing steps out into methods that walk over
+        fragment boxes.
+        
+        (WebCore::RenderLayer::backgroundClipRect):
+        Modified to avoid using the clip rects cache when crossing into different pagination contexts,
+        e.g., from unpaginated to paginated.
+        
+        (WebCore::RenderLayer::intersectsDamageRect):
+        (WebCore::RenderLayer::boundingBox):
+        Modified boundingBox to work with fragments. A new flag is used to indicate whether or not
+        the bounds of fragments or the original unsplit box are being computed.
+        
+        (WebCore::RenderLayer::collectLayers):
+        Fix layer collection so that in-flow RenderFlowThreads can still be collected, since in-flow
+        RenderFlowThreads do not establish stacking contexts.
+
+        * rendering/RenderLayer.h:
+        (WebCore::ClipRect::moveBy):
+        Added a moveBy method that just wrap the corresponding LayoutRect method.
+
+        (LayerFragment):
+        (WebCore::LayerFragment::LayerFragment):
+        (WebCore::LayerFragment::setRects):
+        (WebCore::LayerFragment::moveBy):
+        (WebCore::LayerFragment::intersect):
+        (WebCore::RenderLayer::enclosingPaginationLayer):
+        The new LayerFragment struct. Holds clips and translation information for each fragment box.
+
+        (WebCore::RenderLayer::isOutOfFlowRenderFlowThread):
+        Helper method for determining if the renderer is an out-of-flow RenderFlowThread.
+
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::createMultiColumnFlowThreadStyle):
+        Change the flow thread style to no longer establish a stacking context.
+        
+        (WebCore::RenderMultiColumnBlock::layoutBlock):
+        Patched to move the flow thread to a position that allows it to be untranslated in the
+        initial column.
+
+        (WebCore):
+        * rendering/RenderMultiColumnBlock.h:
+        (RenderMultiColumnBlock):
+        layoutBlock is subclassed to tweak the flow thread's position.
+
+        * rendering/RenderMultiColumnFlowThread.h:
+        (RenderMultiColumnFlowThread):
+        The flow thread for multi-column blocks implements collectLayerFragments to hand back LayerFragment
+        information based off its RenderMultiColumnSets.
+
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::paintObject):
+        Changed to no longer paint column contents, since the layer code is just doing that now.
+
+        (WebCore::RenderMultiColumnSet::collectLayerFragments):
+        The method that figures out what columns are intersected by a layer and hands back
+        initial fragment information.
+
+        * rendering/RenderMultiColumnSet.h:
+        (RenderMultiColumnSet):
+        Declaration of collectLayerFragments.
+        
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::container):
+        Patch container() to allow fixed positioned objects to escape in-flow RenderFlowThreads.
+        
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isInFlowRenderFlowThread):
+        (WebCore::RenderObject::isOutOfFlowRenderFlowThread):
+        Methods for distinguishing between in-flow and out-of-flow RenderFlowThreads.
+
+        (WebCore::RenderObject::canContainFixedPositionObjects):
+        Patch canContainFixedPositionObjects() to allow fixed positioned objects to escape
+        in-flow RenderFlowThreads.
+        
+        * rendering/RenderRegion.h:
+        (WebCore::RenderRegion::collectLayerFragments):
+        (RenderRegion):
+        The virtual functions on Region for fragment collection.
+
 2013-02-28  Vivek Galatage  <vivek.vg@samsung.com>
 
         Web Inspector: Adding existing key in DOMStorageItemsView leaves it inconsistent state
