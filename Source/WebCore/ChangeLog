@@ -1,3 +1,24 @@
+2013-03-01  Mike West  <mkwst@chromium.org>
+
+        XSSAuditor should use threadSafeMatch when relevant.
+        https://bugs.webkit.org/show_bug.cgi?id=111099
+
+        Reviewed by Adam Barth.
+
+        Given the work on breaking parsing out into a background thread, we
+        should compare QualifiedNames in a thread-safe manner. Rather than
+        casting the result of QualifiedName::localName to a String, we can
+        call out to threadSafeMatch to do the comparison.
+
+        This patch leaves one use of equalIgnoringNullity in
+        XSSAuditor::findAttributeWithName. That usage seems safe, since we're
+        creating a new string against which to compare.
+
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::hasName):
+            Replace call to equalIgnoringNullity(Vector<UChar...>, String)
+            with threadSafeMatch(String, QualifiedName).
+
 2013-02-28  Keishi Hattori  <keishi@webkit.org>
 
         Add calendar table view for the new calendar picker
