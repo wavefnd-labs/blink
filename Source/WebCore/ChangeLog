@@ -1,3 +1,26 @@
+2013-02-26  Eugene Klyuchnikov  <eustas@chromium.org>
+
+        Web Inspector: Save/load timeline should preserve DOMContentLoaded and Load event markers
+        https://bugs.webkit.org/show_bug.cgi?id=110819
+
+        Reviewed by Pavel Feldman.
+
+        To create event divider TimelinePresentation model checks if record
+        frame is main frame. With this patch check is moved to backend and
+        result is saved in record to avoid incoherence.
+
+        * inspector/InspectorTimelineAgent.cpp:
+        (WebCore::InspectorTimelineAgent::didMarkDOMContentEvent):
+        Record "isMainFrame" flag.
+        (WebCore::InspectorTimelineAgent::didMarkLoadEvent): Ditto.
+        * inspector/TimelineRecordFactory.cpp:
+        (WebCore::TimelineRecordFactory::createMarkData):
+        Added data object constructor.
+        * inspector/TimelineRecordFactory.h: Ditto.
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel.isEventDivider):
+        Use saved flag value instead of comparing with "current" main frame.
+
 2013-03-01  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [DataGrid] Columns are misaligned after rows being refreshed.
