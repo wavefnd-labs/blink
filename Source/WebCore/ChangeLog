@@ -1,3 +1,32 @@
+2013-03-01  Victor Carbune  <vcarbune@chromium.org>
+
+        Support padding, margin and border for internal UA cue styling
+        https://bugs.webkit.org/show_bug.cgi?id=110703
+
+        Reviewed by Eric Carlson.
+
+        For some particular user agent styling this allows the possibility
+        of making the window around the cue text bigger to match some user
+        styles (see CaptionUserPreferencesMac::captionsStyleSheetOverride).
+
+        These properties *cannot* be set through by using the ::cue
+        pseudo-element and, as specified, are used only internally.
+
+        Test: media/track/track-cue-rendering-with-padding.html
+
+        * css/mediaControls.css:
+        (video::-webkit-media-text-track-display): Set the CSS box model
+        to include in the specified width or height the values of
+        padding / margin / border by using -webkit-box-sizing and avoid
+        overflow over 100% width because of having these properties set.
+        * rendering/RenderTextTrackCue.cpp:
+        (WebCore::RenderTextTrackCue::isOutside): To not interfere with
+        the regular WebVTT positioning algorithm, the check is done for
+        the absolute content box.
+        (WebCore::RenderTextTrackCue::repositionCueSnapToLinesSet): Added
+        an extra adjustment step to accomodate vertical padding (and not
+        overflow the cue container)
+
 2013-02-26  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: Save/load timeline should preserve DOMContentLoaded and Load event markers
