@@ -1,3 +1,43 @@
+2013-03-01  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Change flow thread containment to be a state.
+        https://bugs.webkit.org/show_bug.cgi?id=111110
+
+        Change m_inRenderFlowThread from a single bit to an actual state. This
+        will let us track whether we're inside a multicolumn (in-flow) flow thread
+        or a named (out-of-flow) flow thread. In the former case, we're going to have
+        to do more work to maintain this state, but for now I've kept all the logic
+        the same just for the initial landing.
+
+        Reviewed by Andreas Kling.
+
+        * dom/NodeRenderingContext.cpp:
+        (WebCore::NodeRenderingContext::createRendererForElementIfNeeded):
+        (WebCore::NodeRenderingContext::createRendererForTextIfNeeded):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::clone):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::clone):
+        * rendering/RenderMultiColumnFlowThread.cpp:
+        (WebCore::RenderMultiColumnFlowThread::RenderMultiColumnFlowThread):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::setFlowThreadStateIncludingDescendants):
+        (WebCore::RenderObject::removeFromRenderFlowThreadRecursive):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::setParent):
+        (RenderObject):
+        (WebCore::RenderObject::inRenderFlowThread):
+        (WebCore::RenderObject::flowThreadState):
+        (WebCore::RenderObject::setFlowThreadState):
+        (WebCore::RenderObject::RenderObjectBitfields::RenderObjectBitfields):
+        (RenderObjectBitfields):
+        (WebCore::RenderObject::RenderObjectBitfields::flowThreadState):
+        (WebCore::RenderObject::RenderObjectBitfields::setFlowThreadState):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::addChild):
+        
 2013-03-01  Jessie Berlin  <jberlin@apple.com>
 
         Build fix.
@@ -1327,7 +1367,7 @@
         Removed initialization list values not needed anymore and reassigned
         calls to m_boundFBO, m_boundTexture0 and m_activeTexture to m_state
         respectives.
-
+        
 2013-02-28  David Hyatt  <hyatt@apple.com>
 
         Unreviewed build fix. A merge error led to a duplication of a single line.
