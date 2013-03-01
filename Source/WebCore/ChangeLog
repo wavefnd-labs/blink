@@ -1,3 +1,42 @@
+2013-02-28  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: Selector's raw start position in its line is considered to be 0 when computing UILocation
+        https://bugs.webkit.org/show_bug.cgi?id=110732
+
+        Reviewed by Vsevolod Vlasov.
+
+        Test: inspector/styles/selector-line.html
+
+        * inspector/ContentSearchUtils.cpp:
+        (WebCore::ContentSearchUtils::sizetExtractor): Utility for binary search.
+        (WebCore::ContentSearchUtils::textPositionFromOffset): Converts absolute raw text offset into line:column.
+        (WebCore::ContentSearchUtils::getRegularExpressionMatchesByLines): Refactor.
+        (WebCore::ContentSearchUtils::lineEndings): Factored out of getRegularExpressionMatchesByLines.
+        (WebCore::ContentSearchUtils::buildObjectForSearchMatch): Drive-by: pass String by reference.
+        * inspector/ContentSearchUtils.h:
+        * inspector/Inspector.json: Use line:column for SourceRange boundaries rather than raw offsets.
+        * inspector/InspectorStyleSheet.cpp:
+        (ParsedStyleSheet::text): ASSERT(m_hasText).
+        (WebCore::InspectorStyle::buildObjectForStyle): Supply the lineEndings argument.
+        (WebCore::buildSourceRangeObject): Follow the protocol change.
+        (WebCore::InspectorStyle::setPropertyText): Refactor.
+        (WebCore::InspectorStyle::toggleProperty): Ditto.
+        (WebCore::InspectorStyle::styleText): Ditto.
+        (WebCore::InspectorStyle::populateAllProperties): Ditto.
+        (WebCore::InspectorStyle::styleWithProperties): Convert relative property range offsets into absolute ones.
+        (WebCore::InspectorStyle::extractSourceData): Factored out.
+        (WebCore::InspectorStyle::newLineAndWhitespaceDelimiters): Supply the lineEndings argument.
+        (WebCore::InspectorStyleSheet::buildObjectForSelectorList): Ditto.
+        (WebCore::InspectorStyleSheet::lineEndings): Compute line endings for ordinary stylesheets.
+        (WebCore::InspectorStyleSheetForInlineStyle::lineEndings): Ditto for bogus inline style stylesheets.
+        * inspector/InspectorStyleSheet.h:
+        * inspector/front-end/AuditRules.js: Removed the byte counting for unused CSS.
+        * inspector/front-end/CSSStyleModel.js:
+        (WebInspector.CSSRule): Set selector rawLocation based on the selectorList range or sourceLine.
+        (WebInspector.CSSRule.prototype._setRawLocation): Added.
+        * inspector/front-end/SASSSourceMapping.js:
+        (WebInspector.SASSSourceMapping.prototype._bindUISourceCode): Fix call order when binding scss sourcecodes.
+
 2013-03-01  Benjamin Poulain  <benjamin@webkit.org>
 
         Get rid of two silly static null Strings
