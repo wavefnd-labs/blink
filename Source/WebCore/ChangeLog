@@ -1,3 +1,107 @@
+2013-03-01  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Change inRenderFlowThread to follow containing block chain
+        https://bugs.webkit.org/show_bug.cgi?id=111206
+
+        Reviewed by Simon Fraser.
+
+        This patch removes inRenderFlowThread and changes enclosingRenderFlowThread()
+        to flowThreadContainingBlock(). flowThreadContainingBlock() now follows
+        the containing block chain instead of the parent chain when outside of layout.
+        (It already did the right thing when called during layout.)
+        
+        By removing inRenderFlowThread (which was following the parent chain), all
+        code that is checking for flow thread containment now correctly uses the
+        containing block chain. This allows for content to escape in-flow flow threads
+        and do the right thing without asserting.
+        
+        Test: fast/multicol/positioned-outside-of-columns.html
+
+        * dom/WebKitNamedFlow.cpp:
+        (WebCore::inFlowThread):
+        (WebCore::WebKitNamedFlow::getRegionsByContent):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::removeLeftoverAnonymousBlock):
+        (WebCore::RenderBlock::collapseAnonymousBoxChild):
+        (WebCore::RenderBlock::updateRegionsAndExclusionsLogicalSize):
+        (WebCore::RenderBlock::computeRegionRangeForBlock):
+        (WebCore::RenderBlock::layoutBlock):
+        (WebCore::RenderBlock::computeOverflow):
+        (WebCore::RenderBlock::determineLogicalLeftPositionForChild):
+        (WebCore::RenderBlock::computeLogicalLocationForFloat):
+        (WebCore::RenderBlock::logicalLeftOffsetForContent):
+        (WebCore::RenderBlock::logicalRightOffsetForContent):
+        (WebCore::RenderBlock::hasNextPage):
+        (WebCore::RenderBlock::applyBeforeBreak):
+        (WebCore::RenderBlock::applyAfterBreak):
+        (WebCore::RenderBlock::pageLogicalTopForOffset):
+        (WebCore::RenderBlock::pageLogicalHeightForOffset):
+        (WebCore::RenderBlock::pageRemainingLogicalHeightForOffset):
+        (WebCore::RenderBlock::adjustForUnsplittableChild):
+        (WebCore::RenderBlock::adjustLinePositionForPagination):
+        (WebCore::RenderBlock::lineWidthForPaginatedLineChanged):
+        (WebCore::RenderBlock::offsetFromLogicalTopOfFirstPage):
+        (WebCore::RenderBlock::regionAtBlockOffset):
+        (WebCore::RenderBlock::setStaticInlinePositionForChild):
+        (WebCore::RenderBlock::logicalWidthChangedInRegions):
+        (WebCore::RenderBlock::clampToStartAndEndRegions):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::layoutExclusionShapeInsideInfo):
+        (WebCore::LineLayoutState::LineLayoutState):
+        (WebCore::LineLayoutState::flowThread):
+        (WebCore::LineLayoutState::setFlowThread):
+        (LineLayoutState):
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange):
+        (WebCore::RenderBlock::linkToEndLineIfNeeded):
+        (WebCore::RenderBlock::layoutInlineChildren):
+        (WebCore::RenderBlock::determineStartPosition):
+        (WebCore::RenderBlock::checkPaginationAndFloatsAtEndLine):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::clearRenderBoxRegionInfo):
+        (WebCore::RenderBox::renderBoxRegionInfo):
+        (WebCore::RenderBox::containingBlockLogicalWidthForPositioned):
+        (WebCore::RenderBox::containingBlockLogicalHeightForPositioned):
+        (WebCore::RenderBox::computePositionedLogicalWidth):
+        (WebCore::RenderBox::computePositionedLogicalHeight):
+        * rendering/RenderDeprecatedFlexibleBox.cpp:
+        (WebCore::RenderDeprecatedFlexibleBox::layoutBlock):
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::objectInFlowRegion):
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::layoutBlock):
+        * rendering/RenderInline.cpp:
+        (WebCore::RenderInline::updateAlwaysCreateLineBoxes):
+        * rendering/RenderLayer.cpp:
+        (WebCore::accumulateOffsetTowardsAncestor):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::canBeComposited):
+        * rendering/RenderMedia.cpp:
+        (WebCore::RenderMedia::layout):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::locateFlowThreadContainingBlock):
+        (WebCore::RenderObject::containerForRepaint):
+        (WebCore::RenderObject::willBeRemovedFromTree):
+        (WebCore::RenderObject::removeFromRenderFlowThread):
+        (WebCore::RenderObject::removeFromRenderFlowThreadRecursive):
+        * rendering/RenderObject.h:
+        (RenderObject):
+        (WebCore::RenderObject::flowThreadContainingBlock):
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::setObjectStyleInRegion):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::addChild):
+        (WebCore::RenderView::initializeLayoutState):
+        (WebCore::RenderView::setSelection):
+        * rendering/RenderView.h:
+        (WebCore::RenderView::pushLayoutState):
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::containingRegion):
+        (WebCore::RootInlineBox::setContainingRegion):
+
 2013-02-28  Sam Weinig  <sam@webkit.org>
 
         Add SPI for marking a WebView as doing things on behalf of another process
