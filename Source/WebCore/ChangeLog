@@ -1,3 +1,48 @@
+2013-03-01  Bear Travis  <betravis@adobe.com>
+
+        [css exclusions] setting shape-inside on a parent does not relayout child blocks' inline content
+        https://bugs.webkit.org/show_bug.cgi?id=108128
+
+        Reviewed by David Hyatt.
+
+        Ensure that blocks lay out when their parent's shape-inside changes.
+        ExclusionShapeInsideInfo now stores an additional flag indicating whether
+        the shape has changed and its block's children require layout. Each block
+        can look up the flag via LayoutState to determine whether it needs to lay
+        out its children.
+
+        Test: fast/exclusions/shape-inside/shape-inside-dynamic-nested.html
+
+        * rendering/ExclusionShapeInfo.h:
+        (WebCore::ExclusionShapeInfo::shapeSizeDirty): Add a method to determine
+        if the shape has changed.
+        (ExclusionShapeInfo):
+        * rendering/ExclusionShapeInsideInfo.h:
+        (WebCore::ExclusionShapeInsideInfo::setNeedsLayout): Set the flag indicating
+        layout is necessary.
+        (WebCore::ExclusionShapeInsideInfo::needsLayout): Retrieve the layout flag.
+        (ExclusionShapeInsideInfo):
+        (WebCore::ExclusionShapeInsideInfo::ExclusionShapeInsideInfo): Initialize
+        the layout flag.
+        * rendering/RenderBlock.cpp:
+        (WebCore::exclusionInfoRequiresRelayout): Return true if the shape info should
+        cause a relayout. Also update the needsLayout flag on the ExclusionShapeInsideInfo.
+        (WebCore):
+        (WebCore::RenderBlock::updateRegionsAndExclusionsLogicalSize): Return a boolean
+        indicating whether regions or exclusions updates should cause a relayout.
+        (WebCore::RenderBlock::layoutBlock): Relayout children if the shape inside has
+        changed.
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutExclusionShapeInsideInfo): Changing to be a
+        class method.
+        (WebCore::LineWidth::LineWidth): Changing to use class method.
+        (WebCore::RenderBlock::computeInlineDirectionPositionsForLine): Ditto.
+        (WebCore::constructBidiRunsForLine): Ditto.
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange): Ditto.
+        (WebCore::RenderBlock::LineBreaker::nextLineBreak): Ditto.
+
 2013-03-01  Uday Kiran  <udaykiran@motorola.com>
 
         getComputedStyle not implemented for -webkit-column-rule shorthand
