@@ -1,3 +1,28 @@
+2013-03-01  Andy Estes  <aestes@apple.com>
+
+        REGRESSION (r125809): CFStrings created via StringImpl::createCFString()  might reference freed memory when Objective-C garbage collection is enabled
+        https://bugs.webkit.org/show_bug.cgi?id=111219
+
+        Reviewed by Benjamin Poulain.
+
+        StringImpl::createCFString() uses CFStringCreateWithBytesNoCopy() in
+        order to create CFString without making an unnecessary copy. In order
+        to ensure that the the StringImpl's backing buffer isn't deallocated
+        while the CFString is still alive, we use a custom CFAllocator to
+        ref/deref the StringImpl at the appropriate times.
+
+        However, custom allocators aren't supported when Objective-C garbage
+        collection is enabled, so in this case we use the default CF allocator.
+        Since we can't guarantee the lifetime of the StringImpl in this case,
+        we should just fall back to copying the string, as we did prior to r125809.
+
+        * platform/text/cf/StringImplCF.cpp:
+        (garbageCollectionEnabled): Moved the check for whether garbage
+        collection is enabled from StringWrapperCFAllocator::create() to here.
+        (WTF::StringWrapperCFAllocator::create): Call garbageCollectionEnabled().
+        (WTF::StringImpl::createCFString): If garbage collection is enabled,
+        call the variants of CFStringCreate that copy the string.
+
 2013-03-01  Roger Fong  <roger_fong@apple.com>
 
         Unreviewed AppleWin build fix.
