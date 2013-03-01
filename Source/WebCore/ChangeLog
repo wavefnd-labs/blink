@@ -1,3 +1,28 @@
+2013-02-28  Adam Barth  <abarth@webkit.org>
+
+        The threaded HTML parser shouldn't need to invalidate the speculation buffer on every document.write
+        https://bugs.webkit.org/show_bug.cgi?id=111130
+
+        Reviewed by Eric Seidel.
+
+        Previously, the threaded HTML parser always invalidated its speculation
+        buffer when it received a document.write.  That means we performed
+        poorly on web sites that contained document.write calls early in the
+        page.
+
+        This patch teaches the HTMLDocumentParser that we don't need to discard
+        the speculation buffer in the common case of starting and ending in the
+        DataState.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::checkForSpeculationFailure):
+        (WebCore::HTMLDocumentParser::didFailSpeculation):
+        * html/parser/HTMLDocumentParser.h:
+        (WebCore):
+        (ParsedChunk):
+
 2013-02-28  Eberhard Graether  <egraether@google.com>
 
         WebInspector: Switch hide element shortcut in ElementsPanel to use a selector
