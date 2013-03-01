@@ -1,3 +1,316 @@
+2013-03-01  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Upstream BlackBerry::Platform::Graphics::GraphicsContext integration related changes in platform/graphics/blackberry
+        https://bugs.webkit.org/show_bug.cgi?id=111072
+
+        Reviewed by Rob Buis.
+
+        BlackBerry PR 293208
+
+        This patch contains contributions from many members of the BlackBerry
+        WebKit team:
+
+        Rob Buis
+        Robin Cao
+        Michael Carmody
+        Max Feil
+        Eli Fidler
+        Antonio Gomes
+        Jacky Jiang
+        Mike Lattanzio
+        Yong Li
+        Andrew Lo
+        Maxim Mogilnitsky
+        Joshua Netterfield
+        Arvid Nilsson
+        Jakob Petsovits
+        Konrad Piascik
+        Jeff Rogers
+        Artem Simonov
+        Filip Spacek
+        George Staikos
+        Cosmin Truta
+
+        Covered by existing tests.
+
+        * platform/graphics/blackberry/CanvasLayerWebKitThread.cpp:
+        (WebCore::CanvasLayerWebKitThread::deleteTextures):
+        (CanvasLayerCompositingThreadClient):
+        (WebCore::CanvasLayerCompositingThreadClient::layerCompositingThreadDestroyed):
+        (WebCore::CanvasLayerCompositingThreadClient::layerVisibilityChanged):
+        (WebCore::CanvasLayerCompositingThreadClient::uploadTexturesIfNeeded):
+        (WebCore::CanvasLayerCompositingThreadClient::clearBuffer):
+        (WebCore):
+        (WebCore::CanvasLayerCompositingThreadClient::CanvasLayerCompositingThreadClient):
+        (WebCore::CanvasLayerCompositingThreadClient::drawTextures):
+        (WebCore::CanvasLayerCompositingThreadClient::deleteTextures):
+        (WebCore::CanvasLayerCompositingThreadClient::commitPendingTextureUploads):
+        (WebCore::CanvasLayerWebKitThread::CanvasLayerWebKitThread):
+        (WebCore::CanvasLayerWebKitThread::~CanvasLayerWebKitThread):
+        (WebCore::CanvasLayerWebKitThread::clearBuffer):
+        * platform/graphics/blackberry/CanvasLayerWebKitThread.h:
+        (WebCore):
+        (WebCore::CanvasLayerWebKitThread::create):
+        (CanvasLayerWebKitThread):
+        * platform/graphics/blackberry/DisplayRefreshMonitorBlackBerry.cpp:
+        (WebCore::DisplayRefreshMonitor::displayLinkFired):
+        * platform/graphics/blackberry/DrawingBufferBlackBerry.cpp:
+        (WebCore::DrawingBuffer::DrawingBuffer):
+        (WebCore):
+        (WebCore::DrawingBuffer::publishToPlatformLayer):
+        (WebCore::DrawingBuffer::platformLayer):
+        * platform/graphics/blackberry/EGLImageLayerCompositingThreadClient.cpp:
+        (WebCore::EGLImageLayerCompositingThreadClient::~EGLImageLayerCompositingThreadClient):
+        (WebCore::EGLImageLayerCompositingThreadClient::uploadTexturesIfNeeded):
+        (WebCore::EGLImageLayerCompositingThreadClient::drawTextures):
+        (WebCore::EGLImageLayerCompositingThreadClient::deleteTextures):
+        (WebCore::EGLImageLayerCompositingThreadClient::bindContentsTexture):
+        (WebCore::EGLImageLayerCompositingThreadClient::setTextureAccessor):
+        * platform/graphics/blackberry/EGLImageLayerCompositingThreadClient.h:
+        (Graphics):
+        (EGLImageLayerCompositingThreadClient):
+        (WebCore::EGLImageLayerCompositingThreadClient::EGLImageLayerCompositingThreadClient):
+        * platform/graphics/blackberry/EGLImageLayerWebKitThread.cpp:
+        (WebCore::EGLImageLayerWebKitThread::EGLImageLayerWebKitThread):
+        (WebCore::EGLImageLayerWebKitThread::~EGLImageLayerWebKitThread):
+        (WebCore::EGLImageLayerWebKitThread::updateFrontBuffer):
+        (WebCore::EGLImageLayerWebKitThread::deleteFrontBuffer):
+        (WebCore::EGLImageLayerWebKitThread::commitPendingTextureUploads):
+        (WebCore::EGLImageLayerWebKitThread::createTextureIfNeeded):
+        (WebCore::EGLImageLayerWebKitThread::blitToFrontBuffer):
+        * platform/graphics/blackberry/EGLImageLayerWebKitThread.h:
+        (Graphics):
+        (EGLImageLayerWebKitThread):
+        * platform/graphics/blackberry/FloatRectBlackBerry.cpp:
+        (WebCore::FloatRect::normalized):
+        (WebCore):
+        * platform/graphics/blackberry/FontCacheBlackberry.cpp: Removed.
+        * platform/graphics/blackberry/GraphicsContext3DBlackBerry.cpp:
+        (WebCore::GraphicsContext3D::GraphicsContext3D):
+        (WebCore::GraphicsContext3D::paintToCanvas):
+        (WebCore::GraphicsContext3D::getImageData):
+        (WebCore):
+        * platform/graphics/blackberry/GraphicsLayerBlackBerry.cpp:
+        (WebCore::GraphicsLayerBlackBerry::GraphicsLayerBlackBerry):
+        (WebCore::GraphicsLayerBlackBerry::setBackgroundColor):
+        (WebCore::GraphicsLayerBlackBerry::clearBackgroundColor):
+        (WebCore):
+        (WebCore::GraphicsLayerBlackBerry::setContentsNeedsDisplay):
+        (WebCore::GraphicsLayerBlackBerry::setNeedsDisplay):
+        (WebCore::GraphicsLayerBlackBerry::setNeedsDisplayInRect):
+        (WebCore::GraphicsLayerBlackBerry::updateLayerBackgroundColor):
+        (WebCore::GraphicsLayerBlackBerry::setupContentsLayer):
+        * platform/graphics/blackberry/GraphicsLayerBlackBerry.h:
+        (GraphicsLayerBlackBerry):
+        (WebCore::GraphicsLayerBlackBerry::notifySyncRequired):
+        * platform/graphics/blackberry/ImageBlackBerry.cpp:
+        (WebCore::ImageFrame::asNewNativeImage):
+        (WebCore):
+        (WebCore::FrameData::clear):
+        (WebCore::BitmapImage::BitmapImage):
+        (WebCore::BitmapImage::checkForSolidColor):
+        (WebCore::BitmapImage::invalidatePlatformData):
+        (WebCore::BitmapImage::draw):
+        (WebCore::Image::drawPattern):
+        * platform/graphics/blackberry/InstrumentedPlatformCanvas.h: Removed.
+        * platform/graphics/blackberry/LayerCompositingThread.cpp:
+        (WebCore::LayerCompositingThread::drawTextures):
+        (WebCore::LayerCompositingThread::drawSurface):
+        (WebCore::LayerCompositingThread::contentsTexture):
+        (WebCore::LayerCompositingThread::commitPendingTextureUploads):
+        (WebCore):
+        * platform/graphics/blackberry/LayerCompositingThread.h:
+        (Graphics):
+        (LayerCompositingThread):
+        * platform/graphics/blackberry/LayerCompositingThreadClient.h:
+        (Graphics):
+        (WebCore):
+        (LayerCompositingThreadClient):
+        (WebCore::LayerCompositingThreadClient::contentsTexture):
+        (WebCore::LayerCompositingThreadClient::commitPendingTextureUploads):
+        * platform/graphics/blackberry/LayerData.h:
+        (WebCore::LayerData::LayerData):
+        (WebCore::LayerData::contentsResolutionIndependent):
+        (LayerData):
+        (WebCore::LayerData::layerProgram):
+        (WebCore::LayerData::isContainerForFixedPositionLayers):
+        (WebCore::LayerData::isFixedToTop):
+        (WebCore::LayerData::isFixedToLeft):
+        (WebCore::LayerData::frameVisibleRect):
+        (WebCore::LayerData::frameContentsSize):
+        (WebCore::LayerData::contentsScale):
+        * platform/graphics/blackberry/LayerFilterRenderer.cpp:
+        (WebCore::LayerFilterRendererAction::LayerFilterRendererAction):
+        (WebCore::LayerFilterRenderer::initializeSharedGLObjects):
+        (WebCore::LayerFilterRenderer::ping):
+        (WebCore::LayerFilterRenderer::pong):
+        (WebCore::LayerFilterRenderer::pushSnapshot):
+        (WebCore::LayerFilterRenderer::popSnapshot):
+        (WebCore::LayerFilterRenderer::applyActions):
+        * platform/graphics/blackberry/LayerRenderer.cpp:
+        (WebCore):
+        (WebCore::LayerRenderer::LayerRenderer):
+        (WebCore::LayerRenderer::~LayerRenderer):
+        (WebCore::LayerRenderer::setViewport):
+        (WebCore::LayerRenderer::compositeLayers):
+        (WebCore::LayerRenderer::compositeBuffer):
+        (WebCore::LayerRenderer::drawColor):
+        (WebCore::LayerRenderer::useSurface):
+        (WebCore::LayerRenderer::drawLayersOnSurfaces):
+        (WebCore::glRound):
+        (WebCore::LayerRenderer::toOpenGLWindowCoordinates):
+        (WebCore::LayerRenderer::drawDebugBorder):
+        (WebCore::LayerRenderer::drawHolePunchRect):
+        (WebCore::LayerRenderer::updateLayersRecursive):
+        (WebCore::LayerRenderer::compositeLayersRecursive):
+        (WebCore::LayerRenderer::createProgram):
+        (WebCore::LayerRenderer::useProgram):
+        (WebCore::LayerRenderer::useLayerProgram):
+        * platform/graphics/blackberry/LayerRenderer.h:
+        (LayerRenderer):
+        * platform/graphics/blackberry/LayerRendererSurface.cpp:
+        (WebCore::LayerRendererSurface::ensureTexture):
+        * platform/graphics/blackberry/LayerTile.cpp:
+        (WebCore::LayerTile::LayerTile):
+        (WebCore::LayerTile::setContents):
+        (WebCore::LayerTile::updateContents):
+        * platform/graphics/blackberry/LayerTile.h:
+        (LayerTile):
+        (WebCore::LayerTile::renderState):
+        (WebCore::LayerTile::needsRender):
+        (WebCore::LayerTile::setNeedsRender):
+        (WebCore::LayerTile::setRenderPending):
+        (WebCore::LayerTile::setRenderDone):
+        * platform/graphics/blackberry/LayerTileIndex.h:
+        * platform/graphics/blackberry/LayerTiler.cpp:
+        (WebCore):
+        (WebCore::defaultTileSize):
+        (WebCore::LayerTiler::LayerTiler):
+        (WebCore::LayerTiler::updateTextureContentsIfNeeded):
+        (WebCore::LayerTiler::createBuffer):
+        (WebCore::LayerTiler::willCommit):
+        (WebCore::LayerTiler::commitPendingTextureUploads):
+        (WebCore::LayerTiler::layerVisibilityChanged):
+        (WebCore::LayerTiler::uploadTexturesIfNeeded):
+        (WebCore::LayerTiler::processTextureJob):
+        (WebCore::LayerTiler::addTileJob):
+        (WebCore::LayerTiler::performTileJob):
+        (WebCore::LayerTiler::drawTile):
+        (WebCore::LayerTiler::drawTextures):
+        (WebCore::LayerTiler::pruneTextures):
+        (WebCore::LayerTiler::updateTileSize):
+        (WebCore::LayerTiler::setNeedsBacking):
+        (WebCore::LayerTiler::contentsTexture):
+        * platform/graphics/blackberry/LayerTiler.h:
+        (WebCore::LayerTiler::tileSize):
+        (LayerTiler):
+        (WebCore::LayerTiler::TextureJob::TextureJob):
+        (WebCore::LayerTiler::TextureJob::setContents):
+        (WebCore::LayerTiler::TextureJob::updateContents):
+        (TextureJob):
+        (WebCore::LayerTiler::needsRender):
+        (WebCore::LayerTiler::removeUpdateContentsJobs):
+        * platform/graphics/blackberry/LayerWebKitThread.cpp:
+        (WebCore::LayerWebKitThread::LayerWebKitThread):
+        (WebCore::LayerWebKitThread::~LayerWebKitThread):
+        (WebCore::LayerWebKitThread::paintContents):
+        (WebCore::LayerWebKitThread::commitPendingTextureUploads):
+        (WebCore::LayerWebKitThread::setContents):
+        (WebCore::LayerWebKitThread::setNeedsCommit):
+        (WebCore::LayerWebKitThread::notifyAnimationsStarted):
+        (WebCore::LayerWebKitThread::commitOnWebKitThread):
+        (WebCore::LayerWebKitThread::startAnimations):
+        (WebCore::LayerWebKitThread::updateTextureContents):
+        (WebCore::LayerWebKitThread::commitOnCompositingThread):
+        (WebCore::LayerWebKitThread::addSublayer):
+        (WebCore):
+        (WebCore::LayerWebKitThread::addOverlay):
+        (WebCore::LayerWebKitThread::insert):
+        (WebCore::LayerWebKitThread::removeFromSuperlayer):
+        (WebCore::LayerWebKitThread::removeSublayerOrOverlay):
+        (WebCore::LayerWebKitThread::remove):
+        (WebCore::LayerWebKitThread::replaceSublayer):
+        (WebCore::LayerWebKitThread::filtersCanBeComposited):
+        (WebCore::LayerWebKitThread::removeAll):
+        (WebCore::LayerWebKitThread::setSublayers):
+        (WebCore::LayerWebKitThread::updateLayerHierarchy):
+        (WebCore::LayerWebKitThread::setIsMask):
+        (WebCore::LayerWebKitThread::releaseLayerResources):
+        * platform/graphics/blackberry/LayerWebKitThread.h:
+        (WebCore::LayerWebKitThread::insertSublayer):
+        (LayerWebKitThread):
+        (WebCore::LayerWebKitThread::isMask):
+        (WebCore::LayerWebKitThread::removeAllSublayers):
+        (WebCore::LayerWebKitThread::setFixedPosition):
+        (WebCore::LayerWebKitThread::setIsContainerForFixedPositionLayers):
+        (WebCore::LayerWebKitThread::setFixedToTop):
+        (WebCore::LayerWebKitThread::setFixedToLeft):
+        (WebCore::LayerWebKitThread::setFrameVisibleRect):
+        (WebCore::LayerWebKitThread::setFrameContentsSize):
+        (WebCore::LayerWebKitThread::setLayerProgram):
+        * platform/graphics/blackberry/MediaPlayerPrivateBlackBerry.cpp:
+        (WebCore::MediaPlayerPrivate::MediaPlayerPrivate):
+        (WebCore::MediaPlayerPrivate::play):
+        (WebCore::MediaPlayerPrivate::supportsFullscreen):
+        (WebCore::MediaPlayerPrivate::paintCurrentFrameInContext):
+        (WebCore::MediaPlayerPrivate::prepareForRendering):
+        (WebCore):
+        (WebCore::MediaPlayerPrivate::resizeSourceDimensions):
+        (WebCore::MediaPlayerPrivate::percentLoaded):
+        (WebCore::MediaPlayerPrivate::updateStates):
+        (WebCore::MediaPlayerPrivate::waitMetadataTimerFired):
+        (WebCore::MediaPlayerPrivate::onAuthenticationNeeded):
+        (WebCore::MediaPlayerPrivate::notifyChallengeResult):
+        (WebCore::MediaPlayerPrivate::isProcessingUserGesture):
+        (WebCore::loadBufferingImageData):
+        (WebCore::MediaPlayerPrivate::setBuffering):
+        (WebCore::MediaPlayerPrivate::drawBufferingAnimation):
+        (WebCore::MediaPlayerPrivate::onConditionallyEnterFullscreen):
+        (WebCore::MediaPlayerPrivate::onExitFullscreen):
+        (WebCore::MediaPlayerPrivate::onCreateHolePunchRect):
+        (WebCore::MediaPlayerPrivate::onDestroyHolePunchRect):
+        * platform/graphics/blackberry/MediaPlayerPrivateBlackBerry.h:
+        (BlackBerry):
+        (Platform):
+        (Graphics):
+        (MediaPlayerPrivate):
+        * platform/graphics/blackberry/PluginLayerWebKitThread.cpp:
+        (WebCore::PluginLayerWebKitThread::setPluginView):
+        * platform/graphics/blackberry/Texture.cpp:
+        (WebCore::Texture::Texture):
+        (WebCore::Texture::updateContents):
+        (WebCore::Texture::setContentsToColor):
+        (WebCore::Texture::protect):
+        * platform/graphics/blackberry/Texture.h:
+        (Texture):
+        (WebCore::Texture::textureId):
+        (WebCore::Texture::isDirty):
+        (WebCore::Texture::hasTexture):
+        (WebCore::Texture::sizeInBytes):
+        (WebCore::Texture::setTextureId):
+        (WebCore::Texture::setSize):
+        * platform/graphics/blackberry/TextureCacheCompositingThread.cpp:
+        (WebCore::TextureCacheCompositingThread::allocateTextureId):
+        (WebCore::freeTextureId):
+        (WebCore::TextureCacheCompositingThread::collectGarbage):
+        (WebCore::TextureCacheCompositingThread::textureSizeInBytesChanged):
+        (WebCore):
+        (WebCore::TextureCacheCompositingThread::textureDestroyed):
+        (WebCore::TextureCacheCompositingThread::install):
+        (WebCore::TextureCacheCompositingThread::resizeTexture):
+        (WebCore::TextureCacheCompositingThread::evict):
+        (WebCore::TextureCacheCompositingThread::prune):
+        (WebCore::TextureCacheCompositingThread::clear):
+        (WebCore::TextureCacheCompositingThread::textureForTiledContents):
+        (WebCore::TextureCacheCompositingThread::updateContents):
+        * platform/graphics/blackberry/TextureCacheCompositingThread.h:
+        (TextureCacheCompositingThread):
+        (WebCore::TextureCacheCompositingThread::ZombieTexture::ZombieTexture):
+        (ZombieTexture):
+        * platform/graphics/blackberry/skia/ImageBufferDataSkia.h: Removed.
+        * platform/graphics/blackberry/skia/PlatformSupport.cpp: Removed.
+        * platform/graphics/blackberry/skia/PlatformSupport.h: Removed.
+
 2013-03-01  Jocelyn Turcotte  <jocelyn.turcotte@digia.com>
 
         [Qt] Fix the Mac build with the current qtbase/dev branch
