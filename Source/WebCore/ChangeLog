@@ -1,3 +1,82 @@
+2013-03-01  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: Introduce opaque SecurityOrigin string identifiers in the frontend
+        https://bugs.webkit.org/show_bug.cgi?id=111165
+
+        Reviewed by Vsevolod Vlasov.
+
+        A plain string security origin value has been replaced by WebInspector.SecurityOrigin all over the code,
+        containing a URL (which holds a stringified security origin) and an identifier (which is now used
+        as a key in place of the stringified security origin in various maps). To avoid the ResourceTreeModel
+        code clutter, the security origin tracking code has been extracted into a separate type,
+        WebInspector.SecurityOriginTracker, which works as a helper on the ResourceTreeModel.
+
+        No new tests, as it is a refactoring.
+
+        * inspector/front-end/DOMStorage.js:
+        (WebInspector.DOMStorage.storageId):
+        (WebInspector.DOMStorage.prototype.id):
+        (WebInspector.DOMStorage.prototype.getItems):
+        (WebInspector.DOMStorage.prototype.setItem):
+        (WebInspector.DOMStorage.prototype.removeItem):
+        (WebInspector.DOMStorageModel.prototype._securityOriginAdded):
+        (WebInspector.DOMStorageModel.prototype._securityOriginRemoved):
+        (WebInspector.DOMStorageModel.prototype._storageKey):
+        * inspector/front-end/ExtensionAuditCategory.js:
+        * inspector/front-end/FileSystemModel.js:
+        (WebInspector.FileSystemModel.prototype._reset):
+        (WebInspector.FileSystemModel.prototype._securityOriginAdded):
+        (WebInspector.FileSystemModel.prototype._securityOriginRemoved):
+        (WebInspector.FileSystemModel.prototype._addOrigin):
+        (WebInspector.FileSystemModel.prototype._removeOrigin):
+        (WebInspector.FileSystemModel.prototype._requestFileSystemRoot):
+        (WebInspector.FileSystemModel.prototype._fileSystemRootReceived):
+        (WebInspector.FileSystemModel.prototype._removeFileSystem):
+        (WebInspector.FileSystemModel.FileSystem.prototype.get name):
+        * inspector/front-end/IndexedDBModel.js:
+        (WebInspector.IndexedDBModel.prototype._reset):
+        (WebInspector.IndexedDBModel.prototype.refreshDatabaseNames):
+        (WebInspector.IndexedDBModel.prototype._securityOriginAdded):
+        (WebInspector.IndexedDBModel.prototype._securityOriginRemoved):
+        (WebInspector.IndexedDBModel.prototype._addOrigin):
+        (WebInspector.IndexedDBModel.prototype._removeOrigin):
+        (WebInspector.IndexedDBModel.prototype._updateOriginDatabaseNames):
+        (WebInspector.IndexedDBModel.prototype._loadDatabaseNames):
+        (WebInspector.IndexedDBModel.prototype._loadDatabase):
+        (WebInspector.IndexedDBModel.prototype.):
+        (WebInspector.IndexedDBModel.prototype._requestData):
+        (WebInspector.IndexedDBModel.DatabaseId.prototype.equals):
+        * inspector/front-end/IndexedDBViews.js:
+        (WebInspector.IDBDatabaseView.prototype._refreshDatabase):
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.ResourceTreeModel.prototype._addFrame):
+        (WebInspector.ResourceTreeModel.prototype.securityOriginForId):
+        (WebInspector.ResourceTreeModel.prototype.securityOrigins):
+        (WebInspector.ResourceTreeModel.prototype._handleMainFrameDetached):
+        (WebInspector.ResourceTreeModel.prototype._frameNavigated):
+        (WebInspector.ResourceTreeModel.prototype._frameDetached):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker.prototype._addSecurityOrigin):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker.prototype._removeSecurityOrigin):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker.prototype._bindSecurityOrigin):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker.prototype._unbindSecurityOrigin):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker.prototype._detachMainFrame):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker.prototype._securityOriginForId):
+        (WebInspector.ResourceTreeModel.SecurityOriginTracker.prototype._securityOrigins):
+        (WebInspector.ResourceTreeFrame.prototype._navigate):
+        (WebInspector.SecurityOrigin.prototype.id):
+        (WebInspector.SecurityOrigin.prototype.url):
+        (WebInspector.SecurityOrigin.prototype.uiTitle):
+        (WebInspector.SecurityOrigin.prototype.toProtocol):
+        * inspector/front-end/ResourcesPanel.js:
+        (WebInspector.IDBDatabaseTreeElement):
+        (WebInspector.IDBDatabaseTreeElement.prototype.get itemURL):
+        (WebInspector.IDBObjectStoreTreeElement.prototype.get itemURL):
+        (WebInspector.IDBIndexTreeElement.prototype.get itemURL):
+        (WebInspector.DOMStorageTreeElement):
+        (WebInspector.DOMStorageTreeElement.prototype.get itemURL):
+        (WebInspector.FileSystemTreeElement):
+
 2013-03-01  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [Timeline] Show "curtains" when mouse is over CPU bar.
