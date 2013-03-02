@@ -1,5 +1,31 @@
 2013-03-02  Eric Seidel  <eric@webkit.org>
 
+        Remove two unnecessary mallocs from the main-thread-parser code path
+        https://bugs.webkit.org/show_bug.cgi?id=111249
+
+        Reviewed by Adam Barth.
+
+        I noticed these while fixing up our Vector -> String conversions
+        but never went back to fix the FIXME.
+
+        AtomicString(Vector<UChar, capacity>) is smart enough to avoid mallocing
+        if the represented string is already in the AtomicString table.  It
+        also handles 8bit vs. 16bit and empty() just like nameString() does.
+
+        I also removed a 3rd caller to nameString() in the XSSAuditor which
+        was causing an unnecessary malloc in both the main and background
+        thread parser paths.
+
+        * html/parser/AtomicHTMLToken.h:
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        * html/parser/HTMLToken.h:
+        * html/parser/XSSAuditor.cpp:
+        (WebCore):
+        (WebCore::threadSafeMatch):
+        (WebCore::hasName):
+
+2013-03-02  Eric Seidel  <eric@webkit.org>
+
         constructTreeFromCompactHTMLToken should call clearExternalCharacters
         https://bugs.webkit.org/show_bug.cgi?id=111248
 
