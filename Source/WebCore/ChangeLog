@@ -1,3 +1,48 @@
+2013-03-01  Kentaro Hara  <haraken@chromium.org>
+
+        Style recalculation takes too long when adding whitespace text nodes
+        https://bugs.webkit.org/show_bug.cgi?id=110786
+
+        Reviewed by Darin Adler.
+
+        // This takes 216 msec.
+        for (var i = 0; i < 1500; ++i) {
+          document.body.appendChild(document.createTextNode('x'));
+          document.body.appendChild(document.createElement('div'));
+          document.body.appendChild(document.createTextNode('x'));
+        }
+
+        // But this takes 25.3 seconds.
+        for (var i = 0; i < 1500; ++i) {
+          document.body.appendChild(document.createTextNode(' '));
+          document.body.appendChild(document.createElement('div'));
+          document.body.appendChild(document.createTextNode(' '));
+        }
+
+        The reason is that we do not create renderers for empty text
+        nodes and thus we are hitting the worst O(N^2) case in Node::attach().
+        (See FIXME in Node::attach().)
+
+        This patch adds a logic to bail out the loop to avoid the O(N^2) case.
+        Specifically, the patch bails out the loop if we encounter a text node
+        for which we again decided not to create a renderer. This bail out is
+        reasonable because the fact that we again decided not to create a renderer
+        for the text node indicates that there will be no affect of the result
+        of Text::textRendererIsNeeded() of the rest of the sibling nodes.
+
+        Performance test: https://bugs.webkit.org/attachment.cgi?id=190545
+        Performance result in Chromium/Linux: 25.3 sec => 48 msec !
+
+        Test: perf/append-text-nodes-without-renderers.html (for performance)
+              fast/dynamic/create-renderer-for-whitespace-only-text.html (for correctness)
+
+        The loop was introduced in r29054. We have to make sure that
+        all layout tests that were updated in r29054 pass with this patch.
+        See http://trac.webkit.org/changeset/29054.
+
+        * dom/Node.cpp:
+        (WebCore::Node::attach):
+
 2013-03-01  Jason Anderssen  <janderssen@gmail.com>
 
         Moved markerTextForListItem from TestRunner to Internals
