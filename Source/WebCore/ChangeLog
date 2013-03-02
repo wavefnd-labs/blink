@@ -1,3 +1,52 @@
+2013-03-01  Bear Travis  <betravis@adobe.com>
+
+        [css exclusions] Move ExclusionShapeInsideInfo into RenderBlockRareData
+        https://bugs.webkit.org/show_bug.cgi?id=110995
+
+        Reviewed by Julien Chaffraix.
+
+        This patch moves ExclusionShapeInsideInfo into the RenderBlockRareData struct,
+        which enables us to move away from the global ExclusionShapeInsideInfo map.
+        Some additional refactoring was done to remove ExclusionShapeInsideInfo's
+        dependency on InlineIterator, which depended on RenderBlock. This work required
+        adding a new LineSegmentIterator struct.
+
+        Refactoring, no new tests.
+
+        * rendering/ExclusionShapeInsideInfo.cpp:
+        (WebCore):
+        (WebCore::LineSegmentRange::LineSegmentRange): Moving the InlineIterator
+        constructor to the .cpp file, as InlineIterator is now forward declared in
+        the .h file.
+        (WebCore::ExclusionShapeInsideInfo::isEnabledFor): Moving isEnabledFor to
+        the .cpp file, as RenderBlock is now forward declared in the .h file.
+        * rendering/ExclusionShapeInsideInfo.h:
+        (WebCore):
+        (LineSegmentIterator): A simple struct for containing segment positions for
+        layout.
+        (WebCore::LineSegmentIterator::LineSegmentIterator): Constructor.
+        (LineSegmentRange): Transitioning to store LineSegmentIterator.
+        (WebCore::LineSegmentRange::LineSegmentRange): Ditto.
+        (ExclusionShapeInsideInfo):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::willBeDestroyed): Destroying a block will now destroy
+        its ExclusionShapeInsideInfo, so there is no need to remove it from the map.
+        (WebCore):
+        (WebCore::RenderBlock::updateExclusionShapeInsideInfoAfterStyleChange): Use
+        the RenderBlockRareData struct rather than the global map.
+        * rendering/RenderBlock.h:
+        (WebCore):
+        (WebCore::RenderBlock::ensureExclusionShapeInsideInfo): Ensure an info struct
+        is present if the shape-inside style is set.
+        (WebCore::RenderBlock::exclusionShapeInsideInfo): Look up the info struct for
+        the current block.
+        (WebCore::RenderBlock::setExclusionShapeInsideInfo): Update the info struct
+        for the current block.
+        (RenderBlockRareData): Add the ExclusionShapeInsideInfo member.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::constructBidiRunsForLine): Construct the appropriate offsets during
+        layout based on the stored LineSegmentIterators.
+
 2013-03-01  Terry Anderson  <tdanderson@chromium.org>
 
         EventHandler::handleGestureScrollUpdate() should invoke the user-generated scroll routines 
