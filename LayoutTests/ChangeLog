@@ -1,3 +1,53 @@
+2013-03-01  Terry Anderson  <tdanderson@chromium.org>
+
+        EventHandler::handleGestureScrollUpdate() should invoke the user-generated scroll routines 
+        so its behavior matches other user-initiated scrolls
+        https://bugs.webkit.org/show_bug.cgi?id=109769
+
+        Reviewed by James Robinson.
+
+        Four new layout tests have been added and touch-gesture-scroll-page.html has been
+        modified to demonstrate that this patch fixes two existing bugs. See the inline
+        comments below for details.
+
+        Because I am now using the existing user-generated scroll logic, the delta for a single
+        GestureScrollUpdate event will not be propagated to the parent of the targeted node
+        unless the targeted node has no remaining scrollable area. So the changes to the
+        existing layout tests have been made to ensure that the targeted node has been fully
+        scrolled before subsequent GestureScrollUpdate events will scroll the parent(s) of
+        the targeted node.
+
+        I have also removed the function recordScroll() from the existing layout tests
+        because this function already exists in the included file resources/gesture-helpers.js.
+
+        * fast/events/touch/gesture/touch-gesture-noscroll-body-expected.txt: Added.
+        * fast/events/touch/gesture/touch-gesture-noscroll-body-propagated-expected.txt: Added.
+        * fast/events/touch/gesture/touch-gesture-noscroll-body-propagated.html: Copied from LayoutTests/fast/events/touch/gesture/touch-gesture-scroll-page.html.
+        * fast/events/touch/gesture/touch-gesture-noscroll-body-xhidden-expected.txt: Added.
+        * fast/events/touch/gesture/touch-gesture-noscroll-body-xhidden.html: Copied from LayoutTests/fast/events/touch/gesture/touch-gesture-scroll-page.html.
+        * fast/events/touch/gesture/touch-gesture-noscroll-body-yhidden-expected.txt: Added.
+        * fast/events/touch/gesture/touch-gesture-noscroll-body-yhidden.html: Copied from LayoutTests/fast/events/touch/gesture/touch-gesture-scroll-page.html.
+        * fast/events/touch/gesture/touch-gesture-noscroll-body.html: Copied from LayoutTests/fast/events/touch/gesture/touch-gesture-scroll-page.html.
+        * fast/events/touch/gesture/touch-gesture-scroll-div-not-propagated.html:
+        * fast/events/touch/gesture/touch-gesture-scroll-div-propagated.html:
+        * fast/events/touch/gesture/touch-gesture-scroll-div-twice-propagated.html:
+        * fast/events/touch/gesture/touch-gesture-scroll-iframe-not-propagated.html:
+        * fast/events/touch/gesture/touch-gesture-scroll-iframe-propagated.html:
+        * fast/events/touch/gesture/touch-gesture-scroll-page-not-propagated.html:
+        * fast/events/touch/gesture/touch-gesture-scroll-page-propagated.html:
+        * fast/events/touch/gesture/touch-gesture-scroll-page.html:
+              I modified this layout test in order to add test coverage for another bug
+              which is fixed by this patch: if the hit test performed on a GestureScrollBegin
+              does not target a specific node, the subsequent GestureScrollUpdate events should
+              still attempt to scroll the page itself. This is consistent with how mousewheel
+              events behave.
+        * platform/chromium/fast/events/touch/gesture/touch-gesture-noscroll-body-expected.txt: Added.
+        * platform/chromium/fast/events/touch/gesture/touch-gesture-noscroll-body-propagated-expected.txt: Added.
+        * platform/chromium/fast/events/touch/gesture/touch-gesture-noscroll-body-xhidden-expected.txt: Added.
+        * platform/chromium/fast/events/touch/gesture/touch-gesture-noscroll-body-yhidden-expected.txt: Added.
+              These four new layout tests verify that a non-scrollable body will not scroll,
+              as reported in https://bugs.webkit.org/show_bug.cgi?id=109316.
+
 2013-03-01  Roger Fong  <roger_fong@apple.com>
 
 		Unreviewed gardening of AppleWin port.

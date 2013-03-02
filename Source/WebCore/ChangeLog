@@ -1,3 +1,40 @@
+2013-03-01  Terry Anderson  <tdanderson@chromium.org>
+
+        EventHandler::handleGestureScrollUpdate() should invoke the user-generated scroll routines 
+        so its behavior matches other user-initiated scrolls
+        https://bugs.webkit.org/show_bug.cgi?id=109769
+
+        Reviewed by James Robinson.
+
+        To ensure that the scrolling behavior of GestureScrollUpdate events are consistent with
+        the scrolling behavior of mousewheel events, use the existing user-generated scroll logic
+        instead of calling into RenderLayer::scrollByRecursively(). This patch fixes the bug
+        reported in https://bugs.webkit.org/show_bug.cgi?id=109316, where the example page can
+        be scrolled using touch but cannot be scrolled using mousewheels.
+
+        Note that this patch does not use any of the mousewheel event-handling code.
+
+        Tests: fast/events/touch/gesture/touch-gesture-noscroll-body-propagated.html
+               fast/events/touch/gesture/touch-gesture-noscroll-body-xhidden.html
+               fast/events/touch/gesture/touch-gesture-noscroll-body-yhidden.html
+               fast/events/touch/gesture/touch-gesture-noscroll-body.html
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::clear):
+        (WebCore::EventHandler::handleGestureEvent):
+        (WebCore::EventHandler::handleGestureScrollBegin):
+        (WebCore::EventHandler::handleGestureScrollUpdate):
+        (WebCore::EventHandler::sendScrollEventToView):
+            By calling this function at the start of handleGestureScrollUpdate() in the case
+            where |m_scrollGestureHandlingNode| is null, we ensure that the scroll updates
+            can still scroll the page itself, if possible.
+        (WebCore):
+        (WebCore::EventHandler::clearGestureScrollNodes):
+        * page/EventHandler.h:
+        (EventHandler):
+        * platform/PlatformWheelEvent.h:
+        (WebCore::PlatformWheelEvent::setHasPreciseScrollingDeltas):
+
 2013-03-01  Alec Flett  <alecflett@chromium.org>
 
         IndexedDB: Avoid ScriptValue copies in IDBAny
