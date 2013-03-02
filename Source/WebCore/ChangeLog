@@ -1,3 +1,31 @@
+2013-03-01  Elliott Sprehn  <esprehn@gmail.com>
+
+        Don't leak Documents when using MutationObserver from extensions
+        https://bugs.webkit.org/show_bug.cgi?id=111234
+
+        Reviewed by Adam Barth.
+
+        MutationObserverCallback holds a WorldContextHandle which secretly isn't
+        a handle to anything when it's for the main world. When it's for a non-main
+        world though, like those used in extensions, it becomes a strong reference
+        to the v8::Context which results in leaks by creating cycles:
+
+        MutationObserver -> Callback -> World -> Document -> Node -> MutationObserver.
+
+        Instead we should keep a RefPtr to a DOMWrapperWorld in the callback and then
+        get the v8::Context from that inside handleEvent.
+
+        Tests: ManualTests/leak-observer-nonmain-world.html
+
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::toV8Context): Added overload that takes a DOMWrapperWorld.
+        * bindings/v8/V8Binding.h:
+        * bindings/v8/V8MutationCallback.cpp:
+        (WebCore::V8MutationCallback::V8MutationCallback):
+        (WebCore::V8MutationCallback::handleEvent):
+        * bindings/v8/V8MutationCallback.h:
+        (V8MutationCallback):
+
 2013-03-01  Bear Travis  <betravis@adobe.com>
 
         [css exclusions] Move ExclusionShapeInsideInfo into RenderBlockRareData
