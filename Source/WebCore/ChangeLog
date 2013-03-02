@@ -1,3 +1,226 @@
+2013-02-28  Alexey Proskuryakov  <ap@apple.com>
+
+        Reduce amount of rebuilding when touching networking headers
+        https://bugs.webkit.org/show_bug.cgi?id=111035
+
+        Reviewed by Eric Seidel.
+
+        This uses a number of common unsurprising techniques. One interesting observation
+        is that including CachedResource related headers is very expensive. We can usually
+        get away with their Client counterparts, and with CachedResourceHandle.
+
+        * page/Frame.cpp:
+        * page/Frame.h:
+        Don't include FrameLoader, greatly reducing include graph for most non-loader files.
+        This required making Frame::init() non-inline - I'm not sure why it ever was.
+
+        * loader/FrameLoader.cpp:
+        * loader/FrameLoader.h:
+        Even though FrameLoader is logically on loading side of WebCore, it's included in
+        too many places. Not including PolicyChecker.h and ResourceHandle.h was among the
+        largest wins. As a future improvement, we should probably convert other members
+        to OwnPtrs.
+
+        * css/CSSCrossfadeValue.h: Initializing CachedResourceHandle with 0 requires a
+        definition of a class it holds, but default construction does not.
+
+        * loader/CrossOriginAccessControl.h: This file among others only needs ResourceHandleTypes.h,
+        not ResourceHandle.h. This header is semi-recent, so not all include sites were updated.
+
+        * loader/cache/CachedFont.h:
+        * loader/cache/CachedFontClient.h: Added.
+        * loader/cache/CachedRawResource.h:
+        * loader/cache/CachedRawResourceClient.h: Added.
+        * loader/cache/CachedSVGDocument.h:
+        * loader/cache/CachedSVGDocumentClient.h: Added.
+        These types were defining client types in the same headers, making it impossible
+        to avoid including networking headers through CachedResource. Moved clients into
+        separate files.
+
+        * plugins/PluginStream.h:
+        * plugins/PluginStreamClient.h: Added.
+        Similar situation here.
+
+        * loader/cache/CachedResourceHandle.cpp:
+        * loader/cache/CachedResourceHandle.h:
+        Moved functions that need to know about CachedResource to .cpp file. This is another
+        huge win. Added a destructor, so that CachedResource woudn't be needed in all files
+        that include CachedResourceHandle.
+
+        * loader/cache/CachedSVGDocumentReference.cpp: Added.
+        * loader/cache/CachedSVGDocumentReference.h:
+        Moved constructor and virtual function implementations to a .cpp file - they need
+        not inlining, and this lets us avoid including CachedSVGDocument.h in the header.
+
+        * platform/graphics/filters/FilterOperation.cpp:
+        * platform/graphics/filters/FilterOperation.h:
+        Avoid including CachedSVGDocumentReference.h. This is not such a big win now that
+        CachedSVGDocumentReference.h itself is smaller, but FilterOperation is so clearly
+        rendering code that it seems best to cut any ties with resources and loading.
+        Added a virtual destrutor in .cpp file, because inline destructors in polymorphic
+        classes are generally harmful (due to code bloat).
+
+        * plugins/PluginRequest.h: Added.
+        * plugins/PluginView.h:
+        Moved PluginRequest into a separate file, it was out of place in a view hierarchy
+        class file.
+
+        * rendering/RenderImageResource.cpp:
+        * rendering/RenderImageResource.h:
+        Moved definitions of virtual functions to a .cpp file. Thre is no win from having
+        them inline, and now we don't need CachedImage.h in the header.
+
+        * rendering/style/StyleCustomFilterProgram.cpp: Added.
+        * rendering/style/StyleCustomFilterProgram.h:
+        Ditto.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/mediastream/RTCPeerConnection.cpp:
+        * Modules/notifications/Notification.cpp:
+        * Target.pri:
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * bindings/ScriptControllerBase.cpp:
+        * bindings/js/JSNodeCustom.cpp:
+        * bindings/js/ScriptController.cpp:
+        * bindings/js/ScriptSourceCode.h:
+        * bindings/objc/DOM.mm:
+        * bindings/v8/ScriptController.cpp:
+        * bindings/v8/V8DOMWindowShell.cpp:
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        * css/CSSFontFaceSource.h:
+        * css/CSSFontSelector.cpp:
+        * css/WebKitCSSSVGDocumentValue.cpp:
+        * css/WebKitCSSSVGDocumentValue.h:
+        * dom/Clipboard.cpp:
+        * dom/ContainerNode.cpp:
+        * dom/DOMImplementation.cpp:
+        * dom/PendingScript.h:
+        * dom/ScriptElement.cpp:
+        * dom/ScriptElement.h:
+        * history/CachedFrame.cpp:
+        * html/DOMURL.cpp:
+        * html/HTMLAnchorElement.cpp:
+        * html/HTMLAppletElement.cpp:
+        * html/HTMLElement.cpp:
+        * html/HTMLEmbedElement.cpp:
+        * html/HTMLFrameSetElement.cpp:
+        * html/HTMLHtmlElement.cpp:
+        * html/HTMLImageElement.cpp:
+        * html/HTMLObjectElement.cpp:
+        * html/HTMLPlugInElement.cpp:
+        * html/ImageDocument.cpp:
+        * html/ImageInputType.cpp:
+        * html/MediaDocument.cpp:
+        * html/PluginDocument.cpp:
+        * html/canvas/WebGLRenderingContext.cpp:
+        * html/parser/HTMLConstructionSite.cpp:
+        * html/parser/HTMLParserOptions.cpp:
+        * html/parser/HTMLScriptRunner.h:
+        * html/parser/XSSAuditor.cpp:
+        * html/parser/XSSAuditorDelegate.cpp:
+        * inspector/InspectorDebuggerAgent.cpp:
+        * inspector/InspectorFileSystemAgent.cpp:
+        * inspector/InspectorFrontendHost.cpp:
+        * inspector/InspectorInstrumentation.h:
+        * inspector/InspectorPageAgent.cpp:
+        * inspector/NetworkResourcesData.cpp:
+        * inspector/NetworkResourcesData.h:
+        * loader/CookieJar.cpp:
+        * loader/CrossOriginAccessControl.cpp:
+        * loader/CrossOriginPreflightResultCache.h:
+        * loader/DocumentThreadableLoader.h:
+        * loader/ImageLoader.cpp:
+        * loader/ImageLoader.h:
+        * loader/LinkLoader.h:
+        * loader/MainResourceLoader.cpp:
+        * loader/MainResourceLoader.h:
+        * loader/MixedContentChecker.cpp:
+        * loader/PingLoader.cpp:
+        * loader/PolicyChecker.h:
+        * loader/ProgressTracker.cpp:
+        * loader/SubframeLoader.cpp:
+        * loader/SubresourceLoader.cpp:
+        * loader/TextTrackLoader.cpp:
+        * loader/TextTrackLoader.h:
+        * loader/ThreadableLoader.h:
+        * loader/appcache/ApplicationCacheGroup.cpp:
+        * loader/appcache/ApplicationCacheGroup.h:
+        * loader/appcache/ApplicationCacheHost.cpp:
+        * loader/archive/cf/LegacyWebArchive.cpp:
+        * loader/cache/CachedFont.cpp:
+        * loader/cache/CachedImage.cpp:
+        * loader/cache/CachedRawResource.cpp:
+        * loader/cache/CachedResource.cpp:
+        * loader/cache/CachedStyleSheetClient.h:
+        * loader/cache/MemoryCache.cpp:
+        * loader/cache/MemoryCache.h:
+        * loader/chromium/CachedRawResourceChromium.cpp:
+        * loader/icon/IconController.cpp:
+        * loader/icon/IconLoader.h:
+        * loader/mac/ResourceLoaderMac.mm:
+        * page/DOMWindowExtension.cpp:
+        * page/DragController.cpp:
+        * page/PerformanceNavigation.cpp:
+        * page/PerformanceTiming.cpp:
+        * page/PointerLockController.cpp:
+        * page/Settings.cpp:
+        * page/animation/CSSPropertyAnimation.cpp:
+        * platform/chromium/PasteboardChromium.cpp:
+        * platform/efl/ErrorsEfl.cpp:
+        * platform/graphics/avfoundation/MediaPlayerPrivateAVFoundation.cpp:
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.h:
+        * platform/graphics/gstreamer/WebKitWebSourceGStreamer.cpp:
+        * platform/gtk/ErrorsGtk.cpp:
+        * platform/gtk/PasteboardGtk.cpp:
+        * platform/gtk/PasteboardHelper.h:
+        * platform/mac/ClipboardMac.h:
+        * platform/mac/ClipboardMac.mm:
+        * platform/mac/HTMLConverter.mm:
+        * platform/mac/PasteboardMac.mm:
+        * platform/network/AuthenticationChallengeBase.cpp:
+        * platform/network/cf/CookieJarCFNet.cpp:
+        * platform/network/cf/ResourceRequestCFNet.cpp:
+        * platform/network/mac/CookieStorageMac.mm:
+        * platform/qt/PasteboardQt.cpp:
+        * plugins/DOMMimeType.cpp:
+        * plugins/PluginView.cpp:
+        * rendering/HitTestResult.cpp:
+        * rendering/InlineFlowBox.cpp:
+        * rendering/RenderBox.cpp:
+        * rendering/RenderEmbeddedObject.cpp:
+        * rendering/RenderImage.cpp:
+        * rendering/RenderImageResourceStyleImage.cpp:
+        * rendering/RenderLayer.cpp:
+        * rendering/RenderLayerBacking.cpp:
+        * rendering/RenderLayerFilterInfo.h:
+        * rendering/RenderListItem.cpp:
+        * rendering/RenderListMarker.cpp:
+        * rendering/RenderSnapshottedPlugIn.cpp:
+        * rendering/RenderTableCol.cpp:
+        * rendering/RenderTableRow.cpp:
+        * rendering/RenderTableSection.cpp:
+        * rendering/style/StyleCachedShader.h:
+        * svg/SVGFEImageElement.h:
+        * svg/SVGFontFaceUriElement.h:
+        * svg/SVGImageLoader.cpp:
+        * svg/SVGUseElement.cpp:
+        * svg/SVGUseElement.h:
+        * svg/graphics/SVGImageCache.cpp:
+        * testing/MockPagePopupDriver.cpp:
+        * xml/XSLStyleSheet.h:
+        * xml/XSLTProcessorLibxslt.cpp:
+        * xml/parser/XMLDocumentParser.cpp:
+        * xml/parser/XMLDocumentParser.h:
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        Many self-evident changes - removing unnecessary header includes, adding smaller
+        more local ones that are now necessary.
+
 2013-03-01  David Hyatt  <hyatt@apple.com>
 
         [New Multicolumn] Transformed objects inside fragmented transparent objects don't render
