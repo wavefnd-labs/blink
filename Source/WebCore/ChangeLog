@@ -1,3 +1,38 @@
+2013-03-01  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Transformed objects inside fragmented transparent objects don't render
+        https://bugs.webkit.org/show_bug.cgi?id=111221.
+
+        Reviewed by Simon Fraser.
+
+        Improve transparencyClipBox so that it understands when moving into descendants
+        that it does in fact have to break up the transformed clip rect across the
+        fragments.
+        
+        Make sure when handling fragmented transforms using multiple paints that
+        the test that determines the extent of the transform within the fragments
+        uses transparencyClipBox. This gives us an accurate set of columns that the
+        final transformed result will paint across.
+
+        Tests: fast/multicol/mixed-opacity-fixed-test.html
+               fast/multicol/mixed-opacity-test.html
+               fast/multicol/transform-inside-opacity.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::transparencyClipBox):
+        (WebCore::expandClipRectForDescendantsAndReflection):
+        Break transformed boxes up into fragments when they are
+        being requested by an ancestor.
+
+        (WebCore::RenderLayer::collectFragments):
+        (WebCore::RenderLayer::paintTransformedLayerIntoFragments):
+        (WebCore::RenderLayer::hitTestTransformedLayerInFragments):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        Modify collectFragments so that we pass in the correct range
+        within the columns that can possibly cover the fragmented
+        transformed box.
+
 2013-03-01  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: Native Memory Instrumentation: do not visit raw pointers by default.
