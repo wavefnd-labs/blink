@@ -1,3 +1,25 @@
+2013-03-03  David Kilzer  <ddkilzer@apple.com>
+
+        BUILD FIX: RenderLayerFilterInfo.h needs to include Element.h with ENABLE(SVG)
+
+        Fixes the following build failures:
+
+            In file included from Source/WebCore/rendering/RenderLayerFilterInfo.cpp:33:
+            Source/WebCore/rendering/RenderLayerFilterInfo.h:118:19: error: use of undeclared identifier 'Element'
+                Vector<RefPtr<Element> > m_internalSVGReferences;
+                              ^
+            Source/WebCore/rendering/RenderLayerFilterInfo.h:118:28: error: expected a type
+                Vector<RefPtr<Element> > m_internalSVGReferences;
+                                       ^
+            Source/WebCore/rendering/RenderLayerFilterInfo.h:118:30: error: private field 'm_internalSVGReferences' is not used [-Werror,-Wunused-private-field]
+                Vector<RefPtr<Element> > m_internalSVGReferences;
+                                         ^
+            3 errors generated.
+
+        * rendering/RenderLayerFilterInfo.h: Include Element.h within
+        ENABLE(SVG).  Move ENABLE(SVG) block below unconditional
+        headers.
+
 2013-03-03  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r144567.
