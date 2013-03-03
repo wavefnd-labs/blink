@@ -1,3 +1,28 @@
+2013-03-03  Dean Jackson  <dino@apple.com>
+
+        Plug-ins that are appropriately large w.r.t page size should autostart
+        https://bugs.webkit.org/show_bug.cgi?id=111242
+
+        Reviewed by Brady Eidson.
+
+        A "full-page" plug-in site should never snapshot. The trick is
+        how to determine what is full-page. This change implements the
+        following algorithm.
+
+        - The plug-in is in the main frame (not an iframe).
+        - The plug-in is sized with width and height 100%.
+        - The displayed area of the plug-in is more than 96% of the viewport area.
+
+        This is definitely not foolproof. For example, zombo.com has a slight
+        border around its plug-in. As the window size gets smaller, the body margin
+        takes up more than 5% of the width or height, and the plug-in doesn't pass
+        the tests above.
+
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore): New static constant: sizingFullPageThresholdPercentage
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): Implements
+            the rules described above.
+
 2013-03-03  Ryosuke Niwa  <rniwa@webkit.org>
 
         [Win] IDLParser.pm fails to parse OESTextureHalfFloat and causes a build failure
