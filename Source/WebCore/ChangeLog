@@ -1,3 +1,27 @@
+2013-03-03  Mike West  <mkwst@chromium.org>
+
+        CSP: Throw a warning when a '*-report-only' header doesn't contain a 'report-uri' directive.
+        https://bugs.webkit.org/show_bug.cgi?id=111208
+
+        Reviewed by Adam Barth.
+
+        Developers in the wild have been observed to serve a report-only CSP
+        header with a policy that doesn't contain a 'report-uri' directive.
+        This has zero effect, of course, and we should help them understand
+        that by throwing a warning up on the console.
+
+        Test: http/tests/security/contentSecurityPolicy/report-only-report-uri-missing.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPDirectiveList::isReportOnly): Added.
+        (WebCore::CSPDirectiveList::reportURIs): Added.
+        (WebCore::CSPDirectiveList::create):
+            After creating a CSPDirectiveList, check whether it's in
+            report-only mode without a report-uri. If so, warn the developer.
+        (WebCore::ContentSecurityPolicy::reportMissingReportURI): Added.
+            Write an exciting message to the console, warning the developer
+            about her expensive no-op machine.
+
 2013-03-03  Adam Barth  <abarth@webkit.org>
 
         Unreviewed rollout of http://trac.webkit.org/r144530
