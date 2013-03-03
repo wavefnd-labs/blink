@@ -1,3 +1,67 @@
+2013-02-18  Darin Adler  <darin@apple.com>
+
+        Cut down the number of source files that depend on Clipboard.h
+        https://bugs.webkit.org/show_bug.cgi?id=110030
+
+        Reviewed by Ryosuke Niwa.
+
+        I am doing some work on Clipboard and it's better to recompile 50 files
+        each time we touch the header instead of 700. Also cut down on includes
+        of DragState.h.
+
+        * WebCore.exp.in: Updated for new MouseEvent::create function.
+
+        * dom/ClipboardEvent.cpp: Added include of Clipboard.h since we use it
+        here and the world no longer includes it everywhere.
+
+        * dom/ClipboardEvent.h: Forward declared Clipboard instead of including
+        Clipboard.h. Also made some overrides private because they can be.
+
+        * dom/DataTransferItem.h: Removed unneeded include of Clipboard.h.
+
+        * dom/MouseEvent.cpp: Added include of Clipboard.h since we use it
+        here and the world no longer includes it everywhere.
+        (WebCore::MouseEvent::create): Made the create function non-inline
+        since we can't compile it without including Clipboard.h and we don't
+        want to include Clipboard.h in the header. This is not so commonly
+        used or so hot that this needs to be inlined.
+
+        * dom/MouseEvent.h: Forward declared Clipboard instead of including
+        Clipboard.h. Made MouseEvent::create a non-inline function and also
+        used overloading instead of default arguments, since we can't compile
+        a default argument of type PassRefPtr<Clipboard> without including
+        Clipboard.h.
+
+        * dom/WheelEvent.cpp: Added include of Clipboard.h since we use it
+        here and the world no longer includes it everywhere.
+
+        * dom/WheelEvent.h: Forward declare PlatformWheelEvent since it is used
+        in this header. Previously we'd get it indirectly from including a header
+        that included Clipboard.h.
+
+        * editing/Editor.cpp: Added include of Clipboard.h since we use it here
+        and the world no longer includes it everywhere.
+
+        * inspector/InspectorDebuggerAgent.cpp: Added include of CachedResource.h.
+        We used to get this indirectly through Clipboard.h.
+
+        * inspector/InspectorFrontendHost.cpp: Added includes of ResourceError.h
+        and ResourceResponse.h. We used to get these indirectly through Clipboard.h.
+        Also removed unneeded include of <wtf/RefPtr.h>.
+
+        * inspector/NetworkResourcesData.cpp: Added include of CachedResource.h.
+        We used to get this indirectly through Clipboard.h.
+
+        * loader/PingLoader.cpp: Added include of ResourceResponse.h.
+        We used to get this indirectly through Clipboard.h.
+
+        * page/DragController.cpp: Added include of DragState.h.
+        We used to get this indirectly through EventHandler.h
+
+        * page/EventHandler.h: Forward declared DragState and Element instead of
+        including DragState.h. Also added an include of LayoutPoint.h, which we
+        used to get indirectly through DragState.h.
+
 2013-02-27  Darin Adler  <darin@apple.com>
 
         StringHasher functions require alignment that call sites do not all guarantee
