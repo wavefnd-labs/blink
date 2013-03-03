@@ -1,3 +1,52 @@
+2013-03-03  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Support CSP 1.1 directives on the unprefixed header.
+        https://bugs.webkit.org/show_bug.cgi?id=111254
+
+        Reviewed by Adam Barth.
+
+        We'd like to ensure that early adopters don't get stuck on a prefixed
+        header; when CSP 1.1 is baked enough to be supported in multiple
+        browsers, everything should Just Work™.
+
+        This patch changes WebKit's behavior regarding CSP_NEXT features.
+        Currently, they're only exposed on the prefixed header ('X-WebKit-CSP').
+        This patch exposes those features on the canonical header, assuming
+        that the runtime flag is set. This shouldn't have any effect at all on
+        ports that haven't yet enabled CSP_NEXT, and will simply clear the way
+        for a clean deployment to a wider audience once the specification
+        process is further along.
+
+        This change shouldn't have any effect on the existing tests: they
+        should run just as they did before. The next step will be to adjust
+        the LayoutTests for 1.1 to prefer the canonical header, but I'll do
+        that in another patch to reduce churn.
+
+        Related, the enum names no longer made sense: the difference between the
+        canonical 'Content-Security-Policy' header and 'X-WebKit-CSP' is the
+        prefix, not the functionality. This patch renames them for clarity.
+
+        * dom/Document.cpp:
+        (WebCore::Document::processHttpEquiv):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didBeginDocument):
+            Use the new enum names.
+        * page/ContentSecurityPolicy.cpp:
+        (CSPDirectiveList):
+        (WebCore::CSPDirectiveList::CSPDirectiveList):
+        (WebCore::CSPDirectiveList::addDirective):
+            Drop the 'm_experimental' property from CSPDirectiveList; we'll
+            control the behavior via the runtime flag from now on.
+
+            Also, this fixes a small bug in 'addDirective()': we never threw
+            unrecognized directive errors for users who were sending the
+            prefixed header. Oops!
+        (WebCore::ContentSecurityPolicy::deprecatedHeaderType):
+            Use the new enum names.
+        * page/ContentSecurityPolicy.h:
+            Redefine the enum for clarity: 'PrefixedReport' and 'Report'
+            rather than 'ReportAllDirectives' and 'ReportStableDirectives'.
+
 2013-03-03  Ryosuke Niwa  <rniwa@webkit.org>
 
         Another Windows build fix attempt after r144567.
