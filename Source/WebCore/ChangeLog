@@ -1,3 +1,61 @@
+2013-03-04  Mario Sanchez Prada  <mario.prada@samsung.com>
+
+        [GTK] WebCore::returnString is unsafe and should be removed!
+        https://bugs.webkit.org/show_bug.cgi?id=110423
+
+        Reviewed by Martin Robinson.
+
+        Remove returnString() and replace it in callers with a new
+        function that will cache and return the values of string
+        properties for ATK interfaces in the private section of the
+        wrapper AtkObject WebKitAccessible.
+
+        * accessibility/atk/WebKitAccessibleUtil.cpp: Remove returnString().
+        * accessibility/atk/WebKitAccessibleUtil.h: Ditto.
+
+        * accessibility/atk/WebKitAccessibleWrapperAtk.cpp:
+        (_WebKitAccessiblePrivate): New private structure to store cached
+        values of string property for the different ATK interfaces.
+        (cacheAndReturnAtkProperty): New helper function to make sure the
+        returned const gchar* value is previously cached in the private
+        section of the wrapper AtkObject.
+        (webkitAccessibleGetName): Use the new helper function.
+        (webkitAccessibleGetDescription): Ditto.
+        (webkitAccessibleInit): Initialize pointer to private structure.
+        (webkitAccessibleFinalize): Remove unneeded code.
+        (webkitAccessibleClassInit): Add private struct to class type/
+        * accessibility/atk/WebKitAccessibleWrapperAtk.h:
+        (_WebKitAccessible): New member pointing to the private structure,
+        made the new helper function cacheAndReturnAtkProperty() available
+        to external callers (implementation files for ATK interfaces).
+        (AtkCachedProperty): New enum to allow reusing code when calling
+        cacheAndReturnAtkProperty() to cache and return different properties.
+
+        * accessibility/atk/WebKitAccessibleInterfaceAction.cpp:
+        (webkitAccessibleActionGetKeybinding): Replace calls to returnString()
+        with calls to the new helper function cacheAndReturnAtkProperty().
+        (webkitAccessibleActionGetName): Ditto.
+        * accessibility/atk/WebKitAccessibleInterfaceDocument.cpp:
+        (documentAttributeValue): Ditto.
+        (webkitAccessibleDocumentGetLocale): Ditto.
+        * accessibility/atk/WebKitAccessibleInterfaceImage.cpp:
+        (webkitAccessibleImageGetImageDescription): Ditto.
+
+        Remove returnString() from WebKitAccessibleHyperlink (which is not
+        an AtkObject, but a GObject) as well, replacing it in callers with
+        simple code that will cache and return the required values in the
+        private section of these kind of objects.
+
+        * accessibility/atk/WebKitAccessibleHyperlink.cpp:
+        (_WebKitAccessibleHyperlinkPrivate): Added two new fields to cache
+        string values for the key binding and name properties from the
+        AtkAction interface, which is implemented by AtkHyperlink.
+        (webkitAccessibleHyperlinkActionGetKeybinding): Cache the string
+        value for the key binding before returning a const gchar* pointer.
+        (webkitAccessibleHyperlinkActionGetName): Ditto.
+        (webkitAccessibleHyperlinkGetURI): Do not cache the URI here, as
+        this function returns a gchar* that will be owned by the caller.
+
 2013-03-04  peavo@outlook.com  <peavo@outlook.com>
 
         [Curl] Compile fix after r144216
