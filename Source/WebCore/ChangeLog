@@ -1,3 +1,89 @@
+2013-03-04  Marja Hölttä  <marja@chromium.org>
+
+        [V8] Add a "context type" parameter to GetTemplate and ConfigureV8SomethingTemplate functions
+        https://bugs.webkit.org/show_bug.cgi?id=110875
+
+        The parameter will later be used for generating specialized V8
+        bindings for the 3 different world types (main world, isolated
+        work, worker).
+
+        Reviewed by Kentaro Hara.
+
+        No new tests (no changes in behavior yet).
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        (GenerateDomainSafeFunctionGetter):
+        (GenerateDomainSafeFunctionSetter):
+        (GenerateNormalAttrGetter):
+        (GenerateNamedConstructor):
+        (GenerateImplementation):
+        * bindings/v8/DOMDataStore.cpp:
+        (WebCore::DOMDataStore::DOMDataStore):
+        * bindings/v8/DOMDataStore.h:
+        (DOMDataStore):
+        * bindings/v8/DOMWrapperWorld.cpp:
+        (WebCore):
+        (WebCore::DOMWrapperWorld::setInitializingWindow):
+        (WebCore::DOMWrapperWorld::DOMWrapperWorld):
+        (WebCore::DOMWrapperWorld::contextHasCorrectPrototype):
+        * bindings/v8/DOMWrapperWorld.h:
+        (DOMWrapperWorld):
+        (WebCore::DOMWrapperWorld::getWorld):
+        * bindings/v8/Dictionary.cpp:
+        (WebCore::Dictionary::get):
+        * bindings/v8/PageScriptDebugServer.cpp:
+        (WebCore::retrieveFrameWithGlobalObjectCheck):
+        * bindings/v8/V8AdaptorFunction.cpp:
+        (WebCore::V8AdaptorFunction::getTemplate):
+        (WebCore::V8AdaptorFunction::wrap):
+        * bindings/v8/V8AdaptorFunction.h:
+        (V8AdaptorFunction):
+        * bindings/v8/V8Binding.cpp:
+        (WebCore::toDOMWindow):
+        (WebCore::toScriptExecutionContext):
+        (WebCore::worldType):
+        (WebCore):
+        (WebCore::worldTypeInMainThread):
+        * bindings/v8/V8Binding.h:
+        (WebCore):
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::clearForNavigation):
+        (WebCore::V8DOMWindowShell::installDOMWindow):
+        * bindings/v8/V8DOMWrapper.cpp:
+        (WebCore::V8DOMWrapper::createWrapper):
+        * bindings/v8/V8Initializer.cpp:
+        (WebCore::findFrame):
+        * bindings/v8/V8PerContextData.cpp:
+        (WebCore::V8PerContextData::constructorForTypeSlowCase):
+        * bindings/v8/WorkerScriptController.cpp:
+        (WebCore::WorkerScriptController::WorkerScriptController):
+        (WebCore::WorkerScriptController::controllerForContext):
+        * bindings/v8/WrapperTypeInfo.h:
+        (WebCore::WrapperTypeInfo::getTemplate):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::V8DOMWindow::eventAttrGetterCustom):
+        (WebCore::V8DOMWindow::eventAttrSetterCustom):
+        (WebCore::V8DOMWindow::toStringMethodCustom):
+        (WebCore::V8DOMWindow::namedSecurityCheck):
+        (WebCore::V8DOMWindow::indexedSecurityCheck):
+        (WebCore::toV8):
+        * bindings/v8/custom/V8HTMLDocumentCustom.cpp:
+        (WebCore::V8HTMLDocument::wrapInShadowObject):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.cpp:
+        (WebCore::V8HTMLImageElementConstructor::GetTemplate):
+        * bindings/v8/custom/V8HTMLImageElementConstructor.h:
+        (V8HTMLImageElementConstructor):
+        * bindings/v8/custom/V8InjectedScriptManager.cpp:
+        (WebCore::createInjectedScriptHostV8Wrapper):
+        (WebCore::InjectedScriptManager::canAccessInspectedWindow):
+        * bindings/v8/custom/V8LocationCustom.cpp:
+        (WebCore::V8Location::reloadAttrGetterCustom):
+        (WebCore::V8Location::replaceAttrGetterCustom):
+        (WebCore::V8Location::assignAttrGetterCustom):
+        * bindings/v8/custom/V8MessageEventCustom.cpp:
+        (WebCore::V8MessageEvent::initMessageEventMethodCustom):
+
 2013-03-04  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: add Ace editor experiment
