@@ -1,3 +1,41 @@
+2013-03-04  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Add parsing for grid-{start|before}
+        https://bugs.webkit.org/show_bug.cgi?id=110988
+
+        Reviewed by Tony Chang.
+
+        Test: fast/css-grid-layout/grid-item-start-before-get-set.html
+
+        Refactored how we store internally grid-{row|column} to be based on grid-{before|start}.
+        This is required as grid-{row|column} are shorthands for resp. grid-{before|after} and grid-{start|end}
+        in the specification and will also be in the code. That means a lot of methods were renamed to be more
+        aligned with the new design.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/CSSPropertyNames.in:
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::applyProperty):
+        Added the code to parse, apply and get back the new properties. Also
+        some renaming after the internal naming change below.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        (WebCore::RenderGrid::autoPlacementMajorAxisPositionForChild):
+        (WebCore::RenderGrid::autoPlacementMinorAxisPositionForChild):
+        * rendering/style/RenderStyle.h:
+        * rendering/style/StyleGridItemData.cpp:
+        (WebCore::StyleGridItemData::StyleGridItemData):
+        * rendering/style/StyleGridItemData.h:
+        (WebCore::StyleGridItemData::operator==):
+        Updated the naming now that we manipulate grid-{before|start} instead of grid-{row|column}.
+
 2013-03-04  Chris Fleizach  <cfleizach@apple.com>
 
         WebSpeech: change voiceURI to voice
