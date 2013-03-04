@@ -1,3 +1,27 @@
+2013-03-03  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Make sure region styling works for columns inside regions.
+        https://bugs.webkit.org/show_bug.cgi?id=111276
+
+        Reviewed by Sam Weinig.
+
+        Test: fast/regions/region-styling-in-columns.html
+
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::CurrentRenderFlowThreadMaintainer::CurrentRenderFlowThreadMaintainer):
+        (WebCore::CurrentRenderFlowThreadMaintainer::~CurrentRenderFlowThreadMaintainer):
+        * rendering/RenderFlowThread.h:
+        (CurrentRenderFlowThreadMaintainer):
+        Fix the CurrentRenderFlowThreadMaintainer so that it saves off the old render flow thread
+        and restores it when done. This effectively makes flow thread layout a push/pop stack,
+        since with in-flow threads, this is allowed. We assert that a nested flow thread is
+        in-flow to preserve the invariant that you can't nest CSS Regions flow thread.
+
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::computeChildrenStyleInRegion):
+        Add isInFlowRenderFlowThread() to the anonymous check to make sure a style gets made
+        for the nested flow thread.
+
 2013-03-04  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: WebInspector.AceTextEditor throws a warning
