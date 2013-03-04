@@ -1,3 +1,77 @@
+2013-03-04  Mike West  <mkwst@chromium.org>
+
+        Long URLs in error messages should be shortened
+        https://bugs.webkit.org/show_bug.cgi?id=111133
+
+        Reviewed by Jochen Eisinger.
+
+        When generating console messages, we're often copying the page's URL
+        in order to add detail about where the error occurred. Generally, this
+        is fine, but in edge cases (multi-meg 'data:' URLs), we're using far
+        more memory than we should, and impacting performance.
+
+        This patch adds an 'elidedString()' method to KURL for use in this
+        sort of case; when generating console messages, we should insert the
+        elided URL rather than the full URL.
+
+        This shouldn't change any visible behavior; we're already visually
+        eliding URLs in console messages for URLs above 150 characters. This
+        patch simply changes the underlying string to ensure that no URL is
+        over 1k in length to begin with.
+
+        * platform/KURL.cpp:
+        (WebCore::KURL::elidedString): Added.
+        * platform/KURL.h:
+            An exciting new method that gives you the same result as string()
+            for URLs less than 1k long, and elides the middle of URLs longer
+            than 1k by replacing everything but the first and last 0.5k with
+            "...".
+        * bindings/ScriptControllerBase.cpp:
+        (WebCore::ScriptController::canExecuteScripts):
+        * Modules/websockets/WebSocket.cpp:
+        (WebCore::WebSocket::connect):
+        (WebCore::WebSocket::send):
+        * Modules/websockets/WebSocketChannel.cpp:
+        (WebCore::WebSocketChannel::send):
+        (WebCore::WebSocketChannel::fail):
+        * bindings/ScriptControllerBase.cpp:
+        (WebCore::ScriptController::canExecuteScripts):
+        * dom/Document.cpp:
+        (WebCore::Document::processHttpEquiv):
+        * dom/ScriptElement.cpp:
+        (WebCore::ScriptElement::executeScript):
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::canPlayType):
+        (WebCore::HTMLMediaElement::isSafeToLoadURL):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::submitForm):
+        (WebCore::FrameLoader::loadFrameRequest):
+        (WebCore::FrameLoader::commitProvisionalLoad):
+        (WebCore::FrameLoader::shouldInterruptLoadForXFrameOptions):
+        (WebCore::FrameLoader::loadProvisionalItemFromCachedPage):
+        (WebCore::createWindow):
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::willSendRequest):
+        (WebCore::MainResourceLoader::responseReceived):
+        * loader/appcache/ApplicationCacheGroup.cpp:
+        (WebCore::ApplicationCacheGroup::didReceiveResponse):
+        (WebCore::ApplicationCacheGroup::didFail):
+        * loader/cache/CachedResourceLoader.cpp:
+        (WebCore::CachedResourceLoader::canRequest):
+        (WebCore::CachedResourceLoader::requestResource):
+        (WebCore::CachedResourceLoader::loadResource):
+        (WebCore::CachedResourceLoader::printAccessDeniedMessage):
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPDirectiveList::checkSourceAndReportViolation):
+        (WebCore::CSPDirectiveList::allowScriptNonce):
+        (WebCore::CSPDirectiveList::allowPluginType):
+            Use 'KURL::elidedString()' rather than 'KURL::string()'
+        * loader/MixedContentChecker.cpp:
+        (WebCore::MixedContentChecker::logWarning):
+            Here, we're doing the same as above, but it enables us to throw
+            away the asUTF8() function entirely by switching to makeString
+            rather than String::format.
+
 2013-03-04  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: add runtime flag to determine if inspector's source files were flattened.
