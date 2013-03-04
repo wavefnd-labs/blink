@@ -1,3 +1,55 @@
+2013-03-04  Ian Vollick  <vollick@chromium.org>
+
+        ASSERTION FAILED: m_clipRectsCache->m_respectingOverflowClip[clipRectsType] == (clipRectsContext.respectOverflowClip == RespectOverflowClip) in RenderLayer.
+        https://bugs.webkit.org/show_bug.cgi?id=108257
+
+        Reviewed by David Hyatt.
+
+        With composited scrolling we paint both with and without respecting
+        overflow clip. To prevent collisions in the clip cache, and to prevent
+        throwing away cached clips unnecessarily, we keep two copies of the
+        clip cache -- one for when overflow clip is respected, and one for
+        when it isn't.
+
+        No new tests. Covered by existing tests (in debug):
+          compositing/overflow/automatically-opt-into-composited-scrolling.html
+          compositing/overflow/composited-scrolling-creates-a-stacking-container.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateClipRects):
+          No longer asserts that our 'respect overflow clip' status is
+          consistent. It also gets and sets the clip cache using the clip rect
+          context rather than just the clip rect type.
+        (WebCore::RenderLayer::calculateClipRects):
+        (WebCore::RenderLayer::parentClipRects):
+        (WebCore::RenderLayer::clearClipRects):
+        (WebCore::ClipRectsCache::ClipRectsCache):
+        (WebCore::ClipRectsCache::getClipRects):
+        (WebCore::ClipRectsCache::setClipRects):
+        (WebCore::ClipRectsCache::getIndex):
+          Get and set the cached clip rects using the context rather than
+          type.
+        (WebCore::RenderLayer::clipRects):
+          We now cache twice as many clip rects.
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+          ShouldRespectOverflowClip was moved out of RenderLayer.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::updateClipRects):
+        (WebCore::RenderLayer::calculateClipRects):
+        (WebCore::RenderLayer::parentClipRects):
+        (WebCore::RenderLayer::clearClipRects):
+        * rendering/RenderLayer.h:
+        (WebCore::ClipRectsCache::ClipRectsCache):
+        (WebCore::ClipRectsCache::getClipRects):
+        (WebCore::ClipRectsCache::setClipRects):
+        (ClipRectsCache):
+        (WebCore::ClipRectsCache::getIndex):
+        (WebCore::RenderLayer::clipRects):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+
 2013-03-04  Aaron Colwell  <acolwell@chromium.org>
 
         Remove unused return value from SourceBufferPrivate::abort() and WebSourceBuffer::abort().
