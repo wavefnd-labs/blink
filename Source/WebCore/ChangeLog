@@ -1,3 +1,79 @@
+2013-03-04  Alexis Menard  <alexis@webkit.org>
+
+        transition properties can't be found in CSSStyleDeclaration
+        https://bugs.webkit.org/show_bug.cgi?id=110011
+
+        Reviewed by Antti Koivisto.
+
+        The previous approach for handling the unprefixing was to alias the
+        unprefixed properties with the prefixed ones in CSSPropertyNames.in.
+        Unfortunately it will alias the properties in the parsing code which will just
+        identically parse the two versions. This means that when we populate StylePropertySet
+        we do not have information whether we just parsed the prefixed, the
+        unprefixed properties or we parsed both. The patch takes another
+        approach by creating two distinct sets of properties (unprefixed and
+        prefixed). Each properties have their own id and we now handle them in
+        the parsing code as disctints properties and add both versions to the
+        declared style. In order to avoid properties getting out of sync, 
+        this patch adds few facilities to StylePropertySet to update the
+        prefixed and the unprefixed entries. Finally the style resolution
+        happens only for the prefixed version (to limit the size of this patch)
+        and the unprefixed versions are not resolved. This is to avoid creating
+        the animation objects twice for the resolved style.
+
+        Test : transitions/transitions-parsing.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore):
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::addPropertyWithPrefixingVariant): Always add the
+        prefixed and the unprefixed property even if only one is specified.
+        (WebCore):
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseTransitionShorthand): Add both prefixed and
+        unprefixed longhands to the declarated style.
+        (WebCore::CSSParser::parseAnimationProperty):
+        * css/CSSParser.h:
+        (CSSParser):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/CSSProperty.h:
+        (WebCore:: prefixingVariantForPropertyId): This function takes a given
+        property id and returns its prefixed or unprefixed id if it exists. If
+        not it returns the same id.
+        (WebCore):
+        * css/CSSPropertyNames.in:
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::getPropertyValue):
+        (WebCore::StylePropertySet::removeShorthandProperty):
+        (WebCore::StylePropertySet::removeProperty):
+        (WebCore::StylePropertySet::removeProperty): Remove
+        also the prefixed or unprefixed shorthand if it exists.
+        (WebCore):
+        (WebCore::StylePropertySet::setProperty):
+        (WebCore::StylePropertySet:: appendPrefixingVariantProperty):
+        (WebCore::StylePropertySet::setPrefixingVariantProperty): If it
+        exists a unprefixed or prefixed counterpart of the property we're
+        trying to set, then we update the other one.
+        (WebCore::StylePropertySet::asText):
+        (WebCore::StylePropertySet::mergeAndOverrideOnConflict):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+        * css/StylePropertyShorthand.cpp:
+        (WebCore::transitionShorthand):
+        (WebCore):
+        (WebCore::shorthandForProperty): Define the transitions unprefixed
+        longhands.
+        * css/StylePropertyShorthand.h:
+        (WebCore):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::applyProperty): StyleBuilder will handle the
+        resolution and the creation of the animations for the style. As the
+        declarated style now contains declarations for the prefixed and
+        unprefixed property we do not want to resolve two times and create duplicate animations.
+        Therefore when we try to resolve the unprefixed version we just bail out.
+
 2013-03-04  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: CPU Flame Chart: reveal profiler DataGrid node when user clicks on a FlameChart item.
