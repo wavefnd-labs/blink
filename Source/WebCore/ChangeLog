@@ -1,3 +1,30 @@
+2013-03-04  Mike West  <mkwst@chromium.org>
+
+        XSSAuditor should strip dangerous attributes from SMIL animation elements.
+        https://bugs.webkit.org/show_bug.cgi?id=111071
+
+        Reviewed by Adam Barth.
+
+        SMIL animation elements can, amusingly enough, animate the 'href' of a
+        link. This patch teaches XSSAuditor how to deal with the
+        semicolon-separated 'animation[values]' attribute in order to ensure
+        that it doesn't contain JavaScript URLs that could be animated into
+        place for an unsuspecting user to click on.
+
+        Test: http/tests/security/xssAuditor/svg-animate.html
+
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::isSemicolonSeparatedAttribute): Added.
+            This returns true if the given attribute is SVGNames::valuesAttr,
+            but makes it possible to easily extend the list with additional
+            attributes with this strange property.
+        (WebCore::semicolonSeparatedValueContainsJavaScriptURL): Added.
+            Given a semicolon-separated string, determine if it contains any
+            JavaScript URLs.
+        (WebCore::XSSAuditor::eraseDangerousAttributesIfInjected):
+            When looking for dangerousness, determine whether or not we should
+            be comparing against each member of a semicolon-separated list.
+
 2013-03-04  Arvid Nilsson  <anilsson@rim.com>
 
         [BlackBerry] New files for BlackBerry::Platform::Graphics::GraphicsContext integration
