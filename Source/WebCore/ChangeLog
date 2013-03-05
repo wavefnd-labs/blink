@@ -1,3 +1,55 @@
+2013-03-04  Alexey Proskuryakov  <ap@apple.com>
+
+        Make AsyncFileReader work without ScriptExecutionContext
+        https://bugs.webkit.org/show_bug.cgi?id=111376
+
+        Reviewed by Anders Carlsson.
+
+        * WebCore.xcodeproj/project.pbxproj: Added MainThreadTask.h.
+
+        * dom/ScriptExecutionContext.cpp:
+        * dom/ScriptExecutionContext.h:
+        Removed fileThread(). Creating a thread for every context that acesses files appears
+        wasteful and unnecessary.
+
+        * fileapi/AsyncFileStream.h:
+        * fileapi/AsyncFileStream.cpp:
+        (WebCore::createFileThread): FileThread is now a singleton.
+        (WebCore::fileThread): Ditto.
+        (WebCore::AsyncFileStream::AsyncFileStream):
+        (WebCore::AsyncFileStream::create):
+        (WebCore::didStart):
+        (WebCore::AsyncFileStream::startOnFileThread):
+        (WebCore::AsyncFileStream::stop):
+        (WebCore::derefProxyOnMainThread):
+        (WebCore::AsyncFileStream::stopOnFileThread):
+        (WebCore::didGetSize):
+        (WebCore::AsyncFileStream::getSizeOnFileThread):
+        (WebCore::didOpen):
+        (WebCore::AsyncFileStream::openForReadOnFileThread):
+        (WebCore::AsyncFileStream::openForWriteOnFileThread):
+        (WebCore::didRead):
+        (WebCore::AsyncFileStream::readOnFileThread):
+        (WebCore::didWrite):
+        (WebCore::AsyncFileStream::writeOnFileThread):
+        (WebCore::didTruncate):
+        (WebCore::AsyncFileStream::truncateOnFileThread):
+        Use callOnMainThread() instead of posting messages through a context. We never used
+        other threads, and don't plan to.
+
+        * loader/ResourceLoader.cpp:
+        * loader/ResourceLoader.h:
+        We no longer need this pseudo-client call to create an AsyncFileStream, now that
+        we don't need to get a ScriptExecutionContext somewhere.
+
+        * platform/MainThreadTask.h: Added. This implements callOnMainThread with multiple
+        strongly typed arguments. Closely based on CrossThreadTask.h.
+
+        * platform/network/BlobResourceHandle.cpp:
+        (WebCore::BlobResourceHandle::BlobResourceHandle): Create AsyncFileStream directly.
+
+        * platform/network/ResourceHandleClient.h: Removed createAsyncFileStream().
+
 2013-03-05  Jessie Berlin  <jberlin@apple.com>
 
         Update the localizable strings file.
