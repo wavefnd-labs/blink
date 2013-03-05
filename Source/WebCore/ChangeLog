@@ -1,3 +1,92 @@
+2013-03-05  Mark Lam  <mark.lam@apple.com>
+
+        Improve robustness of WebSQL quota management.
+        https://bugs.webkit.org/show_bug.cgi?id=110600.
+
+        Reviewed by Geoffrey Garen.
+
+        1. Introduced the OriginLock for synchronizing write access to the
+           database origin directory. This allows us to more accurately
+           compute the disk usage.
+
+           The OriginLock uses a mutex to provide mutual exclusion between
+           threads and a file lock for mutual exclusion between processes.
+           The file lock part is conditional on USE(FILE_LOCK).
+
+           The mutex mutual exclusion also serves to ensure that only 1 thread
+           can write to a sqlite database at one time.
+
+        2. Change the SQLTransactionCoordinator to only allow one write
+           transaction to an origin instead of one write transaction per
+           database. This is needed in order to accurately compute the
+           disk usage. It is also necessary so that the OriginLock does not
+           deadlock itself (as would be the case if concurrent write transactions
+           to different databases in the same origin are allowed).
+
+        3. Fix DatabaseTracker::getMaxSizeForDatabase() to check for when
+           disk usage may exceed the quota, and ensure that we will return
+           an appropriate max database size.
+
+           Disk usage can exceed the usage if it is already near the quota limit
+           but have not exceeded it yet. If a new database is opened in that
+           origin, it may bump the usage above the quota, but should not
+           continually repeat this. Subsequent attempts to open a database
+           will find that the quota is already exhausted and fail.
+
+           There is still a race condition pertaining to the tracker database
+           getting out of sync that may still enable runaway growth in the
+           database sizes. That issue only manifest in a multi-process
+           environment, and will be fixed in another changeset.
+
+        4. Fixed a bug in SQLStatement to check if the errorCallback exists
+           before invoking it.
+
+        No new layout tests. A quota-test.html was attached to bugzilla for manual
+        testing of multi-tab concurrent consumption of storage resource, and also
+        to test handling situations when the user deletes the database files while
+        the script is still using the database.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Modules/webdatabase/DatabaseTracker.cpp:
+        (WebCore::DatabaseTracker::getMaxSizeForDatabase):
+        (WebCore::DatabaseTracker::originLockFor):
+        (WebCore::DatabaseTracker::deleteOriginLockFor):
+        (WebCore::DatabaseTracker::deleteOrigin):
+        * Modules/webdatabase/DatabaseTracker.h:
+        * Modules/webdatabase/OriginLock.cpp: Added.
+        (WebCore::OriginLock::lockFileNameForPath):
+        (WebCore::OriginLock::OriginLock):
+        (WebCore::OriginLock::~OriginLock):
+        (WebCore::OriginLock::lock):
+        (WebCore::OriginLock::unlock):
+        * Modules/webdatabase/OriginLock.h: Added.
+        * Modules/webdatabase/SQLStatement.cpp:
+        (WebCore::SQLStatement::performCallback):
+        * Modules/webdatabase/SQLTransactionBackend.cpp:
+        (WebCore::SQLTransactionBackend::doCleanup):
+        (WebCore::SQLTransactionBackend::computeNextStateAndCleanupIfNeeded):
+        (WebCore::SQLTransactionBackend::openTransactionAndPreflight):
+        (WebCore::SQLTransactionBackend::postflightAndCommit):
+        (WebCore::SQLTransactionBackend::cleanupAfterTransactionErrorCallback):
+        (WebCore::SQLTransactionBackend::acquireOriginLock):
+        (WebCore::SQLTransactionBackend::releaseOriginLockIfNeeded):
+        * Modules/webdatabase/SQLTransactionBackend.h:
+        (SQLTransactionBackend):
+        * Modules/webdatabase/SQLTransactionCoordinator.cpp:
+        (WebCore::getDatabaseIdentifier):
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * config.h:
+        * platform/FileSystem.h:
+        * platform/posix/FileSystemPOSIX.cpp:
+        (WebCore::lockFile):
+        (WebCore::unlockFile):
+
 2013-03-05  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: move PopoverContentHelper from TimelinePresentationModel.js to Popover.js.

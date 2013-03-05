@@ -1,3 +1,27 @@
+2013-03-05  Mark Lam  <mark.lam@apple.com>
+
+        Improve robustness of WebSQL quota management.
+        https://bugs.webkit.org/show_bug.cgi?id=110600.
+
+        Reviewed by Geoffrey Garen.
+
+        * storage/websql/multiple-databases-garbage-collection.js:
+        - This test runs 2 transactions on 2 databases (1 each). The 2 databases
+          are named "persistent" and "forgotten". The test executes the
+          transaction on "persistent" first, but expects the transaction on
+          "forgotten" to finish first. This is because "forgotten"'s transaction
+          is a smaller one. The new changes to SQLTransactionCoordinator now
+          ensures that a write transaction must completes before another is
+          started for databases in the same origin. Hence, the previously expected
+          result will no longer be true.
+
+          Regardless, the purpose of the test is not to test the order of
+          completion but that resources are reclaimed. So, I'm changing the test
+          to start the "forgotten" transaction first followed by the "persistent"
+          transaction. This ensures that the test will yield consistent results
+          even when run on ports that may allow more than one write transaction
+          to run at the same time.
+
 2013-03-05  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: remove length parameter from Parse HTML timeline event
