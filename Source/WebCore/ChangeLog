@@ -1,3 +1,58 @@
+2013-03-04  Chris Fleizach  <cfleizach@apple.com>
+
+        AX: cellForColumnAndRow fails for tables with hidden table cells
+        https://bugs.webkit.org/show_bug.cgi?id=110050
+
+        Reviewed by Tim Horton.
+
+        If a table had hidden cells, then accessibility code was being confused in a few ways.
+        1) The cellForColumnAndRow method would return the wrong information since that was
+           using the RenderTableSection to retrieve a cell, which did not have the same data as the AXTable
+        2) The way we were adding children made it impossible to determine column and row range because we 
+           would skip rows that had hidden children
+        3) AccessibilityARIAGrid and AccessibilityTable were using different methods for cellForColumnAndRow
+
+        The fix does a few things to make things right:
+        1) Always add an accessibility row, even if there are no visible cells in that row.
+        2) Have one method for AXTable and AXARIAGrid for cellForColumnAndRow.
+        3) Change cellForColumnAndRow to query the accessibility children rather than the RenderTableSection in determining the row, col info.
+        4) cellForColumnAndRow should use unsigned values instead of int values.
+
+        Test: accessibility/table-with-hidden-head-section.html
+
+        * accessibility/AccessibilityARIAGrid.cpp:
+        (WebCore):
+        * accessibility/AccessibilityARIAGrid.h:
+        (AccessibilityARIAGrid):
+        * accessibility/AccessibilityARIAGridCell.cpp:
+        (WebCore::AccessibilityARIAGridCell::rowIndexRange):
+        (WebCore::AccessibilityARIAGridCell::columnIndexRange):
+        * accessibility/AccessibilityARIAGridCell.h:
+        (AccessibilityARIAGridCell):
+        * accessibility/AccessibilityTable.cpp:
+        (WebCore::AccessibilityTable::addChildren):
+        (WebCore::AccessibilityTable::cellForColumnAndRow):
+        * accessibility/AccessibilityTable.h:
+        (WebCore):
+        (AccessibilityTable):
+        * accessibility/AccessibilityTableCell.cpp:
+        (WebCore::AccessibilityTableCell::rowIndexRange):
+        (WebCore::AccessibilityTableCell::columnIndexRange):
+        * accessibility/AccessibilityTableCell.h:
+        (AccessibilityTableCell):
+        * accessibility/atk/WebKitAccessibleInterfaceTable.cpp:
+        (webkitAccessibleTableGetColumnAtIndex):
+        (webkitAccessibleTableGetRowAtIndex):
+        (webkitAccessibleTableGetColumnExtentAt):
+        (webkitAccessibleTableGetRowExtentAt):
+        (webkitAccessibleTableGetColumnHeader):
+        (webkitAccessibleTableGetRowHeader):
+        * accessibility/mac/WebAccessibilityObjectWrapperMac.mm:
+        (-[WebAccessibilityObjectWrapper accessibilityAttributeValue:]):
+        * rendering/RenderTableSection.h:
+        (RenderTableSection):
+        (WebCore::RenderTableSection::rowRendererAt):
+
 2013-03-04  Arpita Bahuguna  <a.bah@samsung.com>
 
         getAttribute does not behave correctly for mixed-case attributes on HTML elements
