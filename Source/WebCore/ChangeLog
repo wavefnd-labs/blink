@@ -1,3 +1,147 @@
+2013-03-04  David Hyatt  <hyatt@apple.com>
+
+        [New Multicolumn] Autogenerate regions for columns.
+        https://bugs.webkit.org/show_bug.cgi?id=111363
+
+        Reviewed by Dean Jackson.
+
+        In CSS Regions, we lay out the regions first, and then
+        we put the flow thread into the regions. This model doesn't
+        really work for multicolumn layout, which needs to be able
+        to auto-generate new regions lazily in response to the flow
+        thread asking for regions at particular offsets.
+
+        With the multi-column model, where the regions can't just occur
+        anywhere, its ok not to lay them out before the flow thread, as
+        long as we have at least given them the correct size.
+        
+        This patch changes the layout algorithm for columns to:
+        (1) Size any existing regions (without worrying about placement).
+        (2) Lay out the flow thread (generating and sizing regions lazily
+        that need to be created).
+        (3) Lay out the regions (to give them correct placement and to
+        compute overflow correctly for the multi-column block that contains
+        the regions).
+
+        There are no new tests, since there are no behavioral changes. This
+        is just groundwork for being able to add new sets in response to
+        spans, balancing, and nested pagination contexts.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::determineLogicalLeftPositionForChild):
+        (WebCore::RenderBlock::layoutBlockChild):
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        Since we want to be able to call determineLogicalLeftPositionForChild
+        to place the flow thread properly, and we don't want to apply a layout
+        delta (flow threads repaint themselves), we parameterize the method
+        here so that it can be called without applying a layout delta.
+        
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::addRegionToThread):
+        (WebCore::RenderFlowThread::removeRegionFromThread):
+        These methods are only used by RenderMultiColumnFlowThread, since
+        RenderNamedFlowThread overrides them. Remove the code that invalidates
+        the flow threads region set as regions come and go, since that is now
+        going to be expected with auto-generation.
+
+        (WebCore::RenderFlowThread::validateRegions):
+        Refactor the code in RenderFlowThread::layout that validates the regions
+        into its own method, so that we can re-validate regions at any time
+        after generating new ones.
+        
+        (WebCore::RenderFlowThread::layout):
+        Changed to move the region validation code into its own function that is
+        now called from here.
+
+        (WebCore::RenderFlowThread::updateLogicalWidth):
+        Don't assert if a region set needs layout.
+
+        (WebCore::RenderFlowThread::computeLogicalHeight):
+        Ditto. Don't assert if a region set needs layout. That's expected now.
+
+        (WebCore::RenderFlowThread::regionAtBlockOffset):
+        Add code to regionAtBlockOffset to auto-generate regions up to
+        the offset. This ensures the region that is being asked for
+        exists.
+
+        (WebCore::RenderFlowThread::pageLogicalTopForOffset):
+        (WebCore::RenderFlowThread::pageLogicalWidthForOffset):
+        (WebCore::RenderFlowThread::pageLogicalHeightForOffset):
+        (WebCore::RenderFlowThread::pageRemainingLogicalHeightForOffset):
+        These functions are no longer const, since the act of asking for
+        pagination offsets can cause us to generate new regions.
+
+        (WebCore::RenderFlowThread::mapFromFlowToRegion):
+        Modified to turn auto-generation off, since this is not really
+        a "layout-time" function.
+
+        (WebCore::RenderFlowThread::logicalWidthChangedInRegions):
+        Modified to not assert if a region set needs layout, since that is
+        expected now.
+
+        * rendering/RenderFlowThread.h:
+        Changes to remove const from the methods that can trigger region
+        auto-generation.
+
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::RenderMultiColumnBlock::styleDidChange):
+        Make sure to propagate style changes down into the regions. I don't know
+        of any correctness bugs around this, but I figured I'd be thorough.
+
+        (WebCore::RenderMultiColumnBlock::checkForPaginationLogicalHeightChange):
+        We no longer build a column set aggressively. We wait for the flow thread
+        to ask us for a region at a particular offset, and only then do we
+        build the set.
+        
+        (WebCore::RenderMultiColumnBlock::addChild):
+        Now that we lay out the flow thread as a special excluded child, we don't
+        care about the ordering of it relative to the region children.
+
+        (WebCore::RenderMultiColumnBlock::layoutSpecialExcludedChild):
+        We now lay out the flow thread as a special excluded child (like the legend
+        of a fieldset).
+
+        * rendering/RenderMultiColumnBlock.h:
+        (RenderMultiColumnBlock):
+        Add new overrides like layoutSpecialExcludedChild.
+        
+        * rendering/RenderMultiColumnFlowThread.cpp:
+        (WebCore::RenderMultiColumnFlowThread::initialLogicalWidth):
+        Set the flow thread to the initial column width even when no regions exist
+        yet. This way we ensure the width is right even when we don't have any
+        regions yet.
+
+        (WebCore::RenderMultiColumnFlowThread::autoGenerateRegionsToBlockOffset):
+        This method handles autogenerating the new region for a given offset.
+        Right now it's simplistic, since we only have one column set. This method
+        will be enhanced in future patches when we start supporting multiple column
+        sets.
+
+        * rendering/RenderMultiColumnFlowThread.h:
+        (RenderMultiColumnFlowThread):
+        Adding new method declarations like autoGenerateRegionsToBlockOffset.
+
+        * rendering/RenderMultiColumnSet.cpp:
+        (WebCore::RenderMultiColumnSet::updateLogicalWidth):
+        Since regions lay out after flow threads, we don't need to make 
+        setFlowThreadPortionRect virtual any longer. We can just get our column set's
+        width correct immediately. This is the same logic, just moved into updateLogicalWidth().
+
+        * rendering/RenderMultiColumnSet.h:
+        Remove setFlowThreadPortionRect override, since the function can just be simple
+        and non-virtual in RenderRegion now.
+
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::layoutBlock):
+        Don't ever invalidate region sets in response to our size changing during layout. Since
+        our size is always determined outside of layout now, we don't need to do any of
+        these checks.
+
+        * rendering/RenderRegion.h:
+        (WebCore::RenderRegion::setFlowThreadPortionRect):
+        Changed to be non-virtual now that RenderMultiColumnSet doesn't need to override.
+
 2013-03-04  Alexey Proskuryakov  <ap@apple.com>
 
         Make AsyncFileReader work without ScriptExecutionContext
