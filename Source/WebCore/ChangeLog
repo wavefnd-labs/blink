@@ -1,3 +1,105 @@
+2013-03-05  Gwang Yoon Hwang  <ryumiel@company100.net>
+
+        Coordinated Graphics: CoordinatedGraphicsLayer makes CoordinatedGraphicsScene perform via CoordinatedGraphicsState.
+        https://bugs.webkit.org/show_bug.cgi?id=108294
+
+        Reviewed by Anders Carlsson.
+
+        CoordinatedLayerTreeHostProxy has too many IPC messages (e.g. SyncCanvas and
+        CreateTile), and there is a long function chain from CoordinatedGraphicsLayer to
+        CoordinatedGraphicsScene (4 classes).
+        If we want to add a new message, we need to add similar functions into 4 classes.
+
+        Now CoordinatedLayerTreeHost has only one IPC message for CoordinatedGraphicsLayer:
+        CommitCoordinatedGraphicsState.
+        CoordinatedGraphicsLayer makes CoordinatedGraphicsScene run as follows:
+        1. CoordinatedGraphicsLayer makes a CoordinatedGraphicsLayerState.
+        2. CoordinatedLayerTreeHost stores all LayerStates.
+        3. CoordinatedLayerTreeHost sends GraphicsState includes LayerStates to CoordinatedLayerTreeHostProxy
+        at the moment of flushing via CommitCoordinatedGraphicsState message.
+        4. CoordinatedGraphicsScene applies all state changes to layers.
+
+        There is one big behavior change. All states changes (e.g.
+        UpdateTiles, SetLayerChildren, and etc..) are performed at the same time, when
+        CoordinatedGraphicsScene::commitCoordinatedGraphicsState is called.
+
+        This patch is based on Dongsung Huang, and Noam's work in
+        https://bugs.webkit.org/show_bug.cgi?id=108294
+
+        No new tests, covered by existing tests.
+
+        * Target.pri:
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.cpp:
+        (WebCore::CoordinatedGraphicsLayer::setPosition):
+        (WebCore::CoordinatedGraphicsLayer::setAnchorPoint):
+        (WebCore::CoordinatedGraphicsLayer::setSize):
+        (WebCore::CoordinatedGraphicsLayer::setTransform):
+        (WebCore::CoordinatedGraphicsLayer::setChildrenTransform):
+        (WebCore::CoordinatedGraphicsLayer::setPreserves3D):
+        (WebCore::CoordinatedGraphicsLayer::setMasksToBounds):
+        (WebCore::CoordinatedGraphicsLayer::setDrawsContent):
+        (WebCore::CoordinatedGraphicsLayer::setContentsVisible):
+        (WebCore::CoordinatedGraphicsLayer::setContentsOpaque):
+        (WebCore::CoordinatedGraphicsLayer::setBackfaceVisibility):
+        (WebCore::CoordinatedGraphicsLayer::setOpacity):
+        (WebCore::CoordinatedGraphicsLayer::setContentsRect):
+        (WebCore::CoordinatedGraphicsLayer::setFilters):
+        (WebCore::CoordinatedGraphicsLayer::setContentsToSolidColor):
+        (WebCore::CoordinatedGraphicsLayer::setShowDebugBorder):
+        (WebCore::CoordinatedGraphicsLayer::setShowRepaintCounter):
+        (WebCore::CoordinatedGraphicsLayer::setMaskLayer):
+        (WebCore::CoordinatedGraphicsLayer::setReplicatedByLayer):
+        (WebCore::CoordinatedGraphicsLayer::setFixedToViewport):
+        (WebCore::CoordinatedGraphicsLayer::syncChildren):
+        (WebCore::CoordinatedGraphicsLayer::syncFilters):
+        (WebCore::CoordinatedGraphicsLayer::syncImageBacking):
+        (WebCore::CoordinatedGraphicsLayer::syncLayerState):
+        (WebCore::CoordinatedGraphicsLayer::setDebugBorder):
+        (WebCore::CoordinatedGraphicsLayer::syncAnimations):
+        (WebCore::CoordinatedGraphicsLayer::syncCanvas):
+        (WebCore::CoordinatedGraphicsLayer::destroyCanvasIfNeeded):
+        (WebCore::CoordinatedGraphicsLayer::createCanvasIfNeeded):
+        (WebCore::CoordinatedGraphicsLayer::flushCompositingStateForThisLayerOnly):
+        (WebCore::CoordinatedGraphicsLayer::resetLayerState):
+        (WebCore):
+        (WebCore::CoordinatedGraphicsLayer::releaseImageBackingIfNeeded):
+        (WebCore::CoordinatedGraphicsLayer::setRootLayer):
+        (WebCore::CoordinatedGraphicsLayer::tiledBackingStorePaintEnd):
+        (WebCore::CoordinatedGraphicsLayer::createTile):
+        (WebCore::CoordinatedGraphicsLayer::updateTile):
+        (WebCore::CoordinatedGraphicsLayer::removeTile):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.h:
+        (CoordinatedGraphicsLayerClient):
+        (CoordinatedGraphicsLayer):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.cpp:
+        (WebCore::CoordinatedGraphicsScene::createCanvasIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::syncCanvasIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::destroyCanvasIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::setLayerRepaintCountIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::setLayerChildrenIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::setLayerFiltersIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::setLayerState):
+        (WebCore::CoordinatedGraphicsScene::deleteLayer):
+        (WebCore::CoordinatedGraphicsScene::createTilesIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::removeTilesIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::updateTilesIfNeeded):
+        (WebCore::CoordinatedGraphicsScene::assignImageBackingToLayer):
+        (WebCore::CoordinatedGraphicsScene::commitSceneState):
+        (WebCore::CoordinatedGraphicsScene::setLayerAnimationsIfNeeded):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.h:
+        (WebCore):
+        (CoordinatedGraphicsScene):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsState.h: Added.
+        (WebCore):
+        (TileUpdateInfo):
+        (TileCreationInfo):
+        (WebCore::CoordinatedGraphicsLayerState::CoordinatedGraphicsLayerState):
+        (CoordinatedGraphicsLayerState):
+        (CoordinatedGraphicsState):
+        * platform/graphics/texmap/coordinated/CoordinatedImageBacking.h:
+        * platform/graphics/texmap/coordinated/CoordinatedLayerInfo.h: Removed.
+        * platform/graphics/texmap/coordinated/SurfaceUpdateInfo.h:
+
 2013-03-05  Roger Fong  <roger_fong@apple.com>
 
         Unreviewed. AppleWin VS2010 build fix.
