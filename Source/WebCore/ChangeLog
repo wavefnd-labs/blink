@@ -1,3 +1,44 @@
+2013-03-05  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Add parsing for grid-{end|after}
+        https://bugs.webkit.org/show_bug.cgi?id=111372
+
+        Reviewed by Tony Chang.
+
+        Test: fast/css-grid-layout/grid-item-end-after-get-set.html
+
+        This change adds the proper support for grid-{end|after}. It doesn't update
+        grid-{row|column} to be a shorthand for both grid-{before|start} and grid-{after|end}
+        though.
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        Added the new properties to our known properties. Also added
+        support for getComputedStyle.
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        Added parsing for the new properties.
+
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        The new properties are not inherited.
+
+        * css/CSSPropertyNames.in:
+        Added the new properties.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::applyProperty):
+        Added code to handle applying them to our style.
+
+        * rendering/style/RenderStyle.h:
+        * rendering/style/StyleGridItemData.cpp:
+        (WebCore::StyleGridItemData::StyleGridItemData):
+        * rendering/style/StyleGridItemData.h:
+        (WebCore::StyleGridItemData::operator==):
+        (StyleGridItemData):
+        Updated our representation to store the new properties.
+
 2013-03-05  Andrey Kosyakov  <caseq@chromium.org>
 
         Unreviewed follow-up to r144756, fix broken inspector-less build.
