@@ -1,3 +1,25 @@
+2013-03-05  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Remove some unused binding code
+        https://bugs.webkit.org/show_bug.cgi?id=111463
+
+        Reviewed by Adam Barth.
+
+        IDBRequest got a custom V8 getter for |request| to help diagnose an issue, but the
+        root cause was found/fixed (http://wkbug.com/110916 and http://wkbug.com/110206) so
+        remove it. Also, IDBKey was marked ScriptWrappable but it is now explicitly converted
+        to a ScriptValue before it gets anywhere near the binding code, so remove that too.
+        Finally, createIDBKeyFromValue doesn't need to be exposed from IDBBindingUtilities.
+
+        No new tests - just removing dead code.
+
+        * Modules/indexeddb/IDBKey.h: No need for ScriptWrappable.
+        * Modules/indexeddb/IDBRequest.idl: Remove custom binding (root cause of bug found).
+        * WebCore.gypi: Ditto.
+        * bindings/js/IDBBindingUtilities.h: Don't expose internal createIDBKeyFromValue().
+        * bindings/v8/IDBBindingUtilities.h: Ditto.
+        * bindings/v8/custom/V8IDBRequestCustom.cpp: Removed.
+
 2013-03-05  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r144798.
