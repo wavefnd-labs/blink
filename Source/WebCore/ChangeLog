@@ -1,3 +1,33 @@
+2013-03-05  Andrei Bucur  <abucur@adobe.com>
+
+        [CSS Regions] Crash when MathML used in CSS Regions
+        https://bugs.webkit.org/show_bug.cgi?id=110686
+
+        Reviewed by David Hyatt.
+
+        The MathML blocks trigger a children layout when computing the preferred widths. This happens to determine the preferred
+        logical heights of the children. When the layout reaches the line boxes computation the preferred width of the containing block
+        is requested. Because it wasn't computed, the layout of the children is started again to determine the preferred logical heights.
+        This causes an infinite recursion and triggers a stack overflow.
+
+        The patch introduces a new RAII utility class that disables fragmentation when the constructor is called and restores it
+        on the destructor. This class is used when computing the preferred height for the children of a MathML block.
+
+        Test: fast/regions/mathml-crash.html
+
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::setFlowThreadStateIncludingDescendants): Do not cross RenderFlowThread boundaries when updating the flow thread
+        state flag. The innermost flow threads need to manage their descendants flag values.
+        * rendering/RenderView.cpp:
+        (WebCore::FragmentationDisabler::FragmentationDisabler):
+        (WebCore):
+        (WebCore::FragmentationDisabler::~FragmentationDisabler):
+        * rendering/RenderView.h:
+        (FragmentationDisabler):
+        (WebCore):
+        * rendering/mathml/RenderMathMLBlock.cpp:
+        (WebCore::RenderMathMLBlock::computeChildrenPreferredLogicalHeights):
+
 2013-03-05  Mike West  <mkwst@chromium.org>
 
         Cleanup: Move HitTestLocation and HitTestResult into separate files.
