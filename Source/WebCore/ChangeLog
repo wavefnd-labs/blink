@@ -1,3 +1,28 @@
+2013-03-05  Mike West  <mkwst@chromium.org>
+
+        Remove redundant code in Document::updateHoverActiveState.
+        https://bugs.webkit.org/show_bug.cgi?id=111303
+
+        Reviewed by Darin Adler.
+
+        Document::updateHoverActiveState currently looks for touchrelease events
+        and explictly clears out the hover state for all nodes between the
+        currently hovered node and the top of the hover chain. This is actually
+        redundant with the logic in the rest of the function; we can simplify by
+        setting the Element* we're working with to 0, which causes the later
+        loops to do the necessary work.
+
+        There should be no web-visible effect from this change; it should simply
+        make this function less complex.
+
+        Extracted from Allan Sandfeld Jensen's original patch to wkbug.com/98168
+
+        * dom/Document.cpp:
+        (WebCore::Document::updateHoverActiveState):
+            Set innerElementInDocument to 0 rather than walking the hover chain
+            and clearing it when we see a touchrelease event. The rest of the
+            code in this function will have the same effect.
+
 2013-03-05  Koji Hara  <kojih@chromium.org>
 
         [V8] Remove unused custom indexedPropertyGetter
