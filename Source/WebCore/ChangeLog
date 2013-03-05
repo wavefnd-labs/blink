@@ -1,3 +1,56 @@
+2013-03-05  Mike West  <mkwst@chromium.org>
+
+        Cleanup: Move HitTestLocation and HitTestResult into separate files.
+        https://bugs.webkit.org/show_bug.cgi?id=111294
+
+        Reviewed by Allan Sandfeld Jensen.
+
+        HitTestLocation and HitTestResult currently both live in
+        HitTestResult.h. That makes things more difficult to understand than
+        they should be, and violates the one-class-one-file principle that
+        WebKit generally follows. Happily, it's fairly trivial to fix.
+
+        This should have no visible change; it's strictly an internal
+        refactoring. It doesn't even touch any implementation code: we're
+        just moving bits from one place to another.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+            Hey, look: a new file! Let's add it to six different build systems! :)
+        * rendering/HitTestLocation.cpp: Added.
+        (WebCore):
+        (WebCore::HitTestLocation::HitTestLocation):
+        (WebCore::HitTestLocation::~HitTestLocation):
+        (WebCore::HitTestLocation::operator=):
+        (WebCore::HitTestLocation::move):
+        (WebCore::HitTestLocation::intersectsRect):
+        (WebCore::HitTestLocation::intersects):
+        (WebCore::HitTestLocation::rectForPoint):
+        * rendering/HitTestLocation.h: Added.
+        (WebCore):
+        (HitTestLocation):
+        (WebCore::HitTestLocation::point):
+        (WebCore::HitTestLocation::roundedPoint):
+        (WebCore::HitTestLocation::region):
+        (WebCore::HitTestLocation::isRectBasedTest):
+        (WebCore::HitTestLocation::isRectilinear):
+        (WebCore::HitTestLocation::boundingBox):
+        (WebCore::HitTestLocation::topPadding):
+        (WebCore::HitTestLocation::rightPadding):
+        (WebCore::HitTestLocation::bottomPadding):
+        (WebCore::HitTestLocation::leftPadding):
+        (WebCore::HitTestLocation::transformedPoint):
+        (WebCore::HitTestLocation::transformedRect):
+        * rendering/HitTestResult.cpp:
+        * rendering/HitTestResult.h:
+            Move all this code from HitTestResult.* to HitTestLocation.*.
+        * rendering/RenderBlock.cpp:
+            Include HitTestLocation.h.
+
 2013-03-05  Jochen Eisinger  <jochen@chromium.org>
 
         Refactor UserGestureIndicator::Token to be a top-level class
