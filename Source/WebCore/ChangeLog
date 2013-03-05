@@ -1,3 +1,102 @@
+2013-03-05  Bem Jones-Bey  <bjonesbe@adobe.com>
+
+        [CSS Exclusions] shape-outside on floats for polygon shapes
+        https://bugs.webkit.org/show_bug.cgi?id=98676
+
+        Reviewed by David Hyatt.
+
+        Implement support for polygonal shape-outside on floats. The basic
+        tack taken here is to keep using the bounding box of the shape to
+        position the float, but to compute the offset (caused by the shape)
+        from the bounding box for each line when creating and positioning
+        other inline content.
+
+        Test: fast/exclusions/shape-outside-floats/shape-outside-floats-simple-polygon.html
+
+        * rendering/ExclusionShapeInfo.cpp:
+        (WebCore):
+        (WebCore::::computedShape): Add new template parameter.
+        (WebCore::::logicalTopOffset): Add new template parameter.
+        (WebCore::::computeSegmentsForLine): Move here from
+            ExclusionShapeInsideInfo, since ExclusionShapeOutsideInfo needs it
+            as well. Make virtual since there is slightly different behavior
+            between each class even though the vast majority of the code is
+            common.
+        * rendering/ExclusionShapeInfo.h:
+        (WebCore):
+        (WebCore::ExclusionShapeInfo::~ExclusionShapeInfo): Since
+            computeSegmentsForLine is virtual, the destructor must be virtual
+            as well.
+        (ExclusionShapeInfo): Add new data members to support
+            computeSegmentsForLine.
+        (WebCore::ExclusionShapeInfo::shapeLogicalRight): Fix bug, the logical
+            right is based off of maxX, not y. (it's a logical bounding box!)
+        (WebCore::ExclusionShapeInfo::logicalLineTop): Moved from
+            ExclusionShapeInsideInfo for use by computeSegmentsForLine and
+            lineOverlapsShapeBounds.
+        (WebCore::ExclusionShapeInfo::logicalLineBottom): Moved from
+            ExclusionShapeInsideInfo for use by computeSegmentsForLine and
+            lineOverlapsShapeBounds.
+        (WebCore::ExclusionShapeInfo::lineOverlapsShapeBounds): Moved from
+            ExclusionShapeInsideInfo for use by computeSegmentsForLine.
+        * rendering/ExclusionShapeInsideInfo.cpp: Moved common code from
+            computeSegmentsForLine into ExclusionShapeInfo.
+        * rendering/ExclusionShapeInsideInfo.h:
+        (WebCore): Moved some methods to ExclusionShapeInfo.
+        (ExclusionShapeInsideInfo): Update for new template parameter.
+        (WebCore::ExclusionShapeInsideInfo::compyteSegmentsForLine): Override
+            superclass method to clear the segment ranges. Segement ranges
+            aren't used by shape outside, and have some complex dependencies
+            that make it very hard to try and move up into ExclusionShapeInfo.
+        (WebCore::ExclusionShapeInsideInfo::ExclusionShapeInsideInfo): Update
+            for new template parameter.
+        * rendering/ExclusionShapeOutsideInfo.cpp:
+        (WebCore::ExclusionShapeOutsideInfo::isEnabledFor): Add polygons as a
+            supported shape.
+        (WebCore::ExclusionShapeOutsideInfo::computeSegmentsForLine): Override
+            superclass method to not recompute if it isn't needed (this isn't
+            straightfoward for shape inside, which is why it isn't common),
+            and to save the left and right offsets caused by the shape
+            outside, since that's all that is needed to properly do layout in
+            the case of floats.
+        * rendering/ExclusionShapeOutsideInfo.h:
+        (WebCore::ExclusionShapeOutsideInfo::shapeLogicalOffset): Reformat to
+            be on a single line, like most other methods of it's type in
+            WebKit headers.
+        (ExclusionShapeOutsideInfo): Update for new template parameter.
+        (WebCore::ExclusionShapeOutsideInfo::logicalLeftOffsetForLine):
+            Accessor method to get the left offset between the shape and the
+            shape's bounding box.
+        (WebCore::ExclusionShapeOutsideInfo::logicalRightOffsetForLine):
+            Accessor method to get the left offset between the shape and the
+            shape's bounding box.
+        (WebCore::ExclusionShapeOutsideInfo::ExclusionShapeOutsideInfo):
+            Update for new template parameter.
+        * rendering/RenderBlock.cpp:
+        (WebCore::::collectIfNeeded): Save the last float encountered so that
+            the shape outside offset can be accounted for.
+        (WebCore::RenderBlock::logicalLeftOffsetForLine): Account for the
+            shape outside offset on the outermost float.
+        (WebCore::RenderBlock::logicalRightOffsetForLine): Account for the
+            shape outside offset on the outermost float.
+        * rendering/RenderBlock.h:
+        (WebCore::RenderBlock::FloatIntervalSearchAdapter::FloatIntervalSearchAdapter):
+            Initialize the lastFloat member.
+        (WebCore::RenderBlock::FloatIntervalSearchAdapter::lastFloat): Get the
+            last float encountered.
+        (FloatIntervalSearchAdapter): Add a pointer to the last float
+            encountered. Note that the variable is mutable because
+            collectIfNeeded is declared as a const method even though it isn't
+            (it uses loopholes to update m_offset and m_heightRemaining).
+            Instead of trying to come up with a hack to stick with the
+            loopholes, I decided to be explicit about it.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::LineWidth::shrinkAvailableWidthForNewFloatIfNeeded): Take
+            into account the offset from any polygonal shape outside.
+        (WebCore::RenderBlock::LineBreaker::nextSegmentBreak): Add a FIXME
+            because the current code will not work properly with stacked
+            floats that have polygonal shape outside.
+
 2013-03-04  David Hyatt  <hyatt@apple.com>
 
         [New Multicolumn] Autogenerate regions for columns.
