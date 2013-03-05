@@ -1,3 +1,45 @@
+2013-03-05  David Kilzer  <ddkilzer@apple.com>
+
+        BUILD FIX (r144727): Change type of columnRange and rowRange to pair<unsigned, unsigned>
+        <http://webkit.org/b/110050>
+
+        Fixes the following build failures:
+
+            Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:741:30: error: non-const lvalue reference to type 'pair<unsigned int, unsigned int>' cannot bind to a value of unrelated type 'pair<int, int>'
+                tableCell->rowIndexRange(rowRange);
+                                         ^~~~~~~~
+            In file included from Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:33:
+            Source/WebCore/accessibility/AccessibilityTableCell.h:47:58: note: passing argument to parameter 'rowRange' here
+                virtual void rowIndexRange(pair<unsigned, unsigned>& rowRange);
+                                                                     ^
+            Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:742:33: error: non-const lvalue reference to type 'pair<unsigned int, unsigned int>' cannot bind to a value of unrelated type 'pair<int, int>'
+                tableCell->columnIndexRange(columnRange);
+                                            ^~~~~~~~~~~
+            In file included from Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:33:
+            Source/WebCore/accessibility/AccessibilityTableCell.h:49:61: note: passing argument to parameter 'columnRange' here
+                virtual void columnIndexRange(pair<unsigned, unsigned>& columnRange);
+                                                                        ^
+            Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:804:30: error: non-const lvalue reference to type 'pair<unsigned int, unsigned int>' cannot bind to a value of unrelated type 'pair<int, int>'
+                tableCell->rowIndexRange(rowRange);
+                                         ^~~~~~~~
+            In file included from Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:33:
+            Source/WebCore/accessibility/AccessibilityTableCell.h:47:58: note: passing argument to parameter 'rowRange' here
+                virtual void rowIndexRange(pair<unsigned, unsigned>& rowRange);
+                                                                     ^
+            Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:818:33: error: non-const lvalue reference to type 'pair<unsigned int, unsigned int>' cannot bind to a value of unrelated type 'pair<int, int>'
+                tableCell->columnIndexRange(columnRange);
+                                            ^~~~~~~~~~~
+            In file included from Source/WebCore/accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:33:
+            Source/WebCore/accessibility/AccessibilityTableCell.h:49:61: note: passing argument to parameter 'columnRange' here
+                virtual void columnIndexRange(pair<unsigned, unsigned>& columnRange);
+                                                            ^
+            4 errors generated.
+
+        * accessibility/ios/WebAccessibilityObjectWrapperIOS.mm:
+        (-[WebAccessibilityObjectWrapper accessibilityHeaderElements]):
+        (-[WebAccessibilityObjectWrapper accessibilityRowRange]):
+        (-[WebAccessibilityObjectWrapper accessibilityColumnRange]):
+
 2013-03-04  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: [refactoring] set frame identifiers in timeline records early, do not keep them in event stack
