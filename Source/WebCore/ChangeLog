@@ -1,3 +1,21 @@
+2013-03-05  Otto Derek Cheung  <otcheung@rim.com>
+
+        [BlackBerry] Fix assertion in CookieManager::getBackingStoreCookies
+        https://bugs.webkit.org/show_bug.cgi?id=111468
+
+        Reviewed by Rob Buis.
+        Internally reviewed by Konrad Piascik.
+
+        The assert in getBackingStoreCookies could be giving out false positives now
+        that we have our fixes for cookie loading in PR 286189. The cookie store could
+        be half loaded if the first cookie get/set call happens before the db is fully loaded.
+        A full webkit sync call to reload the database will cause the assert to be hit.
+
+        Safer to flush everything out and try again.
+
+        * platform/blackberry/CookieManager.cpp:
+        (WebCore::CookieManager::getBackingStoreCookies):
+
 2013-03-05  Tony Gentilcore  <tonyg@chromium.org>
 
         CompactHTMLToken does not need an XSSInfo pointer
