@@ -1,3 +1,36 @@
+2013-03-05  Tony Gentilcore  <tonyg@chromium.org>
+
+        CompactHTMLToken does not need an XSSInfo pointer
+        https://bugs.webkit.org/show_bug.cgi?id=111423
+
+        Reviewed by Eric Seidel.
+
+        The CompactHTMLToken should remain as small as possible because it is copied. This shrinks the size by one pointer
+        by moving a relatively uncommon attribute out to its own Vector.
+
+        No new tests because no new functionality.
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::checkThatXSSInfosAreSafeToSendToAnotherThread):
+        (WebCore):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+        * html/parser/BackgroundHTMLParser.h:
+        (BackgroundHTMLParser):
+        * html/parser/CompactHTMLToken.cpp:
+        (SameSizeAsCompactHTMLToken):
+        (WebCore::CompactHTMLToken::isSafeToSendToAnotherThread):
+        * html/parser/CompactHTMLToken.h:
+        (WebCore):
+        (CompactHTMLToken):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        * html/parser/HTMLDocumentParser.h:
+        (ParsedChunk):
+        * html/parser/XSSAuditorDelegate.h:
+        (XSSInfo):
+        (WebCore):
+
 2013-03-05  Anders Carlsson  <andersca@apple.com>
 
         Split StorageEventDispatcher::dispatch into two functions
