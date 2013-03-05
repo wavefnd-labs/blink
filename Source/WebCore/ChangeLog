@@ -1,3 +1,49 @@
+2013-03-04  Chris Rogers  <crogers@google.com>
+
+        Add audio hardware support for multi-channel output by implementing AudioDestinationNode.maxChannelCount
+        https://bugs.webkit.org/show_bug.cgi?id=111385
+
+        Reviewed by James Robinson.
+        
+        See specification details for .maxChannelCount:
+        https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html#AudioDestinationNode
+        
+        * Modules/webaudio/AudioDestinationNode.h:
+        (WebCore::AudioDestinationNode::maxChannelCount):
+        * Modules/webaudio/AudioDestinationNode.idl:
+        * Modules/webaudio/AudioNode.h:
+        Implement .maxChannelCount attribute.
+        
+        (AudioNode):
+        * Modules/webaudio/DefaultAudioDestinationNode.h:
+        * Modules/webaudio/DefaultAudioDestinationNode.cpp:
+        (WebCore::DefaultAudioDestinationNode::initialize):
+        (WebCore::DefaultAudioDestinationNode::createDestination):
+        (WebCore::DefaultAudioDestinationNode::enableInput):
+        Call to createDestination() now takes no argument.
+        Instead we maintain a member variable for the input device ID.
+        (WebCore::DefaultAudioDestinationNode::maxChannelCount):
+        (WebCore::DefaultAudioDestinationNode::setChannelCount):
+        Check port-specific hardware support for maxChannelCount(),
+        and allow setting the channel count based on what the hardware
+        supports.
+        
+        * platform/audio/AudioDestination.h:
+        (AudioDestination):
+        * platform/audio/chromium/AudioDestinationChromium.cpp:
+        (WebCore::AudioDestination::maxChannelCount):
+        (WebCore::AudioDestinationChromium::render):
+        Call into chromium WebKit API: audioHardwareOutputChannels().
+
+        * platform/audio/gstreamer/AudioDestinationGStreamer.cpp:
+        (WebCore::AudioDestination::maxChannelCount):
+        Add basic implementation for maxChannelCount() only supporting stereo output.
+
+        * platform/audio/mac/AudioDestinationMac.cpp:
+        (WebCore::AudioDestination::maxChannelCount):
+        Add basic implementation for maxChannelCount() only supporting stereo output.
+        Later, the mac port can support more than this with some small improvements to AudioDestinationMac.
+
 2013-03-04  Adam Barth  <abarth@webkit.org>
 
         Background HTML parser can rewind the tokenizer after end-of-file
