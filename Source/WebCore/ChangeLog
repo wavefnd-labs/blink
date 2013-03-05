@@ -1,3 +1,37 @@
+2013-03-04  Adam Barth  <abarth@webkit.org>
+
+        Background HTML parser can rewind the tokenizer after end-of-file
+        https://bugs.webkit.org/show_bug.cgi?id=111365
+
+        Reviewed by Eric Seidel.
+
+        Prior to this patch, it was possible to call didFailSpeculation after
+        processing the end-of-file token because checkForSpeculationFailure
+        didn't zero out m_tokenizer in some control paths.
+
+        This patch renames checkForSpeculationFailure to validateSpeculations
+        and ensures that it always takes ownership of the main thread's
+        HTMLTokenizer.
+
+        This patch also adds a number of ASSERTs to make sure the parser state
+        machine stays in the correct configuration (e.g., that we don't have a
+        main thread tokenizer while we're supposed to be tokenizing on the
+        background thread).
+
+        Test: fast/parser/document-write-fighting-eof.html
+
+        * html/parser/BackgroundHTMLInputStream.cpp:
+        (WebCore::BackgroundHTMLInputStream::rewindTo):
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::append):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::validateSpeculations):
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::pumpPendingSpeculations):
+        (WebCore::HTMLDocumentParser::resumeParsingAfterScriptExecution):
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+
 2013-03-04  Tim 'mithro' Ansell  <mithro@mithis.com>
 
         Make sure that clearOwnerNode also clears StyleResolver references (via didMutate).
