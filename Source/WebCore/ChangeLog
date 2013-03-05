@@ -1,3 +1,51 @@
+2013-03-05  Antoine Quint  <graouts@apple.com>
+
+        Web Inspector: allow retrieval of composited layers in a given DOM subtree
+        https://bugs.webkit.org/show_bug.cgi?id=111312
+
+        Introduce the LayerTreeAgent.layersForNode(node) method allowing the front-end
+        to gather all composited layers associated with nodes in the subtree of which
+        the provided node is the root.
+
+        In order to gather the layers in the subtree, we first traverse the node's
+        renderer's RenderObject hierarchy and whenever we encounter a RenderObject
+        that has a RenderLayer, we then traverse that renderLayer's RenderLayer
+        hierarchy. This allows for a quick path through the relevant objects we're
+        gathering.
+
+        Layers gathered will push the node to which they're associated, allowing a
+        nodeId for this layer to be listed in the Layer object sent to the front-end.
+        It is crucial to be able to provide a nodeId as well as a layerId for a Layer
+        object in order to be able to correctly assess mutations in the layer tree.
+        For instance, it is expected that a node's layer be replaced by a new layer
+        to represent a slightly different rendering of its content, but the front-end
+        should be able to represent this layer as an object for which only certain
+        attributes have changed (like the "paintCount" property).
+
+        Layer objects also indicate whether they're associated to a node hosted in a
+        shadow tree (the optional "isInShadowTree" property) in order for the front-end
+        to be able to only show this layer if the option to show nodes hosted in shadow
+        tree is enabled.
+
+        Finally, since we're only gathering composited layers, we're removing the
+        "isLayerComposited" property and removing the optional flag on the "paintCount",
+        "memory" and "compositedBounds" properties.
+
+        Reviewed by Simon Fraser.
+
+        Test: inspector-protocol/layers/layers-for-node.html
+
+        * inspector/Inspector.json:
+        * inspector/InspectorLayerTreeAgent.cpp:
+        (WebCore::InspectorLayerTreeAgent::layersForNode):
+        (WebCore):
+        (WebCore::InspectorLayerTreeAgent::gatherLayersUsingRenderObjectHierarchy):
+        (WebCore::InspectorLayerTreeAgent::gatherLayersUsingRenderLayerHierarchy):
+        (WebCore::InspectorLayerTreeAgent::buildObjectForLayer):
+        (WebCore::InspectorLayerTreeAgent::idForNode):
+        * inspector/InspectorLayerTreeAgent.h:
+        (InspectorLayerTreeAgent):
+
 2013-03-04  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: use timestamps consistent with rest of Timeline in WebSocket events.
