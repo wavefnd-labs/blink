@@ -1,3 +1,71 @@
+2013-03-05  Hajime Morrita  <morrita@google.com>
+
+        ShadowRoot needs guardRef() and guardDeref()
+        https://bugs.webkit.org/show_bug.cgi?id=109777
+
+        Reviewed by Dimitri Glazkov.
+
+        This change moves m_guardRefCount from Document to TreeScope,
+        which allows ShadowRoot to be guarded by guardRef() mechanism as
+        Document. After r137524, Node referes TreeScope instead of
+        Document. This is natural consequence of the change: It no longer
+        makes sense to guardRef() Document pointer from Node.
+
+        Detail:
+
+        - Document::m_guardRefCount and related funcdtions are moved to TreeScope
+        - Document::removedLastRef is factored out into TreeScope::removedLastRefToScope(),
+          TreeScope::dispose() and Docuent::dispose(). ShadowRoot also got its own dispose() implementation.
+        - Moved guardRef() and guardDeref() calls to TreeScope and Node.
+          Note that there are two "guarded" TreeScope references. One is
+          Node::m_treeScope and another is TreeScope::m_parentTreeScope.
+          The guarded-ref management is now encapsulated in these two classes.
+
+        No new tests. Covered by existing tests.
+
+        * WebCore.exp.in:
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::~Document):
+        (WebCore::Document::dispose): Extracted from removedLastRef()
+        * dom/Document.h:
+        (WebCore::Node::isTreeScope):
+        (WebCore::Node::Node):
+        * dom/DocumentFragment.cpp:
+        (WebCore::DocumentFragment::DocumentFragment): Remove ASSERT() and move it to ...
+        (WebCore::DocumentFragment::create): ... here, to allow NULL document from ShadowRoot.
+        * dom/Node.cpp:
+        (WebCore::Node::~Node):
+        (WebCore::Node::removedLastRef):
+        * dom/Node.h:
+        (WebCore::Node::setTreeScope):
+        * dom/Element.cpp:
+        (WebCore::Element::ensureAttr): This has been wrong and is fixed in this revision since the incorrectness is unveiled by this change.
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::ShadowRoot): Passed NULL document to superclass. This aligns what Document is doing.
+        (WebCore::ShadowRoot::dispose): Added.
+        * dom/ShadowRoot.h:
+        (ShadowRoot):
+        * dom/TreeScope.cpp:
+        (SameSizeAsTreeScope):
+        (WebCore::TreeScope::TreeScope):
+        (WebCore::TreeScope::~TreeScope):
+        (WebCore::TreeScope::dispose): Added.
+        (WebCore::TreeScope::setParentTreeScope):
+        (WebCore::TreeScope::deletionHasBegun):
+        (WebCore::TreeScope::beginDeletion):
+        (WebCore::TreeScope::refCount): Added.
+        * dom/TreeScope.h: Turned m_rootNode to Node* from ContainerNode* for Node::isTreeScope to be inlined.
+        (WebCore::TreeScope::guardRef): Pulled up from Document.
+        (WebCore::TreeScope::guardDeref): Ditto.
+        (WebCore::TreeScope::hasGuardRefCount): Added to hide m_guardRefCount.
+        (WebCore::TreeScope::deletionHasBegun): Added.
+        (WebCore::TreeScope::beginDeletion): Added.
+        (WebCore::TreeScope::removedLastRefToScope): Pulled up from Document.
+        * dom/TreeScopeAdopter.cpp:
+        (WebCore::TreeScopeAdopter::moveTreeToNewScope):
+        (WebCore::TreeScopeAdopter::moveNodeToNewDocument):
+
 2013-03-04  Uday Kiran  <udaykiran@motorola.com>
 
         getPropertyValue for -webkit-text-stroke returns null, should compute the shorthand value
