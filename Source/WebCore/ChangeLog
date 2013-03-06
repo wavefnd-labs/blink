@@ -1,3 +1,43 @@
+2013-03-06  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        Remove the (dead) code for handling shorthands in StyleResolver / StyleBuilder
+        https://bugs.webkit.org/show_bug.cgi?id=111505
+
+        Reviewed by Alexis Menard.
+
+        The CSS parsing code expands shorthands (with the exception of 'font') to their longhands.
+        This means that all the code in StyleResolver / StyleBuilder to handle shorthands is basically
+        dead and shouldn't be there. The reason for it to be is that people didn't know about shorthands
+        expansion and thus copied existing code.
+
+        This change addresses both issues by removing the code and adding ASSERTs that should prevent people
+        from adding more dead code.
+
+        Refactoring, covered by existing tests.
+
+        * css/StylePropertyShorthand.h: Added isExpandedShorthand.
+        * css/StylePropertyShorthand.cpp:
+        (WebCore::isExpandedShorthand):
+        Added this function that ignores 'font' as it is the only shorthand that is no consistently expanded
+        to account for system fonts.
+
+        * css/StyleBuilder.cpp:
+        (WebCore::StyleBuilder::StyleBuilder):
+        Removed the shorthands.
+
+        * css/StyleBuilder.h:
+        (WebCore::StyleBuilder::setPropertyHandler):
+        Added ASSERTs that people don't add shorthand handling.
+
+        * css/StyleResolver.cpp:
+        (WebCore::isValidVisitedLinkProperty):
+        Removed all the shorthands (shouldn't be reachable unless the ASSERT in applyProperty
+        triggers).
+
+        (WebCore::StyleResolver::applyProperty):
+        Removed all shorthand handling code, moved the shorthands together and added some ASSERT
+        to ensure people don't abuse the code and re-add some of it back by mistake.
+
 2013-03-05  Kent Tamura  <tkent@chromium.org>
 
         Rename WebCore/editing/visible_units.* to VisibleUnits.*
