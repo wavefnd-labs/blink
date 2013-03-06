@@ -1,3 +1,62 @@
+2013-03-05  Yury Semikhatsky  <yurys@chromium.org>
+
+        Web Inspector: support stable remote object ids
+        https://bugs.webkit.org/show_bug.cgi?id=109908
+
+        Reviewed by Pavel Feldman.
+
+        Introduced a map from javascript object to its id. It guarantees
+        that object is assined id only once (unless it is explicitely
+        released). The map is per execution context and is stored in
+        InjectedScriptManager.
+
+        Test: inspector-protocol/persistent-id.html
+
+        * bindings/js/JSInjectedScriptHostCustom.cpp:
+        (WebCore::JSInjectedScriptHost::objectId):
+        (WebCore):
+        (WebCore::JSInjectedScriptHost::releaseObjectId):
+        * bindings/js/ScriptObject.h:
+        (WTF):
+        (WTF::ScriptObjectHash::hash):
+        (WTF::ScriptObjectHash::equal):
+        (ScriptObjectHash):
+        * bindings/v8/ScriptObject.h:
+        (WTF):
+        (WTF::ScriptObjectHash::hash):
+        (WTF::ScriptObjectHash::equal):
+        (ScriptObjectHash):
+        * bindings/v8/custom/V8InjectedScriptHostCustom.cpp:
+        (WebCore::V8InjectedScriptHost::objectIdMethodCustom):
+        (WebCore):
+        (WebCore::V8InjectedScriptHost::releaseObjectIdMethodCustom):
+        * inspector/InjectedScriptHost.cpp:
+        (WebCore::InjectedScriptHost::create):
+        (WebCore::InjectedScriptHost::InjectedScriptHost):
+        (WebCore::InjectedScriptHost::disconnect):
+        (WebCore::InjectedScriptHost::objectId):
+        (WebCore):
+        (WebCore::InjectedScriptHost::releaseObjectId):
+        * inspector/InjectedScriptHost.h:
+        (WebCore):
+        (InjectedScriptHost):
+        * inspector/InjectedScriptHost.idl:
+        * inspector/InjectedScriptManager.cpp:
+        (InjectedScriptManager::ObjectIdMap):
+        (WebCore::InjectedScriptManager::ObjectIdMap::ObjectIdMap):
+        (WebCore::InjectedScriptManager::ObjectIdMap::objectId):
+        (WebCore::InjectedScriptManager::ObjectIdMap::releaseObjectId):
+        (WebCore):
+        (WebCore::InjectedScriptManager::InjectedScriptManager):
+        (WebCore::InjectedScriptManager::discardInjectedScripts):
+        (WebCore::InjectedScriptManager::discardInjectedScriptsFor):
+        (WebCore::InjectedScriptManager::objectId):
+        (WebCore::InjectedScriptManager::releaseObjectId):
+        * inspector/InjectedScriptManager.h:
+        (InjectedScriptManager):
+        * inspector/InjectedScriptSource.js:
+        (.):
+
 2013-03-06  Marja Hölttä  <marja@chromium.org>
 
         REGRESSION(r144617): Wrong usage of overwritten variable in toDOMWindow (V8Binding.cpp)
