@@ -1,3 +1,26 @@
+2013-03-06  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        [soup] session cookies are not correctly reported in getRawCookies()
+        https://bugs.webkit.org/show_bug.cgi?id=111584
+
+        Reviewed by Martin Robinson.
+
+        As per libsoup documentation, SoupCookie->expires is NULL for session cookies.
+        However, the soup implementation for getRawCookies() does not check for NULL
+        case before passing the value to soup_date_to_time_t(), which leads to run time
+        warnings.
+
+        We should also pass true for WebCore::Cookie's session argument if
+        SoupCookie->expires is NULL. The current implementation reports the cookie as a
+        session one if soup_cookie_jar_is_persistent(jar) returns true, which is
+        inaccurate.
+
+        No new tests, no behavior change for layout tests as Web Inspector currently
+        ignores the "session" member and uses expires/max-age instead to deduce it.
+
+        * platform/network/soup/CookieJarSoup.cpp:
+        (WebCore::getRawCookies):
+
 2013-03-06  Douglas Stockwell  <dstockwell@chromium.org>
 
         REGRESSION(r111639): delayed animation start can be postponed
