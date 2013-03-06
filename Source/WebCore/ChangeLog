@@ -1,3 +1,24 @@
+2013-03-06  Alexis Menard  <alexis@webkit.org>
+
+        Do not add CSSPropertyBorderImage shorthand part of the property list when parsing CSS border property
+        https://bugs.webkit.org/show_bug.cgi?id=111481
+
+        Reviewed by Julien Chaffraix.
+
+        After http://trac.webkit.org/changeset/135848 and more generally we do not 
+        add shorthand directly into the property list used afterwards to build
+        StylePropertySet but we rather expand the shorthand to add the
+        longhands. CSSPropertyBorderImage is a shorthand and it should follow
+        that rule, so when we successfully parsed CSS border property and we
+        should reset border-image then we should reset the longhands too.
+
+        Test: LayoutTests/inspector/styles/styles-new-API-expected.txt which
+        reflects the fact that we add longhands instead of the shorthand. All
+        the other tests should not regress.
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+
 2013-03-06  Luiz Agostini  <luiz.agostini@nokia.com>
 
         Accelerated overflow scrolling for Coordinated Graphics.
