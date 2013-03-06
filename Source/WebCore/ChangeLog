@@ -1,3 +1,50 @@
+2013-03-05  Hajime Morrita  <morrita@google.com>
+
+        [Custom Elements][V8] Custom Element doesn't need its own WrapperTypeInfo
+        https://bugs.webkit.org/show_bug.cgi?id=111411
+
+        Reviewed by Kentaro Hara.
+
+        No new tests. No observable change yet.
+
+        This is a preparation for Bug 110436, where WebKit is going to
+        allow any HTML element to be a superclass of custom elements.
+
+        This change eliminates WrapperTypeInfo for custom element. Instead
+        of that, the wrapper of a custom element picks WrapperTypeInfo
+        from most descendant built-in HTML element. For example, think about
+        following hierarchy:
+
+        - ... <- HTMLElement <- HTMLDivElememnt <- ExistingCustomElement <- NewCustomElement
+
+        In this case, both ExistingCustomElement and NewCustomElement has
+        HTMLDivElememnt's type info. This is because HTMLDivElememnt is
+        the most descendant (or "the nearest") built-in HTML
+        element. (HTMLElement isn't the most descendant.
+        ExistingCustomElement isn't a built-in.)
+
+        Using such WrapperTypeInfos, created custom element wrappers can
+        get appropriate set of method and properties regardless of its
+        super-elements.
+
+        This change tells the prototype object of each built-in object
+        which WrapperTypeInfo the native backing wants:
+        HTMLDivElememnt.prototype knows V8HTMLDivElement::info for
+        example. The pointer to the type info is stored into an internal
+        field. On wrapper construction, createWrapper() walks up the
+        prototype chain and pick the first one.
+
+        * bindings/v8/V8DOMConfiguration.cpp:
+        (WebCore::V8DOMConfiguration::configureTemplate):
+        * bindings/v8/V8HTMLCustomElement.cpp:
+        (WebCore::findWrapperTypeOf):
+        (WebCore::V8HTMLCustomElement::createWrapper):
+        * bindings/v8/V8HTMLCustomElement.h:
+        * bindings/v8/V8PerContextData.cpp:
+        (WebCore::V8PerContextData::constructorForTypeSlowCase):
+        * bindings/v8/WrapperTypeInfo.h:
+        (WebCore):
+
 2013-03-05  Aaron Colwell  <acolwell@chromium.org>
 
         Heap-use-after-free in WebCore::HTMLMediaElement::~HTMLMediaElement
