@@ -1,3 +1,33 @@
+2013-03-06  Adam Klein  <adamk@chromium.org>
+
+        [V8] Use implicit references instead of object groups to keep registered MutationObservers alive
+        https://bugs.webkit.org/show_bug.cgi?id=111382
+
+        Reviewed by Adam Barth.
+
+        Two-phase approach to implicit references: after grouping objects
+        together, add an implicit reference between each registered node's
+        group and the MutationObserver's group (which includes wrappers from
+        all worlds).
+
+        Also changed many uses of v8::Value to v8::Object where we know we're
+        dealing with Object and the V8 API expects them.
+
+        Test: ManualTests/mutation-observer-leaks-nodes.html
+
+        * bindings/v8/V8GCController.cpp:
+        (WebCore::ImplicitConnection::ImplicitConnection):
+        (WebCore::ImplicitConnection::wrapper):
+        (ImplicitConnection):
+        (WebCore::ImplicitReference::ImplicitReference): Wrapper class holding a parent who should have an implicit reference to a child.
+        (ImplicitReference):
+        (WebCore::operator<): Needed for std::sort() call to avoid the overhead of using a HashMap
+        (WebCore::WrapperGrouper::addObjectWrapperToGroup):
+        (WebCore::WrapperGrouper::addNodeWrapperToGroup):
+        (WebCore::WrapperGrouper::addImplicitReference):
+        (WrapperGrouper):
+        (WebCore::WrapperGrouper::apply):
+
 2013-03-06  Ankur Taly  <ataly@google.com>
 
         Modify log method in V8DOMActivityLogger so that the apiName and
