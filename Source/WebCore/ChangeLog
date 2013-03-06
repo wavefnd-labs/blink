@@ -1,3 +1,93 @@
+2013-03-05  Hayato Ito  <hayato@chromium.org>
+
+        [Shadow] Implements event re-targeting for Touch Events.
+        https://bugs.webkit.org/show_bug.cgi?id=107800
+
+        Reviewed by Dimitri Glazkov.
+
+        So far, Touch Events have been intentionally disabled in shadow
+        tree since it allows users to access internal nodes in shadow tree
+        by accessing Touch Event's information.
+
+        This patch re-targets all individual touch point's target in
+        TouchList (touches, targetTouches and changedTouches) owned by a Touch Event
+        before the Touch Event is dispatched so that we won't break an
+        upper boundary of shadow DOM.
+
+        Touch Events re-targeting is similar to that of Mouse Events
+        re-targeting. The difference is that a Touch Event can have more
+        than one related target because of multiple touches. We must
+        re-target all individual touch points which can be referred from
+        the Touch Event.
+
+        Now, Touch Events can be fired in shadow tree. I've removed the
+        existing limitation.
+
+        Test: fast/dom/shadow/touch-event-retargeting.html
+
+        * dom/EventContext.cpp:
+        (WebCore::EventContext::isTouchEventContext):
+        (WebCore):
+        (WebCore::TouchEventContext::TouchEventContext):
+        (WebCore::TouchEventContext::~TouchEventContext):
+        (WebCore::TouchEventContext::handleLocalEvents):
+        (WebCore::TouchEventContext::isTouchEventContext):
+        (WebCore::TouchEventContext::checkReachability):  Used for assertion of reachability for each Touch point.
+        * dom/EventContext.h:
+        (WebCore):
+        (EventContext):
+        (TouchEventContext): Introduced to hold necessary information for re-targeting Touch event.
+        (WebCore::TouchEventContext::touches):
+        (WebCore::TouchEventContext::targetTouches):
+        (WebCore::TouchEventContext::changedTouches):
+        (WebCore::EventContext::isReachable):
+        * dom/EventRetargeter.cpp:
+        (WebCore::EventRetargeter::calculateEventPath):
+        (WebCore::EventRetargeter::adjustForTouchEvent):
+        (WebCore):
+        (WebCore::EventRetargeter::adjustTouchList):
+        (WebCore::EventRetargeter::adjustForRelatedTarget):
+        (WebCore::EventRetargeter::calculateAdjustedNodes): Updated so that this can be used for Touch point re-targeting.
+        (WebCore::EventRetargeter::buildRelatedNodeMap):
+        * dom/EventRetargeter.h:
+        (WebCore):
+        (EventRetargeter):
+        * dom/Node.cpp:
+        (WebCore::Node::dispatchEvent):
+        (WebCore):
+        (WebCore::Node::dispatchTouchEvent):
+        * dom/Node.h:
+        (WebCore):
+        (Node):
+        * dom/Touch.cpp:
+        (WebCore::Touch::Touch):
+        (WebCore):
+        (WebCore::Touch::cloneWithNewTarget):
+        * dom/Touch.h:
+        (Touch):
+        * dom/TouchEvent.cpp:
+        (WebCore::TouchEventDispatchMediator::create):
+        (WebCore):
+        (WebCore::TouchEventDispatchMediator::TouchEventDispatchMediator):
+        (WebCore::TouchEventDispatchMediator::event):
+        (WebCore::TouchEventDispatchMediator::dispatchEvent):
+        * dom/TouchEvent.h:
+        (TouchEvent):
+        (WebCore::TouchEvent::setTouches):
+        (WebCore::TouchEvent::setTargetTouches):
+        (WebCore::TouchEvent::setChangedTouches):
+        (TouchEventDispatchMediator):
+        (WebCore):
+        (WebCore::toTouchEvent):
+        * dom/TouchList.cpp:
+        (WebCore::TouchList::item):
+        (WebCore):
+        * dom/TouchList.h:
+        (TouchList):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::hitTestResultInFrame): Removed the limitation. Adjusting is no longer done here.
+        (WebCore::EventHandler::handleTouchEvent):
+
 2013-03-05  Hajime Morrita  <morrita@google.com>
 
         [Custom Elements][V8] Custom Element doesn't need its own WrapperTypeInfo
