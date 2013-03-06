@@ -1,3 +1,98 @@
+2013-03-06  Luiz Agostini  <luiz.agostini@nokia.com>
+
+        Accelerated overflow scrolling for Coordinated Graphics.
+        https://bugs.webkit.org/show_bug.cgi?id=110323
+
+        Reviewed by Noam Rosenthal.
+
+        A scroll offset is applied to individual layers on UI process and the
+        web process is notified assynchronously.
+        The new API WKCoordinatedScene may be used to scroll layers in the UI process.
+
+        Tests will be added on bug #111140.
+
+        Scrolling coordinator is used to provide a ScrollableArea to CoordinatedGraphicsLayer.
+
+        * page/scrolling/coordinatedgraphics/ScrollingCoordinatorCoordinatedGraphics.cpp:
+        (WebCore::ScrollingCoordinatorCoordinatedGraphics::scrollableAreaScrollLayerDidChange):
+        (WebCore):
+        (WebCore::ScrollingCoordinatorCoordinatedGraphics::willDestroyScrollableArea):
+        * page/scrolling/coordinatedgraphics/ScrollingCoordinatorCoordinatedGraphics.h:
+        (ScrollingCoordinatorCoordinatedGraphics):
+
+        GraphicsLayerTextureMapper is responsible for receiving the 'did commit' messages and to pass
+        them to its TextureMapperLayer on the appropriated time.
+
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.cpp:
+        (WebCore::GraphicsLayerTextureMapper::GraphicsLayerTextureMapper):
+        (WebCore::GraphicsLayerTextureMapper::didCommitScrollOffset):
+        (WebCore):
+        (WebCore::GraphicsLayerTextureMapper::setIsScrollable):
+        (WebCore::GraphicsLayerTextureMapper::commitLayerChanges):
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.h:
+        (WebCore::GraphicsLayerTextureMapper::setScrollClient):
+        (WebCore::GraphicsLayerTextureMapper::setID):
+        (GraphicsLayerTextureMapper):
+        (WebCore::GraphicsLayerTextureMapper::isScrollable):
+
+        TextureMapperLayer is responsible for applying the requested scroll offset and for
+        sending the commit messages to web process. It is also able to hittest layers and identify
+        the ones that are scrollable.
+
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::hitTest):
+        (WebCore):
+        (WebCore::TextureMapperLayer::scrollableLayerHitTestCondition):
+        (WebCore::TextureMapperLayer::findScrollableContentsLayerAt):
+        (WebCore::TextureMapperLayer::mapScrollOffset):
+        (WebCore::TextureMapperLayer::commitScrollOffset):
+        (WebCore::TextureMapperLayer::scrollBy):
+        (WebCore::TextureMapperLayer::didCommitScrollOffset):
+        * platform/graphics/texmap/TextureMapperLayer.h:
+        (TextureMapperLayer):
+        (ScrollingClient):
+        (WebCore::TextureMapperLayer::TextureMapperLayer):
+        (WebCore::TextureMapperLayer::setID):
+        (WebCore::TextureMapperLayer::id):
+        (WebCore::TextureMapperLayer::setScrollClient):
+        (WebCore::TextureMapperLayer::setIsScrollable):
+        (WebCore::TextureMapperLayer::isScrollable):
+        (WebCore::TextureMapperLayer::adjustedPosition):
+
+        CoordinatedGraphicsLayer receives the commit messages and updates its ScrollableArea.
+
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.cpp:
+        (WebCore::CoordinatedGraphicsLayer::CoordinatedGraphicsLayer):
+        (WebCore::CoordinatedGraphicsLayer::setScrollableArea):
+        (WebCore):
+        (WebCore::CoordinatedGraphicsLayer::commitScrollOffset):
+        (WebCore::CoordinatedGraphicsLayer::resetLayerState):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.h:
+        (WebCore):
+        (CoordinatedGraphicsLayer):
+        (WebCore::CoordinatedGraphicsLayer::isScrollable):
+
+        CoordinatedGraphicsScene receives the commit messages from TextureMapperLayer and
+        dispatches them on the main thread. It also has a new method that is used to find
+        the topmost scrollable layer at a given point.
+
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.cpp:
+        (WebCore::CoordinatedGraphicsScene::setLayerState):
+        (WebCore::CoordinatedGraphicsScene::createLayer):
+        (WebCore::CoordinatedGraphicsScene::dispatchCommitScrollOffset):
+        (WebCore):
+        (WebCore::CoordinatedGraphicsScene::commitScrollOffset):
+        (WebCore::CoordinatedGraphicsScene::findScrollableContentsLayerAt):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.h:
+        (WebCore):
+        (CoordinatedGraphicsSceneClient):
+        (CoordinatedGraphicsScene):
+
+        New fields have been added to CoordinatedGraphicsLayerState.
+
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsState.h:
+        (CoordinatedGraphicsLayerState):
+
 2013-03-06  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         REGGRESSION (r142112): It made compositing tests fail on EFL, Qt.
