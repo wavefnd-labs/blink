@@ -1,3 +1,23 @@
+2013-03-06  Douglas Stockwell  <dstockwell@chromium.org>
+
+        REGRESSION(r111639): delayed animation start can be postponed
+        https://bugs.webkit.org/show_bug.cgi?id=108582
+
+        Query the animation timer directly for the time it will next fire rather than
+        trying to cache the interval. Previous approach was incorrect -- as time advanced
+        it was possible for the interval to jump beyond the next service time.
+
+        Reviewed by Darin Adler.
+
+        Test: animations/animation-delay-changed.html
+
+        * page/animation/AnimationController.cpp:
+        (WebCore::AnimationControllerPrivate::AnimationControllerPrivate):
+        (WebCore::AnimationControllerPrivate::updateAnimationTimerForRenderer):
+        (WebCore::AnimationControllerPrivate::updateAnimationTimer):
+        * page/animation/AnimationControllerPrivate.h:
+        (AnimationControllerPrivate): Remove m_previousTimeToNextService
+
 2013-03-06  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: [ACE] show execution line in Ace editor
