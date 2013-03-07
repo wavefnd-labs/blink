@@ -1,3 +1,62 @@
+2013-03-07  Mike West  <mkwst@chromium.org>
+
+        Move side-effects on hover/active state out of hit-testing
+        https://bugs.webkit.org/show_bug.cgi?id=98168
+
+        Reviewed by Julien Chaffraix.
+
+        Original patch by Allan Sandfeld Jensen; I'm just tweaking things.
+
+        Document::updateHoverActiveState is currently called during hit testing
+        to update the hover and active states of elements effected by mouse
+        movements (or their keyboard equivalents). This conflates the hit test
+        algorithm itself with side-effects associated with specific use-cases.
+
+        This conflation makes it very difficult to reuse the hover/active logic
+        for things other than hit testing. 'mouseenter'/'mouseleave' events[1]
+        are one example of a feature that would be simple to implement on top of
+        this existing logic if we split it out from the hit testing path, and
+        instead call it explicitly when necessary. An explicit split between
+        hit testing and its side-effects will also enable us to simplify the
+        logic in future patches with well-named parameters, rather than relying
+        on stuffing properties into HitTestRequest.
+
+        This patch drops the call to Document::updateHoverActiveState from
+        RenderView::hitTest, and adjusts the three call-sites in EventHandler
+        to explicitly call out to it rather than Document::updateStyleIfNeeded.
+        The latter call is still necessary but has been folded into
+        updateHoverActiveState, as the former is never called without calling
+        the latter.
+
+        [1]: http://wkbug.com/18930
+
+        * dom/Document.h:
+        * dom/Document.cpp:
+        (WebCore::Document::updateHoverActiveState):
+            First, this function must now only be called from contexts that were
+            performing a read/write hit-test: the code asserts this
+            precondition.
+
+            Second, rather than accepting a HitTestResult, the function accepts
+            an Element* from which to begin the hover/active chain changes.
+
+            Third, we have to explicitly update the hover/active states for
+            documents between the updated element and the top-level document.
+            The hit-testing logic was taking care of this for us, now we need to
+            take care of it ourselves.
+
+            Fourth, call out to updateStyleIfNeeded rather than making our
+            caller do so. The calls were always paired; now that's explicit.
+        (WebCore::Document::prepareMouseEvent):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::hitTestResultAtPoint):
+        (WebCore::EventHandler::sendContextMenuEventForKey):
+        (WebCore::EventHandler::hoverTimerFired):
+            Call out to updateHoverActiveState rather than updateStyleIfNeeded.
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::hitTest):
+            Drop the call to updateHoverActiveState.
+
 2013-03-07  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r145097.
