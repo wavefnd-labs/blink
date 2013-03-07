@@ -1,3 +1,51 @@
+2013-03-06  Hajime Morrita  <morrita@google.com>
+
+        Custom Elements Refactoring: CustomElementConstructor API shouldn't bound to HTMLElement
+        https://bugs.webkit.org/show_bug.cgi?id=111678
+
+        Reviewed by Kentaro Hara.
+
+        The latest Custom Elements standard supports non-HTML custom elements. Even though current implementation
+        support only HTML, it'd be better off to make API generic enough to support them.
+
+        This change
+
+        - eliminates HTMLElement from the API signature by replacing it with Element, and
+        - rename V8HTMLCustomElement to V8CustomElement.
+
+        No new tests, just changing signatures and a class name.
+
+        * WebCore.gypi:
+        * bindings/v8/V8CustomElement.cpp: Renamed from Source/WebCore/bindings/v8/V8HTMLCustomElement.cpp.
+        (WebCore):
+        (WebCore::findWrapperTypeOf):
+        (WebCore::V8CustomElement::createWrapper):
+        * bindings/v8/V8CustomElement.h: Renamed from Source/WebCore/bindings/v8/V8HTMLCustomElement.h.
+        (WebCore):
+        (V8CustomElement):
+        (WebCore::V8CustomElement::toV8):
+        (WebCore::V8CustomElement::wrap):
+        (WebCore::HTMLCustomElement::wrap):
+        * bindings/v8/custom/V8CustomElementConstructorCustom.cpp:
+        (WebCore::V8CustomElementConstructor::callAsFunctionCallback):
+        * dom/CustomElementConstructor.cpp:
+        (WebCore::CustomElementConstructor::createElement):
+        * dom/CustomElementConstructor.h:
+        (WebCore):
+        (CustomElementConstructor):
+        * dom/CustomElementRegistry.cpp:
+        (WebCore::CustomElementRegistry::constructorOf):
+        (WebCore::CustomElementRegistry::createElement):
+        * dom/CustomElementRegistry.h:
+        (WebCore):
+        (CustomElementRegistry):
+        * dom/Document.cpp: Ensured that the document is an HTML.
+        (WebCore::Document::registerElement):
+        * dom/Document.idl:
+        * dom/make_names.pl:
+        (printWrapperFactoryCppFile):
+        * html/HTMLDocument.idl: Moved an API to Document.idl
+
 2013-03-06  Tim Horton  <timothy_horton@apple.com>
 
         TileCache debug minimap should fit inside the intersection of the visible rect and exposed rect
