@@ -1,3 +1,42 @@
+2013-03-07  Mike West  <mkwst@chromium.org>
+
+        XSSAuditor should send only one console error when blocking a page.
+        https://bugs.webkit.org/show_bug.cgi?id=110733
+
+        Reviewed by Daniel Bates.
+
+        Currently, we send two console errors when XSSAuditor blocks a page:
+        "Refused to execute a JavaScript script. Source code of script found
+        within request.\n", and "Entire page will be blocked.".
+
+        We should only send one message, tuning it properly for the context, and
+        including the URL of the page effected by the XSSAuditor's work.
+
+        Covered by rebaselines of all the XSSAuditor and 'reflected-xss' tests.
+
+        * html/parser/XSSAuditor.cpp:
+        * html/parser/XSSAuditor.h:
+        (WebCore::XSSAuditor::XSSAuditor):
+            Add two booleans to track the headers used to set the XSSAuditor state.
+        (WebCore::XSSAuditor::init):
+            Save a copy of the document's URL even if we're not generating a
+            report upon violation: we'll need it for the console messages. Also
+            populate the didSendValidXXXHeader booleans for use later.
+        (WebCore::XSSAuditor::filterToken):
+            Add detail about the header status to the constructed XSSInfo object.
+        * html/parser/XSSAuditorDelegate.cpp:
+        (WebCore::buildConsoleError):
+            Move message construction out into a separate inlined function, as
+            it's becoming complex.
+        (WebCore::XSSAuditorDelegate::didBlockScript):
+            Fold the "Entire page will be blocked" message into the main console
+            error.
+        * html/parser/XSSAuditorDelegate.h:
+        (WebCore::XSSInfo::create):
+        (WebCore::XSSInfo::XSSInfo):
+            Add detail about header status to XSSInfo in order to correctly
+            construct the console error.
+
 2013-03-07  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: Add some more compilation annotations to NavigatorView
