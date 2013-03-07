@@ -1,3 +1,52 @@
+2013-03-06  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Extend our grammar to support 2 positions for grid-{row|column}
+        https://bugs.webkit.org/show_bug.cgi?id=110777
+
+        Reviewed by Tony Chang.
+
+        Now that we support all the logical grid properties, we can change grid-{row|column}
+        into shorthands. That's what this change does along with extending our parsing support
+        to handle 2 positions.
+
+        Tests: fast/css-grid-layout/grid-item-column-row.html
+               fast/css-grid-layout/grid-item-end-after-get-set.html
+               fast/css-grid-layout/grid-item-start-before-get-set.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        Removed grid-{row|column} from computedProperties as they are shorthands (see comments
+        at computedProperties definition).
+
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        (WebCore::CSSComputedStyleDeclaration::getCSSPropertyValuesForGridShorthand):
+        Switched to using the StylePropertyShorthand and reusing the existing longhand code.
+
+        * css/CSSComputedStyleDeclaration.h:
+        Added getCSSPropertyValuesForGridShorthand.
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseGridItemPositionShorthand):
+        Added custom parsing for the shorthand, that builds on top of the longhand code.
+
+        * css/CSSParser.h:
+        Added parseGridItemPositionShorthand.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::applyProperty):
+        Removed the previous handling as shorthand are expanded at parse time.
+
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::getPropertyValue):
+        Added the new shorthands to the list.
+
+        * css/StylePropertyShorthand.cpp:
+        (WebCore::webkitGridColumnShorthand):
+        (WebCore::webkitGridRowShorthand):
+        (WebCore::shorthandForProperty):
+        * css/StylePropertyShorthand.h:
+        Registered grid-{row|column} as shorthands.
+
 2013-03-06  Kenneth Russell  <kbr@google.com>
 
         [Chromium] Fix byte ordering bugs reading back WebGL canvases' content on Android
