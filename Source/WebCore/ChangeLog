@@ -1,3 +1,73 @@
+2013-03-07  Keishi Hattori  <keishi@webkit.org>
+
+        Add clear button to date/time input types
+        https://bugs.webkit.org/show_bug.cgi?id=111319
+
+        Reviewed by Kent Tamura.
+
+        We want to remove the clear button from the calendar picker (Bug 109439)
+        so we are adding the clear button to the right side of the input element.
+
+        Tests: fast/forms/date-multiple-fields/date-multiple-fields-clearbutton-change-and-input-events.html
+               fast/forms/datetimelocal-multiple-fields/datetimelocal-multiple-fields-clearbutton-change-and-input-events.html
+               fast/forms/month-multiple-fields/month-multiple-fields-clearbutton-change-and-input-events.html
+               fast/forms/time-multiple-fields/time-multiple-fields-clearbutton-change-and-input-events.html
+               fast/forms/week-multiple-fields/week-multiple-fields-clearbutton-change-and-input-events.html
+
+        * CMakeLists.txt: Added ClearButtonElement.cpp
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.vcxproj/WebCore.vcxproj: Ditto.
+        * WebCore.vcxproj/WebCore.vcxproj.filters: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * css/html.css:
+        (input::-webkit-clear-button): Styles for the clear button.
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::editControlValueChanged):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::BaseMultipleFieldsDateAndTimeInputType):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::~BaseMultipleFieldsDateAndTimeInputType):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::createShadowSubtree):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::destroyShadowSubtree):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::disabledAttributeChanged):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::requiredAttributeChanged): Hide clear button if the value is required.
+        (WebCore):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::readonlyAttributeChanged):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::updateInnerTextValue):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::focusAndSelectClearButtonOwner): Called on mouse down on clear button.
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::shouldClearButtonRespondToMouseEvents):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::clearValue):
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::updateClearButtonVisibility): We want to hide the clear button if the value is required or the value is empty.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::updateClearButtonVisibility):
+        (WebCore):
+        (WebCore::HTMLInputElement::requiredAttributeChanged):
+        * html/HTMLInputElement.h:
+        (HTMLInputElement):
+        * html/InputType.cpp:
+        (WebCore::InputType::requiredAttributeChanged): Notifies the InputType that the required attribute has changed.
+        (WebCore):
+        (WebCore::InputType::updateClearButtonVisibility):
+        * html/InputType.h:
+        (InputType):
+        * html/shadow/ClearButtonElement.cpp: Added.
+        (WebCore):
+        (WebCore::ClearButtonElement::ClearButtonElement):
+        (WebCore::ClearButtonElement::create):
+        (WebCore::ClearButtonElement::detach):
+        (WebCore::ClearButtonElement::releaseCapture): Stop capturing mouse events.
+        (WebCore::ClearButtonElement::defaultEventHandler):
+        * html/shadow/ClearButtonElement.h: Added.
+        (WebCore):
+        (ClearButtonElement):
+        (ClearButtonOwner):
+        (WebCore::ClearButtonElement::ClearButtonOwner::~ClearButtonOwner):
+        (WebCore::ClearButtonElement::removeClearButtonOwner):
+        (WebCore::ClearButtonElement::isMouseFocusable):
+
 2013-03-07  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: Refactorings: Prepare SuggestBox for reuse.
