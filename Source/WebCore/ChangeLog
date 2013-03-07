@@ -1,3 +1,79 @@
+2013-03-07  Antoine Quint  <graouts@apple.com>
+
+        Web Inspector: identify layers for CSS generated content in LayerTreeAgent
+        https://bugs.webkit.org/show_bug.cgi?id=111551
+
+        Layers can be associated with pseudo elements, elements that are generated
+        when ::before or ::after pseudo-classes are used to style an element and
+        provide additional rendering using the CSS "content" property. In order to
+        identify that a layer is associated to a pseudo element, we add a new set of
+        optional properties on the Layer object: "isGeneratedContent", "pseudoElementId"
+        and "pseudoClass".
+
+        We need to provide the "pseudoElementId" for the same reason we provide a
+        "nodeId" for the Layer. This is so that the front-end can identify that a
+        layer whose "layerId" may have changed between two layer tree updates is
+        used to render content for the same pseudo element.
+
+        In the instance that a layer is rendering generated content, we also set
+        the "nodeId" to be the generating node's id. The generating node is the
+        node in the DOM that the user styled using ::before or ::after pseudo-classes.
+        We also add the pseudo-class used as the "pseudoClass" property such that the
+        front-end may provide useful information to the user about what type of
+        pseudo-class yielded the generation of this layer. We also deal with the
+        possibility that the layer is a reflection for a pseudo element.
+    
+        Since pseudo elements are not part of the user-visible DOM, and thus can't be
+        pushed to the front-end, we maintain a special ID hash map in the LayerTreeAgent.
+        In order to be able to unbind a pseudo element id and a pseudo element, we add a
+        destructor method to PseudoElement and provide a new instrumentation call so that
+        the LayerTreeAgent may be notified of a PseudoElement being destroyed. This
+        reflects the principle we use to update the RenderLayer bindings when a
+        RenderLayer is destroyed, as notified by the RenderLayerCompositor.
+
+        Reviewed by Simon Fraser.
+
+        Test: inspector-protocol/layers/layers-generated-content.html
+
+        * dom/PseudoElement.cpp:
+        (WebCore::PseudoElement::~PseudoElement): New destructor used to notify
+        InspectorInstrumentation of a PseudoElement being destroyed, such that
+        it can eventually be relayed to the InspectorLayerTreeAgent.
+        (WebCore):
+        * dom/PseudoElement.h:
+        (PseudoElement):
+        * inspector/Inspector.json: Add the new PseudoElementId type used for
+        the new "pseudoElementId" property on Layer, to which we also add the
+        "isGeneratedContent" and "pseudoClass" properties.
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::pseudoElementDestroyedImpl):
+        * inspector/InspectorInstrumentation.h:
+        (WebCore):
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::pseudoElementDestroyed): New method
+        called in the PseudoElement destructor used to relay the fact that a
+        PseudoElement was destroyed to the InspectorLayerTreeAgent.
+        * inspector/InspectorLayerTreeAgent.cpp:
+        (WebCore::InspectorLayerTreeAgent::reset): Clear the new PseudoElement
+        identifier maps.
+        (WebCore::InspectorLayerTreeAgent::pseudoElementDestroyed): Remove any
+        identifier binding for the provided PseudoElement being destroyed.
+        (WebCore):
+        (WebCore::InspectorLayerTreeAgent::buildObjectForLayer): Set the new
+        "isGeneratedContent", "pseudoElementId" and "pseudoClass" properties on
+        the Layer object for layers associated with a pseudo element.
+        (WebCore::InspectorLayerTreeAgent::bind): Use emptyString() instead of "".
+        (WebCore::InspectorLayerTreeAgent::unbind): Use an iterator instead of a
+        get() and remove() combination in order to reduce lookups and mimick the
+        code written for unbindPseudoElement().
+        (WebCore::InspectorLayerTreeAgent::bindPseudoElement): Binds the provided
+        PseudoElement to a unique identifier.
+        (WebCore::InspectorLayerTreeAgent::unbindPseudoElement): Unbinds the
+        provided PseudoElement from its unique identifier.
+        * inspector/InspectorLayerTreeAgent.h:
+        (InspectorLayerTreeAgent):
+
 2013-03-07  Keishi Hattori  <keishi@webkit.org>
 
         Add clear button to date/time input types
