@@ -1,5 +1,34 @@
 2013-03-07  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
 
+        [texmap] Remove direct access to clip state from clip stack
+        https://bugs.webkit.org/show_bug.cgi?id=111630
+
+        Reviewed by Allan Sandfeld Jensen.
+
+        As we are now monitoring the clip state from
+        TextureMapperGL/BitmapTextureGL, have direct access to clip state object
+        would eventually make it dirty without properly setting the
+        'clipStateDirty' flag. This bug intends to substitute direct access with
+        auxiliary functions which would set the clip state dirty when necessary.
+
+        No new tests. No user visible behavior changed.
+
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::ClipStack::intersect):
+        (WebCore::TextureMapperGL::ClipStack::setStencilIndex):
+        (WebCore::TextureMapperGL::drawBorder):
+        (WebCore::TextureMapperGL::drawTexture):
+        (WebCore::TextureMapperGL::beginScissorClip):
+        (WebCore::TextureMapperGL::beginClip):
+        Replaced direct access with auxiliary functions.
+
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (ClipStack): Removed ClipStack::current() function.
+        (WebCore::TextureMapperGL::ClipStack::getStencilIndex): Added.
+        (WebCore::TextureMapperGL::ClipStack::isCurrentScissorBoxEmpty): Added.
+
+2013-03-07  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
+
         [Texturemapper] transform-style 'flat' value is broken
         https://bugs.webkit.org/show_bug.cgi?id=111566
 
