@@ -1,3 +1,132 @@
+2013-03-07  Takashi Sakamoto  <tasak@google.com>
+
+        [Refactoring] Implement RuleCollector
+        https://bugs.webkit.org/show_bug.cgi?id=109916
+
+        Reviewed by Antti Koivisto.
+
+        Implemented rule collector for an element and collector for a page.
+        Not all members in class State are required entire while resolving
+        a style.
+
+        No new tests, because just refactoring.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/CSSAllInOne.cpp:
+        Added ElementRuleCollector and PageRuleCollector.
+        * css/DocumentRuleSets.cpp:
+        (WebCore::ShadowDistributedRules::collectMatchRequests):
+        Since behaviorAtBoundary is a state owned by ElementRuleCollector,
+        removed from here.
+        * css/DocumentRuleSets.h:
+        (WebCore::ShadowDistributedRules::isEmpty):
+        Added to quickly check whether there exist any ShadowDistributedRules
+        or not.
+        * css/ElementRuleCollector.cpp: Copied from Source/WebCore/css/StyleResolver.cpp.
+        (WebCore):
+        (WebCore::ElementRuleCollector::matchedResult):
+        (WebCore::ElementRuleCollector::matchedRuleList):
+        (WebCore::ElementRuleCollector::addMatchedRule):
+        (WebCore::ElementRuleCollector::clearMatchedRules):
+        (WebCore::ElementRuleCollector::ensureRuleList):
+        (WebCore::ElementRuleCollector::addElementStyleProperties):
+        (WebCore::ElementRuleCollector::collectMatchingRules):
+        (WebCore::ElementRuleCollector::collectMatchingRulesForRegion):
+        (WebCore::ElementRuleCollector::sortAndTransferMatchedRules):
+        (WebCore::ElementRuleCollector::matchScopedAuthorRules):
+        (WebCore::ElementRuleCollector::matchHostRules):
+        (WebCore::ElementRuleCollector::matchShadowDistributedRules):
+        (WebCore::ElementRuleCollector::matchAuthorRules):
+        (WebCore::ElementRuleCollector::matchUserRules):
+        (WebCore::ElementRuleCollector::matchUARules):
+        (WebCore::ElementRuleCollector::ruleMatches):
+        (WebCore::ElementRuleCollector::collectMatchingRulesForList):
+        (WebCore::ElementRuleCollector::sortMatchedRules):
+        (WebCore::ElementRuleCollector::matchAllRules):
+        Moved these methods from StyleResolver to this class.
+        (WebCore::ElementRuleCollector::hasAnyMatchingRules):
+        This method is used for checking whether a given element can share
+        a cache.
+        * css/ElementRuleCollector.h: Copied from Source/WebCore/css/StyleResolver.h.
+        (WebCore):
+        (WebCore::ElementRuleCollector::ElementRuleCollector):
+        Use styleResolver instance to initialize its member variables, i.e.
+        SelectorFilter, RuleSets, InspectorCSSOMWrappers, and
+        StyleScopedResolver.
+        (ElementRuleCollector):
+        (WebCore::ElementRuleCollector::setMode):
+        (WebCore::ElementRuleCollector::setPseudoStyleRequest):
+        (WebCore::ElementRuleCollector::setSameOriginOnly):
+        (WebCore::ElementRuleCollector::setRegionForStyling):
+        Mode, SameOriginOnly, RegionForStyling are only used while collecting
+        matched rules.
+        (WebCore::ElementRuleCollector::setMedium):
+        Need to know which default stylesheet should be looked up.
+        (WebCore::ElementRuleCollector::document):
+        * css/PageRuleCollector.cpp: Copied from Source/WebCore/css/StyleResolver.cpp.
+        (WebCore::comparePageRules):
+        (WebCore::PageRuleCollector::isLeftPage):
+        (WebCore::PageRuleCollector::isFirstPage):
+        (WebCore::PageRuleCollector::pageName):
+        (WebCore::PageRuleCollector::matchAllPageRules):
+        (WebCore::PageRuleCollector::matchPageRules):
+        (WebCore::checkPageSelectorComponents):
+        (WebCore::PageRuleCollector::matchPageRulesForList):
+        Moved from StyleResolver.
+        * css/PageRuleCollector.h: Copied from Source/WebCore/css/StyleResolver.h.
+        (WebCore):
+        (WebCore::PageRuleCollector::PageRuleCollector):
+        (PageRuleCollector):
+        (WebCore::PageRuleCollector::matchedResult):
+        * css/StyleResolver.cpp:
+        (WebCore):
+        (WebCore::StyleResolver::State::clear):
+        (WebCore::StyleResolver::MatchResult::addMatchedProperties):
+        (WebCore::StyleResolver::State::initForStyleResolve):
+        (WebCore::StyleResolver::styleSharingCandidateMatchesRuleSet):
+        (WebCore::StyleResolver::styleForElement):
+        (WebCore::StyleResolver::styleForKeyframe):
+        (WebCore::StyleResolver::pseudoStyleForElement):
+        (WebCore::StyleResolver::styleForPage):
+        (WebCore::StyleResolver::pseudoStyleRulesForElement):
+        (WebCore::StyleResolver::applyMatchedProperties):
+        * css/StyleResolver.h:
+        (WebCore::MatchRequest::MatchRequest):
+        Removed behaviorAtBoundary. Instead, ElementRuleCollector have the
+        state.
+        (MatchRequest):
+        (WebCore::StyleResolver::selectorFilter):
+        Added to obtain SelectorFilter in ElementRuleCollector's constructor.
+        (StyleResolver):
+        (MatchResult):
+        (WebCore::StyleResolver::State::State):
+        To pass ASSERT in StyleResolver::applyProperties, need to keep
+        m_regionForStyling.
+        (State):
+        (WebCore::StyleResolver::State::regionForStyling):
+        (WebCore::StyleResolver::State::useSVGZoomRules):
+        (WebCore::StyleResolver::hasSelectorForId):
+        (WebCore):
+        (WebCore::checkRegionSelector):
+        * inspector/InspectorCSSAgent.cpp:
+        (WebCore::InspectorCSSAgent::willMatchRule):
+        Removed StyleResolver from its parameter list. Instead, added
+        InspectorCSSOMWrappers and DocumentStyleSheetCollection.
+        * inspector/InspectorCSSAgent.h:
+        (WebCore):
+        (InspectorCSSAgent):
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore):
+        (WebCore::InspectorInstrumentation::willMatchRuleImpl):
+        * inspector/InspectorInstrumentation.h:
+        (WebCore):
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::willMatchRule):
+
 2013-03-07  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: [ACE] add experimental breakpoint support
