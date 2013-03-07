@@ -1,3 +1,47 @@
+2013-03-07  Ian Vollick  <vollick@chromium.org>
+
+        Fix painting phases for composited scrolling
+        https://bugs.webkit.org/show_bug.cgi?id=107618
+
+        Reviewed by Simon Fraser.
+
+        With composited scrolling, the scrolling contents layer paints the 
+        foreground and the main graphics layer paints the background. This 
+        causes a few problems:
+
+          1) If we create a foreground layer, we end up with two layers painting 
+             the foreground phase.
+          2) Focus rings / outlines paint into the foreground layer, so they end
+             up moving around with the scrolling contents.
+          3) Neg z-order descendants paint in the the main graphics layer and
+             will therefore not scroll.
+
+        To deal with 1) we need to stop painting the foreground into both the
+        foreground and scrolling contents layers. We also need to ensure that
+        the foreground layer is the right size and has the right offset from
+        renderer if we're on the composited scrolling path.
+
+        To deal with 2) and 3), I have added a new graphics layer painting phase 
+        flag -- GraphicsLayerPaintCompositedScroll -- and applied it to two
+        layers in the subtree created by RenderLayerBacking. This ultimately
+        affects the paint phase passed to RenderLayer::paintLayerContents and
+        allows us to paint the focus rings, outlines and negative z-order
+        descendants into the proper layers.
+
+        * compositing/overflow/composited-scrolling-paint-phases-expected.txt: Added.
+        * compositing/overflow/composited-scrolling-paint-phases.html: Added.
+        * platform/mac/compositing/overflom/composited-scrolling-paint-phases-expected.txt: Added.
+          This is a text-based test that checks that the graphics layer
+          painting phases are correct with composited scrolling + foreground
+          layers.
+        * compositing/overflow/do-not-paint-outline-into-composited-scrolling-contents.html: Added.
+        * compositing/overflow/paint-neg-z-order-descendants-into-scrolling-contents-layer.html: Added.
+          These tests cover cases 2) and 3) above.
+        * platform/chromium/TestExpectations:
+        * platform/mac-wk2/TestExpectations:
+        * platform/mac/TestExpectations:
+          These have been updated to reflect the missing baselines.
+
 2013-03-07  Antoine Quint  <graouts@apple.com>
 
         Web Inspector: identify layers for CSS generated content in LayerTreeAgent

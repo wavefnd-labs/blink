@@ -1,3 +1,69 @@
+2013-03-07  Ian Vollick  <vollick@chromium.org>
+
+        Fix painting phases for composited scrolling
+        https://bugs.webkit.org/show_bug.cgi?id=107618
+
+        Reviewed by Simon Fraser.
+
+        With composited scrolling, the scrolling contents layer paints the 
+        foreground and the main graphics layer paints the background. This 
+        causes a few problems:
+
+          1) If we create a foreground layer, we end up with two layers painting 
+             the foreground phase.
+          2) Focus rings / outlines paint into the foreground layer, so they end
+             up moving around with the scrolling contents.
+          3) Neg z-order descendants paint in the the main graphics layer and
+             will therefore not scroll.
+
+        To deal with 1) we need to stop painting the foreground into both the
+        foreground and scrolling contents layers. We also need to ensure that
+        the foreground layer is the right size and has the right offset from
+        renderer if we're on the composited scrolling path.
+
+        To deal with 2) and 3), I have added a new graphics layer painting phase 
+        flag -- GraphicsLayerPaintCompositedScroll -- and applied it to two
+        layers in the subtree created by RenderLayerBacking. This ultimately
+        affects the paint phase passed to RenderLayer::paintLayerContents and
+        allows us to paint the focus rings, outlines and negative z-order
+        descendants into the proper layers.
+
+        Tests: compositing/overflow/composited-scrolling-paint-phases.html
+               compositing/overflow/do-not-paint-outline-into-composited-scrolling-contents.html
+               compositing/overflow/paint-neg-z-order-descendants-into-scrolling-contents-layer.html
+
+        * page/Frame.h:
+          Added a flag for including painting phases in the layer tree dump.
+        (WebCore::GraphicsLayer::dumpProperties):
+          Can now dump painting phase information, but only if requested.
+        * platform/graphics/GraphicsLayerClient.h:
+          Added a new entry to GraphicsLayerPaintingPhaseFlags for comp-scroll.
+        (WebCore::RenderLayer::paintLayerContents):
+          Updated the logic to account for the new comp-scroll-related paint
+          phase flag.
+        * rendering/RenderLayer.h:
+          Added the RenderLayer painting phase counterpart to
+          GraphicsLayerPaintCompositedScroll.
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+          Ensures that the foreground layer is sized correctly for comp-scroll.
+        (WebCore::RenderLayerBacking::updateScrollingLayers):
+          If we have a foreground layer, the scrolling contents layer no
+          longer gets assigned the foreground painting phase.
+        (WebCore::RenderLayerBacking::paintingPhaseForPrimaryLayer):
+          If we're comp-scrolling, then the primary layer gets the new phase.
+        (WebCore::RenderLayerBacking::paintIntoLayer):
+          Simply translates the new graphics layer painting phase to its
+          render layer counterpart.
+        (WebCore::RenderLayerCompositor::layerTreeAsText):
+        * testing/Internals.cpp:
+        (WebCore::Internals::layerTreeAsText):
+        * testing/Internals.h:
+        * testing/Internals.idl:
+          The above changes are solely plumbing to allow layout tests to
+          request that paint phase information be included in the layer tree
+          dump.
+
 2013-03-07  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] Use Qt5.1 supportedMimeTypes methods.
