@@ -1,3 +1,51 @@
+2013-03-07  David Hyatt  <hyatt@apple.com>
+
+        border-fit-adjust should happen at layout time rather than paint time
+        https://bugs.webkit.org/show_bug.cgi?id=111606
+        <rdar://problem/13101714>
+
+        Reviewed by Antti Koivisto.
+
+        In order for border-fit-adjust to be accurate in more cases, it needs
+        to be a layout-time adjustment rather than a paint-time adjustment.
+        Specifically there are cases where an LTR adjusted box was right-aligned
+        by its container, and without genuinely shrinking the size of the box,
+        we end up chopping off the right edge but not shifting the box to the
+        right to compensate.
+        
+        This patch changes border-fit-adjust to now do the adjustment using
+        the override width mechanism and a second layout pass instead of just
+        hacking painting.
+
+        Test: fast/block/border-fit-with-right-alignment.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock):
+        Calls fitBorderToLinesIfNeeded at the end of layout to do a second
+        layout pass if the adjustment needs to be made.
+
+        (WebCore::RenderBlock::fitBorderToLinesIfNeeded):
+        Renamed borderFitAdjust to fitBorderToLinesIfNeeded and made it
+        non-virtual, since it's no longer called from RenderBox code. Changed it
+        to do a relayout using override widths if an adjustment is needed.
+
+        * rendering/RenderBlock.h:
+        (RenderBlock):
+        Renamed borderFitAdjust to fitBorderToLinesIfNeeded and made it
+        non-virtual.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::paintBoxDecorations):
+        (WebCore::RenderBox::paintMask):
+        Removed the paint-time border-fit adjustment.
+
+        (WebCore::RenderBox::computeLogicalWidthInRegion):
+        Use the override width when border-fit is set to lines.
+
+        * rendering/RenderBox.h:
+        (RenderBox):
+        Remove the virtual borderFitAdjust method.
+
 2013-03-07  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         REGRESSION(r143727): Clicking / selecting inside an <embed> is broken
