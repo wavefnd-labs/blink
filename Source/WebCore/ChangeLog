@@ -1,3 +1,22 @@
+2013-03-06  Dana Jansens  <danakj@chromium.org>
+
+        [chromium] Don't get callbacks or create GrContext from unowned WebGraphicsContext3D
+        https://bugs.webkit.org/show_bug.cgi?id=111638
+
+        Reviewed by James Robinson.
+
+        If the context is not owned, it's lifetime is not guaranteed, and by the time
+        the GraphicsContext3D is destroyed, the WGC3D can already be deleted.
+
+        When the context is not owned by the GraphicsContext3D, then don't clean it up
+        in the destructor or set up callbacks, as these are the owner's responsibility.
+
+        * platform/chromium/support/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::~GraphicsContext3DPrivate):
+        (WebCore::GraphicsContext3DPrivate::grContext):
+        (WebCore::GraphicsContext3DPrivate::setContextLostCallback):
+        (WebCore::GraphicsContext3DPrivate::setErrorMessageCallback):
+
 2013-02-22  Jer Noble  <jer.noble@apple.com>
 
         Default mouse cursor behavior should be auto-hide for full screen video with custom controls
