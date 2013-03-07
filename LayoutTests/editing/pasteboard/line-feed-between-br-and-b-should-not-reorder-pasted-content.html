@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html> 
 <head>
 
@@ -17,14 +18,21 @@
 .expected-results:first-line { font-weight: bold }
 </style>
 <script src=../editing.js language="JavaScript" type="text/JavaScript" ></script>
-
+<script src="../../resources/dump-as-markup.js"></script>
 <script>
 
 function editingTest() {
     for (i = 0; i < 3; i++)
         extendSelectionForwardByLineCommand();
+
+    Markup.description(document.querySelector('.explanation').innerText);
+
+    Markup.dump('root', 'Before cut');
     cutCommand();
+    Markup.dump('root', 'After cut');
+
     pasteCommand();
+    Markup.dump('root', 'After paste');
 }
 
 </script>
@@ -38,6 +46,8 @@ function editingTest() {
 Tests: 
 <br>
 Bug fix for <a href="rdar://problem/4035648">&lt;rdar://problem/4035648&gt;</a> REGRESSION (Mail): line feed in source HTML file causes bad copy/paste behavior
+<br>
+In particular, the line feed that appears between br and b elements should not reorder the content in createMarkup.
 </div>
 <div class="expected-results">
 Expected Results:
