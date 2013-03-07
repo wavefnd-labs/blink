@@ -1,3 +1,29 @@
+2013-03-06  Mike West  <mkwst@chromium.org>
+
+        [V8] Preprocess constant values to avoid a "static_cast<signed int>" in CodeGeneratorV8.
+        https://bugs.webkit.org/show_bug.cgi?id=111625
+
+        Reviewed by Kentaro Hara.
+
+        When processing constants in IDL files, CodeGeneratorV8 currently runs
+        the values through 'static_cast<signed int>' in the generated code. We
+        can avoid this miniscule bit of overhead by preprocessing the hex value
+        in Perl when generating the code.
+
+        The FIXME has been in the code since it originally landed in 2009[1].
+        Now's as good a time as any to take care of it.
+
+        [1]: http://trac.webkit.org/browser/trunk/Source/WebCore/bindings/scripts/CodeGeneratorV8.pm?rev=144976#L2933
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateImplementation):
+            If we're presented with a string which begins with '0x', run it
+            through some fairly obtuse Perlisms to first convert from a hex
+            string to an integer ('hex($value)'), "pack" the integer as an
+            unsigned integer ('pack("I", ...)'), and then "unpack" it as a
+            signed integer ('unpack("i", ...)'). Because that's _of course_
+            how you would do things.
+
 2013-03-06  Paweł Forysiuk  <tuxator@o2.pl>
 
         WebKit does not build without accelerated compositing after Changeset 144823
