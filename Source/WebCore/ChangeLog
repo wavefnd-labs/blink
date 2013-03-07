@@ -1,3 +1,24 @@
+2013-03-06  Philippe Liard  <pliard@chromium.org>
+
+        Make RuleData support up to 8191 selectors
+        https://bugs.webkit.org/show_bug.cgi?id=111663
+
+        Reviewed by Andreas Kling.
+
+        r125294 made RuleData consume less memory by replacing a pointer with
+        an index encoded on 12 bits.
+        This unfortunately breaks Chrome for Android (and others) when a lot of
+        CSS is used or more precisely when selectorIndex cannot be stored on 12
+        bits.
+
+        Threfore this change decreases the number of bits used to store
+        m_position by 1 (from 19 to 18) and adds this extra bit to
+        m_selectorIndex so that values up to 8191 can be stored safely without
+        overflowing.
+
+        * css/RuleSet.h:
+        (RuleData):
+
 2013-03-06  Seokju Kwon  <seokju.kwon@gmail.com>
 
         Web Inspector: Remove unused code from contextmenu of element panel
