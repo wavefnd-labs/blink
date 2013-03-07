@@ -1,3 +1,34 @@
+2013-03-07  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
+
+        [Texturemapper] transform-style 'flat' value is broken
+        https://bugs.webkit.org/show_bug.cgi?id=111566
+
+        Reviewed by Allan Sandfeld Jensen.
+
+        After changes from r144290, the CSS3 'transform-styles' property, when
+        used with 'flat' value, resulted in non-stenciled rendering inside
+        clipped area - vide example from Surfin' Safari blog:
+        https://www.webkit.org/blog-files/3d-transforms/transform-style.html
+
+        This patch forces the clip state to be applied when binding the default
+        surface.
+
+        No new tests. No user visible behavior changed.
+
+        * platform/graphics/texmap/TextureMapperGL.cpp:
+        (WebCore::TextureMapperGL::ClipStack::apply):
+        (WebCore::TextureMapperGL::ClipStack::applyIfNeeded): Added.
+        Moved state cache check from apply() to applyIfNeeded().
+
+        (WebCore::BitmapTextureGL::clearIfNeeded):
+        (WebCore::BitmapTextureGL::bind):
+        (WebCore::TextureMapperGL::beginScissorClip):
+        (WebCore::TextureMapperGL::beginClip):
+        (WebCore::TextureMapperGL::endClip):
+        * platform/graphics/texmap/TextureMapperGL.h:
+        (ClipStack):
+        Use applyIfNeeded() to check for clip state before clipping.
+
 2013-03-07  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: refactoring: move TextEditorModel.Indent enum into TextUtils
