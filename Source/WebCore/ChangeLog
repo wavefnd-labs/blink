@@ -1,3 +1,26 @@
+2013-03-06  Levi Weintraub  <leviw@chromium.org>
+
+        InsertUnorderedList can lead to lost content and assertions in moveParagraphs
+        https://bugs.webkit.org/show_bug.cgi?id=111228
+
+        Reviewed by Ryosuke Niwa.
+
+        When a list is wrapped in a presentational inline like a b tag, we'd create markup that included
+        everything up to the b tag from moveParagraphs when intending to only move the contents of the
+        list item. This could make it impossible to remove content from a list and trigger loss of
+        editable text.
+
+        Test: editing/execCommand/insert-remove-block-list-inside-presentational-inline.html
+
+        * editing/EditingStyle.cpp:
+        (WebCore::elementMatchesAndPropertyIsNotInInlineStyleDecl): Ensure there's an inline style
+        before calling propertyExistsInStyle.
+        (WebCore::HTMLElementEquivalent::propertyExistsInStyle): Removing null check for style.
+        All callers ensure this value isn't null.
+        * editing/markup.cpp:
+        (WebCore::highestAncestorToWrapMarkup): Avoid going over RenderBlocks when finding the highest
+        presentational ancestor to avoid leaving the bounds of the original paragraph.
+
 2013-03-06  Adam Klein  <adamk@chromium.org>
 
         [V8] Use implicit references instead of object groups to keep registered MutationObservers alive
