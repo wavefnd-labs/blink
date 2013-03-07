@@ -1,3 +1,39 @@
+2013-03-06  Alexey Proskuryakov  <ap@apple.com>
+
+        [Mac] Synthetic ResourceResponses cannot be sent over IPC without losing most information
+        https://bugs.webkit.org/show_bug.cgi?id=111623
+
+        Reviewed by Brady Eidson.
+
+        * WebCore.exp.in: Exported functions for building synthetic responses.
+
+        * platform/network/ResourceResponseBase.cpp:
+        * platform/network/ResourceResponseBase.h:
+        Added a lot of FIXMEs.
+
+        * platform/network/cf/ResourceResponse.h:
+        (WebCore::ResourceResponse::ResourceResponse):
+        (WebCore::ResourceResponse::platformResponseIsUpToDate):
+        Track m_platformResponseIsUpToDate flag as well as we can. Currently, it will
+        be incorrect if a real platform response gets mutated.
+
+        * platform/network/cf/ResourceResponseCFNet.cpp:
+        (WebCore::ResourceResponse::cfURLResponse): Added a FIXME about how useless this
+        function is when it tries to create a new CFURLResponse.
+
+        * platform/network/mac/ResourceResponseMac.mm:
+        (WebCore::ResourceResponse::initNSURLResponse): Added a FIXME.
+        (WebCore::ResourceResponse::nsURLResponse): Added a return to make logic more clear.
+        (WebCore::ResourceResponse::ResourceResponse): Track m_platformResponseIsUpToDate.
+
+        * platform/network/blackberry/ResourceResponse.h:
+        * platform/network/curl/ResourceResponse.h:
+        * platform/network/qt/ResourceResponse.h:
+        * platform/network/soup/ResourceResponse.h:
+        * platform/network/win/ResourceResponse.h:
+        These platforms do not keep a platform response, so it's never up to date, and
+        WebCore data needs to be serialized.
+
 2013-03-06  Dana Jansens  <danakj@chromium.org>
 
         [chromium] Remove WebSharedGraphicsContext3D class
