@@ -1,3 +1,64 @@
+2013-03-07  Simon Fraser  <simon.fraser@apple.com>
+
+        Rename Mac's TileCache to TileController, and WebTileCacheLayer to WebTiledBackingLayer
+        https://bugs.webkit.org/show_bug.cgi?id=111779
+
+        Reviewed by Tim Horton.
+        
+        "TileCache" was a name conflict in downstream code, so rename it to TileController.
+        The layer that has a TileController is now a WebTiledBackingLayer (which fits with
+        the TiledBacking API that TileController exposes).
+        
+        Also renamed the flags in PlatformCALayer to match.
+
+        Rename only, no behavior change.
+
+        * WebCore.xcodeproj/project.pbxproj:
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::logExposedUnfilledArea):
+        * platform/graphics/GraphicsLayerClient.h:
+        (WebCore::GraphicsLayerClient::shouldUseTiledBacking):
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::GraphicsLayerCA):
+        (WebCore::GraphicsLayerCA::recursiveCommitChanges):
+        (WebCore::GraphicsLayerCA::platformCALayerShowRepaintCounter):
+        (WebCore::GraphicsLayerCA::platformCALayerDidCreateTiles):
+        (WebCore::GraphicsLayerCA::updateVisibleRect):
+        (WebCore::GraphicsLayerCA::getDebugBorderInfo):
+        (WebCore::GraphicsLayerCA::requiresTiledLayer):
+        (WebCore::GraphicsLayerCA::swapFromOrToTiledLayer):
+        * platform/graphics/ca/GraphicsLayerCA.h:
+        * platform/graphics/ca/PlatformCALayer.h:
+        (WebCore::PlatformCALayer::usesTiledBackingLayer):
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm:
+        (PlatformCALayer::PlatformCALayer):
+        (PlatformCALayer::~PlatformCALayer):
+        (PlatformCALayer::tiledBacking):
+        * platform/graphics/ca/mac/TileController.h: Renamed from Source/WebCore/platform/graphics/ca/mac/TileCache.h.
+        * platform/graphics/ca/mac/WebTileLayer.h:
+        (TileController):
+        * platform/graphics/ca/mac/WebTileLayer.mm:
+        (-[WebTileLayer drawInContext:]):
+        (-[WebTileLayer setTileController:WebCore::]):
+        (-[WebTileLayer logFilledFreshTile]):
+        * platform/graphics/ca/mac/WebTiledBackingLayer.h: Renamed from Source/WebCore/platform/graphics/ca/mac/WebTileCacheLayer.h.
+        * platform/graphics/ca/mac/WebTiledBackingLayer.mm: Renamed from Source/WebCore/platform/graphics/ca/mac/WebTileCacheLayer.mm.
+        * platform/graphics/mac/WebLayer.mm:
+        (drawLayerContents):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::RenderLayerBacking):
+        (WebCore::RenderLayerBacking::shouldUseTiledBacking):
+        (WebCore::RenderLayerBacking::adjustTiledBackingCoverage):
+        (WebCore::RenderLayerBacking::createPrimaryGraphicsLayer):
+        * rendering/RenderLayerBacking.h:
+        (WebCore::RenderLayerBacking::usingTiledBacking):
+        (RenderLayerBacking):
+        (WebCore::RenderLayerBacking::hasTiledBackingFlatteningLayer):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::frameViewDidLayout):
+        (WebCore::RenderLayerCompositor::rootFixedBackgroundsChanged):
+        (WebCore::RenderLayerCompositor::supportsFixedRootBackgroundCompositing):
+
 2013-03-07  Alexey Proskuryakov  <ap@apple.com>
 
         FormData should allow setting filename to empty
