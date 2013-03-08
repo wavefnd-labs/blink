@@ -1,3 +1,37 @@
+2013-03-08  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Handle 2 positions with one 'auto' properly
+        https://bugs.webkit.org/show_bug.cgi?id=111653
+
+        Reviewed by Tony Chang.
+
+        The rendering code was making the assumption that we have one position.
+        Thus it couldn't fully match what the specification wants as the 2 opposite
+        positions are required to resolve either position in several cases (e.g.
+        1 / span 2, auto / 'c').
+
+        This change introduces resolveGridPositionsFromStyle to do both opposite
+        positions resolution in one pass and thus handling more cases.
+
+        Test: fast/css-grid-layout/grid-item-spanning-resolution.html
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        (WebCore::RenderGrid::placeSpecifiedMajorAxisItemsOnGrid):
+        (WebCore::RenderGrid::placeAutoMajorAxisItemOnGrid):
+        Updated the above functions to rely on resolveGridPositionsFromStyle.
+
+        (WebCore::RenderGrid::resolveGridPositionsFromStyle):
+        Added this new function that handle the correct resolution.
+
+        (WebCore::RenderGrid::resolveGridPositionFromStyle):
+        Updated the ASSERT to match the new code flow.
+
+        * rendering/RenderGrid.h:
+        (WebCore::RenderGrid::GridSpan::GridSpan):
+        Introduced this new struct to hold the 2 positions along one axis.
+
 2013-03-08  Dominic Cooney  <dominicc@chromium.org>
 
         RenderTextControlSingleLine should not assume that its text element has a renderer
