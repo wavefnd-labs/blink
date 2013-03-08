@@ -1,3 +1,29 @@
+2013-03-08  Ryosuke Niwa  <rniwa@webkit.org>
+
+        After sending message, Mail changes formatting
+        https://bugs.webkit.org/show_bug.cgi?id=111360
+
+        Reviewed by Enrica Casucci.
+
+        Added makeInsertedContentRoundTrippableWithHTMLTreeBuilder to move prohibited children (e.g. p, h1, etc...)
+        out of paragraph elements to run immediately after the fragment insertion. This function splits trees and
+        moves prohibited children out of paragraph elements to keep the tree isomorphic under HTML serialization and
+        parsing. Unfortunately, there are many other DOM tree constructs we need to fix to make the subtree truly
+        isomorphic but this is a step forward.
+
+        Test: editing/pasteboard/pasting-into-p-should-not-nest-p.html
+
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::isProhibitedParagraphChild): Added. Matches the list at
+        https://dvcs.w3.org/hg/editing/raw-file/57abe6d3cb60/editing.html#prohibited-paragraph-child
+        except main element, which is currently missing in the specification.
+        (WebCore::ReplaceSelectionCommand::makeInsertedContentRoundTrippableWithHTMLTreeBuilder): Added.
+        (WebCore::ReplaceSelectionCommand::moveNodeOutOfAncestor): Added.
+        (WebCore::ReplaceSelectionCommand::doApply): Call moveProhibitedChildrenOutOfParagraphElements.
+
+        * editing/ReplaceSelectionCommand.h:
+        (ReplaceSelectionCommand):
+
 2013-03-08  Eric Seidel  <eric@webkit.org>
 
         AtomicHTMLToken should not be heap allocated or RefCounted
