@@ -1,3 +1,27 @@
+2013-03-08  Yuki Sekiguchi  <yuki.sekiguchi@access-company.com>
+
+        When we set word-wrap: break-word and xml:space="preserve" to svg text element, the text is collapsed.
+        https://bugs.webkit.org/show_bug.cgi?id=111675
+
+        Reviewed by Stephen Chenney.
+
+        RenderSVGText define its size when it laid out its first line at SVGRootInlineBox::computePerCharacterLayoutInformation().
+
+        In the following spec, SVG don't perform automatic line break or word wrapping.
+        http://www.w3.org/TR/SVG/text.html#Introduction
+        > SVG performs no automatic line breaking or word wrapping.
+        However, when we set word-wrap: break-word and xml:space="preserve" to svg text element, RenderBlock::LineBreaker::nextLineBreak() breaks the text.
+        This make single character lines and make RenderSVGText narrow.
+
+        We must ignore word-wrap property to make the text a single line.
+
+        We always disable break words and break all in nextLineBreak() when the object is SVGInlineText.
+
+        Test: svg/text/preserve-break-word.html
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::LineBreaker::nextSegmentBreak): Disable break words and break all when we process SVG Text.
+
 2013-03-08  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] HTML5 video - sound volume bar out of widget
