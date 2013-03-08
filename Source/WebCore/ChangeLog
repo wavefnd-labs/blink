@@ -1,3 +1,25 @@
+2013-03-07  Aaron Colwell  <acolwell@chromium.org>
+
+        Heap-use-after-free in WebCore::HTMLMediaElement::~HTMLMediaElement
+        https://bugs.webkit.org/show_bug.cgi?id=110623
+
+        Reviewed by Kentaro Hara.
+
+        Test: http/tests/misc/delete-frame-during-readystatechange-with-gc-after-video-removal.html
+
+        * bindings/v8/V8GCController.cpp: Fix MinorGCWrapperVisitor so it doesn't collect ActiveDOMObjects
+                                          that have pending activity.
+        * html/HTMLAudioElement.h:
+        (HTMLAudioElement): Removed hasPendingActivity() now that this is handled by the base class.
+        * html/HTMLAudioElement.idl: Removed ActiveDOMObject annotation since HTMLMediaElement now has it.
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::hasPendingActivity): Update implementation to return true if the media
+                                                         has audio and is playing. This brings the code into
+                                                         compliance with the detached element behavior outlined
+                                                         in the HTML5 spec.
+        * html/HTMLMediaElement.idl: Added ActiveDOMObject annotation so that all derived classes are
+                                     considered ActiveDOMObjects.
+
 2013-03-07  Jeffrey Pfau  <jpfau@apple.com>
 
         CFNetwork cache partitioning does not work properly on subdomains
