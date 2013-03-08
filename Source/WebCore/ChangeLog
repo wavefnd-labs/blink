@@ -1,3 +1,57 @@
+2013-03-08  Eric Seidel  <eric@webkit.org>
+
+        AtomicHTMLToken should not be heap allocated or RefCounted
+        https://bugs.webkit.org/show_bug.cgi?id=111250
+
+        Reviewed by Adam Barth.
+
+        It was clearly an oversight on our part to ever make AtomicHTMLToken ref-counted.
+        We don't need the actual "token" saved, just enough of it to recreate a fake token.
+
+        This removed many more mallocs than I thought it would, for a nice little speed win.
+        Before:
+        median= 450.482999993 ms, stdev= 7.2381436538 ms, min= 436.084999994 ms, max= 464.968999964 ms
+        After:
+        median= 436.41600004 ms, stdev= 5.71435647554 ms, min= 427.160999971 ms, max= 446.753000026 ms
+
+        * html/parser/AtomicHTMLToken.h:
+        (AtomicHTMLToken):
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::createElementFromSavedToken):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::constructTreeFromHTMLToken):
+        (WebCore::HTMLDocumentParser::constructTreeFromCompactHTMLToken):
+        * html/parser/HTMLElementStack.cpp:
+        (WebCore::HTMLElementStack::isHTMLIntegrationPoint):
+        * html/parser/HTMLFormattingElementList.cpp:
+        (WebCore):
+        (WebCore::HTMLFormattingElementList::tryToEnsureNoahsArkConditionQuickly):
+        (WebCore::HTMLFormattingElementList::ensureNoahsArkCondition):
+        * html/parser/HTMLStackItem.h:
+        (WebCore::HTMLStackItem::create):
+        (WebCore::HTMLStackItem::localName):
+        (WebCore::HTMLStackItem::attributes):
+        (WebCore::HTMLStackItem::getAttributeItem):
+        (HTMLStackItem):
+        (WebCore::HTMLStackItem::hasLocalName):
+        (WebCore::HTMLStackItem::hasTagName):
+        (WebCore::HTMLStackItem::HTMLStackItem):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processFakeStartTag):
+        (WebCore::HTMLTreeBuilder::processFakeEndTag):
+        (WebCore::HTMLTreeBuilder::processFakePEndTagIfPInButtonScope):
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody):
+        (WebCore::HTMLTreeBuilder::processStartTag):
+        (WebCore::HTMLTreeBuilder::processEndTagForInBody):
+        (WebCore::HTMLTreeBuilder::processEndTag):
+        (WebCore::HTMLTreeBuilder::defaultForBeforeHTML):
+        (WebCore::HTMLTreeBuilder::defaultForBeforeHead):
+        (WebCore::HTMLTreeBuilder::defaultForInHead):
+        (WebCore::HTMLTreeBuilder::defaultForInHeadNoscript):
+        (WebCore::HTMLTreeBuilder::defaultForAfterHead):
+        * html/parser/TextDocumentParser.cpp:
+        (WebCore::TextDocumentParser::insertFakePreElement):
+
 2013-03-08  Roger Fong  <roger_fong@apple.com>
 
         Makefile fixes.
