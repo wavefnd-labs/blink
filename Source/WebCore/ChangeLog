@@ -1,3 +1,29 @@
+2013-03-08  Huang Dongsung  <luxtella@company100.net>
+
+        [EFL][Qt] REGRESSION(r144787): A fixed element lags when scrolling and wheeling.
+        https://bugs.webkit.org/show_bug.cgi?id=111829
+
+        Reviewed by Noam Rosenthal.
+
+        Currently, flagsChanged deals with all boolean flags. It introduces this bug
+        because when another flag (i.e. preserves3D) is changed, fixedToViewport is set
+        to false. So this patch updates all flags when at least one flag is changed.
+
+        In addition, this patch amends isScrollable code to match other flags.
+
+        This patch can only be tested manually since there is no automated
+        testing facilities for in-motion touch.
+        Test: ManualTests/fixed-position.html
+              ManualTests/nested-fixed-position.html
+
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.cpp:
+        (WebCore::CoordinatedGraphicsLayer::setScrollableArea):
+        (WebCore::CoordinatedGraphicsLayer::syncLayerState):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.cpp:
+        (WebCore::CoordinatedGraphicsScene::setLayerState):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsState.h:
+        (WebCore::CoordinatedGraphicsLayerState::CoordinatedGraphicsLayerState):
+
 2013-03-07  Dean Jackson  <dino@apple.com>
 
         Remove dead label code in snapshotted plugin
