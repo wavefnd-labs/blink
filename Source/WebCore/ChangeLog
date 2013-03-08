@@ -1,3 +1,38 @@
+2013-03-08  Glenn Hartmann  <hartmanng@chromium.org>
+
+       Adding a hook to collect data for a Google UMA histogram to track when
+       m_needsCompositedScrolling is turned on and off.
+       https://bugs.webkit.org/show_bug.cgi?id=111725
+
+       Reviewed by Julien Chaffraix.
+
+       We want to keep track of this information to quantify the effects of a
+       few patches that will cause us to opt in to composited scrolling.
+       Specifically, we want to measure the effects of
+       https://bugs.webkit.org/show_bug.cgi?id=109302,
+       https://bugs.webkit.org/show_bug.cgi?id=109966,
+       https://bugs.webkit.org/show_bug.cgi?id=109591, and
+       https://bugs.webkit.org/show_bug.cgi?id=107618.
+
+       We do this by measuring a per-layer boolean value, and comparing the
+       ratio between number of layers opted in and number of layers that remain
+       uncomposited. We hope the relative number of layers opting in will
+       increase after the relevant patches land and are enabled.
+
+       Unfortunately implementing extra statistics is impractical at the
+       moment since most of the actionable relevant data is expensive to
+       compute. For example, it would be useful to know if the layers that opt
+       out do so because of invisible or non-overlapping layers that cause a
+       potential stacking container's children to be discontiguous, because we
+       would potentially be able to mitigate the problem. However, this would
+       add considerable overhead to perform overlap testing just to gather
+       data.
+
+       No new tests (no change in behaviour).
+
+       * rendering/RenderLayer.cpp:
+       (WebCore::RenderLayer::updateNeedsCompositedScrolling):
+
 2013-03-08  Alberto Garcia  <agarcia@igalia.com>
 
         [BlackBerry] GraphicsContext: rename addRoundedRectClip to clipRoundedRect
