@@ -1,3 +1,30 @@
+2013-03-08  Mike West  <mkwst@chromium.org>
+
+        CSP: 'eval()' is blocked in report-only mode.
+        https://bugs.webkit.org/show_bug.cgi?id=111867
+
+        Reviewed by Adam Barth.
+
+        Setting a 'Content-Security-Policy-Report-Only' header should not have
+        any effect on what a page actually executes. Currently, however, setting
+        a 'script-src' directive that doesn't whitelist 'unsafe-eval' actually
+        blocks 'eval()' on the page. This patch fixes that by checking whether
+        we're in report-only mode before turning 'eval()' off inside the script
+        engine.
+
+        This leaves us in a weird state, however. We don't currently have any
+        mechanism of explaining to the VM that we just want to be notified of
+        'eval()' usage. I've filed http://wkbug.com/111869 to cover this
+        aspect.
+
+        Test: http/tests/security/contentSecurityPolicy/eval-allowed-in-report-only-mode.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::ContentSecurityPolicy::didReceiveHeader):
+            For each policy we parse, check that we're only turning off eval in
+            the VM when we're in enforce mode. If we're in report-only mode,
+            skip it.
+
 2013-03-08  Christian Biesinger  <cbiesinger@chromium.org>
 
         REGRESSION (r143643): <button> should support ::first-line and ::first-letter
