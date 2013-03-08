@@ -1,3 +1,24 @@
+2013-03-07  Emil A Eklund  <eae@chromium.org>
+
+        [sub-pixel] Rounding error in table cell height calculation causes unnecessary scrollbar
+        https://bugs.webkit.org/show_bug.cgi?id=111794
+
+        Reviewed by Levi Weintraub.
+        
+        In RenderTableCell::logicalHeightForRowSizing the
+        adjustedLogicalHeight is calculated from the logicalHeight and
+        intrinsic padding and is then returned and floored. This can
+        cause cause the cell to be slightly smaller (0.5px) than the
+        element it contains.
+
+        Test: fast/sub-pixel/table-cell-height.html
+
+        * rendering/RenderTableCell.h:
+        (WebCore::RenderTableCell::logicalHeightForRowSizing):
+        Change to use pixelSnapped version of logicalHeight method and
+        change signature to return int as the only caller immediately
+        down-casts the result to an int.
+
 2013-03-08  Christian Biesinger  <cbiesinger@chromium.org>
 
         RenderFullScreen needs to clear override sizes when exiting full screen
