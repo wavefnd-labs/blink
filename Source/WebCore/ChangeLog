@@ -1,3 +1,39 @@
+2013-03-08  Eric Seidel  <eric@webkit.org>
+
+        Free up background parser's checkpoints when speculation succeeds
+        https://bugs.webkit.org/show_bug.cgi?id=110547
+
+        Reviewed by Adam Barth.
+
+        This should be a memory (and possible perf) win while parsing
+        pages, as we will no longer hold multiple copies of every
+        source byte during the whole parse.
+
+        Many LayoutTests exercise this code path, and I've manually (debugger and printf)
+        that we're hitting this code, but we'll have to wait for the memory/perf bots
+        to tell us if this shows up as a win.
+
+        We only bother to message the parser at the end of a speculation chain, so as not
+        to send too many messages to the background parser.
+
+        * html/parser/BackgroundHTMLInputStream.cpp:
+        (WebCore::BackgroundHTMLInputStream::BackgroundHTMLInputStream):
+        (WebCore::BackgroundHTMLInputStream::invalidateCheckpointsUpThrough):
+        (WebCore):
+        (WebCore::BackgroundHTMLInputStream::rewindTo):
+        * html/parser/BackgroundHTMLInputStream.h:
+        (BackgroundHTMLInputStream):
+        (Checkpoint):
+        (WebCore::BackgroundHTMLInputStream::Checkpoint::isNull):
+        (WebCore::BackgroundHTMLInputStream::Checkpoint::clear):
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::passedCheckpoint):
+        (WebCore):
+        * html/parser/BackgroundHTMLParser.h:
+        (BackgroundHTMLParser):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::pumpPendingSpeculations):
+
 2013-03-08  Chandra Shekar Vallala  <brk376@motorola.com>
 
         [chromium] Keydown event for 'shift+alt' returns win keycode instead of 'alt'
