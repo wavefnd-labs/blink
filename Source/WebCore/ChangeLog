@@ -1,3 +1,34 @@
+2013-03-07  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Use WeakPtr for Factory-to-BackingStore reference
+        https://bugs.webkit.org/show_bug.cgi?id=111459
+
+        Reviewed by Adam Barth.
+
+        IDBFactoryBackendImpl maintains a map of backing stores - if another database in the same
+        origin is opened, the backing store instance must be re-used). This was a map to raw
+        pointers so that the backing store can be collected when all database references are
+        dropped. The map was maintained manually by passing the factory to the IDBBackingStore which
+        would add/remove itself on creation/destruction.
+
+        Replace this with a HashMap<WeakPtr<>>. This simplifies the plumbing; map entries
+        "leak" but are purged on subsequent opens.
+
+        Added webkit_unit_test (Chromium port) to verify refcounts.
+
+        * Modules/indexeddb/IDBBackingStore.cpp:
+        (WebCore::IDBBackingStore::IDBBackingStore): No need to notify factory of lifetime.
+        (WebCore::IDBBackingStore::~IDBBackingStore): Ditto.
+        (WebCore::IDBBackingStore::open): Ditto.
+        * Modules/indexeddb/IDBBackingStore.h: No reference to the factory, but...
+        (WebCore::IDBBackingStore::createWeakPtr): Do need to expose weak pointers for the factory to hold.
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp:
+        (WebCore::cleanWeakMap): Helper function to scrub a HashMap<WeakPtr<T>> of empty pointers.
+        May move to WTF when we've learned how general it is, or come up with a dedicated WeakPtrHashMap type.
+        (WebCore::IDBFactoryBackendImpl::openBackingStore): WeakPtr fu.
+        * Modules/indexeddb/IDBFactoryBackendImpl.h:
+        (IDBFactoryBackendImpl): Remove plumbing methods.
+
 2013-03-07  Otto Derek Cheung  <otcheung@rim.com>
 
         [BlackBerry] RefCounting ParsedCookie to avoid SegFaults
