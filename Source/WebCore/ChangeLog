@@ -1,3 +1,96 @@
+2013-03-07  Keishi Hattori  <keishi@webkit.org>
+
+        Update calendar picker UI
+        https://bugs.webkit.org/show_bug.cgi?id=109439
+
+        Reviewed by Kent Tamura.
+
+        This patch changes the calendar picker UI.
+
+        Added tests to existing calendar picker tests.
+        Test: platform/chromium/fast/forms/calendar-picker/calendar-picker-appearance-month-popup.html
+
+        * Resources/pagepopups/calendarPicker.css:
+        (body):
+        (.rtl):
+        (.scroll-view):
+        (.scroll-view-content):
+        (.list-cell):
+        (.list-cell.hidden):
+        (.day-cell):
+        (.week-number-cell):
+        (.day-cell.today):
+        (.day-cell.highlighted):
+        (.day-cell.highlighted.disabled):
+        (.day-cell.selected):
+        (.day-cell.disabled):
+        (.day-cell.current-month):
+        (.calendar-table-view):
+        (.preparing .calendar-table-view:focus):
+        (.week-day-label):
+        (.week-number-label):
+        (.calendar-table-header-view):
+        (.calendar-picker):
+        (.calendar-header-view):
+        (.calendar-title):
+        (.rtl .calendar-title):
+        (.month-popup-button:disabled):
+        (.month-popup-button):
+        (.month-popup-button .disclosure-triangle):
+        (.month-popup-button .disclosure-triangle svg):
+        (.today-button::after):
+        (.calendar-navigation-button):
+        (.year-list-view):
+        (.year-list-cell):
+        (.year-list-cell .label):
+        (.year-list-cell .month-chooser):
+        (.month-buttons-row):
+        (.month-button):
+        (.month-button.highlighted):
+        (.scrubby-scroll-bar):
+        (.scrubby-scroll-thumb):
+        (.month-popup-view):
+        (.year-list-view .scrubby-scroll-bar):
+        (.rtl .year-list-view .scrubby-scroll-bar):
+        * Resources/pagepopups/calendarPicker.js:
+        (setGlobalParams): Sets the global params.
+        (initialize):
+        (openCalendarPicker):
+        (CalendarHeaderView.prototype.onNavigationButtonClick): Fix typo.
+        (CalendarPicker):
+        (CalendarPicker.prototype.onWindowResize): We want to have the "preparing" class applied
+        to cancel css transitions while setting up the calendar picker so we can avoid flaky pixel tests.
+        (CalendarPicker.prototype.onYearListViewDidHide): The user clicked on a month so hide the month popup.
+        (CalendarPicker.prototype.onYearListViewDidSelectMonth): Change the current month in response to the month popup.
+        (CalendarPicker.prototype.attachTo): We want the calendar table focused when the calendar picker first opens.
+        (CalendarPicker.prototype.cleanup): Clean up any event listeners or elements attached to nodes outside of this.element.
+        (CalendarPicker.prototype.onMonthPopupButtonClick): Open the month popup in response to the month popup button being clicked.
+        (CalendarPicker.prototype._setConfig): Configures the calendar picker.
+        (CalendarPicker.prototype.currentMonth): The currently shown month.
+        (CalendarPicker.prototype.setCurrentMonth): Scrolls the calendar table to the given month. Use the navigation behavior param to specify if you want a transition animation.
+        (CalendarPicker.prototype.adjustHeight): Adjusts the height so its just tall enough to fit the current month. If the month picker is open, fit that.
+        (CalendarPicker.prototype.selection): Currently selected date range.
+        (CalendarPicker.prototype.highlight): Currently highlighted date range.
+        (CalendarPicker.prototype.firstVisibleDay): Returns the first visible day ignoring scroll animation (i.e. this is the first visible day when the scroll animation is done).
+        (CalendarPicker.prototype.lastVisibleDay): Returns the last visible day ignoring scroll animation.
+        (CalendarPicker.prototype.selectRangeContainingDay): Sets the selection to the date range containing the given day.
+        (CalendarPicker.prototype.highlightRangeContainingDay): Sets the highlight to the date range containing the given day.
+        (CalendarPicker.prototype.setSelection): Sets the selection to the given date range.
+        (CalendarPicker.prototype._setHighlight): Sets the highlight to the given date range.
+        (CalendarPicker.prototype._stepMismatch): Just moving.
+        (CalendarPicker.prototype._outOfRange): Ditto.
+        (CalendarPicker.prototype.isValid): Returns true if the given date range is a valid selection.
+        (CalendarPicker.prototype.isValidDay): Returns true if the day is part of a valid selection.
+        (CalendarPicker.prototype._moveHighlight): Moves the highlight to the given date range if possible. Returns true if it succeeds.
+        (CalendarPicker.prototype.onCalendarTableKeyDown): Handles the arrow keys, etc.
+        (CalendarPicker.prototype.width):
+        (CalendarPicker.prototype.height):
+        (CalendarPicker.prototype.setHeight):
+        (CalendarPicker.prototype.onBodyKeyDown): Handles esc/m/y/d.
+        * Resources/pagepopups/chromium/calendarPickerChromium.css:
+        (.calendar-table-view:focus):
+        (.preparing .calendar-table-view:focus):
+
 2013-03-07  Seokju Kwon  <seokju.kwon@gmail.com>
 
         Web Inspector: Remove unused return value after r122962
