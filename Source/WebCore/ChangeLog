@@ -1,3 +1,56 @@
+2013-03-07  Dean Jackson  <dino@apple.com>
+
+        Implement a custom appearance for the snapshotted plugin background
+        https://bugs.webkit.org/show_bug.cgi?id=108368
+
+        Reviewed by Tim Horton.
+
+        After https://bugs.webkit.org/show_bug.cgi?id=108284 (r142507), a
+        snapshotted plugin was no longer drawing the background of the
+        label blurred. Since the snapshot content was now a shadow tree,
+        it wasn't feasible to pre-blur a region of the snapshot: the label
+        could be any size and in any location, with ports being able to
+        override the appearance through their UA style sheet.
+
+        Instead we now use one of the elements in the tree, the snapshot-overlay,
+        as a hook where ports can add any effect they want. This could be simply
+        a border, or a transparent mask, or even a CSS filter. We introduce a custom
+        CSS appearance "snapshotted-plugin-overlay", which could be added to the
+        element in the injected UA stylesheet. This calls into RenderTheme in
+        the same way that custom controls do.
+
+        Meanwhile, in RenderThemeMac, we implement the appearance by drawing the
+        content of the plugin snapshot into the background of the element. That
+        way we can add effects in CSS.
+
+        Test: plugins/snapshot-appearance.html
+
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue): Handle SnapshottedPluginOverlayPart.
+        * css/CSSValueKeywords.in: New appearance value snapshotted-plugin-overlay.
+        * platform/ThemeTypes.h: New value SnapshottedPluginOverlayPart.
+        * html/HTMLPlugInElement.h:
+        (WebCore::toHTMLPlugInElement): Add safer casting helpers.
+        * html/HTMLPlugInImageElement.h:
+        (WebCore::toHTMLPlugInImageElement): Ditto.
+        * rendering/RenderSnapshottedPlugIn.cpp: Remove the code for handling
+            the blur directly in the renderer.
+        (WebCore::RenderSnapshottedPlugIn::paint): Simplify the paint logic since we're
+            no longer trying to blur here.
+        (WebCore::RenderSnapshottedPlugIn::paintSnapshot): Ditto.
+        * rendering/RenderSnapshottedPlugIn.h: Remove the methods that were trying
+            to blur the image directly.
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::paint): Call paintSnapshottedPluginOverlay.
+        * rendering/RenderTheme.h:
+        (WebCore::RenderTheme::paintSnapshottedPluginOverlay): New virtual method with default implementation.
+        * rendering/RenderThemeMacShared.h:
+        (RenderThemeMacShared): Override paintSnapshottedPluginOverlay.
+        * rendering/RenderThemeMacShared.mm:
+        (WebCore::RenderThemeMacShared::paintSnapshottedPluginOverlay): Implement a custom render path
+            that takes the snapshot image from the node's parent, and draws it into the background.
+            Along the way make sure we're actually using the right type of element (an HTMLPlugInImageElement).
+
 2013-03-08  Sergio Villar Senin  <svillar@igalia.com>
 
         Improve drag&drop of list items in contentEditable divs
