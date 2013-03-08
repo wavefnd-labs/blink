@@ -1,3 +1,31 @@
+2013-03-07  Jeffrey Pfau  <jpfau@apple.com>
+
+        CFNetwork cache partitioning does not work properly on subdomains
+        https://bugs.webkit.org/show_bug.cgi?id=111772
+
+        Reviewed by David Kilzer.
+
+        Ensure that the cache partitioning is done over the top privately-controlled domain for the NSURLRequest.
+
+        Not possible to test with current automated test tools, must be tested manually.
+
+        * loader/cache/MemoryCache.cpp: Remove extraneous calls to partitionName
+        (WebCore):
+        (WebCore::MemoryCache::add):
+        (WebCore::MemoryCache::revalidationSucceeded):
+        (WebCore::MemoryCache::resourceForRequest):
+        (WebCore::MemoryCache::evict):
+        (WebCore::MemoryCache::removeResourcesWithOrigin):
+        * platform/network/cf/ResourceRequest.h: Put top privately-controlled domain reduction code into ResourceRequest::partitionName
+        (ResourceRequest):
+        (WebCore::ResourceRequest::cachePartition):
+        (WebCore::ResourceRequest::setCachePartition): Pre-process the partition name
+        * platform/network/cf/ResourceRequestCFNet.cpp:
+        (WebCore):
+        (WebCore::ResourceRequest::partitionName):
+        * platform/network/mac/ResourceRequestMac.mm:
+        (WebCore::ResourceRequest::doUpdatePlatformRequest): Use a UTF-8 version of the cache partition name
+
 2013-03-07  Kenneth Russell  <kbr@google.com>
 
         Compute WebGL context attributes from DrawingBuffer when it is used
