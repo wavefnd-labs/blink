@@ -1,3 +1,82 @@
+2013-03-08  Eric Seidel  <eric@webkit.org>
+
+        BackgroundHTMLParser should be able to atomize well-known strings
+        https://bugs.webkit.org/show_bug.cgi?id=107337
+
+        Reviewed by Adam Barth.
+
+        Testing this patch easily requires applying bug 107236 locally
+        to remove all the rendering noise from Parser/html-threaded-parser.html.
+
+        This patch adds a new class HTMLIdentifier which allows us to avoid
+        allocating strings for known tag/attribute names from HTMLNames.
+
+        There is still a lot of meat on this bone, but I think it's important to
+        land something "smallish" to start and iterate from there.
+
+        This took Parser/html-threaded-parser.html from:
+        median= 443.726500002 ms, stdev= 7.25002679952 ms, min= 430.244000047 ms, max= 455.511000007 ms
+        to:
+        median= 427.849500004 ms, stdev= 9.96967058292 ms, min= 417.914000049 ms, max= 461.528000014 ms
+        on my MBP.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * html/parser/AtomicHTMLToken.h:
+        (WebCore::AtomicHTMLToken::AtomicHTMLToken):
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::tokenExitsForeignContent):
+        (WebCore::tokenExitsSVG):
+        (WebCore::tokenExitsMath):
+        (WebCore::BackgroundHTMLParser::simulateTreeBuilder):
+        * html/parser/CSSPreloadScanner.cpp:
+        (WebCore::CSSPreloadScanner::scan):
+        * html/parser/CSSPreloadScanner.h:
+        (WebCore):
+        (CSSPreloadScanner):
+        * html/parser/CompactHTMLToken.cpp:
+        (SameSizeAsCompactHTMLToken):
+        (WebCore::CompactHTMLToken::CompactHTMLToken):
+        * html/parser/CompactHTMLToken.h:
+        (WebCore::CompactHTMLToken::Attribute::Attribute):
+        (Attribute):
+        (WebCore::CompactHTMLToken::data):
+        (WebCore::CompactHTMLToken::publicIdentifier):
+        (CompactHTMLToken):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::startBackgroundParser):
+        * html/parser/HTMLIdentifier.cpp: Added.
+        (WebCore):
+        (WebCore::identifierTable):
+        (WebCore::HTMLIdentifier::hasIndex):
+        (WebCore::HTMLIdentifier::findIndex):
+        (WebCore::nameForIndex):
+        (WebCore::HTMLIdentifier::asString):
+        (WebCore::HTMLIdentifier::asStringImpl):
+        (WebCore::HTMLIdentifier::addNames):
+        (WebCore::HTMLIdentifier::init):
+        * html/parser/HTMLIdentifier.h: Added.
+        (WebCore):
+        (HTMLIdentifier):
+        (WebCore::HTMLIdentifier::HTMLIdentifier):
+        (WebCore::HTMLIdentifier::isSafeToSendToAnotherThread):
+        * html/parser/HTMLParserIdioms.cpp:
+        (WebCore::threadSafeEqual):
+        (WebCore::threadSafeMatch):
+        * html/parser/HTMLParserIdioms.h:
+        (WebCore):
+        (WebCore::threadSafeHTMLNamesMatch):
+        * html/parser/HTMLPreloadScanner.cpp:
+        (WebCore::TokenPreloadScanner::tagIdFor):
+        (WebCore::TokenPreloadScanner::StartTagScanner::match):
+        (TokenPreloadScanner::StartTagScanner):
+        (WebCore::TokenPreloadScanner::StartTagScanner::processAttribute):
+        * html/parser/HTMLPreloadScanner.h:
+
 2013-03-08  Brandon Jones  <bajones@google.com>
 
         Check to ensure MultisampleRenderbuffer creation succeeds
