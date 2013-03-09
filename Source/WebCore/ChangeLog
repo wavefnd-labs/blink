@@ -1,3 +1,28 @@
+2013-03-07  Robert Hogan  <robert@webkit.org>
+
+        REGRESSION(r140907): Incorrect baseline for cells with media content during load
+        https://bugs.webkit.org/show_bug.cgi?id=108357
+
+        Reviewed by Julien Chaffraix.
+
+        If a cell has replaced content, the intrinsic height of its content can change between layouts. If that's the case then the intrinsic padding we used
+        for layout (the padding required to push the contents of the cell down to the row's baseline) is included in the new height and baseline and makes both
+        of them wrong. So if a cell's content's intrinsic height has changed push the new content up into the intrinsic padding and relayout so that the rest of
+        table and row layout can use the correct baseline and height for this cell.
+
+        Tests: fast/css/vertical-align-baseline-rowspan-012.html
+               http/tests/css/vertical-align-baseline-after-image-load-2.html
+               http/tests/css/vertical-align-baseline-after-image-load-3.html
+               http/tests/css/vertical-align-baseline-after-image-load.html
+
+        * rendering/RenderTableCell.cpp:
+        (WebCore::RenderTableCell::layout):
+        * rendering/RenderTableCell.h:
+        (WebCore::RenderTableCell::isBaselineAligned):
+        * rendering/RenderTableSection.cpp:
+        (WebCore::RenderTableSection::calcRowLogicalHeight):
+        (WebCore::RenderTableSection::layoutRows):
+
 2013-03-08  Chris Fleizach  <cfleizach@apple.com>
 
         REGRESSION: Intermittent crash in SpeechSynthesis::didFinishSpeaking
