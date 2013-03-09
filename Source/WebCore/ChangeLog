@@ -1,5 +1,66 @@
 2013-03-09  Eric Carlson  <eric.carlson@apple.com>
 
+        Enable platform code to implement text track menu
+        https://bugs.webkit.org/show_bug.cgi?id=111924
+
+        Reviewed by Dean Jackson.
+
+        No new tests, the new code isn't enabled in any ports yet.
+
+        * WebCore.xcodeproj/project.pbxproj: Add PlatformTextTrack.h and PlatformTextTrackMenu.h.
+
+        * html/HTMLAudioElement.cpp:
+        (WebCore::HTMLAudioElement::createForJSConstructor): scheduleLoad -> scheduleDelayedAction.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement): Deal with scheduleLoad to scheduleDelayedAction rename.
+        (WebCore::HTMLMediaElement::parseAttribute): Ditto.
+        (WebCore::HTMLMediaElement::finishParsingChildren): Ditto.
+        (WebCore::HTMLMediaElement::insertedInto): Ditto.
+        (WebCore::HTMLMediaElement::scheduleDelayedAction): Ditto.
+        (WebCore::HTMLMediaElement::scheduleNextSourceChild): Ditto.
+        (WebCore::HTMLMediaElement::loadTimerFired): Ditto.
+        (WebCore::HTMLMediaElement::textTrackModeChanged): Notify platform menu of track change.
+        (WebCore::HTMLMediaElement::playInternal): Deal with scheduleLoad to scheduleDelayedAction rename.
+        (WebCore::HTMLMediaElement::pauseInternal): Ditto.
+        (WebCore::HTMLMediaElement::mediaPlayerDidAddTrack): Ditto. Call addTrack() instead of appending 
+            the track directly.
+        (WebCore::HTMLMediaElement::setSelectedTextTrack): Deal with platform menu changing the
+            selected track.
+        (WebCore::HTMLMediaElement::platformTextTracks): Return an array of PlatformTracks representing
+            the current text tracks.
+        (WebCore::HTMLMediaElement::notifyMediaPlayerOfTextTrackChanges): Notify the platform menu
+            that the list of text tracks has changed.
+        (WebCore::HTMLMediaElement::platformTextTrackMenu): Return the platform track menu, if any.
+        (WebCore::HTMLMediaElement::closeCaptionTracksChanged): 
+        (WebCore::HTMLMediaElement::addTrack): Call addTrack() instead of appending the track directly.
+        (WebCore::HTMLMediaElement::removeTrack): Call closeCaptionTracksChanged.
+        (WebCore::HTMLMediaElement::addTextTrack): Call addTrack() instead of appending the track directly.
+        (WebCore::HTMLMediaElement::didAddTrack): Ditto.
+        (WebCore::HTMLMediaElement::didRemoveTrack): Deal with scheduleLoad to scheduleDelayedAction rename.
+        (WebCore::HTMLMediaElement::sourceWasAdded): Ditto.
+        (WebCore::HTMLMediaElement::clearMediaPlayer): Forget the platform track menu.
+        (WebCore::HTMLMediaElement::resume): Deal with scheduleLoad to scheduleDelayedAction rename.
+        * html/HTMLMediaElement.h:
+
+        * html/track/InbandTextTrack.h: scheduleLoad -> scheduleDelayedAction.
+
+        * html/track/TextTrack.cpp:
+        (WebCore::TextTrack::platformTextTrack): Create a PlatformTextTrack.
+        * html/track/TextTrack.h:
+
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::MediaPlayer::implementsTextTrackControls): New, player private passthrough.
+        (WebCore::MediaPlayer::textTrackMenu): Ditto.
+        * platform/graphics/MediaPlayer.h:
+        * platform/graphics/MediaPlayerPrivate.h:
+
+        * platform/graphics/PlatformTextTrack.h: Added.
+
+        * platform/graphics/PlatformTextTrackMenu.h: Added.
+
+2013-03-09  Eric Carlson  <eric.carlson@apple.com>
+
         Video size calculated incorrectly when PLUGIN_PROXY_FOR_VIDEO
         https://bugs.webkit.org/show_bug.cgi?id=111912
 
