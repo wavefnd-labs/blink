@@ -1,3 +1,22 @@
+2013-03-08  Chris Fleizach  <cfleizach@apple.com>
+
+        REGRESSION: Intermittent crash in SpeechSynthesis::didFinishSpeaking
+        https://bugs.webkit.org/show_bug.cgi?id=111613
+
+        Reviewed by Ryosuke Niwa.
+
+        This crash happens when the mock synthesizer utterance variable gets cleared
+        before the speakingFinished timer happens. I don't see how that could happen
+        but I was able to make a similar problem happen when cancel is called twice.
+
+        This adds in a few more asserts and common sense checks. I'm hoping it will
+        illuminate the problem further.
+
+        * platform/mock/PlatformSpeechSynthesizerMock.cpp:
+        (WebCore::PlatformSpeechSynthesizerMock::speakingFinished):
+        (WebCore::PlatformSpeechSynthesizerMock::speak):
+        (WebCore::PlatformSpeechSynthesizerMock::cancel):
+
 2013-03-08  David Kilzer  <ddkilzer@apple.com>
 
         BUILD FIX: Make WebCore link for iOS
