@@ -1,3 +1,35 @@
+2013-03-08  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Resolve grid-{end|after} integer against the end|after edge
+        https://bugs.webkit.org/show_bug.cgi?id=111885
+
+        Reviewed by Tony Chang.
+
+        The current code resolves grid-end (resp. grid-after) <integer>'s format against the start
+        (resp. before) axis. The specification changed so that they are resolved against their matching
+        axis.
+
+        Test: fast/css-grid-layout/grid-auto-flow-resolution.html
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::maximumIndexInDirection):
+        Updated the code to do the grid sizing measurement without resolveGridPositionsFromStyle. That's required
+        as resolveGridPositionsFromStyle requires the grid to be sized.
+
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        Added a comment about not recomputing after grid growth. This issue was raised to www-style
+        (http://lists.w3.org/Archives/Public/www-style/2013Mar/0182.html).
+
+        (WebCore::RenderGrid::resolveGridPositionsFromStyle):
+        Added an ASSERT now that we don't call it during grid construction. Also added some code to pass
+        the side of the GridPosition we give to resolveGridPositionFromStyle.
+
+        (WebCore::RenderGrid::resolveGridPositionFromStyle):
+        Updated the code to resolve the grid position against the right side.
+
+        * rendering/RenderGrid.h:
+        Added GridPositionSide and updated resolveGridPositionFromStyle's signature.
+
 2013-03-08  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r142015.
