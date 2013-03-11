@@ -1,3 +1,73 @@
+2013-03-11  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exclusions] Refactor the ExclusionPolygon class to enable storing multiple boundaries
+        https://bugs.webkit.org/show_bug.cgi?id=111766
+
+        Reviewed by Dirk Schulze.
+
+        Refactored the ExclusionPolygon class to enable adding support for shape-margin and shape-padding.
+        Extracted a new FloatPolygon class which is now used by ExclusionPolygon to represent the shape's
+        boundary. It will be used to add m_paddedPolygon and m_marginPolygon members to ExclusionPolygon
+        in a subsequent patch.
+
+        No new tests. This is strictly a refactoring of the existing code.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/FloatPolygon.cpp: Factored out of Source/WebCore/rendering/ExclusionPolygon.cpp.
+        (WebCore::determinant):
+        (WebCore::areCollinearPoints):
+        (WebCore::areCoincidentPoints):
+        (WebCore::isPointOnLineSegment):
+        (WebCore::nextVertexIndex):
+        (WebCore::FloatPolygon::FloatPolygon):
+        (WebCore::FloatPolygon::findNextEdgeVertexIndex):
+        (WebCore::FloatPolygon::overlappingEdges):
+        (WebCore::leftSide):
+        (WebCore::FloatPolygon::contains):
+        (WebCore::VertexPair::overlapsRect):
+        (WebCore::VertexPair::intersection):
+        * platform/graphics/FloatPolygon.h: Factored out of Source/WebCore/rendering/ExclusionPolygon.h.
+        (FloatPolygon):
+        (WebCore::FloatPolygon::vertexAt):
+        (WebCore::FloatPolygon::numberOfVertices):
+        (WebCore::FloatPolygon::fillRule):
+        (WebCore::FloatPolygon::edgeAt):
+        (WebCore::FloatPolygon::numberOfEdges):
+        (WebCore::FloatPolygon::boundingBox):
+        (WebCore::FloatPolygon::isEmpty):
+        (VertexPair):
+        (WebCore::VertexPair::~VertexPair):
+        (WebCore::VertexPair::minX):
+        (WebCore::VertexPair::minY):
+        (WebCore::VertexPair::maxX):
+        (WebCore::VertexPair::maxY):
+        (FloatPolygonEdge):
+        (WebCore::FloatPolygonEdge::previousEdge):
+        (WebCore::FloatPolygonEdge::nextEdge):
+        (WebCore::FloatPolygonEdge::polygon):
+        (WebCore::FloatPolygonEdge::vertexIndex1):
+        (WebCore::FloatPolygonEdge::vertexIndex2):
+        (WebCore::FloatPolygonEdge::edgeIndex):
+        * rendering/ExclusionPolygon.cpp: Now depends on FloatPolygon.
+        (EdgeIntersection):
+        (WebCore::leftSide):
+        (WebCore::computeXIntersection):
+        (WebCore::getVertexIntersectionVertices):
+        (WebCore::computeXIntersections):
+        (WebCore::computeOverlappingEdgeXProjections):
+        (WebCore::ExclusionPolygon::getExcludedIntervals):
+        (WebCore::ExclusionPolygon::getIncludedIntervals):
+        (WebCore::firstFitRectInPolygon):
+        (WebCore::ExclusionPolygon::firstIncludedIntervalLogicalTop):
+        * rendering/ExclusionPolygon.h: Now depends on FloatPolygon.
+        (WebCore::OffsetPolygonEdge::OffsetPolygonEdge):
+        (ExclusionPolygon):
+        (WebCore::ExclusionPolygon::ExclusionPolygon):
+
 2013-03-11  Alexey Proskuryakov  <ap@apple.com>
 
         Roll out part of r144671.
