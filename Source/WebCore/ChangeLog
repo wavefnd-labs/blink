@@ -1,3 +1,47 @@
+2013-03-10  Glenn Adams  <glenn@skynav.com>
+
+        Line breaking opportunities at the end of a text node are missed
+        https://bugs.webkit.org/show_bug.cgi?id=17427
+
+        Reviewed by Darin Adler.
+
+        When initializing context for determining next break position,
+        reuse last two characters from previous text node(s) within block.
+        This additional state is stored in the current LazyLineBreakIterator
+        as an optimization to prevent having to add two new parameters to
+        isBreakable().
+
+        At present, this fixes only the ASCII shortcut code path, but
+        does not yet handle the non-ASCII path. Since the ASCII path is
+        the most performant critical, the handling of this latter path
+        will be addressed by webkit.org/b/105692.
+
+        Additionally test for case where last two characters context
+        is derived from distinct nodes, possibly with intervening empty
+        inline node(s).
+
+        Test: fast/text/line-break-between-text-nodes.html
+
+        * platform/text/TextBreakIterator.h:
+        (WebCore::LazyLineBreakIterator::LazyLineBreakIterator):
+        (WebCore::LazyLineBreakIterator::lastCharacter):
+        (WebCore::LazyLineBreakIterator::secondToLastCharacter):
+        (WebCore::LazyLineBreakIterator::setLastTwoCharacters):
+        (WebCore::LazyLineBreakIterator::resetLastTwoCharacters):
+        (WebCore::LazyLineBreakIterator::updateLastTwoCharacters):
+        (LazyLineBreakIterator):
+        Add state variables to retain last two characters of previous text node(s)
+        for reuse when initializing nextBreakPosition<>() context.
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange):
+        (WebCore::RenderBlock::LineBreaker::nextSegmentBreak):
+        Record and reset retained last two characters of previous text node(s) as
+        appropriate.
+        * rendering/break_lines.cpp:
+        (WebCore::nextBreakablePosition):
+        Use state variables holding retained last two characters of previous text node(s)
+        for when initializing nextBreakPosition<>() context.
+
 2013-03-10  Darin Adler  <darin@apple.com>
 
         NetworkStorageSession leaks its CFURLStorageSessionRef
