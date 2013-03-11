@@ -1,3 +1,40 @@
+2013-03-11  Adam Klein  <adamk@chromium.org>
+
+        MutationCallback should be a WebIDL 'callback', not a [Callback] interface
+        https://bugs.webkit.org/show_bug.cgi?id=91406
+
+        Reviewed by Adam Barth.
+
+        Spec: http://dom.spec.whatwg.org/#mutationcallback
+
+        Besides no longer calling handleEvent methods on passed-in objects,
+        throw a TypeError if a non-function is passed to the MutationObserver constructor.
+        This is per WebIDL: http://www.w3.org/TR/WebIDL/#es-callback-function
+
+        Updated MutationObserver constructor tests to exercise TypeError-throwing behavior.
+
+        * bindings/js/JSMutationCallback.cpp:
+        (WebCore::JSMutationCallback::call): Call the callback directly instead of handing off to JSCallbackData; make return value void.
+        Use jsArray() to convert from WTF::Vector -> JSArray.
+        * bindings/js/JSMutationCallback.h:
+        (JSMutationCallback): Rename handleEvent() to call(), make it void.
+        * bindings/js/JSMutationObserverCustom.cpp:
+        (WebCore::JSMutationObserverConstructor::constructJSMutationObserver): Throw if passed a non-function.
+        * bindings/v8/V8MutationCallback.cpp:
+        (WebCore::V8MutationCallback::V8MutationCallback): Take a v8::Function instead of a v8::Object.
+        (WebCore::V8MutationCallback::call): Call the callback directly instead of handing off to invokeCallback(); make return value void.
+        Use v8Array() to convert form WTF::Vector -> JSArray.
+        * bindings/v8/V8MutationCallback.h:
+        (WebCore::V8MutationCallback::create): Take a v8::Function instead of a v8::Object.
+        (V8MutationCallback): ditto
+        * bindings/v8/custom/V8MutationObserverCustom.cpp:
+        (WebCore::V8MutationObserver::constructorCustom): Throw if passed a non-function, cast to a v8::Function when constructing callback.
+        * dom/MutationCallback.h:
+        (WebCore): Remove unnecessary typedef.
+        (MutationCallback): Rename handleEvent() to call(), make it void.
+        * dom/MutationObserver.cpp:
+        (WebCore::MutationObserver::deliver): Update MutationCallback method name.
+
 2013-03-11  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Handle spanning grid items over specified grid tracks
