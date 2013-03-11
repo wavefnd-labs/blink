@@ -1,3 +1,44 @@
+2013-02-26  Dima Gorbik  <dgorbik@apple.com>
+
+        Not all properties apply to the '::cue' pseudo-element
+        https://bugs.webkit.org/show_bug.cgi?id=110705
+
+        Reviewed by Eric Carlson.
+
+        Background properties are not inherited and they were not applied to right elements.
+        Now we apply all ::cue properties to WebVTT cue background box, which -webkit-media-text-track-all-nodes
+        container was corresponding to. Now it has 'cue' pseudoId instead of '-webkit-media-text-track-all-nodes'.
+        Property filtering is turned off for user agent rules so that we are still able to apply filtered rules
+        to this container internally. m_cueContainer is removed because it is no longer needed.
+        m_allDocumentNodes container was renamed to m_cueBackgroundBox.
+
+        Existing tests modified to cover this case.
+
+        * css/RuleSet.h:
+        (WebCore::RuleData::propertyWhitelistType): disable filtering for UA rules.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::sortAndTransferMatchedRules): pass the UA scope to propertyWhitelistType().
+        * css/mediaControls.css: rename -webkit-media-text-track-all-nodes to 'cue'
+        (video::cue): 
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlTextTrackContainerElement::updateDisplay):
+        * html/shadow/MediaControlElements.h:
+        (MediaControlTextTrackContainerElement):
+        * html/shadow/MediaControls.cpp:
+        (WebCore::MediaControls::createTextTrackDisplay):
+        * html/shadow/MediaControlsChromium.cpp:
+        (WebCore::MediaControlsChromium::createTextTrackDisplay):
+        * html/shadow/MediaControlsGtk.cpp:
+        (WebCore::MediaControlsGtk::createTextTrackDisplay):
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCue::TextTrackCue):
+        (WebCore::TextTrackCue::updateDisplayTree):
+        (WebCore::TextTrackCue::getDisplayTree):
+        * html/track/TextTrackCue.h:
+        (WebCore::TextTrackCue::element):
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::captionsStyleSheetOverride):
+
 2013-03-11  Tim Horton  <timothy_horton@apple.com>
 
         ChromeClient.h doesn’t need to include RenderSnapshottedPlugIn
