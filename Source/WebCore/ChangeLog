@@ -1,3 +1,23 @@
+2013-03-10  Darin Adler  <darin@apple.com>
+
+        NetworkStorageSession leaks its CFURLStorageSessionRef
+        https://bugs.webkit.org/show_bug.cgi?id=111950
+        <rdar://problem/13384134>
+
+        Reviewed by Sam Weinig.
+
+        * platform/network/NetworkStorageSession.h:
+        Change the argument type of the constructor to a RetainPtr.
+        * platform/network/cf/NetworkStorageSessionCFNet.cpp:
+        (WebCore::NetworkStorageSession::NetworkStorageSession): Changed
+        the argument type to a RetainPtr.
+        (WebCore::NetworkStorageSession::switchToNewTestingSession): Added
+        calls to adoptCF to adopt the value returned by wkCreatePrivateStorageSession.
+        (WebCore::NetworkStorageSession::createPrivateBrowsingSession): Ditto.
+        (WebCore::NetworkStorageSession::cookieStorage): Changed to use adoptCF
+        instead of the RetainPtr constructor with AdoptCF since the former is
+        far easier to read.
+
 2013-03-10  Jason Anderssen  <janderssen@gmail.com>
 
         Conformance Test 1.0.3 (Beta) function: bufferData undefined value failed.
