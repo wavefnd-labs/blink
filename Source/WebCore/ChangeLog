@@ -1,3 +1,32 @@
+2013-03-10  Matt Falkenhagen  <falken@chromium.org>
+
+        Implement inert subtrees needed for modal <dialog>
+        https://bugs.webkit.org/show_bug.cgi?id=110952
+
+        Reviewed by Hajime Morrita.
+
+        This changes Node::disabled() to return true when a modal dialog is
+        open and the node is not in the dialog.
+
+        Reusing disabled for inertness is useful because then event
+        targeting and focus control automatically have the desired behavior:
+        inert nodes are skipped over.
+
+        Tests: fast/dom/HTMLDialogElement/closed-dialog-does-not-block-mouse-events.html
+               fast/dom/HTMLDialogElement/modal-dialog-blocks-mouse-events.html
+               fast/dom/HTMLDialogElement/non-modal-dialog-does-not-block-mouse-events.html
+
+        * dom/Document.h:
+        (WebCore::Document::activeModalDialog): Returns the topmost element in the top layer.
+        Since now the only elements in the top layer are modal dialogs, it is the active modal dialog.
+        * dom/Node.cpp:
+        (WebCore):
+        (WebCore::Node::isInert): As per the spec, a node that is not an ancestor or descendant of the modal dialog is inert.
+        (WebCore::Node::disabled): Return false when inert.
+        * dom/Node.h:
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::disabled): Fall back to the superclass so inert is taken into account.
+
 2013-03-10  Glenn Adams  <glenn@skynav.com>
 
         Line breaking opportunities at the end of a text node are missed
