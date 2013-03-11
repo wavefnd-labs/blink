@@ -1,3 +1,106 @@
+2013-03-11  Philip Rogers  <pdr@google.com>
+
+        Replace SVG's static_cast<SVGElement> with toSVGElement()
+        https://bugs.webkit.org/show_bug.cgi?id=111651
+
+        Reviewed by Abhishek Arya.
+
+        toSVGElement is preferred over static_cast because bad casts can be caught on
+        our testing infrastructure. This patch replaces all static_cast<SVGElement>
+        instances with toSVGElement.
+
+        No new tests as this is just a refactoring.
+
+        * css/CSSCursorImageValue.cpp:
+        (WebCore::CSSCursorImageValue::updateIfSVGCursorIsUsed):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::matchAllRules):
+        (WebCore::StyleResolver::locateCousinList):
+        (WebCore::StyleResolver::canShareStyleWithElement):
+        (WebCore::StyleResolver::locateSharedStyle):
+        * dom/Element.cpp:
+        (WebCore::Element::synchronizeAllAttributes):
+        (WebCore::Element::synchronizeAttribute):
+        * rendering/svg/RenderSVGModelObject.cpp:
+        (WebCore::getElementCTM):
+        (WebCore::RenderSVGModelObject::checkIntersection):
+        (WebCore::RenderSVGModelObject::checkEnclosure):
+        * rendering/svg/RenderSVGResource.cpp:
+        (WebCore::removeFromCacheAndInvalidateDependencies):
+        * rendering/svg/RenderSVGResourceClipper.cpp:
+        (WebCore::RenderSVGResourceClipper::pathOnlyClipping):
+        (WebCore::RenderSVGResourceClipper::drawContentIntoMaskImage):
+        (WebCore::RenderSVGResourceClipper::calculateClipContentRepaintRect):
+        (WebCore::RenderSVGResourceClipper::hitTestClipContent):
+        * rendering/svg/RenderSVGResourceFilter.cpp:
+        (WebCore::RenderSVGResourceFilter::buildPrimitives):
+        * rendering/svg/RenderSVGResourceMasker.cpp:
+        (WebCore::RenderSVGResourceMasker::drawContentIntoMaskImage):
+        (WebCore::RenderSVGResourceMasker::calculateMaskContentRepaintRect):
+        * rendering/svg/RenderSVGResourcePattern.cpp:
+        (WebCore::RenderSVGResourcePattern::createTileImage):
+        * rendering/svg/RenderSVGShape.cpp:
+        (WebCore::RenderSVGShape::strokeWidth):
+        * rendering/svg/RenderSVGText.cpp:
+        (WebCore::RenderSVGText::strokeBoundingBox):
+        * rendering/svg/SVGRenderSupport.cpp:
+        (WebCore::SVGRenderSupport::layoutChildren):
+        (WebCore::SVGRenderSupport::applyStrokeStyleToContext):
+        * rendering/svg/SVGRenderTreeAsText.cpp:
+        (WebCore::writeSVGPaintingResource):
+        (WebCore::writeStyle):
+        (WebCore::operator<<):
+        * rendering/svg/SVGResources.cpp:
+        (WebCore::SVGResources::buildCachedResources):
+        * rendering/svg/SVGTextLayoutEngine.cpp:
+        (WebCore::SVGTextLayoutEngine::layoutTextOnLineOrPath):
+        * svg/SVGAElement.cpp:
+        (WebCore::SVGAElement::createRenderer):
+        * svg/SVGAnimationElement.cpp:
+        (WebCore::SVGAnimationElement::adjustForInheritance):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::viewportElement):
+        (WebCore::SVGElement::haveLoadedRequiredResources):
+        (WebCore::SVGElement::sendSVGLoadEventIfPossible):
+        (WebCore::SVGElement::childShouldCreateRenderer):
+        * svg/SVGElement.h:
+        (WebCore::toSVGElement):
+        (WebCore):
+        * svg/SVGFEImageElement.cpp:
+        (WebCore::SVGFEImageElement::buildPendingResource):
+        * svg/SVGFilterElement.cpp:
+        (WebCore::SVGFilterElement::childShouldCreateRenderer):
+        * svg/SVGGradientElement.cpp:
+        (WebCore::SVGGradientElement::buildStops):
+        * svg/SVGLocatable.cpp:
+        (WebCore::SVGLocatable::nearestViewportElement):
+        (WebCore::SVGLocatable::farthestViewportElement):
+        (WebCore::SVGLocatable::computeCTM):
+        * svg/SVGMPathElement.cpp:
+        (WebCore::SVGMPathElement::buildPendingResource):
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::collectIntersectionOrEnclosureList):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::updateRelativeLengthsInformation):
+        * svg/SVGSwitchElement.cpp:
+        (WebCore::SVGSwitchElement::childShouldCreateRenderer):
+        * svg/SVGTextPathElement.cpp:
+        (WebCore::SVGTextPathElement::buildPendingResource):
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::buildPendingResource):
+        (WebCore::SVGUseElement::toClipPath):
+        (WebCore::SVGUseElement::rendererClipChild):
+        (WebCore::SVGUseElement::buildInstanceTree):
+        (WebCore::SVGUseElement::hasCycleUseReferencing):
+        (WebCore::SVGUseElement::expandUseElementsInShadowTree):
+        (WebCore::SVGUseElement::associateInstancesWithShadowTreeElements):
+        * svg/SVGViewSpec.cpp:
+        (WebCore::SVGViewSpec::viewTarget):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::buildPendingResource):
+        * svg/graphics/filters/SVGFEImage.cpp:
+        (WebCore::FEImage::platformApplySoftware):
+
 2013-03-11  Carlos Garcia Campos  <cgarcia@igalia.com>
 
         [SOUP] ResourceRequest::updateSoupMessage doesn't update the URI of the soup message
