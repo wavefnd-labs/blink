@@ -1,3 +1,40 @@
+2013-03-05  Ojan Vafai  <ojan@chromium.org>
+
+        Intrinsic width keyword values don't work for tables
+        https://bugs.webkit.org/show_bug.cgi?id=111515
+
+        Reviewed by Julien Chaffraix.
+
+        Tests: fast/css-intrinsic-dimensions/css-tables.html
+               fast/css-intrinsic-dimensions/tables.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::computeIntrinsicLogicalWidthUsing):
+        (WebCore::RenderBox::computeLogicalWidthInRegionUsing):
+        (WebCore::RenderBox::computeReplacedLogicalWidthUsing):
+        (WebCore::RenderBox::computePositionedLogicalWidthUsing):
+        * rendering/RenderBox.h:
+        Pass in the border and padding as an argument since RenderTable needs
+        to pass in a different value. Unfortunately, the math doesn't work out right
+        in the positioned/replaced cases if we just pass 0. We need to pass in the correct
+        border and padding and then subtract it from the result.
+
+        * rendering/RenderTable.cpp:
+        (WebCore::RenderTable::updateLogicalWidth):
+        Compute intrinsic widths as well as specified ones. Down the road
+        we may want to consider having intrinsic width values return true for
+        isSpecified.
+
+        (WebCore::RenderTable::convertStyleLogicalWidthToComputedWidth):
+        Compute intrinsic widths as well.
+
+        (WebCore::RenderTable::computeIntrinsicLogicalWidths):
+        Implement this method so that the RenderBox::computeIntrinsicLogicalWidthUsing
+        gets the right intrinsic values instead of the preferred values.
+
+        (WebCore::RenderTable::computePreferredLogicalWidths):
+        * rendering/RenderTable.h:
+
 2013-03-11  Stephen Chenney  <schenney@chromium.org>
 
         HTMLInputElement can delete an ImageLoader while it's still needed
