@@ -1,3 +1,42 @@
+2013-03-11  Dean Jackson  <dino@apple.com>
+
+        Plugins created during user gestures (or soon after) should not be snapshotted
+        https://bugs.webkit.org/show_bug.cgi?id=111975
+
+        Reviewed by Tim Horton.
+
+        There are sites which create plugins in response to user actions, such as clicking
+        on an image that is acting like a poster frame. In those cases we should never snapshot.
+
+        There are some other sites which also create plugins in response to user actions,
+        but don't necessarily create the content themselves. Instead they run some script
+        that injects an iframe, and the frame loads a plugin. In order to make sure we don't
+        snapshot in those cases, we're adding the concept of a blessed plugin. Anything that
+        is created soon after a *handled* user gesture is not snapshotted. To do this we
+        mark a timestamp in the document when we've called an event listener for a user
+        gesture. The plugin element then compares its creation time with the most recent
+        user action time.
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document): Initialise new timestamp.
+        (WebCore::Document::resetLastHandledUserGestureTimestamp): Sets the member variable
+            to the current time.
+        * dom/Document.h:
+        (WebCore::Document::lastHandledUserGestureTimestamp): Getter.
+
+        * dom/EventTarget.cpp:
+        (WebCore::EventTarget::fireEventListeners): If there were some event listeners and
+            we were processing a user gesture, then reset the timestamp in the document.
+
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::HTMLPlugInImageElement): Remember if we were created
+            during a user gesture.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): Start the plugin
+            if we were created during a user gesture, or if we are close enough in time
+            to a listener that fired in relation to a user gesture.
+        * html/HTMLPlugInImageElement.h: New private member flag indicating if we were
+            in a user gesture when constructed.
+
 2013-03-11  Jeffrey Pfau  <jpfau@apple.com>
 
         List cache partitions as units instead of as their contents
