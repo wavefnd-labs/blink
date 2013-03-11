@@ -1,3 +1,42 @@
+2013-03-11  Mike West  <mkwst@chromium.org>
+
+        XSSAuditor doesn't need a copy of the original document's body.
+        https://bugs.webkit.org/show_bug.cgi?id=111946
+
+        Reviewed by Darin Adler.
+
+        The XSSAuditor currently copies the original HTTP body of the document
+        that's being audited in order to include it into a violation report if
+        reflected XSS is detected. We don't actually need to do this, as we
+        have access to the original request information from inside the
+        XSSAuditorDelegate where the report is generated.
+        XSSAuditorDelegate::didBlockScript ASSERTs that it's running on the
+        main thread, so it should be safe to reach through the document's
+        loader to get that information directly, rather than passing it from
+        thread to thread via XSSInfo object properties.
+
+        * html/parser/XSSAuditor.h:
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::init):
+        (WebCore::XSSAuditor::filterToken):
+        (WebCore::XSSAuditor::isSafeToSendToAnotherThread):
+        * html/parser/XSSAuditorDelegate.h:
+        (WebCore::XSSInfo::create):
+        (WebCore::XSSInfo::XSSInfo):
+        * html/parser/XSSAuditorDelegate.cpp:
+        (WebCore::XSSInfo::isSafeToSendToAnotherThread):
+            Drop the XSSInfo and XSSAuditor properties that held an
+            isolatedCopy of the the original HTTP body. Depending on the
+            document's size, this could be a significant savings.
+        (WebCore::XSSAuditorDelegate::didBlockScript):
+            Reach into the document's loader's original request in order to
+            grab the body as a String, and feed that into the violation report
+            object.
+
+            As a drive-by, this patch creates a FrameLoader* temporary
+            variable to minimize repetition in this area of the code. We use
+            the loader a few times, but should only have to grab it once.
+
 2013-03-11  Silvia Pfeiffer  <silviapf@chromium.org>
 
         [Chromium] REGRESSION: Closed Captions button not showing properly
