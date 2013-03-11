@@ -1,3 +1,26 @@
+2013-03-07  Alexander Pavlov  <apavlov@chromium.org>
+
+        Web Inspector: [Elements] XSLT transformation result from the xml-stylesheet PI not rendered
+        https://bugs.webkit.org/show_bug.cgi?id=111313
+
+        Reviewed by Vsevolod Vlasov.
+
+        Frame document update upon XSL transformation was never instrumented.
+        This change instruments the Document::applyXSLTransform() method to that end.
+
+        Test: http/tests/inspector/styles/xsl-transformed.xml
+
+        * dom/Document.cpp:
+        (WebCore::Document::applyXSLTransform): Instrumented.
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::frameDocumentUpdated): Invoked upon applyXSLTransform().
+        * inspector/InspectorDOMAgent.h:
+        * inspector/InspectorInstrumentation.cpp:
+        (WebCore::InspectorInstrumentation::frameDocumentUpdatedImpl): Added.
+        * inspector/InspectorInstrumentation.h:
+        (WebCore::InspectorInstrumentation::didCommitLoad): Drive-by: simplified.
+        (WebCore::InspectorInstrumentation::frameDocumentUpdated): Added.
+
 2013-03-10  Matt Falkenhagen  <falken@chromium.org>
 
         Implement inert subtrees needed for modal <dialog>
