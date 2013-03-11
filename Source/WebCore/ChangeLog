@@ -1,3 +1,41 @@
+2013-03-11  Xiyuan Xia  <xiyuan@chromium.org>
+
+        [Chromium] chromium/linux breaks expectation of select popup background due to bad UA css rules
+        https://bugs.webkit.org/show_bug.cgi?id=111873
+
+        Reviewed by Tony Chang.
+
+        On linux the default <select> background color is too dark to use as the
+        popup background color.  Last fixes:
+        https://bugs.webkit.org/show_bug.cgi?id=54115 and
+        https://bugs.webkit.org/show_bug.cgi?id=56023
+        attempt to fix the problem by applying a lighter background using
+        special <option> selector. This breaks expectations of some websites.
+
+        This CL reverts the bad UA css rules above and provides the lighter
+        background color if <select> and <option> elements are using the default
+        background.
+
+        No new tests, this tests <select> popups and can be verified by ManualTests/select-scroll.html.
+
+        * css/themeChromiumLinux.css:
+        (select):
+        * platform/PopupMenuStyle.h:
+        (WebCore::PopupMenuStyle::PopupMenuStyle):
+        (WebCore::PopupMenuStyle::backgroundColorType):
+        (PopupMenuStyle):
+        * platform/chromium/PopupListBox.cpp:
+        (WebCore::PopupListBox::paintRow):
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::itemStyle):
+        (WebCore::RenderMenuList::getItemBackgroundColor):
+        * rendering/RenderMenuList.h:
+        (RenderMenuList):
+        * rendering/RenderSearchField.cpp:
+        (WebCore::RenderSearchField::menuStyle):
+        * rendering/RenderThemeChromiumDefault.cpp:
+        (WebCore::RenderThemeChromiumDefault::systemColor):
+
 2013-03-11  James Robinson  <jamesr@chromium.org>
 
         Compile fix. Rubber-stamp by Eric Seidel.
