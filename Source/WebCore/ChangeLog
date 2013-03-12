@@ -1,3 +1,37 @@
+2013-03-11  Alexey Proskuryakov  <ap@apple.com>
+
+        Move SharedWorkerRepository functions out of DefaultSharedWorkerRepository
+        https://bugs.webkit.org/show_bug.cgi?id=100418
+
+        Reviewed by Sam Weinig.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        Added SharedWorkerRepository.cpp.
+
+        * WebCore.gyp/WebCore.gyp:
+        * WebCore.gypi:
+        Chromium uses WebKit/chromium/src/SharedWorkerRepository.cpp instead of
+        WebCore/workers/DefaultSharedWorkerRepository.cpp. Not sure why it's added and
+        then excluded, but did the same with the new SharedWorkerRepository.cpp, which
+        just contains some code moved from that file.
+
+        * workers/DefaultSharedWorkerRepository.cpp:
+        (WebCore::SharedWorkerScriptLoader::load): Removed a PLATFORM(CHROMIUM) clause,
+        chromium doesn't compile this file.
+        (WebCore::DefaultSharedWorkerRepository::connectToWorker): Added a FIXME about
+        seemingly wrong code.
+
+        * workers/SharedWorkerRepository.cpp: Added.
+        (WebCore::SharedWorkerRepository::isAvailable):
+        (WebCore::SharedWorkerRepository::connect):
+        (WebCore::SharedWorkerRepository::documentDetached):
+        (WebCore::SharedWorkerRepository::hasSharedWorkers):
+        Moved from DefaultSharedWorkerRepository.cpp, because this is part of SharedWorkerRepository.
+
 2013-03-11  Adam Barth  <abarth@webkit.org>
 
         Make BackgroundHTMLParser work with doc.writes that enter or leave foreign content
