@@ -1,3 +1,45 @@
+2013-03-11  Adam Barth  <abarth@webkit.org>
+
+        Make BackgroundHTMLParser work with doc.writes that enter or leave foreign content
+        https://bugs.webkit.org/show_bug.cgi?id=109764
+
+        Reviewed by Eric Seidel.
+
+        Previously, we were not reseting the state of the
+        HTMLTreeBuilderSimulator when we failed speculative parsing. This had a
+        number of observable consequences, including not parsing CDATA sections
+        correctly when document.write caused us to enter foreign content.
+
+        Test: fast/parser/document-write-svg-cdata.html
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::BackgroundHTMLParser):
+        (WebCore::BackgroundHTMLParser::resumeFrom):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+        * html/parser/BackgroundHTMLParser.h:
+        (Checkpoint):
+        (BackgroundHTMLParser):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::validateSpeculations):
+        (WebCore::HTMLDocumentParser::didFailSpeculation):
+        * html/parser/HTMLDocumentParser.h:
+        (ParsedChunk):
+        * html/parser/HTMLElementStack.h:
+        (WebCore::HTMLElementStack::ElementRecord::namespaceURI):
+        * html/parser/HTMLTreeBuilder.h:
+        (WebCore::HTMLTreeBuilder::options):
+        (WebCore::HTMLTreeBuilder::openElements):
+        (HTMLTreeBuilder):
+        * html/parser/HTMLTreeBuilderSimulator.cpp:
+        (WebCore::HTMLTreeBuilderSimulator::stateFor):
+        (WebCore):
+        * html/parser/HTMLTreeBuilderSimulator.h:
+        (WebCore):
+        (WebCore::HTMLTreeBuilderSimulator::state):
+        (WebCore::HTMLTreeBuilderSimulator::setState):
+        (HTMLTreeBuilderSimulator):
+
 2013-03-11  Abhishek Arya  <inferno@chromium.org>
 
         Replace static_casts with to* functions.
