@@ -1,3 +1,57 @@
+2013-03-12  Simon Fraser  <simon.fraser@apple.com>
+
+        Keep track of the number of GraphicsLayers with tiled backing in RenderLayerCompositor
+        https://bugs.webkit.org/show_bug.cgi?id=112083
+
+        Reviewed by Dean Jackson.
+
+        Have RenderLayerCompositor keep track of how many of its GraphicsLayers use TiledBacking.
+        This is useful for platforms to decide whether it's necessary to force GraphicsLayer flushes
+        to update the visibleRect of those TiledBackings.
+        
+        GraphicsLayers are always created without TiledBacking. There are two
+        ways the count can change:
+        1. A GraphicsLayerCA toggles into or out of tiled mode. It notifies its
+           client via a new tiledBackingUsageChanged() callback on GraphicsLayerClient.
+        2. A tiled GraphicsLayerCA is destroyed. Added a new bottleneck function to
+           RenderLayerBacking::willDestroyLayer() that is called everywhere we destroy layers.
+           
+        The main page TiledBacking is not counted as part of this.
+        
+        Also renamed uses of "tiledLayer" to "tiledBacking" in GraphicsLayer[CA].
+    
+        * platform/graphics/GraphicsLayer.cpp:
+        (WebCore::GraphicsLayer::GraphicsLayer):
+        (WebCore::GraphicsLayer::getDebugBorderInfo):
+        (WebCore::GraphicsLayer::dumpProperties):
+        * platform/graphics/GraphicsLayer.h:
+        (WebCore::GraphicsLayer::usingTiledBacking):
+        * platform/graphics/GraphicsLayerClient.h:
+        (WebCore::GraphicsLayerClient::tiledBackingUsageChanged):
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::recursiveCommitChanges):
+        (WebCore::GraphicsLayerCA::updateGeometry):
+        (WebCore::GraphicsLayerCA::updateLayerDrawsContent):
+        (WebCore::GraphicsLayerCA::updateContentsScale):
+        (WebCore::GraphicsLayerCA::swapFromOrToTiledLayer):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::willDestroyLayer):
+        (WebCore::RenderLayerBacking::tiledBackingUsageChanged):
+        (WebCore::RenderLayerBacking::destroyGraphicsLayers):
+        (WebCore::RenderLayerBacking::updateClippingLayers):
+        (WebCore::RenderLayerBacking::updateOverflowControlsLayers):
+        (WebCore::RenderLayerBacking::updateForegroundLayer):
+        (WebCore::RenderLayerBacking::updateBackgroundLayer):
+        (WebCore::RenderLayerBacking::updateMaskLayer):
+        (WebCore::RenderLayerBacking::updateScrollingLayers):
+        (WebCore::RenderLayerBacking::compositingLayerType):
+        * rendering/RenderLayerBacking.h:
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::RenderLayerCompositor):
+        (WebCore::RenderLayerCompositor::layerTiledBackingUsageChanged):
+        * rendering/RenderLayerCompositor.h:
+        (WebCore::RenderLayerCompositor::haveNonMainLayersWithTiledBacking):
+
 2013-03-12  Abhishek Arya  <inferno@chromium.org>
 
         Replace static_casts with to* functions.
