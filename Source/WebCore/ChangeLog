@@ -1,3 +1,50 @@
+2013-03-11  Philip Rogers  <pdr@google.com>
+
+        Replace static_casts for SVGSVGElement and SVGStopElement
+        https://bugs.webkit.org/show_bug.cgi?id=111651
+
+        Reviewed by Stephen Chenney.
+
+        toSVGSVGElement and toSVGStopElement are preferred over static_casts because bad casts
+        can be caught on our testing infrastructure. This patches replaces all static_casts for
+        SVGSVGElement and SVGStopElement with toSVGSVGElement and toSVGStopElement, respectively.
+
+        Additionaly, this patch renames SVGElement::isSVG to SVGElement::isSVGSVGElement to
+        remove ambiguity for callers who may confuse this with isSVGElement.
+
+        No new tests as this is covered with existing tests.
+
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::computeIntrinsicRatioInformation):
+        (WebCore::RenderSVGRoot::computeReplacedLogicalWidth):
+        (WebCore::RenderSVGRoot::computeReplacedLogicalHeight):
+        (WebCore::RenderSVGRoot::layout):
+        (WebCore::RenderSVGRoot::buildLocalToBorderBoxTransform):
+        (WebCore::RenderSVGRoot::hasRelativeDimensions):
+        (WebCore::RenderSVGRoot::hasRelativeIntrinsicLogicalWidth):
+        (WebCore::RenderSVGRoot::hasRelativeLogicalHeight):
+        * rendering/svg/RenderSVGViewportContainer.cpp:
+        (WebCore::RenderSVGViewportContainer::determineIfLayoutSizeChanged):
+        (WebCore::RenderSVGViewportContainer::calcViewport):
+        (WebCore::RenderSVGViewportContainer::viewportTransform):
+        * svg/SVGDocument.cpp:
+        (WebCore::SVGDocument::rootElement):
+        (WebCore::SVGDocument::childShouldCreateRenderer):
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::ownerSVGElement):
+        * svg/SVGElement.h:
+        (WebCore::SVGElement::isSVGSVGElement):
+        * svg/SVGGradientElement.cpp:
+        (WebCore::SVGGradientElement::buildStops):
+        * svg/SVGLengthContext.cpp:
+        (WebCore::SVGLengthContext::determineViewport):
+        * svg/SVGSVGElement.h:
+        (WebCore):
+        (WebCore::toSVGSVGElement):
+        * svg/SVGStopElement.h:
+        (WebCore::toSVGStopElement):
+        (WebCore):
+
 2013-03-11  Tony Chang  <tony@chromium.org>
 
         Small code cleanup in RenderFlexibleBox
