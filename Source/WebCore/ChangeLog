@@ -1,3 +1,23 @@
+2013-03-11  Yuki Sekiguchi  <yuki.sekiguchi@access-company.com>
+
+        Ruby text is incorrectly positioned when its writing-mode is changed to vertical after layout is done
+        https://bugs.webkit.org/show_bug.cgi?id=96592
+
+        Reviewed by Hajime Morrita.
+
+        Fixed logical left of RenderRubyText is not cleared.
+
+        This causes trouble when RenderRubyTest is laid out vertically after horizontally.
+        Horizontal layout set logical top(== y).
+        Vertical layout don't set logical left(== y).
+        RenderRubyText::y remain old one.
+        We clear old RenderRubyText::y at the first part of layout().
+
+        Test: fast/writing-mode/ruby-text-logical-left.html
+
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::layout): Reset logicalLeft not to reuse old one.
+
 2013-03-11  Lamarque V. Souza  <Lamarque.Souza@basyskom.com>
 
         [css3-text] Add partial parsing support for text-underline-position property from CSS3 Text
