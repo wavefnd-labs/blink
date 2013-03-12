@@ -1,3 +1,63 @@
+2013-03-11  Simon Fraser  <simon.fraser@apple.com>
+
+        [CA] Animations of CSS filters don't work correctly
+        https://bugs.webkit.org/show_bug.cgi?id=111905
+
+        Reviewed by Dean Jackson.
+
+        Fix various issues with transitions of composited filters on Mac,
+        most of which stemmed from the conversion to use CAFilter.
+        
+        Put the Mac CA filter-related code into a new file, PlatformCAFilters,
+        to group code that creates filter properties into a single place.
+        
+        Animations of CIFilters using multiple values never worked correctly,
+        because we would clobber all but the last property for each filter,
+        so fix that.
+        
+        Changes in the moved filter code:
+            - Made use of sepiaFullConstants in the CIFilter and CAFilter code.
+            - For CI, return CIVectors instead of NSArrays of NSNumbers.
+            - Fudge the inputColor for the CI grayscale filter to better match software filters.
+            - fix some cases where the behavior was wrong in the isDefault() case.
+
+        * WebCore.xcodeproj/project.pbxproj: Add PlatformCAFilters.h, PlatformCAFiltersMac.mm.
+        * platform/graphics/GraphicsLayer.cpp:
+        (WebCore::GraphicsLayer::animationNameForTransition): This function was creating a string
+        containing non-ASCII characters.
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::animationIdentifier): To handle CIFilter animations, we need to tack another
+        index onto the animation identifier, since some animations require animating multiple
+        properties of the same CIFilter. Add "subIndex" for this.
+        (WebCore::GraphicsLayerCA::moveOrCopyAnimations): Ditto.
+        (WebCore::GraphicsLayerCA::updateAnimations): Ditto.
+        (WebCore::GraphicsLayerCA::setAnimationOnLayer): Ditto.
+        (WebCore::GraphicsLayerCA::removeCAAnimationFromLayer): Ditto.
+        (WebCore::GraphicsLayerCA::pauseCAAnimationOnLayer): Ditto.
+        (WebCore::GraphicsLayerCA::createAnimationFromKeyframes): Ditto.
+        (WebCore::GraphicsLayerCA::appendToUncommittedAnimations): Ditto.
+        * platform/graphics/ca/GraphicsLayerCA.h: Ditto.
+        (WebCore::GraphicsLayerCA::LayerPropertyAnimation::LayerPropertyAnimation):
+        (LayerPropertyAnimation):
+        * platform/graphics/ca/PlatformCAAnimation.h:
+        (PlatformCAAnimation): Functions moved.
+        * platform/graphics/ca/PlatformCAFilters.h: Added.
+        (PlatformCAFilters):
+        * platform/graphics/ca/mac/PlatformCAAnimationMac.mm:
+        (PlatformCAAnimation::setFromValue):
+        (PlatformCAAnimation::setToValue):
+        (PlatformCAAnimation::setValues):
+        * platform/graphics/ca/mac/PlatformCAFiltersMac.mm: Added.
+        (PlatformCAFilters::filterValueForOperation):
+        (PlatformCAFilters::colorMatrixValueForFilter):
+        (PlatformCAFilters::numAnimatedFilterProperties):
+        (PlatformCAFilters::animatedFilterPropertyName):
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm:
+        (PlatformCALayer::PlatformCALayer):
+        (PlatformCALayer::addAnimationForKey):
+        (PlatformCALayer::setFilters):
+        (PlatformCALayer::filtersCanBeComposited):
+
 2013-03-11  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r145462.
