@@ -1,3 +1,39 @@
+2013-03-12  Mike West  <mkwst@chromium.org>
+
+        XSSAuditor should send only one console error when blocking a page.
+        https://bugs.webkit.org/show_bug.cgi?id=110733
+
+        Reviewed by Daniel Bates.
+
+        Currently, we send two console errors when XSSAuditor blocks a page:
+        "Refused to execute a JavaScript script. Source code of script found
+        within request.\n", and "Entire page will be blocked.".
+
+        We should only send one message, tuning it properly for the context, and
+        including the URL of the page effected by the XSSAuditor's work.
+
+        Covered by rebaselines of all the XSSAuditor and 'reflected-xss' tests.
+
+        * html/parser/XSSAuditor.cpp:
+        * html/parser/XSSAuditor.h:
+        (WebCore::XSSAuditor::XSSAuditor):
+            Add two booleans to track the headers used to set the XSSAuditor state.
+        (WebCore::XSSAuditor::init):
+        (WebCore::XSSAuditor::filterToken):
+            Add detail about the header status to the constructed XSSInfo object.
+        * html/parser/XSSAuditorDelegate.cpp:
+        (WebCore::buildConsoleError):
+            Move message construction out into a separate inlined function, as
+            it's becoming complex.
+        (WebCore::XSSAuditorDelegate::didBlockScript):
+            Fold the "Entire page will be blocked" message into the main console
+            error.
+        * html/parser/XSSAuditorDelegate.h:
+        (WebCore::XSSInfo::create):
+        (WebCore::XSSInfo::XSSInfo):
+            Add detail about header status to XSSInfo in order to correctly
+            construct the console error.
+
 2013-03-12  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r145494.
