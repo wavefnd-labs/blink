@@ -1,3 +1,49 @@
+2013-03-11  Lamarque V. Souza  <Lamarque.Souza@basyskom.com>
+
+        [css3-text] Add partial parsing support for text-underline-position property from CSS3 Text
+        https://bugs.webkit.org/show_bug.cgi?id=102491
+
+        Reviewed by Julien Chaffraix.
+
+        This patch extends the existing parsing to support 'auto', 'alphabetic' and 'under'. We don't fully match
+        the specification as we don't support [ left | right ] and this is left for another implementation
+        as the rendering will need to be added.
+
+        Test: fast/css3-text/css3-text-decoration/getComputedStyle/getComputedStyle-text-underline-position.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseTextUnderlinePosition):
+        * css/CSSParser.h:
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore::CSSPrimitiveValue::operator TextUnderlinePosition):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        Added parsing-related checks for text-underline-position property.
+        * css/CSSPropertyNames.in: Added '-webkit-underline-position' property.
+        * css/CSSValueKeywords.in:
+        * css/SVGCSSValueKeywords.in:
+        * css/StyleBuilder.cpp:
+        (ApplyPropertyTextUnderlinePosition):
+        (WebCore::ApplyPropertyTextUnderlinePosition::applyValue):
+        (WebCore::ApplyPropertyTextUnderlinePosition::createHandler):
+        (WebCore::StyleBuilder::StyleBuilder):
+        Set property handler for text-underline-position.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::applyProperty):
+        * rendering/style/RenderStyle.h:
+        * rendering/style/RenderStyleConstants.h:
+        * rendering/style/StyleRareInheritedData.cpp:
+        (WebCore::StyleRareInheritedData::StyleRareInheritedData):
+        (WebCore::StyleRareInheritedData::operator==):
+        Added support for m_textUnderlinePosition on copy constructor and operator
+        assignment functions.
+        * rendering/style/StyleRareInheritedData.h:
+        (StyleRareInheritedData): Added m_textUnderlinePosition here as it won't be used regularly.
+
 2013-03-11  Christian Biesinger  <cbiesinger@chromium.org>
 
         Hit testing should use ancestorInThisScope to get the non-shadow ancestor
