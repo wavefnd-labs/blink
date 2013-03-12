@@ -1,3 +1,28 @@
+2013-03-12  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: SourceFrames are leaking on reload.
+        https://bugs.webkit.org/show_bug.cgi?id=111961
+
+        Reviewed by Alexander Pavlov.
+
+        Added dispose method on UISourceCodeFrame.
+        Scripts panel now calls dispose when SourceFrame is removed and JavaScriptSourceFrame
+        could remove breakpoint manager listeners in it.
+        TabbedEditorContainer does not call viewForFile other than in appendFileTab methods to 
+        avoid recreating SourceFrame for uiSourceCode when it was already removed.
+
+        Test: inspector/debugger/breakpoint-manager-listeners-count.html
+
+        * inspector/front-end/JavaScriptSourceFrame.js:
+        (WebInspector.JavaScriptSourceFrame.prototype.dispose):
+        * inspector/front-end/ScriptsPanel.js:
+        * inspector/front-end/TabbedEditorContainer.js:
+        (WebInspector.TabbedEditorContainer.prototype._addScrollAndSelectionListeners):
+        (WebInspector.TabbedEditorContainer.prototype._removeScrollAndSelectionListeners):
+        (WebInspector.TabbedEditorContainer.prototype._tabClosed):
+        * inspector/front-end/UISourceCodeFrame.js:
+        (WebInspector.UISourceCodeFrame.prototype.dispose):
+
 2013-03-12  Alexander Pavlov  <apavlov@chromium.org>
 
         Web Inspector: [Elements] Unable to undo "Edit as HTML" changes in the editor
