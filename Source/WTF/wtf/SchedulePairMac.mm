@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Apple Inc. All rights reserved.
+ * Copyright (C) 2008, 2013 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,12 +27,11 @@
  */
 
 #include "config.h"
-
 #include "SchedulePair.h"
 
 #if !USE(CFNETWORK)
 
-namespace WebCore {
+namespace WTF {
 
 SchedulePair::SchedulePair(NSRunLoop* runLoop, CFStringRef mode)
     : m_nsRunLoop(runLoop)

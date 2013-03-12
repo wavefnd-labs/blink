@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Apple Inc. All rights reserved.
+ * Copyright (C) 2008, 2013 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
 OBJC_CLASS NSRunLoop;
 #endif
 
-namespace WebCore {
+namespace WTF {
 
 class SchedulePair : public RefCounted<SchedulePair> {
 public:
@@ -53,13 +53,13 @@ public:
     CFRunLoopRef runLoop() const { return m_runLoop.get(); }
     CFStringRef mode() const { return m_mode.get(); }
 
-    bool operator==(const SchedulePair& other) const;
+    WTF_EXPORT_PRIVATE bool operator==(const SchedulePair& other) const;
 
 private:
-    SchedulePair(CFRunLoopRef, CFStringRef);
+    WTF_EXPORT_PRIVATE SchedulePair(CFRunLoopRef, CFStringRef);
 
 #if PLATFORM(MAC) && !USE(CFNETWORK)
-    SchedulePair(NSRunLoop*, CFStringRef);
+    WTF_EXPORT_PRIVATE SchedulePair(NSRunLoop*, CFStringRef);
     RetainPtr<NSRunLoop*> m_nsRunLoop;
 #endif
 
@@ -81,6 +81,9 @@ struct SchedulePairHash {
 
 typedef HashSet<RefPtr<SchedulePair>, SchedulePairHash> SchedulePairHashSet;
 
-} // namespace WebCore
+} // namespace WTF
+
+using WTF::SchedulePair;
+using WTF::SchedulePairHashSet;
 
 #endif

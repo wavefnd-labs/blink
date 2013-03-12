@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2009, 2013 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,9 +31,10 @@
 #if PLATFORM(MAC) && HAVE(RUNLOOP_TIMER)
 
 #include "RunLoopTimer.h"
+
 #include "AutodrainedPool.h"
 
-namespace WebCore {
+namespace WTF {
 
 RunLoopTimerBase::~RunLoopTimerBase()
 {
@@ -86,6 +87,6 @@ bool RunLoopTimerBase::isActive() const
     return m_timer && CFRunLoopTimerIsValid(m_timer.get());
 }
 
-} // namespace WebCore
+} // namespace WTF
 
 #endif // PLATFORM(MAC) && HAVE(RUNLOOP_TIMER)

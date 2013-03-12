@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Apple Inc. All rights reserved.
+ * Copyright (C) 2007, 2013 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,30 +26,41 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "config.h"
-#import "AutodrainedPool.h"
+#ifndef AutodrainedPool_h
+#define AutodrainedPool_h
 
-namespace WebCore {
+#include <wtf/Noncopyable.h>
 
-AutodrainedPool::AutodrainedPool(int iterationLimit)
-    : m_iterationLimit(iterationLimit)
-    , m_iterationCount(0)
-    , m_pool([[NSAutoreleasePool alloc] init])
-{ 
-}
+OBJC_CLASS NSAutoreleasePool;
 
-AutodrainedPool::~AutodrainedPool()
-{
-    [m_pool drain];
-}
+namespace WTF {
 
-void AutodrainedPool::cycle()
-{
-    if (++m_iterationCount == m_iterationLimit) {
-        [m_pool drain];
-        m_pool = [[NSAutoreleasePool alloc] init];
-        m_iterationCount = 0;
-    }
-}
+class AutodrainedPool {
+    WTF_MAKE_NONCOPYABLE(AutodrainedPool);
+public:
+    WTF_EXPORT_PRIVATE explicit AutodrainedPool(int iterationLimit = 1);
+    WTF_EXPORT_PRIVATE ~AutodrainedPool();
+    
+    WTF_EXPORT_PRIVATE void cycle();
+    
+private:
+#if PLATFORM(MAC)
+    int m_iterationLimit;
+    int m_iterationCount;
+    NSAutoreleasePool* m_pool;
+#endif
+};
 
-} // namespace WebCore
+#if !PLATFORM(MAC)
+inline AutodrainedPool::AutodrainedPool(int) { }
+inline AutodrainedPool::~AutodrainedPool() { }
+inline void AutodrainedPool::cycle() { }
+#endif
+
+} // namespace WTF
+
+using WTF::AutodrainedPool;
+
+#endif
+
+

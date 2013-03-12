@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Apple Inc. All rights reserved.
+ * Copyright (C) 2009 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,27 +26,57 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "SchedulePair.h"
+#ifndef RunLoopTimer_h
+#define RunLoopTimer_h
 
-namespace WebCore {
+#include <wtf/SchedulePair.h>
+#include <wtf/RetainPtr.h>
 
-SchedulePair::SchedulePair(CFRunLoopRef runLoop, CFStringRef mode)
-    : m_runLoop(runLoop)
-{
-    if (mode)
-        m_mode.adoptCF(CFStringCreateCopy(0, mode));
-}
+namespace WTF {
 
-bool SchedulePair::operator==(const SchedulePair& other) const
-{
-    if (runLoop() != other.runLoop())
-        return false;
-    CFStringRef thisMode = mode();
-    CFStringRef otherMode = other.mode();
-    if (!thisMode || !otherMode)
-        return thisMode == otherMode;
-    return CFEqual(thisMode, otherMode);
-}
+// Time intervals are all in seconds.
 
-} // namespace
+class WTF_EXPORT_PRIVATE RunLoopTimerBase {
+    WTF_MAKE_NONCOPYABLE(RunLoopTimerBase);
+public:
+    RunLoopTimerBase() { }
+    WTF_EXPORT_PRIVATE virtual ~RunLoopTimerBase();
+
+    WTF_EXPORT_PRIVATE void schedule(const SchedulePair*);
+    WTF_EXPORT_PRIVATE void schedule(const SchedulePairHashSet&);
+
+    WTF_EXPORT_PRIVATE void start(double nextFireInterval, double repeatInterval);
+
+    void startRepeating(double repeatInterval) { start(repeatInterval, repeatInterval); }
+    void startOneShot(double interval) { start(interval, 0); }
+
+    WTF_EXPORT_PRIVATE void stop();
+    bool isActive() const;
+
+    virtual void fired() = 0;
+
+private:
+#if USE(CF)
+    RetainPtr<CFRunLoopTimerRef> m_timer;
+#endif
+};
+
+template <typename TimerFiredClass> class RunLoopTimer : public RunLoopTimerBase {
+public:
+    typedef void (TimerFiredClass::*TimerFiredFunction)(RunLoopTimer*);
+
+    RunLoopTimer(TimerFiredClass* o, TimerFiredFunction f)
+        : m_object(o), m_function(f) { }
+
+    virtual void fired() { (m_object->*m_function)(this); }
+
+private:
+    TimerFiredClass* m_object;
+    TimerFiredFunction m_function;
+};
+
+} // namespace WTF
+
+using WTF::RunLoopTimer;
+
+#endif
