@@ -1,3 +1,58 @@
+2013-03-12  Philip Rogers  <pdr@google.com>
+
+        Replace static_casts for SVG transformable and locatable elements
+        https://bugs.webkit.org/show_bug.cgi?id=111651
+
+        Reviewed by Abhishek Arya.
+
+        toSVGStyledTransformableElement and toSVGStyledLocatableElement are preferred over
+        static_casts because bad casts can be caught on our testing infrastructure. This patch
+        replaces all static_casts for SVGStyledTransformableElement and SVGStyledLocatableElement
+        with toSVGStyledTransformableElement and toSVGStyledLocatableElement, respectively.
+
+        No new tests as this is covered with existing tests.
+
+        * rendering/svg/RenderSVGResourceClipper.cpp:
+        (WebCore::RenderSVGResourceClipper::pathOnlyClipping):
+        * rendering/svg/RenderSVGResourceContainer.cpp:
+        (WebCore::RenderSVGResourceContainer::transformOnNonScalingStroke):
+        * rendering/svg/RenderSVGShape.cpp:
+        (WebCore::RenderSVGShape::updateShapeFromElement):
+        (WebCore::RenderSVGShape::layout):
+        (WebCore::RenderSVGShape::nonScalingStrokeTransform):
+        (WebCore::RenderSVGShape::shouldGenerateMarkerPositions):
+        * rendering/svg/RenderSVGTransformableContainer.cpp:
+        (WebCore::RenderSVGTransformableContainer::calculateLocalTransform):
+        * svg/SVGAnimatedLength.cpp:
+        (WebCore::SVGAnimatedLengthAnimator::calculateDistance):
+
+            This was an unnecessary cast and has been removed.
+
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::getBoundingBox):
+        * svg/SVGLocatable.cpp:
+        (WebCore::SVGLocatable::getTransformToElement):
+        * svg/SVGStyledLocatableElement.h:
+        (WebCore):
+        (WebCore::toSVGStyledLocatableElement):
+        * svg/SVGStyledTransformableElement.h:
+        (WebCore):
+        (WebCore::toSVGStyledTransformableElement):
+
+            It makes the code cleaner to pass Node* in here, rather than converting the Node*
+            to an SVGElement* before calling this function. The same was not necessary for
+            SVGStyledLocatable.
+
+        * svg/SVGSVGElement.h:
+        (WebCore):
+        (WebCore::toSVGSVGElement):
+
+            This code has been cleaned up. During the review of this patch, a similar cleanup
+            was done in toSVGStyledTransformableElement.
+
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::toClipPath):
+
 2013-03-12  Abhishek Arya  <inferno@chromium.org>
 
         Replace static_casts with to* helper functions.
