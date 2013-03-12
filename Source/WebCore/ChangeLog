@@ -1,3 +1,25 @@
+2013-03-12  Christian Biesinger  <cbiesinger@chromium.org>
+
+        Mac: Incorrect rendering of <audio> controls
+        https://bugs.webkit.org/show_bug.cgi?id=110913
+
+        Reviewed by Tony Chang.
+
+        Covered by existing tests under media/.
+
+        * css/mediaControls.css:
+        (audio::-webkit-media-controls-timeline-container, video::-webkit-media-controls-timeline-container):
+        (audio::-webkit-media-controls-timeline, video::-webkit-media-controls-timeline):
+        The timeline container and the timeline need min-width: 0 so that they can shrink if needed.
+        * css/mediaControlsQuickTime.css:
+        (audio::-webkit-media-controls-timeline-container, video::-webkit-media-controls-timeline-container):
+        (audio::-webkit-media-controls-current-time-display, video::-webkit-media-controls-current-time-display):
+        (audio::-webkit-media-controls-time-remaining-display, video::-webkit-media-controls-time-remaining-display):
+        The timeline container also needs flex-start to ensure that it never overlaps
+        the play/rewind buttons. The current-time and remaining-time displays need min-width: 0 so that the hack
+        in RenderMediaControls.cpp works correctly - otherwise, RenderFlexibleBox tries to use the preferred width
+        of the time displays, which is wrong when they try to hide themselves.
+
 2013-03-12  Alexey Proskuryakov  <ap@apple.com>
 
         Improve logging in ResourceHandleMac.mm
