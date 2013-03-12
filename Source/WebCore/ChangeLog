@@ -1,3 +1,25 @@
+2013-03-12  Benjamin Poulain  <bpoulain@apple.com>
+
+        Add a single character cache to WidthCache
+        https://bugs.webkit.org/show_bug.cgi?id=112084
+
+        Reviewed by Geoffrey Garen.
+
+        More than half of the values stored in WidthCache are values
+        for a single character.
+
+        Previously, we were creating a new SmallStringKey for each one of
+        them, causing a lot of extra memory operations even for the simple
+        cases.
+
+        This patch adds a second map, m_singleCharMap, to simplify the
+        computation for the common case of a single char TextRun.
+
+        * platform/graphics/WidthCache.h:
+        (WebCore::WidthCache::clear):
+        (WidthCache):
+        (WebCore::WidthCache::addSlowCase):
+
 2013-03-12  Philip Rogers  <pdr@google.com>
 
         Replace static_casts for SVG transformable and locatable elements
