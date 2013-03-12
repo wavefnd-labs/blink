@@ -1,3 +1,18 @@
+2013-03-11  James Robinson  <jamesr@chromium.org>
+
+        [chromium] Fix flaky timeouts in platform/chromium/events/fast/events/intercept-postmessage.html
+        https://bugs.webkit.org/show_bug.cgi?id=112089
+
+        Reviewed by Adam Barth.
+
+        This test had a few problems. The most serious is it raced a window.postMessage() from an inline <script> in the
+        <head> with the HTML parser processing the rest of the testcase. If the HTML parser yielded before parsing out
+        the <pre id="console">, function recvMsg1 would generate an error accessing the undefined pre. The test also
+        set up a setTimeout with a timeout of 50ms to run after a postMessage handler. There's no need to wait after
+        yielding for a timeout, these events are processed in order.
+
+        * platform/chromium/fast/events/intercept-postmessage.html:
+
 2013-03-11  Adam Barth  <abarth@webkit.org>
 
         Make BackgroundHTMLParser work with doc.writes that enter or leave foreign content
