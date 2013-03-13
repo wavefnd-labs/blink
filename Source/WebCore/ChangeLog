@@ -1,3 +1,19 @@
+2013-03-12  James Robinson  <jamesr@chromium.org>
+
+        Fix Gamepad::axes and Gamepad::buttons to avoid calling std::copy(..., ..., 0)
+        https://bugs.webkit.org/show_bug.cgi?id=89510
+
+        Reviewed by Kenneth Russell.
+
+        WTF::Vector::begin() returns 0 when the vector has length zero. On windows, the debug implementation of
+        std::copy() is unhappy with 0 as a third parameter even when the first and second parameters are equal.
+
+        Covered by gamepad/gamepad-polling-access.html
+
+        * Modules/gamepad/Gamepad.cpp:
+        (WebCore::Gamepad::axes):
+        (WebCore::Gamepad::buttons):
+
 2013-03-12  Elliott Sprehn  <esprehn@chromium.org>
 
         Remove TextIterator.cpp's isAllCollapsibleWhitespace
