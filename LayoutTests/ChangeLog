@@ -1,3 +1,41 @@
+2013-03-13  Tao Bai  <michaelbai@chromium.org>
+
+        Add the default video poster if it doesn't exist in video tag
+        https://bugs.webkit.org/show_bug.cgi?id=110263
+
+        Reviewed by Eric Carlson.
+
+        The Android web view application could provide the default poster
+        for a video that doesn't have the poster attribute.
+
+        To provide the default poster, the application must set defaultVideoPosterURL
+        setting and return the image in the response of that URL.
+
+        The way to do this would be:
+
+        A) Replace the Element::imageSourceAttributeName function with an
+           Element::imageSourceURL function that returns the imageSourceURL as a
+           const AtomicString&. The body will be the same as before, it will just also
+           include a call to getAttribute. Also will need to revise the four classes
+           that override that function.
+
+        B) Add a new HTMLVideoElement::posterImageURL function that implements the
+           default poster URL logic.
+
+        C) Update the four functions that get the poster attribute to handle poster
+           loading and display to call posterImageURL.
+
+           1) HTMLVideoElement::imageSourceURL.
+           2) HTMLVideoElement::setDisplayMode.
+           3) HTMLVideoElement::updateDisplayState.
+           4) HTMLMediaElement::getPluginProxyParams. Will need to cast to
+              HTMLVideoElement after checking isVideo.
+
+        * media/video-default-poster-expected.txt: Added.
+        * media/video-default-poster.html: Added.
+        * media/video-no-default-poster-expected.txt: Added.
+        * media/video-no-default-poster.html: Added.
+
 2013-03-13  James Robinson  <jamesr@chromium.org>
 
         Force clip in fast/regions/autoheight-break-after-expected.html to match test
