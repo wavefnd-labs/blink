@@ -1,3 +1,41 @@
+2013-03-13  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Refactor GridCoordinate to hold GridSpans
+        https://bugs.webkit.org/show_bug.cgi?id=112211
+
+        Reviewed by Tony Chang.
+
+        In order to bring more spanning knowledge to RenderGrid without having
+        duplicated GridSpan resolution, it became needed to store them into
+        GridCoordinate. Note that this change is needed as we can only resolve
+        all the positions with enough context in one place: when we place the
+        item in the grid.
+
+        Refactoring, no change in behavior expected.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::GridIterator::nextEmptyGridArea):
+        Updated to create 2 GridSpans. Also fixed a style violation (PassOwnPtr
+        as local member, not sure why it wasn't caught earlier).
+
+        (WebCore::RenderGrid::placeItemsOnGrid):
+        (WebCore::RenderGrid::placeSpecifiedMajorAxisItemsOnGrid):
+        (WebCore::RenderGrid::placeAutoMajorAxisItemOnGrid):
+        (WebCore::RenderGrid::gridAreaBreadthForChild):
+        (WebCore::RenderGrid::findChildLogicalPosition):
+        Updated the original function after GridCoordinate internal representation change.
+
+        (WebCore::RenderGrid::insertItemIntoGrid):
+        Ditto. Also added a new overloaded function that does resolution after auto-placement.
+
+        (WebCore::RenderGrid::resolveGridPositionsFromAutoPlacementPosition):
+        Removed the extra GridSpan computation, which was wrong.
+
+        * rendering/RenderGrid.h:
+        (WebCore::RenderGrid::GridCoordinate::GridCoordinate):
+        Updated GridCoordinate to hold 2 GridSpan. Also removed the 2 position
+        constructor (it would have been a hazard), replaced by a 2 GridSpan constructor.
+
 2013-03-13  Jochen Eisinger  <jochen@chromium.org>
 
         Also don't log error messages from the GraphicsContext3D if webGLErrorsToConsoleEnabled is false
