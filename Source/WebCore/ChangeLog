@@ -1,3 +1,35 @@
+2013-03-12  Jun Jiang  <jun.a.jiang@intel.com>
+
+        Enable GPU-GPU texture copy in texImage2D() for HTMLVideoElement if hardware accelerated video decode is in use
+        https://bugs.webkit.org/show_bug.cgi?id=111126
+
+        Reviewed by Kenneth Russell.
+
+        In texImage2D() for HTMLVideoElement in WebGL, it is possible to do a GPU-GPU texture copy instead of CPU readback
+        and upload when videoFrame is in the form of textures. Each platform port needs to implement the interface
+        copyVideoTextureToPlatformTexture() defined in MediaPlayer.h to make it work.
+ 
+        Already covered by current tests.
+
+        * html/HTMLVideoElement.cpp:
+        (WebCore::HTMLVideoElement::copyVideoTextureToPlatformTexture):
+        * html/HTMLVideoElement.h:
+        (HTMLVideoElement):
+        * html/canvas/WebGLRenderingContext.cpp:
+        (WebCore::WebGLRenderingContext::videoFrameToImage): Move some security check to upper level.
+        (WebCore::WebGLRenderingContext::texImage2D): Add the fast GPU-GPU textures copy path for HTMLVideoElement and some security check.
+        (WebCore::WebGLRenderingContext::texSubImage2D): Add some security check.
+        * html/canvas/WebGLTexture.cpp:
+        (WebCore::WebGLTexture::isValid): Added to check if the texture is defined at the given level.
+        * html/canvas/WebGLTexture.h:
+        (WebGLTexture):
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore::MediaPlayer::copyVideoTextureToPlatformTexture): Added to do the GPU-GPU textures copy.
+        * platform/graphics/MediaPlayer.h:
+        (MediaPlayer):
+        * platform/graphics/MediaPlayerPrivate.h:
+        (WebCore::MediaPlayerPrivateInterface::copyVideoTextureToPlatformTexture):
+
 2013-03-12  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r145280.
