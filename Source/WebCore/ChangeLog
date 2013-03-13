@@ -1,5 +1,48 @@
 2013-03-13  Mike West  <mkwst@chromium.org>
 
+        Pass the XSSAuditor's report URL to the XSSAuditorDelegate on the main thread.
+        https://bugs.webkit.org/show_bug.cgi?id=112179
+
+        Reviewed by Adam Barth.
+
+        Rather than relying on XSSInfo objects to move the XSSAuditor's report
+        URL into the XSSAuditorDelegate for reporting, we should be able to grab
+        the URL directly from XSSAuditor before it moves off the main thread,
+        and store it on the delegate.
+
+        This will enable us to drop the report URL properties from both
+        XSSAuditor and XSSInfo. Oh, happy day!
+
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore::BackgroundHTMLParser::sendTokensToMainThread):
+            We no longer need to check whether XSSInfo objects are thread safe,
+            as we've dropped the only problematic bit.
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::pumpTokenizer):
+        (WebCore::HTMLDocumentParser::startBackgroundParser):
+        * html/parser/XSSAuditor.cpp:
+        (WebCore::XSSAuditor::init):
+            When initializing the XSSAuditor, pass in an XSSAuditorDelegate*
+            and assign the report URL directly onto that object.
+        (WebCore::XSSAuditor::filterToken):
+            Drop the report URL parameter from XSSInfo objects we create in the
+            Auditor, as they're now handled directly from the delegate.
+        (WebCore::XSSAuditor::isSafeToSendToAnotherThread):
+            Drop the report URL property from XSSAuditor's threadsafeness check,
+            as properties that do not exist are automatically thread-safe.
+        * html/parser/XSSAuditorDelegate.cpp:
+        (WebCore::XSSAuditorDelegate::didBlockScript):
+            Use the delegate's own report URL rather than the XSSInfo objects'.
+        * html/parser/XSSAuditorDelegate.h:
+        (WebCore::XSSInfo::create):
+        (WebCore::XSSInfo::XSSInfo):
+            Drop the report URL property from XSSInfo.
+        (WebCore::XSSAuditorDelegate::setReportURL):
+        (XSSAuditorDelegate):
+            Provide a public API for setting a delegate's report URL.
+
+2013-03-13  Mike West  <mkwst@chromium.org>
+
         Unsafe JavaScript attempt errors are ludicrously verbose and annoying
         https://bugs.webkit.org/show_bug.cgi?id=112042
 
