@@ -1,5 +1,24 @@
 2013-03-13  Nate Chapin  <japhet@chromium.org>
 
+        REGRESSION(r137607): Redirecting a post to a get then reloading triggers resubmit warning
+        https://bugs.webkit.org/show_bug.cgi?id=112194
+
+        Reviewed by Alexey Proskuryakov.
+
+        Test: http/tests/navigation/post-redirect-get-reload.php
+
+        * loader/SubresourceLoader.cpp:
+        (WebCore::SubresourceLoader::willSendRequest): Matching urls aren't a reliable way of checking whether
+            we are in a redirect. Check redirectResponse.isNull() instead.
+        * testing/Internals.cpp:
+        (WebCore::Internals::forceReload): Expose a means of forcing a reload like one a user generates for testing.
+            Note that testRunner.queueReload() does this, but is not supported after the initial load completes,
+            which makes it unsuitable for this case.
+        * testing/Internals.h:
+        * testing/Internals.idl:
+
+2013-03-13  Nate Chapin  <japhet@chromium.org>
+
         Merge MainResourceLoader's didFinishLoading and dataReceived into DocumentLoader
         https://bugs.webkit.org/show_bug.cgi?id=109952
 
