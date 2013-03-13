@@ -1,3 +1,23 @@
+2013-03-13  Tony Chang  <tony@chromium.org>
+
+        Regression(r143542): -webkit-align-items: center with overflow: auto/scroll has extra bottom padding
+        https://bugs.webkit.org/show_bug.cgi?id=112047
+
+        Reviewed by Ojan Vafai.
+
+        Add a new pass for computing the client bottom edge that runs after we've repositioned children
+        due to wrap-reverse, flex-end or vertical centering.
+
+        Test: css3/flexbox/negative-overflow.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::layoutBlock): Remove the code to use clientLogicalBottom() that was computed before
+        repositioning. The repositioning can change the edge.
+        (WebCore::RenderFlexibleBox::clientLogicalBottomAfterRepositioning): Compute the new bottom based on the final position
+        of flex items.
+        * rendering/RenderFlexibleBox.h:
+        (RenderFlexibleBox):
+
 2013-03-13  Nate Chapin  <japhet@chromium.org>
 
         REGRESSION(r137607): Redirecting a post to a get then reloading triggers resubmit warning
