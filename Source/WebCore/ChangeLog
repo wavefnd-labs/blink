@@ -1,3 +1,38 @@
+2013-03-13  Takashi Sakamoto  <tasak@google.com>
+
+        Implement :scope for element.querySelector[All]()
+        https://bugs.webkit.org/show_bug.cgi?id=81069
+
+        Reviewed by Dimitri Glazkov.
+
+        Implemented :scope for element.querySelector[All]().
+        Reuse scope in SelectorCheckingContext and added a new value to
+        enum BehaviorAtBoundary.
+        :scope spec is http://dev.w3.org/csswg/selectors4/#scope-pseudo.
+
+        Test: fast/selectors/querySelector-scope.html
+
+        * css/CSSSelector.cpp:
+        (WebCore::CSSSelector::pseudoId):
+        (WebCore::nameToPseudoTypeMap):
+        (WebCore::CSSSelector::extractPseudoType):
+        Added :scope pseudo type.
+        * css/CSSSelector.h:
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::match):
+        (WebCore::SelectorChecker::checkOne):
+        Added PseudoScope case and modified "scope" meaning when
+        behaviorAtBoundary is equal to StaysWithinTreeScope.
+        If so, "scope" is just a contextual reference node.
+        * css/SelectorChecker.h:
+        * dom/SelectorQuery.cpp:
+        (WebCore::SelectorDataList::selectorMatches):
+        (WebCore::SelectorDataList::matches):
+        (WebCore::SelectorDataList::execute):
+        Use rootNode as a contextual reference node.
+        * dom/SelectorQuery.h:
+        (SelectorDataList):
+
 2013-03-13  Alberto Garcia  <agarcia@igalia.com>
 
         [BlackBerry] FontPlatformData: remove TextOrientation parameter
