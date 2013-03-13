@@ -1,3 +1,49 @@
+2013-03-13  Mikhail Pozdnyakov  <mikhail.pozdnyakov@intel.com>
+
+        [EFL] Start using evas object directly in Widget class
+        https://bugs.webkit.org/show_bug.cgi?id=111858
+
+        Reviewed by Antonio Gomes.
+
+        Based on a patch by Kenneth Rohde Christiansen.
+
+        EFL Widget class should use evas object pointer directly rather
+        than WidgetPrivate* m_data as platformWidget() is a Mac specific
+        implementation detail that they are moving away from with WebKit2.
+
+        This patch brings: firstly better compliance with other ports,
+        secondly it makes code cleaner.
+
+        Besides, the evasObject is only directly used in the ScrollbarEfl
+        subclass of Widget and not in Widget or ScrollView or any other subclass,
+        thus the evas_object code has now been concentrated in ScrollbarEfl.
+
+        No new tests as there are no behavioral changes.
+
+        * page/efl/EventHandlerEfl.cpp:
+        * platform/Widget.h:
+        (Widget):
+        (WebCore::Widget::evasObject):
+        * platform/efl/ScrollbarEfl.cpp:
+        (ScrollbarEfl::~ScrollbarEfl):
+        (scrollbarEflEdjeMessage):
+        (ScrollbarEfl::show):
+        (ScrollbarEfl::hide):
+        (ScrollbarEfl::setParent):
+        (ScrollbarEfl::updateThumbPositionAndProportion):
+        (ScrollbarEfl::frameRectsChanged):
+        * platform/efl/ScrollbarEfl.h:
+        (ScrollbarEfl):
+        * platform/efl/WidgetEfl.cpp:
+        (WebCore::Widget::Widget):
+        (WebCore::Widget::~Widget):
+        (WebCore::Widget::frameRectsChanged):
+        (WebCore::Widget::show):
+        (WebCore::Widget::hide):
+        (WebCore::Widget::setEvasObject):
+        * plugins/efl/PluginViewEfl.cpp:
+        (WebCore::PluginView::platformGetValue):
+
 2013-03-13  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: [CodeMirror] token highlight still has some problems
