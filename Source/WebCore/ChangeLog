@@ -1,3 +1,29 @@
+2013-03-12  Antti Koivisto  <antti@apple.com>
+
+        Basic child obscuration test for backgrounds
+        https://bugs.webkit.org/show_bug.cgi?id=111701
+
+        Reviewed by Simon Fraser.
+        
+        Test: fast/repaint/obscured-background-no-repaint.html
+
+        We can easily detect some simple cases where a background image is fully obscured by an opaque child.
+        
+        This avoids unncessary painting and image decoding. It is especially helpful for cases like about.com home
+        page where a fully obscured 'loading' spinner keeps triggering frequent complex repaints (gif animations
+        progress by getting painted and stop if they are not).
+        
+        This could be made way more sophisticated. The checking could also be done per-layout rather per-paint.
+        Even this simple approach gets hit surprisingly often in real world sites.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::backgroundIsObscured):
+        
+            Before painting background test if any single child renderer fully obscures it.
+
+        (WebCore::RenderBox::backgroundIsOpaqueInRect):
+        * rendering/RenderBox.h:
+
 2013-03-12  Hayato Ito  <hayato@chromium.org>
 
         [Crash] Touch Events retargeting causes crashes on chrome on android.
