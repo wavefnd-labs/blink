@@ -1,3 +1,65 @@
+2013-03-14  Brady Eidson  <beidson@apple.com>
+
+        Add a mode to ResourceLoader that takes SharedBuffers instead of raw pointers and lengths.
+        <rdar://problem/13416953> and https://bugs.webkit.org/show_bug.cgi?id=112310
+
+        Reviewed by Andy Estes.
+
+        No new tests (No independently testable change in behavior).
+
+        Many of the tested platforms deliver data buffers to their ResourceHandles from objects
+        that encapsulate a data buffer such as NSData (Mac), CFDataRef (CF), or QByteArray (qt).
+
+        If those platforms also augmented SharedBuffer to wrap their native object (which Mac/CF do)
+        and there existed ResourceLoader callbacks to take that SharedBuffer instead of char* + length,
+        then many resource loads could avoid a useless copy.
+
+        At least on Mac, there are some extremely important behind-the-scenes optimizations for NS/CFData
+        that will be a more important win than simply avoiding a copy.
+
+        This patch adds that SharedBuffer-based callback with the hope that all platforms could find a 
+        way to use a buffer-encapsulating object going forward, and we could therefore deprecate the
+        char* + length version of didReceiveData.
+
+        * platform/network/ResourceHandleClient.h:
+        (WebCore::ResourceHandleClient::didReceiveBuffer): Add a didReceiveBuffer callback that takes 
+          a SharedBuffer object. The default implementation passes raw bytes + length to didReceiveData.
+
+        * loader/ResourceLoader.cpp:
+        (WebCore::ResourceLoader::addDataOrBuffer): Replacing addData(), optionally adding the data from
+          either a data+length or SharedBuffer
+        (WebCore::ResourceLoader::didReceiveData): Pipe to didReceiveDataOrBuffer.
+        (WebCore::ResourceLoader::didReceiveBuffer): Pipe to didReceiveDataOrBuffer.
+        (WebCore::ResourceLoader::didReceiveDataOrBuffer): Single chokepoint for receiving data.
+        * loader/ResourceLoader.h: Add OVERRIDE to all of the ResourceHandleClient methods to help
+          catch future mistakes. Remove "virtual" from methods that didn't need it. Make "addData" into
+          "addDataOrBuffer" and make it private.
+
+        * loader/NetscapePlugInStreamLoader.cpp:
+        (WebCore::NetscapePlugInStreamLoader::didReceiveData): Pipe to didReceiveDataOrBuffer.
+        (WebCore::NetscapePlugInStreamLoader::didReceiveBuffer): Pipe to didReceiveDataOrBuffer.
+        (WebCore::NetscapePlugInStreamLoader::didReceiveDataOrBuffer): Single chokepoint for receiving data.
+        * loader/NetscapePlugInStreamLoader.h:
+
+        * loader/SubresourceLoader.cpp:
+        (WebCore::SubresourceLoader::didReceiveData): Pipe to didReceiveDataOrBuffer.
+        (WebCore::SubresourceLoader::didReceiveBuffer): Pipe to didReceiveDataOrBuffer.
+        (WebCore::SubresourceLoader::didReceiveDataOrBuffer): Single chokepoint for receiving data. Also,
+          rely on ResourceLoader's base implementation for notifying the ResourceLoadNotifier.
+        * loader/SubresourceLoader.h:
+
+        * loader/ResourceBuffer.cpp:
+        (WebCore::ResourceBuffer::append): Add a mode that appends a SharedBuffer.
+        * loader/ResourceBuffer.h:
+
+        * platform/cf/SharedBufferCF.cpp:
+        (WebCore::SharedBuffer::maybeTransferPlatformData): Fix a bug where appending data to a CFData-backed
+          SharedBuffer would re-enter maybeTransferPlatformData and blow out the stack.
+
+        * platform/network/mac/ResourceHandleMac.mm:
+        (-[WebCoreResourceHandleAsDelegate connection:didReceiveData:lengthReceived:]): Send a wrapped NSData
+          to didReceiveBuffer() instead of sending its char* and length to didReceiveData()
+
 2013-03-14  Yury Semikhatsky  <yurys@chromium.org>
 
         Web Inspector: nuke bottom up CPU profile calculation on backend
