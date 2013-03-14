@@ -1,3 +1,40 @@
+2013-03-14  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] resolveContentBasedTrackSizingFunctions should iterate over the grid items not the grid tracks
+        https://bugs.webkit.org/show_bug.cgi?id=112299
+
+        Reviewed by Tony Chang.
+
+        Our initial implementation would iterate over the grid tracks. This was equivalent as no items were spanning but
+        once grid items spans, they start to contribute to several grid tracks differently. This change aligns our code
+        with what the specification does.
+
+        One upside of doing a grid items' iteration is that the complexity should be better in all cases as we don't do
+        a full grid walking (which is potentially quadratic), only some extra grid tracks' iteration (which are linear).
+
+        Refactoring, there should be no change in behavior.
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::computedUsedBreadthOfGridTracks):
+        Moved the |availableLogicalSpace| update into resolveContentBasedTrackSizingFunctions. This simplifies and consolidate our handling.
+
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctions):
+        Updated the core loop to iterator over grid items and not grid tracks. This idea is that now resolveContentBasedTrackSizingFunctionsForItems
+        uses a filtering function to only process the appropriate grid tracks.
+
+        (WebCore::RenderGrid::resolveContentBasedTrackSizingFunctionsForItems):
+        Updated to filter the grid tracks here (this matches the |TracksForGrowth| spec logic that is merely a filtering function).
+
+        * rendering/RenderGrid.h:
+        Added a new typedef and updated resolveContentBasedTrackSizingFunctionsForItems to use it.
+
+        * rendering/style/GridTrackSize.h:
+        (WebCore::GridTrackSize::hasMinOrMaxContentMinTrackBreadth):
+        (WebCore::GridTrackSize::hasMaxContentMinTrackBreadth):
+        (WebCore::GridTrackSize::hasMinOrMaxContentMaxTrackBreadth):
+        (WebCore::GridTrackSize::hasMaxContentMaxTrackBreadth):
+        Added the following filtering function, which matches the values from |TracksForGrowth| in the specification.
+
 2013-03-14  Alberto Garcia  <agarcia@igalia.com>
 
         [BlackBerry] Gradient: don't use the default setPlatformGradientSpaceTransform()
