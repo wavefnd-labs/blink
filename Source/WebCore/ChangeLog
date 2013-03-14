@@ -1,3 +1,181 @@
+2013-03-14  Abhishek Arya  <inferno@chromium.org>
+
+        Replace static_casts with to* helper functions.
+        https://bugs.webkit.org/show_bug.cgi?id=112296
+
+        Reviewed by Kentaro Hara.
+
+        to* helper functions are preferred over static_cast calls since they
+        help to catch bad casts easily on the testing infrastructure.
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore::nodeHasRole):
+        * accessibility/AccessibilityObject.cpp:
+        (WebCore::AccessibilityObject::hasAttribute):
+        (WebCore::AccessibilityObject::getAttribute):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::anchorElement):
+        (WebCore::AccessibilityRenderObject::helpText):
+        (WebCore::AccessibilityRenderObject::checkboxOrRadioRect):
+        (WebCore::AccessibilityRenderObject::titleUIElement):
+        (WebCore::AccessibilityRenderObject::computeAccessibilityIsIgnored):
+        (WebCore::AccessibilityRenderObject::accessKey):
+        (WebCore::AccessibilityRenderObject::setElementAttributeValue):
+        (WebCore::AccessibilityRenderObject::setValue):
+        (WebCore::AccessibilityRenderObject::activeDescendant):
+        (WebCore::AccessibilityRenderObject::handleActiveDescendantChanged):
+        (WebCore::AccessibilityRenderObject::correspondingLabelForControlElement):
+        (WebCore::AccessibilityRenderObject::inheritsPresentationalRole):
+        (WebCore::AccessibilityRenderObject::setAccessibleName):
+        (WebCore::AccessibilityRenderObject::stringRoleForMSAA):
+        * bindings/gobject/WebKitDOMBinding.cpp:
+        (WebKit::createWrapper):
+        * bindings/js/JSClipboardCustom.cpp:
+        (WebCore::JSClipboard::setDragImage):
+        * bindings/js/JSElementCustom.cpp:
+        (WebCore::toJSNewlyCreated):
+        * bindings/js/JSNodeCustom.cpp:
+        (WebCore::createWrapperInline):
+        * bindings/v8/custom/V8ClipboardCustom.cpp:
+        (WebCore::V8Clipboard::setDragImageMethodCustom):
+        * bindings/v8/custom/V8ElementCustom.cpp:
+        (WebCore::wrap):
+        * bindings/v8/custom/V8NodeCustom.cpp:
+        (WebCore::wrap):
+        * dom/Document.cpp:
+        (WebCore::Document::importNode):
+        (WebCore::Document::recalcStyle):
+        (WebCore::Document::setFocusedNode):
+        (WebCore::Document::updateFocusAppearanceTimerFired):
+        * dom/DocumentStyleSheetCollection.cpp:
+        (WebCore::DocumentStyleSheetCollection::collectActiveStyleSheets):
+        * dom/Element.cpp:
+        (WebCore::Element::offsetParent):
+        (WebCore::Element::boundsInRootViewSpace):
+        (WebCore::Element::getBoundingClientRect):
+        (WebCore::Element::recalcStyle):
+        (WebCore::Element::computeInheritedLanguage):
+        (WebCore::Element::lastElementChild):
+        * dom/LiveNodeList.cpp:
+        (WebCore::LiveNodeList::namedItem):
+        * dom/Node.cpp:
+        (WebCore::Node::dumpStatistics):
+        (WebCore::Node::normalize):
+        (WebCore::Node::rootEditableElement):
+        (WebCore::Node::isDefaultNamespace):
+        (WebCore::Node::ancestorElement):
+        (WebCore::appendAttributeDesc):
+        * dom/Position.cpp:
+        (WebCore::Position::element):
+        * dom/Range.cpp:
+        (WebCore::Range::getBorderAndTextQuads):
+        * dom/SelectorQuery.cpp:
+        (WebCore::SelectorDataList::queryFirst):
+        (WebCore::SelectorDataList::execute):
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::recalcStyle):
+        * dom/StaticHashSetNodeList.cpp:
+        (WebCore::StaticHashSetNodeList::namedItem):
+        * editing/ApplyStyleCommand.cpp:
+        (WebCore::ApplyStyleCommand::splitAncestorsWithUnicodeBidi):
+        (WebCore::ApplyStyleCommand::pushDownInlineStyleAroundNode):
+        (WebCore::ApplyStyleCommand::mergeStartWithPreviousIfIdentical):
+        (WebCore::ApplyStyleCommand::surroundNodeRangeWithElement):
+        * editing/Editor.cpp:
+        (WebCore::Editor::applyEditingStyleToBodyElement):
+        * editing/FrameSelection.cpp:
+        (WebCore::removingNodeRemovesPosition):
+        * editing/IndentOutdentCommand.cpp:
+        (WebCore::IndentOutdentCommand::outdentParagraph):
+        * editing/MarkupAccumulator.cpp:
+        (WebCore::MarkupAccumulator::entityMaskForText):
+        (WebCore::MarkupAccumulator::appendStartMarkup):
+        (WebCore::MarkupAccumulator::appendEndMarkup):
+        * editing/ModifySelectionListLevel.cpp:
+        (WebCore::IncreaseSelectionListLevelCommand::doApply):
+        * editing/ReplaceSelectionCommand.cpp:
+        (WebCore::haveSameTagName):
+        (WebCore::handleStyleSpansBeforeInsertion):
+        (WebCore::ReplaceSelectionCommand::doApply):
+        * editing/SplitTextNodeContainingElementCommand.cpp:
+        (WebCore::SplitTextNodeContainingElementCommand::doApply):
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::advance):
+        * editing/htmlediting.cpp:
+        (WebCore::unsplittableElementForPosition):
+        (WebCore::enclosingTableCell):
+        * editing/markup.cpp:
+        (WebCore::StyledMarkupAccumulator::wrapWithNode):
+        (WebCore::createMarkupInternal):
+        (WebCore::createFragmentFromMarkupWithContext):
+        (WebCore::isPlainTextMarkup):
+        (WebCore::createFragmentFromText):
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::insertAdjacentElement):
+        (WebCore::contextElementForInsertion):
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::focusPostAttach):
+        (WebCore::updateFromElementCallback):
+        * html/HTMLFormElement.cpp:
+        (WebCore::submitElementFromEvent):
+        * html/HTMLObjectElement.cpp:
+        (WebCore::HTMLObjectElement::updateDocNamedItem):
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::updateSnapshotInfo):
+        * html/HTMLViewSourceDocument.cpp:
+        (WebCore::HTMLViewSourceDocument::addRange):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::closestFormAncestor):
+        * html/shadow/MediaControlElementTypes.cpp:
+        (WebCore::toParentMediaElement):
+        * html/shadow/TextFieldDecorationElement.h:
+        (WebCore::toTextFieldDecorationElement):
+        * inspector/DOMPatchSupport.cpp:
+        (WebCore::DOMPatchSupport::createDigest):
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::buildObjectForNode):
+        (WebCore::InspectorDOMAgent::didInvalidateStyleAttr):
+        * inspector/InspectorStyleSheet.cpp:
+        (WebCore::InspectorStyleSheet::inlineStyleSheetText):
+        * mathml/MathMLElement.h:
+        (WebCore::toMathMLElement):
+        * page/ContextMenuController.cpp:
+        (WebCore::ContextMenuController::populate):
+        * page/DragController.cpp:
+        (WebCore::elementUnderMouse):
+        (WebCore::DragController::startDrag):
+        * page/FocusController.cpp:
+        (WebCore::FocusController::advanceFocusInDocumentOrder):
+        * page/Frame.cpp:
+        (WebCore::Frame::searchForLabelsBeforeElement):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::updateWidget):
+        * page/SpatialNavigation.cpp:
+        (WebCore::rectToAbsoluteCoordinates):
+        * page/animation/ImplicitAnimation.cpp:
+        (WebCore::ImplicitAnimation::sendTransitionEvent):
+        * page/animation/KeyframeAnimation.cpp:
+        (WebCore::KeyframeAnimation::KeyframeAnimation):
+        (WebCore::KeyframeAnimation::sendAnimationEvent):
+        * platform/efl/RenderThemeEfl.cpp:
+        (WebCore::RenderThemeEfl::paintMediaFullscreenButton):
+        (WebCore::RenderThemeEfl::paintMediaMuteButton):
+        * rendering/FilterEffectRenderer.cpp:
+        (WebCore::FilterEffectRenderer::buildReferenceFilter):
+        * rendering/svg/RenderSVGViewportContainer.cpp:
+        (WebCore::RenderSVGViewportContainer::calcViewport):
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::getElementById):
+        * svg/SVGUseElement.cpp:
+        (WebCore::isDisallowedElement):
+        * svg/animation/SVGSMILElement.cpp:
+        (WebCore::SVGSMILElement::buildPendingResource):
+        * xml/XPathStep.cpp:
+        (WebCore::XPath::nodeMatchesBasicTest):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+        (WebCore::XMLDocumentParser::parseEndElement):
+
 2013-03-14  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: keep deprecated function stubs in InspectorFrontendHost.
