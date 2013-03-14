@@ -1,3 +1,74 @@
+2013-03-13  Bruno de Oliveira Abinader  <bruno.abinader@basyskom.com>
+
+        [css3-text] Add support for text-decoration-color
+        https://bugs.webkit.org/show_bug.cgi?id=91638
+
+        Reviewed by Julien Chaffraix.
+
+        This patch implements the CSS3's 'text-decoration-color' property, with
+        '-webkit' vendor prefix.
+
+        More info about "text-decoration-color" property can be found here:
+        http://dev.w3.org/csswg/css-text-decor-3/#text-decoration-color-property
+
+        Mozilla implementation (using -moz prefix) is described here:
+        https://developer.mozilla.org/en/CSS/text-decoration-color
+
+        Tests: fast/css3-text/css3-text-decoration/getComputedStyle/getComputedStyle-text-decoration-color.html
+               fast/css3-text/css3-text-decoration/repaint/repaint-text-decoration-color.html
+               fast/css3-text/css3-text-decoration/text-decoration-color.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::isColorPropertyID):
+        (WebCore::CSSParser::parseValue):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        Added parsing checks for '-webkit-text-decoration-color' property.
+
+        * css/CSSPropertyNames.in:
+        Added '-webkit-text-decoration-color' property name.
+
+        * css/StyleBuilder.cpp:
+        (WebCore::StyleBuilder::StyleBuilder):
+        Set property handler for '-webkit-text-decoration-color'.
+
+        * css/StyleResolver.cpp:
+        (WebCore::isValidVisitedLinkProperty):
+        (WebCore::StyleResolver::applyProperty):
+        Added switch case checks for text-decoration-color property on visited
+        link checks and property appliance.
+
+        * rendering/RenderObject.cpp:
+        (WebCore::decorationColor):
+        The newly added property needs to checked here when selecting the text
+        decoration color.
+
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::diff):
+        (WebCore::RenderStyle::colorIncludingFallback):
+        (WebCore::RenderStyle::visitedDependentColor):
+        There is no proper way to check if a property has been set or not, so if
+        text decoration color fallbacks to default color, it would override the
+        check for 'text-fill-color' and 'text-stroke-color' properties on
+        WebCore::decorationColor() static function, changing current behavior,
+        which can be verified by new failing layout tests (ie.
+        fast/text/stroking-decorations.html).
+
+        * rendering/style/RenderStyle.h:
+        Added {non-}visited text decoration color getters and setters.
+
+        * rendering/style/StyleRareNonInheritedData.cpp:
+        (WebCore::StyleRareNonInheritedData::StyleRareNonInheritedData):
+        (WebCore::StyleRareNonInheritedData::operator==):
+        Added {non-}visited text decoration color variables initialization to
+        copy constructor and operator assignment functions.
+
+        * rendering/style/StyleRareNonInheritedData.h:
+        (StyleRareNonInheritedData):
+        Added here as this property is not used regularly.
+
 2013-03-13  Rik Cabanier  <cabanier@adobe.com>
 
         create runtime flags for CSS Compositing
