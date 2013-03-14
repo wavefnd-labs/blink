@@ -1,3 +1,31 @@
+2013-03-14  Mike West  <mkwst@chromium.org>
+
+        Explicitly send only one report via XSSAuditorDelegate.
+        https://bugs.webkit.org/show_bug.cgi?id=111964
+
+        Reviewed by Adam Barth.
+
+        This patch pulls the XSSAuditor report generation out into a separate
+        function in XSSAuditorDelegate::generateViolationReport, and moves the
+        call to that function into the "have we already notified folks about
+        violations on this page?" block. This both clarifies the flow in
+        XSSAuditorDelegate::didBlockScript, and ensures that only one violation
+        report will be sent per page, which regressed in r145695.
+
+        Existing tests verify that reports are generated and sent correctly.
+
+        We have no tests for the latter condition: the XSSAuditor tests
+        currently verify that a report showed up, but they can't verify that
+        no report appeared without sitting around for a few more than a few
+        seconds on every run.
+
+        * html/parser/XSSAuditorDelegate.cpp:
+        (WebCore::XSSAuditorDelegate::generateViolationReport):
+            Pull the report generation logic out to this new function.
+        (WebCore::XSSAuditorDelegate::didBlockScript):
+            Move the report generation call into the block that ensures it only
+            executes for the first violation.
+
 2013-03-14  Sergio Villar Senin  <svillar@igalia.com>
 
         Empty list items after drag&drop in contentEditable divs
