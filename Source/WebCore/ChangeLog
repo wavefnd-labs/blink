@@ -1,3 +1,84 @@
+2013-03-12  Florin Malita  <fmalita@chromium.org>
+
+        Tighten up the type bounds for SVGPropertyInfo callback parameters
+        https://bugs.webkit.org/show_bug.cgi?id=111786
+
+        Reviewed by Philip Rogers.
+
+        Update SVGPropertyInfo's callbacks to pass SVGElement* parameters instead of void*. This
+        allows us to perform some ASSERT-based type checking before downcasting in implementors.
+
+        To avoid adding virtual methods unused in release builds to the base class (and overrides
+        in descendants), for subtypes lacking polymorphic type markers (isXXX()) the check is
+        performed using hasTagName() instead.
+
+        The patch is also removing the lookupOrCreateWrapperForAnimatedProperty() SVGPropertyInfo
+        callback for SVGViewSpec properties, because
+
+          a) it doesn't appear to be reachable (SVGViewSpec doesn't have a backing element and
+          thus cannot have an associated animator)
+
+          b) it interferes with the parameter specialization described above (SVGViewSpec does not
+          inherit from SVGElement)
+
+        No new tests, refactoring only.
+
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::synchronizeRequiredFeatures):
+        (WebCore::SVGElement::synchronizeRequiredExtensions):
+        (WebCore::SVGElement::synchronizeSystemLanguage):
+        * svg/SVGElement.h:
+        (SVGElement):
+        * svg/SVGMarkerElement.cpp:
+        (WebCore::SVGMarkerElement::synchronizeOrientType):
+        (WebCore::SVGMarkerElement::lookupOrCreateOrientTypeWrapper):
+        * svg/SVGMarkerElement.h:
+        (SVGMarkerElement):
+        (WebCore::toSVGMarkerElement):
+        (WebCore):
+        * svg/SVGPathElement.cpp:
+        (WebCore::SVGPathElement::lookupOrCreateDWrapper):
+        (WebCore::SVGPathElement::synchronizeD):
+        * svg/SVGPathElement.h:
+        (SVGPathElement):
+        (WebCore::toSVGPathElement):
+        (WebCore):
+        * svg/SVGPolyElement.cpp:
+        (WebCore::SVGPolyElement::synchronizePoints):
+        (WebCore::SVGPolyElement::lookupOrCreatePointsWrapper):
+        * svg/SVGPolyElement.h:
+        (SVGPolyElement):
+        (WebCore::toSVGPolyElement):
+        (WebCore):
+        * svg/SVGTextContentElement.cpp:
+        (WebCore::SVGTextContentElement::synchronizeTextLength):
+        (WebCore::SVGTextContentElement::lookupOrCreateTextLengthWrapper):
+        * svg/SVGTextContentElement.h:
+        (SVGTextContentElement):
+        (WebCore::toSVGTextContentElement):
+        (WebCore):
+        Change SVGPropertyInfo callback params to SVGElement* and replace static casts with
+        conversion wrappers. Implement conversion wrappers where needed.
+
+        * svg/SVGViewSpec.cpp:
+        (WebCore::SVGViewSpec::viewBoxPropertyInfo):
+        (WebCore::SVGViewSpec::preserveAspectRatioPropertyInfo):
+        (WebCore::SVGViewSpec::transformPropertyInfo):
+        (WebCore::SVGViewSpec::lookupOrCreateViewBoxWrapper):
+        (WebCore::SVGViewSpec::lookupOrCreatePreserveAspectRatioWrapper):
+        (WebCore::SVGViewSpec::lookupOrCreateTransformWrapper):
+        * svg/SVGViewSpec.h:
+        (SVGViewSpec):
+        Remove SVGPropertyInfo-based lookupOrCreate* callbacks and updated the methods' parameters
+        to SVGViewSpec*. Remove now-unneeded casts.
+
+        * svg/properties/SVGAnimatedPropertyMacros.h:
+        (WebCore):
+        * svg/properties/SVGPropertyInfo.h:
+        (WebCore):
+        (SVGPropertyInfo):
+        Update callback declarations.
+
 2013-03-14  Jesus Sanchez-Palencia  <jesus.palencia@openbossa.org>
 
         Move platform-specific typedefs to PlatformMenuDescription.h
