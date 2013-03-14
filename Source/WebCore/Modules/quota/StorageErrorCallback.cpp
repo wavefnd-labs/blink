@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,23 +28,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StorageInfoUsageCallback_h
-#define StorageInfoUsageCallback_h
+#include "config.h"
 
 #if ENABLE(QUOTA)
 
-#include <wtf/RefCounted.h>
+#include "StorageErrorCallback.h"
+
+#include "DOMCoreException.h"
+#include "ExceptionCodeDescription.h"
 
 namespace WebCore {
 
-class StorageInfoUsageCallback : public RefCounted<StorageInfoUsageCallback> {
-public:
-    virtual ~StorageInfoUsageCallback() { }
-    virtual bool handleEvent(unsigned long long currentUsageInBytes, unsigned long long currentQuotaInBytes) = 0;
-};
+StorageErrorCallback::CallbackTask::CallbackTask(PassRefPtr<StorageErrorCallback> callback, ExceptionCode ec)
+    : m_callback(callback)
+    , m_ec(ec)
+{
+}
 
-} // namespace
+void StorageErrorCallback::CallbackTask::performTask(ScriptExecutionContext*)
+{
+    if (!m_callback)
+        return;
+    ExceptionCodeDescription description(m_ec);
+    m_callback->handleEvent(DOMCoreException::create(description).get());
+}
+
+} // namespace WebCore
 
 #endif // ENABLE(QUOTA)
-
-#endif // StorageInfoUsageCallback_h

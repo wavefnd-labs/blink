@@ -28,9 +28,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-[
-    Conditional=QUOTA,
-    Callback
-] interface StorageInfoErrorCallback {
-    boolean handleEvent(in DOMCoreException error);
+#ifndef StorageQuota_h
+#define StorageQuota_h
+
+#if ENABLE(QUOTA)
+
+#include <wtf/PassRefPtr.h>
+#include <wtf/RefCounted.h>
+
+namespace WebCore {
+
+class ScriptExecutionContext;
+class StorageErrorCallback;
+class StorageQuotaCallback;
+class StorageUsageCallback;
+
+class StorageQuota : public RefCounted<StorageQuota> {
+public:
+    enum Type {
+        Temporary,
+        Persistent,
+    };
+
+    static PassRefPtr<StorageQuota> create(Type type)
+    {
+        return adoptRef(new StorageQuota(type));
+    }
+
+    void queryUsageAndQuota(ScriptExecutionContext*, PassRefPtr<StorageUsageCallback>, PassRefPtr<StorageErrorCallback>);
+
+    void requestQuota(ScriptExecutionContext*, unsigned long long newQuotaInBytes, PassRefPtr<StorageQuotaCallback>, PassRefPtr<StorageErrorCallback>);
+
+    ~StorageQuota();
+
+private:
+    explicit StorageQuota(Type);
+    Type m_type;
 };
+
+} // namespace WebCore
+
+#endif // ENABLE(QUOTA)
+
+#endif // StorageQuota_h

@@ -28,8 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StorageInfoErrorCallback_h
-#define StorageInfoErrorCallback_h
+#ifndef StorageUsageCallback_h
+#define StorageUsageCallback_h
 
 #if ENABLE(QUOTA)
 
@@ -37,16 +37,14 @@
 
 namespace WebCore {
 
-class DOMCoreException;
-
-class StorageInfoErrorCallback : public RefCounted<StorageInfoErrorCallback> {
+class StorageUsageCallback : public RefCounted<StorageUsageCallback> {
 public:
-    virtual ~StorageInfoErrorCallback() { }
-    virtual bool handleEvent(DOMCoreException*) = 0;
+    virtual ~StorageUsageCallback() { }
+    virtual bool handleEvent(unsigned long long currentUsageInBytes, unsigned long long currentQuotaInBytes) = 0;
 };
 
-} // namespace WebCore
+} // namespace
 
 #endif // ENABLE(QUOTA)
 
-#endif // StorageInfoErrorCallback_h
+#endif // StorageUsageCallback_h

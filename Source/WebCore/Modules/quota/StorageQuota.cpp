@@ -28,23 +28,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StorageInfoQuotaCallback_h
-#define StorageInfoQuotaCallback_h
+#include "config.h"
 
 #if ENABLE(QUOTA)
 
-#include <wtf/RefCounted.h>
+#include "StorageQuota.h"
 
 namespace WebCore {
 
-class StorageInfoQuotaCallback : public RefCounted<StorageInfoQuotaCallback> {
-public:
-    virtual ~StorageInfoQuotaCallback() { }
-    virtual bool handleEvent(unsigned long long grantedQuotaInBytes) = 0;
-};
+StorageQuota::StorageQuota(Type type)
+    : m_type(type)
+{
+}
 
-} // namespace
+StorageQuota::~StorageQuota()
+{
+}
+
+} // namespace WebCore
 
 #endif // ENABLE(QUOTA)
-
-#endif // StorageInfoQuotaCallback_h

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,9 +28,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-[
-    Conditional=QUOTA,
-    Callback
-] interface StorageInfoUsageCallback {
-    boolean handleEvent(in unsigned long long currentUsageInBytes, in unsigned long long currentQuotaInBytes);
+#ifndef NavigatorStorageQuota_h
+#define NavigatorStorageQuota_h
+
+#if ENABLE(QUOTA)
+
+#include "DOMWindowProperty.h"
+#include "Supplementable.h"
+
+namespace WebCore {
+
+class Frame;
+class StorageQuota;
+class Navigator;
+
+class NavigatorStorageQuota : public Supplement<Navigator>, public DOMWindowProperty {
+public:
+    virtual ~NavigatorStorageQuota();
+    static NavigatorStorageQuota* from(Navigator*);
+
+    static StorageQuota* webkitTemporaryStorage(Navigator*);
+    static StorageQuota* webkitPersistentStorage(Navigator*);
+    StorageQuota* webkitTemporaryStorage() const;
+    StorageQuota* webkitPersistentStorage() const;
+
+private:
+    explicit NavigatorStorageQuota(Frame*);
+    static const char* supplementName();
+
+    mutable RefPtr<StorageQuota> m_temporaryStorage;
+    mutable RefPtr<StorageQuota> m_persistentStorage;
 };
+
+} // namespace WebCore
+
+#endif // ENABLE(QUOTA)
+
+#endif // NavigatorStorageQuota_h

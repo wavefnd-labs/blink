@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -29,17 +29,16 @@
  */
 
 #include "config.h"
-#include "StorageInfo.h"
+#include "StorageQuota.h"
 
 #if ENABLE(QUOTA)
 
-#include "DOMCoreException.h"
 #include "Document.h"
 #include "ExceptionCode.h"
 #include "ScriptExecutionContext.h"
-#include "StorageInfoErrorCallback.h"
-#include "StorageInfoQuotaCallback.h"
-#include "StorageInfoUsageCallback.h"
+#include "StorageErrorCallback.h"
+#include "StorageQuotaCallback.h"
+#include "StorageUsageCallback.h"
 #include "WebFrameClient.h"
 #include "WebFrameImpl.h"
 #include "WebStorageQuotaCallbacksImpl.h"
@@ -49,49 +48,41 @@ using namespace WebKit;
 
 namespace WebCore {
 
-namespace {
-void fireStorageInfoErrorCallback(PassRefPtr<StorageInfoErrorCallback> errorCallback, ExceptionCode ec)
+void StorageQuota::queryUsageAndQuota(ScriptExecutionContext* scriptExecutionContext, PassRefPtr<StorageUsageCallback> successCallback, PassRefPtr<StorageErrorCallback> errorCallback)
 {
-    if (!errorCallback)
-        return;
-    ExceptionCodeDescription description(ec);
-    errorCallback->handleEvent(DOMCoreException::create(description).get());
-}
-}
-
-void StorageInfo::queryUsageAndQuota(ScriptExecutionContext* context, int storageType, PassRefPtr<StorageInfoUsageCallback> successCallback, PassRefPtr<StorageInfoErrorCallback> errorCallback)
-{
-    ASSERT(context);
+    ASSERT(scriptExecutionContext);
+    WebStorageQuotaType storageType = static_cast<WebStorageQuotaType>(m_type);
     if (storageType != WebStorageQuotaTypeTemporary && storageType != WebStorageQuotaTypePersistent) {
         // Unknown storage type is requested.
-        fireStorageInfoErrorCallback(errorCallback, NOT_SUPPORTED_ERR);
+        scriptExecutionContext->postTask(StorageErrorCallback::CallbackTask::create(errorCallback, NOT_SUPPORTED_ERR));
         return;
     }
-    if (context->isDocument()) {
-        Document* document = static_cast<Document*>(context);
+    if (scriptExecutionContext->isDocument()) {
+        Document* document = static_cast<Document*>(scriptExecutionContext);
         WebFrameImpl* webFrame = WebFrameImpl::fromFrame(document->frame());
-        webFrame->client()->queryStorageUsageAndQuota(webFrame, static_cast<WebStorageQuotaType>(storageType), new WebStorageQuotaCallbacksImpl(successCallback, errorCallback));
+        webFrame->client()->queryStorageUsageAndQuota(webFrame, storageType, new WebStorageQuotaCallbacksImpl(successCallback, errorCallback));
     } else {
         // FIXME: calling this on worker is not yet supported.
-        fireStorageInfoErrorCallback(errorCallback, NOT_SUPPORTED_ERR);
+        scriptExecutionContext->postTask(StorageErrorCallback::CallbackTask::create(errorCallback, NOT_SUPPORTED_ERR));
     }
 }
 
-void StorageInfo::requestQuota(ScriptExecutionContext* context, int storageType, unsigned long long newQuotaInBytes, PassRefPtr<StorageInfoQuotaCallback> successCallback, PassRefPtr<StorageInfoErrorCallback> errorCallback)
+void StorageQuota::requestQuota(ScriptExecutionContext* scriptExecutionContext, unsigned long long newQuotaInBytes, PassRefPtr<StorageQuotaCallback> successCallback, PassRefPtr<StorageErrorCallback> errorCallback)
 {
-    ASSERT(context);
+    ASSERT(scriptExecutionContext);
+    WebStorageQuotaType storageType = static_cast<WebStorageQuotaType>(m_type);
     if (storageType != WebStorageQuotaTypeTemporary && storageType != WebStorageQuotaTypePersistent) {
         // Unknown storage type is requested.
-        fireStorageInfoErrorCallback(errorCallback, NOT_SUPPORTED_ERR);
+        scriptExecutionContext->postTask(StorageErrorCallback::CallbackTask::create(errorCallback, NOT_SUPPORTED_ERR));
         return;
     }
-    if (context->isDocument()) {
-        Document* document = static_cast<Document*>(context);
+    if (scriptExecutionContext->isDocument()) {
+        Document* document = static_cast<Document*>(scriptExecutionContext);
         WebFrameImpl* webFrame = WebFrameImpl::fromFrame(document->frame());
-        webFrame->client()->requestStorageQuota(webFrame, static_cast<WebStorageQuotaType>(storageType), newQuotaInBytes, new WebStorageQuotaCallbacksImpl(successCallback, errorCallback));
+        webFrame->client()->requestStorageQuota(webFrame, storageType, newQuotaInBytes, new WebStorageQuotaCallbacksImpl(successCallback, errorCallback));
     } else {
         // FIXME: calling this on worker is not yet supported.
-        fireStorageInfoErrorCallback(errorCallback, NOT_SUPPORTED_ERR);
+        scriptExecutionContext->postTask(StorageErrorCallback::CallbackTask::create(errorCallback, NOT_SUPPORTED_ERR));
     }
 }
 
