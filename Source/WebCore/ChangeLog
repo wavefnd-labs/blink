@@ -1,3 +1,63 @@
+2013-03-12  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: do not aggregate non-main thread timeline events, handle them in a generic fashion
+        https://bugs.webkit.org/show_bug.cgi?id=112172
+
+        Reviewed by Vsevolod Vlasov.
+
+        - build nested event trees for non-main thread events similar to how it's done on the main thread;
+        - drop aggregation logic for Rasterize events;
+        - extract time conversion logic so that it may be reused in TimelineTraceEventProcessor.
+
+        * English.lproj/localizedStrings.js: drive-by: drop duplicate line.
+        * inspector/InspectorTimelineAgent.cpp:
+        (WebCore::TimelineTimeConverter::reset):
+        (WebCore):
+        (WebCore::InspectorTimelineAgent::pushGCEventRecords):
+        (WebCore::InspectorTimelineAgent::start):
+        (WebCore::InspectorTimelineAgent::innerAddRecordToTimeline):
+        (WebCore::InspectorTimelineAgent::InspectorTimelineAgent):
+        (WebCore::InspectorTimelineAgent::appendRecord):
+        (WebCore::InspectorTimelineAgent::sendEvent):
+        (WebCore::InspectorTimelineAgent::timestamp):
+        * inspector/InspectorTimelineAgent.h:
+        (TimelineTimeConverter):
+        (WebCore::TimelineTimeConverter::TimelineTimeConverter):
+        (WebCore::TimelineTimeConverter::fromMonotonicallyIncreasingTime):
+        (WebCore):
+        (InspectorTimelineAgent):
+        (WebCore::InspectorTimelineAgent::timeConverter):
+        * inspector/TimelineRecordFactory.cpp:
+        (WebCore::TimelineRecordFactory::createBackgroundRecord):
+        (WebCore):
+        * inspector/TimelineRecordFactory.h:
+        (TimelineRecordFactory):
+        * inspector/TimelineTraceEventProcessor.cpp:
+        (WebCore::TimelineRecordStack::TimelineRecordStack):
+        (WebCore):
+        (WebCore::TimelineRecordStack::addScopedRecord):
+        (WebCore::TimelineRecordStack::closeScopedRecord):
+        (WebCore::TimelineRecordStack::addInstantRecord):
+        (WebCore::TimelineRecordStack::isOpenRecordOfType):
+        (WebCore::TimelineRecordStack::send):
+        (WebCore::TimelineTraceEventProcessor::TimelineTraceEventProcessor):
+        (WebCore::TimelineTraceEventProcessor::onBeginFrame):
+        (WebCore::TimelineTraceEventProcessor::onRasterTaskBegin):
+        (WebCore::TimelineTraceEventProcessor::onRasterTaskEnd):
+        (WebCore::TimelineTraceEventProcessor::createRecord):
+        * inspector/TimelineTraceEventProcessor.h:
+        (TimelineRecordStack):
+        (WebCore::TimelineRecordStack::Entry::Entry):
+        (Entry):
+        (WebCore::TimelineRecordStack::TimelineRecordStack):
+        (WebCore):
+        (WebCore::TimelineTraceEventProcessor::TimelineThreadState::TimelineThreadState):
+        (TimelineThreadState):
+        (TimelineTraceEventProcessor):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::TraceEvent):
+        (WebCore::TimelineTraceEventProcessor::TraceEvent::isNull):
+        (WebCore::TimelineTraceEventProcessor::threadState):
+
 2013-03-14  Xan Lopez  <xlopez@igalia.com>
 
         [GTK] Wrong ASSERT in AudioDestinationGstreamer::stop
