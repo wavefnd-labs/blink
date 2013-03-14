@@ -1,3 +1,132 @@
+2013-03-13  Kunihiko Sakamoto  <ksakamoto@chromium.org>
+
+        Implement FontLoader interface
+        https://bugs.webkit.org/show_bug.cgi?id=98395
+
+        Reviewed by Eric Seidel.
+
+        This patch implements the FontLoader interface defined in CSS Font
+        Load Events Module Level 3.[1] It adds fontloader attribute to
+        Document, and adds two interfaces, FontLoader and
+        CSSFontFaceLoadEvent to WebCore.
+
+        [1]: http://dev.w3.org/csswg/css-font-load-events-3/
+
+        This feature is guarded by FONT_LOAD_EVENTS compiler flag and
+        RuntimeEnabledFeatures::fontLoadEventsEnabled() runtime flag.
+
+        Tests: fast/css/fontloader-download-error.html
+               fast/css/fontloader-events.html
+               fast/css/fontloader-loadingdone.html
+               fast/css/fontloader-multiple-faces-download-error.html
+               fast/css/fontloader-multiple-faces.html
+               fast/css/fontloader-multiple-families.html
+               http/tests/webfont/fontloader-loading-attribute.html
+
+        * CMakeLists.txt: Adding FontLoader/CSSFontFaceLoadEvent files.
+        * DerivedSources.cpp: Ditto.
+        * DerivedSources.make: Ditto.
+        * DerivedSources.pri: Ditto.
+        * GNUmakefile.list.am: Ditto.
+        * Target.pri: Ditto.
+        * WebCore.gypi: Ditto.
+        * WebCore.vcproj/WebCore.vcproj: Ditto.
+        * WebCore.vcxproj/WebCore.vcxproj: Ditto.
+        * WebCore.vcxproj/WebCore.vcxproj.filters: Ditto.
+        * WebCore.xcodeproj/project.pbxproj: Ditto.
+        * bindings/js/JSDictionary.cpp:
+        (WebCore::JSDictionary::convertValue): Add convertValue() for CSSFontFaceRule, DOMError, and VoidCallback.
+        * bindings/js/JSDictionary.h: Ditto.
+        * bindings/v8/Dictionary.cpp: Add get() for CSSFontFaceRule, DOMError, and VoidCallback.
+        (WebCore::Dictionary::get):
+        * bindings/v8/Dictionary.h: Ditto.
+        (Dictionary):
+        * css/CSSFontFace.cpp: Notifies FontLoader as load progresses.
+        (WebCore::CSSFontFace::fontLoaded):
+        (WebCore::CSSFontFace::getFontData):
+        (WebCore::CSSFontFace::notifyFontLoader):
+        (WebCore::CSSFontFace::notifyLoadingDone):
+        * css/CSSFontFace.h: Add two member variables. m_rule stores CSSFontFaceRule for the fontface. m_loadState holds current state of the fontface in terms of FontLoader.
+        (WebCore::CSSFontFace::create): Takes additional parameter of type CSSFontFaceRule.
+        (WebCore::CSSFontFace::loadState):
+        (WebCore::CSSFontFace::CSSFontFace):
+        * css/CSSFontFaceLoadEvent.cpp: Added.
+        (WebCore::CSSFontFaceLoadEvent::CSSFontFaceLoadEvent):
+        (WebCore::CSSFontFaceLoadEvent::~CSSFontFaceLoadEvent):
+        (WebCore::CSSFontFaceLoadEvent::interfaceName):
+        * css/CSSFontFaceLoadEvent.h: Added.
+        (CSSFontFaceLoadEventInit):
+        (CSSFontFaceLoadEvent):
+        (WebCore::CSSFontFaceLoadEvent::create):
+        (WebCore::CSSFontFaceLoadEvent::createForFontFaceRule):
+        (WebCore::CSSFontFaceLoadEvent::createForError):
+        (WebCore::CSSFontFaceLoadEvent::fontface):
+        (WebCore::CSSFontFaceLoadEvent::error):
+        * css/CSSFontFaceLoadEvent.idl: Added.
+        * css/CSSFontFaceRule.idl: Add JSGenerateToJSObject and JSGenerateToNativeObject as JSC binding needs them.
+        * css/CSSFontFaceSource.cpp:
+        (WebCore::CSSFontFaceSource::isDecodeError): Added.
+        (WebCore::CSSFontFaceSource::ensureFontData): Added.
+        * css/CSSFontFaceSource.h:
+        (CSSFontFaceSource):
+        * css/CSSFontSelector.cpp:
+        (WebCore::CSSFontSelector::addFontFaceRule): Pass a CSSFontFaceRule to CSSFontFace::create().
+        (WebCore::CSSFontSelector::getFontData): Moved logic for creating a CSSSegmentedFontFace to a helper function getFontFace().
+        (WebCore::CSSFontSelector::getFontFace): Added.
+        * css/CSSFontSelector.h:
+        * css/CSSSegmentedFontFace.cpp:
+        (WebCore::CSSSegmentedFontFace::fontLoaded): Fires callbacks when load is completed.
+        (WebCore::CSSSegmentedFontFace::isLoading): Returns true if any fonts are still loading.
+        (WebCore::CSSSegmentedFontFace::checkFont): Returns true if all fonts are loaded.
+        (WebCore::CSSSegmentedFontFace::loadFont): Starts load by calling getFontData().
+        * css/CSSSegmentedFontFace.h:
+        (CSSSegmentedFontFace): Declares new functions and a vector to store callbacks.
+        (LoadFontCallback):
+        (WebCore::CSSSegmentedFontFace::LoadFontCallback::~LoadFontCallback):
+        * css/FontLoader.cpp: Added.
+        (LoadFontCallback): Holds callback functions of FontLoader.loadFont().
+        (WebCore::LoadFontCallback::create):
+        (WebCore::LoadFontCallback::createFromParams):
+        (WebCore::LoadFontCallback::LoadFontCallback):
+        (WebCore::LoadFontCallback::notifyLoaded):
+        (WebCore::LoadFontCallback::notifyError):
+        (WebCore::FontLoader::FontLoader):
+        (WebCore::FontLoader::~FontLoader):
+        (WebCore::FontLoader::eventTargetData):
+        (WebCore::FontLoader::ensureEventTargetData):
+        (WebCore::FontLoader::interfaceName):
+        (WebCore::FontLoader::scriptExecutionContext):
+        (WebCore::FontLoader::didLayout): Fires pending events and callbacks. This is called when layout have completed.
+        (WebCore::FontLoader::scheduleEvent): Defers event dispatching until layout completes.
+        (WebCore::FontLoader::firePendingEvents): Dispatches pending events.
+        (WebCore::FontLoader::beginFontLoading): Schedules loading/loadstart events. This is called from CSSFontFace.
+        (WebCore::FontLoader::fontLoaded): Schedules load/loadingdone events. This is called from CSSFontFace.
+        (WebCore::FontLoader::loadError): Schedules error/loadingdone events. This is called from CSSFontFace.
+        (WebCore::FontLoader::notifyWhenFontsReady): Implements fontloader.notifyWhenFontsReady().
+        (WebCore::FontLoader::loadingDone): Fires callbacks of notifyWhenFontsReady.
+        (WebCore::FontLoader::loadFont): Implements fontloader.loadFont().
+        (WebCore::FontLoader::checkFont): Implements fontloader.checkFont().
+        (WebCore::FontLoader::resolveFontStyle): Parses the given font parameter using the syntax of CSS 'font' property and creates Font object. The logic is taken from CanvasRenderingContext2D::setFont().
+        * css/FontLoader.h: Added.
+        (FontLoader):
+        (WebCore::FontLoader::create):
+        (WebCore::FontLoader::loading):
+        (WebCore::FontLoader::document):
+        (WebCore::FontLoader::refEventTarget):
+        (WebCore::FontLoader::derefEventTarget):
+        * css/FontLoader.idl: Added.
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::fontloader): Added.
+        * dom/Document.h:
+        (Document): Add m_fontloader and fontloader().
+        * dom/Document.idl: Add fontloader attribute.
+        * dom/EventNames.h: Add loading and loadingdone events.
+        * dom/EventNames.in: Add CSSFontFaceLoadEvent.
+        * dom/EventTargetFactory.in: Add FontLoader.
+        * page/FrameView.cpp:
+        (WebCore::FrameView::performPostLayoutTasks): Calls FontLoader::didLayout().
+
 2013-03-13  Antti Koivisto  <antti@apple.com>
 
         Compute image background size when testing for background visibility
