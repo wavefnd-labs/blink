@@ -1,3 +1,57 @@
+2013-03-14  Eric Seidel  <eric@webkit.org>
+
+        Threaded HTML Parser should limit speculation to avoid using too much memory
+        https://bugs.webkit.org/show_bug.cgi?id=112069
+
+        Reviewed by Adam Barth.
+
+        This is a speculative fix for memory issues seen in:
+        https://code.google.com/p/chromium/issues/detail?id=180819
+
+        This also fixed https://bugs.webkit.org/show_bug.cgi?id=110546
+        as a side-effect of simplifying the m_currentChunk handling.
+
+        We now tell the background html parser every time we start
+        a chunk on the main thread (instead of end), which greatly
+        simplified the checkpoint cleanup code from:
+        https://trac.webkit.org/changeset/145277
+
+        The cost for this is now we have more messages going to the
+        background thread (and postTask acquires a lock to write to the
+        message queue).  Chromium has more advanced (lock-less) primatives
+        for message posting, which we'll hopefully add to WebKit in
+        furture patches.
+
+        The outstanding chunks limit has not been tuned.  But it makes sense that
+        we should not keeping infinite speculative tokens around for
+        large documents with slow-to-load scripts.
+
+        * html/parser/BackgroundHTMLInputStream.cpp:
+        (WebCore::BackgroundHTMLInputStream::BackgroundHTMLInputStream):
+        (WebCore::BackgroundHTMLInputStream::invalidateCheckpointsBefore):
+        (WebCore):
+        (WebCore::BackgroundHTMLInputStream::rewindTo):
+        * html/parser/BackgroundHTMLInputStream.h:
+        (BackgroundHTMLInputStream):
+        (WebCore::BackgroundHTMLInputStream::outstandingCheckpointCount):
+        (Checkpoint):
+        (WebCore::BackgroundHTMLInputStream::Checkpoint::isNull):
+        (WebCore::BackgroundHTMLInputStream::Checkpoint::clear):
+        * html/parser/BackgroundHTMLParser.cpp:
+        (WebCore):
+        (WebCore::BackgroundHTMLParser::startedChunkWithCheckpoint):
+        (WebCore::BackgroundHTMLParser::pumpTokenizer):
+        * html/parser/BackgroundHTMLParser.h:
+        (BackgroundHTMLParser):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::validateSpeculations):
+        (WebCore::HTMLDocumentParser::discardSpeculationsAndResumeFrom):
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::pumpPendingSpeculations):
+        (WebCore::HTMLDocumentParser::resumeParsingAfterScriptExecution):
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+
 2013-03-14  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: Flame Chart. Minor changes for the popover.
