@@ -1,3 +1,62 @@
+2013-03-11  Jer Noble  <jer.noble@apple.com>
+
+        Crash in DumpRenderTree at com.apple.WebCore: WebCore::CaptionUserPreferences::captionPreferencesChanged + 185
+        https://bugs.webkit.org/show_bug.cgi?id=112051
+
+        Reviewed by Eric Carlson.
+
+        No new tests; fixes a crash during media/video-controls-captions-trackmenu.html.
+
+        Instead of relying on a registration system which can fail when an element's document does not have a page,
+        Elements will register for captionPreferencesChanged() notifications directly with their owning Document.
+        CaptionUserPreferences, in turn, will notify all Documents in its PageGroup, rather than only directly
+        registered listeners.
+
+        * dom/Document.cpp:
+        (WebCore::Document::registerForCaptionPreferencesChangedCallbacks): Added. Notify the CaptionUserPreferences that someone
+            is interested in captionPreferencesChanged notfications.
+        (WebCore::Document::unregisterForCaptionPreferencesChangedCallbacks): Added.
+        (WebCore::Document::captionPreferencesChanged): Added. Pass to all registered elements.
+        * dom/Document.h:
+        * dom/Element.h:
+        (WebCore::Element::captionPreferencesChanged): Added. Empty; intended
+            to be overridden by subclasses.
+        * history/CachedPage.cpp:
+        (WebCore::CachedPage::CachedPage): Initialize m_needsCaptionPreferenceChanged member.
+        (WebCore::CachedPage::restore): Call captionPreferencesChanged() if necessary.
+        * history/CachedPage.h:
+        (WebCore::CachedPage::markForCaptionPreferencesChanged): Set the m_needsCaptionPreferenceChanged member.
+        * history/PageCache.cpp:
+        (WebCore::PageCache::markPagesForCaptionPreferencesChanged): Pass to every CachedPage.
+        * history/PageCache.h:
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement): Register with the Document.
+        (WebCore::HTMLMediaElement::~HTMLMediaElement): Unregister with same.
+        (WebCore::HTMLMediaElement::attach): Remove previous registration call.
+        * html/HTMLMediaElement.h:
+        * page/CaptionUserPreferences.cpp:
+        (WebCore::CaptionUserPreferences::captionPreferencesChanged): Pass to the
+            PageGroup.
+        * page/CaptionUserPreferences.h:
+        (WebCore::CaptionUserPreferences::setInterestedInCaptionPreferenceChanges):
+            Empty; intended to be overridden by subclasses.
+        * page/CaptionUserPreferencesMac.h:
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::setInterestedInCaptionPreferenceChanges):
+            Renamed from registerForPreferencesChangedCallbacks().
+        (WebCore::CaptionUserPreferencesMac::captionPreferencesChanged):
+            Replace call to havePreferenceChangeListeners() with m_listeningForPreferenceChanges.
+        * page/Page.cpp:
+        (WebCore::Page::captionPreferencesChanged):
+            Pass to every contained Document.
+        * page/Page.h:
+        * page/CaptionUserPreferences.cpp:
+        (WebCore::CaptionUserPreferences::captionPreferencesChanged): Pass to the PageGroup.
+        * page/CaptionUserPreferences.h:
+        * page/PageGroup.cpp:
+        (WebCore::PageGroup::captionPreferencesChanged): Pass to every page, as well as pages in the PageCache.
+        * page/PageGroup.h:
+
 2013-03-14  David Grogan  <dgrogan@chromium.org>
 
         IndexedDB: Histogram leveldb open errors.
