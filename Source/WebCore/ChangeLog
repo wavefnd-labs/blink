@@ -1,3 +1,60 @@
+2013-03-14  Xabier Rodriguez Calvar  <calvaris@igalia.com>
+
+        [GStreamer] Stopping playback of html5 media when receiving a higher priority audio event needs implementation
+        https://bugs.webkit.org/show_bug.cgi?id=91611
+
+        React to REQUEST_STATE GStreamer message to stop the pipeline when
+        a higher priority stream is played. When this happens, states are
+        updated accordingly.
+
+        A method was added in the MediaPlayer class and internals to allow
+        the the test runner to simulate an audio interruption.
+
+        Reviewed by Philippe Normand.
+
+        Test: media/media-higher-prio-audio-stream.html
+
+        * platform/graphics/MediaPlayer.h:
+        * platform/graphics/MediaPlayer.cpp:
+        (WebCore):
+        (MediaPlayer):
+        (WebCore::MediaPlayer::simulateAudioInterruption): New method
+        delegating an audio interruption to the private backend to
+        simulate the use-case where an external application needs
+        exclusive access to the audio device.
+        * platform/graphics/MediaPlayerPrivate.h:
+        (MediaPlayerPrivateInterface):
+        (WebCore::MediaPlayerPrivateInterface::simulateAudioInterruption):
+        Added default empty method in the common private header.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp:
+        (WebCore):
+        (WebCore::MediaPlayerPrivateGStreamer::createAudioSink):
+        (WebCore::setAudioStreamPropertiesCallback): Hooked to child-added
+        signal on the audio sink, delegates on setAudioStreamProperties.
+        (WebCore::MediaPlayerPrivateGStreamer::setAudioStreamProperties):
+        Sets the audio stream properties.
+        (WebCore::MediaPlayerPrivateGStreamer::MediaPlayerPrivateGStreamer):
+        Initializes the new attribute.
+        (WebCore::MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer):
+        Disconnects autoaudiosink signal.
+        (WebCore::MediaPlayerPrivateGStreamer::changePipelineState):
+        Changed logging.
+        (WebCore::MediaPlayerPrivateGStreamer::handleMessage): Reacting to
+        the REQUEST_STATE message.
+        (WebCore::MediaPlayerPrivateGStreamer::simulateAudioInterruption):
+        Added. Injects the REQUEST_STATE message to the pipeline.
+        (WebCore::MediaPlayerPrivateGStreamer::updateStates): Updating the
+        playback state if REQUEST_STATE.
+        * platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.h:
+        (MediaPlayerPrivateGStreamer): Added new method and attribute.
+        * testing/Internals.h:
+        * testing/Internals.idl:
+        * testing/Internals.cpp:
+        (WebCore):
+        (WebCore::Internals::simulateAudioInterruption): Added to call the
+        method to stop the element because of a higher prio stream at the
+        tests.
+
 2013-03-14  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] Add support for tiled shadow blur
