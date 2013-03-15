@@ -1,3 +1,450 @@
+2013-03-15  Marja Hölttä  <marja@chromium.org>
+
+        [V8] Add machinery for generating specialized bindings for the main world
+        https://bugs.webkit.org/show_bug.cgi?id=111417
+
+        Reviewed by Kentaro Hara.
+
+        The new specialized bindings will be faster, because they don't need to
+        do the "main world, isolated world or a worker" check, but can right
+        away assume that we're in the main world.
+
+        This patch generates main world bindings for getters and setters.
+
+        No new tests (updated existing bindings tests).
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateHeader):
+        (GenerateNormalAttrGetterCallback):
+        (GenerateNormalAttrGetter):
+        (GenerateNormalAttrSetterCallback):
+        (GenerateNormalAttrSetter):
+        (GenerateNamedConstructor):
+        (GenerateBatchedAttributeData):
+        (GenerateSingleBatchedAttribute):
+        (GenerateImplementation):
+        (GenerateCallbackImplementation):
+        (GenerateFunctionCallString):
+        (CreateCustomSignature):
+        (NativeToJSValue):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore::ConfigureV8Float64ArrayTemplate):
+        (WebCore::V8Float64Array::GetTemplate):
+        (WebCore::V8Float64Array::HasInstance):
+        * bindings/scripts/test/V8/V8Float64Array.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.cpp:
+        (WebCore::TestActiveDOMObjectV8Internal::excitingAttrAttrGetterForMainWorld):
+        (TestActiveDOMObjectV8Internal):
+        (WebCore::TestActiveDOMObjectV8Internal::excitingAttrAttrGetterCallbackForMainWorld):
+        (WebCore):
+        (WebCore::ConfigureV8TestActiveDOMObjectTemplate):
+        (WebCore::V8TestActiveDOMObject::GetTemplate):
+        (WebCore::V8TestActiveDOMObject::HasInstance):
+        * bindings/scripts/test/V8/V8TestActiveDOMObject.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore::ConfigureV8TestCustomNamedGetterTemplate):
+        (WebCore::V8TestCustomNamedGetter::GetTemplate):
+        (WebCore::V8TestCustomNamedGetter::HasInstance):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestEventConstructor.cpp:
+        (WebCore::TestEventConstructorV8Internal::attr1AttrGetterForMainWorld):
+        (TestEventConstructorV8Internal):
+        (WebCore::TestEventConstructorV8Internal::attr1AttrGetterCallbackForMainWorld):
+        (WebCore::TestEventConstructorV8Internal::attr2AttrGetterForMainWorld):
+        (WebCore::TestEventConstructorV8Internal::attr2AttrGetterCallbackForMainWorld):
+        (WebCore):
+        (WebCore::ConfigureV8TestEventConstructorTemplate):
+        (WebCore::V8TestEventConstructor::GetTemplate):
+        (WebCore::V8TestEventConstructor::HasInstance):
+        * bindings/scripts/test/V8/V8TestEventConstructor.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore::ConfigureV8TestEventTargetTemplate):
+        (WebCore::V8TestEventTarget::GetTemplate):
+        (WebCore::V8TestEventTarget::HasInstance):
+        * bindings/scripts/test/V8/V8TestEventTarget.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestException.cpp:
+        (WebCore::TestExceptionV8Internal::nameAttrGetterForMainWorld):
+        (TestExceptionV8Internal):
+        (WebCore::TestExceptionV8Internal::nameAttrGetterCallbackForMainWorld):
+        (WebCore):
+        (WebCore::ConfigureV8TestExceptionTemplate):
+        (WebCore::V8TestException::GetTemplate):
+        (WebCore::V8TestException::HasInstance):
+        * bindings/scripts/test/V8/V8TestException.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore::TestInterfaceV8Internal::supplementalStaticReadOnlyAttrAttrGetterForMainWorld):
+        (TestInterfaceV8Internal):
+        (WebCore::TestInterfaceV8Internal::supplementalStaticReadOnlyAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStaticAttrAttrGetterForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStaticAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStaticAttrAttrSetterForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStaticAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr1AttrGetterForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr1AttrGetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr2AttrGetterForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr2AttrGetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr2AttrSetterForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr2AttrSetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr3AttrGetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalStr3AttrSetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalNodeAttrGetterForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalNodeAttrGetterCallbackForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalNodeAttrSetterForMainWorld):
+        (WebCore::TestInterfaceV8Internal::supplementalNodeAttrSetterCallbackForMainWorld):
+        (WebCore):
+        (WebCore::ConfigureV8TestInterfaceTemplate):
+        (WebCore::V8TestInterface::GetTemplate):
+        (WebCore::V8TestInterface::HasInstance):
+        * bindings/scripts/test/V8/V8TestInterface.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore::ConfigureV8TestMediaQueryListListenerTemplate):
+        (WebCore::V8TestMediaQueryListListener::GetTemplate):
+        (WebCore::V8TestMediaQueryListListener::HasInstance):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.cpp:
+        (WebCore::V8TestNamedConstructorConstructor::GetTemplate):
+        (WebCore::ConfigureV8TestNamedConstructorTemplate):
+        (WebCore::V8TestNamedConstructor::GetTemplate):
+        (WebCore::V8TestNamedConstructor::HasInstance):
+        * bindings/scripts/test/V8/V8TestNamedConstructor.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestNode.cpp:
+        (WebCore::ConfigureV8TestNodeTemplate):
+        (WebCore::V8TestNode::GetTemplate):
+        (WebCore::V8TestNode::HasInstance):
+        * bindings/scripts/test/V8/V8TestNode.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::readOnlyLongAttrAttrGetterForMainWorld):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::readOnlyLongAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::readOnlyStringAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::readOnlyStringAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::readOnlyTestObjAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::readOnlyTestObjAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::staticReadOnlyLongAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::staticReadOnlyLongAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::staticStringAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::staticStringAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::staticStringAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::staticStringAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::enumAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::enumAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::enumAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::enumAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::shortAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::shortAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::shortAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::shortAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedShortAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedShortAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedShortAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedShortAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::longAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::longAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::longAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::longAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::longLongAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::longLongAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::longLongAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::longLongAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedLongLongAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedLongLongAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedLongLongAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::unsignedLongLongAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::testObjAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::testObjAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::testObjAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::testObjAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::XMLObjAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::XMLObjAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::XMLObjAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::XMLObjAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::createAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::createAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::createAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::createAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedStringAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedStringAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedStringAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedStringAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedIntegralAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedIntegralAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedIntegralAttrAttrSetter):
+        (WebCore::TestObjV8Internal::reflectedIntegralAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedIntegralAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedUnsignedIntegralAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedUnsignedIntegralAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedUnsignedIntegralAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedUnsignedIntegralAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedBooleanAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedBooleanAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedBooleanAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedBooleanAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedURLAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedURLAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedURLAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedURLAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomIntegralAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomIntegralAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomIntegralAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomIntegralAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomBooleanAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomBooleanAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomBooleanAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomBooleanAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomURLAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomURLAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomURLAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::reflectedCustomURLAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::typedArrayAttrAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::typedArrayAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::typedArrayAttrAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::typedArrayAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithGetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithGetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithGetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithGetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithSetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithSetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithSetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::attrWithSetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithGetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithGetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithGetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithGetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithSetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithSetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithSetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::stringAttrWithSetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::customAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::customAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeRaisesAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeRaisesAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeRaisesAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptStateAttributeRaisesAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAttributeRaisesAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateAttributeRaisesAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptExecutionContextAndScriptStateWithSpacesAttributeAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::withScriptArgumentsAndCallStackAttributeAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr1AttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr1AttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr1AttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr1AttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr2AttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr2AttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr2AttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr2AttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr3AttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr3AttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr3AttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::conditionalAttr3AttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::cachedAttribute1AttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::cachedAttribute1AttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::cachedAttribute2AttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::cachedAttribute2AttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::anyAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::anyAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::anyAttributeAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::anyAttributeAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr1AttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr1AttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr1AttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr1AttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr2AttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr2AttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr2AttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::enabledAtRuntimeAttr2AttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::floatArrayAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::floatArrayAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::floatArrayAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::floatArrayAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::doubleArrayAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::doubleArrayAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::doubleArrayAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::doubleArrayAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::contentDocumentAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::contentDocumentAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::mutablePointAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::mutablePointAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::mutablePointAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::mutablePointAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::immutablePointAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::immutablePointAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::immutablePointAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::immutablePointAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::strawberryAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::strawberryAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::strawberryAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::strawberryAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::strictFloatAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::strictFloatAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::strictFloatAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::strictFloatAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::descriptionAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::descriptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::idAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::idAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::idAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::idAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::hashAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::hashAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::replaceableAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::replaceableAttributeAttrGetterCallbackForMainWorld):
+        (WebCore):
+        (WebCore::ConfigureV8TestObjTemplate):
+        (WebCore::V8TestObj::GetTemplate):
+        (WebCore::V8TestObj::HasInstance):
+        * bindings/scripts/test/V8/V8TestObj.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestOverloadedConstructors.cpp:
+        (WebCore::ConfigureV8TestOverloadedConstructorsTemplate):
+        (WebCore::V8TestOverloadedConstructors::GetTemplate):
+        (WebCore::V8TestOverloadedConstructors::HasInstance):
+        * bindings/scripts/test/V8/V8TestOverloadedConstructors.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::valueAttrGetterForMainWorld):
+        (TestSerializedScriptValueInterfaceV8Internal):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::valueAttrGetterCallbackForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::valueAttrSetterForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::valueAttrSetterCallbackForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::readonlyValueAttrGetterForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::readonlyValueAttrGetterCallbackForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrGetterForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrGetterCallbackForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrSetterForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedValueAttrSetterCallbackForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::portsAttrGetterForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::portsAttrGetterCallbackForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedReadonlyValueAttrGetterForMainWorld):
+        (WebCore::TestSerializedScriptValueInterfaceV8Internal::cachedReadonlyValueAttrGetterCallbackForMainWorld):
+        (WebCore):
+        (WebCore::ConfigureV8TestSerializedScriptValueInterfaceTemplate):
+        (WebCore::V8TestSerializedScriptValueInterface::GetTemplate):
+        (WebCore::V8TestSerializedScriptValueInterface::HasInstance):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore::TestTypedefsV8Internal::unsignedLongLongAttrAttrGetterForMainWorld):
+        (TestTypedefsV8Internal):
+        (WebCore::TestTypedefsV8Internal::unsignedLongLongAttrAttrGetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::unsignedLongLongAttrAttrSetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::unsignedLongLongAttrAttrSetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::immutableSerializedScriptValueAttrGetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::immutableSerializedScriptValueAttrGetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::immutableSerializedScriptValueAttrSetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::immutableSerializedScriptValueAttrSetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithGetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithGetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithGetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithGetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithSetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithSetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithSetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::attrWithSetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithGetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithGetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithGetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithGetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithSetterExceptionAttrGetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithSetterExceptionAttrGetterCallbackForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithSetterExceptionAttrSetterForMainWorld):
+        (WebCore::TestTypedefsV8Internal::stringAttrWithSetterExceptionAttrSetterCallbackForMainWorld):
+        (WebCore):
+        (WebCore::ConfigureV8TestTypedefsTemplate):
+        (WebCore::V8TestTypedefs::GetTemplate):
+        (WebCore::V8TestTypedefs::HasInstance):
+        * bindings/scripts/test/V8/V8TestTypedefs.h:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        (WebCore::toV8FastForMainWorld):
+        * bindings/v8/DOMDataStore.h:
+        (WebCore::DOMDataStore::getWrapperForMainWorld):
+        (DOMDataStore):
+        * bindings/v8/V8DOMConfiguration.cpp:
+        (WebCore::V8DOMConfiguration::addToTemplate):
+        (WebCore):
+        * bindings/v8/V8DOMConfiguration.h:
+        (V8DOMConfiguration):
+        * bindings/v8/custom/V8DOMWindowCustom.cpp:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        * bindings/v8/custom/V8EventTargetCustom.cpp:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        * bindings/v8/custom/V8IDBAnyCustom.cpp:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        * bindings/v8/custom/V8MicroDataItemValueCustom.cpp:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+        * bindings/v8/custom/V8WorkerContextCustom.cpp:
+        (WebCore::toV8ForMainWorld):
+        (WebCore):
+
 2013-03-15  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: Flame Chart. xOffset calculates incorrectly when chart width less that canvas.width.
