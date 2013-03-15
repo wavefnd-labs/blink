@@ -1,3 +1,35 @@
+2013-03-15  Andy Estes  <aestes@apple.com>
+
+        REGRESSION (r127277): CSS URIs with multi-byte Unicode escape sequences fail to parse
+        https://bugs.webkit.org/show_bug.cgi?id=112436
+
+        Reviewed by Michael Saboff.
+
+        r127277 modified the CSS parser to use 8-bit strings when possible.
+        However, it failed to handle URIs that contain Unicode escape sequences
+        that expand to multi-byte characters. Not only would the URI fail to
+        parse, but so would the remainder of the input string.
+
+        Fix this by producing a 16-bit result when we detect a URI with a
+        multi-byte Unicode escape, like we do for identifiers and other strings.
+
+        Test: fast/css/url-with-multi-byte-unicode-escape.html
+
+        * css/CSSParser.cpp:
+        (WebCore::checkAndSkipString): Changed to be a free function since it
+        doesn't access CSSParser's internal state.
+        (WebCore::CSSParser::findURI): Added a function that consolidates the
+        logic of finding the start and end pointers of the URI and the quote
+        character (if encountered), starting at the current character.
+        (WebCore::CSSParser::parseURIInternal): Removed duplicated logic for
+        finding the URI bounds (this now lives in findURI()) and logic for
+        setting the token type and updating the current character (this now
+        lives in parseURI()).
+        (WebCore::CSSParser::parseURI): Find the URI and parse it. If a
+        multi-byte Unicode escape is encountered, rewind to the beginning of
+        the URI and re-parse with a 16-bit string as the destination.
+        * css/CSSParser.h:
+
 2013-03-15  Andreas Kling  <akling@apple.com>
 
         [JSC] Remove custom WebAudio mark functions that we can generate instead.
