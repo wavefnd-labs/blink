@@ -1,3 +1,34 @@
+2013-03-15  Alexey Proskuryakov  <ap@apple.com>
+
+        Reduce amount of platform specific code in MessagePortChannel
+        https://bugs.webkit.org/show_bug.cgi?id=112469
+
+        Reviewed by Sam Weinig.
+
+        * dom/MessagePortChannel.h: Ifdefed out an unused channel() function, except for
+        Chromium, where it is used. We certainly don't want to expose this implementation
+        detail as a public function.
+
+        * dom/default/PlatformMessagePortChannel.h: Removed functions that are no longer
+        delegated. Made class contents all public, as it's now basically a data storage
+        for MessagePortChannel.
+
+        * dom/default/PlatformMessagePortChannel.cpp:
+        (WebCore::MessagePortChannel::createChannel):
+        (WebCore::MessagePortChannel::~MessagePortChannel):
+        (WebCore::MessagePortChannel::entangleIfOpen):
+        (WebCore::MessagePortChannel::disentangle):
+        (WebCore::MessagePortChannel::postMessageToRemote):
+        (WebCore::MessagePortChannel::tryGetMessageFromRemote):
+        (WebCore::MessagePortChannel::close):
+        (WebCore::MessagePortChannel::isConnectedTo):
+        (WebCore::MessagePortChannel::hasPendingActivity):
+        (WebCore::MessagePortChannel::locallyEntangledPort):
+        (WebCore::PlatformMessagePortChannel::PlatformMessagePortChannel):
+        (WebCore::PlatformMessagePortChannel::entangledChannel):
+        Moved code from PlatformMessagePortChannel to MessagePortChannel. Added some
+        FIXMEs.
+
 2013-03-15  Arvid Nilsson  <anilsson@rim.com>
 
         [BlackBerry] Expose the compositing thread layer's draw rectangle to aid hit testing
