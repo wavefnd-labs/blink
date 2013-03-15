@@ -1,3 +1,47 @@
+2013-03-15  Tim Horton  <timothy_horton@apple.com>
+
+        RenderSnapshottedPlugIn can't be a RenderBlock (what if it's display: inline?)
+        https://bugs.webkit.org/show_bug.cgi?id=112432
+        <rdar://problem/13187211>
+
+        Reviewed by Simon Fraser and Dean Jackson.
+
+        Re-use code from PLUGIN_PROXY_FOR_VIDEO to allow RenderEmbeddedObject to lay out its children,
+        and make RenderSnapshottedPlugIn a RenderEmbeddedObject subclass once again. This will ensure that
+        RenderSnapshottedPlugIn lays itself out in the page the same as the RenderEmbeddedObject it replaces did,
+        preventing snapshotted plug-ins from breaking the layout when they are display: inline.
+
+        * html/HTMLPlugInElement.cpp:
+        (WebCore::HTMLPlugInElement::defaultEventHandler):
+        RenderSnapshottedPlugIn is a RenderEmbeddedObject subclass again, so we need to check
+        for it when we have a RenderEmbeddedObject, instead of when we don't.
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::updateWidget):
+        Ditto.
+
+        * rendering/RenderEmbeddedObject.cpp:
+        (WebCore::RenderEmbeddedObject::layout):
+        (WebCore::RenderEmbeddedObject::canHaveChildren):
+        Allow RenderEmbeddedObject to have and lay out children if it is a RenderSnapshottedPlugIn.
+        Also, preserve the code that allows children if it is a media element and PLUGIN_PROXY_FOR_VIDEO is enabled.
+        Don't call addWidgetToUpdate for instances which will never have a widget, like RenderSnapshottedPlugIn.
+
+        * rendering/RenderEmbeddedObject.h:
+        (RenderEmbeddedObject):
+        We need canHaveChildren() and children() and m_children now.
+        Add canHaveWidget(), which returns true. Subclasses can override if need be.
+
+        * rendering/RenderSnapshottedPlugIn.h: Add canHaveWidget(), which is false for RenderSnapshottedPlugIn.
+        * rendering/RenderSnapshottedPlugIn.cpp:
+        (WebCore::RenderSnapshottedPlugIn::RenderSnapshottedPlugIn):
+        (WebCore::RenderSnapshottedPlugIn::layout):
+        (WebCore::RenderSnapshottedPlugIn::getCursor):
+        Make RenderSnapshottedPlugIn a RenderEmbeddedObject.
+
+        (WebCore::RenderSnapshottedPlugIn::paint):
+        Paint our children.
+
 2013-03-15  Hajime Morrita  <morrita@google.com>
 
         [Custom Elements] Any HTMLElement subclass should become a superclass of custom element
