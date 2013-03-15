@@ -1,3 +1,33 @@
+2013-03-15  Joshua Bell  <jsbell@chromium.org>
+
+        [V8] Binding: Implement EnforceRange IDL Attribute for long long conversions
+        https://bugs.webkit.org/show_bug.cgi?id=96798
+
+        Reviewed by Kentaro Hara.
+
+        Some of the tests for HTMLOptionsCollection.add() assumed it should throw for
+        Infinities and NaNs, but this is not what the DOM+WebIDL specs say. (Firefox doesn't throw
+        so this does not appear to be a web-compat issue.) This updates the tests/expectations so
+        that V8 passes. JSC expectations are FAIL in a few places since it still incorrectly throws
+        on Infinity/NaN -> int32 conversion (existing tests) and does not implement EnforceRange
+        (new tests).
+
+        Tne non-numeric-values-numeric-parameters test was also broken for NaN testing, reporting
+        incorrect results which hid some of this behavior.
+
+        * fast/dom/non-numeric-values-numeric-parameters-expected.txt: Failing behavior for JSC.
+        * fast/dom/script-tests/non-numeric-values-numeric-parameters.js: HTMLOptionsCollection.add()
+        should not throw on NaNs/Infinities.
+        * fast/js/script-tests/select-options-add.js: Ditto.
+        * fast/js/select-options-add-expected.txt: Failing behavior for JSC.
+        * fast/js/webidl-type-mapping-expected.txt: Ditto.
+        * fast/js/webidl-type-mapping.html: Added test cases for [EnforceRange]
+        * platform/chromium/fast/dom/non-numeric-values-numeric-parameters-expected.txt: Added - passing behavior for V8.
+        * platform/chromium/fast/js/select-options-add-expected.txt: Ditto.
+        * platform/chromium/fast/js/webidl-type-mapping-expected.txt: Added.
+        * storage/indexeddb/intversion-bad-parameters-expected.txt: Added non-finite test cases.
+        * storage/indexeddb/resources/intversion-bad-parameters.js: Ditto.
+
 2013-03-15  Simon Fraser  <simon.fraser@apple.com>
 
         Marking sputnik/Conformance/10_Execution_Contexts/10.1_Definitions/10.1.8_Arguments_Object/S10.1.8_A3_T2.html

@@ -1,3 +1,49 @@
+2013-03-15  Joshua Bell  <jsbell@chromium.org>
+
+        [V8] Binding: Implement EnforceRange IDL Attribute for long long conversions
+        https://bugs.webkit.org/show_bug.cgi?id=96798
+
+        Reviewed by Kentaro Hara.
+
+        Implement [EnforceRange] attribute for V8 bindings, which specifies throwing behavior
+        on conversions outside int/uint 32/64 ranges and edge cases like NaNs and Infinities.
+        Conversely, conversions without this attribute should *not* throw.
+
+        Tests: fast/js/webidl-type-mapping.html:
+               fast/dom/non-numeric-values-numeric-parameters.html
+               fast/js/script-tests/select-options-add.html
+               storage/indexeddb/intversion-bad-parameters.html
+
+        * Modules/indexeddb/IDBCursor.cpp: Remove custom range enforcement for advance()
+        * Modules/indexeddb/IDBCursor.h: Adjust type to match WebIDL.
+        * Modules/indexeddb/IDBCursor.idl: Specify [EnforceRange] and type matches spec WebIDL.
+        * Modules/indexeddb/IDBFactory.cpp: Remove custom range enforcement for open()
+        * Modules/indexeddb/IDBFactory.h: Adjust type to match WebIDL.
+        * Modules/indexeddb/IDBFactory.idl: Specify [EnforceRange] and type matches spec WebIDL.
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (JSValueToNative): Add FIXME to support [EnforceRange]
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNormalAttrSetter): Handle [EnforceRange] in attribute setters
+        (GenerateParametersCheck): Handle [EnforceRange] in parameters.
+        (JSValueToNative): Pass EnforceRange to toInt() functions as appropriate.
+        * bindings/scripts/IDLAttributes.txt:
+        * bindings/scripts/test/TestObj.idl: Tests w/ [EnforceRange]
+        * bindings/scripts/test/V8/V8TestObj.cpp: Updated expectations
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp: Updated expectations.
+        * bindings/v8/V8Binding.cpp: Overloads for toInt() variants that handle constraints.
+        (WebCore::toInt32):
+        (WebCore::toUInt32):
+        (WebCore::toInt64):
+        (WebCore::toUInt64):
+        * bindings/v8/V8Binding.h: Ditto, plus helpers for callers not expecting errors.
+        (WebCore::toInt32):
+        (WebCore::toUInt32):
+        (WebCore::toInt64):
+        (WebCore::toUInt64):
+        * bindings/v8/V8BindingMacros.h: Helper macros for type conversions that may throw.
+        * testing/TypeConversions.h: Added new members with EnforceRange constraint.
+        * testing/TypeConversions.idl: Ditto.
+
 2013-03-15  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [Network] Refine JSDocs in NetworkRequest.js
