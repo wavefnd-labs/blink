@@ -1,3 +1,32 @@
+2013-03-14  Jer Noble  <jer.noble@apple.com>
+
+        REGRESSION: -webkit-box-reflect does not show on video elements
+        https://bugs.webkit.org/show_bug.cgi?id=112397
+
+        Reviewed by Simon Fraser.
+
+        Test: compositing/video/video-reflection.html
+
+        Support cloning specific CALayer subtypes in PlatformCALayer,
+        which allows reflections to work correctly for those layer types.
+        Specifically, add support for cloning AVPlayerLayer layers.
+
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::cloneLayer): Moved most of the
+            implementation to PlatformCALayer::clone().
+        * platform/graphics/ca/PlatformCALayer.h:
+        * platform/graphics/ca/mac/PlatformCALayerMac.mm:
+        (PlatformCALayer::PlatformCALayer): Set the layerType to 
+            LayerTypeAVPlayerLayer if the PlatformLayer parameter is an
+            AVPlayerLayer.
+        (PlatformCALayer::clone): Moved from GraphicsLayerCA::cloneLayer().
+            Copy the player value to the new layer, if the current layer is
+            a LayerTypeAVPlayerLayer.
+        (PlatformCALayer::playerLayer):
+        * platform/graphics/ca/win/PlatformCALayerWin.cpp:
+        (PlatformCALayer::clone): Moved from GraphicsLayerCA::cloneLayer().
+            May want to add support for AVCFPlayerLayers in the future.
+
 2013-03-15  Nate Chapin  <japhet@chromium.org>
 
         Hide MainResourceLoader from the outside world
