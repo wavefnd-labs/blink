@@ -1,3 +1,121 @@
+2013-03-15  Peter Beverloo  <peter@chromium.org>
+
+        Implement support for nullable types in the bindings generator
+        https://bugs.webkit.org/show_bug.cgi?id=111728
+
+        Reviewed by Kentaro Hara.
+
+        This patch adds support for nullable types in the bindings
+        generator, as described in section 3.10.22 of WebIDL:
+            http://dev.w3.org/2006/webapi/WebIDL/#idl-nullable-type
+
+        interface MyInterface {
+            readonly attribute boolean? value; // true, false or null.
+        };
+
+        The IDL Parser has been modified to record whether attributes are
+        nullable. Question marks from the type will always be stripped
+        from the domAttribute->signature->type field. Once support for
+        this has been completely implemented, we'll be able to remove a
+        bunch of custom bindings, i.e. those of Device Orientation.
+
+        Any getter for an attribute which returns a nullable type will be
+        called with an additional attribute (passed by reference) named
+        "isNull". This will be the last argument passed to the method,
+        unless an exception code (ec) argument will be passed as well.
+
+        The CPP, GObject and ObjC bindings will not change behavior following
+        this patch, although they have been modified to call the WebCore
+        methods for nullable attributes with the correct signature. The
+        V8 and JS binding generators do have modified behavior, in that they
+        will actually return v8Null/jsNull when isNull == true.
+
+        Tested by existing binding tests and the new nullable attribute
+        tests in the bindings/scripts/test/ directory.
+
+        * bindings/scripts/CodeGeneratorCPP.pm:
+        (GenerateImplementation):
+        * bindings/scripts/CodeGeneratorGObject.pm:
+        (GenerateProperty):
+        (GenerateFunction):
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GenerateImplementation):
+        * bindings/scripts/CodeGeneratorObjC.pm:
+        (GenerateImplementation):
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateNormalAttrGetter):
+        * bindings/scripts/IDLParser.pm:
+        (typeHasNullableSuffix):
+        (typeRemoveNullableSuffix):
+        (parseAttributeRest):
+        (parseOptionalOrRequiredArgument):
+        (parseAttributeRestOld):
+        * bindings/scripts/test/CPP/WebDOMTestObj.cpp:
+        (WebDOMTestObj::nullableDoubleAttribute):
+        (WebDOMTestObj::nullableLongAttribute):
+        (WebDOMTestObj::nullableBooleanAttribute):
+        (WebDOMTestObj::nullableStringAttribute):
+        (WebDOMTestObj::nullableLongSettableAttribute):
+        (WebDOMTestObj::setNullableLongSettableAttribute):
+        (WebDOMTestObj::nullableStringValue):
+        (WebDOMTestObj::setNullableStringValue):
+        * bindings/scripts/test/CPP/WebDOMTestObj.h:
+        * bindings/scripts/test/GObject/WebKitDOMTestObj.cpp:
+        (webkit_dom_test_obj_set_property):
+        (webkit_dom_test_obj_get_property):
+        (webkit_dom_test_obj_class_init):
+        (webkit_dom_test_obj_get_nullable_double_attribute):
+        (webkit_dom_test_obj_get_nullable_long_attribute):
+        (webkit_dom_test_obj_get_nullable_boolean_attribute):
+        (webkit_dom_test_obj_get_nullable_string_attribute):
+        (webkit_dom_test_obj_get_nullable_long_settable_attribute):
+        (webkit_dom_test_obj_set_nullable_long_settable_attribute):
+        (webkit_dom_test_obj_get_nullable_string_value):
+        (webkit_dom_test_obj_set_nullable_string_value):
+        * bindings/scripts/test/GObject/WebKitDOMTestObj.h:
+        * bindings/scripts/test/JS/JSTestObj.cpp:
+        (WebCore):
+        (WebCore::jsTestObjNullableDoubleAttribute):
+        (WebCore::jsTestObjNullableLongAttribute):
+        (WebCore::jsTestObjNullableBooleanAttribute):
+        (WebCore::jsTestObjNullableStringAttribute):
+        (WebCore::jsTestObjNullableLongSettableAttribute):
+        (WebCore::jsTestObjNullableStringValue):
+        (WebCore::setJSTestObjNullableLongSettableAttribute):
+        (WebCore::setJSTestObjNullableStringValue):
+        * bindings/scripts/test/JS/JSTestObj.h:
+        (WebCore):
+        * bindings/scripts/test/ObjC/DOMTestObj.h:
+        * bindings/scripts/test/ObjC/DOMTestObj.mm:
+        (-[DOMTestObj nullableDoubleAttribute]):
+        (-[DOMTestObj nullableLongAttribute]):
+        (-[DOMTestObj nullableBooleanAttribute]):
+        (-[DOMTestObj nullableStringAttribute]):
+        (-[DOMTestObj nullableLongSettableAttribute]):
+        (-[DOMTestObj setNullableLongSettableAttribute:]):
+        (-[DOMTestObj nullableStringValue]):
+        (-[DOMTestObj setNullableStringValue:]):
+        * bindings/scripts/test/TestObj.idl:
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::nullableDoubleAttributeAttrGetter):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::nullableDoubleAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::nullableLongAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::nullableLongAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::nullableBooleanAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::nullableBooleanAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::nullableStringAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::nullableStringAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::nullableLongSettableAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::nullableLongSettableAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::nullableLongSettableAttributeAttrSetter):
+        (WebCore::TestObjV8Internal::nullableLongSettableAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::nullableStringValueAttrGetter):
+        (WebCore::TestObjV8Internal::nullableStringValueAttrGetterCallback):
+        (WebCore::TestObjV8Internal::nullableStringValueAttrSetter):
+        (WebCore::TestObjV8Internal::nullableStringValueAttrSetterCallback):
+        (WebCore):
+
 2013-03-15  Marja Hölttä  <marja@chromium.org>
 
         [V8] Store main world and non-main world templates separately.
