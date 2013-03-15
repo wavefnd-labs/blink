@@ -1,3 +1,40 @@
+2013-03-14  Xidorn Quan  <quanxunzhen@gmail.com>
+
+        Clickable area is incorrect for elements with border-radius
+        https://bugs.webkit.org/show_bug.cgi?id=95373
+
+        Reviewed by Simon Fraser.
+
+        As RenderBlock doesn't see rounded rect which comes from border-radius
+        in nodeAtPoint, the rounded corner seems to have an 'invisible' square
+        box which catches hits. So we added check on whether hitTestPoint also
+        intersects the rounded rect when hasBorderRadius is set.
+
+        This patch is based on Takashi Sakamoto's work in
+        https://bugs.webkit.org/show_bug.cgi?id=95373
+
+        Test: fast/borders/border-radius-position.html
+
+        * platform/graphics/FloatQuad.cpp:
+        (WebCore):
+        (WebCore::lineIntersectsCircle):
+        (WebCore::FloatQuad::intersectsCircle):
+        (WebCore::FloatQuad::intersectsEllipse):
+        * platform/graphics/FloatQuad.h:
+        (FloatQuad):
+        * platform/graphics/RoundedRect.cpp:
+        (WebCore::RoundedRect::intersectsQuad):
+        (WebCore):
+        * platform/graphics/RoundedRect.h:
+        (RoundedRect):
+        * rendering/HitTestLocation.cpp:
+        (WebCore::HitTestLocation::intersects):
+        (WebCore):
+        * rendering/HitTestLocation.h:
+        (HitTestLocation):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::nodeAtPoint):
+
 2013-03-14  Chris Fleizach  <cfleizach@apple.com>
 
         AX: Crash when removing aria-menu item from DOM
