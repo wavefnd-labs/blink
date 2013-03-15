@@ -1,3 +1,31 @@
+2013-03-15  Takashi Sakamoto  <tasak@google.com>
+
+        Crash at RenderStyle::inheritFrom reported by fuzzer
+        https://bugs.webkit.org/show_bug.cgi?id=112322
+
+        Reviewed by Hajime Morrita.
+
+        pseudoStyleForElement should check whether a parent style of a given
+        element is available or not. If a given element's parent is
+        an insertion point whose reset-style-inheritance is true, the parent
+        style is not available. Need to use defaultStyleForElement.
+
+        Test: fast/dom/shadow/insertion-point-resetStyleInheritance-with-pseudo-element-crash.html
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::styleForElement):
+        Removed cloneForParent. Instead, made m_state own parentStyle, i.e.
+        changed m_parentStyle in class State from RenderStyle* to
+        RefPtr<RenderStyle>.
+        (WebCore::StyleResolver::pseudoStyleForElement):
+        If an actual parent style of a given element is not available, use
+        defaultStyleForElement. This is the same logic as styleForElement.
+        * css/StyleResolver.h:
+        (WebCore::StyleResolver::State::setParentStyle):
+        Modified the parameter to use PassRefPtr<RenderStyle>.
+        (WebCore::StyleResolver::State::parentStyle):
+        (State):
+
 2013-03-15  Mihnea Ovidenie  <mihnea@adobe.com>
 
         [CSS Regions] Selecting text inside an empty region causes selection outside the region area
