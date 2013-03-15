@@ -1,3 +1,169 @@
+2013-03-15  Abhishek Arya  <inferno@chromium.org>
+
+        Replace static_casts with to* helper functions.
+        https://bugs.webkit.org/show_bug.cgi?id=112401
+
+        Reviewed by Stephen Chenney.
+
+        to* helper functions are preferred over static_cast calls since they
+        help to catch bad casts easily on the testing infrastructure.
+
+        * accessibility/AccessibilityObject.cpp:
+        (WebCore::appendAccessibilityObject):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::visiblePositionForPoint):
+        * accessibility/AccessibilityScrollView.cpp:
+        (WebCore::AccessibilityScrollView::webAreaObject):
+        (WebCore::AccessibilityScrollView::documentFrameView):
+        (WebCore::AccessibilityScrollView::parentObject):
+        (WebCore::AccessibilityScrollView::parentObjectIfExists):
+        * accessibility/chromium/AXObjectCacheChromium.cpp:
+        (WebCore::AXObjectCache::postPlatformNotification):
+        * bindings/js/JSPluginElementFunctions.cpp:
+        (WebCore::pluginScriptObjectFromPluginViewBase):
+        * bindings/js/PageScriptDebugServer.cpp:
+        (WebCore::PageScriptDebugServer::setJavaScriptPaused):
+        * bindings/js/ScriptController.cpp:
+        (WebCore::ScriptController::createScriptInstanceForWidget):
+        * bindings/js/ScriptControllerQt.cpp:
+        (WebCore::ScriptController::createScriptInstanceForWidget):
+        * bindings/v8/ScriptController.cpp:
+        (WebCore::ScriptController::createScriptInstanceForWidget):
+        * html/HTMLObjectElement.cpp:
+        (WebCore::HTMLObjectElement::appendFormData):
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::subframeForTargetNode):
+        (WebCore::EventHandler::passGestureEventToWidget):
+        * page/Frame.cpp:
+        (WebCore::Frame::frameForWidget):
+        * page/FrameView.cpp:
+        (WebCore::collectFrameViewChildren):
+        (WebCore::FrameView::hasCustomScrollbars):
+        (WebCore::FrameView::convertToContainingView):
+        (WebCore::FrameView::convertFromContainingView):
+        (WebCore::FrameView::removeChild):
+        * page/FrameView.h:
+        (WebCore::toFrameView):
+        (WebCore):
+        * page/Page.cpp:
+        (WebCore::Page::collectPluginViews):
+        * page/chromium/EventHandlerChromium.cpp:
+        (WebCore::EventHandler::passWheelEventToWidget):
+        * page/efl/EventHandlerEfl.cpp:
+        (WebCore::EventHandler::passWheelEventToWidget):
+        * page/gtk/EventHandlerGtk.cpp:
+        (WebCore::EventHandler::passWheelEventToWidget):
+        * page/mac/EventHandlerMac.mm:
+        (WebCore::EventHandler::passWheelEventToWidget):
+        * page/qt/EventHandlerQt.cpp:
+        (WebCore::EventHandler::passWheelEventToWidget):
+        * page/scrolling/ScrollingCoordinator.cpp:
+        (WebCore::ScrollingCoordinator::computeNonFastScrollableRegion):
+        * page/win/EventHandlerWin.cpp:
+        (WebCore::EventHandler::passWheelEventToWidget):
+        * page/wx/EventHandlerWx.cpp:
+        (WebCore::EventHandler::passWheelEventToWidget):
+        * platform/ScrollView.h:
+        (WebCore::toScrollView):
+        (WebCore):
+        * platform/Scrollbar.cpp:
+        (WebCore::Scrollbar::isScrollViewScrollbar):
+        (WebCore::Scrollbar::mouseUp):
+        (WebCore::Scrollbar::axObjectCache):
+        * platform/Widget.h:
+        (WebCore::Widget::isScrollView):
+        * platform/blackberry/PlatformScreenBlackBerry.cpp:
+        (WebCore::toUserSpace):
+        * platform/efl/ScrollbarEfl.cpp:
+        (ScrollbarEfl::setParent):
+        * platform/qt/PlatformSupportQt.cpp:
+        (WebCore::PlatformSupport::popupsAllowed):
+        (WebCore::PlatformSupport::pluginScriptableObject):
+        * plugins/IFrameShimSupport.cpp:
+        (WebCore::getPluginOcclusions):
+        * plugins/PluginView.h:
+        (WebCore::toPluginView):
+        (WebCore):
+        * plugins/PluginViewBase.h:
+        (WebCore::PluginViewBase::isPluginViewBase):
+        (PluginViewBase):
+        (WebCore::toPluginViewBase):
+        (WebCore):
+        * plugins/blackberry/PluginViewBlackBerry.cpp:
+        (WebCore::PluginView::updatePluginWidget):
+        (WebCore::PluginView::updateBuffer):
+        (WebCore::PluginView::paint):
+        (WebCore::PluginView::handleScrollEvent):
+        (WebCore::PluginView::calculateClipRect):
+        (WebCore::PluginView::handleFullScreenAllowedEvent):
+        (WebCore::PluginView::handleFullScreenExitEvent):
+        (WebCore::PluginView::setParent):
+        (WebCore::PluginView::setNPWindowIfNeeded):
+        (WebCore::PluginView::platformGetValue):
+        (WebCore::PluginView::platformStart):
+        (WebCore::PluginView::platformDestroy):
+        (WebCore::PluginView::setBackgroundPlay):
+        * plugins/blackberry/PluginViewPrivateBlackBerry.cpp:
+        (WebCore::PluginViewPrivate::setVisibleRects):
+        (WebCore::PluginViewPrivate::showKeyboard):
+        (WebCore::PluginViewPrivate::requestFullScreen):
+        (WebCore::PluginViewPrivate::requestCenterFitZoom):
+        (WebCore::PluginViewPrivate::lockOrientation):
+        (WebCore::PluginViewPrivate::unlockOrientation):
+        (WebCore::PluginViewPrivate::preventIdle):
+        * plugins/gtk/PluginViewGtk.cpp:
+        (WebCore::PluginView::updatePluginWidget):
+        * plugins/mac/PluginViewMac.mm:
+        (WebCore::PluginView::platformStart):
+        * plugins/qt/PluginViewQt.cpp:
+        (WebCore::PluginView::updatePluginWidget):
+        * plugins/win/PluginViewWin.cpp:
+        (WebCore::PluginView::updatePluginWidget):
+        (WebCore::PluginView::paintIntoTransformedContext):
+        (WebCore::PluginView::paintWindowedPluginIntoContext):
+        (WebCore::PluginView::paint):
+        (WebCore::PluginView::handleMouseEvent):
+        (WebCore::PluginView::setNPWindowRect):
+        (WebCore::PluginView::snapshot):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::addLayoutOverflow):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::mapAbsoluteToLocalPoint):
+        * rendering/RenderEmbeddedObject.cpp:
+        (WebCore::RenderEmbeddedObject::allowsAcceleratedCompositing):
+        (WebCore::RenderEmbeddedObject::viewCleared):
+        (WebCore::RenderEmbeddedObject::nodeAtPoint):
+        (WebCore::RenderEmbeddedObject::scroll):
+        * rendering/RenderFlexibleBox.h:
+        (WebCore::toRenderFlexibleBox):
+        (WebCore):
+        * rendering/RenderFrame.cpp:
+        (WebCore::RenderFrame::viewCleared):
+        * rendering/RenderFrameBase.cpp:
+        (WebCore::RenderFrameBase::layoutWithFlattening):
+        * rendering/RenderIFrame.cpp:
+        (WebCore::RenderIFrame::contentRootRenderer):
+        (WebCore::RenderIFrame::layoutSeamlessly):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerConfiguration):
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::shouldPropagateCompositingToEnclosingFrame):
+        * rendering/RenderPart.cpp:
+        (WebCore::RenderPart::requiresAcceleratedCompositing):
+        (WebCore::RenderPart::embeddedContentBox):
+        (WebCore::RenderPart::nodeAtPoint):
+        * rendering/RenderRuby.cpp:
+        (WebCore::rubyBeforeBlock):
+        (WebCore::rubyAfterBlock):
+        (WebCore::lastRubyRun):
+        (WebCore::findRubyRunParent):
+        * rendering/RenderTreeAsText.cpp:
+        (WebCore::write):
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::paintContents):
+        (WebCore::RenderWidget::setOverlapTestResult):
+        (WebCore::RenderWidget::updateWidgetPosition):
+
 2013-03-15  No'am Rosenthal  <noam@webkit.org>
 
         [Texmap] REGRESSION (r144190): Failure at style with preserve-3d and opacity
