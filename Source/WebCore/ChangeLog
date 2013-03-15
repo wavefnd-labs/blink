@@ -1,3 +1,68 @@
+2013-03-14  Hayato Ito  <hayato@chromium.org>
+
+        [Shadow]: left side of ::-webkit-distributed selector not working as expected
+        https://bugs.webkit.org/show_bug.cgi?id=110825
+
+        Reviewed by Dimitri Glazkov.
+
+        Make functional pseudo distributed elements work even when a left side element has specifiers.
+
+        Test: fast/dom/shadow/distributed-pseudo-element-specifiers-in-left-side.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::rewriteSpecifiersWithNamespaceIfNeeded):
+        Make it call rewriteSpecifiersForShadowDistributed() if required.
+
+        (WebCore::CSSParser::rewriteSpecifiersWithElementName):
+        Updated so that it can generate a correct chain of
+        CSSParserSelectors even when '::distributed()' is used with an
+        element, which might be empty, with specifiers.
+
+        e.g. When parsing a selector of 'content.content-class::-webkit-distributed(div)', the following happens:
+
+        1. rewriteSpecifiersWithElementName(...) is called with:
+
+           elementName is: "content"
+           specifiers is: [.content-class] -> [::-webkit-distributed]
+
+        2. Looking for a distributed pseudo element in the specifiers and
+           found it at the end of tagHistory chain of the specifiers.
+
+        3. The result of calling specifiers->prependTagSelector(tag) is:
+
+           specifiers is: [content] -> [.content-class] -> [::-webkit-distributed]
+
+        4. rewriteSpecifiersForShadowDistributed() is called with:
+
+           specifiers is: [content] -> [.content-class] -> [::-webkit-distributed]
+           distributedPseudoElementSelector is: [::-webkit-distributed]
+
+        5. An argumentSelector of the distributedPseudoElementSelector is:
+
+           argumentSelector is: [div]
+
+        6. Remove the distributed pseudo element selector from the specifiers.
+
+           specifiers is: [content] -> [.content-class]
+
+           Note that one pseudo-element may appear per complex selector
+           and the pseudo-element may appear only if the subject of the
+           selector is the last compound selector in the selector.
+
+        7. Append specifiers to the end of the argument selector with a relation of ShadowDistributed:
+
+           argumentSelector is: [div] -(ShadowDistributed)-> [content] -> [.content-class]
+
+        8. Returns the argument selector as a return value.
+
+        (WebCore::CSSParser::rewriteSpecifiersForShadowDistributed): As explained.
+        * css/CSSParserValues.cpp:
+        (WebCore):
+        (WebCore::CSSParserSelector::findDistributedPseudoElementSelector):
+        * css/CSSParserValues.h:
+        (CSSParserSelector):
+        (WebCore::CSSParserSelector::clearTagHistory):
+
 2013-03-14  Takashi Sakamoto  <tasak@google.com>
 
         Crash at CSSDefaultStyleSheets::ensureDefaultStyleSheetsForElement reported by fuzzer
