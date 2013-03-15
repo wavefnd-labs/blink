@@ -1,3 +1,20 @@
+2013-03-14  Ojan Vafai  <ojan@chromium.org>
+
+        Auto height column flexboxes with border and padding are too short
+        https://bugs.webkit.org/show_bug.cgi?id=112398
+
+        Reviewed by Tony Chang.
+
+        Test: css3/flexbox/auto-height-column-with-border-and-padding.html
+
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::mainAxisContentExtent):
+        computeLogicalHeight expects that you pass in the border-box logicalHeight, not
+        the contentLogicalHeight. Since we subtract the border, padding and scrollbar height from 
+        the returned m_extent, if we pass in the contentLogicalHeight and the flexbox is auto-sized
+        then we end up incorrectly subtracting border, padding and scrollbar height from the
+        contentLogicalHeight.
+
 2013-03-15  Tim Horton  <timothy_horton@apple.com>
 
         RenderSnapshottedPlugIn can't be a RenderBlock (what if it's display: inline?)
