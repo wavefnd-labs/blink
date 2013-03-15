@@ -1,3 +1,46 @@
+2013-03-15  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Allow an embedder to position child windows using window coordinates
+        https://bugs.webkit.org/show_bug.cgi?id=112236
+
+        Reviewed by Rob Buis.
+
+        PR 232752
+
+        The LayerCompositingThread can now position the video window using
+        either document or window coordinates.
+
+        The LayerRenderer class gets a new client interface. This allows us to
+        avoid state duplication by delegating decisions directly to the client,
+        which can then be in charge of the (one and only) state.
+
+        The context is moved over to the client, as well as delegation of the
+        decision on whether to clear the surface every frame.
+
+        Also, the decision on which coordinate system to use for positioning
+        child windows is delegated to the client interface.
+
+        No new tests, not testable using DRT.
+
+        * platform/graphics/blackberry/LayerCompositingThread.cpp:
+        (WebCore::LayerCompositingThread::drawTextures):
+        * platform/graphics/blackberry/LayerRenderer.cpp:
+        (WebCore::LayerRenderer::create):
+        (WebCore::LayerRenderer::LayerRenderer):
+        (WebCore::LayerRenderer::setViewport):
+        (WebCore::LayerRenderer::compositeLayers):
+        (WebCore::LayerRenderer::toWebKitWindowCoordinates):
+        (WebCore::LayerRenderer::makeContextCurrent):
+        * platform/graphics/blackberry/LayerRenderer.h:
+        (WebCore):
+        (LayerRenderer):
+        (WebCore::LayerRenderer::client):
+        * platform/graphics/blackberry/LayerRendererClient.h: Added.
+        (Graphics):
+        (WebCore):
+        (LayerRendererClient):
+        (WebCore::LayerRendererClient::~LayerRendererClient):
+
 2013-03-15  Jochen Eisinger  <jochen@chromium.org>
 
         Expose whether a UserGestureToken still has gestures via WebKit API
