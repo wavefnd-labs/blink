@@ -1,3 +1,38 @@
+2013-03-14  Hayato Ito  <hayato@chromium.org>
+
+        [Shadow Dom]: Non Bubbling events in ShadowDOM dispatch in an incorrect order
+        https://bugs.webkit.org/show_bug.cgi?id=112214
+
+        Reviewed by Dimitri Glazkov.
+
+        Fix the order of event dispatching for Shadow DOM.
+
+        So far, an event whose event phase should be set to AT_TARGET,
+        e.g. event at shadow hosts, is dispatched in bubbling phase in the
+        whole event path.  This patch fixed the order of event dispatching
+        so that an event whose event phase must be set to AT_TARGET phase
+        is dispatched in capturing phase rather than bubbling phase.
+
+        The spec is here:
+        https://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/shadow/index.html#event-dispatch
+
+        5.5 Event Dispatch says:
+
+        - When capturing, which entails processing step 3 of the event
+        dispatch algorithm, the Event eventPhase attribute must return
+        AT_TARGET if the relative target is same as the node on which
+        event listeners are invoked
+        - When bubbling, which entails
+        processing step 6 of the event dispatch algorithm, the event
+        listeners must not be invoked on a node if it is the same as its
+        relative target
+
+        No new tests. Update existing layout tests.
+
+        * dom/EventDispatcher.cpp:
+        (WebCore::EventDispatcher::dispatchEventAtCapturing):
+        (WebCore::EventDispatcher::dispatchEventAtBubbling):
+
 2013-03-14  Shezan Baig  <sbaig1@bloomberg.net>
 
         Backspace/delete at start of table cell shouldn't step out of cell
