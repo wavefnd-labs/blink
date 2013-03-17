@@ -1,3 +1,37 @@
+2013-03-17  Adam Barth  <abarth@webkit.org>
+
+        Legacy CSS vendor prefixes should only work for Dashboard
+        https://bugs.webkit.org/show_bug.cgi?id=111890
+
+        Reviewed by Eric Seidel.
+
+        Our experience with the Chromium port is that these legacy CSS vendor
+        prefixes (-apple- and -khtml-) are not needed for web compatibility.
+        There is reason to believe, however, that they are needed for
+        compatibility with Mac OS X Dashboard widgets.
+
+        This patch makes the code for these legacy CSS vendor prefixes
+        enabled at runtime and only enables them when running in Dashboard
+        compatibility mode. This is the first step towards the plan outlined in
+        https://lists.webkit.org/pipermail/webkit-dev/2013-March/024085.html.
+
+        This patch also removes support for ENABLE(LEGACY_CSS_VENDOR_PREFIXES)
+        from the V8 bindings because V8 is never used with Dashboard.
+
+        * bindings/generic/RuntimeEnabledFeatures.cpp:
+        (WebCore):
+        * bindings/generic/RuntimeEnabledFeatures.h:
+        (RuntimeEnabledFeatures):
+        (WebCore::RuntimeEnabledFeatures::setLegacyCSSVendorPrefixesEnabled):
+        (WebCore::RuntimeEnabledFeatures::legacyCSSVendorPrefixesEnabled):
+        * bindings/js/JSCSSStyleDeclarationCustom.cpp:
+        (WebCore::getCSSPropertyNamePrefix):
+        (WebCore::cssPropertyIDForJSCSSPropertyName):
+        * bindings/v8/custom/V8CSSStyleDeclarationCustom.cpp:
+        (WebCore::cssPropertyInfo):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::rewriteSpecifiers):
+
 2013-03-17  David Kilzer  <ddkilzer@apple.com>
 
         BUILD FIX (r145592): AutodrainedPool.h moved to WTF
