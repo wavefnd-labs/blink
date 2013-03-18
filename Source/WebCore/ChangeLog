@@ -1,3 +1,25 @@
+2013-03-18  Dean Jackson  <dino@apple.com>
+
+        Only add wordspacing when kerning to actual word ends
+        https://bugs.webkit.org/show_bug.cgi?id=112507
+        <rdar://problem/12945869>
+
+        Reviewed by Enrica Casucci.
+
+        When measuring text, we currently include any word spacing in
+        the result (it's removed later). When kerning is active, we
+        were adding the word spacing to every wordMeasurement instance
+        whether or not it is a separate word. For example, a nested
+        <span> element would get a wordMeasurement, even though it
+        should not always get word spacing.
+
+        Test: fast/text/word-space-with-kerning-3.html
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::setLogicalWidthForTextRun): Test if the current character
+        referenced by the wordMeasurement is a space character, and add word
+        spacing only then.
+
 2013-03-18  Tony Chang  <tony@chromium.org>
 
         [chromium] Default background color of listboxes should be white
