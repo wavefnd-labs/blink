@@ -33,6 +33,7 @@
 
 #include "../../../Platform/chromium/public/WebCommon.h"
 #include "../../../Platform/chromium/public/WebFileSystem.h"
+#include "../../../Platform/chromium/public/WebFileSystemType.h"
 
 namespace WebKit {
 
@@ -59,7 +60,11 @@ public:
     }
 
     // Called on the main webkit thread before opening a file system.
+#ifdef WEBKIT_USE_NEW_WEBFILESYSTEMTYPE
+    virtual void openFileSystem(WebFileSystemType, long long size, bool create, WebFileSystemCallbacks*)
+#else
     virtual void openFileSystem(WebFileSystem::Type, long long size, bool create, WebFileSystemCallbacks*)
+#endif
     {
         WEBKIT_ASSERT_NOT_REACHED();
     }
