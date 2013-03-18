@@ -1,3 +1,37 @@
+2013-03-18  Alexey Proskuryakov  <ap@apple.com>
+
+        MessagePortChannel::EventData should not be exposed
+        https://bugs.webkit.org/show_bug.cgi?id=112635
+
+        Reviewed by Geoff Garen.
+
+        MessagePortChannel::EventData is an implementation detail that's only needed to
+        store events in MessageQueue. Other existing code already gets away without it,
+        just passing message and ports separately.
+
+        * dom/MessagePort.cpp:
+        (WebCore::MessagePort::postMessage):
+        (WebCore::MessagePort::dispatchMessages):
+        * dom/MessagePortChannel.cpp:
+        * dom/MessagePortChannel.h:
+        * dom/default/PlatformMessagePortChannel.cpp:
+        (WebCore::PlatformMessagePortChannel::EventData::create):
+        (WebCore::PlatformMessagePortChannel::EventData::EventData):
+        (WebCore::MessagePortChannel::postMessageToRemote):
+        (WebCore::MessagePortChannel::tryGetMessageFromRemote):
+        * dom/default/PlatformMessagePortChannel.h:
+        (WebCore::PlatformMessagePortChannel::EventData::message):
+        (WebCore::PlatformMessagePortChannel::EventData::channels):
+        (PlatformMessagePortChannel):
+        (WebCore::PlatformMessagePortChannel::MessagePortQueue::tryGetMessage):
+        (WebCore::PlatformMessagePortChannel::MessagePortQueue::appendAndCheckEmpty):
+        * dom/default/chromium/PlatformMessagePortChannelChromium.cpp:
+        (WebCore::MessagePortChannel::postMessageToRemote):
+        (WebCore::MessagePortChannel::tryGetMessageFromRemote):
+        (WebCore::PlatformMessagePortChannel::postMessageToRemote):
+        (WebCore::PlatformMessagePortChannel::tryGetMessageFromRemote):
+        * dom/default/chromium/PlatformMessagePortChannelChromium.h:
+
 2013-03-18  Tom Sepez  <tsepez@chromium.org>
 
         [v8] Suppress binding integrity check of HTMLContentElement.
