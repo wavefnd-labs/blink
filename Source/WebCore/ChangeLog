@@ -1,3 +1,30 @@
+2013-03-18  Joshua Bell <jsbell@chromium.org>
+
+        IDB Cursor continue moves one item at a time
+        https://bugs.webkit.org/show_bug.cgi?id=109972
+
+        Reviewed by Tony Chang.
+
+        IndexedDB: Use seek on the underlying levelDB iterator to implement the continue operation
+        on a cursor, instead of advancing one item at a time. On a simple test in Chrome - open a
+        key cursor on an index w/ 100 items, then do continue(50), rinse and repeat - this cuts the
+        time 50% (850c/s to 1700c/s). (Original patch c/o Pankaj Kakkar <pankaj@google.com>)
+
+        Covered by existing storage/indexeddb cursor tests; just a performance optimization.
+
+        * Modules/indexeddb/IDBBackingStore.cpp:
+        (WebCore::IDBBackingStore::Cursor::continueFunction): Special case first iteration w/ key
+        to use leveldb seek (forward cursors only, since reverse seek isn't exposed).
+        (WebCore::ObjectStoreKeyCursorImpl::encodeKey): Helper for encoding key to seek to.
+        (WebCore::ObjectStoreCursorImpl::encodeKey): Ditto.
+        (WebCore::IndexKeyCursorImpl::encodeKey): Ditto.
+        (WebCore::IndexCursorImpl::encodeKey): Ditto.
+        (WebCore::objectStoreCursorOptions): Store IDs for encodeKey() to use.
+        (WebCore::indexCursorOptions): Ditto.
+        * Modules/indexeddb/IDBBackingStore.h:
+        (CursorOptions): Storage for IDs.
+        (Cursor): Add encodeKey() to interface.
+
 2013-03-18  Alexey Proskuryakov  <ap@apple.com>
 
         MessagePortChannel::EventData should not be exposed
