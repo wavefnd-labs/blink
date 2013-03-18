@@ -1,3 +1,23 @@
+2013-03-15  Jer Noble  <jer.noble@apple.com>
+
+        Text track cues do not update sizes when entering or exiting full screen.
+        https://bugs.webkit.org/show_bug.cgi?id=112472
+
+        Reviewed by Eric Carlson.
+
+        The style properties of the TextCueBoxes were not being updated after the size of the video bounds changed.
+        Because getDisplayTree() will not do it when the cue itself has not changed, explicitly call videoSizeDidChange()
+        from updateSizes().
+
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlTextTrackContainerElement::updateSizes): call videoSizeDidChange() on every active cue.
+        * html/track/TextTrackCue.h:
+        (WebCore::TextTrackCue::hasDisplayTree): returns whether or not the cue has created a display tree without side effects.
+        (WebCore::TextTrackCue::videoSizeDidChange): Overridable empty method.
+        * html/track/TextTrackCueGeneric.cpp:
+        (WebCore::TextTrackCueGeneric::videoSizeDidChange): Update the CSS height attribute of the cue box using the new video size.
+        * html/track/TextTrackCueGeneric.h:
+
 2013-03-18  Mike West  <mkwst@chromium.org>
 
         CSP 1.1: Add 'effective-directive' to violation reports.
