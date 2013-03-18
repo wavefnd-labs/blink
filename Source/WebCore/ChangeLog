@@ -1,3 +1,47 @@
+2013-03-18  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Add 'effective-directive' to violation reports.
+        https://bugs.webkit.org/show_bug.cgi?id=112568
+
+        Reviewed by Adam Barth.
+
+        https://dvcs.w3.org/hg/content-security-policy/rev/bc2bb0e5072a
+        introduced an 'effective-directive' field on CSP violation reports,
+        which allows developers to distinguish between resource types when
+        'default-src' is the violated directive.
+
+        This patch implements the new field behind the CSP_NEXT flag.
+
+        Test: http/tests/security/contentSecurityPolicy/1.1/report-uri-effective-directive.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPDirectiveList::checkSourceAndReportViolation):
+        (WebCore::CSPDirectiveList::reportViolation):
+            These methods now accept an additional parameter to pipe the
+            effective directive from the initial callsite down into
+            ContentSecurityPolicy::reportViolation.
+        (WebCore::CSPDirectiveList::checkEvalAndReportViolation):
+        (WebCore::CSPDirectiveList::checkNonceAndReportViolation):
+        (WebCore::CSPDirectiveList::checkMediaTypeAndReportViolation):
+        (WebCore::CSPDirectiveList::checkInlineAndReportViolation):
+        (WebCore::CSPDirectiveList::allowScriptFromSource):
+        (WebCore::CSPDirectiveList::allowObjectFromSource):
+        (WebCore::CSPDirectiveList::allowChildFrameFromSource):
+        (WebCore::CSPDirectiveList::allowImageFromSource):
+        (WebCore::CSPDirectiveList::allowStyleFromSource):
+        (WebCore::CSPDirectiveList::allowFontFromSource):
+        (WebCore::CSPDirectiveList::allowMediaFromSource):
+        (WebCore::CSPDirectiveList::allowConnectToSource):
+        (WebCore::CSPDirectiveList::allowFormAction):
+            These methods now pass the effective directive name down
+            into checkSourceAndReportViolation or reportViolation.
+        (WebCore::ContentSecurityPolicy::reportViolation):
+        * page/ContentSecurityPolicy.h:
+            This method now accepts a new parameter that carries
+            the effective directive name. If CSP_NEXT is enabled,
+            the field is added to the violation report before it's
+            sent out into the world.
+
 2013-03-18  W. James MacLean  <wjmaclean@chromium.org>
 
         [chromium] Remove NCCH code that relies on boundsContainsPageScale().
