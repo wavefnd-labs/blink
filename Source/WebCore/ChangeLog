@@ -1,3 +1,58 @@
+2013-03-17  Kent Tamura  <tkent@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Don't update shadow tree by updating any attribute
+        https://bugs.webkit.org/show_bug.cgi?id=111990
+
+        Reviewed by Hajime Morrita.
+
+        Bug detail:
+        Typing '1' then '1' into an hour field doesn't set the field to
+        '11' if an attribute is updated during these two keyboard inputs
+        because we always re-construct a shadow DOM tree by updating any
+        attributes and a shadow node records keyboard input state.
+
+        How to fix:
+        We should not re-construct a shadow DOM tree by updating
+        unaffected attributes. For example, we should re-construct it by
+        updating 'min' attribute, but we should not by updating 'class'
+        attribute.
+        We have InputType::updateInnerTextValue call in parseAttribute for
+        text field input types. The multiple fields input types
+        re-construct shadow DOM tree in updateInnerTextValue. The
+        updateInnerTextValue call is unnecessary for the multiple fields
+        input types, and we should call it when it is necessary. So, we
+        add InputType::attributeChange and text field input types call
+        updateInnerTextValue in it, and other input types don't.
+        Also, multiple fields input types need to call
+        updateInnerTextValue by 'value' attribute change. We add
+        InputType::valueAttributeChanged.
+
+        Tests: Update
+        fast/forms/time-multiple-fields/time-multiple-fields-keyboard-events.html. The
+        value attribute change behavior is covered by
+        time-multiple-fields-change-layout-by-value.html and
+        time-multiple-fields-spinbutton-change-and-input-events.html.
+
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::parseAttribute):
+        - Add a valueAttributeChanged call.
+        - Calls InputType::attributeChanged
+        * html/InputType.cpp:
+        (WebCore::InputType::attributeChanged): Added an empty implementation.
+        (WebCore::InputType::valueAttributeChanged): Ditto.
+        * html/InputType.h:
+        (InputType): Declare attributeChanged and valueAttributeChanged.
+        * html/TextFieldInputType.cpp:
+        (WebCore::TextFieldInputType::attributeChanged):
+        Added. Always call updateInnerTextValue.
+        * html/TextFieldInputType.h:
+        (TextFieldInputType): Declare attributeChanged.
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::valueAttributeChanged):
+        Added. Re-construct shadow DOM tree if the input has no dirty value.
+        * html/BaseMultipleFieldsDateAndTimeInputType.h:
+        (BaseMultipleFieldsDateAndTimeInputType): Declare valueAttributeChanged.
+
 2013-03-17  Rafael Weinstein  <rafaelw@chromium.org>
 
         [HTMLTemplateElement] prevent </template> from matching "template" in a non-HTML tags on the stack of open elements
