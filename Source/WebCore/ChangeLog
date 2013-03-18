@@ -1,3 +1,25 @@
+2013-03-17  Russell McClellan  <russell.mcclellan@gmail.com>
+
+        ScriptProcessorNode is garbage collected while still active if unreachable
+        https://bugs.webkit.org/show_bug.cgi?id=112521
+
+        Reviewed by Kentaro Hara.
+
+        Fix for issue where ScriptProcessorNodes (and AudioNode js wrappers generally)
+        would be garbage collected before their time.  Made AudioNode an ActiveDOMElement
+        marked pending if there are any open audio connections.
+
+        Test: webaudio/javascriptaudionode.html
+
+        * Modules/webaudio/AudioNode.cpp:
+        (WebCore::AudioNode::AudioNode): 
+        (WebCore::AudioNode::hasPendingActivity): it's pending (and thus not GCed)
+        if it has open audio connections.
+        * Modules/webaudio/AudioNode.h: AudioNode is now an ActiveDOMElement
+        * Modules/webaudio/AudioScheduledSourceNode.h: added a using declaration
+        to avoid function name hiding.
+        * Modules/webaudio/ScriptProcessorNode.idl: AudioNode is an ActiveDOMElement
+
 2013-03-17  Kunihiko Sakamoto  <ksakamoto@chromium.org>
 
         INPUT_MULTIPLE_FIELDS_UI: Step-up/-down of minute/second/millisecond fields should respect min/max attributes
