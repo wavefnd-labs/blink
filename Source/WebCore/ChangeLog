@@ -1,3 +1,27 @@
+2013-03-18  Eugene Klyuchnikov  <eustas@chromium.org>
+
+        Web Inspector: [Resources] Local Storage: duplicate keys are processed inappropriately.
+        https://bugs.webkit.org/show_bug.cgi?id=112402
+
+        Reviewed by Alexander Pavlov.
+
+        When user creates new items or renames existing one some existing item
+        may be overriden. If value is changed, then frontend will receive
+        notification and update record appropriately.
+
+        If item value hasn't been changed, then no notification comes.
+        But UI still expect / rely on this notification.
+
+        With this patch the "no notification" scenario is fixed:
+        duplicate items are removed.
+
+        Another scenario is when update notification comes when we started
+        editing value (after entering / renaming key). In this case
+        selected node should not be changed to leave user in editing mode.
+
+        * inspector/front-end/DOMStorageItemsView.js:
+        Added workarounds for "no notification" and "useless notification".
+
 2013-03-18  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         Clean up RenderFrameSet::nodeAtPoint
