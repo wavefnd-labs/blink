@@ -1,5 +1,27 @@
 2013-03-18  Dominic Cooney  <dominicc@chromium.org>
 
+        A placeholder renderer should not be taken to imply the existence of a text renderer in single line text controls
+        https://bugs.webkit.org/show_bug.cgi?id=112410
+
+        Reviewed by Tony Chang.
+
+        The assumption that if a text control had a placeholder renderer
+        then it also had a text renderer is not valid. If
+        ::-webkit-textfield-decoration-controller is set to display: none;
+        a single line text control's decoration container renderer and
+        hence text renderer are not created. This change handles this
+        corner case where a text control has a placeholder renderer but
+        not a text renderer.
+
+        Tests: fast/forms/search/search-hide-decoration-container-crash.html (Updated)
+
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::HTMLTextFormControlElement::fixPlaceholderRenderer):
+        * rendering/RenderTextControlSingleLine.cpp:
+        (WebCore::RenderTextControlSingleLine::layout):
+
+2013-03-18  Dominic Cooney  <dominicc@chromium.org>
+
         [Shadow] offsetParent should never return nodes in user agent Shadow DOM to script
         https://bugs.webkit.org/show_bug.cgi?id=112530
 
