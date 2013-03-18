@@ -1,3 +1,36 @@
+2013-03-18  Victor Carbune  <vcarbune@chromium.org>
+
+        Determine text direction for rendering a TextTrackCue
+        https://bugs.webkit.org/show_bug.cgi?id=79749
+
+        Reviewed by Levi Weintraub.
+
+        The rendering rules for WebVTT cues are slightly different
+        depending on the directionality determined from the characters
+        of the cue text. This patch implements the preliminary step
+        to be able to take directionality into account.
+
+        It iterates through the cue characters and setting the CSS
+        directionality to the one of the first strong directional character.
+
+        Test: media/track/track-cue-rendering-rtl.html
+
+        * html/track/TextTrackCue.cpp:
+        (WebCore::TextTrackCueBox::applyCSSProperties): Applies the determined
+        direction.
+        (WebCore::TextTrackCue::TextTrackCue): Sets the default value for the
+        display direction.
+        (WebCore::isCueParagraphSeparator): Tests for explicit unicode characters
+        that are paragraph separators.
+        (WebCore):
+        (WebCore::TextTrackCue::determineTextDirection): Determined the direction
+        by the first strong directional character found.
+        (WebCore::TextTrackCue::calculateDisplayParameters): Updated.
+        (WebCore::TextTrackCue::getCSSWritingDirection): Return the determined CSS
+        writing direction.
+        * html/track/TextTrackCue.h:
+        (TextTrackCue):
+
 2013-03-18  Hans Wennborg  <hans@chromium.org>
 
         Fix GridTrackSize::operator==
