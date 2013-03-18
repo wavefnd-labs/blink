@@ -1,3 +1,28 @@
+2013-03-18  Wei James  <james.wei@intel.com>
+
+        AudioBasicProcessorNode need to check for deferred updating of output channels
+        https://bugs.webkit.org/show_bug.cgi?id=112544
+
+        There can in rare cases be a slight delay before the output
+        bus is updated to the new number of channels because of tryLocks() in the
+        context's updating system but the processor already updated to the new
+        number of channels, so need to check the channel number before processing.
+
+        Reviewed by Chris Rogers.
+
+        * Modules/webaudio/AudioBasicProcessorNode.cpp:
+        (WebCore::AudioBasicProcessorNode::process):
+        * Modules/webaudio/WaveShaperProcessor.cpp:
+        (WebCore::WaveShaperProcessor::process):
+        * platform/audio/AudioDSPKernelProcessor.cpp:
+        (WebCore::AudioDSPKernelProcessor::AudioDSPKernelProcessor):
+        * platform/audio/AudioDSPKernelProcessor.h:
+        (WebCore::AudioDSPKernelProcessor::numberOfChannels):
+        (AudioDSPKernelProcessor):
+        * platform/audio/AudioProcessor.h:
+        (WebCore::AudioProcessor::AudioProcessor):
+        (AudioProcessor):
+
 2013-03-18  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Fix StyleGridData::operator==
