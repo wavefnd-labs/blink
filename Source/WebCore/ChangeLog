@@ -1,3 +1,44 @@
+2013-03-18  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Schemeless source expressions match HTTPS resources on HTTP sites.
+        https://bugs.webkit.org/show_bug.cgi?id=112573
+
+        Reviewed by Adam Barth.
+
+        Currently, the directive 'script-src example.com' would match only
+        scripts served from 'http://example.com' when served on an HTTP site,
+        and only scripts served from 'https://example.com' when served on an
+        HTTPS site. This patch changes the matching behavior for ports that
+        have enabled CSP_NEXT in order to encourage use of HTTPS resources by
+        allow schemeless source expressions to match HTTPS origins when on
+        HTTP sites.
+
+        Thread: http://lists.w3.org/Archives/Public/public-webappsec/2013Mar/0013.html
+        Spec change: https://dvcs.w3.org/hg/content-security-policy/rev/a7dc8820946e
+
+        Test: http/tests/security/contentSecurityPolicy/source-list-parsing-10.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPSource::CSPSource):
+            Pass the current policy into CSPSource so that we can check the
+            protected resource's scheme inside schemeMatches, rather than
+            overwriting the source expression's scheme before creating the
+            CSPSource.
+        (WebCore::CSPSource::schemeMatches):
+            If CSP_NEXT is enabled, ensure that HTTPS resources match the
+            HTTP scheme when loaded on HTTP pages with schemaless source
+            expressions.
+        (WebCore::CSPSource::portMatches):
+            Check the port against the URL's scheme: if m_scheme isn't
+            empty, this will match it. If m_scheme is empty, we can't
+            do a strict match against it, nor can we do a strict match
+            against the protected resource's port. Checking the URL's
+            port against the default port for its scheme solves this
+            problem elegantly.
+        (WebCore::CSPSourceList::parse):
+        (WebCore::CSPSourceList::addSourceSelf):
+            Pass in the policy when creating a CSPSource object.
+
 2013-03-15  Jer Noble  <jer.noble@apple.com>
 
         Text track cues do not update sizes when entering or exiting full screen.
