@@ -1,3 +1,63 @@
+2013-03-17  Kunihiko Sakamoto  <ksakamoto@chromium.org>
+
+        INPUT_MULTIPLE_FIELDS_UI: Step-up/-down of minute/second/millisecond fields should respect min/max attributes
+        https://bugs.webkit.org/show_bug.cgi?id=112527
+
+        Reviewed by Kent Tamura.
+
+        Make step-up/-down of the minute, second, and millisecond field
+        respect the min/max attributes of the element.
+        Note that it still accepts any keyboard inputs (the element
+        becomes 'invalid' state when out-of-range values entered).
+        Also, disable these fields when there is only single possible value.
+
+        Tests: fast/forms/time-multiple-fields/time-multiple-fields-readonly-subfield.html
+               fast/forms/time-multiple-fields/time-multiple-fields-stepup-stepdown-from-renderer.html
+
+        * html/shadow/DateTimeEditElement.cpp:
+        (DateTimeEditBuilder): Add fields for min/max of minute/second/millisecond.
+        (WebCore::DateTimeEditBuilder::DateTimeEditBuilder): Set min/max for the fields.
+        (WebCore::DateTimeEditBuilder::visitField): Pass min/max parameters to the field constructors.
+        (WebCore::DateTimeEditBuilder::shouldHourFieldDisabled): Does not disable if minute, second, millisecond fields are all disabled, because we need at least one editable field.
+        (WebCore::DateTimeEditBuilder::shouldMillisecondFieldDisabled): Disables if min, max, and value are equal.
+        (WebCore::DateTimeEditBuilder::shouldMinuteFieldDisabled): Ditto.
+        (WebCore::DateTimeEditBuilder::shouldSecondFieldDisabled): Ditto.
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeDayFieldElement::DateTimeDayFieldElement):
+        (WebCore::DateTimeHourFieldElementBase::DateTimeHourFieldElementBase):
+        (WebCore::DateTimeHour11FieldElement::DateTimeHour11FieldElement):
+        (WebCore::DateTimeHour12FieldElement::DateTimeHour12FieldElement):
+        (WebCore::DateTimeHour23FieldElement::DateTimeHour23FieldElement):
+        (WebCore::DateTimeHour24FieldElement::DateTimeHour24FieldElement):
+        (WebCore::DateTimeMillisecondFieldElement::DateTimeMillisecondFieldElement):
+        (WebCore::DateTimeMillisecondFieldElement::create):
+        (WebCore::DateTimeMinuteFieldElement::DateTimeMinuteFieldElement):
+        (WebCore::DateTimeMinuteFieldElement::create):
+        (WebCore::DateTimeMonthFieldElement::DateTimeMonthFieldElement):
+        (WebCore::DateTimeSecondFieldElement::DateTimeSecondFieldElement):
+        (WebCore::DateTimeSecondFieldElement::create):
+        (WebCore::DateTimeWeekFieldElement::DateTimeWeekFieldElement):
+        (WebCore::DateTimeYearFieldElement::DateTimeYearFieldElement):
+        * html/shadow/DateTimeFieldElements.h:
+        (DateTimeDayFieldElement):
+        (DateTimeHourFieldElementBase):
+        (DateTimeHour11FieldElement):
+        (DateTimeHour12FieldElement):
+        (DateTimeHour23FieldElement):
+        (DateTimeHour24FieldElement):
+        (DateTimeMillisecondFieldElement): Add minimum/maximum parameters.
+        (DateTimeMinuteFieldElement): Add minimum/maximum parameters.
+        (DateTimeMonthFieldElement):
+        (DateTimeSecondFieldElement): Add minimum/maximum parameters.
+        (DateTimeWeekFieldElement):
+        (DateTimeYearFieldElement):
+        * html/shadow/DateTimeNumericFieldElement.cpp:
+        (WebCore::DateTimeNumericFieldElement::DateTimeNumericFieldElement):
+        (WebCore::DateTimeNumericFieldElement::formatValue): Use hard-limit value instead of m_range.maximum, because millisecond field with max<100 will be displayed in two digits otherwise.
+        (WebCore::DateTimeNumericFieldElement::setValueAsInteger):
+        * html/shadow/DateTimeNumericFieldElement.h:
+        (DateTimeNumericFieldElement): Changed to have hard limits as a data member.
+
 2013-03-17  Alexey Proskuryakov  <ap@apple.com>
 
         Encapsulate PlatformMessagePortChannel a little better yet
