@@ -1,3 +1,34 @@
+2013-03-19  Max Vujovic  <mvujovic@adobe.com>
+
+        Refactor conditions for setCompositingLayersNeedRebuild in RenderLayer::styleChanged
+        https://bugs.webkit.org/show_bug.cgi?id=112606
+
+        Reviewed by Simon Fraser.
+
+        To fix bug 109098 [1], we will need to add more conditions for calling
+        RenderLayerCompositor::setCompositingLayersNeedRebuild in RenderLayer::styleChanged.
+        Adding more non-trivial conditions will make this block of code even harder to follow.
+        This patch refactors the current conditions into functions:
+            needsCompositingLayersRebuiltForClip
+            needsCompositingLayersRebuiltForOverflow
+
+        In bug 109098 [1], I'm planning to add:
+            needsCompositingLayersRebuiltForFilters
+
+        [1]: https://bugs.webkit.org/show_bug.cgi?id=109098
+
+        No new tests. Just refactoring.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore):
+        (WebCore::RenderLayer::needsCompositingLayersRebuiltForClip):
+        (WebCore::RenderLayer::needsCompositingLayersRebuiltForOverflow):
+            This is a method and not a file static function because it needs to look at the
+            RenderLayer's stackingContainer(), which is a private method.
+        (WebCore::RenderLayer::styleChanged):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+
 2013-03-19  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] Support kerning in fast path font rendering
