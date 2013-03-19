@@ -1,3 +1,65 @@
+2013-03-19  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] Add parsing for grid-auto-{row|column}
+        https://bugs.webkit.org/show_bug.cgi?id=112724
+
+        Reviewed by Tony Chang.
+
+        This change is a first step towards handling grid-auto-{row|column}.
+        For now, only the parsing, storing and getComputedStyle bits are implemented.
+        In order to do so without duplicating code, the functions handling <track-size>
+        (named <track-minmax> in the code based on a previous version of the grammar)
+        have been tweaked to be called in a standalone fashion. The code was also
+        updated to match the grammar more closely:
+        - <track-minmax> is now <track-size>.
+        - <track-group> was renmoved, folded into <track-list>.
+
+        Test: fast/css-grid-layout/grid-auto-columns-rows-get-set.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::valueForGridTrackSize):
+        Renamed from valueForGridTrackMinMax.
+
+        (WebCore::valueForGridTrackList):
+        Folded valueForGridTrackGroup here.
+
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseValue):
+        Added the parsing for grid-auto-{rows|columns}.
+
+        (WebCore::CSSParser::parseGridTrackSize):
+        Renamed from parseGridTrackMinMax. Changed to return the parsed value (or 0 in case of
+        error). This enables us to reuse it in parseValue. Note that this function now moves
+        the parser value list instead of the caller.
+
+        (WebCore::CSSParser::parseGridTrackList):
+        Updated after parseGridTrackSize changes and parseGridTrackGroup removal.
+
+        * css/CSSParser.h: Updated the names.
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/CSSPropertyNames.in:
+        Added the 2 new non-inherited properties.
+
+        * css/StyleResolver.cpp:
+        (WebCore::createGridTrackSize):
+        Renamed from createGridTrackMinMax. Also simplified to ensure code reuse (applyProperty hands
+        down a CSSValue) and consistency (the state wasn't consistently the last argument).
+
+        (WebCore::createGridTrackList):
+        Folded createGridTrackGroup into this function.
+
+        (WebCore::StyleResolver::applyProperty):
+        Added the code for the new properties.
+
+        * rendering/style/RenderStyle.h:
+        * rendering/style/StyleGridData.cpp:
+        (WebCore::StyleGridData::StyleGridData):
+        * rendering/style/StyleGridData.h:
+        (WebCore::StyleGridData::operator==):
+        Added the storage and boiler-plate code for the new properties.
+
 2013-03-19  Geoffrey Garen  <ggaren@apple.com>
 
         Removed a using declaration to avoid name conflicts
