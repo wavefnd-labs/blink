@@ -1,3 +1,33 @@
+2013-03-18  Ojan Vafai  <ojan@chromium.org>
+
+        Make intrinsic size keywords on flexboxes work
+        https://bugs.webkit.org/show_bug.cgi?id=112652
+
+        Reviewed by Tony Chang.
+
+        Tests: fast/css-intrinsic-dimensions/intrinsic-sized-column-flex-items.html
+               fast/css-intrinsic-dimensions/intrinsic-sized-flex-items.html
+
+        * platform/Length.h:
+        (WebCore::Length::isSpecifiedOrIntrinsic):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::constrainLogicalWidthInRegionByMinMax):
+        (WebCore::RenderBox::computeLogicalWidthInRegion):
+        (WebCore::RenderBox::computeLogicalWidthInRegionUsing):
+        Pass in the Length so that RenderFlexibleBox can call this method and avoid
+        doing a bunch of code duplication.
+
+        * rendering/RenderBox.h:
+        * rendering/RenderFlexibleBox.cpp:
+        (WebCore::RenderFlexibleBox::computeMainAxisExtentForChild):
+        Instead of just calling valueForLength, call computeLogicalWidthInRegionUsing so that
+        we properly resolve intrinsic Length types. Incidentally, this should also make viewport
+        percentage units work.
+
+        (WebCore::RenderFlexibleBox::adjustChildSizeForMinAndMax):
+        Resolve intrinsic min/max Lengths. Also, instead of calling minPreferredLogicalWidth for the
+        min-width: auto case, call computeMainAxisExtentForChild to correctly compute the min intrinsic size.
+
 2013-03-19  Geoffrey Garen  <ggaren@apple.com>
 
         Try to fix the Windows build.
