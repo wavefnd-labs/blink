@@ -1,3 +1,38 @@
+2013-03-19  Philip Rogers  <pdr@google.com>
+
+        Separate SVG image size and container size
+        https://bugs.webkit.org/show_bug.cgi?id=112651
+
+        Reviewed by Stephen Chenney.
+
+        Previously, SVG images could retain their cached size between reloads due to a bug where an
+        old container size would be re-used if the image's new container size was not available yet.
+
+        This patch changes SVGImage::size() to return the intrinsic size of the image before a
+        container size has been set. SVGImageCache::imageSizeForRenderer will now return the
+        image's intrinsic size instead of a cached value if the container size cannot be looked up.
+        In javascript, querying [SVGImage].width will now return either the image's intrinsic size
+        or the size of 'imageForContainer'.
+
+        Test: svg/as-image/svg-container-size-after-reload.html
+
+        * svg/graphics/SVGImage.cpp:
+        (WebCore::SVGImage::setContainerSize):
+        (WebCore::SVGImage::containerSize):
+        (WebCore::SVGImage::draw):
+        (WebCore::SVGImage::dataChanged):
+        * svg/graphics/SVGImage.h:
+
+            The member variable 'm_intrinsicSize' has been added to track the image's intrinsic
+            size. This term can be found in: http://www.w3.org/TR/css3-images/#default-sizing
+
+        * svg/graphics/SVGImageCache.cpp:
+        (WebCore::SVGImageCache::imageSizeForRenderer):
+        (WebCore::SVGImageCache::imageForRenderer):
+
+            In both of these functions, image has been renamed to imageForContainer here to clarify
+            that the cached container size is being returned, not the image's intrinsic size.
+
 2013-03-19  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Use integer plumbing for deleteDatabase onVersionChange calls
