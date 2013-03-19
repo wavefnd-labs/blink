@@ -1,3 +1,104 @@
+2013-03-19  Alpha Lam  <hclam@chromium.org>
+
+        GIFImageReader to count frames and decode in one pass
+        https://bugs.webkit.org/show_bug.cgi?id=111144
+
+        Reviewed by Stephen White.
+
+        OBJECTIVE
+
+        This change has the objective of improving performance reading GIF
+        files. This implementation can parse the entire GIF file in one pass
+        and saves information about each frame, such that decoding in a later
+        pass does not need to parse the file again.
+
+        This change fixes the performance problem of decoding GIF files when
+        they are received very slowly. Existing implementation creates a new
+        GIFImageReader for counting frames for every time it is notified that
+        new data has been received, this has O(n^2) behavior when data is
+        received very slowly.
+
+        ALGORITHM
+
+        This implementation divides the decoding process into two separate
+        steps: parse and LZW decoding.
+
+        In the parse step, the state machine is similar to the existing
+        implementation. However this algorithm does not perform any decoding
+        while scanning through the file. Intead it creates a new data structure
+        for caching all frame information and the corresponding LZW blocks.
+
+        If a full decode is requested then LZW decoding is performed. This
+        implementation looks through all frame information saved and decodes
+        each frame sequentially until the target frame is reached.
+
+        Because of the separation of parse and decode, each frame can be
+        decoded separately. This paves the way to support seeking in GIF files.
+
+        TESTING
+
+        Added a new unit test to cover progressively decoding a GIF image.
+        There are already GIF unit tests for functional testing.
+        Exhaustive testing was done locally with a corpus of 60k images.
+        I mixed the corpus with some generated bad data and truncated files.
+        The results was bit-identical when compared to the previous
+        implementation.
+
+        These was also no crashing when decoding the entire corpus.
+
+        * platform/image-decoders/gif/GIFImageDecoder.cpp:
+        (WebCore::GIFImageDecoder::GIFImageDecoder):
+        (WebCore::GIFImageDecoder::setData):
+        (WebCore::GIFImageDecoder::frameCount):
+        (WebCore::GIFImageDecoder::repetitionCount):
+        (WebCore::GIFImageDecoder::decode):
+        * platform/image-decoders/gif/GIFImageDecoder.h:
+        (GIFImageDecoder):
+        * platform/image-decoders/gif/GIFImageReader.cpp:
+        (GIFLZWContext::outputRow):
+        (GIFLZWContext::doLZW):
+        (GIFFrameContext::decode):
+        (GIFImageReader::decode):
+        (GIFImageReader::parse):
+        (GIFImageReader::addFrameIfNecessary):
+        (GIFLZWContext::prepareToDecode):
+        * platform/image-decoders/gif/GIFImageReader.h:
+        There is a lot of reshuffling in GIFLZWContext and GIFFrameContext.
+        These changes has the goal of having GIFLZWContext be a pure decoding
+        state machine. GIFFrameContext is mostly a read-only container for
+        frame information. With all these changes we can decode each
+        GIFFrameContext independently.
+
+        The ownership pattern is:
+        GIFImageReader owns GIFFrameContext owns GIFLZWContext.
+
+        (GIFLZWContext::GIFLZWContext):
+        (GIFLZWContext):
+        (GIFLZWContext::hasRemainingRows):
+        GIFLZWContext is moved to the top of file.
+        (GIFLZWBlock):
+        (GIFLZWBlock::GIFLZWBlock):
+        New data structure to save block position and size.
+        (GIFFrameContext):
+        (GIFFrameContext::GIFFrameContext):
+        (GIFFrameContext::~GIFFrameContext):
+        (GIFFrameContext::addLzwBlock):
+        (GIFFrameContext::isComplete):
+        (GIFFrameContext::isHeaderDefined):
+        (GIFFrameContext::isDataSizeDefined):
+        (GIFFrameContext::setComplete):
+        (GIFFrameContext::setHeaderDefined):
+        (GIFFrameContext::setDataSize):
+        Now owns GIFLZWContext for decoding.
+        (GIFImageReader::GIFImageReader):
+        (GIFImageReader::~GIFImageReader):
+        (GIFImageReader::imagesCount):
+        (GIFImageReader::frameContext):
+        (GIFImageReader):
+        (GIFImageReader::parseFailed):
+        (GIFImageReader::isFirstFrame):
+        Owns a list of GIFFrameContxt.
+
 2013-03-19  Brent Fulgham  <bfulgham@webkit.org>
 
         [WinCairo] Unreviewed build correction for WebCore library.
