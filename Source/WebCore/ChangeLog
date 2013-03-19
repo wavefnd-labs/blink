@@ -1,3 +1,24 @@
+2013-03-19  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSSRegions] Crash reflowing content in variable width regions
+        https://bugs.webkit.org/show_bug.cgi?id=112515
+
+        Reviewed by David Hyatt.
+
+        When removing floats during relayout of a line in a paginated context,
+        we have to make sure that the floats collection actually has elements before
+        accessing the last float from the collection.
+        This situation arises when a block had floats in a previous layout and after
+        they were removed, m_floatingObjects is not destroyed, only emptied.
+
+        Test: fast/regions/crash-reflow-inline-content-in-variable-width-regions.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::removeFloatingObjectsBelow):
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutRunsAndFloats):
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange):
+
 2013-03-18  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: Debugger scripts should visually differ from network/filesystem files in workspace.
