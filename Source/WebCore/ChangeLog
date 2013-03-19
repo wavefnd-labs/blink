@@ -1,3 +1,180 @@
+2013-03-19  Geoffrey Garen  <ggaren@apple.com>
+
+        Refactored script content removal in the fragment parser for clarity and speed
+        https://bugs.webkit.org/show_bug.cgi?id=112734
+
+        Reviewed by Enrica Casucci.
+
+        * WebCore.exp.in: Export!
+
+        * dom/DocumentFragment.cpp:
+        (WebCore::DocumentFragment::parseHTML):
+        (WebCore::DocumentFragment::parseXML):
+        * dom/DocumentFragment.h:
+        (DocumentFragment): Updated for rename of FragmentScriptingPermission to
+        ParserContentPolicy.
+
+        * dom/Element.cpp:
+        (WebCore::isEventHandlerAttribute):
+        (WebCore::Element::isJavaScriptURLAttribute):
+        (WebCore::Element::isJavaScriptAttribute): Fixed a FIXME by factoring
+        out some helper functions that reuse isURLAttribute(). This makes our
+        attribute removal slightly more precise, as reflected in test changes.
+
+        (WebCore::Element::stripJavaScriptAttributes): Factored this function out
+        of parserSetAttributes to clarify that the parser is responsible for
+        fully removing scripts before inserting anything into the DOM.
+
+        Now that this is a helper function, we can avoid doing any work in the
+        common case, where script content is allowed. Also, when we do have to
+        strip attributes, we use "two finger compaction" to avoid copying the
+        vector, and to avoid O(N) vector removal operations when there is
+        something to remove.
+
+        (WebCore::Element::parserSetAttributes):
+        * dom/Element.h:
+
+        * dom/FragmentScriptingPermission.h:
+        (WebCore::scriptingContentIsAllowed):
+        (WebCore::disallowScriptingContent):
+        (WebCore::pluginContentIsAllowed):
+        (WebCore::allowPluginContent): Renamed for clarity, and added some helper
+        functions for reading values out of this enum.
+
+        * dom/ScriptableDocumentParser.cpp:
+        (WebCore::ScriptableDocumentParser::ScriptableDocumentParser): Moved
+        a settings check into the parser constructor so we're sure that all
+        clients get the right behavior.
+
+        * dom/ScriptableDocumentParser.h:
+        (WebCore::ScriptableDocumentParser::parserContentPolicy):
+        (ScriptableDocumentParser):
+        * editing/markup.cpp:
+        (WebCore::createFragmentFromMarkup):
+        (WebCore::createFragmentFromMarkupWithContext):
+        (WebCore::createFragmentForInnerOuterHTML):
+        (WebCore::createContextualFragment):
+        * editing/markup.h: Updated for renames.
+
+        * html/HTMLAnchorElement.cpp:
+        (WebCore::HTMLAnchorElement::isURLAttribute): Fixed a bug where
+        isURLAttribute would ignore href attributes in other namespaces, like
+        xlink:href.
+
+        * html/HTMLBaseElement.cpp:
+        (WebCore::HTMLBaseElement::isURLAttribute): Same bug.
+
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::isURLAttribute): Fixed a logic error where HTMLElement
+        wouldn't call through to its base class.
+
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::isURLAttribute): Same isURLAttribute namespace
+        bug as above.
+
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::setAttributes): Helper function for optionally stripping
+        disallowed attributes before setting them on an element. This helps all
+        clients get the right behavior without sprinkling checks everywhere.
+
+        (WebCore::HTMLConstructionSite::HTMLConstructionSite):
+        (WebCore::HTMLConstructionSite::insertHTMLHtmlStartTagBeforeHTML):
+
+        (WebCore::HTMLConstructionSite::insertScriptElement): Don't schedule the
+        element for insertion into the document if the element is forbidden. This
+        is slightly clearer than leaving an empty forbidden element in the document.
+
+        (WebCore::HTMLConstructionSite::createElement):
+        (WebCore::HTMLConstructionSite::createHTMLElement):
+        * html/parser/HTMLConstructionSite.h:
+        (HTMLConstructionSite):
+        (WebCore::HTMLConstructionSite::parserContentPolicy):
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::HTMLDocumentParser):
+        (WebCore::HTMLDocumentParser::runScriptsForPausedTreeBuilder):
+        (WebCore::HTMLDocumentParser::parseDocumentFragment):
+        * html/parser/HTMLDocumentParser.h:
+        (HTMLDocumentParser):
+        (WebCore::HTMLDocumentParser::create):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::HTMLTreeBuilder):
+        (WebCore::HTMLTreeBuilder::FragmentParsingContext::FragmentParsingContext):
+        Updated for renames and interface changes above.
+
+        (WebCore::HTMLTreeBuilder::processStartTagForInBody):
+        (WebCore::HTMLTreeBuilder::processEndTag): Removed isParsingFragment()
+        checks to make it possible to use ParserContentPolicy in more places.
+
+        Removed call to removeChildren() because, if an element is forbidden,
+        we fully remove the element now. This brings behavior for <script>
+        elements in line with behavior for plug-in elements. It also brings
+        behavior of the HTML parser in line with behavior of the XML parser.
+
+        * html/parser/HTMLTreeBuilder.h:
+        (WebCore::HTMLTreeBuilder::create):
+        (FragmentParsingContext):
+        (WebCore::HTMLTreeBuilder::FragmentParsingContext::contextElement):
+        * platform/blackberry/PasteboardBlackBerry.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/chromium/DragDataChromium.cpp:
+        (WebCore::DragData::asFragment):
+        * platform/chromium/PasteboardChromium.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/gtk/PasteboardGtk.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/mac/PasteboardMac.mm:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/qt/DragDataQt.cpp:
+        (WebCore::DragData::asFragment):
+        * platform/qt/PasteboardQt.cpp:
+        (WebCore::Pasteboard::documentFragment):
+        * platform/win/ClipboardUtilitiesWin.cpp:
+        (WebCore::fragmentFromCFHTML):
+        (WebCore::fragmentFromHTML):
+        * platform/wx/PasteboardWx.cpp:
+        (WebCore::Pasteboard::documentFragment): Updated for renames and interface
+        changes.
+
+        * svg/SVGAElement.cpp:
+        (WebCore::SVGAElement::isURLAttribute): Fixed a bug where SVG anchor
+        elements didn't identify their URL attributes.
+
+        * svg/SVGAElement.h:
+        (SVGAElement):
+
+        * xml/XMLErrors.cpp:
+        (WebCore::createXHTMLParserErrorHeader):
+        (WebCore::XMLErrors::insertErrorMessageBlock): No need to disallow
+        scripting attributes here because we're creating the attributes 
+        ourselves and we know they're not scripting attributes.
+
+        * xml/parser/XMLDocumentParser.cpp:
+        (WebCore::XMLDocumentParser::parseDocumentFragment):
+        * xml/parser/XMLDocumentParser.h:
+        (WebCore::XMLDocumentParser::create):
+        (XMLDocumentParser): Updated for renames and interface changes above.
+
+        Removed the 8 inline capacity in the attribute vector so we could share
+        helper functions with the HTML parser, which didn't have it.
+
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::setAttributes):
+        (WebCore):
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+        (WebCore::handleNamespaceAttributes):
+        (WebCore::handleElementAttributes):
+        (WebCore::XMLDocumentParser::startElementNs):
+        (WebCore::XMLDocumentParser::endElementNs):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::setAttributes):
+        (WebCore):
+        (WebCore::XMLDocumentParser::XMLDocumentParser):
+        (WebCore::handleNamespaceAttributes):
+        (WebCore::handleElementAttributes):
+        (WebCore::XMLDocumentParser::parseStartElement):
+        (WebCore::XMLDocumentParser::parseEndElement): Same changes as for the
+        HTML parser.
+
 2013-03-19  Philip Rogers  <pdr@google.com>
 
         Clean up static_casts for SVG renderers

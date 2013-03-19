@@ -1,3 +1,53 @@
+2013-03-19  Geoffrey Garen  <ggaren@apple.com>
+
+        Refactored script content removal in the fragment parser for clarity and speed
+        https://bugs.webkit.org/show_bug.cgi?id=112734
+
+        Reviewed by Enrica Casucci.
+
+        Updated tests to improve coverage and reflect behavior tweaks to improve
+        clarity.
+
+        * editing/pasteboard/paste-noscript-expected.txt: 
+            - The "href", "source", and "action" attributes are fully removed now,
+            instead of being set to the empty string, because for clarity we
+            fully remove script attributes instead of setting their values to
+            the empty string.
+
+            - The "formaction" attribute on the form control is not removed because,
+            even though it seems to contain javascript content, the formaction
+            attribute doesn't map to anything on a form element, and won't ever
+            run as script.
+
+            - I added a button with a "formaction" attribute, to verify that it
+            does get stripped, since this is the case where the "formaction"
+            attribute can run as script.
+
+        * editing/pasteboard/paste-noscript-svg-expected.txt:
+            - The "xlink:href" attribute is fully removed now. See above.
+
+        * editing/pasteboard/paste-noscript-xhtml-expected.txt:
+        * editing/pasteboard/paste-noscript.html:
+            - The "href", "source", and "action" attributes are fully removed now.
+            See above.
+
+            - The <script> element is fully removed now. See above.
+
+            - The "formaction" attribute on the form control is not removed.
+            See above.
+
+            - I added a button with a "formaction" attribute. See above.
+
+
+        * editing/pasteboard/paste-visible-script-expected.txt:
+            - The <script> elements are fully removed now. See above.
+
+        * editing/pasteboard/resources/paste-noscript-content.html:
+            - The "formaction" attribute on the form control is not removed.
+            See above.
+
+            - I added a button with a "formaction" attribute. See above.
+
 2013-03-19  Mark Hahnenberg  <mhahnenberg@apple.com>
 
         Crash in SpeculativeJIT::fillSpeculateIntInternal<false> on http://bellard.org/jslinux
