@@ -1,3 +1,46 @@
+2013-03-19  Mike West  <mkwst@chromium.org>
+
+        FeatureObserver: Measure X-Frame-Options usage.
+        https://bugs.webkit.org/show_bug.cgi?id=112670
+
+        Reviewed by Adam Barth.
+
+        This patch adds three FeatureObserver entries to gather information
+        about 'X-Frame-Options' usage in general, and in particular usage
+        and potential misunderstanding of the 'SAMEORIGIN' value.
+
+        Three entries are added:
+
+        - XFrameOptions measures the raw number of 'X-Frame-Options' headers.
+
+        - XFrameOptionsSameOrigin measures the number of those headers that
+          set the value to 'SAMEORIGIN'.
+
+        - XFrameOptionsSameOriginWithBadAncestorChain measures the number of
+          occasions in which the frame passed the "top-only" origin check we're
+          currently performing, but would have failed a more strict check
+          against poisoned ancestor chains (that is, an ancestor chain that
+          looks like 'example.com' -> 'evil.com' -> 'example.com').
+
+        Mozilla is considering changing 'SAMEORIGIN's behavior to block the
+        latter loophole[1], and the UI Safety spec is considering dropping
+        'top-only' entirely[2]. This data will inform those decisions.
+
+        [1]: https://bugzilla.mozilla.org/show_bug.cgi?id=725490
+        [2]: http://lists.w3.org/Archives/Public/public-webappsec/2013Mar/0007.html
+
+        This doesn't change web-visible behavior; it only adds histograms
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::shouldInterruptLoadForXFrameOptions):
+            When processing an 'X-Frame-Options' header's value, call out to
+            FeatureObserver when relevant to increment the correct histogram
+            entries.
+        * page/FeatureObserver.h:
+            Added three entries to the FeatureObserver enum: XFrameOptions,
+            XFrameOptionsSameOrigin, and XFrameOptionsSameOriginWithBadAncestorChain.
+            Each is explained above.
+
 2013-03-19  Adam Barth  <abarth@webkit.org>
 
         GenerateHashValue should be usable outside CodeGeneratorJS.pm
