@@ -1,3 +1,37 @@
+2013-03-19  Nate Chapin  <japhet@chromium.org>
+
+        Merge MainResourceLoader::responseReceived into DocumentLoader
+        https://bugs.webkit.org/show_bug.cgi?id=112593
+
+        Part of the ongoing effort to merge MainResourceLoader entirely
+        into DocumentLoader.
+
+        Reviewed by Adam Barth.
+
+        No new tests, refactor only.
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::DocumentLoader):
+        (WebCore::DocumentLoader::stopLoading):
+        (WebCore::DocumentLoader::finishedLoading): The only thing left in
+            MainResourceLoader related to this function was a RefPtr which indirectly
+            protected DocumentLoader. Move the RefPtr here and protect DocumentLoader directly.
+        (WebCore::DocumentLoader::responseReceived): Moved from MainResourceLoader.
+        (WebCore::DocumentLoader::callContinueAfterContentPolicy): Moved from MainResourceLoader.
+        (WebCore::DocumentLoader::continueAfterContentPolicy): Moved from MainResourceLoader.
+        (WebCore::DocumentLoader::interruptedForPolicyChangeError): Moved from MainResourceLoader.
+        (WebCore::DocumentLoader::stopLoadingForPolicyChange): Moved from MainResourceLoader.
+        (WebCore::DocumentLoader::receivedData):
+        (WebCore::DocumentLoader::cancelMainResourceLoad):
+        * loader/DocumentLoader.h:
+        (WebCore::DocumentLoader::isLoadingMultipartContent): Store multipart bit here.
+        * loader/MainResourceLoader.cpp:
+        (WebCore::MainResourceLoader::MainResourceLoader):
+        (WebCore::MainResourceLoader::cancel):
+        (WebCore::MainResourceLoader::responseReceived):
+        (WebCore::MainResourceLoader::notifyFinished):
+        * loader/MainResourceLoader.h:
+
 2013-03-19  Tony Chang  <tony@chromium.org>
 
         Cleanup defaultUnifiedTextCheckerEnabled type
