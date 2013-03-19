@@ -1,3 +1,21 @@
+2013-03-19  Nate Chapin  <japhet@chromium.org>
+
+        REGRESSION(r146223): chromium asserts/crashes in DocumentLoader
+        https://bugs.webkit.org/show_bug.cgi?id=112745
+
+        Reviewed by Kenneth Russell.
+
+        Fixes layout tests on chromium debug
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::mainReceivedError): Frame might be detached, get
+            defersLoading() from mainResourceLoader().
+        (WebCore::DocumentLoader::responseReceived): RefPtr got dropped, it's really needed.
+        (WebCore::DocumentLoader::receivedData): Frame might be detached, get
+            defersLoading() from mainResourceLoader().
+        (WebCore::DocumentLoader::cancelMainResourceLoad): The ResourceError parameter
+            can be null if coming from the WebKit layer, we should have a default just in case.
+
 2013-03-19  Geoffrey Garen  <ggaren@apple.com>
 
         Refactored script content removal in the fragment parser for clarity and speed
