@@ -1,3 +1,23 @@
+2013-03-19  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Use integer plumbing for deleteDatabase onVersionChange calls
+        https://bugs.webkit.org/show_bug.cgi?id=112715
+
+        Reviewed by Tony Chang.
+
+        When deleteDatabase on the back-end needs to send the front-end an
+        onVersionChange notification it does so using the string overload. That's
+        the only remaining use of that overload and we'd like to delete it. Switch
+        to using the integer overload, with an already defined special value.
+        This will unblock http://wkbug.com/112712 to delete the dead code.
+
+        No new tests - no functional change.
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::onVersionChange): Map NoIntVersion to null.
+        * Modules/indexeddb/IDBDatabaseBackendImpl.cpp:
+        (WebCore::IDBDatabaseBackendImpl::deleteDatabase): Call integer overload.
+
 2013-03-19  Terry Anderson  <tdanderson@chromium.org>
 
         Hover effects from a GestureTapDown are dismissed by a GestureTap on the hover element
