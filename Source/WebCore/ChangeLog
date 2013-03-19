@@ -1,3 +1,62 @@
+2013-03-19  John J. Barton  <johnjbarton@chromium.org>
+
+        Web Inspector: Add iframe option to inspectedWindow.eval() extension API
+        https://bugs.webkit.org/show_bug.cgi?id=106811
+
+        Reviewed by Vsevolod Vlasov.
+
+        Add a new case to the options processing in inspectedWindow.eval(), look
+        for option.frameURL <string> and/or option.scriptExecutionContext: <string>, find the
+        matching JS context in the runtimeModel, and call evaluate() in that
+        context; or error if the context is not found. 
+
+        Test: http/tests/inspector/extensions-iframe-eval.html
+
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onEvaluateOnInspectedPage):
+        (WebInspector.ExtensionServer.prototype.):
+        (WebInspector.ExtensionServer.prototype.evaluate):
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.ResourceTreeModel.prototype.frames):
+           Added read access to _frames
+       * inspector/front-end/RuntimeModel.js:
+        (WebInspector.RuntimeModel.prototype.contextListByFrame):
+           Added access to a frame's contextList, removed contextByFrameAndSecurityOrigin()
+        (WebInspector.FrameExecutionContextList.prototype.mainWorldContext):
+           Added access to frame's mainWorldContext, rather than implicit first context.
+           Now we can go from ResourceTreeModel -> frame -> contextList then either
+           mainWorldContext() or contextBySecurityOrigin() to access contexts.
+
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype.):
+        (WebInspector.ExtensionServer.prototype._onEvaluateOnInspectedPage):
+        (WebInspector.ExtensionServer.prototype.evaluate):
+        * inspector/front-end/ResourceTreeModel.js:
+        * inspector/front-end/RuntimeModel.js:
+        (WebInspector.RuntimeModel.prototype.contextListByFrame):
+        (WebInspector.FrameExecutionContextList.prototype.mainWorldContext):
+
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype._onReload):
+        (WebInspector.ExtensionServer.prototype.resolveURLToFrame.hasMatchingURL):
+        (WebInspector.ExtensionServer.prototype.):
+        (WebInspector.ExtensionServer.prototype.evaluate):
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.ResourceTreeModel.prototype.frames):
+        * inspector/front-end/RuntimeModel.js:
+        (WebInspector.RuntimeModel.prototype.contextListByFrame):
+        (WebInspector.FrameExecutionContextList.prototype.mainWorldContext):
+
+        * inspector/front-end/ExtensionServer.js:
+        (WebInspector.ExtensionServer.prototype.resolveURLToFrame.hasMatchingURL):
+        (WebInspector.ExtensionServer.prototype.):
+        (WebInspector.ExtensionServer.prototype.evaluate):
+        * inspector/front-end/ResourceTreeModel.js:
+        (WebInspector.ResourceTreeModel.prototype.frames):
+        * inspector/front-end/RuntimeModel.js:
+        (WebInspector.RuntimeModel.prototype.contextListByFrame):
+        (WebInspector.FrameExecutionContextList.prototype.mainWorldContext):
+
 2013-03-19  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: rename TimelineOverviewWindow to OverviewGrid.Window and fix names for constants.
