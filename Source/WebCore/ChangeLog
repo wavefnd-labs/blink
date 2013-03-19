@@ -1,3 +1,32 @@
+2013-03-19  Dean Jackson  <dino@apple.com>
+
+        Restarting a snapshotted plugin should restart all plugins from the same domain on the page
+        https://bugs.webkit.org/show_bug.cgi?id=112725
+
+        Reviewed by Tim Horton.
+
+        If the user restarts a snapshotted plugin, then typically they will
+        want to restart all similar plugins on the page, where similarity
+        is defined by the domain of the content. Or in other words, since clients
+        will typically add a restarted plugin to the list of autostarting
+        domain hashes, we should start the other plugins that would autostart
+        on reload.
+
+        When a snapshotted plugin gets the user click telling it to restart, it iterates
+        over every frame in the document looking for domain hashes similar to its own.
+        It then manually restarts each of the paused plugins.
+
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::addPlugInsFromNodeListMatchingOriginHash): Static helper function
+            that builds a list of plugins to restart.
+        (WebCore::HTMLPlugInImageElement::userDidClickSnapshot): After restarting itself,
+            the plugin looks for all other similar snapshotted plugins in the page.
+        (WebCore::HTMLPlugInImageElement::restartSnapshottedPlugIn): Splits out the actual
+            restart functionality, to make it separate from plugins that were manually
+            restarted and thus probably want to forward a delayed click event.
+        * html/HTMLPlugInImageElement.h:
+        (HTMLPlugInImageElement): New method restartSnapshottedPlugIn.
+
 2013-03-19  Nate Chapin  <japhet@chromium.org>
 
         Merge MainResourceLoader's SubstituteData loading + others into DocumentLoader
