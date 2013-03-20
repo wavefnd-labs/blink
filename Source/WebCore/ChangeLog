@@ -1,3 +1,101 @@
+2013-03-20  Eric Carlson  <eric.carlson@apple.com>
+
+        Allow ports specific text track menu
+        https://bugs.webkit.org/show_bug.cgi?id=112800
+
+        Reviewed by Dean Jackson.
+
+        No new tests, existing tests updated for changes.
+
+        * English.lproj/Localizable.strings: Add localizable strings for text track names.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::HTMLMediaElement): userPrefersCaptions -> shouldShowCaptions.
+        (WebCore::HTMLMediaElement::setSelectedTextTrack): toggleTrackAtIndex -> setSelectedTextTrack.
+        (WebCore::HTMLMediaElement::userPrefersCaptions): userPrefersCaptions -> shouldShowCaptions.
+        (WebCore::HTMLMediaElement::userIsInterestedInThisTrackKind): Get preferences from CaptionUserPreferences
+            instead of from Settings.
+        (WebCore::HTMLMediaElement::setSelectedTextTrack): Renamed from toggleTrackAtIndex. Now takes
+            a TextTrack* instead of an int.
+        (WebCore::HTMLMediaElement::captionPreferencesChanged): Don't force a recalculation unless 
+            captions are enabled/disabled to avoid unnecessary thrash.
+        * html/HTMLMediaElement.h:
+
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlClosedCaptionsTrackListElement::defaultEventHandler): Use the menu to track
+            map instead of just the track index.
+        (WebCore::MediaControlClosedCaptionsTrackListElement::updateDisplay): Build and configure the
+            menu from the menu to track map.
+        (WebCore::MediaControlClosedCaptionsTrackListElement::rebuildTrackListMenu): Start with a list
+            of tracks already sorted according to platform specific rules. Build a menu to track map
+            so tracks are retained while the menu is visible.
+        * html/shadow/MediaControlElements.h:
+
+        * html/shadow/MediaControls.cpp:
+        (WebCore::MediaControls::textTrackPreferencesChanged): Call closedCaptionTracksChanged so the
+            track menu will be rebuilt before it is shown again.
+
+        * html/track/InbandTextTrack.cpp:
+        (WebCore::InbandTextTrack::containsOnlyForcedSubtitles): New, passthrough to the private track.
+        (WebCore::InbandTextTrack::isMainProgramContent): Ditto.
+        (WebCore::InbandTextTrack::isEasyToRead): Ditto.
+        * html/track/InbandTextTrack.h:
+        * html/track/TextTrack.h:
+
+        * html/track/TextTrackList.cpp:
+        (WebCore::TextTrackList::contains): New.
+        * html/track/TextTrackList.h:
+
+        * page/CaptionUserPreferences.cpp:
+        (WebCore::CaptionUserPreferences::CaptionUserPreferences): Pull in from .h ditto.
+        (WebCore::CaptionUserPreferences::~CaptionUserPreferences): Ditto.
+        (WebCore::CaptionUserPreferences::shouldShowCaptions): Renamed from userPrefersCaptions. 
+        (WebCore::CaptionUserPreferences::setShouldShowCaptions): New.
+        (WebCore::CaptionUserPreferences::userPrefersCaptions): Ditto.
+        (WebCore::CaptionUserPreferences::setUserPrefersCaptions): Ditto.
+        (WebCore::CaptionUserPreferences::userPrefersSubtitles): Ditto.
+        (WebCore::CaptionUserPreferences::setUserPrefersSubtitles): Ditto.
+        (WebCore::CaptionUserPreferences::userPrefersTextDescriptions): Ditto.
+        (WebCore::CaptionUserPreferences::setUserPrefersTextDescriptions): Ditto.
+        (WebCore::CaptionUserPreferences::displayNameForTrack): Ditto.
+        (WebCore::CaptionUserPreferences::sortedTrackListForMenu): Ditto.
+        * page/CaptionUserPreferences.h:
+
+        * page/CaptionUserPreferencesMac.h:
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::shouldShowCaptions): Renamed from userPrefersCaptions. 
+        (WebCore::CaptionUserPreferencesMac::userPrefersCaptions): New.
+        (WebCore::CaptionUserPreferences::userPrefersSubtitles): Ditto.
+        (WebCore::trackDisplayName): Update logic used to build track title.
+        (WebCore::CaptionUserPreferencesMac::displayNameForTrack): Call trackDisplayName.
+        (WebCore::textTrackCompare): Text track title sort comparison function.
+        (WebCore::CaptionUserPreferencesMac::sortedTrackListForMenu): New. Sort the list of tracks
+            according to title, language, and user preferences.
+
+        * platform/Language.cpp:
+        (WebCore::displayNameForLanguageLocale): Don't leak the CFLocale.
+        
+        * platform/LocalizedStrings.cpp:
+        (WebCore::textTrackCountryAndLanguageMenuItemText): New.
+        (WebCore::textTrackLanguageMenuItemText): Ditto.
+        (WebCore::closedCaptionTrackMenuItemText): Ditto.
+        (WebCore::sdhTrackMenuItemText): Ditto.
+        (WebCore::easyReaderTrackMenuItemText): Ditto.
+        * platform/LocalizedStrings.h:
+
+        * platform/graphics/InbandTextTrackPrivate.h:
+        * platform/graphics/avfoundation/objc/InbandTextTrackPrivateAVFObjC.h:
+        * platform/graphics/avfoundation/objc/InbandTextTrackPrivateAVFObjC.mm:
+        (WebCore::InbandTextTrackPrivateAVFObjC::containsOnlyForcedSubtitles): New, return AVFoundation property.
+        (WebCore::InbandTextTrackPrivateAVFObjC::isMainProgramContent): Ditto.
+        (WebCore::InbandTextTrackPrivateAVFObjC::isEasyToRead): Ditto.
+
+        * testing/InternalSettings.cpp:
+        (WebCore::InternalSettings::setShouldDisplayTrackKind): Set setting via CaptionUserPreferences
+            instead of from Settings.
+        (WebCore::InternalSettings::shouldDisplayTrackKind): Get setting from CaptionUserPreferences
+            instead of from Settings.
+
 2013-03-20  Zan Dobersek  <zdobersek@igalia.com>
 
         [GTK] Clean up TemporaryLinkStubs.cpp
