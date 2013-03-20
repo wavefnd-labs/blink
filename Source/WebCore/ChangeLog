@@ -1,3 +1,26 @@
+2013-03-20  Chris Fleizach  <cfleizach@apple.com>
+
+        WebSpeech: Crash in WebCore::PlatformSpeechSynthesisUtterance::client / WebCore::SpeechSynthesis::didResumeSpeaking
+        https://bugs.webkit.org/show_bug.cgi?id=112728
+
+        Reviewed by Tim Horton.
+
+        When cancel() is called, there was a delay in the platform returning and saying speech was finished, which caused
+        the m_currentSpeechUtterance variable to get deallocated but not cleared. 
+
+        This patch fixes up the management of the utterances in SpeechSynthesis and the Mac platform given that
+        we can't rely on the platform to return immediately on a stop speaking job.
+
+        Test: platform/mac/fast/speechsynthesis/speech-synthesis-cancel-crash.html
+
+        * Modules/speech/SpeechSynthesis.cpp:
+        (WebCore::SpeechSynthesis::cancel):
+        (WebCore::SpeechSynthesis::resume):
+        * platform/mac/PlatformSpeechSynthesizerMac.mm:
+        (-[WebSpeechSynthesisWrapper cancel]):
+        (-[WebSpeechSynthesisWrapper speechSynthesizer:didFinishSpeaking:]):
+        (-[WebSpeechSynthesisWrapper speechSynthesizer:willSpeakWord:ofString:]):
+
 2013-03-20  Eric Carlson  <eric.carlson@apple.com>
 
         Unreviewed, fix Mac release build.
