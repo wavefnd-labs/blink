@@ -1,3 +1,48 @@
+2013-03-20  Tien-Ren Chen  <trchen@chromium.org>
+
+        Correct coordinated scrolling for RTL iframe and overflow:scroll
+        https://bugs.webkit.org/show_bug.cgi?id=112088
+
+        Reviewed by James Robinson.
+
+        This patch adds appropriate offset in ScrollingCoordinatorChromium to
+        adjust impl-side scroll position to the range [0, maxPos - minPos].
+
+        This also corrects RenderLayer to return correct scroll position for RTL,
+        explained below:
+
+        There are 2 commonly used scroll offset coordinate systems in WebCore.
+
+        1. The scroll offset is the amount that needs to be translated when painting
+           child elements in a RenderBox. The value can be negative when there is
+           negative overflow (for RTL). The range will be within
+           [overflow_top_left_corner, overflow_bottom_right_corner - client_size].
+           This system is mainly used for painting and layer positioning.
+           
+        2. The scroll offset will be always non-negative, and the range will be within
+           [0, content_size - client_size]. This system is mainly used for scrollbars.
+
+        scrollOrigin is defined to convert between the two systems. scrollOrigin is always
+        non-negative, and equivalent to -overflow_top_left_corner.
+
+        The first system is used for ScrollableArea::scrollPosition/minimumScrollPosition/
+        maximumScrollPosition function family. So is it implemented in ScrollView/Frameview.
+        RenderLayer errorneously implemented scrollPosition in the second system,
+        and worse, returned minimumScrollPosition/maximumScrollPosition were totally non-sense.
+        This patch corrects RenderLayer to use the first coordinate system.
+
+        Test: compositing/rtl/rtl-overflow-scrolling.html
+              ScrollingCoordinatorChromiumTest.rtlIframe
+
+        * page/scrolling/chromium/ScrollingCoordinatorChromium.cpp:
+        (WebCore::ScrollingCoordinatorChromium::scrollableAreaScrollLayerDidChange):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::scrollPosition):
+        (WebCore::RenderLayer::minimumScrollPosition):
+        (WebCore::RenderLayer::maximumScrollPosition):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+
 2013-03-20  Jessie Berlin  <jberlin@apple.com>
 
         REGRESSION(r145592): AutodrainedPool.h. RunLoopTimer.h, SchedulePair.h are being copied into
