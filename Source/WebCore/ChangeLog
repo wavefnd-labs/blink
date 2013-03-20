@@ -1,3 +1,60 @@
+2013-03-19  Antti Koivisto  <antti@apple.com>
+
+        Don't compute background obscuration on every repaint
+        https://bugs.webkit.org/show_bug.cgi?id=112457
+
+        Reviewed by Simon Fraser.
+
+        Test: fast/backgrounds/obscured-background-child-style-change.html
+        
+        It is generally enough to compute background obscuration status once per layout rather than doing it on every repaint.
+        Since there are fewer layouts than repaints this will allow more expensive checks in the future.
+        
+        With this patch adds caching and invalidation of the obscuration status.
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layout):
+        
+            Invalidate the obscuration status on layout.
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleDidChange):
+        
+            Invalidate the parent obscuration status if there is repaint-only style change (often background related). 
+            Tested by the new fast/css/obscured-background-child-style-change.html.
+
+        (WebCore::RenderBox::layout):
+        (WebCore::RenderBox::computeBackgroundIsKnownToBeObscured):
+        * rendering/RenderBox.h:
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::imageChanged):
+        (WebCore::RenderImage::notifyFinished):
+        (WebCore::RenderImage::boxShadowShouldBeAppliedToBackground):
+        (WebCore::RenderImage::computeBackgroundIsKnownToBeObscured):
+        
+            Use CachedImage::currentFrameKnownToBeOpaque which ensures that the frame is decoded and we get the real status.
+            Tested by an additional case in fast/css/obscured-background-child-style-change.html.
+
+        * rendering/RenderImage.h:
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::styleWillChange):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::hasBoxDecorations):
+        (WebCore::RenderObject::computeBackgroundIsKnownToBeObscured):
+        (WebCore::RenderObject::RenderObjectBitfields::RenderObjectBitfields):
+        (RenderObjectBitfields):
+        (WebCore::RenderObject::RenderObjectBitfields::boxDecorationState):
+        (WebCore::RenderObject::RenderObjectBitfields::setBoxDecorationState):
+        
+            Combine box decoration bit and the obscuration status so we only need one extra bit.
+
+        (WebCore::RenderObject::setNeedsSimplifiedNormalFlowLayout):
+        (WebCore::RenderObject::setHasBoxDecorations):
+        (WebCore::RenderObject::invalidateBackgroundObscurationStatus):
+        (WebCore::RenderObject::backgroundIsKnownToBeObscured):
+        * rendering/RenderReplaced.cpp:
+        (WebCore::RenderReplaced::layout):
+
 2013-03-19  Dominic Mazzoni  <dmazzoni@google.com>
 
         Implement Web Speech Synthesis for Chromium
