@@ -1,3 +1,29 @@
+2013-03-19  Ankur Taly  <ataly@google.com>
+
+        Cache a pointer to V8DOMActivityLogger in PerContextData.
+        https://bugs.webkit.org/show_bug.cgi?id=112719
+
+        Reviewed by Kentaro Hara.
+
+        Adds a data member (and getter, setter methods) to V8PerContextData
+        that holds a pointer to a V8DOMActivityLogger. This member is set while
+        initializing the context for a V8DOMWindowShell. Ownership of the pointer
+        is still retained by the HashMap in DOMWrapperWorld.
+        As a result of this patch, subsequent patches that will implement logging
+        for DOM API access (See bug 107207) will be able to obtain a reference to
+        the logger directly from PerContextData. This will benefit performance as it
+        will be faster than looking up the logger in the DOMActivityLoggerMap in
+        DOMWrapperWorld.
+
+        There are no new tests as there is no change in behavior.
+
+        * bindings/v8/V8DOMWindowShell.cpp:
+        (WebCore::V8DOMWindowShell::initializeIfNeeded):
+        * bindings/v8/V8PerContextData.h:
+        (WebCore::V8PerContextData::activityLogger):
+        (V8PerContextData):
+        (WebCore::V8PerContextData::setActivityLogger):
+
 2013-03-19  Arnaud Renevier  <a.renevier@sisa.samsung.com>
 
         do not use string reference for enum support in CodeGeneratorJS.pm
