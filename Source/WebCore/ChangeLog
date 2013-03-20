@@ -1,3 +1,36 @@
+2013-03-20  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Enable appropriate vertex attribute arrays in LayerRenderer::useProgram()
+        https://bugs.webkit.org/show_bug.cgi?id=112757
+
+        Reviewed by Rob Buis.
+
+        PR 306465
+
+        Make the LayerRenderer and associated code more bullet-proof when it
+        comes to enabling vertex attribute arrays, by enabling them already
+        when LayerRenderer::useProgram() is called. This fixes a bug where the
+        video hole punch rectangle wasn't punched when preceding rendering
+        caused the vertex attribute array at index 0 to be disabled, such as
+        when rendering the text selection overlay immediately before video.
+
+        A number of places where the position attribute index was hard-coded
+        to 0 were also fixed. This causes no change in behavior, the position
+        attribute was really at 0, but nonetheless that shouldn't be hardcoded.
+
+        The effects of this patch are only manually testable.
+
+        * platform/graphics/blackberry/LayerCompositingThread.cpp:
+        (WebCore::LayerCompositingThread::drawTextures):
+        (WebCore::LayerCompositingThread::drawSurface):
+        * platform/graphics/blackberry/LayerRenderer.cpp:
+        (WebCore::LayerRenderer::compositeBuffer):
+        (WebCore::LayerRenderer::drawColor):
+        (WebCore::LayerRenderer::drawDebugBorder):
+        (WebCore::LayerRenderer::drawHolePunchRect):
+        (WebCore::LayerRenderer::compositeLayersRecursive):
+        (WebCore::LayerRenderer::useProgram):
+
 2013-03-20  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: [CodeMirror] implement highlightRange method
