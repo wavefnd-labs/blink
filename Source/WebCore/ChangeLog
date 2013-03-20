@@ -1,3 +1,68 @@
+2013-03-19  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Stub out SecurityPolicyViolationEvent interface.
+        https://bugs.webkit.org/show_bug.cgi?id=112681
+
+        Reviewed by Adam Barth.
+
+        A first pass at a SecurityPolicyViolationEvent interface is defined in
+        CSP 1.1's editor's draft[1]. This patch puts the big components into
+        place so that we can start getting some implementation experience with
+        the new event interface as it's defined, and feed that back into the
+        working group.
+
+        Here, we're only defining the interface, and creating a listener on the
+        Document. Events aren't yet being fired when Content Security Policy
+        violations occur. I'll tackle that in a future patch; adding files is
+        a big enough annoyance to do it separately.
+
+        This patch has only two web-visible impacts:
+
+        - Document objects now have an 'onsecuritypolicyviolation' attribute.
+        - A SecurityPolicyViolationEvent constructor is accessible on the Window object.
+
+        Ports that have not enabled the CSP_NEXT flag should experience no change.
+
+        [1]: https://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-specification.dev.html#securitypolicyviolationevent-events
+
+        Test: http/tests/security/contentSecurityPolicy/1.1/securitypolicyviolation-basics.html
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+            Wow! A new file! This is so exciting! I'm going to tell ALL my build
+            systems about this!
+        * dom/Document.h:
+        * dom/Document.idl:
+            Define an 'onsecuritypolicyviolation' event handler on Document objects.
+        * dom/EventNames.h:
+        * dom/EventNames.in:
+            Define a 'securitypolicyviolation' event type.
+        * dom/SecurityPolicyViolationEvent.h: Added.
+        (WebCore::SecurityPolicyViolationEventInit::SecurityPolicyViolationEventInit):
+        (SecurityPolicyViolationEventInit):
+        (SecurityPolicyViolationEvent):
+        (WebCore::SecurityPolicyViolationEvent::create):
+        (WebCore::SecurityPolicyViolationEvent::documentURI):
+        (WebCore::SecurityPolicyViolationEvent::referrer):
+        (WebCore::SecurityPolicyViolationEvent::blockedURI):
+        (WebCore::SecurityPolicyViolationEvent::violatedDirective):
+        (WebCore::SecurityPolicyViolationEvent::effectiveDirective):
+        (WebCore::SecurityPolicyViolationEvent::originalPolicy):
+        (WebCore::SecurityPolicyViolationEvent::sourceURL):
+        (WebCore::SecurityPolicyViolationEvent::lineNumber):
+        (WebCore::SecurityPolicyViolationEvent::interfaceName):
+        (WebCore::SecurityPolicyViolationEvent::SecurityPolicyViolationEvent):
+        * dom/SecurityPolicyViolationEvent.idl: Added.
+            Define the SecurityPolicyViolationEvent's IDL, and then create all the
+            boilerplate necessary to properly initialize a SecurityPolicyViolationEvent
+            object with the relevant properties.
+        * page/DOMWindow.idl:
+            Add the new SecurityPolicyViolationEvent constructor to the Window object
+            so it's available on a page.
+
 2013-03-19  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: [Timeline] Tune status bar UI for limited-width window.
