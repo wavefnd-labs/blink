@@ -1,3 +1,30 @@
+2013-03-20  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] compositing/iframes/scroll-fixed-transformed-element.html fails in manual testing
+        https://bugs.webkit.org/show_bug.cgi?id=112806
+
+        Reviewed by Antonio Gomes.
+
+        PR 283363
+
+        When scrolling the iframe, the position: fixed element is correctly
+        positioned, that is, as if it was fixed with respect to the iframe's
+        viewport. When scrolling the main frame however, the fixed pos element
+        was positioned as if it was fixed with respect to the main frame's
+        viewport.
+
+        Fixed by falling back to using the WebKit-thread scroll position for
+        fixed positioning in LayerRenderer, if the override doesn't have a
+        position currently set, i.e. if we are not currently scrolling the
+        iframe.
+
+        The effects of the bug are only visual, i.e. not detectable by DRT.
+
+        Manually testable using compositing/iframes/scroll-fixed-transformed-element.html
+
+        * platform/graphics/blackberry/LayerRenderer.cpp:
+        (WebCore::LayerRenderer::updateLayersRecursive):
+
 2013-03-20  Michael Pruett  <michael@68k.org>
 
         [V8] Simplify implementation of EnforceRange conversions
