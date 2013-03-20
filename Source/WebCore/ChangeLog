@@ -1,3 +1,20 @@
+2013-03-20  Kent Tamura  <tkent@chromium.org>
+
+        Crash in Document::setFocusedNode if the frame of new focused node is detached in 'change' event handler
+        https://bugs.webkit.org/show_bug.cgi?id=112653
+
+        Reviewed by Dimitri Glazkov.
+
+        Test: fast/frames/detach-frame-during-focus.html
+
+        * page/FocusController.cpp:
+        (WebCore::FocusController::setFocusedNode):
+        A oldDocument->setFocusedNode call might dispatch a 'change' event for
+        an old focused node, and an event handler code might detach the
+        newFocusedFrame. So we should check it. Without the check, the following
+        newDocument->setFocusedNode call would crash because of null
+        Frame::page().
+
 2013-03-20  Ryosuke Niwa  <rniwa@webkit.org>
 
         Assertion in LegacyWebArchive::create() in editing tests
