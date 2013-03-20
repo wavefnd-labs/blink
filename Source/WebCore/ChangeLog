@@ -1,3 +1,57 @@
+2013-03-20  Jaehun Lim  <ljaehun.lim@samsung.com>
+
+        [css3-text] Parsing -webkit-each-line value for text-indent from css3-text
+        https://bugs.webkit.org/show_bug.cgi?id=109021
+ 
+        Reviewed by Julien Chaffraix.
+ 
+        "each-line" is added for text-indent in CSS3.
+        http://dev.w3.org/csswg/css3-text/#each-line
+ 
+        This patch is the parsing part to support each-line value for text-indent.
+ 
+        "each-line" means "Indentation affects the first line of the block
+        container as well as each line after a forced line break, but does
+        not affect lines after a soft wrap break."
+ 
+        It's prefixed and guarded by CSS3_TEXT flag.
+ 
+        Tests: fast/css3-text/css3-text-indent/getComputedStyle/getComputedStyle-text-indent-inherited.html
+               fast/css3-text/css3-text-indent/getComputedStyle/getComputedStyle-text-indent.html
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+            style.getPropertyCSSValue(text-indent) returns CSSPrimitiveValue when text-indent has only <length>
+            or <percentage> value, but returns CSSValueList when text-indent also has -webkit-each-line.
+
+        * css/CSSParser.cpp:
+        (WebCore::isSimpleLengthPropertyID): Removed CSSPropertyTextIndent case.
+        (WebCore::CSSParser::parseValue):
+        (WebCore::CSSParser::parseTextIndent): Added.
+        * css/CSSParser.h:
+            Parsed <length> or <percentage> with -webkit-each-line for text-indent.
+
+        * css/CSSValueKeywords.in: Added new -webkit-each-line keyword.
+        * css/StyleBuilder.cpp:
+        (ApplyPropertyTextIndent): Added.
+        (WebCore::ApplyPropertyTextIndent::applyInheritValue):
+        (WebCore::ApplyPropertyTextIndent::applyInitialValue):
+        (WebCore::ApplyPropertyTextIndent::applyValue):
+        (WebCore::ApplyPropertyTextIndent::createHandler):
+        (WebCore::StyleBuilder::StyleBuilder):
+            Added codes to handle applying text-indent offset and -webkit-each-line option to our style.
+
+        * rendering/style/RenderStyle.cpp:
+        (WebCore::RenderStyle::diff):
+        * rendering/style/RenderStyle.h:
+        * rendering/style/RenderStyleConstants.h: Added enum TextIndentLine.
+        * rendering/style/StyleRareInheritedData.cpp:
+        (WebCore::StyleRareInheritedData::StyleRareInheritedData):
+        (WebCore::StyleRareInheritedData::operator==):
+        * rendering/style/StyleRareInheritedData.h: Added m_textIndentLine.
+        (StyleRareInheritedData):
+            Added the usual getter / setter / initial methods for m_textIndentLine.
+
 2013-03-20  Tien-Ren Chen  <trchen@chromium.org>
 
         Correct coordinated scrolling for RTL iframe and overflow:scroll
