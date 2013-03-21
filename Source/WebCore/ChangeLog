@@ -1,3 +1,55 @@
+2013-03-21  Florin Malita  <fmalita@chromium.org>
+
+        [SVG] Suppress painting when an empty viewBox is specified
+        https://bugs.webkit.org/show_bug.cgi?id=112623
+
+        Reviewed by Philip Rogers.
+
+        Per spec, elements with an empty viewBox should not be rendered:
+        http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute.
+
+        This patch adds the missing viewBox checks to RenderSVGRoot, RenderSVGViewPortContainer,
+        RenderSVGResourceMarker and RenderSVGResourceMarker's paint methods.
+
+        In order to detect the case of "viewBox present but invalid", the patch also introduces
+        SVGAnimatedProperty plumbing for tracking property validity: the baseVal setter now takes
+        an additional optional 'validValue' boolean parameter, which can later be queried via a
+        macroed getter (LowerProperty##IsValid()).
+
+        Test: svg/custom/viewBox-empty.html
+
+        * rendering/svg/RenderSVGResourceMarker.cpp:
+        (WebCore::RenderSVGResourceMarker::draw):
+        * rendering/svg/RenderSVGResourcePattern.cpp:
+        (WebCore::RenderSVGResourcePattern::buildPattern):
+        * rendering/svg/RenderSVGRoot.cpp:
+        (WebCore::RenderSVGRoot::paintReplaced):
+        * rendering/svg/RenderSVGViewportContainer.cpp:
+        (WebCore::RenderSVGViewportContainer::paint):
+        (WebCore):
+        * rendering/svg/RenderSVGViewportContainer.h:
+        (RenderSVGViewportContainer):
+        * svg/SVGPatternElement.cpp:
+        (WebCore::SVGPatternElement::collectPatternAttributes):
+        * svg/SVGSVGElement.h:
+        (WebCore::SVGSVGElement::hasEmptyViewBox):
+        (SVGSVGElement):
+        Suppress painting if a valid empty viewBox is found.
+
+        * svg/SVGFitToViewBox.h:
+        (WebCore::SVGFitToViewBox::parseAttribute):
+        Mark the viewBox property as invalid if not successfully parsed.
+
+        * svg/SVGExternalResourcesRequired.h:
+        (SVGExternalResourcesRequired):
+        * svg/SVGURIReference.h:
+        (SVGURIReference):
+        * svg/properties/SVGAnimatedPropertyMacros.h:
+        (WebCore::SVGSynchronizableAnimatedProperty::SVGSynchronizableAnimatedProperty):
+        (SVGSynchronizableAnimatedProperty):
+        (WebCore):
+        Plumbing for tracking property value validation.
+
 2013-03-21  Alexei Filippov  <alph@chromium.org>
 
         Web Inspector: Hide toolbar customization experimental setting
