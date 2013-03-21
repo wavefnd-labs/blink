@@ -1,3 +1,26 @@
+2013-03-21  Philip Rogers  <pdr@google.com>
+
+        Correct bisector angle calculation for markers
+        https://bugs.webkit.org/show_bug.cgi?id=112054
+
+        Reviewed by Stephen Chenney.
+
+        The SVG marker spec states that mid markers with orient=auto should be aligned with their
+        x-axis along the bisector of the incoming (in) and outgoing (out) angles. Previously we
+        calculated this bisector angle as:
+            bisector = (in + out) / 2;
+        Angles cannot be averaged this way! Consider in=90deg and out=-180deg: the bisector should
+        be 135deg but a naive average gives -45deg. This patch corrects for the discontinuity in
+        angle values with:
+            bisector = (in + out + 360) / 2   // if |in - out| > 180
+            bisector = (in + out) / 2         // otherwise
+        This patch includes an exhaustive test of angle values.
+
+        Test: svg/custom/marker-orient-auto.html
+
+        * rendering/svg/SVGMarkerData.h:
+        (WebCore::SVGMarkerData::currentAngle):
+
 2013-03-21  Harald Alvestrand  <hta@google.com>
 
         Expose the Type field of an RTCStatsReport
