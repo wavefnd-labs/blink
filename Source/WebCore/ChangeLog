@@ -1,3 +1,26 @@
+2013-03-21  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Ensure script wrappers can be collected after context is stopped
+        https://bugs.webkit.org/show_bug.cgi?id=112976
+
+        Reviewed by Adam Barth.
+
+        ActiveDOMObject::hasPendingActivity is called to see if script wrappers
+        can be disposed of. Once the script execution context has stopped they
+        should be free to go - include this in the checks.
+
+        No new tests - suggestions welcome.
+
+        * Modules/indexeddb/IDBDatabase.cpp:
+        (WebCore::IDBDatabase::hasPendingActivity): Return false if stopped.
+        (WebCore::IDBDatabase::stop): Don't bother calling empty super impl.
+        * Modules/indexeddb/IDBRequest.cpp:
+        (WebCore::IDBRequest::hasPendingActivity): Return false if stopped.
+        (WebCore::IDBRequest::stop): Don't bother calling empty super impl.
+        * Modules/indexeddb/IDBTransaction.cpp:
+        (WebCore::IDBTransaction::hasPendingActivity): Return false if stopped.
+        (WebCore::IDBTransaction::stop): Don't bother calling empty super impl.
+
 2013-03-21  Russell McClellan  <russell.mcclellan@gmail.com>
 
         Remove upcastPointer from ActiveDOMObject constructor
