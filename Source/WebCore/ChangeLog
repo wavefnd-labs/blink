@@ -1,3 +1,38 @@
+2013-03-21  Alok Priyadarshi  <alokp@chromium.org>
+
+        Mark GraphicsLayers as opaque when possible
+        https://bugs.webkit.org/show_bug.cgi?id=70634
+
+        Reviewed by Simon Fraser.
+
+        Mark layers as opaque in a very simple case - any child renderer has an opaque background and covers the entire composited bounds. It is important to note that since we only consider the background, the only layer that can be marked opaque is the primary GraphicsLayer of a RenderLayer.
+
+        Tests: compositing/contents-opaque/background-clip.html
+               compositing/contents-opaque/background-color.html
+               compositing/contents-opaque/body-background-painted.html
+               compositing/contents-opaque/body-background-skipped.html
+               compositing/contents-opaque/layer-opacity.html
+               compositing/contents-opaque/layer-transform.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::skipBodyBackground):
+        (WebCore):
+        (WebCore::RenderBox::paintBackground):
+        (WebCore::RenderBox::backgroundIsKnownToBeOpaqueInRect):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::backgroundIsKnownToBeOpaqueInRect):
+        (WebCore):
+        (WebCore::RenderLayer::listBackgroundIsKnownToBeOpaqueInRect):
+        * rendering/RenderLayer.h:
+        (RenderLayer):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+        * rendering/RenderLayerModelObject.h:
+        (RenderLayerModelObject):
+        (WebCore::RenderLayerModelObject::backgroundIsKnownToBeOpaqueInRect):
+
 2013-03-21  Alexandru Chiculita  <achicu@adobe.com>
 
         [CSS Shaders] Implement a StyleCustomFilterProgram cache
