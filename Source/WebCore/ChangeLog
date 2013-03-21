@@ -1,3 +1,138 @@
+2013-03-21  Dominic Mazzoni  <dmazzoni@google.com>
+
+        Implement Web Speech Synthesis for Chromium
+        https://bugs.webkit.org/show_bug.cgi?id=111695
+
+        Reviewed by Adam Barth.
+
+        Straightforward implementation of speech synthesis
+        for Chromium by exposing interfaces for the platform
+        to implement.
+
+        * Modules/speech/SpeechSynthesis.cpp:
+        (WebCore::SpeechSynthesis::boundaryEventOccurred):
+        (WebCore::SpeechSynthesis::didStartSpeaking):
+        (WebCore::SpeechSynthesis::didPauseSpeaking):
+        (WebCore::SpeechSynthesis::didResumeSpeaking):
+        (WebCore::SpeechSynthesis::didFinishSpeaking):
+        (WebCore::SpeechSynthesis::speakingErrorOccurred):
+        (WebCore):
+        * Modules/speech/SpeechSynthesis.h:
+        (SpeechSynthesis):
+        * Modules/speech/SpeechSynthesisUtterance.cpp:
+        (WebCore::SpeechSynthesisUtterance::SpeechSynthesisUtterance):
+        (WebCore):
+        (WebCore::SpeechSynthesisUtterance::~SpeechSynthesisUtterance):
+        (WebCore::SpeechSynthesisUtterance::setVoice):
+        * Modules/speech/SpeechSynthesisUtterance.h:
+        (SpeechSynthesisUtterance):
+        (WebCore::SpeechSynthesisUtterance::text):
+        (WebCore::SpeechSynthesisUtterance::setText):
+        (WebCore::SpeechSynthesisUtterance::lang):
+        (WebCore::SpeechSynthesisUtterance::setLang):
+        (WebCore::SpeechSynthesisUtterance::volume):
+        (WebCore::SpeechSynthesisUtterance::setVolume):
+        (WebCore::SpeechSynthesisUtterance::rate):
+        (WebCore::SpeechSynthesisUtterance::setRate):
+        (WebCore::SpeechSynthesisUtterance::pitch):
+        (WebCore::SpeechSynthesisUtterance::setPitch):
+        (WebCore::SpeechSynthesisUtterance::startTime):
+        (WebCore::SpeechSynthesisUtterance::setStartTime):
+        (WebCore::SpeechSynthesisUtterance::platformUtterance):
+        * Modules/speech/SpeechSynthesisVoice.h:
+        (WebCore::SpeechSynthesisVoice::~SpeechSynthesisVoice):
+        * WebCore.exp.in:
+        * WebCore.gypi:
+        * platform/PlatformSpeechSynthesis.h:
+        (PlatformSpeechSynthesis):
+        * platform/PlatformSpeechSynthesisUtterance.cpp:
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesisUtterance::create):
+        * platform/PlatformSpeechSynthesisUtterance.h:
+        (PlatformSpeechSynthesisUtterance):
+        (WebCore::PlatformSpeechSynthesisUtterance::setClient):
+        * platform/PlatformSpeechSynthesisVoice.cpp:
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesisVoice::create):
+        (WebCore::PlatformSpeechSynthesisVoice::PlatformSpeechSynthesisVoice):
+        * platform/PlatformSpeechSynthesisVoice.h:
+        (PlatformSpeechSynthesisVoice):
+        (WebCore::PlatformSpeechSynthesisVoice::setVoiceURI):
+        (WebCore::PlatformSpeechSynthesisVoice::setName):
+        (WebCore::PlatformSpeechSynthesisVoice::setLang):
+        (WebCore::PlatformSpeechSynthesisVoice::setLocalService):
+        (WebCore::PlatformSpeechSynthesisVoice::setIsDefault):
+        * platform/PlatformSpeechSynthesizer.cpp:
+        (WebCore::PlatformSpeechSynthesizer::create):
+        (WebCore::PlatformSpeechSynthesizer::setVoiceList):
+        (WebCore):
+        * platform/PlatformSpeechSynthesizer.h:
+        (WebKit):
+        (PlatformSpeechSynthesizerClient):
+        (PlatformSpeechSynthesizer):
+        * platform/chromium/PlatformSpeechSynthesizerChromium.cpp: Added.
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesizer::PlatformSpeechSynthesizer):
+        (WebCore::PlatformSpeechSynthesizer::~PlatformSpeechSynthesizer):
+        (WebCore::PlatformSpeechSynthesizer::initializeVoiceList):
+        (WebCore::PlatformSpeechSynthesizer::speak):
+        (WebCore::PlatformSpeechSynthesizer::pause):
+        (WebCore::PlatformSpeechSynthesizer::resume):
+        (WebCore::PlatformSpeechSynthesizer::cancel):
+        * platform/chromium/support/WebSpeechSynthesisUtterance.cpp: Added.
+        (WebKit):
+        (WebKit::WebSpeechSynthesisUtterance::WebSpeechSynthesisUtterance):
+        (WebKit::WebSpeechSynthesisUtterance::operator=):
+        (WebKit::WebSpeechSynthesisUtterance::assign):
+        (WebKit::WebSpeechSynthesisUtterance::reset):
+        (WebKit::WebSpeechSynthesisUtterance::operator PassRefPtr<PlatformSpeechSynthesisUtterance>):
+        (WebKit::WebSpeechSynthesisUtterance::operator PlatformSpeechSynthesisUtterance*):
+        (WebKit::WebSpeechSynthesisUtterance::text):
+        (WebKit::WebSpeechSynthesisUtterance::lang):
+        (WebKit::WebSpeechSynthesisUtterance::voice):
+        (WebKit::WebSpeechSynthesisUtterance::volume):
+        (WebKit::WebSpeechSynthesisUtterance::rate):
+        (WebKit::WebSpeechSynthesisUtterance::pitch):
+        (WebKit::WebSpeechSynthesisUtterance::startTime):
+        * platform/chromium/support/WebSpeechSynthesisVoice.cpp: Added.
+        (WebKit):
+        (WebKit::WebSpeechSynthesisVoice::assign):
+        (WebKit::WebSpeechSynthesisVoice::reset):
+        (WebKit::WebSpeechSynthesisVoice::setVoiceURI):
+        (WebKit::WebSpeechSynthesisVoice::setName):
+        (WebKit::WebSpeechSynthesisVoice::setLanguage):
+        (WebKit::WebSpeechSynthesisVoice::setIsLocalService):
+        (WebKit::WebSpeechSynthesisVoice::setIsDefault):
+        (WebKit::WebSpeechSynthesisVoice::operator PassRefPtr<WebCore::PlatformSpeechSynthesisVoice>):
+        * platform/chromium/support/WebSpeechSynthesizerClientImpl.cpp: Added.
+        (WebCore):
+        (WebCore::WebSpeechSynthesizerClientImpl::WebSpeechSynthesizerClientImpl):
+        (WebCore::WebSpeechSynthesizerClientImpl::~WebSpeechSynthesizerClientImpl):
+        (WebCore::WebSpeechSynthesizerClientImpl::setVoiceList):
+        (WebCore::WebSpeechSynthesizerClientImpl::didStartSpeaking):
+        (WebCore::WebSpeechSynthesizerClientImpl::didFinishSpeaking):
+        (WebCore::WebSpeechSynthesizerClientImpl::didPauseSpeaking):
+        (WebCore::WebSpeechSynthesizerClientImpl::didResumeSpeaking):
+        (WebCore::WebSpeechSynthesizerClientImpl::speakingErrorOccurred):
+        (WebCore::WebSpeechSynthesizerClientImpl::wordBoundaryEventOccurred):
+        (WebCore::WebSpeechSynthesizerClientImpl::sentenceBoundaryEventOccurred):
+        * platform/chromium/support/WebSpeechSynthesizerClientImpl.h: Added.
+        (WebCore):
+        (WebSpeechSynthesizerClientImpl):
+        * platform/mac/PlatformSpeechSynthesizerMac.mm:
+        (-[WebSpeechSynthesisWrapper speakUtterance:WebCore::]):
+        (-[WebSpeechSynthesisWrapper speechSynthesizer:didFinishSpeaking:]):
+        (WebCore::PlatformSpeechSynthesizer::PlatformSpeechSynthesizer):
+        (WebCore):
+        (WebCore::PlatformSpeechSynthesizer::~PlatformSpeechSynthesizer):
+        (WebCore::PlatformSpeechSynthesizer::speak):
+        * platform/mock/PlatformSpeechSynthesizerMock.cpp:
+        (WebCore::PlatformSpeechSynthesizerMock::PlatformSpeechSynthesizerMock):
+        (WebCore::PlatformSpeechSynthesizerMock::speakingFinished):
+        (WebCore::PlatformSpeechSynthesizerMock::speak):
+        * platform/mock/PlatformSpeechSynthesizerMock.h:
+        (PlatformSpeechSynthesizerMock):
+
 2013-03-21  Julien Chaffraix  <jchaffraix@webkit.org>
 
         [CSS Grid Layout] Properly layout spanning grid items with minmax grid tracks
