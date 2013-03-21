@@ -1,3 +1,54 @@
+2013-03-21  Marja Hölttä  <marja@chromium.org>
+
+        [V8] Generate specialized callbacks for the main world
+        https://bugs.webkit.org/show_bug.cgi?id=112430
+
+        Reviewed by Jochen Eisinger.
+
+        The new specialized bindings will be faster, because they don't need to
+        do the "main world, isolated world or a worker" check, but can right
+        away assume that we're in the main world.
+
+        This patch generates main world bindings for getters and setters of Node,
+        Element and Document.
+
+        No new tests (updated existing binding tests).
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateOverloadedFunction):
+        (GenerateFunctionCallback):
+        (GenerateFunction):
+        (GenerateParametersCheck):
+        (GenerateSingleConstructorCallback):
+        (GenerateNonStandardFunction):
+        (GenerateImplementation):
+        (GenerateFunctionCallString):
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore):
+        * bindings/v8/V8DOMConfiguration.cpp:
+        (WebCore::V8DOMConfiguration::batchConfigureCallbacks):
+        (WebCore::V8DOMConfiguration::configureTemplate):
+        * bindings/v8/V8DOMConfiguration.h:
+        (BatchedMethod):
+        (V8DOMConfiguration):
+        * dom/Document.idl:
+        * dom/Element.idl:
+        * dom/Node.idl:
+
 2013-03-21  Elliott Sprehn  <esprehn@chromium.org>
 
         Remove RenderObject::canHaveRegionStyle since nothing uses it
