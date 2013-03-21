@@ -1,3 +1,27 @@
+2013-03-20  Simon Fraser  <simon.fraser@apple.com>
+
+        Make GraphicsLayerCA::backingStoreMemoryEstimate() give a better estimate for tiled layers
+        https://bugs.webkit.org/show_bug.cgi?id=112864
+
+        Reviewed by Tim Horton.
+        
+        If a GraphicsLayerCA has TiledBacking, ask the TiledBacking how
+        much memory it's using for tiles, rather than just using 
+        height * width * 4.
+        
+        Implement retainedTileBackingStoreMemory() in the TileController,
+        summing the memory used by parented tiles.
+
+        The original code was incorrectly multiplying by contentsScale
+        only once rather than twice (2x contents scale uses 4x as much memory).
+
+        * platform/graphics/TiledBacking.h:
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::backingStoreMemoryEstimate):
+        * platform/graphics/ca/mac/TileController.h:
+        * platform/graphics/ca/mac/TileController.mm:
+        (WebCore::TileController::retainedTileBackingStoreMemory):
+
 2013-03-20  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r146419.
