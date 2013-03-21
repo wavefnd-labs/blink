@@ -1,3 +1,36 @@
+2013-03-21  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Fire a SecurityPolicyViolationEvent when violations occur.
+        https://bugs.webkit.org/show_bug.cgi?id=112783
+
+        Reviewed by Adam Barth.
+
+        A new event type for Content Security Policy violations landed in
+        http://wkrev.com/146305; this patch takes that stub, and wires it up to
+        ContentSecurityPolicy::reportViolation such that violation events fire
+        when resources are blocked.
+
+        This should bring WebKit up to date with the current description of
+        CSP's event model in sections 3.3[1] and 3.4.1.3[2] of the editor's
+        draft.
+
+        [1]: https://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-specification.dev.html#processing-model
+        [2]: https://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-specification.dev.html#firing-events-using-the-securitypolicyviolationevent-interface
+
+        Test: http/tests/security/contentSecurityPolicy/1.1/securitypolicyviolation-block-image.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::gatherSecurityPolicyViolationEventData):
+            Populate a SecurityPolicyViolationEventInit object with the various
+            bits of data that should be passed into the event constructor.
+
+            This static method is strictly an implementation detail; it's not
+            part of ContentSecurityPolicy's public API.
+        (WebCore::ContentSecurityPolicy::reportViolation):
+            Regardless of whether the policy has set a 'report-uri' directive
+            or not, gather together all the data we'll need to fire an event,
+            create the event, and queue it up for dispatching on the Document.
+
 2013-03-21  Terry Anderson  <tdanderson@chromium.org>
 
         [chromium] Remove SK_SUPPORT_HINTING_SCALE_FACTOR flag and code
