@@ -1,3 +1,116 @@
+2013-03-21  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [EFL][WebGL] Implement a common GraphicsSurface Implementation.
+        https://bugs.webkit.org/show_bug.cgi?id=111759
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Covered by existing WebGL tests.
+
+        This is in preparation to add transport surface support for GLES2.
+        This patch makes it easy to share the core logic of using
+        Transport Surface and client on GLX and GLES2 backends without
+        any code duplication.
+
+        * PlatformEfl.cmake:
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::initialize):
+        (WebCore::GraphicsContext3DPrivate::releaseResources):
+        (WebCore::GraphicsContext3DPrivate::prepareBuffer):
+        (WebCore::GraphicsContext3DPrivate::createGraphicsSurface):
+        (WebCore::GraphicsContext3DPrivate::didResizeCanvas):
+        (WebCore::GraphicsContext3DPrivate::copyToGraphicsSurface):
+        * platform/graphics/efl/GraphicsContext3DPrivate.h:
+        (GraphicsContext3DPrivate):
+
+        TransportSurface related code is moved to GraphicsSurfaceCommon.
+        As GraphicsSurface is deleted on resize, added logic to ensure that
+        current buffer is not deleted before having the shared buffer
+        with correct size. This would avoid any flashing during resize.
+
+        * platform/graphics/opengl/GLPlatformSurface.cpp:
+        (WebCore::GLPlatformSurface::createTransportSurface):
+        * platform/graphics/opengl/GLPlatformSurface.h:
+        * platform/graphics/surfaces/efl/GLTransportSurface.cpp: Renamed from Source/WebCore/platform/graphics/surfaces/GLTransportSurface.cpp.
+        (WebCore):
+        (WebCore::GLTransportSurface::GLTransportSurface):
+        (WebCore::GLTransportSurface::~GLTransportSurface):
+        (WebCore::GLTransportSurface::updateContents):
+        (WebCore::GLTransportSurface::setGeometry):
+        (WebCore::GLTransportSurface::destroy):
+        (WebCore::GLTransportSurface::draw):
+        (WebCore::GLTransportSurface::bindArrayBuffer):
+        (WebCore::GLTransportSurface::updateTransformationMatrix):
+        (WebCore::GLTransportSurface::initializeShaderProgram):
+        (WebCore::GLTransportSurfaceClient::createTransportSurfaceClient):
+        (WebCore::GLTransportSurfaceClient::GLTransportSurfaceClient):
+        (WebCore::GLTransportSurfaceClient::~GLTransportSurfaceClient):
+        (WebCore::GLTransportSurfaceClient::destroy):
+        (WebCore::GLTransportSurfaceClient::prepareTexture):
+        (WebCore::GLTransportSurfaceClient::createTexture):
+        * platform/graphics/surfaces/efl/GLTransportSurface.h: Renamed from Source/WebCore/platform/graphics/surfaces/GLTransportSurface.h.
+        (WebCore):
+        (GLTransportSurface):
+        (GLTransportSurfaceClient):
+        (WebCore::GLTransportSurfaceClient::texture):
+        (WebCore::GLTransportSurfaceClient::hasAlpha):
+
+        Moved TransportSurface to EFL folder as this is being used by EFL port only.
+        Added a base class for TransportSurfaceClient.
+
+        * platform/graphics/surfaces/efl/GraphicsSurfaceCommon.cpp: Added.
+        (WebCore):
+        (GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::~GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::destroy):
+        (WebCore::GraphicsSurfacePrivate::initializeTransportSurface):
+        (WebCore::GraphicsSurfacePrivate::makeContextCurrent):
+        (WebCore::GraphicsSurfacePrivate::copyFromTexture):
+        (WebCore::GraphicsSurfacePrivate::handle):
+        (WebCore::GraphicsSurfacePrivate::updateClientBuffer):
+        (WebCore::GraphicsSurfacePrivate::flags):
+        (WebCore::GraphicsSurfacePrivate::rect):
+        (WebCore::GraphicsSurfacePrivate::size):
+        (WebCore::GraphicsSurfacePrivate::textureId):
+        (WebCore::GraphicsSurfacePrivate::initializeClient):
+        (WebCore::GraphicsSurface::platformExport):
+        (WebCore::GraphicsSurface::platformGetTextureID):
+        (WebCore::GraphicsSurface::platformCopyToGLTexture):
+        (WebCore::GraphicsSurface::platformCopyFromTexture):
+        (WebCore::GraphicsSurface::platformPaintToTextureMapper):
+        (WebCore::GraphicsSurface::platformFrontBuffer):
+        (WebCore::GraphicsSurface::platformSwapBuffers):
+        (WebCore::GraphicsSurface::platformSize):
+        (WebCore::GraphicsSurface::platformCreate):
+        (WebCore::GraphicsSurface::platformImport):
+        (WebCore::GraphicsSurface::platformLock):
+        (WebCore::GraphicsSurface::platformUnlock):
+        (WebCore::GraphicsSurface::platformDestroy):
+        (WebCore::GraphicsSurface::platformBeginPaint):
+        (WebCore::GraphicsSurface::createReadOnlyImage):
+
+        GraphicsSurface implementation to be shared by both GLX and GLES2.
+
+        * platform/graphics/surfaces/egl/EGLSurface.cpp:
+        (WebCore::EGLWindowTransportSurface::EGLWindowTransportSurface):
+        * platform/graphics/surfaces/egl/EGLSurface.h:
+        (EGLWindowTransportSurface):
+        * platform/graphics/surfaces/glx/GLXSurface.cpp:
+        (WebCore):
+        (WebCore::resolveGLMethods):
+        (WebCore::isMesaGLX):
+        (WebCore::GLXTransportSurface::GLXTransportSurface):
+        (WebCore::GLXTransportSurfaceClient::GLXTransportSurfaceClient):
+        (WebCore::GLXTransportSurfaceClient::~GLXTransportSurfaceClient):
+        (WebCore::GLXTransportSurfaceClient::destroy):
+        (WebCore::GLXTransportSurfaceClient::prepareTexture):
+        * platform/graphics/surfaces/glx/GLXSurface.h:
+        (GLXTransportSurface):
+        (GLXTransportSurfaceClient):
+        (WebCore):
+        GLXTransportSurfaceClient implementation.
+
 2013-03-21  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r146454.

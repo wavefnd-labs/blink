@@ -28,16 +28,42 @@
 
 #if USE(ACCELERATED_COMPOSITING)
 
+#if USE(GLX)
+#include "GLXSurface.h"
+#endif
+
+#if USE(EGL)
+#include "EGLSurface.h"
+#endif
+
+#include <texmap/TextureMapperShaderProgram.h>
+
 namespace WebCore {
 
 static const GLfloat vertices[] = { 0, 0, 1, 0, 1, 1, 0, 1 };
 static bool vertexArrayObjectSupported = false;
 
-GLTransportSurface::GLTransportSurface(SurfaceAttributes attributes)
+PassOwnPtr<GLTransportSurface> GLTransportSurface::createTransportSurface(const IntSize& size, SurfaceAttributes attributes)
+{
+#if USE(GLX)
+    OwnPtr<GLTransportSurface> surface = adoptPtr(new GLXTransportSurface(size, attributes));
+#elif USE(EGL)
+    OwnPtr<GLTransportSurface> surface = adoptPtr(new EGLWindowTransportSurface(attributes));
+#endif
+
+    if (surface && surface->handle() && surface->drawable())
+        return surface.release();
+
+    return nullptr;
+}
+
+GLTransportSurface::GLTransportSurface(const IntSize& size, SurfaceAttributes attributes)
     : GLPlatformSurface(attributes)
     , m_vbo(0)
     , m_vertexHandle(0)
+    , m_boundTexture(0)
 {
+    m_rect = IntRect(IntPoint(), size);
 }
 
 GLTransportSurface::~GLTransportSurface()
@@ -67,12 +93,11 @@ void GLTransportSurface::destroy()
 {
     m_rect = IntRect();
 
-    ::glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    ::glBindTexture(GL_TEXTURE_2D, 0);
-
     if (!m_shaderProgram || !m_context3D)
         return;
 
+    ::glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    ::glBindTexture(GL_TEXTURE_2D, 0);
     ::glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     if (m_vbo)
@@ -88,6 +113,7 @@ void GLTransportSurface::destroy()
 
     m_shaderProgram = nullptr;
     m_context3D = nullptr;
+    m_boundTexture = 0;
 }
 
 void GLTransportSurface::draw(const uint32_t texture)
@@ -95,7 +121,11 @@ void GLTransportSurface::draw(const uint32_t texture)
     if (!m_vertexHandle)
         bindArrayBuffer();
 
-    ::glBindTexture(GL_TEXTURE_2D, texture);
+    if (m_boundTexture != texture) {
+        ::glBindTexture(GL_TEXTURE_2D, texture);
+        m_boundTexture = texture;
+    }
+
     ::glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
@@ -112,6 +142,7 @@ void GLTransportSurface::updateTransformationMatrix()
         return;
 
     ::glViewport(m_rect.x(), m_rect.y(), m_rect.width(), m_rect.height());
+    m_boundTexture = 0;
 
     FloatRect targetRect = FloatRect(m_rect);
     TransformationMatrix identityMatrix;
@@ -171,11 +202,59 @@ void GLTransportSurface::initializeShaderProgram()
     }
 
     updateTransformationMatrix();
+}
 
-    ::glBindFramebuffer(GL_FRAMEBUFFER, 0);
+PassOwnPtr<GLTransportSurfaceClient> GLTransportSurfaceClient::createTransportSurfaceClient(const PlatformBufferHandle handle)
+{
+#if USE(GLX)
+    OwnPtr<GLTransportSurfaceClient> client = adoptPtr(new GLXTransportSurfaceClient(handle));
+
+    if (!client->texture()) {
+        LOG_ERROR("Failed to Create Transport Surface client.");
+        return nullptr;
+    }
+
+    return client.release();
+
+#else
+    return nullptr;
+#endif
+}
+
+
+GLTransportSurfaceClient::GLTransportSurfaceClient(const PlatformBufferHandle)
+    : m_texture(0)
+    , m_hasAlpha(true)
+{
+}
+
+GLTransportSurfaceClient::~GLTransportSurfaceClient()
+{
+}
+
+void GLTransportSurfaceClient::destroy()
+{
+    if (m_texture) {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDeleteTextures(1, &m_texture);
+        m_texture = 0;
+    }
+}
+
+void GLTransportSurfaceClient::prepareTexture()
+{
+}
+
+void GLTransportSurfaceClient::createTexture()
+{
+    ::glGenTextures(1, &m_texture);
+    ::glBindTexture(GL_TEXTURE_2D, m_texture);
+    ::glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    ::glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    ::glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    ::glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 }
 
 #endif
-

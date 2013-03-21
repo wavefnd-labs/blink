@@ -29,21 +29,24 @@
 #if USE(ACCELERATED_COMPOSITING)
 
 #include "GLPlatformSurface.h"
-#include <texmap/TextureMapperShaderProgram.h>
 #include <wtf/PassOwnPtr.h>
 
 namespace WebCore {
 
+class TextureMapperShaderProgram;
+
 class GLTransportSurface : public GLPlatformSurface {
 
 public:
-    GLTransportSurface(SurfaceAttributes);
+    // Creates a GL surface whose results can be transported to the UI process for display.
+    static PassOwnPtr<GLTransportSurface> createTransportSurface(const IntSize&, SurfaceAttributes = GLPlatformSurface::Default);
     virtual ~GLTransportSurface();
     virtual void updateContents(const uint32_t) OVERRIDE;
     virtual void setGeometry(const IntRect&) OVERRIDE;
     virtual void destroy() OVERRIDE;
 
 protected:
+    GLTransportSurface(const IntSize&, SurfaceAttributes);
     void updateTransformationMatrix();
     void bindArrayBuffer() const;
     void initializeShaderProgram();
@@ -53,6 +56,24 @@ protected:
     RefPtr<TextureMapperShaderProgram> m_shaderProgram;
     Platform3DObject m_vbo;
     Platform3DObject m_vertexHandle;
+    GLuint m_boundTexture;
+};
+
+class GLTransportSurfaceClient {
+
+public:
+    static PassOwnPtr<GLTransportSurfaceClient> createTransportSurfaceClient(const PlatformBufferHandle);
+    virtual ~GLTransportSurfaceClient();
+    virtual void prepareTexture();
+    virtual void destroy();
+    GLuint texture() const { return m_texture; }
+    bool hasAlpha() const { return m_hasAlpha; }
+
+protected:
+    GLTransportSurfaceClient(const PlatformBufferHandle);
+    void createTexture();
+    GLuint m_texture;
+    bool m_hasAlpha;
 };
 
 }
@@ -60,4 +81,3 @@ protected:
 #endif
 
 #endif
-
