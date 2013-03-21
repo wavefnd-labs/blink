@@ -1,3 +1,98 @@
+2013-03-21  Alexandru Chiculita  <achicu@adobe.com>
+
+        [CSS Shaders] Implement a StyleCustomFilterProgram cache
+        https://bugs.webkit.org/show_bug.cgi?id=112602
+
+        Reviewed by Dean Jackson.
+
+        When the style is recalculated, the new computed RenderStyle is saved as the m_style of the
+        RenderObject, even if the style was not different.
+
+        In the case of Custom Filters, a new StyleCustomFilterProgram was created at all times, but the
+        actual equality check was done by comparing the pair of cached shaders from inside the StyleCustomFilterProgram.
+
+        Because of that the RenderLayer::styleChanged was not called when the new StyleCustomFilterProgram was created, so it
+        will end up still knowing only about the previous StyleCustomFilterProgram.
+
+        The RenderLayer sets itself as a client of the StyleCustomFilterProgram, so that it can repaint itself
+        when the program is loaded, but because RenderLayer::styleChanged is not called, it will not add itself as a client of the new
+        StyleCustomFilterProgram.
+
+        StyleCustomFilterProgram waits until the first client to load the programs, so in this case it will just remain unloaded.
+
+        There was no crash, but just an assert in debug mode. Also, as a visible side-effect some frames were rendered using blank shaders, 
+        resulting in a pass-through filter.
+
+        The fix would be to actually make the RenderStyle::diff detect the change of the StyleCustomFilterProgram
+        using the pointer value and not the values. However, that will always invalidate the "filter" property because
+        of the StyleCustomFilterProgram that always gets created during the recalculation time.
+
+        I've added StyleCustomFilterProgramCache to cache all the instances of the StyleCustomFilterPrograms that a
+        StyleResolver allocates. This way, next time it will try to reuse previously allocated StyleCustomFilterPrograms. 
+        The key of the cache is the CustomFilterProgramInfo, that combines the URLs to the shaders and a couple of other program settings.
+
+        StyleCustomFilterProgramCache is owned by the StyleResovler and StyleCustomFilterPrograms are responsible with
+        removing themselves from the cache when the last reference goes away.
+
+        This change makes the previous "platform level" program cache obsolete and I will remove that in a future patch.
+        https://bugs.webkit.org/show_bug.cgi?id=112844
+
+        Test: css3/filters/custom/custom-filter-reload.html
+
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::lookupCustomFilterProgram): Lookup any similar programs in the cache. It will create a new pending 
+        StyleCustomFilterProgram if there is no pre-cached version of the program.
+        if no program is found. loadPendingShaders is responsible for adding the program in the cache if it is actually going to be used.
+        (WebCore::StyleResolver::loadPendingShaders): At this point the program is final, so it's safe to add it to the cache.
+        (WebCore::StyleResolver::createCustomFilterOperationWithInlineSyntax):
+        * css/StyleResolver.h:
+        (StyleResolver):
+        * css/WebKitCSSShaderValue.cpp:
+        (WebCore::WebKitCSSShaderValue::completeURL): Factored out the function to compute the complete URL of the resource.
+        (WebCore::WebKitCSSShaderValue::cachedShader):
+        * css/WebKitCSSShaderValue.h:
+        (WebCore::toWebKitCSSShaderValue):
+        (WebKitCSSShaderValue):
+        * platform/graphics/filters/CustomFilterOperation.cpp:
+        (WebCore::CustomFilterOperation::blend):
+        * platform/graphics/filters/CustomFilterOperation.h:
+        (WebCore::CustomFilterOperation::operator==): Removed. Programs should now compare by pointer. Kept it as
+        private to catch any potential use of it.
+        * rendering/style/StyleCustomFilterProgram.cpp: Copied from Source/WebCore/css/WebKitCSSShaderValue.h.
+        (WebCore::StyleCustomFilterProgram::~StyleCustomFilterProgram): Destructor removes the program from the cache.
+        * rendering/style/StyleCustomFilterProgram.h:
+        (WebCore::StyleCustomFilterProgram::setVertexShader): Added an assert to check that the shader is not in the
+        cache while the mutation happens. Otherwise the cache might have the wrong key.
+        (WebCore::StyleCustomFilterProgram::setFragmentShader): Ditto.
+        (WebCore::StyleCustomFilterProgram::isLoaded): Added more asserts to catch cases when the program is used with no clients.
+        (StyleCustomFilterProgram):
+        (WebCore::StyleCustomFilterProgram::hasPendingShaders):
+        (WebCore::StyleCustomFilterProgram::inCache):
+        (WebCore::StyleCustomFilterProgram::setCache): Function called when a program is added to / removed from the cache.
+        (WebCore::StyleCustomFilterProgram::vertexShaderURL): Added methods to store the KURL that we used as keys in the cache.
+        The same KURLs will be used to lookup and remove the filter at the end.
+        (WebCore::StyleCustomFilterProgram::setVertexShaderURL):
+        (WebCore::StyleCustomFilterProgram::fragmentShaderURL):
+        (WebCore::StyleCustomFilterProgram::setFragmentShaderURL):
+        (WebCore::StyleCustomFilterProgram::StyleCustomFilterProgram):
+        * rendering/style/StyleCustomFilterProgramCache.cpp: Added.
+        (WebCore::StyleCustomFilterProgramCache::programCacheKey):
+        (WebCore::StyleCustomFilterProgramCache::StyleCustomFilterProgramCache):
+        (WebCore::StyleCustomFilterProgramCache::~StyleCustomFilterProgramCache): Destructor removes itself from all the
+        referenced StyleCustomFilterPrograms. This is to avoid issues with different destruction orders.
+        (WebCore::StyleCustomFilterProgramCache::lookup):
+        (WebCore::StyleCustomFilterProgramCache::add):
+        (WebCore::StyleCustomFilterProgramCache::remove):
+        * rendering/style/StyleCustomFilterProgramCache.h:
+        (StyleCustomFilterProgramCache):
+        * platform/graphics/texmap/coordinated/CoordinatedCustomFilterProgram.h:
+        (WebCore::CoordinatedCustomFilterProgram::operator==: Removed. Programs should now compare by pointer.
+
 2013-03-21  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Ensure all API methods have IDB_TRACE macros
