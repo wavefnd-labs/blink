@@ -1,3 +1,27 @@
+2013-03-21  Stephen Chenney  <schenney@chromium.org>
+
+        SVG text path referencing parent text infinite loops
+        https://bugs.webkit.org/show_bug.cgi?id=112078
+
+        Reviewed by Philip Rogers.
+
+        We do not check the target type when adding a resource reference for
+        SVG Text Path's URI. This goes horribly wrong when the target is the
+        text path's parent text element. In this patch we check that the target
+        element of the text path is indeed a path element, as the spec
+        requires. No other element type is allowed.
+
+        Note that RenderSVGTextPath enforces this check in the renderer code
+        also, so if we get past this check via pending resources, it doesn't
+        matter. You can't get into this situation with a pending reference
+        because, by definition, the parent must be defined before the text
+        path child.
+
+        Test: svg/text/textpath-referencing-text-crash.svg
+
+        * svg/SVGTextPathElement.cpp:
+        (WebCore::SVGTextPathElement::buildPendingResource):
+
 2013-03-21  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Remove onVersionChange(string) plumbing
