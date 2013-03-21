@@ -1,3 +1,74 @@
+2013-03-21  Kunihiko Sakamoto  <ksakamoto@chromium.org>
+
+        Refactoring: Reorganize datetime field element parameters
+        https://bugs.webkit.org/show_bug.cgi?id=112877
+
+        Reviewed by Kent Tamura.
+
+        Before this patch, the field element constructors took minimum/maximum
+        as a pair of integers, and step/stepbase as a DateTimeNumericFieldElement::Parameters.
+        This patch makes these constructors to take a Range (for minimum/maximum)
+        and a Step (for step/stepbase).
+
+        No new tests. Just refactoring.
+
+        * html/shadow/DateTimeEditElement.cpp:
+        (DateTimeEditBuilder): Replaced min/max data members by Ranges.
+        (WebCore::DateTimeEditBuilder::DateTimeEditBuilder):
+        (WebCore::DateTimeEditBuilder::visitField):
+        (WebCore::DateTimeEditBuilder::shouldAMPMFieldDisabled):
+        (WebCore::DateTimeEditBuilder::shouldDayOfMonthFieldDisabled):
+        (WebCore::DateTimeEditBuilder::shouldHourFieldDisabled):
+        (WebCore::DateTimeEditBuilder::shouldMillisecondFieldDisabled):
+        (WebCore::DateTimeEditBuilder::shouldMinuteFieldDisabled):
+        (WebCore::DateTimeEditBuilder::shouldSecondFieldDisabled):
+        (WebCore::DateTimeEditBuilder::createStep):
+        * html/shadow/DateTimeFieldElements.cpp:
+        (WebCore::DateTimeDayFieldElement::DateTimeDayFieldElement):
+        (WebCore::DateTimeDayFieldElement::create):
+        (WebCore::DateTimeHourFieldElementBase::DateTimeHourFieldElementBase):
+        (WebCore::DateTimeHour11FieldElement::DateTimeHour11FieldElement):
+        (WebCore::DateTimeHour11FieldElement::create):
+        (WebCore::DateTimeHour12FieldElement::DateTimeHour12FieldElement):
+        (WebCore::DateTimeHour12FieldElement::create):
+        (WebCore::DateTimeHour23FieldElement::DateTimeHour23FieldElement):
+        (WebCore::DateTimeHour23FieldElement::create):
+        (WebCore::DateTimeHour24FieldElement::DateTimeHour24FieldElement):
+        (WebCore::DateTimeHour24FieldElement::create):
+        (WebCore::DateTimeMillisecondFieldElement::DateTimeMillisecondFieldElement):
+        (WebCore::DateTimeMillisecondFieldElement::create):
+        (WebCore::DateTimeMinuteFieldElement::DateTimeMinuteFieldElement):
+        (WebCore::DateTimeMinuteFieldElement::create):
+        (WebCore::DateTimeMonthFieldElement::DateTimeMonthFieldElement):
+        (WebCore::DateTimeMonthFieldElement::create):
+        (WebCore::DateTimeSecondFieldElement::DateTimeSecondFieldElement):
+        (WebCore::DateTimeSecondFieldElement::create):
+        (WebCore::DateTimeWeekFieldElement::DateTimeWeekFieldElement):
+        (WebCore::DateTimeWeekFieldElement::create):
+        * html/shadow/DateTimeFieldElements.h:
+        (DateTimeDayFieldElement):
+        (DateTimeHourFieldElementBase):
+        (DateTimeHour11FieldElement):
+        (DateTimeHour12FieldElement):
+        (DateTimeHour23FieldElement):
+        (DateTimeHour24FieldElement):
+        (DateTimeMillisecondFieldElement):
+        (DateTimeMinuteFieldElement):
+        (DateTimeMonthFieldElement):
+        (DateTimeSecondFieldElement):
+        (DateTimeWeekFieldElement):
+        * html/shadow/DateTimeNumericFieldElement.cpp:
+        (WebCore):
+        (WebCore::DateTimeNumericFieldElement::DateTimeNumericFieldElement):
+        (WebCore::DateTimeNumericFieldElement::roundDown):
+        (WebCore::DateTimeNumericFieldElement::roundUp):
+        * html/shadow/DateTimeNumericFieldElement.h:
+        (WebCore::DateTimeNumericFieldElement::Step::Step): Renamed from Parameters.
+        (WebCore::DateTimeNumericFieldElement::Range::Range):
+        (WebCore::DateTimeNumericFieldElement::Range::isSingleton): Returns true if the range is a singleton range (i.e. contains exactly one value).
+        (Range): Now it's parameter type, hence public.
+        (DateTimeNumericFieldElement): Replaced two int members (m_step and m_stepBase) by a Range.
+
 2013-03-21  Sergey Ryazanov  <serya@chromium.org>
 
         Web Inspector: Track CSS error location information.
