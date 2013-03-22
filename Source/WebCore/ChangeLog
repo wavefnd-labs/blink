@@ -1,3 +1,22 @@
+2013-03-21  Takashi Sakamoto  <tasak@google.com>
+
+        XMLDocumentParser doesn't parse <template> correctly.
+        https://bugs.webkit.org/show_bug.cgi?id=112328
+
+        Reviewed by Hajime Morrita.
+
+        XMLDocumentParser should check whether a parent node is attached or not
+        when a new element is appended.
+
+        Test: fast/dom/HTMLTemplateElement/xhtml-with-titleElement-parsing-crash.xhtml
+
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::XMLDocumentParser::startElementNs):
+        m_currentNode is a parent node of newElement, but it is updated by
+        pushCurrentNode. So firstly stored copied m_curretNode's value into
+        local currentNode and used the currentNode to check whether
+        newElement's parent is attached or not.
+
 2013-03-21  David Grogan  <dgrogan@chromium.org>
 
         Unreviewed, rolling out r146560.
