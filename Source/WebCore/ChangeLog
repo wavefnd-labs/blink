@@ -1,3 +1,29 @@
+2013-03-22  Matt Falkenhagen  <falken@chromium.org>
+
+        Implement isEnabledFormControl() for SliderThumbElement and SpinButtonElement in terms of disabled()
+        https://bugs.webkit.org/show_bug.cgi?id=112993
+
+        Reviewed by Kent Tamura.
+
+        This is an intermediate step for refactoring Node::disabled and
+        Element::isEnabledFormControl. All classes that override
+        isEnabledFormControl just return !disabled(), except for
+        SliderThumbElement and SpinButtonElement. This patch changes those two
+        classes to do so, which shows that the two functions are redundant and
+        easy to refactor into a single function in a subsequent patch.
+
+        No new tests, there should be no behavior change.
+
+        * html/shadow/SliderThumbElement.cpp:
+        (WebCore::SliderThumbElement::disabled):
+        (WebCore):
+        (WebCore::SliderThumbElement::isEnabledFormControl):
+        * html/shadow/SliderThumbElement.h:
+        (SliderThumbElement):
+        * html/shadow/SpinButtonElement.h: The check of shadowHost() is
+        necessary because it can be detached by JavaScript that runs during
+        event handling (see r76566)
+
 2013-03-22  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] New fast/text/word-space-with-kerning-3.html fails on Qt.
