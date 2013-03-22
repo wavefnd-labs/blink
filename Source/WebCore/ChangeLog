@@ -1,3 +1,94 @@
+2013-03-22  Daniel Cheng  <dcheng@chromium.org>
+
+        Data store should be readable in dragstart/copy/cut events
+        https://bugs.webkit.org/show_bug.cgi?id=23695
+
+        Reviewed by Tony Chang.
+
+        There were several events where data could be written but not read back due to the fact that
+        different Clipboard method implementations checked permissions inconsistently. This patch
+        adds helper methods to check if an operation is permitted on a Clipboard and refactors all
+        direct comparisons against Clipboard::m_policy to use the new helpers instead. This fixes
+        several bugs where Clipboard::types and Clipboard::getData are not usable inside the
+        aforementioned events.
+
+        Tests: editing/pasteboard/can-read-in-copy-and-cut-events.html
+               editing/pasteboard/can-read-in-dragstart-event.html
+
+        * dom/Clipboard.cpp:
+        (WebCore::Clipboard::canReadTypes): Formerly restricted to ClipboardReadable and
+                                            ClipboardTypesReadable; now allows ClipboardWritable as
+                                            well.
+        (WebCore::Clipboard::canReadData): Formerly restricted to ClipboardReadable; now allows
+                                           ClipboardWritable as well.
+        (WebCore::Clipboard::canWriteData):
+        (WebCore::Clipboard::canSetDragImage):
+        (WebCore::Clipboard::hasFileOfType):
+        (WebCore::Clipboard::hasStringOfType):
+        (WebCore::Clipboard::setDropEffect):
+        (WebCore::Clipboard::setEffectAllowed):
+        * dom/Clipboard.h:
+        (Clipboard):
+        * platform/blackberry/ClipboardBlackBerry.cpp:
+        (WebCore::ClipboardBlackBerry::clearData):
+        (WebCore::ClipboardBlackBerry::clearAllData):
+        (WebCore::ClipboardBlackBerry::getData):
+        (WebCore::ClipboardBlackBerry::setData):
+        (WebCore::ClipboardBlackBerry::types):
+        * platform/chromium/ClipboardChromium.cpp:
+        (WebCore::DataTransferItemPolicyWrapper::kind):
+        (WebCore::DataTransferItemPolicyWrapper::type):
+        (WebCore::DataTransferItemPolicyWrapper::getAsString):
+        (WebCore::DataTransferItemPolicyWrapper::getAsFile):
+        (WebCore::ClipboardChromium::clearData):
+        (WebCore::ClipboardChromium::clearAllData):
+        (WebCore::ClipboardChromium::getData):
+        (WebCore::ClipboardChromium::setData):
+        (WebCore::ClipboardChromium::types):
+        (WebCore::ClipboardChromium::files):
+        (WebCore::ClipboardChromium::setDragImage):
+        * platform/gtk/ClipboardGtk.cpp:
+        (WebCore::ClipboardGtk::clearData):
+        (WebCore::ClipboardGtk::clearAllData):
+        (WebCore::ClipboardGtk::getData):
+        (WebCore::ClipboardGtk::setData):
+        (WebCore::ClipboardGtk::types):
+        (WebCore::ClipboardGtk::files):
+        (WebCore::ClipboardGtk::setDragImage):
+        * platform/mac/ClipboardMac.mm:
+        (WebCore::ClipboardMac::clearData):
+        (WebCore::ClipboardMac::clearAllData):
+        (WebCore::ClipboardMac::getData):
+        (WebCore::ClipboardMac::setData):
+        (WebCore::ClipboardMac::types):
+        (WebCore::ClipboardMac::files):
+        (WebCore::ClipboardMac::setDragImage):
+        * platform/qt/ClipboardQt.cpp:
+        (WebCore::ClipboardQt::clearData):
+        (WebCore::ClipboardQt::clearAllData):
+        (WebCore::ClipboardQt::getData):
+        (WebCore::ClipboardQt::setData):
+        (WebCore::ClipboardQt::types):
+        (WebCore::ClipboardQt::files):
+        (WebCore::ClipboardQt::setDragImage):
+        (WebCore::ClipboardQt::items):
+        * platform/qt/DataTransferItemListQt.cpp:
+        (WebCore::DataTransferItemListQt::length):
+        (WebCore::DataTransferItemListQt::item):
+        (WebCore::DataTransferItemListQt::deleteItem):
+        (WebCore::DataTransferItemListQt::clear):
+        (WebCore::DataTransferItemListQt::add):
+        * platform/qt/DataTransferItemQt.cpp:
+        (WebCore::DataTransferItemQt::getAsString):
+        * platform/win/ClipboardWin.cpp:
+        (WebCore::ClipboardWin::clearData):
+        (WebCore::ClipboardWin::clearAllData):
+        (WebCore::ClipboardWin::getData):
+        (WebCore::ClipboardWin::setData):
+        (WebCore::ClipboardWin::types):
+        (WebCore::ClipboardWin::files):
+        (WebCore::ClipboardWin::setDragImage):
+
 2013-03-22  Andrei Bucur  <abucur@adobe.com>
 
         [CSS Regions] Remove pushLayoutState(RenderFlowThread*) from RenderView
