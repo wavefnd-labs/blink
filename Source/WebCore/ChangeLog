@@ -1,3 +1,32 @@
+2013-03-22  Tim Horton  <timothy_horton@apple.com>
+
+        Plugin Snapshotting: Auto-start dominant plugins
+        https://bugs.webkit.org/show_bug.cgi?id=113111
+        <rdar://problem/13475726>
+
+        Reviewed by Dean Jackson.
+
+        * html/HTMLPlugInElement.cpp:
+        (WebCore::HTMLPlugInElement::defaultEventHandler):
+        Acknowledge the new "Restarting" DisplayState.
+        * html/HTMLPlugInElement.h:
+        Rename PlayingWithPendingMouseClick to RestartingWithPendingMouseClick for accuracy.
+        Add "Restarting" DisplayState, so we can be aware that the plugin is intentionally restarting and not re-snapshot it.
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::HTMLPlugInImageElement::HTMLPlugInImageElement): Remove m_isPrimarySnapshottedPlugIn.
+        (WebCore::classNameForShadowRoot): Remove m_isPrimarySnapshottedPlugIn.
+        (WebCore::HTMLPlugInImageElement::setIsPrimarySnapshottedPlugIn): Restart the plugin when it becomes primary.
+        (WebCore::HTMLPlugInImageElement::updateSnapshotInfo): Remove m_isPrimarySnapshottedPlugIn.
+        (WebCore::HTMLPlugInImageElement::restartSnapshottedPlugIn):
+        Move the plugin to Restarting unless it's already marked as PendingMouseClick.
+        (WebCore::HTMLPlugInImageElement::simulatedMouseClickTimerFired): Match the PlayingWithPendingMouseClick rename.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): Don't snapshot if we're restarting.
+        * html/HTMLPlugInImageElement.h: Remove m_isPrimarySnapshottedPlugIn.
+        * rendering/RenderSnapshottedPlugIn.cpp:
+        (WebCore::RenderSnapshottedPlugIn::paint): Acknowledge the new "Restarting" DisplayState.
+        (WebCore::RenderSnapshottedPlugIn::getCursor): Acknowledge the new "Restarting" DisplayState.
+        (WebCore::RenderSnapshottedPlugIn::handleEvent): Match the PlayingWithPendingMouseClick rename.
+
 2013-03-19  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] Add support for building the WebCore bindings to the gyp build
