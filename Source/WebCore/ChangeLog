@@ -1,3 +1,24 @@
+2013-03-22  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Shaders] Clamp css_MixColor before the blending and compositing steps
+        https://bugs.webkit.org/show_bug.cgi?id=113088
+
+        Reviewed by Dean Jackson.
+
+        The blending and compositing operations from the spec [1] expect that they are operating on
+        valid color inputs, in the range [0.0, 1.0]. Thus, we should clamp the css_MixColor input to
+        this range to avoid implementation-dependent behavior for invalid color inputs.
+
+        [1]: https://dvcs.w3.org/hg/FXTF/rawfile/tip/compositing/index.html#blending
+
+        Tests: css3/filters/custom/custom-filter-clamp-css-mix-color-negative.html
+               css3/filters/custom/custom-filter-clamp-css-mix-color.html
+
+        * platform/graphics/filters/CustomFilterValidatedProgram.cpp:
+        (WebCore::CustomFilterValidatedProgram::rewriteMixFragmentShader):
+            Clamp css_MixColor as clampedMixColor before using it in the blending and compositing
+            steps.
+
 2013-03-19  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] Add WebCoreDOM to the gyp build
