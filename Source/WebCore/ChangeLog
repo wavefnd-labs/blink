@@ -1,3 +1,28 @@
+2013-03-22  ChangSeok Oh  <changseok.oh@collabora.com>
+
+        [GTK][AC] Add removing animations procedure with clutter ac backend
+        https://bugs.webkit.org/show_bug.cgi?id=110607
+
+        Reviewed by Gustavo Noronha Silva.
+
+        This changes is based on mac port implementation. The only different thing is
+        that updateAnimations is called explicitly in destructor of GraphicsLayerClutter
+        to remove uncommitted animations. Because even though we call notifyFlushRequired
+        to remove existing animations in removeAnimation(), removeClutterAnimationFromLayer
+        has been never reached since the root layer is destroyed before. It means
+        that we haven't lost a change to remove actual animations from clutterActor.
+
+        Covered by existing animation tests.
+
+        * platform/graphics/clutter/GraphicsLayerClutter.cpp:
+        (WebCore::GraphicsLayerClutter::~GraphicsLayerClutter):
+        (WebCore::GraphicsLayerClutter::removeAnimation):
+        (WebCore):
+        (WebCore::GraphicsLayerClutter::removeClutterAnimationFromLayer):
+        * platform/graphics/clutter/GraphicsLayerClutter.h:
+        (WebCore::GraphicsLayerClutter::animationIsRunning):
+        (GraphicsLayerClutter):
+
 2013-03-22  Kondapally Kalyan  <kalyan.kondapally@intel.com>
 
         [EFL][WebGL] Optimize AlphaOp for HTMLVideoElement input.
