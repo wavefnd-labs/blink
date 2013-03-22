@@ -1,3 +1,20 @@
+2013-03-22  peavo@outlook.com  <peavo@outlook.com>
+
+        [Curl] Performance fix, avoid loading cookie file on every request.
+        https://bugs.webkit.org/show_bug.cgi?id=113023
+
+        Reviewed by Brent Fulgham.
+
+        We currently load the cookie file on every request, and when setting cookies from JavaScript, by using the option CURLOPT_COOKIEFILE.
+        This is very inefficient as the cookie file can get quite large, and file I/O is slow.
+        It is sufficient to load the cookie file on startup, as we use a shared cookie database between the requests.
+
+        * platform/network/curl/CookieJarCurl.cpp:
+        (WebCore::setCookiesFromDOM): Avoid loading cookie file when setting cookies from JavaScript.
+        * platform/network/curl/ResourceHandleManager.cpp:
+        (WebCore::ResourceHandleManager::initializeHandle): Avoid loading cookie file on every request.
+        (WebCore::ResourceHandleManager::initCookieSession): Load the cookie file to shared database on startup.
+
 2013-03-22  Tiancheng Jiang  <tijiang@rim.com>
 
         [BlackBerry] Update Input field Background Color
