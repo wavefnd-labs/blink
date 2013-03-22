@@ -1,3 +1,53 @@
+2013-03-22  Eric Carlson  <eric.carlson@apple.com>
+
+        Cleanup text track selection logic
+        https://bugs.webkit.org/show_bug.cgi?id=113062
+
+        Reviewed by Jer Noble.
+
+        No new tests, covered by existing tests.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::userIsInterestedInThisTrackKind): Remove.
+        (WebCore::HTMLMediaElement::configureTextTrackGroup): Don't look at track attributes directly,
+            use captionPreferences->textTrackSelectionScore to calculate track rank.
+        (WebCore::HTMLMediaElement::setClosedCaptionsVisible): Set m_processingPreferenceChange here
+            instead of in captionPreferencesChanged.
+        (WebCore::HTMLMediaElement::captionPreferencesChanged): Don't suppress calls to setClosedCaptionsVisible,
+            existing code already makes sure we don't do unnecessary work.
+        * html/HTMLMediaElement.h:
+
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlTextTrackContainerElement::updateDisplay): Drive by cleanup, don't
+            process inactive cues.
+
+        * html/shadow/MediaControlsApple.cpp:
+        (WebCore::MediaControlsApple::changedClosedCaptionsVisibility): Call resetTrackListMenu instead
+            of updateDisplay so we only mark the menu as needing a recalculation and do the work when
+            it is displayed.
+
+        * page/CaptionUserPreferences.cpp:
+        (WebCore::CaptionUserPreferences::shouldShowCaptions): When in testing mode, return true if
+            the caption or subtitle preference has been set.
+        (WebCore::CaptionUserPreferences::setShouldShowCaptions): In testing mode, clear the caption
+            and subtitle preference when passed false.
+        (WebCore::CaptionUserPreferences::textTrackSelectionScore): Calculate the track score based on
+            track type preference and preferred language.
+        (WebCore::CaptionUserPreferences::textTrackLanguageSelectionScore): Score a track according to
+            the language presence and position in the preferred languages list.
+        * page/CaptionUserPreferences.h:
+
+        * page/CaptionUserPreferencesMac.h:
+        * page/CaptionUserPreferencesMac.mm:
+        (WebCore::CaptionUserPreferencesMac::textTrackSelectionScore): Calculate track language score 
+            according to user preferences.
+
+        * platform/Language.cpp:
+        (WebCore::indexOfBestMatchingLanguageInList): Repurposed the static bestMatchingLanguage
+            function to return the location of a language in a Vector.
+        (WebCore::preferredLanguageFromList): Removed.
+        * platform/Language.h:
+
 2013-03-22  ChangSeok Oh  <changseok.oh@collabora.com>
 
         Build fix for TransformationMatrix
