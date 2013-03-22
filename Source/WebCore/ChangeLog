@@ -1,3 +1,27 @@
+2013-03-22  Allan Sandfeld Jensen  <allan.jensen@digia.com>
+
+        [Qt] New fast/text/word-space-with-kerning-3.html fails on Qt.
+        https://bugs.webkit.org/show_bug.cgi?id=112668
+
+        Reviewed by Jocelyn Turcotte.
+
+        Qt adds word-spacing to leading spaces, but WebCore only expects
+        us to add for trailing spaces. We only corrected for this in width
+        calculation but do need to also do it for drawing.
+
+        Instead of subtracting the extra word-spacing we now configure the
+        FormatRange not to apply to leading spaces. This means this behavior
+        will be applied everywhere reliably.
+
+        * platform/graphics/Font.h:
+        (Font):
+        * platform/graphics/qt/FontQt.cpp:
+        (WebCore::Font::drawComplexText):
+        (WebCore::Font::floatWidthForComplexText):
+        (WebCore::Font::offsetForPositionForComplexText):
+        (WebCore::Font::selectionRectForComplexText):
+        (WebCore::Font::initFormatForTextLayout):
+
 2013-03-22  Joshua Bell  <jsbell@chromium.org>
 
         REGRESSION (r146540?): Crashes in storage/indexeddb/factory-basics-workers.html, storage/indexeddb/transaction-error.html
