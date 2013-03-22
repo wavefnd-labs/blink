@@ -1,3 +1,29 @@
+2013-03-21  Brady Eidson  <beidson@apple.com>
+
+        If a previously loaded resource is later stored to the disk cache, replace the buffer with MMAP'ed memory.
+        <rdar://problem/13414154> and https://bugs.webkit.org/show_bug.cgi?id=112943
+
+        Reviewed by Geoff Garen.
+
+        No new tests (No change in behavior.)
+
+        Give SharedBuffer the ability to replace its contents from another SharedBuffer:
+        * platform/SharedBuffer.h:
+        * platform/cf/SharedBufferCF.cpp:
+        (WebCore::SharedBuffer:: tryReplaceContentsWithPlatformBuffer):
+
+        Forward along SharedBuffer's new ability to ResourceBuffer:
+        * loader/mac/ResourceBuffer.mm:
+        (WebCore::ResourceBuffer:: tryReplaceSharedBufferContents):
+        * loader/ResourceBuffer.h:
+
+        Give CachedResource the ability to replace its encoded data buffer if appropriate:
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource:: tryReplaceEncodedData):
+        * loader/cache/CachedResource.h:
+
+        * WebCore.exp.in:
+
 2013-03-21  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Ensure script wrappers can be collected after context is stopped
