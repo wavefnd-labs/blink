@@ -1,3 +1,44 @@
+2013-03-22  Dane Wallinga  <dgwallinga@chromium.org>
+
+        Add client callbacks to notify of changes of associated from controls
+        https://bugs.webkit.org/show_bug.cgi?id=110375
+
+        Reviewed by Ryosuke Niwa.
+
+        Hook FormAssociatedElement, HTMLFormElement to notify EditorClient of form changes after a page has loaded.
+        Will be used to add autofill support for ajax-y webpages. e.g if while filling out a form, new fields
+        are dynamically created, autofill can know to re-query the autofill server and keep going.
+        https://bugs.webkit.org/show_bug.cgi?id=110375
+
+        * dom/Document.cpp:
+        (WebCore::Document::Document):
+        (WebCore::Document::didAssociateFormControl):
+        (WebCore):
+        (WebCore::Document::didAssociateFormControlsTimerFired):
+        * dom/Document.h:
+        (Document):
+        added method didAssociateFormControl, which batches form changes
+        and calls out to ChromeClient on a timer.
+        * html/FormAssociatedElement.cpp:
+        (WebCore::FormAssociatedElement::resetFormOwner):
+        (WebCore::FormAssociatedElement::formAttributeChanged):
+        (WebCore):
+        * html/FormAssociatedElement.h:
+        (FormAssociatedElement):
+        add calls to Document::didAssociateFormControl when form changes
+        * html/HTMLFormElement.cpp:
+        (WebCore::HTMLFormElement::insertedInto):
+        (WebCore):
+        * html/HTMLFormElement.h:
+        add call to Document::didAssociateFormControl
+        * loader/EmptyClients.h:
+        (EmptyChromeClient):
+        (WebCore::EmptyChromeClient::didAssociateFormControls):
+        (WebCore::EmptyChromeClient::shouldNotifyOnFormChanges):
+        * page/ChromeClient.h:
+        (ChromeClient):
+        add new method didAssociateFormControls
+
 2013-03-22  Alexey Proskuryakov  <ap@apple.com>
 
         Split ResourceHandleMac into multiple files
