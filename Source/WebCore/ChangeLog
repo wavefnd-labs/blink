@@ -1,3 +1,114 @@
+2013-03-22  Hajime Morrita  <morrita@google.com>
+
+        Custom Elements: "readyCallback" lifecycle callback should be called.
+        https://bugs.webkit.org/show_bug.cgi?id=112538
+
+        Reviewed by Elliott Sprehn.
+
+        This change allows each custom element definition to hook up its instantiation,
+        namely "readyCallback" lifecycle callback.
+
+        The change has two parts:
+        - 1. Tracking which Element objects to be created.
+        - 2. Invoking appropriate JavaScript functions, which are readyCallback(),
+          before the Element object is visible from page script.
+
+        For 1, CustomElementRegistry maintains list of "callback
+        invocaions".  Each list item ("invocation") tracks the element
+        which has a lifecycle callback to be invoked. Each invocation is
+        registered when - Any custom element C++ object is instantiated.
+        See changes on CustomElementConstructor.cpp.
+
+        This also happens when @is attribute is set by the parser or node
+        cloning routine, which can turn a non-custom element into a
+        type-extended custom element. See changes on Element.cpp.
+
+        For 2, CustomElementRegistry basically follows what
+        MutationObserver is doing, and introduces a method called
+        deliverLifecycleCallbacks(). This function flushes all pending
+        callback invocations. You can think it as a dual of
+        MutationObserver::deliverAllMutations().
+
+        The delivery function is called places where MutationObserver's
+        deliverAllMutations() is called. In addition, it is also called
+        just before returning from a set of DOM APIs. For example, it is
+        called just before createElement() returns, so that possibly
+        created custom element becomes ready through its readyCallback().
+        Such APIs get "V8DeliverCustomElementCallbacks" IDL attribute. In
+        principle, APIs which can create new custom element instnaces are
+        marked. See CustomElementRegistry::CallbackDeliveryScope and
+        changes on CodeGeneratorV8.pm.
+
+        We need this extra work because the readyCallback() needs to give
+        an illusion so that JavaScript programmers feel like the
+        readyCallback() callback being called just after it is created,
+        instead of called on arbitrary late timing like MutationObserver
+        notifications.
+
+        Tests: fast/dom/custom/lifecycle-ready-createElement-recursion.html
+               fast/dom/custom/lifecycle-ready-createElement-reentrancy.html
+               fast/dom/custom/lifecycle-ready-creation-api.html
+               fast/dom/custom/lifecycle-ready-innerHTML.html
+               fast/dom/custom/lifecycle-ready-parser-only.html
+               fast/dom/custom/lifecycle-ready-parser-script.html
+               fast/dom/custom/lifecycle-ready-paste.html
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        - Hooked up CallbackDeliveryScope through V8DeliverCustomElementCallbacks attriute.
+        (GenerateCustomElementInvocationScopeIfNeeded):
+        (GenerateNormalAttrSetter):
+        (GenerateFunction):
+        * bindings/scripts/IDLAttributes.txt:
+        * bindings/v8/CustomElementHelpers.cpp:
+        (WebCore::CustomElementHelpers::invokeReadyCallbackIfNeeded):
+        (WebCore::CustomElementHelpers::invokeReadyCallbacksIfNeeded):
+        * bindings/v8/CustomElementHelpers.h:
+        (CustomElementHelpers):
+        * bindings/v8/V8RecursionScope.cpp: Added deliverAllLifecycleCallbacks()
+        (WebCore::V8RecursionScope::didLeaveScriptContext):
+        * dom/CustomElementConstructor.cpp:
+        (WebCore::CustomElementConstructor::createElement):
+        (WebCore::CustomElementConstructor::createElementInternal):
+        * dom/CustomElementConstructor.h:
+        (WebCore::CustomElementConstructor::isExtended):
+        (CustomElementConstructor):
+        * dom/CustomElementRegistry.cpp: Adding element tracking and invocation execution.
+        (WebCore::CustomElementInvocation::CustomElementInvocation):
+        (WebCore::CustomElementInvocation::~CustomElementInvocation):
+        (WebCore::activeCustomElementRegistries):
+        (WebCore::CustomElementRegistry::~CustomElementRegistry):
+        (WebCore::CustomElementRegistry::didGiveTypeExtension):
+        (WebCore::CustomElementRegistry::didCreateElement):
+        (WebCore::CustomElementRegistry::activate):
+        (WebCore::CustomElementRegistry::deactivate):
+        (WebCore::CustomElementRegistry::deliverLifecycleCallbacks):
+        (WebCore::CustomElementRegistry::deliverAllLifecycleCallbacks):
+        * dom/CustomElementRegistry.h:
+        (CustomElementInvocation):
+        (WebCore::CustomElementInvocation::element):
+        (CallbackDeliveryScope):
+        (WebCore::CustomElementRegistry::CallbackDeliveryScope::CallbackDeliveryScope):
+        (WebCore::CustomElementRegistry::CallbackDeliveryScope::~CallbackDeliveryScope):
+        (CustomElementRegistry):
+        (WebCore::CustomElementRegistry::deliverAllLifecycleCallbacksIfNeeded):
+        * dom/Document.cpp:
+        (WebCore::Document::createElement):
+        (WebCore::Document::didCreateCustomElement):
+        * dom/Document.h:
+        (Document):
+        * dom/Document.idl:
+        * dom/Element.cpp:
+        (WebCore::Element::attributeChangedFromParserOrByCloning): Added to catch @is attribute
+        (WebCore::Element::parserSetAttributes):
+        (WebCore::Element::cloneAttributesFromElement):
+        * dom/Element.h:
+        * dom/Node.idl:
+        * dom/ShadowRoot.idl:
+        * html/HTMLElement.idl:
+        * html/parser/HTMLScriptRunner.cpp: Added deliverAllLifecycleCallbacks()
+        (WebCore::HTMLScriptRunner::executePendingScriptAndDispatchEvent):
+        (WebCore::HTMLScriptRunner::runScript):
+
 2013-03-22  Tommy Widenflycht  <tommyw@google.com>
 
         MediaStream API: Finalize the RTCPeerConnection states
