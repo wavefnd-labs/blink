@@ -1,3 +1,30 @@
+2013-03-22  Mike West  <mkwst@chromium.org>
+
+        Prefer 'KURL(ParsedURLString, String)' when dealing with known-good data.
+        https://bugs.webkit.org/show_bug.cgi?id=112965
+
+        Reviewed by Alexey Proskuryakov.
+
+        In https://bugs.webkit.org/show_bug.cgi?id=112783#c6, Adam noted that
+        it would be possible to use 'KURL(ParsedURLString, [url])' rather than
+        'KURL(KURL(), [url])', since we knew that the URL in question is a
+        value and absolute URL. This patch fixes the obvious instances of this
+        pattern; there are several more 'KURL(KURL(), String)' calls in
+        WebCore but these were the only places I was reasonably sure that bad
+        data couldn't creep in.
+
+        * dom/Document.cpp:
+        (WebCore::Document::updateBaseURL):
+            'documentURI' is pulled from 'url()->string()'. It's safe.
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::gatherSecurityPolicyViolationEventData):
+        (WebCore::ContentSecurityPolicy::reportViolation):
+            'CallFrame::sourceURL()' is a known valid/absolute URL.
+        * page/SecurityOrigin.cpp:
+        (WebCore::SecurityOrigin::createFromDatabaseIdentifier):
+        (WebCore::SecurityOrigin::create):
+            The strings constructed here are certainly valid.
+
 2013-03-22  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: Flame Chart. move overview window when user scrolls the chart.
