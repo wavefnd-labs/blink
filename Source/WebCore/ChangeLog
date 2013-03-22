@@ -1,3 +1,27 @@
+2013-03-21  Jer Noble  <jer.noble@apple.com>
+
+        Crash in WebCore::MediaPlayer::cachedResourceLoader + 4
+        https://bugs.webkit.org/show_bug.cgi?id=112977
+
+        Reviewed by Geoffrey Garen.
+
+        Speculative fix for a NULL-dereference crash. MediaPlayerPrivateAVFoundationObjC is the
+        sole owner of a WebCoreAVFLoaderDelegate instance. It releases this instance in its destructor,
+        but it is possible that, on another thread, the AVAssetResourceLoader has already begun
+        using the delegate and in so doing has retained it. By the time the delegate method is fired
+        on the main thread, the MediaPlayerPrivateAVFoundationObjC owner of the delegate has already
+        been deleted, and the delegate's m_callback pointer is now pointing at freed memory.
+
+        In addition to calling -[AVAssetResourceLoader setDelegate:queue:] to avoid any not-yet-started
+        delegate callbacks, MediaPlayerPrivateAVFoundationObjC should clear the WebCoreAVFLoaderDelegate
+        m_callback ivar, to avoid calling into freed memory for already queued delegate callbacks.
+
+        * platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm:
+        (WebCore::MediaPlayerPrivateAVFoundationObjC::~MediaPlayerPrivateAVFoundationObjC): Clear the m_loaderDelegate's callback pointer.
+        (-[WebCoreAVFLoaderDelegate resourceLoader:shouldWaitForLoadingOfRequestedResource:]): Check the value of m_callback before continuing.
+        (-[WebCoreAVFLoaderDelegate resourceLoader:didCancelLoadingRequest:]): Ditto.
+        (-[WebCoreAVFLoaderDelegate setCallback:]): Added simple setter.
+
 2013-03-21  Takashi Sakamoto  <tasak@google.com>
 
         XMLDocumentParser doesn't parse <template> correctly.
