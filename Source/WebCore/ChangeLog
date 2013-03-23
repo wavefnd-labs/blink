@@ -1,3 +1,23 @@
+2013-03-22  Julien Chaffraix  <jchaffraix@webkit.org>
+
+        [CSS Grid Layout] content-sized row tracks with percentage logical height grid items don't resolve properly
+        https://bugs.webkit.org/show_bug.cgi?id=113085
+
+        Reviewed by Tony Chang.
+
+        The core issue is that because overrideContainingBlockLogicalHeight() is unset in
+        logicalContentHeightForChild, RenderBox::computePercentageLogicalHeight would try to
+        resolve percentage logical height against the grid element (wrong containing block
+        as a grid item's containing block is the grid area).
+
+        Tests: fast/css-grid-layout/grid-item-multiple-minmax-content-resolution.html
+               fast/css-grid-layout/grid-item-with-percent-height-in-auto-height-grid-resolution.html
+
+        * rendering/RenderGrid.cpp:
+        (WebCore::RenderGrid::logicalContentHeightForChild):
+        Set our override logical height to -1, so that we don't try to constrain a grid item's logical height
+        based on resolving (badly) its percentage.
+
 2013-03-19  Zhenyao Mo  <zmo@google.com>
 
         Check WEBGL_draw_buffers requirements before exposing the extension
