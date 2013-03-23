@@ -1,5 +1,30 @@
 2013-03-23  David Kilzer  <ddkilzer@apple.com>
 
+        BUILD FIX (r146667): ResourceRequest constructor in SynchronousLoaderClient.cpp is ambiguous on iOS
+
+        Fixes the following build failure:
+
+            Source/WebCore/platform/network/SynchronousLoaderClient.cpp:52:15: error: conversion from 'int' to 'const WebCore::ResourceRequest' is ambiguous
+                request = 0;
+                          ^
+            In file included from Source/WebCore/platform/network/SynchronousLoaderClient.cpp:30:
+            In file included from Source/WebCore/platform/network/ResourceHandle.h:37:
+            In file included from Source/WebCore/platform/network/ios/QuickLook.h:13:
+            Source/WebCore/platform/network/cf/ResourceRequest.h:79:9: note: candidate constructor
+                    ResourceRequest(NSURLRequest *);
+                    ^
+            Source/WebCore/platform/network/cf/ResourceRequest.h:83:9: note: candidate constructor
+                    ResourceRequest(CFURLRequestRef cfRequest)
+                    ^
+            1 error generated.
+
+        * platform/network/SynchronousLoaderClient.cpp:
+        (WebCore::SynchronousLoaderClient::willSendRequest): If
+        USE(CFNETWORK) is defined, use static_cast<CFURLRequestRef>(0),
+        otherwise use static_cast<NSURLRequest *>(0).
+
+2013-03-23  David Kilzer  <ddkilzer@apple.com>
+
         BUILD FIX (r146687): setDefaultMIMEType() is unused in ResourceHandleCFNet.cpp on iOS
 
         Fixes the following build failure:
