@@ -1,5 +1,28 @@
 2013-03-24  Chris Fleizach  <cfleizach@apple.com>
 
+        AX: Crash in WebCore::AccessibilitySpinButton::incrementButton()
+        https://bugs.webkit.org/show_bug.cgi?id=111582
+
+        Reviewed by Tim Horton.
+
+        There are two ways to create a spin button: from a textfield counter or from ARIA.
+        If an ARIA spin button is created, it was returning true for isSpinButton, so we were 
+        casting to the other kind of spin button, leading to a crash.
+
+        We need to be more specific about our class types.
+
+        Test: platform/mac/accessibility/aria-spinbutton-crash.html
+
+        * accessibility/AccessibilityObject.h:
+        (WebCore::AccessibilityObject::isNativeSpinButton):
+        * accessibility/AccessibilitySpinButton.h:
+        (WebCore::AccessibilitySpinButton::isNativeSpinButton):
+        (WebCore::toAccessibilitySpinButton):
+        * accessibility/mac/WebAccessibilityObjectWrapperMac.mm:
+        (-[WebAccessibilityObjectWrapper accessibilityAttributeValue:]):
+
+2013-03-24  Chris Fleizach  <cfleizach@apple.com>
+
         AXObjectCache gets recreated during document tear-down.
         https://bugs.webkit.org/show_bug.cgi?id=112525
 
