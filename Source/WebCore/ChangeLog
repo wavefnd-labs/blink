@@ -1,3 +1,26 @@
+2013-03-24  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        [EFL] NetworkStateNotifier::updateState() is called too often
+        https://bugs.webkit.org/show_bug.cgi?id=113152
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Wait until we have read all the data on the Netlink socket before
+        reporting a possible network interface change. This way, we make
+        sure we don't call NetworkStateNotifier::updateState() several
+        times in a row for no reason.
+
+        We also call NetworkStateNotifier::updateState() only if we get a
+        RTM_NEWADDR event and we are currently offline, or if we get a
+        RTM_DELADDR and we are currently online. This avoids calling
+        NetworkStateNotifier::updateState() uselessly as there is no way
+        the online state can change otherwise.
+
+        No new tests, no behavior change for layout tests.
+
+        * platform/network/efl/NetworkStateNotifierEfl.cpp:
+        (WebCore::NetworkStateNotifier::readSocketCallback):
+
 2013-03-24  Chris Fleizach  <cfleizach@apple.com>
 
         AX: Crash in WebCore::AccessibilitySpinButton::incrementButton()
