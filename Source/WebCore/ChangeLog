@@ -1,3 +1,22 @@
+2013-03-23  Daniel Cheng  <dcheng@chromium.org>
+
+        [Qt] editing/pasteboard/can-read-in-dragstart-event.html and /can-read-in-copy-and-cut-events.html are crashing
+        https://bugs.webkit.org/show_bug.cgi?id=113126
+
+        Reviewed by Ryosuke Niwa.
+
+        The ClipboardQt implementation only allows reading or writing, not both. Attempting to read
+        when the clipboard is only writable will lead to a crash since the corresponding member will
+        be null. To prevent crashes, change the asserts to early returns. In the long term, the
+        correct fix is to unify the m_readableData and m_writableData members.
+
+        No new tests since no functionality in Qt port should change.
+
+        * platform/qt/ClipboardQt.cpp:
+        (WebCore::ClipboardQt::getData):
+        (WebCore::ClipboardQt::types):
+        (WebCore::ClipboardQt::files):
+
 2013-03-23  Carlos Garcia Campos  <cgarcia@igalia.com>
 
         [GTK][Regression] webkit_dom_html_table_element_insert_row returns value that doesn't pass WEBKIT_DOM_IS_HTML_TABLE_ROW_ELEMENT macro
