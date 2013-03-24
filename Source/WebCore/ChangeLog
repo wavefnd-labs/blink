@@ -1,3 +1,114 @@
+2013-03-24  Chris Fleizach  <cfleizach@apple.com>
+
+        AXObjectCache gets recreated during document tear-down.
+        https://bugs.webkit.org/show_bug.cgi?id=112525
+
+        Reviewed by Simon Fraser.
+
+        In many cases, a document's AXObjectCache was being created after the
+        document had detached, which is wasteful and could potentially lead to
+        crashes because the AXObjectCache has a timer and relies on its document
+        to exist.
+
+        This patch provides a way to get the existing AX object cache, instead of
+        always creating a new one.
+        It moves the accessibilityEnabled() checks into the axObjectCache retrieval
+        for easier readability.
+        It adds a number of ASSERTs to vieryf that only the correct (top) document is used
+        for cache manipulation.
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore::AXObjectCache::stopCachingComputedObjectAttributes):
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::~ContainerNode):
+        * dom/Document.cpp:
+        (WebCore::Document::~Document):
+        (WebCore::Document::clearAXObjectCache):
+        (WebCore::Document::existingAXObjectCache):
+        (WebCore::Document::axObjectCache):
+        (WebCore::Document::setFocusedNode):
+        * dom/Document.h:
+        (Document):
+        * dom/Element.cpp:
+        (WebCore::Element::attributeChanged):
+        * dom/Node.cpp:
+        (WebCore::Node::~Node):
+        (WebCore::Node::isEditableToAccessibility):
+        (WebCore::Node::attach):
+        (WebCore::Node::rootEditableElement):
+        (WebCore::Node::didMoveToNewDocument):
+        * editing/AppendNodeCommand.cpp:
+        (WebCore::sendAXTextChangedIgnoringLineBreaks):
+        * editing/DeleteFromTextNodeCommand.cpp:
+        (WebCore::DeleteFromTextNodeCommand::doApply):
+        (WebCore::DeleteFromTextNodeCommand::doUnapply):
+        * editing/Editor.cpp:
+        (WebCore::Editor::respondToChangedContents):
+        (WebCore::Editor::markAndReplaceFor):
+        * editing/InsertIntoTextNodeCommand.cpp:
+        (WebCore::InsertIntoTextNodeCommand::doApply):
+        (WebCore::InsertIntoTextNodeCommand::doUnapply):
+        * editing/InsertNodeBeforeCommand.cpp:
+        (WebCore::InsertNodeBeforeCommand::doApply):
+        (WebCore::InsertNodeBeforeCommand::doUnapply):
+        * editing/atk/FrameSelectionAtk.cpp:
+        (WebCore::FrameSelection::notifyAccessibilityForSelectionChange):
+        * editing/chromium/FrameSelectionChromium.cpp:
+        (WebCore::FrameSelection::notifyAccessibilityForSelectionChange):
+        * editing/mac/FrameSelectionMac.mm:
+        (WebCore::FrameSelection::notifyAccessibilityForSelectionChange):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::setChecked):
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::optionElementChildrenChanged):
+        (WebCore::HTMLSelectElement::setRecalcListItems):
+        * html/HTMLTextFormControlElement.cpp:
+        (WebCore::HTMLTextFormControlElement::setInnerTextValue):
+        * html/InputType.cpp:
+        (WebCore::InputType::applyStep):
+        * html/RangeInputType.cpp:
+        (WebCore::RangeInputType::handleKeydownEvent):
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::prepareForLoadStart):
+        (WebCore::FrameLoader::checkLoadCompleteForThisFrame):
+        * page/FocusController.cpp:
+        (WebCore::FocusController::setInitialFocus):
+        * page/Frame.cpp:
+        (WebCore::Frame::disconnectOwnerElement):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::removeFromAXObjectCache):
+        (WebCore::FrameView::layout):
+        (WebCore::FrameView::scrollToAnchor):
+        (WebCore::FrameView::axObjectCache):
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::setHasHorizontalScrollbar):
+        (WebCore::ScrollView::setHasVerticalScrollbar):
+        * platform/Scrollbar.cpp:
+        (WebCore::Scrollbar::~Scrollbar):
+        (WebCore):
+        (WebCore::Scrollbar::existingAXObjectCache):
+        * platform/Scrollbar.h:
+        (Scrollbar):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::deleteLineBoxTree):
+        (WebCore::RenderBlock::createRootInlineBox):
+        (WebCore::RenderBlock::createAndAppendRootInlineBox):
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::selectionChanged):
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::addChild):
+        (WebCore::RenderMenuList::didUpdateActiveOption):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::styleWillChange):
+        (WebCore::RenderObject::willBeDestroyed):
+        * rendering/RenderObjectChildList.cpp:
+        (WebCore::RenderObjectChildList::removeChildNode):
+        (WebCore::RenderObjectChildList::insertChildNode):
+        * rendering/RenderText.cpp:
+        (WebCore::RenderText::setText):
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::willBeDestroyed):
+
 2013-03-23  Mike West  <mkwst@chromium.org>
 
         Drop full URLs from cross-origin access errors caused by sandboxing.
