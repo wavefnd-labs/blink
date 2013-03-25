@@ -1,3 +1,37 @@
+2013-03-25  Michelangelo De Simone  <michelangelo@webkit.org>
+
+        [CSS Filters] Using negative drop-shadow radius values has slow performance
+        https://bugs.webkit.org/show_bug.cgi?id=107848
+
+        Setting negative blur radius values in drop-shadow() and box-shadow() led to
+        significant rendering performance loss. The invalid value overflowed and the
+        embedder became unresponsive for few seconds.
+        This impacted SVG too (SVGFEDropShadow and SVGFEGaussianBlur).
+
+        Reviewed by Dirk Schulze.
+
+        Tests: css3/filters/effect-drop-shadow-negative-radius.html
+               fast/box-shadow/box-shadow-parsing-invalid.html
+               svg/filters/feDropShadow-negative-deviation-expected.svg
+               svg/filters/feDropShadow-negative-deviation.svg
+               svg/filters/feDropShadow-zero-deviation.svg
+               svg/filters/feGaussianBlur-negative-deviation-expected.svg
+               svg/filters/feGaussianBlur-negative-deviation.svg
+               svg/filters/feGaussianBlur-zero-deviation.svg
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParser::parseShadow): Negative values are skipped during parsing: as per
+        CSS Background and Borders specs, negative values shall not be allowed.
+        * platform/graphics/filters/FEGaussianBlur.cpp:
+        (WebCore::FEGaussianBlur::calculateUnscaledKernelSize): Added "non-negative" assertion for
+        negative deviations.
+        * svg/SVGFEDropShadowElement.cpp:
+        (WebCore::SVGFEDropShadowElement::build): If a negative standard deviation is encountered, don't
+        build the filter and returns earlier, this avoids unnecessary calls: FEGaussianBlur is not being
+        created with wrong and potentially overflowing values.
+        * svg/SVGFEGaussianBlurElement.cpp:
+        (WebCore::SVGFEGaussianBlurElement::build): Ditto.
+
 2013-03-25  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] REGRESSION(r146630): 8 text related test asserts on debug builds
