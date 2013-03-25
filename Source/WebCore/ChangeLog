@@ -1,3 +1,40 @@
+2013-03-25  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Strip URLs in SecurityPolicyViolationEvents, just as we do for POSTed violation reports.
+        https://bugs.webkit.org/show_bug.cgi?id=113039
+
+        Reviewed by Jochen Eisinger.
+
+        I'd originally assumed that we didn't need to be quite so careful when
+        handing URLs to JavaScript via SecurityPolicyViolationEvents. This was
+        a mistake. Cross-origin URLs aren't accessible to JavaScript currently
+        and there's no reason that we should begin exposing them via an event.
+
+        This patch extracts the stripping logic from the existing reports into
+        stripURLForUseInReport(), and uses that new method when populating the
+        event and report objects.
+
+        Relatedly, we were doing the wrong thing with 'file:' URLs, which this
+        patch made clear. Now they're treated the same as 'data:' et al.
+
+        Spec: https://dvcs.w3.org/hg/content-security-policy/rev/45f6ccaba0ef
+
+        Tests: http/tests/security/contentSecurityPolicy/1.1/securitypolicyviolation-block-cross-origin-image-from-script.html
+               http/tests/security/contentSecurityPolicy/1.1/securitypolicyviolation-block-cross-origin-image.html
+               http/tests/security/contentSecurityPolicy/1.1/securitypolicyviolation-block-image-from-script.html
+               http/tests/security/contentSecurityPolicy/report-blocked-file-uri.html
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::stripURLForUseInReport):
+            Extract the logic from blockedURI out into a reusable method:
+            cross-origin URLs are stripped down to the ASCII serialization of
+            their origin, and non-heirarchical (and 'file:') URLs are stripped
+            down to the ASCII serialization of their protocol.
+        (WebCore::gatherSecurityPolicyViolationEventData):
+        (WebCore::ContentSecurityPolicy::reportViolation):
+            Use ::stripURLForUseInReport for blockedURL and sourceFile
+            attributes in these two methods.
+
 2013-03-25  Eugene Klyuchnikov  <eustas@chromium.org>
 
         Web Inspector: Fix JSDocs.
