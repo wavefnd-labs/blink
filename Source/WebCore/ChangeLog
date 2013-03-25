@@ -1,3 +1,22 @@
+2013-03-25  Hurnjoo Lee  <hurnjoo.lee@samsung.com>
+
+        [Texmap] Memory leak when closing a tab
+        https://bugs.webkit.org/show_bug.cgi?id=112127
+
+        Reviewed by Noam Rosenthal.
+
+        When closing a tab, if there are any updates pending in CoordinatedGraphicsScene's
+        render queue, the scene is not freed because reference count of m_scene is not zero.
+
+        No new tests.
+
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.cpp:
+        (WebCore::CoordinatedGraphicsScene::detach): When bind updates in CoordinatedGraphicsScene,
+        the reference count of m_scene is increasing, if m_renderQueue is not empty
+        before closing tab, then m_scene is never freed.
+        Hence, when closing tab, need to clear m_renderQueue explicitly in order to
+        destroy m_scene.
+
 2013-03-25  Keishi Hattori  <keishi@webkit.org>
 
         Clear button visibility is not updated when restoring form state
