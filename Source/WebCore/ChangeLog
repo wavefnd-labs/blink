@@ -1,3 +1,36 @@
+2013-03-25  Dean Jackson  <dino@apple.com>
+
+        Cleanup plugin snapshotting autostart decision making
+        https://bugs.webkit.org/show_bug.cgi?id=113231
+
+        Reviewed by Tim Horton.
+
+        Move the code that creates a hash of plugin origin info
+        out of WebCore. All WebCore needs to do now is simply ask its
+        host layer whether or not a tuple of (pluginOrigin, pageOrigin, mimeType)
+        should autostart or not.
+
+        As a drive-by, the code in subframeLoaderWillCreatePlugIn was not quite
+        restarting properly when the displayState was Restarting or
+        RestartingWithPendingMouseClick. It still worked most of the time, but usually
+        because the code ran soon after a mouse click. Now it should be explicit and
+        also allowed us to be more clear about snapshotting at the end of the method.
+
+        * html/HTMLPlugInElement.h: No more pluginOriginHash().
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::addPlugInsFromNodeListMatchingPlugInOrigin): Change signature to accept the tuple
+            described above, and compare strings rather than hashes.
+        (WebCore::HTMLPlugInImageElement::userDidClickSnapshot): Tell host layer the origin
+            info rather than hash info.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): Remember the url that
+            the plugin was loaded from. Make some of the logging messages more clear. Test for
+            plugin and page origin rather than hash.
+        * html/HTMLPlugInImageElement.h:
+        (WebCore::HTMLPlugInImageElement::loadedUrl): New loadedURL member function.
+        * page/PlugInClient.h:
+        (PlugInClient): Change signature of virtual class to accept origin and mimeType info
+            rather than hash.
+
 2013-03-25  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r146793.
