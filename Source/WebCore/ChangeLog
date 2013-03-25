@@ -1,3 +1,81 @@
+2013-03-25  Marja Hölttä  <marja@chromium.org>
+
+        [V8] Generate specialized callbacks for the main world
+        https://bugs.webkit.org/show_bug.cgi?id=112430
+
+        Reviewed by Kentaro Hara.
+
+        The new specialized bindings will be faster, because they don't need to
+        do the "main world, isolated world or a worker" check, but can right
+        away assume that we're in the main world.
+
+        This patch generates main world bindings for getters and setters for a
+        small amount of frequently used functions / functions used by Dromaeo.
+
+        Added tests to TestObj.idl and updated bindings tests.
+
+        * bindings/scripts/CodeGeneratorV8.pm:
+        (GenerateOverloadedFunction):
+        (GenerateFunctionCallback):
+        (GenerateFunction):
+        (GenerateParametersCheck):
+        (GenerateSingleConstructorCallback):
+        (GenerateNonStandardFunction):
+        (GenerateImplementation):
+        (GenerateFunctionCallString):
+        * bindings/scripts/test/TestObj.idl:
+        * bindings/scripts/test/V8/V8Float64Array.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestCustomNamedGetter.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestEventTarget.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestInterface.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestMediaQueryListListener.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestObj.cpp:
+        (WebCore::TestObjV8Internal::perWorldReadOnlyAttributeAttrGetter):
+        (TestObjV8Internal):
+        (WebCore::TestObjV8Internal::perWorldReadOnlyAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::perWorldReadOnlyAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::perWorldReadOnlyAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrGetter):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrGetterCallback):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrGetterForMainWorld):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrGetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrSetter):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrSetterCallback):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrSetterForMainWorld):
+        (WebCore::TestObjV8Internal::perWorldAttributeAttrSetterCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::perWorldMethodMethod):
+        (WebCore::TestObjV8Internal::perWorldMethodMethodForMainWorld):
+        (WebCore::TestObjV8Internal::perWorldMethodMethodCallback):
+        (WebCore::TestObjV8Internal::perWorldMethodMethodCallbackForMainWorld):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethod1Method):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethod1MethodForMainWorld):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethod2Method):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethod2MethodForMainWorld):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethodMethod):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethodMethodForMainWorld):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethodMethodCallback):
+        (WebCore::TestObjV8Internal::overloadedPerWorldMethodMethodCallbackForMainWorld):
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestSerializedScriptValueInterface.cpp:
+        (WebCore):
+        * bindings/scripts/test/V8/V8TestTypedefs.cpp:
+        (WebCore):
+        * bindings/v8/V8DOMConfiguration.cpp:
+        (WebCore::V8DOMConfiguration::batchConfigureCallbacks):
+        (WebCore::V8DOMConfiguration::configureTemplate):
+        * bindings/v8/V8DOMConfiguration.h:
+        (BatchedMethod):
+        (V8DOMConfiguration):
+        * dom/Document.idl:
+        * dom/Element.idl:
+        * dom/Node.idl:
+        * page/DOMWindow.idl:
+
 2013-03-25  Daniel Cheng  <dcheng@chromium.org>
 
         Don't allow drags to start after a mouse press that creates a context menu
