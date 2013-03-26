@@ -1,3 +1,30 @@
+2013-03-25  Timothy Hatcher  <timothy@apple.com>
+
+        Make the Web Inspector console work in strict mode with JavaScriptCore.
+
+        https://webkit.org/b/65829
+        rdar://problem/11271238
+
+        Reviewed by Oliver Hunt.
+
+        * bindings/js/JSInjectedScriptHostCustom.cpp:
+        (WebCore::JSInjectedScriptHost::evaluate):
+        Return the evalFunction directly.
+
+        * inspector/InjectedScriptHost.h:
+        (WebCore::InjectedScriptHost::evaluateReturnsEvalFunction):
+        Added. Return true on JSC and false on V8.
+
+        * inspector/InjectedScriptHost.idl:
+        Added evaluateReturnsEvalFunction and change evaluate to an attribute on JSC.
+
+        * inspector/InjectedScriptSource.js:
+        (InjectedScript.prototype._evaluateOn): Change from using 'with' statements to creating
+        a closure that evaluates the expression. The command line APIs are passed as parameters
+        to the closure so they are in scope but not injected. This allows the code evaluated in
+        the console to stay in strict mode (if is was already set), or to get strict mode by
+        prefixing expressions with 'use strict';.
+
 2013-03-25  Tony Chang  <tony@chromium.org>
 
         Image alt text not included in plain-text version when copying
