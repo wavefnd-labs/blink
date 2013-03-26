@@ -1,3 +1,41 @@
+2013-03-26  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        Code duplication between HTTPParsers and HTTPValidation
+        https://bugs.webkit.org/show_bug.cgi?id=113283
+
+        Reviewed by Alexey Proskuryakov.
+
+        Merged isValidHTTPToken() from HTTPValidation.h and isRFC2616Token() from
+        HTTPParsers.h. They were doing exactly the same thing and their
+        implementation was almost the same.
+
+        Removed HTTPValidation.* and moved remaining code to HTTPParsers.* as this
+        seems like the proper place and it seems odd to keep HTTPValidation for
+        just one function.
+
+        No new tests, no behavior change for layout tests.
+
+        * CMakeLists.txt:
+        * GNUmakefile.list.am:
+        * Target.pri:
+        * WebCore.gypi:
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.vcxproj/WebCore.vcxproj:
+        * WebCore.vcxproj/WebCore.vcxproj.filters:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/network/HTTPParsers.cpp:
+        (WebCore::isValidHTTPHeaderValue):
+        (WebCore):
+        (WebCore::isValidHTTPToken): Implementation is slightly simplified based on
+        isValidHTTPToken() from HTTPValidation.cpp. (c >= 0x80 || c == 0x7F) is
+        replaced by (c >= 0x7F). (c <= 0x1F ||  c == ' ' || c == '\t') is replaced
+        by (c <= 0x20). Those expressions are shorter but equivalent.
+        (WebCore::contentDispositionType):
+        * platform/network/HTTPParsers.h:
+        * platform/network/HTTPValidation.cpp: Removed.
+        * platform/network/HTTPValidation.h: Removed.
+        * xml/XMLHttpRequest.cpp: Stop including HTTPValidation.h.
+
 2013-03-26  Sergio Villar Senin  <svillar@igalia.com>
 
         Implement overtype mode for editable content
