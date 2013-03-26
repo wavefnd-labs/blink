@@ -1,3 +1,45 @@
+2013-03-26  Kent Tamura  <tkent@chromium.org>
+
+        Rename HTMLInputElement::isIndeterminate to Element::shouldAppearIndeterminate
+        https://bugs.webkit.org/show_bug.cgi?id=113264
+
+        Reviewed by Kentaro Hara.
+
+        HTMLInputElement had indeterminate() and isIndeterminate(). It's very
+        confusing.
+
+        Because indeterminate is a public DOM function and isIndeterminate is
+        for CSS and rendering, we rename isIndetermiante to
+        shouldAppearIndeterminate. Also, HTMLProgressElement, which support
+        :indeterminate pseudo class, should follow it. We add
+        shouldAppearIndeterminate to Element.
+
+        No new tests. Just a refactoring.
+
+        * dom/Element.cpp:
+        (WebCore::Element::shouldAppearIndeterminate): Added. Returns false.
+        * dom/Element.h:
+        (Element): Declare shouldAppearIndeterminate.
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::shouldAppearIndeterminate):
+        Renamed from isIndeterminate.
+        * html/HTMLInputElement.h:
+        (HTMLInputElement): Rename isIndeterminate to shouldAppearIndeterminate,
+        and overrides Element::shouldAppearIndeterminate.
+        * html/HTMLProgressElement.cpp:
+        (WebCore::HTMLProgressElement::shouldAppearIndeterminate): Added.
+        * html/HTMLProgressElement.h: Add shouldAppearIndeterminate.
+
+        * accessibility/AccessibilityNodeObject.cpp:
+        (WebCore::AccessibilityNodeObject::isIndeterminate):
+        Use shouldAppearIndeterminate.
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOne): Ditto.
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::canShareStyleWithControl): Ditto.
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::isIndeterminate): Ditto.
+
 2013-03-26  Pan Deng  <pan.deng@intel.com>
 
         Web Inspector: [FlameChart] Make function bar highlighted consistent with cursor.
