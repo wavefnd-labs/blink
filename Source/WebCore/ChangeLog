@@ -1,3 +1,48 @@
+2013-03-26  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Experiment with 'base-uri' directive.
+        https://bugs.webkit.org/show_bug.cgi?id=113307
+
+        Reviewed by Jochen Eisinger.
+
+        The 'base-uri' directive was introduced[1] as an experimental directive
+        in CSP 1.1 after a bit of discussion[2][3]. The exact semantics will
+        likely change, but it would be good for us to get some implementation
+        experience with the API as currently specified, and to allow folks to
+        play with the implementation to determine whether it meets the
+        requirements the way we think it might.
+
+        This patch is a first pass at that implementation: it will have no
+        effect on ports that haven't enabled the CSP_NEXT flag.
+
+        [1]: https://dvcs.w3.org/hg/content-security-policy/rev/4b89c246ea16
+        [2]: http://lists.w3.org/Archives/Public/public-webappsec/2012Oct/0022.html
+        [3]: http://lists.w3.org/Archives/Public/public-webappsec/2013Feb/0074.html
+
+        Tests: http/tests/security/contentSecurityPolicy/1.1/base-uri-allow.html
+               http/tests/security/contentSecurityPolicy/1.1/base-uri-deny.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::processBaseElement):
+            Check that the new base URI is allowed by CSP before using it as
+            the document's base URI.
+        * page/ContentSecurityPolicy.cpp:
+            Add a constant for the new directive name (and, as a drive-by, split
+            the list into CSP 1.0 and CSP 1.1 for clarity).
+        (CSPDirectiveList):
+            Add a property to hold the base URI policy directive value.
+        (WebCore::CSPDirectiveList::checkSourceAndReportViolation):
+            Customize the error message iff we're dealing with 'base-uri'.
+        (WebCore::CSPDirectiveList::allowBaseURI):
+            Check the given URI against the 'base-uri' directive's value,
+            exactly as we do for every other source-list type of directive.
+        (WebCore::CSPDirectiveList::addDirective):
+            Accept 'base-uri' as a valid directive iff CSP_NEXT is set, and
+            the embedder has opted-in via the runtime flag.
+        (WebCore::ContentSecurityPolicy::allowBaseURI):
+            Expose an API method on ContentSecurityPolicy to check URIs against
+            the 'base-uri' directive's value.
+
 2013-03-26  Arvid Nilsson  <anilsson@rim.com>
 
         [BlackBerry] Main frame fixed divs not positioned correctly
