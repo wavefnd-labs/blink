@@ -1,3 +1,31 @@
+2013-03-26  Dean Jackson  <dino@apple.com>
+
+        When a primary plugin is restarted, also start similar plugins
+        https://bugs.webkit.org/show_bug.cgi?id=113265
+
+        Reviewed by Tim Horton.
+
+        If we detect a primary plugin that is snapshotted, we immediately restart it.
+        When this happens, we should also restart any other plugins that
+        match the same origin and type. This allows sites with a lot of
+        (geometrically) nearby plugins to behave as if they are a single big plugin.
+
+        Tests: plugins/snapshotting/autoplay-similar-to-dominant-after-delay.html
+               plugins/snapshotting/autoplay-similar-to-dominant.html
+
+        * WebCore.exp.in: Export mimeTypeFromURL.
+        * html/HTMLPlugInImageElement.cpp:
+        (WebCore::addPlugInsFromNodeListMatchingPlugInOrigin): Use loadedMimeType helper.
+        (WebCore::HTMLPlugInImageElement::restartSimilarPlugIns): New method, which copied the
+            existing code from userDidClickSnapshot.
+        (WebCore::HTMLPlugInImageElement::userDidClickSnapshot): Move the similar plugin detection
+            out into another function and call it.
+        (WebCore::HTMLPlugInImageElement::setIsPrimarySnapshottedPlugIn): Call restartSimilarPlugIns.
+        (WebCore::HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn): Use loadedMimeType helper.
+        * html/HTMLPlugInImageElement.h: Declaration of restartSimilarPlugIns.
+        (WebCore::HTMLPlugInImageElement::loadedMimeType): New helper method since this
+            code was being often duplicated.
+
 2013-03-26  Brent Fulgham  <bfulgham@webkit.org>
 
         [Windows, WinCairo] Scroll offset being applied to plugins during print operations.
