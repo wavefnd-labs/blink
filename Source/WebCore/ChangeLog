@@ -1,3 +1,91 @@
+2013-03-26  Alexey Proskuryakov  <ap@apple.com>
+
+        <rdar://problem/13194263> Crashes in NetworkProcess due to threading issues
+        https://bugs.webkit.org/show_bug.cgi?id=113256
+
+        Reviewed by Brady Eidson.
+
+        Added a new code path in ResourceHandle/ResourceHandleClient that doesn't need
+        blocking calls. Implemented it for NSURLConnection by changing NSOperationQueue
+        version to forward calls to main thread.
+
+        * WebCore.exp.in: Export new methods.
+        * WebCore.xcodeproj/project.pbxproj: Added WebCoreResourceHandleAsOperationQueueDelegate.
+
+        * platform/network/CredentialStorage.cpp: Assert that unprotected global map operations
+        happen on main thread.
+
+        * platform/network/ResourceHandle.cpp: Added default implementations of functions
+        that handle async responses.
+
+        * platform/network/chromium/ResourceHandle.cpp: Ditto.
+
+        * platform/network/ResourceHandle.h: Added functions that are called in response
+        to new async functions in ResourceHandleClient. Changed Mac delegate type to id,
+        ast can now be either WebCoreResourceHandleAsDelegate or WebCoreResourceHandleAsOperationQueueDelegate.
+
+        * platform/network/ResourceHandleClient.cpp:
+        (WebCore::ResourceHandleClient::willSendRequestAsync):
+        (WebCore::ResourceHandleClient::shouldUseCredentialStorageAsync):
+        (WebCore::ResourceHandleClient::canAuthenticateAgainstProtectionSpaceAsync):
+        (WebCore::ResourceHandleClient::willCacheResponseAsync):
+        Default implementations of async client functions. These match default behavior of
+        sync versions.
+
+        * platform/network/ResourceHandleClient.h: Added async functions. A ResourceHandle
+        should use these when the client returns true from usesAsyncCallbacks().
+
+        * platform/network/ResourceHandleInternal.h: Changed to use id for delegate type
+        here, too.
+
+        * platform/network/mac/ResourceHandleMac.mm:
+        (WebCore::ResourceHandle::delegate): Create an appropriate delegate for the client.
+        (WebCore::ResourceHandle::willSendRequest): Since this function has a lot of common
+        behavior in sync and async cases, implement the new code path as a branch inside
+        it, not as a new function.
+        (WebCore::ResourceHandle::continueWillSendRequest): Unblock the connection when
+        response is known.
+        (WebCore::ResourceHandle::shouldUseCredentialStorage): Branched here too, for consistency.
+        Perhaps we'll want to break this into separate functions though.
+        (WebCore::ResourceHandle::continueShouldUseCredentialStorage): Unblock the connection.
+        (WebCore::ResourceHandle::canAuthenticateAgainstProtectionSpace): Same change as above.
+        (WebCore::ResourceHandle::continueCanAuthenticateAgainstProtectionSpace): Ditto.
+        (WebCore::ResourceHandle::continueWillCacheResponse): Ditto. Currently, delegate
+        calls the client directly, so we only have a "continue" function, and no "willCacheResponse".
+
+        * platform/network/mac/WebCoreResourceHandleAsDelegate.mm:
+        (-[WebCoreResourceHandleAsDelegate connection:willCacheResponse:]): Removed some
+        nonsense code.
+
+        * platform/network/mac/WebCoreResourceHandleAsOperationQueueDelegate.h: Copied from Source/WebCore/platform/network/mac/WebCoreResourceHandleAsDelegate.h.
+        This delegate is responsible for forwarding calls to main thread. Unfortunately,
+        this adds some code duplication, which I tried to rectify somewhat in previous patches
+        by moving more logic to ResourceHandle.
+
+        * platform/network/mac/WebCoreResourceHandleAsOperationQueueDelegate.mm: Copied from Source/WebCore/platform/network/mac/WebCoreResourceHandleAsDelegate.mm.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate detachHandle]): Unblock waiting
+        threads if we don't expect a response any more.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate dealloc]): Release the semaphore.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate continueWillSendRequest:]): Unblock
+        a waiting thread with a response.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate continueShouldUseCredentialStorage:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate continueCanAuthenticateAgainstProtectionSpace:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate continueWillCacheResponse:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:willSendRequest:redirectResponse:]):
+        Run code that uses WebCore objects on main thread.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connectionShouldUseCredentialStorage:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:didReceiveAuthenticationChallenge:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:didCancelAuthenticationChallenge:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:canAuthenticateAgainstProtectionSpace:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:didReceiveResponse:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:didReceiveDataArray:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:didReceiveData:lengthReceived:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:willStopBufferingData:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connectionDidFinishLoading:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:didFailWithError:]): Ditto.
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:willCacheResponse:]): Ditto.
+
 2013-03-26  Tony Chang  <tony@chromium.org>
 
         Autogenerate the scrollAnimatorEnabled setting in Settings.in
