@@ -1,3 +1,57 @@
+2013-03-26  Sergio Villar Senin  <svillar@igalia.com>
+
+        Implement overtype mode for editable content
+        https://bugs.webkit.org/show_bug.cgi?id=112126
+
+        Reviewed by Ryosuke Niwa.
+
+        Tests: editing/execCommand/overtype-support.html
+               editing/execCommand/overtype.html
+
+        Add a new Overwrite command to the editor. This command will
+        perform overtype operations when enabled instead of "normal" text
+        insertions. As IE does, we maintain a single toggle state in the
+        editor (enabled/disabled) for all the editable content in the
+        page.
+
+        This new command will be only available for richly editable
+        content via keybindings or the context menu. For testing purposes
+        it is also accessible via internals.
+
+        * editing/CompositeEditCommand.cpp:
+        (WebCore::CompositeEditCommand::replaceTextInNode): Use RefPtr for
+        local variables.
+        * editing/Editor.cpp:
+        (WebCore::Editor::Editor):
+        * editing/Editor.h:
+        (WebCore::Editor::isOverwriteModeEnabled):
+        (WebCore::Editor::toggleOverwriteModeEnabled):
+        (Editor): Added two new functions and a new attribute.
+        * editing/EditorCommand.cpp:
+        (WebCore::executeToggleOverwrite): Enables/disables overwrite mode.
+        (WebCore):
+        (WebCore::createCommandMap): New OverWrite command.
+        * editing/InsertTextCommand.cpp:
+        (WebCore::InsertTextCommand::setEndingSelectionWithoutValidation):
+        Refactored from performTrivialReplace(), shared by
+        performOverwrite().
+        (WebCore):
+        (WebCore::InsertTextCommand::performTrivialReplace):
+        (WebCore::InsertTextCommand::performOverwrite):
+        (WebCore::InsertTextCommand::doApply): Perform overwrite if enabled.
+        * editing/InsertTextCommand.h:
+        (InsertTextCommand):
+        * testing/Internals.cpp:
+        (WebCore::Internals::resetToConsistentState): Reset OverWrite mode
+        to false.
+        (WebCore::Internals::isOverwriteModeEnabled):
+        (WebCore):
+        (WebCore::Internals::toggleOverwriteModeEnabled): Provide access
+        to overwrite functionality in Editor for testing purposes.
+        * testing/Internals.h:
+        (Internals):
+        * testing/Internals.idl:
+
 2013-03-26  Arvid Nilsson  <anilsson@rim.com>
 
         [BlackBerry] WebOverlay::pixelViewportRect() should return pixel viewport coordinates
