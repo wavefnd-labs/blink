@@ -1,3 +1,35 @@
+2013-03-26  Arpita Bahuguna  <a.bah@samsung.com>
+
+        Unable to insert a paragraph in between some text whose previous sibling is a non-editable block.
+        https://bugs.webkit.org/show_bug.cgi?id=113007
+
+        Reviewed by Ryosuke Niwa.
+
+        Unable to insert a line break in between a text that follows a
+        non-editable block but is itself contained within an editable
+        block.
+
+        While comparing the positions from the start block till the
+        insertion position, we should ignore the nodes that do not
+        generate a visiblePosition for the position before the node.
+        This ultimately results in an assert within comparePositions().
+
+        For this case, the firstChild of the start block is a text
+        node with no renderer which would thus not generate a candidate
+        position for itself.
+        There is also no candidate previous to it, and since
+        the position after it lies within a different editable element (root),
+        no candidate after it as well.
+        Such a point will thus return a null visiblePosition.
+
+        Test: editing/inserting/insert-paragraph-between-text.html
+
+        * editing/InsertParagraphSeparatorCommand.cpp:
+        (WebCore::InsertParagraphSeparatorCommand::doApply):
+        Added a check to verify the generated visiblePosition (for the
+        position before the node) prior to carrying out a comparison with
+        the insertion point.
+
 2013-03-26  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: OverviewGrid. Dragged window may change its width due to accumulating rounding error.
