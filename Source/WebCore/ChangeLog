@@ -1,3 +1,20 @@
+2013-03-26  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        HTTPHeaderMap::copyData() could call uncheckedAppend()
+        https://bugs.webkit.org/show_bug.cgi?id=113279
+
+        Reviewed by Alexey Proskuryakov.
+
+        HTTPHeaderMap::copyData() calls reserveInitialCapacity() on the Vector
+        but then appends items using append() function. Since we already know
+        the capacity is sufficient, it is more efficient to call uncheckedAppend()
+        instead to bypass capacity checks.
+
+        No new tests, no behavior change for layout tests.
+
+        * platform/network/HTTPHeaderMap.cpp:
+        (WebCore::HTTPHeaderMap::copyData):
+
 2013-03-26  Vsevolod Vlasov  <vsevik@chromium.org>
 
         Web Inspector: UISourceCodes are leaking on reload sometimes.
