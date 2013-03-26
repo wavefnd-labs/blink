@@ -1,3 +1,22 @@
+2013-03-26  Joe Mason  <jmason@blackberry.com>
+
+        [BlackBerry] In RSSFilterStream, don't swallow headers when there's no body
+        https://bugs.webkit.org/show_bug.cgi?id=113334
+
+        Reviewed by Rob Buis.
+
+        RIM PR 316345
+
+        When receiving an HTTP response that has a Content-Type header such as text/xml, but no
+        body, RSSFilterStream::notifyHeadersReceived reads the Content-Type as "potential RSS", and
+        calls saveHeaders. It expects to sniff the body in notifyDataReceived to see if it's RSS,
+        and then call sendSavedHeaders to pass on the headers. But since there is no body,
+        notifyDataReceived is never called. So call sendSavedHeaders in notifyClose too (it will not
+        send them again if they were already sent.)
+
+        * platform/network/blackberry/rss/RSSFilterStream.cpp:
+        (WebCore::RSSFilterStream::notifyClose):
+
 2013-03-26  Dmitry Zvorygin  <zvorygin@chromium.org>
 
         Web Inspector: Faster drawer animation.
