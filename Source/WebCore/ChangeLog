@@ -1,3 +1,29 @@
+2013-03-22  Hajime Morrita  <morrita@google.com>
+
+        Listening touch events on ShadowRoot can crash.
+        https://bugs.webkit.org/show_bug.cgi?id=113035
+
+        Reviewed by Kentaro Hara.
+
+        TreeScope destructor clears a document reference on ShadowRoot but
+        destructors of ContainerNode and Node assumed it being available
+        and tried to access it for some cleanup purposes.
+
+        This change extracts such cleanup to Node::willBeDeletedFrom() and
+        calls it from ShadowRoot dtor before the document reference gets cleared.
+
+        Test: fast/dom/shadow/shadow-root-touch-listener-crash.html
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::~ContainerNode): Adopted willBeDeletedFrom()
+        * dom/Node.cpp:
+        (WebCore::Node::~Node): Adopted willBeDeletedFrom()
+        (WebCore::Node::willBeDeletedFrom): Extracted from Node and ContainerNode
+        (WebCore):
+        * dom/Node.h:
+        * dom/ShadowRoot.cpp:
+        (WebCore::ShadowRoot::~ShadowRoot): Adopted willBeDeletedFrom()
+
 2013-03-25  Hajime Morrita  <morrita@google.com>
 
         Custom Elements Refactoring: The name V8CustomElement is confusing.
