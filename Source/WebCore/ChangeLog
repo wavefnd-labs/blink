@@ -1,3 +1,77 @@
+2013-03-26  Andrei Bucur  <abucur@adobe.com>
+
+        Use DOM ordering for list counts
+        https://bugs.webkit.org/show_bug.cgi?id=110352
+
+        Reviewed by Elliott Sprehn.
+
+        Currently the list items ordering is made by traversing the render tree. This gives bad results for:
+        - list items flown inside regions because they are not rendered as descendants of their DOM list ancestors.
+        - list items matched to insertion points inside a shadow tree. The insertion point may be a child of a
+        list so the numbering gets broken.
+
+        To implement correct DOM ordering I've taken into account the fact that pseudo-elements can have display: list-item
+        so they should be included when traversing the DOM tree. I've added helper methods on the NodeTraversal
+        namespace that should allow easily traversing the tree including the pseudo-elements (e.g. firstChildWithPseudo
+        for an element with pseudo-before will return the before PseudoElement). Using these helper methods I've implemented
+        pre-order traversal methods aware of the pseudo-elements.
+        An effect of this change is how the list items inside shadow tree update their counting. With the patch, if there's
+        no <ol> or <ul> element on the ancestor chain of a <li> element to the shadow root, the list node will be considered the
+        first parent of the <li> or the shadow root if there is no ancestor.
+        The RenderListItem class now makes use of this new method of traversal, replacing the one based on the render tree.
+        To simplify the CSS counters implementation, I've changed the traversal functions inside RenderCounter to also make use
+        of this method. The CSS counters and the list items now have the same traversal algorithm.
+
+        In later patches I'll add tests that should cover the regions and shadow DOM use cases.
+        Tests bug for shadow DOM: https://bugs.webkit.org/show_bug.cgi?id=113193
+        Tests bug for regions: https://bugs.webkit.org/show_bug.cgi?id=103975
+
+        Tests: no new tests is this patch; added the correct expectations for fast/lists/positioned-count-crash.html
+        and fast/dom/shadow/shadow-and-list-elements.html
+
+        * dom/Node.cpp:
+        (WebCore::Node::pseudoAwarePreviousSibling):
+        (WebCore):
+        (WebCore::Node::pseudoAwareNextSibling):
+        (WebCore::Node::pseudoAwareFirstChild):
+        (WebCore::Node::pseudoAwareLastChild):
+        * dom/Node.h:
+        (Node):
+        * dom/NodeTraversal.cpp:
+        (WebCore):
+        (WebCore::NodeTraversal::previousIncludingPseudo):
+        (NodeTraversal):
+        (WebCore::NodeTraversal::nextIncludingPseudo):
+        (WebCore::NodeTraversal::nextIncludingPseudoSkippingChildren):
+        * dom/NodeTraversal.h:
+        (ElementTraversal):
+        (NodeTraversal):
+        (WebCore::ElementTraversal::previousIncludingPseudo):
+        (WebCore::ElementTraversal::nextIncludingPseudo):
+        (WebCore::ElementTraversal::nextIncludingPseudoSkippingChildren):
+        (WebCore::ElementTraversal::pseudoAwarePreviousSibling):
+        * html/HTMLLIElement.cpp:
+        (WebCore::HTMLLIElement::attach):
+        * html/HTMLOListElement.cpp:
+        (WebCore::HTMLOListElement::updateItemValues):
+        (WebCore::HTMLOListElement::recalculateItemCount):
+        * rendering/RenderCounter.cpp:
+        (WebCore::previousInPreOrder):
+        (WebCore::previousSiblingOrParent):
+        (WebCore::parentElement):
+        (WebCore::nextInPreOrder):
+        * rendering/RenderListItem.cpp:
+        (WebCore):
+        (WebCore::enclosingList):
+        (WebCore::RenderListItem::nextListItem):
+        (WebCore::previousListItem):
+        (WebCore::RenderListItem::calcValue):
+        (WebCore::RenderListItem::explicitValueChanged):
+        (WebCore::previousOrNextItem):
+        (WebCore::RenderListItem::updateListMarkerNumbers):
+        * rendering/RenderListItem.h:
+        (RenderListItem):
+
 2013-03-26  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] Poor rounding in GraphicsContext::drawLineForText
