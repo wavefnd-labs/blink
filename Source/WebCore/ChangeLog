@@ -1,3 +1,71 @@
+2013-03-25  Tony Chang  <tony@chromium.org>
+
+        Image alt text not included in plain-text version when copying
+        https://bugs.webkit.org/show_bug.cgi?id=11200
+
+        Reviewed by Ryosuke Niwa.
+
+        Add a setting to enable copying image alt text to the clipboard and drag and drop pasteboard.
+        This setting is disabled by default, so each port can enable if they want to match IE10 and
+        Firefox's behavior.
+
+        Test: editing/pasteboard/copy-image-with-alt-text.html
+
+        * editing/Editor.cpp:
+        (WebCore::Editor::cut): Explicitly ask that the selection on the pasteboard as being for the clipboard.
+        (WebCore::Editor::copy): Explicitly ask that the selection on the pasteboard as being for the clipboard.
+        (WebCore::Editor::selectedText): Add a private version of selectedText() that can choose between having image alt text or not.
+        (WebCore::Editor::selectedTextForClipboard): Ask for image alt text if the setting is enabled.
+        * editing/Editor.h:
+        * editing/TextIterator.cpp:
+        (WebCore::TextIterator::TextIterator): Add a bool to keep track of whether or not to emit image alt text.
+        (WebCore::TextIterator::handleReplacedElement): If there's alt text, point the iterator to it.
+        * editing/TextIterator.h:
+        (TextIterator):
+        * editing/mac/EditorMac.mm:
+        (WebCore::Editor::takeFindStringFromSelection): Use the same text as on the clipboard.
+        (WebCore::Editor::writeSelectionToPasteboard): Don't include image alt text since this is
+        used by Services.
+        (WebCore::Editor::stringSelectionForPasteboard): Don't include image alt text since this is
+        used by Services.
+        * page/DragController.cpp:
+        (WebCore::DragController::startDrag): Use image alt text (matches Firefox).
+        * page/Settings.in: Add a setting that disables image alt text by default.
+        * platform/Pasteboard.h:
+        * platform/blackberry/PasteboardBlackBerry.cpp:
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * platform/chromium/ClipboardChromium.cpp:
+        (WebCore::ClipboardChromium::writeRange): Use clipboard text when writing ranges (used by d&d).
+        * platform/chromium/PasteboardChromium.cpp:
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * platform/efl/PasteboardEfl.cpp:
+        (WebCore::Pasteboard::writeSelection): Update function param.
+        * platform/gtk/ClipboardGtk.cpp:
+        (WebCore::ClipboardGtk::writeRange): Use clipboard text when writing ranges (used by d&d).
+        * platform/gtk/PasteboardGtk.cpp:
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * platform/mac/ClipboardMac.mm:
+        (WebCore::ClipboardMac::writeRange): Use clipboard text when writing ranges (used by d&d).
+        * platform/mac/PasteboardMac.mm:
+        (WebCore::Pasteboard::getStringSelection): Use ShouldSerializeSelectedTextForClipboard to determine whether the selected
+        text is for the clipboard or not.
+        (WebCore::Pasteboard::writeSelectionForTypes): Pass ShouldSerializeSelectedTextForClipboard through.
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * platform/qt/ClipboardQt.cpp:
+        (WebCore::ClipboardQt::writeRange): Use clipboard text when writing ranges (used by d&d).
+        * platform/qt/PasteboardQt.cpp:
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * platform/win/ClipboardWin.cpp:
+        (WebCore::ClipboardWin::writeRange): Use clipboard text when writing ranges (used by d&d).
+        * platform/win/PasteboardWin.cpp:
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * platform/wince/PasteboardWinCE.cpp:
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * platform/wx/PasteboardWx.cpp:
+        (WebCore::Pasteboard::writeSelection): Add ShouldSerializeSelectedTextForClipboard parameter.
+        * rendering/RenderImage.h:
+        (WebCore::RenderImage::altText): Add a getter for the alt text.
+
 2013-03-25  Dean Jackson  <dino@apple.com>
 
         Remove autostart hashing code from WebCore
