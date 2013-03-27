@@ -1,3 +1,54 @@
+2013-03-26  Jer Noble  <jer.noble@apple.com>
+
+        Mac: Media Controls always hide time display elements
+        https://bugs.webkit.org/show_bug.cgi?id=113355
+
+        Reviewed by Eric Carlson.
+
+        No new tests; rebaselined existing tests against correct behavior.
+
+        A prior commit set the "min-width:0" property on the time display elements, which, combined
+        with the "-webkit-flex-box:0 0" setting, caused the flex-box container to collapse the width
+        of the elements to zero. To achieve the desired effect of hiding the time display elements,
+        first set the elements' min-width to the desired width, as the new flex-box spec treats the
+        default value of "min-width:auto" as the intrinsic width, and will collapse the text display
+        elements to the intrinsic width of its contained text node.
+
+        The above allows the timeline container to collapse beyond the sum of its childrens'
+        intrinsic width. Create a custom renderer that detects when this happens, and hide the time
+        display controls.
+
+        * css/mediaControls.css:
+        * css/mediaControlsQuickTime.css:
+        (audio::-webkit-media-controls-current-time-display, video::-webkit-media-controls-current-time-display):
+            Set the "min-width:" property to equal the "width:" property.
+        (audio::-webkit-media-controls-time-remaining-display, video::-webkit-media-controls-time-remaining-display):
+            Ditto.
+        * css/mediaControlsChromium.css:
+        (audio::-webkit-media-controls-time-remaining-display, video::-webkit-media-controls-time-remaining-display):
+            Chromium assumes the time display controls are flex-boxes, so make that explicit.
+        * html/shadow/MediaControlElementTypes.cpp: Removed MediaControlTimeDisplayElement::createRenderer().
+        * html/shadow/MediaControlElementTypes.h:
+        (MediaControlTimeDisplayElement): Ditto.
+        * html/shadow/MediaControlElements.cpp:
+        (WebCore::MediaControlTimelineContainerElement::setTimeDisplaysHidden): Added, walks through the 
+            container's children and shows or hides time display elements.
+        (WebCore::MediaControlTimelineContainerElement::createRenderer): Added, creates a RenderMediaControlTimelineContainer.
+        (WebCore::getMediaControlTimeRemainingDisplayElementShadowPseudoId): Added, allow setTimeDisplaysHidden to
+            query against children's shadowPseudoId().
+        (WebCore::MediaControlTimeRemainingDisplayElement::shadowPseudoId): Moved contents to getMediaControlTimeRemainingDisplayElementShadowPseudoId.
+        (WebCore::getMediaControlCurrentTimeDisplayElementShadowPseudoId): Added, allow setTimeDisplaysHidden to
+            query against children's shadowPseudoId().
+        (WebCore::MediaControlCurrentTimeDisplayElement::shadowPseudoId): Moved contents to getMediaControlCurrentTimeDisplayElementShadowPseudoId.
+        * html/shadow/MediaControlElements.h:
+        (MediaControlTimelineContainerElement):
+        * rendering/RenderMediaControlElements.cpp:
+        (WebCore::RenderMediaControlTimelineContainer::RenderMediaControlTimelineContainer): Added, simple constructor.
+        (WebCore::RenderMediaControlTimelineContainer::layout): Detect when the controller's width is greater than
+            a certain value, and show or hide the time display elements in response.
+        * rendering/RenderMediaControlElements.h:
+        (RenderMediaControlTimelineContainer):
+
 2013-03-27  Ilya Tikhonovsky  <loislo@chromium.org>
 
         Web Inspector: CPU profiler. Swap FlameChart with Data Grid.
