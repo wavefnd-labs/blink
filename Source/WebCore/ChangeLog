@@ -1,3 +1,24 @@
+2013-03-27  Zalan Bujtas  <zalan@apple.com>
+
+        REGRESSION(r143102): iframe with percentage height within table with anonymous cell fails.
+        https://bugs.webkit.org/show_bug.cgi?id=113077
+
+        Reviewed by Antti Koivisto.
+        
+        http://www.w3.org/TR/CSS21/visuren.html#anonymous-block-level
+        "Anonymous block boxes are ignored when resolving percentage values that would refer to it:
+        the closest non-anonymous ancestor box is used instead."
+        When figuring out whether auto height needs to be applied on the current box, ignore anonymous
+        ancestors until the first non-anonymous containing block is found. This matches both
+        Firefox and Opera behaviour.
+        
+        Test: fast/replaced/iframe-with-percentage-height-within-table-with-anonymous-table-cell.html
+
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::hasAutoHeightOrContainingBlockWithAutoHeight): Switch from
+        isAnonymousBlock() to isAnonymous() to make sure all anonymous boxes are ignored.
+        Remove isTableCell() check which is a noop as table cell isn't an anonymous block.
+        
 2013-03-27  Pierre Rossi  <pierre.rossi@gmail.com>
 
         [Qt] Add WOFF support when using zlib
