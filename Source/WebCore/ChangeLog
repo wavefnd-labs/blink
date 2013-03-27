@@ -1,3 +1,23 @@
+2013-03-26  Takeshi Yoshino  <tyoshino@chromium.org>
+
+        Make SocketStreamHandle (Chromium port) fully use IPC window in send()
+        https://bugs.webkit.org/show_bug.cgi?id=113304
+
+        Reviewed by Kent Tamura.
+
+        socket_stream of Chromium buffers send data up to 32KiB (exact) bytes.
+
+        However, SocketStreamHandleInternal::send() method now keeps in-flight
+        send data not greater than m_maxPendingSendAllowed - 1 that is
+        32KiB - 1. This means that SocketStreamHandleInternal consumes the
+        buffered data in SocketStreamHandleBase by 32KiB - 1. It makes memory
+        copy operations unaligned unnecessarily. It should just use the
+        allowed size fully.
+
+        * platform/network/chromium/SocketStreamHandle.cpp:
+        (WebCore::SocketStreamHandleInternal::send):
+        (WebCore):
+
 2013-03-26  Hayato Ito  <hayato@chromium.org>
 
         Allow ShadowContents in HitTests by default.
