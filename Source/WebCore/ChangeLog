@@ -1,3 +1,27 @@
+2013-03-27  Sergio Villar Senin  <svillar@igalia.com>
+
+        Inserting a blank (" ") at the end of a line does not insert anything in Overtype mode
+        https://bugs.webkit.org/show_bug.cgi?id=113413
+
+        Reviewed by Ryosuke Niwa.
+
+        Perform a "normal" insert instead of a replace when there is
+        nothing to replace (like at the end of a line) as this case is not
+        supported by the replacing code path. This will allow us to
+        properly rebalance whitespaces in those cases.
+
+        Updated the editing/execCommand/overtype.html test to check also
+        this use case.
+
+        * editing/InsertTextCommand.cpp:
+        (WebCore::InsertTextCommand::setEndingSelectionWithoutValidation):
+        (WebCore::InsertTextCommand::performTrivialReplace):
+        (WebCore::InsertTextCommand::performOverwrite):
+        (WebCore::InsertTextCommand::doApply): use the recently added
+        setEndingSelectionWithoutValidation() to avoid code duplication.
+        * editing/InsertTextCommand.h:
+        (InsertTextCommand):
+
 2013-03-27  Dean Jackson  <dino@apple.com>
 
         [Mac] Use fontName rather than familyName for internal fonts
