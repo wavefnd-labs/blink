@@ -1,3 +1,32 @@
+2013-03-22  Geoffrey Garen  <ggaren@apple.com>
+
+        Honor the setting for whether JavaScript markup is enabled
+        https://bugs.webkit.org/show_bug.cgi?id=113122
+
+        Reviewed by Ryosuke Niwa.
+
+        * dom/ScriptableDocumentParser.cpp:
+        (WebCore::ScriptableDocumentParser::ScriptableDocumentParser): Applied the
+        setting here, so all document parsing would be covered. This is similar
+        to what we do for plug-in stripping.
+
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::insertForeignElement): Fixed a bug where
+        we would insert an SVG script element into the document even in script
+        markup disabled mode.
+
+        (This bug has existed for copy/paste for a long time, but other bugs and
+        quirks in SVG copy/paste papered over it. It's a serious issue now
+        that non-paste clients will rely on this mode.)
+
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::processTokenInForeignContent): Fixed the same
+        bug -- this time in the part of the parser that executes scripts as they
+        parse.
+
+        I adopted the toScriptElement() convention for testing for a script
+        element to match the XML parser.
+
 2013-03-27  Dean Jackson  <dino@apple.com>
 
         Chromium Mac fails to build after r146995 because the new NSFont category
