@@ -1,3 +1,24 @@
+2013-03-27  Dean Jackson  <dino@apple.com>
+
+        [Mac] Use fontName rather than familyName for internal fonts
+        https://bugs.webkit.org/show_bug.cgi?id=113392
+        <rdar://problem/13474743>
+
+        Reviewed by Enrica Casucci.
+
+        Some internal fonts on OS X have a family name that
+        isn't listed in availableFontFamilies. In this case
+        we should use the font name rather than the family
+        name when looking for a match.
+
+        * platform/mac/ThemeMac.h: NSFont category to provide a web-friendly family name.
+        * platform/mac/ThemeMac.mm:
+        (-[NSFont webCoreFamilyName]): Returns the font name for internal fonts, otherwise the family name.
+        (WebCore::ThemeMac::controlFont):
+        * rendering/RenderThemeMacShared.mm: Use the webCoreFamilyName.
+        (WebCore::RenderThemeMacShared::systemFont): Ditto.
+        (WebCore::RenderThemeMacShared::setFontFromControlSize): Ditto.
+
 2013-03-26  Jer Noble  <jer.noble@apple.com>
 
         Mac: Media Controls always hide time display elements
