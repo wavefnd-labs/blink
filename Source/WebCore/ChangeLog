@@ -1,3 +1,45 @@
+2013-03-26  Antti Koivisto  <antti@apple.com>
+
+        Test if non-immediate descendants obscure background
+        https://bugs.webkit.org/show_bug.cgi?id=113137
+
+        Reviewed by Simon Fraser.
+
+        The current obscuration test only covers immediate children. We can find more cases by looking deeper into descendants.
+        
+        The patch makes the test sufficiently smart to stop a heavy fully obscured gif animation on micrsoft.com.
+
+        * loader/cache/CachedImage.cpp:
+        (WebCore::CachedImage::animationAdvanced):
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::styleDidChange):
+        
+            Invalidate parents to max test depth.
+
+        (WebCore::RenderBox::backgroundPaintedExtent):
+        
+            Background painting is pixel snapped.
+
+        (WebCore::isCandidateForOpaquenessTest):
+        (WebCore::RenderBox::foregroundIsKnownToBeOpaqueInRect):
+        
+            Separate foreground testing and make it recursive.
+            Add fast bailout for common static positioned case.
+            Remove maximum child count, the fast bailouts should prevent long tests.
+            Add maximum depth so we know how deep we need to invalidate in styleDidChange.
+
+        (WebCore::RenderBox::computeBackgroundIsKnownToBeObscured):
+        (WebCore):
+        * rendering/RenderBox.h:
+        (RenderBox):
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::foregroundIsKnownToBeOpaqueInRect):
+        (WebCore):
+        (WebCore::RenderImage::computeBackgroundIsKnownToBeObscured):
+        
+        * rendering/RenderImage.h:
+        (RenderImage):
+
 2013-03-26  Benjamin Poulain  <bpoulain@apple.com>
 
         Regression (r145601): out-of-bounds read in line breaking / new width cache
