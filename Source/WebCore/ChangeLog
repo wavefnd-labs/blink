@@ -1,3 +1,37 @@
+2013-03-27  Kondapally Kalyan  <kalyan.kondapally@intel.com>
+
+        [CoordGfx] Support to share GraphicsSurface flags with client.
+        https://bugs.webkit.org/show_bug.cgi?id=112982
+
+        Reviewed by Noam Rosenthal.
+
+        Covered by existing WebGL tests.
+
+        This patch adds support to pass GraphicsSurface flags during it's client creation.
+        This would be helpful to determine cases when blending can be disabled on client
+        side i.e When AlphaSupport is disabled during Graphics Surface creation.
+        With GLX, we rely on Window to provide us with necessary information on client side.
+        This might not be the case on other platforms or when not using Window on X.
+        This patch doesn't change original behaviour of creating GraphicsSurface client
+        with default flags GraphicsSurface::SupportsTextureTarget and GraphicsSurface::SupportsSharing.
+
+        * platform/graphics/texmap/TextureMapperPlatformLayer.h:
+        (WebCore::TextureMapperPlatformLayer::graphicsSurfaceFlags):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.cpp:
+        (WebCore::CoordinatedGraphicsLayer::createCanvasIfNeeded):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsScene.cpp:
+        (WebCore::CoordinatedGraphicsScene::createCanvasIfNeeded):
+        * platform/graphics/texmap/coordinated/CoordinatedGraphicsState.h:
+        (CoordinatedGraphicsLayerState):
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (WebCore):
+        (WebCore::GraphicsContext3DPrivate::graphicsSurfaceFlags):
+        * platform/graphics/efl/GraphicsContext3DPrivate.h:
+        (GraphicsContext3DPrivate):
+        * platform/graphics/surfaces/efl/GraphicsSurfaceCommon.cpp:
+        (WebCore::GraphicsSurfacePrivate::GraphicsSurfacePrivate):
+        (WebCore::GraphicsSurfacePrivate::initializeClient):
+
 2013-03-26  Takashi Sakamoto  <tasak@google.com>
 
         [shadow] styleForText should consider the case where parent node has no style
