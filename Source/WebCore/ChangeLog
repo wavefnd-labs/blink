@@ -1,3 +1,114 @@
+2013-03-27  Beth Dakin  <bdakin@apple.com>
+
+        Need WK2 API to give a WebView a header and footer
+        https://bugs.webkit.org/show_bug.cgi?id=113352
+        -and corresponding-
+        <rdar://problem/13383835>
+
+        Reviewed by Simon Fraser.
+
+        This API will require RenderLayerCompositor to keep layers for the header and 
+        footer when the exist. It also requires the scrolling machinery to know that the 
+        size of the scrollable area will differ from the contentsSize when there is a 
+        header or footer.
+
+        setWantsLayerForHeader() and setWantsLayerForFooter() return GraphicsLayers to 
+        WK2. setHeaderHeight() and setFooterHeight() set the header and footer heights
+        respectively.
+        * WebCore.exp.in:
+        * page/FrameView.h:
+        (FrameView):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::FrameView):
+        (WebCore::FrameView::setWantsLayerForHeader):
+        (WebCore::FrameView::setWantsLayerForFooter):
+        (WebCore::FrameView::setHeaderHeight):
+        (WebCore::FrameView::setFooterHeight):
+
+        Should use totalContentsSize() instead of contentsSize().
+        (WebCore::FrameView::windowClipRect):
+        (WebCore::FrameView::isScrollable):
+        * page/SpatialNavigation.cpp:
+        (WebCore::canScrollInDirection):
+
+        This should also use totalContentsSize() instead of contentsSize(), and while 
+        we're at it, re-name the variable and function names in the scrolling tree code 
+        from contentsSize to totalContentsSize.
+        * page/scrolling/ScrollingStateScrollingNode.cpp:
+        (WebCore::ScrollingStateScrollingNode::ScrollingStateScrollingNode):
+        (WebCore::ScrollingStateScrollingNode::setTotalContentsSize):
+        (WebCore::ScrollingStateScrollingNode::dumpProperties):
+        * page/scrolling/ScrollingStateScrollingNode.h:
+        (WebCore::ScrollingStateScrollingNode::totalContentsSize):
+        (ScrollingStateScrollingNode):
+        * page/scrolling/ScrollingTreeScrollingNode.cpp:
+        (WebCore::ScrollingTreeScrollingNode::updateBeforeChildren):
+        * page/scrolling/ScrollingTreeScrollingNode.h:
+        (WebCore::ScrollingTreeScrollingNode::totalContentsSize):
+        (ScrollingTreeScrollingNode):
+        * page/scrolling/mac/ScrollingCoordinatorMac.h:
+        (ScrollParameters):
+        * page/scrolling/mac/ScrollingCoordinatorMac.mm:
+        (WebCore::ScrollingCoordinatorMac::frameViewLayoutUpdated):
+        (WebCore::ScrollingCoordinatorMac::setScrollParametersForNode):
+        * page/scrolling/mac/ScrollingTreeScrollingNodeMac.mm:
+        (WebCore::ScrollingTreeScrollingNodeMac::updateAfterChildren):
+        (WebCore::ScrollingTreeScrollingNodeMac::setScrollLayerPosition):
+        (WebCore::ScrollingTreeScrollingNodeMac::maximumScrollPosition):
+
+        Use totalContentsSize() instead of contentsSize().
+        * platform/ScrollView.cpp:
+        (WebCore::ScrollView::maximumScrollPosition):
+        (WebCore::ScrollView::setScrollOffset):
+        (WebCore::ScrollView::overhangAmount):
+        (WebCore::ScrollView::updateScrollbars):
+        (WebCore::ScrollView::calculateOverhangAreasForPainting):
+
+        scrollOffset() represents the offset within the totalContentsSize, but that is 
+        not what we need here. So subtract out the headerHeight() for the appropriate 
+        value.
+        (WebCore::ScrollView::windowToContents):
+        (WebCore::ScrollView::contentsToWindow):
+
+        Use totalContentsSize() instead of contentsSize().
+        * platform/ScrollableArea.cpp:
+        (WebCore::ScrollableArea::maximumScrollPosition):
+        (WebCore):
+        (WebCore::ScrollableArea::totalContentsSize):
+        * platform/ScrollableArea.h:
+        (WebCore::ScrollableArea::headerHeight):
+        (WebCore::ScrollableArea::footerHeight):
+        (ScrollableArea):
+        * platform/mac/ScrollAnimatorMac.mm:
+        (WebCore::ScrollAnimatorMac::adjustScrollPositionIfNecessary):
+        (WebCore::ScrollAnimatorMac::pinnedInDirection):
+        * platform/mac/ThemeMac.mm:
+        (WebCore::ThemeMac::ensuredView):
+
+        The rootContentLayer needs to be offset by the headerHeight().
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::updateRootLayerPosition):
+
+        New member variables m_layerForHeader and m_layerForFooter. This code properly 
+        creates and manages them.
+        (WebCore::RenderLayerCompositor::updateLayerForBottomOverhangArea):
+        (WebCore::RenderLayerCompositor::updateLayerForHeader):
+        (WebCore):
+        (WebCore::RenderLayerCompositor::updateLayerForFooter):
+        (WebCore::RenderLayerCompositor::computeFixedViewportConstraints):
+        (WebCore::RenderLayerCompositor::reportMemoryUsage):
+        * rendering/RenderLayerCompositor.h:
+        (RenderLayerCompositor):
+
+        Test infrastructure. 
+        * testing/Internals.cpp:
+        (WebCore::Internals::resetToConsistentState):
+        (WebCore::Internals::setHeaderHeight):
+        (WebCore):
+        (WebCore::Internals::setFooterHeight):
+        * testing/Internals.h:
+        * testing/Internals.idl:
+
 2013-03-27  Arnaud Renevier  <a.renevier@sisa.samsung.com>
 
         javascriptcore bindings do not check exception after calling valueToStringWithNullCheck
