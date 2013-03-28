@@ -1,3 +1,52 @@
+2013-03-27  Noel Gordon  <noel.gordon@gmail.com>
+
+        Add webp image color profile support
+        https://bugs.webkit.org/show_bug.cgi?id=113184
+
+        Reviewed by Eric Seidel.
+
+        Requires libwebp version 0.3.0 (decoder ABI version 0x201). For images
+        with an ICC color profile chunk, poll the incremental decoder for the
+        current decoded height with the WebPIDecGetRGB() API and color correct
+        any newly decoded rows in-situ in the frame buffer.
+
+        Note: the ICC chunk appears before the encoded image frame in the webp
+        encoding (RIFF container) format. When the incremental decoder outputs
+        decoded pixels, enough encoded data has arrived to read the entire ICC
+        color profile data chunk.
+
+        Tests: fast/images/webp-color-profile-lossless.html
+               fast/images/webp-color-profile-lossy-alpha.html
+               fast/images/webp-color-profile-lossy.html
+
+        * platform/image-decoders/webp/WEBPImageDecoder.cpp:
+        (WebCore::WEBPImageDecoder::WEBPImageDecoder):
+        (WebCore::WEBPImageDecoder::~WEBPImageDecoder): Call clear().
+        (WebCore):
+        (WebCore::WEBPImageDecoder::clear):
+        Added. Helper to clean up the webp decoder and color transform members.
+        (WebCore::WEBPImageDecoder::createColorTransform):
+        Create m_transform using the supplied profile memory data. Note that
+        the |deviceProfile| is not owned, but the |inputProfile| temporary is
+        so release it here with qcms_release_profile().
+        (WebCore::WEBPImageDecoder::readColorProfile):
+        Called once only when the decoder begins to output decoded rows of an
+        image containing an ICC chunk, to read the ICC color profile data from
+        the encoded data stream, verify it, and use it to create m_transform.
+        (WebCore::WEBPImageDecoder::applyColorProfile):
+        Since there is no row callback in libwebp, poll for the decoded height
+        of the image so far. If new rows are decoded, color correct the pixels
+        of those new rows and re-write them back into the frame buffer using
+        buffer.setRGBA() to 1) alpha pre-multiply the pixels if needed, and 2)
+        shuffle the pixel bytes into the platform's RGBA pixel endian-ness.
+        (WebCore::WEBPImageDecoder::decode):
+        If the container format indicates the image has an ICC color profile,
+        decode the image to RGBA format for subsequent input to the QCMS color
+        correction library in applyColorProfile().
+        * platform/image-decoders/webp/WEBPImageDecoder.h:
+        (WEBPImageDecoder):
+        (WebCore::WEBPImageDecoder::colorTransform): m_transform getter.
+
 2013-03-27  Jun Jiang  <jun.a.jiang@intel.com>
 
         Refactor validation checks for texture uploads
