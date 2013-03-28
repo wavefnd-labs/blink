@@ -1,3 +1,28 @@
+2013-03-28  Scott Graham  <scottmg@chromium.org>
+
+        Move preprocessing of idl to pre-pass for gyp
+        https://bugs.webkit.org/show_bug.cgi?id=113448
+
+        Reviewed by Tony Chang.
+
+        Moves the preprocessor invocations when parsing IDL files to a
+        pre-pass to avoid reinvocations when IDLs are referenced from others.
+        This reduces the number of invocations of the preprocessor from 20071
+        to 633, which reduces the runtime from 12m30 to 1m (on a Windows box).
+
+        No new tests, this is a build time improvement, and shouldn't have any
+        visible effect.
+
+        * WebCore.gyp/WebCore.gyp:
+        * bindings/scripts/CodeGenerator.pm:
+        (ParseInterface):
+        * bindings/scripts/IDLParser.pm:
+        (Parse):
+        * bindings/scripts/generate-bindings.pl:
+        * bindings/scripts/generate-preprocessed-idls.pl: Added.
+        * bindings/scripts/preprocessor.pm:
+        (applyPreprocessor):
+
 2013-03-28  Alok Priyadarshi  <alokp@chromium.org>
 
         RenderBox::backgroundIsKnownToBeOpaqueInRect may be wrong for theme-painted elements
