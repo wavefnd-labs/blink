@@ -1,3 +1,39 @@
+2013-03-28  Mike West  <mkwst@chromium.org>
+
+        X-Frame-Options: Multiple headers are ignored completely.
+        https://bugs.webkit.org/show_bug.cgi?id=113387
+
+        Reviewed by Nate Chapin.
+
+        If a server sends multiple 'X-Frame-Options' headers, we end up with a
+        value like 'SAMEORIGIN, SAMEORIGIN'. Currently, we're treating that as
+        invalid, and ignoring the header. It would be safer to follow Gecko's
+        lead[1] by:
+
+        - Folding duplicated entries into their common value (that is:
+          'sameorigin, sameorigin' -> 'sameorigin').
+
+        - Failing closed in the case of conflicts (that is:
+          'sameorigin, allowall' -> 'deny').
+
+        [1]: https://bugzilla.mozilla.org/show_bug.cgi?id=761655
+
+        Tests: http/tests/security/XFrameOptions/x-frame-options-multiple-headers-conflict.html
+               http/tests/security/XFrameOptions/x-frame-options-multiple-headers-sameorigin-allow.html
+               http/tests/security/XFrameOptions/x-frame-options-multiple-headers-sameorigin-deny.html
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::shouldInterruptLoadForXFrameOptions):
+            Call out to parseXFrameOptionsHeader to get the header's disposition
+            and deal with each case in a switch statement for clarity. Add a new
+            console warning for the conflict case described above.
+        * platform/network/HTTPParsers.cpp:
+        (WebCore::parseXFrameOptionsHeader):
+        * platform/network/HTTPParsers.h:
+            Move X-Frame-Options parsing out into HTTPParsers, as it's getting
+            more and more complicated. To do this, the patch defines a new enum
+            to pass around the header's disposition.
+
 2013-03-28  Mihnea Ovidenie  <mihnea@adobe.com>
 
         [CSSRegions] Consolidate use of RenderRegion::isValid
