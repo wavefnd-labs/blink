@@ -1,3 +1,23 @@
+2013-03-28  Nate Chapin  <japhet@chromium.org>
+
+        Don't grant local content permissions for appcache loads.
+        https://bugs.webkit.org/show_bug.cgi?id=112542
+
+        Reviewed by Antti Koivisto.
+
+        No new tests, fixing http/tests/appcache/local-content.html
+
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::DocumentLoader):
+        (WebCore::DocumentLoader::commitData): Don't grant local load permissions
+            to all SubstituteData loads, only give them to loads that were SubstituteData
+            loads at the time of DocumentLoader construction. This constitutes all
+            SubstituteData loads except those triggered by appcache.
+        * loader/DocumentLoader.h:
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::didBeginDocument): Move granting local load
+            permissions for SubstituteData loads to DocumentLoader::commitData().
+
 2013-03-28  Mike West  <mkwst@chromium.org>
 
         X-Frame-Options: Blocked resources should fire load events.
