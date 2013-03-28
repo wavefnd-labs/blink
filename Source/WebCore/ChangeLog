@@ -1,3 +1,41 @@
+2013-03-27  KyungTae Kim <ktf.kim@samsung.com> and Yongjun Zhang  <yongjun_zhang@apple.com>
+
+        Add a settings to disallow initializing background-size if background shorthand doesn't include it.
+        https://bugs.webkit.org/show_bug.cgi?id=113363
+
+        Reviewed by David Kilzer.
+
+        This is based on KyungTae Kim's patch in https://bugs.webkit.org/show_bug.cgi?id=97761.  Many legacy sites set
+        background-size first and then set background for setting background-image.  For backward-compatibility
+        in some WebKit based clients, if 'background' shorthand have no 'background-size' attribute, we could add
+        a settings to let the css parser not initialize 'background-size'.
+
+        Test: fast/backgrounds/background-shorthand-after-set-backgroundSize.html
+
+        * css/CSSParser.cpp:
+        (WebCore::CSSParserContext::CSSParserContext): initialize useLegacyBackgroundSizeShorthandBehavior.
+        (WebCore::operator==):
+        (WebCore::CSSParser::useLegacyBackgroundSizeShorthandBehavior): add a method to return if we want background-size
+            to be initialized by background shorthand.
+        (WebCore):
+        (WebCore::CSSParser::parseFillShorthand): don't initialize background-size in background shorthand if we have
+            useLegacyBackgroundSizeShorthandBehavior set to true.
+        * css/CSSParser.h:
+        (CSSParser):
+        * css/CSSParserMode.h: add member useLegacyBackgroundSizeShorthandBehavior to CSSParserContext.
+        (CSSParserContext):
+        * page/Settings.in: initialize useLegacyBackgroundSizeShorthandBehavior to false.
+        * testing/InternalSettings.cpp:
+        (WebCore::InternalSettings::Backup::Backup): add the new settings useLegacyBackgroundSizeShorthandBehavior to Backup.
+        (WebCore::InternalSettings::Backup::restoreTo): restore useLegacyBackgroundSizeShorthandBehavior from Backup.
+        (WebCore::InternalSettings::setUseLegacyBackgroundSizeShorthandBehavior):
+        (WebCore):
+        * testing/InternalSettings.h:
+        (Backup):
+        (InternalSettings):
+        * testing/InternalSettings.idl: add a JS testing API setUseLegacyBackgroundSizeShorthandBehavior to turn on/off
+            the new settings.
+
 2013-03-27  Florin Malita  <fmalita@chromium.org>
 
         Remove unused RenderLayer::renderBox{X,Y} methods
