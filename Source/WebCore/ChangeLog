@@ -1,5 +1,35 @@
 2013-03-28  Vsevolod Vlasov  <vsevik@chromium.org>
 
+        Web Inspector: ResourceScriptFile should check if resource content really matches VM script when determining hasDiverged state.
+        https://bugs.webkit.org/show_bug.cgi?id=113488
+
+        Reviewed by Pavel Feldman.
+
+        Enabled support for checking that file content matches VM script in ResourceScriptFile (For script resources only).
+        This check is never done before content is loaded in corresponding editor to avoid regressing performance.
+        File - script content matching is done bearing in mind sourceURLs. 
+        Live edit keeps sourceURL in script content now even if it is not present in file's content.
+
+        * inspector/front-end/JavaScriptSourceFrame.js:
+        (WebInspector.JavaScriptSourceFrame.prototype._updateScriptFile):
+        (WebInspector.JavaScriptSourceFrame.prototype.onTextEditorContentLoaded):
+        * inspector/front-end/LiveEditSupport.js:
+        (WebInspector.LiveEditScriptFile.prototype.checkMapping):
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping.prototype._bindUISourceCodeToScripts):
+        (WebInspector.ScriptFile.prototype.checkMapping):
+        (WebInspector.ResourceScriptFile):
+        (WebInspector.ResourceScriptFile.prototype._workingCopyCommitted):
+        (WebInspector.ResourceScriptFile.prototype._isDiverged):
+        (WebInspector.ResourceScriptFile.prototype._sourceMatchesScriptSource):
+        (WebInspector.ResourceScriptFile.prototype._sourceEndsWithSourceURL):
+        (WebInspector.ResourceScriptFile.prototype.checkMapping.callback):
+        (WebInspector.ResourceScriptFile.prototype.checkMapping):
+        * inspector/front-end/ScriptSnippetModel.js:
+        (WebInspector.SnippetScriptFile.prototype.checkMapping):
+
+2013-03-28  Vsevolod Vlasov  <vsevik@chromium.org>
+
         Web Inspector: Simplify ResourceScriptFile so that it stores hasDiverged state in it.
         https://bugs.webkit.org/show_bug.cgi?id=113489
 
