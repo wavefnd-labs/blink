@@ -1,3 +1,37 @@
+2013-03-27  Simon Fraser  <simon.fraser@apple.com>
+
+        Add a way to update GraphicsLayerCA visibleRects without having to do a flush
+        https://bugs.webkit.org/show_bug.cgi?id=113459
+
+        Reviewed by Tim Horton.
+        
+        Some platforms need to update TiledBacking visible rects from
+        outside of WebKit, for example if they use delegated scrolling.
+        They want to avoid forcing layout to be up-to-date when doing this.
+        
+        Currently, updating the visibleRect happens when the GraphicsLayerCA
+        layer are being flushed, but that makes some assumptions about
+        layout being up-to-date.
+        
+        To fix this, add a light-weight pass over the layer tree that
+        uses TransformState to compute the visibleRect for each
+        layer, and only if the visibleRect would cause a change in the
+        tiles in a TiledBacking trigger a layer flush.
+
+        * platform/graphics/GraphicsLayer.h:
+        (WebCore::GraphicsLayer::recomputeVisibleRects):
+        * platform/graphics/TiledBacking.h:
+        * platform/graphics/ca/GraphicsLayerCA.cpp:
+        (WebCore::GraphicsLayerCA::recursiveComputeVisibleRect):
+        (WebCore::GraphicsLayerCA::recomputeVisibleRects):
+        (WebCore::GraphicsLayerCA::computeVisibleRect):
+        * platform/graphics/ca/GraphicsLayerCA.h:
+        * platform/graphics/ca/mac/TileController.h:
+        * platform/graphics/ca/mac/TileController.mm:
+        (WebCore::TileController::tilesWouldChangeForVisibleRect):
+        (WebCore::TileController::computeTileCoverageRect):
+        (WebCore::TileController::revalidateTiles):
+
 2013-03-27  Philip Rogers  <pdr@google.com>
 
         Rename toScriptElement -> toScriptElementIfPossible
