@@ -1,3 +1,25 @@
+2013-03-28  ChangSeok Oh  <changseok.oh@collabora.com>
+
+        [GTK][AC] Animating layer disappears while running with clutter backend
+        https://bugs.webkit.org/show_bug.cgi?id=110470
+
+        Reviewed by Gustavo Noronha Silva.
+
+        The reason of this issue is that clutter_actor_remove_child leads to stopping animations
+        of child actor. ClutterActor's animation could be defined only when it has a parent actor.
+        So we should avoid the case calling the api as much as we can. At least we don't
+        need to reset a actor's parent at all if the current parent is same with new one.
+        If we can't avoid invoking clutter_actor_remove_child for an animating actor, we may apply
+        a more complicated way to keep the animation. But I haven't faced such a case yet.
+
+        Covered by existing animation tests.
+
+        * platform/graphics/clutter/GraphicsLayerActor.cpp:
+        (graphicsLayerActorSetSublayers):
+        * platform/graphics/clutter/GraphicsLayerClutter.cpp:
+        (WebCore::GraphicsLayerClutter::recursiveCommitChanges):
+        (WebCore::GraphicsLayerClutter::updateSublayerList):
+
 2013-03-28  Xianzhu Wang  <wangxianzhu@chromium.org>
 
         Non-painting fixed elements should not cause repaints on scroll
