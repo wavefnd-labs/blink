@@ -1,3 +1,32 @@
+2013-03-28  Hajime Morrita  <morrita@google.com>
+
+        Custom Elements: should support non-HTML namespaces.
+        https://bugs.webkit.org/show_bug.cgi?id=111693
+
+        Reviewed by Dimitri Glazkov.
+
+        Some existing code assumes that the element extends HTMLElements.
+        This change allow it to extend from Element. Note that the
+        namespace URI of a custom element is determined by given element
+        prototype: An element will have XHTML namespace if its prototype
+        chain includes HTMLElements, SVGElement leads SVG namespace and
+        null otherwise, respectively.
+
+        Test: fast/dom/custom/document-register-namespace.html
+
+        * bindings/v8/CustomElementHelpers.cpp:
+        (WebCore::hasValidPrototypeChainFor): Factored out from isValidPrototypeParameter()
+        (WebCore::CustomElementHelpers::isValidPrototypeParameter): Extend to support non HTMLElement prototype
+        (WebCore::CustomElementHelpers::findLocalName): Support non-HTML element names.
+        * bindings/v8/CustomElementHelpers.h:
+        (CustomElementHelpers):
+        * dom/CustomElementConstructor.cpp:
+        (WebCore::CustomElementConstructor::createElementInternal):
+        * dom/CustomElementRegistry.cpp:
+        (WebCore::CustomElementRegistry::registerElement): No longer hard-codes namespace and picks one based on the prototype value.
+        * dom/CustomElementRegistry.h:
+        (CustomElementRegistry):
+
 2013-03-28  Hans Muller  <hmuller@adobe.com>
 
         [CSS Exclusions] Add support for the simple case of padding a polygonal shape-inside
