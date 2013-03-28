@@ -1,3 +1,36 @@
+2013-03-28  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exclusions] Add support for the simple case of padding a polygonal shape-inside
+        https://bugs.webkit.org/show_bug.cgi?id=112592
+
+        Reviewed by Dirk Schulze.
+
+        First pass at computing the padded or inset boundary of a polygon.  This version does not handle
+        self-intersecting polygons, or values of shape-padding large enough to change the shape of the
+        original polygon. The implementation computes an offset edge for each polgon edge, where the offset
+        edge is parallel to the original edge and separated by shape-padding. The padded polygon's vertices
+        are the intersections of each pair of adjacent offset edges. When adjacent offset edges do not intersect,
+        because they share a reflex vertex in the original polygon, an approximation to a circular arc
+        connects the offset edges.
+
+        Tests: fast/exclusions/shape-inside/shape-inside-polygon-padding-001.html
+               fast/exclusions/shape-inside/shape-inside-polygon-padding-002.html
+               fast/exclusions/shape-inside/shape-inside-polygon-padding-003.html
+
+        * rendering/ExclusionPolygon.cpp:
+        (WebCore::isReflexVertex): Just moved this function earlier in the file.
+        (WebCore::inwardEdgeNormal): Unit vector that's perpindicular to the edge and that points inwards.
+        (WebCore::outwardEdgeNormal): Unit vector that's perpindicular to the edge and that points outwards.
+        (WebCore::appendArc): Append a linear approximation to a circular arc to a vector of vertices.
+        (WebCore::computeShapePaddingBounds): Return a polygon whose edges are all inset by shape-padding from m_polygon.
+        (WebCore::computeShapeMarginBounds): Just a stub, see bug 112917.
+        (WebCore::ExclusionPolygon::shapePaddingBounds): Lazily use computeShapePaddingBounds() to initialize m_paddingBounds.
+        (WebCore::ExclusionPolygon::shapeMarginBounds): Lazily use computeShapeMarginBounds() to initialize m_marginBounds.
+        (WebCore::ExclusionPolygon::getIncludedIntervals): Now based on the value of shapePaddingBounds().
+        (WebCore::ExclusionPolygon::firstIncludedIntervalLogicalTop): Now based on the value of shapePaddingBounds().
+        * rendering/ExclusionPolygon.h:
+        (WebCore::ExclusionPolygon::ExclusionPolygon):
+
 2013-03-28  Chris Hutten-Czapski  <chutten@blackberry.com>
 
         [BlackBerry] Handle EXIF orientation for ImageDocuments
