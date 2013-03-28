@@ -1,3 +1,33 @@
+2013-03-27  Ilya Tikhonovsky  <loislo@chromium.org>
+
+        Web Inspector: Timeline. Refresh is slow when user drags the overview window.
+        https://bugs.webkit.org/show_bug.cgi?id=113371
+
+        Reviewed by Pavel Feldman.
+
+        The root of problem is the 300ms delay in scheduleRefresh method.
+        It was introduced for the case when we add a huge number of records per second.
+        The scheduleRefresh was written such a way that refresh happened immediately
+        only for the scrolling operations. Actually we would like to see fast
+        refresh every time when it is forced by an user action.
+
+        In this patch additional flag newRecordWasAdded was added to the
+        _invalidateAndScheduleRefresh. I made it mandatory because the function
+        is also used as a callback for an event and it is easy to make a mistake and
+        interpret the event as the flag.
+
+        * inspector/front-end/TimelinePanel.js:
+        (WebInspector.TimelinePanel.prototype._onCategoryCheckboxClicked):
+        (WebInspector.TimelinePanel.prototype._durationFilterChanged):
+        (WebInspector.TimelinePanel.prototype._repopulateRecords):
+        (WebInspector.TimelinePanel.prototype._onTimelineEventRecorded):
+        (WebInspector.TimelinePanel.prototype._onRecordsCleared):
+        (WebInspector.TimelinePanel.prototype._invalidateAndScheduleRefresh):
+        (WebInspector.TimelinePanel.prototype._scheduleRefresh):
+        (WebInspector.TimelinePanel.prototype._revealRecord):
+        (WebInspector.TimelinePanel.prototype._refreshRecords):
+        (WebInspector.TimelinePanel.prototype.performFilter):
+
 2013-03-27  Keishi Hattori  <keishi@webkit.org>
 
         Dragging to edge should always snap to min/max.
