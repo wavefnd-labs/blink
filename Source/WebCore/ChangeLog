@@ -1,3 +1,20 @@
+2013-03-28  Zoltan Horvath  <zoltan@webkit.org>
+
+        [CSS Exclusions][CSS Regions] Block children do not layout inline content correctly in a region with shape-inside set
+        https://bugs.webkit.org/show_bug.cgi?id=112177
+
+        Reviewed by David Hyatt.
+
+        When we had two multiple regions and a shape-inside was applied on the second region, but not on the first region and the content contained
+        paragraphs, the content was pushed down almost to the bottom in the second region. In a flow thread this behavior caused by the lack of the 
+        proper updating of absoluteLogicalTop in RenderBlock::layoutRunsAndFloatsInRange function.
+
+        Tests: fast/regions/shape-inside/shape-inside-on-additional-regions.html
+               fast/regions/shape-inside/shape-inside-on-regions.html
+
+        * rendering/RenderBlockLineLayout.cpp:
+        (WebCore::RenderBlock::layoutRunsAndFloatsInRange): Update the value of absoluteLogicalTop in every run when we are in a flow thread.
+
 2013-03-28  Arnaud Renevier  <a.renevier@sisa.samsung.com>
 
         exceptions are not checked after toInt32 calls in bindings.
