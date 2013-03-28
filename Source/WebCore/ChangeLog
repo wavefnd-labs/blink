@@ -1,3 +1,28 @@
+2013-03-27  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Shift clicking on an element with -webkit-user-select: all doesn't extend selection
+        https://bugs.webkit.org/show_bug.cgi?id=113270
+
+        Reviewed by Enrica Casucci.
+
+        The bug was caused by updateSelectionForMouseDownDispatchingSelectStart always replacing selection whenever
+        the target node was inside an element with -webkit-suer-select even when we were attemping to extend selection
+        in handleMousePressEventSingleClick.
+
+        Fixed the bug by extracting this logic as a separate function (expandSelectionToRespectUserSelectAll) and deploying
+        it in handleMousePressEventSingleClick to extend selection as needed.
+
+        Test: editing/selection/user-select-all-with-shift.html
+
+        * page/EventHandler.cpp:
+        (WebCore::expandSelectionToRespectUserSelectAll): Extracted from updateSelectionForMouseDownDispatchingSelectStart.
+        (WebCore::EventHandler::updateSelectionForMouseDownDispatchingSelectStart):
+        (WebCore::EventHandler::selectClosestWordFromHitTestResult):
+        (WebCore::EventHandler::selectClosestWordOrLinkFromMouseEvent):
+        (WebCore::EventHandler::handleMousePressEventTripleClick):
+        (WebCore::EventHandler::handleMousePressEventSingleClick): Adjust "pos" as needed when extending selection.
+        Also use shouldConsiderSelectionAsDirectional() instead of manually peeking editingBehaviorType while we're at it.
+
 2013-03-27  Zalan Bujtas  <zalan@apple.com>
 
         REGRESSION(r143102): iframe with percentage height within table with anonymous cell fails.
