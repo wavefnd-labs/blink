@@ -1,3 +1,26 @@
+2013-03-28  Arpita Bahuguna  <a.bah@samsung.com>
+
+        Regression: Crash when selecting Hebrew and numbers in a list
+        https://bugs.webkit.org/show_bug.cgi?id=111894
+
+        Reviewed by Ryosuke Niwa.
+
+        There is a crash when trying to click/select an anonymous
+        renderer.
+
+        This is a regression due to r143313 which tries to add border/padding
+        to the computed caret rect in RenderBox::localCaretRect().
+        The patch calls on the node() method for the corresponding
+        renderer. For an anonymous renderer though, node() returns
+        null. Since no check had been added for this, a crash occurs when
+        caret rect for an anonymous renderer is being computed.
+
+        Test: editing/selection/click-on-anonymous-content-crash.html
+
+        * rendering/RenderBox.cpp:
+        (WebCore::RenderBox::localCaretRect):
+        Added a check for validating the return from the node() call.
+
 2013-03-28  Mike West  <mkwst@chromium.org>
 
         X-Frame-Options: Multiple headers are ignored completely.
