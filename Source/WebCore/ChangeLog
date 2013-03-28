@@ -1,3 +1,129 @@
+2013-03-28  Matt Falkenhagen  <falken@chromium.org>
+
+        Refactoring: Replace Element::disabled and isEnabledFormControl with isDisabledFormControl
+        https://bugs.webkit.org/show_bug.cgi?id=113273
+
+        Reviewed by Kent Tamura.
+
+        Element::disabled is about form controls and Element::isEnabledFormControl
+        is redundant with it, so replace them with a single function
+        Element::isDisabledFormControl.
+
+        No new tests, there should be no behavior change.
+
+        * accessibility/AccessibilityListBox.cpp:
+        (WebCore::AccessibilityListBox::canSetSelectedChildrenAttribute):
+        * accessibility/AccessibilityListBoxOption.cpp:
+        (WebCore::AccessibilityListBoxOption::canSetSelectedAttribute):
+        * accessibility/AccessibilityMenuList.cpp:
+        (WebCore::AccessibilityMenuList::canSetFocusAttribute):
+        * accessibility/AccessibilityMenuListOption.cpp:
+        (WebCore::AccessibilityMenuListOption::isEnabled):
+        * accessibility/AccessibilityNodeObject.cpp:
+        (WebCore::AccessibilityNodeObject::isEnabled):
+        (WebCore::AccessibilityNodeObject::actionElement):
+        (WebCore::AccessibilityNodeObject::canSetFocusAttribute):
+        * css/SelectorChecker.cpp:
+        (WebCore::SelectorChecker::checkOne):
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::canShareStyleWithControl):
+        * dom/Element.cpp:
+        (WebCore::Element::isDisabledFormControl):
+        * dom/Element.h:
+        (Element):
+        (WebCore::isDisabledFormControl): Add helper function for convenience.
+        (WebCore):
+        * dom/EventDispatcher.cpp:
+        (WebCore::EventDispatcher::dispatchSimulatedClick):
+        * dom/GestureEvent.cpp:
+        (WebCore::GestureEventDispatchMediator::dispatchEvent):
+        * dom/MouseEvent.cpp:
+        (WebCore::MouseEventDispatchMediator::dispatchEvent):
+        * dom/Node.cpp:
+        (WebCore::Node::handleLocalEvents):
+        (WebCore::Node::willRespondToMouseMoveEvents):
+        (WebCore::Node::willRespondToMouseClickEvents):
+        (WebCore::Node::willRespondToTouchEvents):
+        * html/BaseMultipleFieldsDateAndTimeInputType.cpp:
+        (WebCore::BaseMultipleFieldsDateAndTimeInputType::isEditControlOwnerDisabled):
+        * html/DOMFormData.cpp:
+        (WebCore::DOMFormData::DOMFormData):
+        * html/FileInputType.cpp:
+        (WebCore::FileInputType::handleDOMActivateEvent):
+        (WebCore::FileInputType::disabledAttributeChanged):
+        * html/HTMLButtonElement.cpp:
+        (WebCore::HTMLButtonElement::defaultEventHandler):
+        (WebCore::HTMLButtonElement::willRespondToMouseClickEvents):
+        (WebCore::HTMLButtonElement::isSuccessfulSubmitButton):
+        * html/HTMLCollection.cpp:
+        (WebCore::isMatchingElement):
+        * html/HTMLFormControlElement.cpp:
+        (WebCore::HTMLFormControlElement::updateAncestorDisabledState):
+        (WebCore::HTMLFormControlElement::isDisabledFormControl):
+        (WebCore::HTMLFormControlElement::supportsFocus):
+        * html/HTMLFormControlElement.h:
+        (HTMLFormControlElement):
+        (WebCore::HTMLFormControlElement::isDisabledOrReadOnly):
+        * html/HTMLInputElement.cpp:
+        (WebCore::HTMLInputElement::isSuccessfulSubmitButton):
+        (WebCore::HTMLInputElement::willRespondToMouseClickEvents):
+        * html/HTMLOptGroupElement.cpp:
+        (WebCore::HTMLOptGroupElement::isDisabledFormControl):
+        * html/HTMLOptGroupElement.h:
+        (HTMLOptGroupElement):
+        * html/HTMLOptionElement.cpp:
+        (WebCore::HTMLOptionElement::isDisabledFormControl):
+        * html/HTMLOptionElement.h:
+        (HTMLOptionElement):
+        * html/HTMLPlugInElement.cpp:
+        (WebCore::HTMLPlugInElement::willRespondToMouseClickEvents):
+        * html/HTMLSelectElement.cpp:
+        (WebCore::HTMLSelectElement::nextValidIndex):
+        (WebCore::HTMLSelectElement::updateListBoxSelection):
+        (WebCore::HTMLSelectElement::recalcListItems):
+        (WebCore::HTMLSelectElement::appendFormData):
+        (WebCore::HTMLSelectElement::updateSelectedState):
+        (WebCore::HTMLSelectElement::listBoxDefaultEventHandler):
+        (WebCore::HTMLSelectElement::defaultEventHandler):
+        (WebCore::HTMLSelectElement::optionAtIndex):
+        * html/ImageInputType.cpp:
+        (WebCore::ImageInputType::handleDOMActivateEvent):
+        * html/ResetInputType.cpp:
+        (WebCore::ResetInputType::handleDOMActivateEvent):
+        * html/SubmitInputType.cpp:
+        (WebCore::SubmitInputType::handleDOMActivateEvent):
+        * html/shadow/SliderThumbElement.cpp:
+        (WebCore::SliderThumbElement::isDisabledFormControl):
+        (WebCore::SliderThumbElement::defaultEventHandler):
+        (WebCore::SliderThumbElement::willRespondToMouseMoveEvents):
+        (WebCore::SliderThumbElement::willRespondToMouseClickEvents):
+        * html/shadow/SliderThumbElement.h:
+        (SliderThumbElement):
+        * html/shadow/SpinButtonElement.h:
+        * html/shadow/TextFieldDecorationElement.cpp:
+        (WebCore::TextFieldDecorationElement::updateImage):
+        * loader/FormSubmission.cpp:
+        (WebCore::FormSubmission::create):
+        * page/DragController.cpp:
+        (WebCore::DragController::tryDocumentDrag):
+        (WebCore::DragController::concludeEditDrag):
+        * rendering/RenderListBox.cpp:
+        (WebCore::RenderListBox::addFocusRingRects):
+        (WebCore::RenderListBox::paintItemForeground):
+        * rendering/RenderMenuList.cpp:
+        (WebCore::RenderMenuList::itemIsEnabled):
+        * rendering/RenderTextControl.cpp:
+        (WebCore::updateUserModifyProperty):
+        * rendering/RenderTheme.cpp:
+        (WebCore::RenderTheme::isEnabled):
+        * rendering/RenderThemeMac.mm:
+        (WebCore::getMediaUIPartStateFlags):
+        * rendering/RenderThemeMacShared.mm:
+        (WebCore::RenderThemeMacShared::adjustMenuListStyle):
+        (WebCore::RenderThemeMacShared::paintSearchFieldCancelButton):
+        * rendering/RenderThemeSafari.cpp:
+        (WebCore::RenderThemeSafari::adjustMenuListStyle):
+
 2013-03-28  Brady Eidson  <beidson@apple.com>
 
         Remove workaround for <rdar://problem/5321972>.
