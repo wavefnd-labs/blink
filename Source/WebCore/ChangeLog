@@ -1,3 +1,47 @@
+2013-03-28  Vsevolod Vlasov  <vsevik@chromium.org>
+
+        Web Inspector: Simplify ResourceScriptFile so that it stores hasDiverged state in it.
+        https://bugs.webkit.org/show_bug.cgi?id=113489
+
+        Reviewed by Pavel Feldman.
+
+        ResourceScriptFile._hasDiverged is the one flag that shows whether we have diverged from VM.
+        It's values is based both on dirty flag on uiSourceCode and information about live edit failures stored in _lastLiveEditFailed field.
+        Removed willMerge/Diverge events from ScriptFile.
+        JavaScriptSourceFrame now uses isMergingToVM/DivergingFromVM methods on ScriptFile.
+        to determine whether breakpointAdded/Removed events should be ignored.
+        Introduced muted state on JavaScriptSourceFrame to determine whether it should ignore user attempts to set/remove breakpoints.
+
+        * inspector/front-end/JavaScriptSourceFrame.js:
+        (WebInspector.JavaScriptSourceFrame):
+        (WebInspector.JavaScriptSourceFrame.prototype._didMergeToVM):
+        (WebInspector.JavaScriptSourceFrame.prototype._didDivergeFromVM):
+        (WebInspector.JavaScriptSourceFrame.prototype._muteBreakpointsWhileEditing):
+        (WebInspector.JavaScriptSourceFrame.prototype._restoreBreakpointsAfterEditing):
+        (WebInspector.JavaScriptSourceFrame.prototype._addBreakpointDecoration):
+        (WebInspector.JavaScriptSourceFrame.prototype._removeBreakpointDecoration):
+        (WebInspector.JavaScriptSourceFrame.prototype._shouldIgnoreExternalBreakpointEvents):
+        (WebInspector.JavaScriptSourceFrame.prototype._breakpointAdded):
+        (WebInspector.JavaScriptSourceFrame.prototype._breakpointRemoved):
+        (WebInspector.JavaScriptSourceFrame.prototype._updateScriptFile):
+        (WebInspector.JavaScriptSourceFrame.prototype.onTextEditorContentLoaded):
+        * inspector/front-end/LiveEditSupport.js:
+        (WebInspector.LiveEditScriptFile.prototype.isMergingToVM):
+        * inspector/front-end/ResourceScriptMapping.js:
+        (WebInspector.ResourceScriptMapping.prototype.rawLocationToUILocation):
+        (WebInspector.ScriptFile.prototype.isMergingToVM):
+        (WebInspector.ResourceScriptFile):
+        (WebInspector.ResourceScriptFile.prototype._workingCopyCommitted):
+        (WebInspector.ResourceScriptFile.prototype._isDiverged):
+        (WebInspector.ResourceScriptFile.prototype._workingCopyChanged):
+        (WebInspector.ResourceScriptFile.prototype._update):
+        (WebInspector.ResourceScriptFile.prototype._divergeFromVM):
+        (WebInspector.ResourceScriptFile.prototype._mergeToVM):
+        (WebInspector.ResourceScriptFile.prototype.hasDivergedFromVM):
+        (WebInspector.ResourceScriptFile.prototype.isMergingToVM):
+        * inspector/front-end/ScriptSnippetModel.js:
+        (WebInspector.SnippetScriptFile.prototype.isMergingToVM):
+
 2013-03-25  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: DOMContentLoaded event divider is not shown on Timeline's main view
