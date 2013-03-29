@@ -1,3 +1,21 @@
+2013-03-29  Dean Jackson  <dino@apple.com>
+
+        Snapshotted plugins must be able to restart on appropriate mouseup events
+        https://bugs.webkit.org/show_bug.cgi?id=113577
+
+        Reviewed by Tim Horton.
+
+        If the page content prevents the default behaviour of a mousedown event, then a snapshotted
+        plugin would never receive a click event, and thus be unable to restart. We have to also
+        look for a mouseup that happens with an associated mousedown, and trigger restart. This
+        won't call any page code - it's just behind the scenes.
+
+        * rendering/RenderSnapshottedPlugIn.cpp:
+        (WebCore::RenderSnapshottedPlugIn::RenderSnapshottedPlugIn): Initialize new member variable.
+        (WebCore::RenderSnapshottedPlugIn::handleEvent): Track the state of mousedown and up pairs, and restart
+            if you see an appropriate mouseup.
+        * rendering/RenderSnapshottedPlugIn.h: New member variable to track mouse state.
+
 2013-03-29  Simon Fraser  <simon.fraser@apple.com>
 
         removeViewportConstrainedLayer() should remove the layer from m_viewportConstrainedLayersNeedingUpdate too
