@@ -1,3 +1,32 @@
+2013-03-29  Alexey Proskuryakov  <ap@apple.com>
+
+        Expose FeatureObserver data to WebKit clients
+        https://bugs.webkit.org/show_bug.cgi?id=113613
+
+        Reviewed by Sam Weinig.
+
+        FeatureObserver used to depend on chromium-only HistogramSupport, which is not
+        really usable on Mac at least.
+
+        Instead of adding parallel feature reporting machinery, I'm adding a way to
+        generically relay the data from FeatureObserver to port code.
+
+        * loader/FrameLoader.cpp:
+        (WebCore::FrameLoader::loadWithDocumentLoader):
+        (WebCore::FrameLoader::commitProvisionalLoad):
+        (WebCore::FrameLoader::reportMemoryUsage):
+        * loader/FrameLoader.h:
+        (WebCore::FrameLoader::previousURL):
+        Exposed m_previousURL, renaming it to follow WebKit style.
+
+        * page/FeatureObserver.cpp:
+        (WebCore::FeatureObserver::~FeatureObserver):
+        (WebCore::FeatureObserver::updateMeasurements):
+        * page/FeatureObserver.h:
+        (WebCore::FeatureObserver::accumulatedFeatureBits):
+        Exposed the data to clients, and made reporting through HistogramSupport
+        chromium only for clarity.
+
 2013-03-29  Bem Jones-Bey  <bjonesbe@adobe.com>
 
         [CSS Exclusions] shape outside segments not properly calculated for ellipses
