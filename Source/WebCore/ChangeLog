@@ -1,3 +1,57 @@
+2013-03-22  Andrey Kosyakov  <caseq@chromium.org>
+
+        Web Inspector: timeline paint rectangles are off for transformed layers
+        https://bugs.webkit.org/show_bug.cgi?id=112919
+
+        Reviewed by Pavel Feldman.
+
+        - pass RenderObject instead of Frame to InspectorInstrumentation::didPaint;
+        - take transforms into account and convert paint clip rect into quad;
+        - emit quads, not rects as Paint and Layout record data;
+        - adjust client to using quads, compute width/height from quad coords.
+
+        * inspector/InspectorInstrumentation.cpp: Pass RenderObject, not frame to {will,did}Paint.
+        (WebCore):
+        (WebCore::InspectorInstrumentation::willPaintImpl):
+        (WebCore::InspectorInstrumentation::didPaintImpl):
+        (WebCore::InspectorInstrumentation::instrumentingAgentsForRenderer): Added.
+        * inspector/InspectorInstrumentation.h:
+        (WebCore):
+        (InspectorInstrumentation):
+        (WebCore::InspectorInstrumentation::willPaint):
+        (WebCore::InspectorInstrumentation::didPaint):
+        * inspector/InspectorTimelineAgent.cpp:
+        (WebCore::InspectorTimelineAgent::didLayout):
+        (WebCore::InspectorTimelineAgent::didPaint):
+        (WebCore::InspectorTimelineAgent::localToPageQuad): Convert local clip rect to transformed quad.
+        (WebCore):
+        * inspector/InspectorTimelineAgent.h:
+        (WebCore):
+        (InspectorTimelineAgent):
+        * inspector/TimelineRecordFactory.cpp: Emit quads as Paint and Layout records data.
+        (WebCore::createQuad):
+        (WebCore):
+        (WebCore::TimelineRecordFactory::createPaintData):
+        (WebCore::TimelineRecordFactory::createLayoutData):
+        * inspector/TimelineRecordFactory.h:
+        (WebCore):
+        (TimelineRecordFactory):
+        * inspector/front-end/TimelinePanel.js: Highlight a quad iff formatted record has highlightQuad field.
+        (WebInspector.TimelinePanel.prototype._mouseOut):
+        (WebInspector.TimelinePanel.prototype._mouseMove):
+        (WebInspector.TimelinePanel.prototype._highlightQuad):
+        (WebInspector.TimelinePanel.prototype._hideQuadHighlight):
+        * inspector/front-end/TimelinePresentationModel.js:
+        (WebInspector.TimelinePresentationModel.Record): Set highlightQuad for Paint and Layout
+        (WebInspector.TimelinePresentationModel.Record.prototype._generatePopupContentWithImagePreview):
+        (WebInspector.TimelinePresentationModel.Record.prototype._getRecordDetails):
+        (WebInspector.TimelinePresentationModel.quadWidth):
+        (WebInspector.TimelinePresentationModel.quadHeight):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::paintContents):
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::paintContents):
+
 2013-03-21  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: generalize InspectorDOMAgent::highlightRect() to highlightQuad()
