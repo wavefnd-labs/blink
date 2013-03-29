@@ -1,3 +1,28 @@
+2013-03-29  Joshua Bell  <jsbell@chromium.org>
+
+        IndexedDB: Bind lifetime of in-memory backing stores to IDBFactory backend
+        https://bugs.webkit.org/show_bug.cgi?id=110820
+
+        Reviewed by Tony Chang.
+
+        Backing stores are dropped as soon as all connections are closed. That makes sense for
+        disk-backed stores to free up memory (although there's a performance trade-off...). But
+        for memory-backed stores, the expected lifetime should match the lifetime of the factory
+        so that an open/write/close/re-open/read yields the written data.
+
+        Test: Chromium's webkit_unit_tests, IDBFactoryBackendTest.MemoryBackingStoreLifetime
+
+        * Modules/indexeddb/IDBBackingStore.cpp:
+        (WebCore::IDBBackingStore::IDBBackingStore): Pass comparator into constructor since it was always
+        assigned immediately afterwards anyway.
+        (WebCore::IDBBackingStore::open): Split into three parts - open() which is disk-backed...
+        (WebCore::IDBBackingStore::openInMemory): ...explit in-memory creation (previously: specified by empty path)
+        (WebCore::IDBBackingStore::create): ... and the common logic which calls the constructor.
+        * Modules/indexeddb/IDBBackingStore.h: Headers for the above.
+        * Modules/indexeddb/IDBFactoryBackendImpl.cpp:
+        (WebCore::IDBFactoryBackendImpl::openBackingStore): Add in-memory backing stores to dependent set.
+        * Modules/indexeddb/IDBFactoryBackendImpl.h: Add member to track dependent backing stores.
+
 2013-03-29  Nate Chapin  <japhet@chromium.org>
 
         ASSERT d->m_defersLoading != defers on detik.com and drive.google.com
