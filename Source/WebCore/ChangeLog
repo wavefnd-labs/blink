@@ -1,3 +1,29 @@
+2013-03-19  Ojan Vafai  <ojan@chromium.org>
+
+        min-width/max-width of min-content/max-content don't work correctly if width is specified
+        https://bugs.webkit.org/show_bug.cgi?id=106143
+
+        Reviewed by Tony Chang.
+
+        Test: fast/css-intrinsic-dimensions/intrinsic-sized-blocks.html
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::computeIntrinsicLogicalWidths):
+        Expose this so that we don't use the preferred widths when calculating intrinsic width
+        values since the preferred width will be the regular width value if it is set.
+        Also, simplified the logic around table cells and scrollbar widths. The old code was
+        wrong and unnecessarily complicated.
+
+        (WebCore::RenderBlock::computePreferredLogicalWidths):
+        Use the new computeIntrinsicLogicalWidths method.
+
+        (WebCore::RenderBlock::computeInlinePreferredLogicalWidths):
+        (WebCore::RenderBlock::computeBlockPreferredLogicalWidths):
+        Pass in the min/max values as out params so they can be called from computeIntrinsicLogicalWidths.
+        Also, make computeBlockPreferredLogicalWidths const.
+
+        * rendering/RenderBlock.h:
+
 2013-03-29  Joshua Bell  <jsbell@chromium.org>
 
         IndexedDB: Use WTF::TemporaryChange rather than manually resetting a flag
