@@ -1,5 +1,44 @@
 2013-03-30  Tom Sepez  <tsepez@chromium.org>
 
+        Cross-Origin copy&paste / drag&drop allowing XSS via srcdoc attribute.
+        https://bugs.webkit.org/show_bug.cgi?id=113443
+
+        Reviewed by Adam Barth.
+
+        Tested by LayoutTests/editing/pasteboard/paste-noscript.html
+
+        * dom/Element.h:
+        (Element):
+        (WebCore::Element::isHTMLContentAttribute):
+        Adds an isHTMLContentAttribute() method to determine whether an attribute can contain
+        (potentially unsafe) HTML content. Currently, the iframe's srcdoc attribute is the only
+        such attribute, but clever folks might add more in the future.
+        Rename stripJavaScriptAttributes() method to stripScriptingAttributes(), to better reflect
+        the reality that scripting content may appear as above.
+        Adds missing consts and consolidate isJavaScriptAttribute() method.
+
+        * dom/Element.cpp:
+        (WebCore::Element::isJavaScriptURLAttribute):
+        (WebCore::Element::stripScriptingAttributes):
+        Consolidated methods.
+        
+        * html/HTMLFrameElementBase.cpp:
+        (WebCore::HTMLFrameElementBase::isHTMLContentAttribute):
+        (WebCore):
+        * html/HTMLFrameElementBase.h:
+        (HTMLFrameElementBase):
+        Indicate that for frames, the srcdoc attribute contains HTML content.
+        
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::setAttributes):
+        * xml/parser/XMLDocumentParserLibxml2.cpp:
+        (WebCore::setAttributes):
+        * xml/parser/XMLDocumentParserQt.cpp:
+        (WebCore::setAttributes):
+        Rename stripJavaScriptAttribute calls to match Element.h
+
+2013-03-30  Tom Sepez  <tsepez@chromium.org>
+
         View-source iframes are dangerous (and not very useful).
         https://bugs.webkit.org/show_bug.cgi?id=113345
 
