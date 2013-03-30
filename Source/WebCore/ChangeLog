@@ -1,3 +1,25 @@
+2013-03-29  Andy Estes  <aestes@apple.com>
+
+        Let cached resources from file: schemes expire immediately
+        https://bugs.webkit.org/show_bug.cgi?id=113626
+
+        Reviewed by Brady Eidson
+
+        When a CachedResource was loaded from a file: URL, we would give it an
+        indefinite freshness lifetime. This means that we would continue to
+        serve a stale resource from the memory cache even if the file was
+        changed on disk. With the introduction of main resource caching, this
+        behavior broke at least one third-party WebKit app (see <rdar://problem/13313769>).
+
+        We should instead let file resources expire immediately. Modern
+        filesystems implement their own caching, so we should get good
+        performance for multiple reads of unmodified files without doing our
+        own caching.
+
+        * loader/cache/CachedResource.cpp:
+        (WebCore::CachedResource::freshnessLifetime): file: URLs should have a
+        0 freshness lifetime.
+
 2013-03-29  Ojan Vafai  <ojan@chromium.org>
 
         Flexitems no longer default min-width to min-content
