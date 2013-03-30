@@ -1,3 +1,56 @@
+2013-03-29  Yongjun Zhang  <yongjun_zhang@apple.com>
+
+        When releasing a CGImage, we should also remove it from the subimage cache.
+        https://bugs.webkit.org/show_bug.cgi?id=102453
+
+        Reviewed by Simon Fraser.
+
+        When we release an image(CGImageRef) from BitmapImage's cachedFrames, if the image was already
+        cached in subimage cache, it's ref count won't drop to 0 and the image won't be deleted.  Usually,
+        the subimage cache will clear the whole cache in a timer with 1 sec delay.  However, if WebCore has
+        to paint another subimage (not necessarily from the same CGImageRef) before this timer fires, we
+        will restart the timer and images inside the cache will stay longer than they should.
+
+        This patch does two things:
+            - move SubimageCacheWithTimer and related helper struct into a separate file.
+            - remove the image from subimage cache when we releasing the CGImageRef, this prevent subimage
+        cache holding the image after we released it.
+
+        No new tests, manually verified the CGImageRef is also removed from subimage cache
+        when we releasing the image from FrameData::clear.
+
+        * WebCore.vcproj/WebCore.vcproj:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/graphics/cg/BitmapImageCG.cpp:
+        (WebCore::FrameData::clear): remove the image from subimage cache before we releasing it.
+        * platform/graphics/cg/GraphicsContextCG.cpp:
+        (WebCore):
+        (WebCore::GraphicsContext::drawNativeImage):
+        * platform/graphics/cg/SubimageCacheWithTimer.cpp: Added.
+        (WebCore):
+        (SubimageRequest):
+        (WebCore::SubimageRequest::SubimageRequest):
+        (WebCore::SubimageCacheAdder::hash):
+        (SubimageCacheAdder):
+        (WebCore::SubimageCacheAdder::equal):
+        (WebCore::SubimageCacheAdder::translate):
+        (WebCore::SubimageCacheWithTimer::SubimageCacheWithTimer):
+        (WebCore::SubimageCacheWithTimer::invalidateCacheTimerFired):
+        (WebCore::SubimageCacheWithTimer::getSubimage):
+        (WebCore::SubimageCacheWithTimer::clearImage):
+        (WebCore::subimageCache):
+        * platform/graphics/cg/SubimageCacheWithTimer.h: Added.
+        (WebCore):
+        (SubimageCacheWithTimer): Added a data member m_images to record which image and its subimages are cached.
+        (SubimageCacheEntry):
+        (SubimageCacheEntryTraits):
+        (WebCore::SubimageCacheWithTimer::SubimageCacheEntryTraits::isEmptyValue):
+        (WebCore::SubimageCacheWithTimer::SubimageCacheEntryTraits::constructDeletedValue):
+        (WebCore::SubimageCacheWithTimer::SubimageCacheEntryTraits::isDeletedValue):
+        (WebCore::SubimageCacheWithTimer::SubimageCacheHash::hash):
+        (WebCore::SubimageCacheWithTimer::SubimageCacheHash::equal):
+        (SubimageCacheHash):
+
 2013-03-29  Andy Estes  <aestes@apple.com>
 
         Let cached resources from file: schemes expire immediately
