@@ -1,3 +1,21 @@
+2013-03-31  Brady Eidson  <beidson@apple.com>
+
+        NetworkProcess crashes in WebCoreResourceHandleAsOperationQueueDelegate callbacks.
+        <rdar://problem/13541868> and https://bugs.webkit.org/show_bug.cgi?id=113664
+
+        Reviewed by Dan Bernstein.
+
+        In the "two-part" callbacks that involve waiting on a semaphore for the async block to finish,
+        the delegate might have been destroyed by the time the wait completes.
+
+        A RetainPtr<> protector will fix that up nicely.
+
+        * platform/network/mac/WebCoreResourceHandleAsOperationQueueDelegate.mm:
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:willSendRequest:redirectResponse:]):
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connectionShouldUseCredentialStorage:]):
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:canAuthenticateAgainstProtectionSpace:]):
+        (-[WebCoreResourceHandleAsOperationQueueDelegate connection:willCacheResponse:]):
+
 2013-03-30  Adam Barth  <abarth@webkit.org>
 
         Remove unused include of RegularExpression.h
