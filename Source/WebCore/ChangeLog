@@ -1,3 +1,36 @@
+2013-04-01  Mike West  <mkwst@chromium.org>
+
+        CSP 1.1: Remove 'type' parameter from CSPDirectiveList::checkSourceAndReportViolation.
+        https://bugs.webkit.org/show_bug.cgi?id=113502
+
+        Reviewed by Adam Barth.
+
+        Now that we're passing in 'effectiveDirective', we don't need the 'type'
+        parameter to generate the proper error message prefix when reporting
+        violations.
+
+        While I'm here, I'll slightly tweak the grammar for the error messages.
+        Changes are covered via rebaselines of existing tests.
+
+        * page/ContentSecurityPolicy.cpp:
+        (WebCore::CSPDirectiveList::checkSourceAndReportViolation):
+            Drop the 'type' parameter. We don't need to pass in a type since
+            we're now passing in the 'effectiveDirective'; we can use the latter
+            to generate the correct error message prefix.
+        (WebCore::CSPDirectiveList::allowScriptFromSource):
+        (WebCore::CSPDirectiveList::allowObjectFromSource):
+        (WebCore::CSPDirectiveList::allowChildFrameFromSource):
+        (WebCore::CSPDirectiveList::allowImageFromSource):
+        (WebCore::CSPDirectiveList::allowStyleFromSource):
+        (WebCore::CSPDirectiveList::allowFontFromSource):
+        (WebCore::CSPDirectiveList::allowMediaFromSource):
+        (WebCore::CSPDirectiveList::allowConnectToSource):
+        (WebCore::CSPDirectiveList::allowFormAction):
+        (WebCore::CSPDirectiveList::allowBaseURI):
+            Drop the 'type' parameter from the callsites, which has the lovely
+            property of allowing us to throw away a bunch of statically allocated
+            strings that we don't need anymore.
+
 2013-04-01  James Craig  <james@cookiecrook.com>
 
         AX: "video element controller" is an overly verbose default description for the playback controls; how about just "playback"
