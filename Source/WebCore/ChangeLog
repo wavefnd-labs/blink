@@ -1,3 +1,83 @@
+2013-04-01  Philip Rogers  <pdr@google.com>
+
+        [SVG2] Add support for the buffered-rendering hint
+        https://bugs.webkit.org/show_bug.cgi?id=104207
+
+        Reviewed by Stephen Chenney.
+
+        This patch adds the SVG2 buffered-rendering property and implements it for the image
+        element. For reference, the spec can be found at:
+            https://svgwg.org/svg2-draft/single-page.html#painting-BufferedRendering
+
+        The buffered-rendering hint causes our implementation to create a temporary image buffer
+        for caching an element's foreground rendering. This behavior has been designed to support
+        other graphical and container elements in followup patches (such as the use and g elements).
+        This patch should not affect rendering, and a test has been added showing the image
+        results are unchanged. 
+
+        The performance aspects of this patch can be tested using the following test:
+            http://philbit.com/bouncingTigers.html
+        Without the patch, rendering is below 1fps. With the patch, rendering is fluid.
+
+        Tests: svg/css/buffered-rendering.html
+               svg/repaint/buffered-rendering-dynamic-image.html
+               svg/repaint/buffered-rendering-static-image.html
+
+        Other than the changes to RenderSVGImage and SVGRenderingContext, the changes below are to
+        support the new buffered-rendering property:
+
+        * css/CSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getPropertyCSSValue):
+        * css/CSSPrimitiveValueMappings.h:
+        (WebCore::CSSPrimitiveValue::CSSPrimitiveValue):
+        (WebCore):
+        (WebCore::CSSPrimitiveValue::operator EBufferedRendering):
+        * css/CSSProperty.cpp:
+        (WebCore::CSSProperty::isInheritedProperty):
+        * css/SVGCSSComputedStyleDeclaration.cpp:
+        (WebCore::CSSComputedStyleDeclaration::getSVGPropertyCSSValue):
+        * css/SVGCSSParser.cpp:
+        (WebCore::CSSParser::parseSVGValue):
+        * css/SVGCSSPropertyNames.in:
+        * css/SVGCSSStyleSelector.cpp:
+        (WebCore::StyleResolver::applySVGProperty):
+        * css/SVGCSSValueKeywords.in:
+        * rendering/style/SVGRenderStyle.cpp:
+        (WebCore::SVGRenderStyle::diff):
+        * rendering/style/SVGRenderStyle.h:
+        (WebCore::SVGRenderStyle::initialBufferedRendering):
+        (WebCore::SVGRenderStyle::setBufferedRendering):
+        (WebCore::SVGRenderStyle::bufferedRendering):
+        (WebCore::SVGRenderStyle::setBitDefaults):
+        * rendering/style/SVGRenderStyleDefs.h:
+        * rendering/svg/RenderSVGImage.cpp:
+        (WebCore::RenderSVGImage::paint):
+
+            The foreground painting has been extracted out into a separate function. This has also
+            been changed so that if the buffered-rendering hint is present, bufferForeground
+            is used.
+
+        (WebCore::RenderSVGImage::paintForeground):
+        (WebCore):
+        (WebCore::RenderSVGImage::invalidateBufferedForeground):
+
+            This function could be replaced with "m_bufferedForeground.clear()" but other renderers
+            (such as container elements) will require more complex invalidation logic. To
+            maintain consistency with this future code, invalidateBufferedForeground has been used.
+
+        (WebCore::RenderSVGImage::imageChanged):
+        * rendering/svg/RenderSVGImage.h:
+        (RenderSVGImage):
+        * rendering/svg/SVGRenderingContext.cpp:
+        (WebCore::SVGRenderingContext::bufferForeground):
+        (WebCore):
+        * rendering/svg/SVGRenderingContext.h:
+        (SVGRenderingContext):
+        * svg/SVGStyledElement.cpp:
+        (WebCore::SVGStyledElement::cssPropertyIdForSVGAttributeName):
+        (WebCore::cssPropertyToTypeMap):
+        * svg/svgattrs.in:
+
 2013-04-01  Mike West  <mkwst@chromium.org>
 
         CSP 1.1: Remove 'type' parameter from CSPDirectiveList::checkSourceAndReportViolation.
