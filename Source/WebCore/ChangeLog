@@ -1,3 +1,22 @@
+2013-04-01  Koji Ishii  <kojiishi@gmail.com>
+
+        ASSERTION FAILED: m_purgePreventCount when clicking text with emphasis marks
+        https://bugs.webkit.org/show_bug.cgi?id=85266
+
+        Reviewed by Darin Adler.
+
+        Font::glyphDataAndPageForCharacter may call FontCache::getFontDataForCharacters
+        if system fallback occurs, which may return SimpleFontData with DoNotRetain,
+        so callers must prevent possible font cache purging.
+
+        Test: fast/text/emphasis-height-crash.html
+
+        * platform/graphics/FontFastPath.cpp:
+        (WebCore::Font::emphasisMarkAscent): Add FontCachePurgePreventer.
+        (WebCore::Font::emphasisMarkDescent): ditto.
+        (WebCore::Font::emphasisMarkHeight): ditto.
+        (WebCore::Font::drawEmphasisMarks): ditto.
+
 2013-04-01  Vladislav Kaznacheev  <kaznacheev@chromium.org>
 
         Web Inspector: Fixed DOM Breakpoint pane styles.
