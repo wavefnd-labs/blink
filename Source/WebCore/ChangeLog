@@ -1,3 +1,62 @@
+2013-04-01  Victor Carbune  <vcarbune@chromium.org>
+
+        Parsing WebVTT Region Header Metadata
+        https://bugs.webkit.org/show_bug.cgi?id=109818
+
+        Reviewed by Eric Carlson.
+
+        This patch enables reading regions from the metadata section of
+        a WebVTT file. The work for defining generic metadata within the
+        WebVTT file header is still work in progress in the TextTrack CG.
+
+        As previous patches, everything is guarded by WEBVTT_REGIONS and
+        is by default disabled in all ports.
+
+        Test: media/track/regions-webvtt/text-track-region-parser.html
+
+        * html/track/LoadableTextTrack.cpp:
+        (WebCore):
+        (WebCore::LoadableTextTrack::newRegionsAvailable): Added method
+        to be called as soon as regions have finished parsing.
+        * html/track/LoadableTextTrack.h:
+        (LoadableTextTrack):
+        * html/track/TextTrack.h: Changed the access modifiers.
+        (TextTrack):
+        * html/track/TextTrackRegion.cpp:
+        (WebCore::TextTrackRegion::setRegionSettings): Entry point for
+        parsing the region settings from a string.
+        (WebCore):
+        (WebCore::TextTrackRegion::getSettingFromString): Maps a string
+        to a RegionSetting value.
+        (WebCore::TextTrackRegion::parseSettingValue): Parses the value
+        of a specific setting.
+        (WebCore::TextTrackRegion::parseSetting): Parses a setting string.
+        * html/track/TextTrackRegion.h:
+        * html/track/WebVTTParser.cpp:
+        (WebCore):
+        (WebCore::WebVTTParser::parseFloatPercentageValue): Helper method
+        to parse a float percentage value (e.g. "50.1%")
+        (WebCore::WebVTTParser::parseFloatPercentageValuePair): Helper method
+        to parse a float percentage value pair (e.g. "50.1%, 30.5%")
+        (WebCore::WebVTTParser::getNewRegions): Retrieves the new regions
+        available for processing.
+        (WebCore::WebVTTParser::parseBytes):
+        (WebCore::WebVTTParser::collectHeader): Generic function to collect
+        header in the metadata region.
+        (WebCore::WebVTTParser::createNewRegion): Creates new region using
+        the existing metadata header name and value.
+        * html/track/WebVTTParser.h:
+        (WebVTTParserClient):
+        (WebVTTParser):
+        * loader/TextTrackLoader.cpp:
+        (WebCore):
+        (WebCore::TextTrackLoader::newRegionsParsed): Called when the
+        regions have been succesfully parsed.
+        (WebCore::TextTrackLoader::getNewRegions): Gets the new regions.
+        * loader/TextTrackLoader.h:
+        (TextTrackLoaderClient): Added methods that need to be implemented.
+        (TextTrackLoader):
+
 2013-04-01  Pavel Feldman  <pfeldman@chromium.org>
 
         Web Inspector: Go to line dialog has 0 height, viewport dialogs have empty gaps.
