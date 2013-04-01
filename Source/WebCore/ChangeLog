@@ -1,3 +1,25 @@
+2013-03-31  Zalan Bujtas  <zalan@apple.com>
+
+        Gradient background does not get repainted when child box is expanded.
+        https://bugs.webkit.org/show_bug.cgi?id=113644
+
+        Reviewed by Antti Koivisto.
+        
+        The initial value for background-size is SizeNone and remains, unless it is
+        set explicitly. However, when the background shorthand is used,
+        the size property defaults to SizeLength. The repaint
+        logic in mustRepaintFillLayers expects to have this value set correctly.
+
+        Test: fast/repaint/background-shorthand-with-gradient-and-height-changes.html
+
+        * rendering/RenderObject.cpp:
+        (WebCore::mustRepaintFillLayers): code cleanup. no functionality change.
+        * rendering/style/FillLayer.cpp:
+        (WebCore::FillLayer::FillLayer):
+        * rendering/style/FillLayer.h:    use SizeNone as initial value.
+        (WebCore::FillLayer::initialFillSizeType):
+        (WebCore::FillLayer::initialFillSize):
+
 2013-03-31  Hayato Ito  <hayato@chromium.org>
 
         Text representation of pseudo elements, '::-webkit-distributed', is wrong in CSSSelector::selectorText().
