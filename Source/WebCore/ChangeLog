@@ -1,3 +1,25 @@
+2013-04-02  Alexey Proskuryakov  <ap@apple.com>
+
+        <rdar://problem/13551119> [WK2] Crashes in NetworkProcess when canceling loads
+        https://bugs.webkit.org/show_bug.cgi?id=113803
+
+        Reviewed by Darin Adler.
+
+        Stop using a delegate proxy. It hasn't been needed in years, and the extra layer
+        just adds bugs.
+
+        This specific issue gets fixed because connection retains its delegate is retained,
+        but a proxy does not.
+
+        * WebCore.exp.in:
+        * platform/network/ResourceHandle.h:
+        * platform/network/ResourceHandleInternal.h:
+        * platform/network/mac/ResourceHandleMac.mm:
+        (WebCore::ResourceHandle::start):
+        (WebCore::ResourceHandle::releaseDelegate):
+        (WebCore::ResourceHandle::platformLoadResourceSynchronously):
+        Removed code that was dealing with delegate proxy.
+
 2013-04-02  John J. Barton  <johnjbarton@chromium.org>
 
         Web Inspector: Encapsulate SetEmbedderData/GetEmbedderData
