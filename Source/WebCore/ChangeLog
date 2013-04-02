@@ -1,3 +1,39 @@
+2013-04-01  Hans Muller  <hmuller@adobe.com>
+
+        [CSS Exclusions] shape-outside on floats fails to respect shape-margin's vertical extent
+        https://bugs.webkit.org/show_bug.cgi?id=113600
+
+        Reviewed by Dirk Schulze.
+
+        ExclusionShapeInsideInfo classes need to depend on the ExclusionShape's padded boundary and
+        ExclusionShapeOutsideInfo classes should depend on the ExclusionShape's margin boundary. Added
+        a virtual method to the ExclusionShapeInfo that returns the ExclusionShape's logical bounding box -
+        computedShapeLogicalBoundingBox() - and overrode that method in the subclasses to return the
+        value of the appropriate ExclusionShape method. Added shapeMarginLogicalBoundingBox() and
+        shapePaddingLogicalBoundingBox() methods to ExclusionShape and removed the shapeLogicalBoundingBox()
+        method, which did not take shape-margin or shape-padding into account.
+
+        Test: fast/exclusions/shape-outside-floats/shape-outside-floats-ellipse-margin-bottom.html
+
+        * rendering/ExclusionPolygon.h: Defined the padding and margin bounding box virtual methods.
+        * rendering/ExclusionRectangle.h: Defined the padding and margin bounding box virtual methods.
+        * rendering/ExclusionShape.h: Added the padding and margin bounding box virtual abstract methods. Removed shapeLogicalBoundingBox().
+        (ExclusionShape):
+        * rendering/ExclusionShapeInfo.h:
+        (WebCore::ExclusionShapeInfo::shapeLogicalTop): Now calls computedShapeLogicalBoundingBox().
+        (WebCore::ExclusionShapeInfo::shapeLogicalBottom): Ditto.
+        (WebCore::ExclusionShapeInfo::shapeLogicalLeft): Ditto.
+        (WebCore::ExclusionShapeInfo::shapeLogicalRight): Ditto.
+        (WebCore::ExclusionShapeInfo::shapeLogicalWidth): Ditto.
+        (WebCore::ExclusionShapeInfo::shapeLogicalHeight): Ditto.
+        (ExclusionShapeInfo): Added computedShapeLogicalBoundingBox().
+        * rendering/ExclusionShapeInsideInfo.h:
+        (ExclusionShapeInsideInfo):
+        (WebCore::ExclusionShapeInsideInfo::computedShapeLogicalBoundingBox): Gets the padded shape's bounding box.
+        * rendering/ExclusionShapeOutsideInfo.h:
+        (ExclusionShapeOutsideInfo):
+        (WebCore::ExclusionShapeOutsideInfo::computedShapeLogicalBoundingBox): Gets the margin shape's bounding box.
+
 2013-04-01  Adam Barth  <abarth@webkit.org>
 
         Assertion failure !m_lastChunkBeforeScript in HTMLDocumentParser during inspector/debugger/pause-in-inline-script.html
