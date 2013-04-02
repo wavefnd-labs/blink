@@ -1,3 +1,102 @@
+2013-04-02  Andrei Bucur  <abucur@adobe.com>
+
+        [CSS Regions] Nested auto-height regions don't layout correctly
+        https://bugs.webkit.org/show_bug.cgi?id=111969
+
+        Reviewed by David Hyatt.
+
+        The patch fixes the auto-height regions processing model to work with nested named flows. Currently
+        this use case doesn't work correctly because the order in which the computed height value is propagated
+        to the regions is incorrect. For example, in the case of two flows (f1 and f2) and two auto-height
+        regions (r1 and r2) with r2 a member of f1:
+        1. the normal layout phase starts
+        2. r1 is laid out with height = 0
+        3. f1 is laid out including r2 with height = 0; overrideLogicalHeight for r1 is computed
+        4. f2 is laid out; overrideLogicalHeight for r2 is computed
+        5. the constrained layout phase starts
+        6. r1 is laid out using the overrideLogicalHeight computed in the normal phase
+        7. f1 is laid out including r2 with its overrideLogicalHeight
+        8. f2 is laid out
+
+        The problem appears at step 6 because the overrideLogicalheight computed during step 3 assumes r2
+        has a height of 0. The patch changes the algorithm to update the auto-height regions in the reverse
+        order of their flow threads dependecies. Here is a high level overview of the new algorithm,
+        considering the named flows are sorted in the order of their dependencies:
+        1. The flows are laid out from the outer flow to the inner flow. This successfully computes the outer
+        non-auto-height regions size so the inner flows have the necessary information to correctly fragment
+        the content.
+        2. The flows are laid out from the inner flow to the outer flow. After an inner flow is laid out it
+        goes into the constrained layout phase and marks the auto-height regions they need layout. This
+        means the outer flows will relayout if they depend on regions with auto-height regions belonging to
+        inner flows. This step will correctly compute the overrideLogicalHeights for the auto-height regions.
+        It's possible for non-auto-height regions to relayout if they depend on auto-height regions. This
+        will invalidate the inner flow threads and mark them as needing layout.
+        3. The last step is to do one last layout if there are pahtological dependencies between non-auto-height
+        regions and auto-height regions as detected in the previous step.
+
+        The patch also removes the layout phase flag from RenderView and moves it to the flow threads. This
+        happens because a flow needs to update its auto-height regions overrideLogicalHeight while updating
+        the logical height of the regions belonging to the inner flows that are laid out by the flow (i.e. the
+        outer flow is in the normal phase while the inner flows are in the constrained layout phase).
+
+        There's also a new flag on the RenderFlowThread that is set when the flow needs the constrained layout
+        phase. This could have been placed on the flow thread controller but I think it will be useful when doing
+        content balancing for the new multi-column implementation.
+
+        Another change is the moment we clear the overrideLogicalHeight value on empty auto-height regions because
+        we don't have to relayout a flow thread once it's in the constrained phase. We need to have the correct
+        flow thread portions correctly computed after the artificial forced break is applied at the end of the content.
+
+        Tests: fast/regions/autoheight-mixed-nested-complex-regions.html
+               fast/regions/autoheight-mixed-nested-regions.html
+               fast/regions/autoheight-mixed-parallel-regions.html
+               fast/regions/autoheight-nested-regions.html
+
+        * rendering/FlowThreadController.cpp:
+        (WebCore::FlowThreadController::FlowThreadController):
+        (WebCore::FlowThreadController::layoutRenderNamedFlowThreads):
+        (WebCore):
+        (WebCore::FlowThreadController::registerNamedFlowContentNode):
+        (WebCore::FlowThreadController::unregisterNamedFlowContentNode):
+        (WebCore::FlowThreadController::updateFlowThreadsChainIfNecessary):
+        (WebCore::FlowThreadController::updateFlowThreadsNeedingLayout):
+        (WebCore::FlowThreadController::updateFlowThreadsNeedingTwoStepLayout):
+        (WebCore::FlowThreadController::resetFlowThreadsWithAutoHeightRegions):
+        (WebCore::FlowThreadController::updateFlowThreadsIntoConstrainedPhase):
+        * rendering/FlowThreadController.h:
+        (FlowThreadController):
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::layoutBlock):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        (WebCore::RenderFlowThread::validateRegions):
+        (WebCore::RenderFlowThread::layout):
+        (WebCore::RenderFlowThread::regionAtBlockOffset):
+        (WebCore::RenderFlowThread::applyBreakAfterContent): Apply an artificial break at the end of the content.
+        This way we can detect when the content ends and clear the overrideLogicalHeight on the empty auto-height regions.
+        (WebCore::RenderFlowThread::computeOverflowStateForRegions):
+        (WebCore):
+        (WebCore::RenderFlowThread::initializeRegionsOverrideLogicalContentHeight):
+        (WebCore::RenderFlowThread::markAutoLogicalHeightRegionsForLayout):
+        (WebCore::RenderFlowThread::updateRegionsFlowThreadPortionRect):
+        (WebCore::RenderFlowThread::addForcedRegionBreak):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::pageLogicalWidth):
+        (WebCore::RenderRegion::pageLogicalHeight):
+        (WebCore::RenderRegion::maxPageLogicalHeight):
+        (WebCore::RenderRegion::logicalHeightOfAllFlowThreadContent):
+        (WebCore::RenderRegion::layoutBlock):
+        (WebCore::RenderRegion::updateLogicalHeight):
+        * rendering/RenderView.cpp:
+        (WebCore::RenderView::RenderView):
+        (WebCore):
+        (WebCore::RenderView::layoutContentInAutoLogicalHeightRegions):
+        (WebCore::RenderView::layout):
+        * rendering/RenderView.h:
+        (WebCore):
+        (RenderView):
+
 2013-04-02  Andrey Kosyakov  <caseq@chromium.org>
 
         Web Inspector: ignore minimum record duration filter in Timeline overview
