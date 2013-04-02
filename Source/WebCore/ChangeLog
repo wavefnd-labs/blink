@@ -1,3 +1,23 @@
+2013-04-01  Nate Chapin  <japhet@chromium.org>
+
+        Crash in WebCore::HTMLMediaElement::~HTMLMediaElement.
+        https://bugs.webkit.org/show_bug.cgi?id=113531
+
+        Reviewed by Adam Barth.
+
+        No new tests, though this is intermittently reproducible with
+        http/tests/misc/delete-frame-during-readystatechange.html under ASAN.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::~HTMLMediaElement): Clear the media player manually
+            before the destructor exits. Clearing the media player may cancel a resource load,
+            which can trigger a readystatechange event. It's possible for the HTMLMediaElement
+            to attempt to fire an abort event within the readystatechange event, even though it is
+            now in an inconsistent state. Clearling the media player before finishing the destructor
+            ensures that the HTMLMediaElement will at least still be alive if this case is triggered.
+            Set m_completelyLoaded to true to ensure that if userCancelledLoad() is called, it doesn't
+            attempt to fire events while destructing.
+
 2013-04-01  Sheriff Bot  <webkit.review.bot@gmail.com>
 
         Unreviewed, rolling out r146373.
