@@ -1,3 +1,26 @@
+2013-04-02  Mike West  <mkwst@chromium.org>
+
+        X-Frame-Options: Blocked frames should not inherit their parent's SecurityOrigin.
+        https://bugs.webkit.org/show_bug.cgi?id=112903
+
+        Reviewed by Adam Barth.
+
+        This change brings WebKit in line with IE and Gecko's behavior, both of
+        which treat the blocked frame as being cross-origin for the purposes of
+        access checks ('[frame].contentWindow.location.href' is inaccessible,
+        for example).
+
+        * dom/Document.cpp:
+        (WebCore::Document::processHttpEquiv):
+            Rather than redirecting to 'about:blank', redirect to
+            'data:text/html,<p></p>' which does not inherit the SecurityOrigin
+            of the parent.
+        * loader/DocumentLoader.cpp:
+        (WebCore::DocumentLoader::responseReceived):
+            Before calling cancelMainResourceLoad, ensure that the frame's
+            document is sandboxed into a unique origin so that it doesn't
+            inherit the parent's SecurityOrigin.
+
 2013-04-01  Elliott Sprehn  <esprehn@chromium.org>
 
         RenderObject::offsetParent should return Element*
