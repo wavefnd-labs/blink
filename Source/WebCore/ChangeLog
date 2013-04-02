@@ -1,3 +1,25 @@
+2013-04-02  Bem Jones-Bey  <bjonesbe@adobe.com>
+
+        [css exclusions] overflow:hidden undoes shape-outside offsets
+        https://bugs.webkit.org/show_bug.cgi?id=110349
+
+        Reviewed by Julien Chaffraix.
+
+        When overflow: hidden was set on a float with shape-outside, the
+        offset from the shape-outside was being ignored. This was because the
+        float was being placed in the normal flow, causing the offsets to be
+        calculated differently. Since floats with shape outside behave like
+        positioned objects in many places, I have caused them to take the same
+        behavior as positioned objects in this case as well: the floats with
+        shape-outside do not get placed in the normal flow when overflow:
+        hidden is set.
+
+        Test: fast/exclusions/shape-outside-floats/shape-outside-floats-overflow-hidden.html
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::RenderLayer::shouldBeNormalFlowOnly): Floats that have
+            shape-outside should not be in the normal flow.
+
 2013-04-02  Andrey Lushnikov  <lushnikov@chromium.org>
 
         Web Inspector: resource preview of html/js/css types should be on a grey background
