@@ -1,3 +1,38 @@
+2013-04-02  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSSRegions] RenderFlowThread should not be created as a Document renderer
+        https://bugs.webkit.org/show_bug.cgi?id=113658
+
+        Reviewed by Julien Chaffraix.
+
+        After https://bugs.webkit.org/show_bug.cgi?id=107138, RenderFlowThread should not be constructed as a renderer for Document.
+        Since it does not have an element associated, it will be constructed using the pattern for anonymous blocks.
+        However, since I do not want the flow thread to be collapsed as anonymous blocks are, i changed RenderObject::isAnonymousBlock
+        to return false for a RenderFlowThread (the alternative would have been to patch more call sites to prevent RenderFlowThread
+        collapsing as anonymous block).
+
+        Covered by existing tests.
+
+        * rendering/FlowThreadController.cpp:
+        (WebCore::FlowThreadController::ensureRenderFlowThreadWithName):
+        * rendering/RenderFlowThread.cpp:
+        (WebCore::RenderFlowThread::RenderFlowThread):
+        * rendering/RenderFlowThread.h:
+        * rendering/RenderMultiColumnBlock.cpp:
+        (WebCore::RenderMultiColumnBlock::addChild):
+        * rendering/RenderMultiColumnFlowThread.cpp:
+        (WebCore::RenderMultiColumnFlowThread::RenderMultiColumnFlowThread):
+        (WebCore::RenderMultiColumnFlowThread::createAnonymous):
+        * rendering/RenderMultiColumnFlowThread.h:
+        (RenderMultiColumnFlowThread):
+        * rendering/RenderNamedFlowThread.cpp:
+        (WebCore::RenderNamedFlowThread::createAnonymous):
+        (WebCore::RenderNamedFlowThread::RenderNamedFlowThread):
+        * rendering/RenderNamedFlowThread.h:
+        (RenderNamedFlowThread):
+        * rendering/RenderObject.h:
+        (WebCore::RenderObject::isAnonymousBlock):
+
 2013-04-02  Shinya Kawanaka  <shinyak@chromium.org>
 
         Unreviewed, rolling out r147383.
