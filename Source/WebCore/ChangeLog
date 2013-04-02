@@ -1,3 +1,62 @@
+2013-04-01  Elliott Sprehn  <esprehn@chromium.org>
+
+        Make all v8 weak callbacks type safe
+        https://bugs.webkit.org/show_bug.cgi?id=111802
+
+        Reviewed by Adam Barth.
+
+        Make all v8 handle weak callbacks typesafe by adding a new class WeakHandleListner
+        that uses templates to generate the callback proxies that have the correct type
+        arguments. Now getting the arguments wrong will fail compilation.
+
+        No new tests, no change in behavior.
+
+        * bindings/v8/DOMDataStore.h:
+        (WebCore::::callback):
+        * bindings/v8/DOMWrapperMap.h:
+        (WebCore::DOMWrapperMap::DOMWrapperMap):
+        (WebCore::DOMWrapperMap::set):
+        (WebCore::DOMWrapperMap::reportMemoryUsage):
+        (DOMWrapperMap):
+        * bindings/v8/DOMWrapperWorld.cpp:
+        (WebCore::::callback):
+        (WebCore::DOMWrapperWorld::makeContextWeak):
+        * bindings/v8/ScriptState.cpp:
+        (WebCore::::callback):
+        (WebCore::ScriptState::ScriptState):
+        * bindings/v8/ScriptState.h:
+        (ScriptState):
+        * bindings/v8/ScriptWrappable.h:
+        (ScriptWrappable):
+        (WebCore::ScriptWrappable::setWrapper):
+        (WebCore::::callback):
+        * bindings/v8/V8AbstractEventListener.cpp:
+        (WebCore::::callback):
+        (WebCore::V8AbstractEventListener::setListenerObject):
+        * bindings/v8/V8AbstractEventListener.h:
+        (V8AbstractEventListener):
+        * bindings/v8/V8MutationCallback.cpp:
+        (WebCore::::callback):
+        (WebCore::V8MutationCallback::V8MutationCallback):
+        * bindings/v8/V8MutationCallback.h:
+        (V8MutationCallback):
+        * bindings/v8/V8NPObject.cpp:
+        (V8NPTemplateMap):
+        (WebCore::V8NPTemplateMap::set):
+        (WebCore::::callback):
+        (WebCore::staticNPObjectMap):
+        * bindings/v8/V8Utilities.h:
+        (WeakHandleListener):
+        (WebCore::WeakHandleListener::makeWeak):
+        (WebCore::WeakHandleListener::WeakHandleListener):
+        (WebCore::WeakHandleListener::invokeWeakCallback):
+        * bindings/v8/V8ValueCache.cpp:
+        (WebCore::::callback):
+        (WebCore::StringCache::v8ExternalStringSlow):
+        * bindings/v8/custom/V8InjectedScriptManager.cpp:
+        (WebCore::::callback):
+        (WebCore::createInjectedScriptHostV8Wrapper):
+
 2013-04-01  Tien-Ren Chen  <trchen@chromium.org>
 
         Hide non-coordinated scrollbars for Android M26
