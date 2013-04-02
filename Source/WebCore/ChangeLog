@@ -1,3 +1,26 @@
+2013-04-02  Dmitry Gozman  <dgozman@chromium.org>
+
+        Web Inspector: allow referencing of nodes that have not been pushed to the front-end
+        https://bugs.webkit.org/show_bug.cgi?id=110921
+
+        Reviewed by Pavel Feldman.
+
+        Nodes not yet pushed to front-end are referenced by BackendNodeId and retained.
+        One can group nodes when generating BackendNodeIds to release them all together later.
+
+        To resolve node references by BackendNodeId, frontend should use new pushNodeByBackendIdToFrontend method.
+        This will invalidate the generated BackendNodeId.
+
+        * inspector/Inspector.json:
+        * inspector/InspectorDOMAgent.cpp:
+        (WebCore::InspectorDOMAgent::discardBindings):
+        (WebCore::InspectorDOMAgent::backendNodeIdForNode):
+        (WebCore::InspectorDOMAgent::releaseBackendNodeIds):
+        (WebCore::InspectorDOMAgent::pushNodeByBackendIdToFrontend):
+        * inspector/InspectorDOMAgent.h:
+        (WebCore):
+        (InspectorDOMAgent):
+
 2013-04-02  Andrei Bucur  <abucur@adobe.com>
 
         [CSS Regions] Nested auto-height regions don't layout correctly
