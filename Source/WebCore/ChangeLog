@@ -1,5 +1,72 @@
 2013-04-02  Jer Noble  <jer.noble@apple.com>
 
+        Add platform AudioSession and iOS platform-specific code.
+        https://bugs.webkit.org/show_bug.cgi?id=113813
+        <rdar://problem/11701792>
+
+        Reviewed by Eric Carlson.
+
+        Replace the deprecated AudioToolbox AudioSession APIs with the new AVAudioSession API.
+        To protect against exposing platform specific intrinsics to cross-platform code, add a
+        platform generic class AudioSession, with port-specific implementations. A default
+        implementation is provided.
+
+        Add a new listener interface to receive interruption notifications:
+        * platform/audio/AudioSessionListener.h: Added.
+        (WebCore::AudioSessionListener::AudioSessionListener):
+        (WebCore::AudioSessionListener::~AudioSessionListener):
+
+        Add a platform generic AudioSession class:
+        * platform/audio/AudioSession.cpp: Added.
+        (AudioSession::sharedSession): AudioSession is a singleton object, and this is its accessor.
+        (AudioSession::addListener): Add the parameter to the listeners set.
+        (AudioSession::removeListener): Remove the parameter from the listers set.
+        (AudioSession::beganAudioInterruption): Iterate over the parameters.
+        (AudioSession::endedAudioInterruption): Ditto.
+        (AudioSession::AudioSession): Empty stub.
+        (AudioSession::~AudioSession): Ditto.
+        (AudioSession::setCategory): Ditto.
+        (AudioSession::category): Ditto.
+        (AudioSession::sampleRate): Ditto.
+        (AudioSession::numberOfOutputChannels): Ditto.
+        (AudioSession::setActive): Ditto.
+        (AudioSession::preferredBufferDuration): Ditto.
+        (AudioSession::setPreferredBufferDuration): Ditto.
+        * platform/audio/AudioSession.h: Added.
+
+        Add IOS-specific AudioSession implementation:
+        * platform/audio/ios/AudioSessionIOS.mm: Added.
+        (-[WebAudioSessionHelper initWithCallback:WebCore::]): Register for interruption notifications.
+        (-[WebAudioSessionHelper dealloc]): Unregister for interruption notifications.
+        (-[WebAudioSessionHelper interruption:]): Pass to AudioSession.
+        (WebCore::AudioSessionPrivate::AudioSessionPrivate): Private storage for AudioSessionIOS.
+        (WebCore::AudioSession::AudioSession): Create AudioSessionPrivate and WebAudioSessionHelper.
+        (WebCore::AudioSession::~AudioSession): Simple destructor.
+        (WebCore::AudioSession::setCategory): Check the current categoryOverride, and refuse to overwrite
+            "MediaPlayback" with "AmbientSound".
+        (WebCore::AudioSession::setCategoryOverride): Simple setter.
+        (WebCore::AudioSession::categoryOverride): Simple getter.
+        (WebCore::AudioSession::category): Pass to AVAudioSession.
+        (WebCore::AudioSession::sampleRate): Ditto.
+        (WebCore::AudioSession::numberOfOutputChannels): Ditto.
+        (WebCore::AudioSession::setActive): Ditto.
+        (WebCore::AudioSession::preferredBufferDuration): Ditto.
+        (WebCore::AudioSession::setPreferredBufferDuration): Ditto.
+
+        Use the new AudioSession class in place of explicit AudioToolbox or AVAudioSession calls:
+        * platform/audio/ios/AudioDestinationIOS.cpp:
+        (WebCore::AudioDestination::hardwareSampleRate): Pass to AudioSession.
+        (WebCore::AudioDestination::maxChannelCount): Ditto.
+        (WebCore::AudioDestinationIOS::AudioDestinationIOS): Register for listeners and activate.
+        (WebCore::AudioDestinationIOS::~AudioDestinationIOS): Unregister and deactivate.
+        (WebCore::AudioDestinationIOS::configure): Use AudioSession to set the buffer length.
+        * platform/audio/ios/AudioDestinationIOS.h:
+
+        Add the new files to the project:
+        * WebCore.xcodeproj/project.pbxproj:
+
+2013-04-02  Jer Noble  <jer.noble@apple.com>
+
         Upstream AudioDestinationIOS.
         https://bugs.webkit.org/show_bug.cgi?id=113806
 
