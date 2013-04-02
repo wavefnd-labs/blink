@@ -1,3 +1,49 @@
+2013-04-02  ChangSeok Oh  <changseok.oh@collabora.com>
+
+        [GTK][AC] Support preserves3D css property for clutter ac backend.
+        https://bugs.webkit.org/show_bug.cgi?id=113318
+
+        Reviewed by Gustavo Noronha Silva.
+
+        This patch brings preserve-3D css property support to WebKitGtk+ with clutter ac backed.
+        Most of the code is based on Mac port's implementation. The core concept is that
+        if a layer has preserve-3d property false, we mark itself and its immediate children
+        to make them flatten. And then we remove 3D factor in a modelView matrix
+        when applying it to each actor.
+
+        No new tests as this is covered with existing AC tests.
+
+        * platform/graphics/clutter/GraphicsLayerActor.cpp:
+        (_GraphicsLayerActorPrivate):
+        (graphics_layer_actor_init):
+        (graphicsLayerActorApplyTransform):
+        (graphicsLayerActorNew):
+        (graphicsLayerActorRemoveFromSuperLayer):
+        (graphicsLayerActorSetDrawsContent):
+        (graphicsLayerActorSetFlatten):
+        * platform/graphics/clutter/GraphicsLayerActor.h:
+        * platform/graphics/clutter/GraphicsLayerClutter.cpp:
+        (WebCore::GraphicsLayerClutter::~GraphicsLayerClutter):
+        (WebCore::GraphicsLayerClutter::platformLayer):
+        (WebCore::GraphicsLayerClutter::moveOrCopyAnimations):
+        (WebCore):
+        (WebCore::GraphicsLayerClutter::setPreserves3D):
+        (WebCore::GraphicsLayerClutter::flushCompositingState):
+        (WebCore::GraphicsLayerClutter::recursiveCommitChanges):
+        (WebCore::GraphicsLayerClutter::commitLayerChangesAfterSublayers):
+        (WebCore::GraphicsLayerClutter::commitLayerChangesBeforeSublayers):
+        (WebCore::GraphicsLayerClutter::updateGeometry):
+        (WebCore::GraphicsLayerClutter::updateSublayerList):
+        (WebCore::GraphicsLayerClutter::updateStructuralLayer):
+        (WebCore::GraphicsLayerClutter::ensureStructuralLayer):
+        (WebCore::GraphicsLayerClutter::structuralLayerPurpose):
+        (WebCore::GraphicsLayerClutter::layerForSuperlayer):
+        * platform/graphics/clutter/GraphicsLayerClutter.h:
+        (CommitState):
+        (WebCore::GraphicsLayerClutter::CommitState::CommitState):
+        (GraphicsLayerClutter):
+        (WebCore::GraphicsLayerClutter::primaryLayer):
+
 2013-04-02  Adam Klein  <adamk@chromium.org>
 
         HTML parser should consistently inspect the namespace of elements on the stack of open elements
