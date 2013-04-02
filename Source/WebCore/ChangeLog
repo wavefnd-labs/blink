@@ -1,3 +1,31 @@
+2013-04-01  Elliott Sprehn  <esprehn@chromium.org>
+
+        RenderObject::offsetParent should return Element*
+        https://bugs.webkit.org/show_bug.cgi?id=113739
+
+        Reviewed by Abhishek Arya.
+
+        The offsetParent of a node should always be an Element, ensure this
+        by fixing RenderObject::offsetParent to return an Element* and clean up
+        the method to match the algorithm in the spec which lets us remove the
+        comments that were trying to explain what was going on.
+
+        This also hardens against badness where RenderObject::offsetParent
+        could have returned a renderer with a non-Element node which would result
+        in a bad cast in Element::offsetParent. We fixed all cases of this, but
+        this patch makes sure such things never happen again.
+
+        No new tests, no change in behavior.
+
+        * dom/Element.cpp:
+        (WebCore::Element::offsetParent):
+        * rendering/RenderBoxModelObject.cpp:
+        (WebCore::RenderBoxModelObject::adjustedPositionRelativeToOffsetParent):
+        * rendering/RenderObject.cpp:
+        (WebCore::RenderObject::offsetParent): Now returns Element*.
+        * rendering/RenderObject.h:
+        (RenderObject):
+
 2013-04-01  Alpha Lam  <hclam@chromium.org>
 
         Simply GIFImageReader error handling
