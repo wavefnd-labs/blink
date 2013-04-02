@@ -1,3 +1,43 @@
+2013-04-02  Adam Klein  <adamk@chromium.org>
+
+        HTML parser should consistently inspect the namespace of elements on the stack of open elements
+        https://bugs.webkit.org/show_bug.cgi?id=113723
+
+        Reviewed by Adam Barth.
+
+        Added HTMLStackItem::matchesHTMLTag method and use that nearly
+        everywhere instead of HTMLStackItem::hasLocalName. The most important
+        of these changes is in HTMLElementStack's inScopeCommon() function,
+        where the use of matchesHTMLTag means that any of the inXXXScope()
+        calls now only match HTML tags.
+
+        Tests: html5lib/generated/run-namespace-sensitivity-data.html
+               html5lib/generated/run-namespace-sensitivity-write.html
+
+        * html/parser/HTMLConstructionSite.cpp:
+        (WebCore::HTMLConstructionSite::generateImpliedEndTagsWithExclusion):
+        * html/parser/HTMLElementStack.cpp:
+        (WebCore::HTMLElementStack::popUntil):
+        (WebCore::HTMLElementStack::topmost):
+        (WebCore::inScopeCommon):
+        (WebCore::HTMLElementStack::inScope):
+        (WebCore::HTMLElementStack::inListItemScope):
+        (WebCore::HTMLElementStack::inTableScope):
+        (WebCore::HTMLElementStack::inButtonScope):
+        (WebCore::HTMLElementStack::inSelectScope):
+        * html/parser/HTMLElementStack.h:
+        (WebCore::HTMLElementStack::popUntilPopped):
+        * html/parser/HTMLFormattingElementList.cpp:
+        (WebCore::HTMLFormattingElementList::closestElementInScopeWithName):
+        * html/parser/HTMLStackItem.h:
+        (WebCore::HTMLStackItem::matchesHTMLTag):
+        (HTMLStackItem):
+        * html/parser/HTMLTreeBuilder.cpp:
+        (WebCore::HTMLTreeBuilder::HTMLTreeBuilder):
+        (WebCore::HTMLTreeBuilder::processAnyOtherEndTagForInBody):
+        (WebCore::HTMLTreeBuilder::processEndTagForInCell):
+        (WebCore::HTMLTreeBuilder::processEndTagForInBody):
+
 2013-04-02  Hayato Ito  <hayato@chromium.org>
 
         Report memory usage for ShadowDistributedRules.
