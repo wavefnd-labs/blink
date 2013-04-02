@@ -1,3 +1,27 @@
+2013-04-01  Adam Barth  <abarth@webkit.org>
+
+        Assertion failure !m_lastChunkBeforeScript in HTMLDocumentParser during inspector/debugger/pause-in-inline-script.html
+        https://bugs.webkit.org/show_bug.cgi?id=112369
+
+        Reviewed by Eric Seidel.
+
+        The threaded HTML parser wasn't correctly handling the nested event
+        loops that can arise from the JavaScript debugger and from
+        showModalDialog. When the parser received a chunk from the background
+        parser, it was always processing it immediately, which lead to
+        re-entrancy. Now, we'll queue the chunk in the speculation buffer and
+        process it once the stack unwinds.
+
+        * html/parser/HTMLDocumentParser.cpp:
+        (WebCore::HTMLDocumentParser::~HTMLDocumentParser):
+        (WebCore::HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::processParsedChunkFromBackgroundParser):
+        (WebCore::HTMLDocumentParser::pumpPendingSpeculations):
+        (WebCore::HTMLDocumentParser::insert):
+        * html/parser/HTMLParserScheduler.cpp:
+        (WebCore::PumpSession::PumpSession):
+        * html/parser/HTMLParserScheduler.h:
+
 2013-04-01  Michael Pruett  <michael@68k.org>
 
         [JSC] IndexedDB: Exceptions not thrown for non-cloneable values
