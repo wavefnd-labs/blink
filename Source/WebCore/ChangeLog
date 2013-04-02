@@ -1,3 +1,72 @@
+2013-04-01  Hayato Ito  <hayato@chromium.org>
+
+        [Shadow DOM] Change the order of event dispatching at AT_TARGET phase.
+        https://bugs.webkit.org/show_bug.cgi?id=113676
+
+        Reviewed by Dimitri Glazkov.
+
+        Change the order of event dispatching at AT_TARGET phase so that it mimics bubbling events.
+
+        The spec side bug is:
+        https://www.w3.org/Bugs/Public/show_bug.cgi?id=21404
+
+        Example:
+
+        Given the event path, from Node A (top-most) to Node G (target,
+        inner-most), where C and D are shadow hosts and G is the target,
+        the event dispatching order in the current WebKit implementation is:
+        (T: AT_TARGET, C: CAPTURING, B: BUBBLING)
+
+        For bubbling events:
+
+          A          1 (C)  11 (B)
+          B          2 (C)  10 (B)
+          C (SH)     3 (T)
+          D          4 (C)   9 (B)
+          E (SH)     5 (T)
+          F          6 (C)   8 (B)
+          G (Target) 7 (T)
+
+        For non-bubbling events:
+
+          A          1 (C)
+          B          2 (C)
+          C (SH)     3 (T)
+          D          4 (C)
+          E (SH)     5 (T)
+          F          6 (C)
+          G (Target) 7 (T)
+
+        This patch has changed the order of event dispatching as follows:
+
+        For bubbling events:
+
+          A          1 (C)  11 (B)
+          B          2 (C)  10 (B)
+          C (SH)             9 (T)
+          D          3 (C)   8 (B)
+          E (SH)             7 (T)
+          F          4 (C)   6 (B)
+          G (Target)         5 (T)
+
+        For non-bubbling events:
+
+          A          1 (C)
+          B          2 (C)
+          C (SH)            7 (T)
+          D          3 (C)
+          E (SH)            6 (T)
+          F          4 (C)
+          G (Target)        5 (T)
+
+        No new tests, updating existing layouts.
+
+        * dom/EventDispatcher.cpp:
+        (WebCore::EventDispatcher::dispatchEventAtCapturing):
+        (WebCore::EventDispatcher::dispatchEventAtBubbling):
+        * dom/EventDispatcher.h:
+        (EventDispatcher):
+
 2013-04-01  Nate Chapin  <japhet@chromium.org>
 
         Crash in WebCore::HTMLMediaElement::~HTMLMediaElement.
