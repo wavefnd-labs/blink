@@ -1,3 +1,32 @@
+2013-04-02  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        fast/dom/HTMLImageElement/image-alt-text.html and fast/dom/HTMLInputElement/input-image-alt-text.html are failing
+        https://bugs.webkit.org/show_bug.cgi?id=94198
+
+        Reviewed by Darin Adler.
+
+        Fix alt text not being displayed for img elements or input of type
+        "image" due to insufficient size. imageSizeForError() was adding
+        padding for the alt text but setImageSizeForAltText() was not. The
+        issue was occurring in paintReplaced() because the contentWidth() /
+        contentHeight() would be exactly the same size as the alt text.
+        However, paintReplaced() first draws an outline rect where the
+        image should be and then reduces the usable width / height for the
+        alt text by 2 so that the text does not get printed over the rect
+        borders. However, after decreasing the usable width / height, there
+        is no longer enough space to draw the text.
+
+        No new tests, already covered by existing tests.
+
+        * rendering/RenderImage.cpp:
+        (WebCore::RenderImage::setImageSizeForAltText): Add padding to the text size
+        so that the alt text can still be drawn, despite the outline rect
+        borders. Such padding was already used in imageSizeForError(). Also use
+        ceilf() for the value returned by Font::width() instead of truncating it.
+        This is needed because we need to fit the whole text in the image and this
+        may not be the case if we truncate.
+        (WebCore::RenderImage::paintReplaced):
+
 2013-04-02  Raymond Toy  <rtoy@google.com>
 
         Add support for using ARM FFT in WebAudio
