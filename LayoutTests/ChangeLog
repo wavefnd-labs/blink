@@ -1,3 +1,62 @@
+2013-04-02  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Filters] Filter outsets clipped on composited layers when filter is applied after first layout
+        https://bugs.webkit.org/show_bug.cgi?id=109098
+
+        Reviewed by Dean Jackson.
+
+        * compositing/filters/sw-layer-overlaps-hw-shadow-expected.txt:
+        * compositing/filters/sw-nested-shadow-overlaps-hw-nested-shadow-expected.txt:
+        * compositing/filters/sw-shadow-overlaps-hw-layer-expected.txt:
+        * compositing/filters/sw-shadow-overlaps-hw-shadow-expected.txt:
+
+            The above tests needed rebaselining because we're now using smaller layers on Safari.
+            We aren't inflating layers for filter outsets since CoreAnimation does it for us
+            already.
+
+        * css3/filters/composited-layer-bounds-after-sw-blur-animation-expected.txt: Added.
+        * css3/filters/composited-layer-bounds-after-sw-blur-animation.html: Added.
+        * css3/filters/composited-layer-bounds-with-composited-blur-expected.txt: Added.
+        * css3/filters/composited-layer-bounds-with-composited-blur.html: Added.
+        * css3/filters/composited-layer-child-bounds-after-composited-to-sw-shadow-change-expected.txt: Added.
+        * css3/filters/composited-layer-child-bounds-after-composited-to-sw-shadow-change.html: Added.
+        * css3/filters/composited-layer-promotion-after-outset-overlap-change-using-composited-shadow-expected.txt: Added.
+        * css3/filters/composited-layer-promotion-after-outset-overlap-change-using-composited-shadow.html: Added.
+        * css3/filters/composited-layer-promotion-after-outset-overlap-change-using-sw-shadow-expected.txt: Added.
+        * css3/filters/composited-layer-promotion-after-outset-overlap-change-using-sw-shadow.html: Added.
+
+            The above tests are all new. They mostly test edge cases with filter render mode
+            changes, filter outset changes, and composited layer promotion due to overlap.
+
+            Before this patch, composited-layer-bounds-after-sw-blur-animation.html breaks
+            visibly on Safari WebKit nightly. The blur filter in the test appears clipped before
+            this patch. The other tests render the same before and after this patch, but now their
+            layer sizes are smaller.
+
+        * css3/filters/filter-change-repaint-composited-expected.png:
+        * css3/filters/filter-change-repaint-composited.html:
+
+            This test has been expanded with two more cases, including the original reproduction of
+            this bug. The test needs rebaselining on Chromium Linux and Win.
+
+        * platform/chromium-win/css3/filters/filter-change-repaint-composited-expected.png: Removed.
+        * platform/chromium/TestExpectations:
+        * platform/chromium/compositing/filters/sw-nested-shadow-overlaps-hw-nested-shadow-expected.txt: Added.
+        * platform/chromium/compositing/filters/sw-shadow-overlaps-hw-shadow-expected.txt: Added.
+        * platform/chromium/css3/filters/composited-layer-bounds-after-sw-blur-animation-expected.txt: Added.
+        * platform/chromium/css3/filters/composited-layer-bounds-with-composited-blur-expected.txt: Added.
+        * platform/chromium/css3/filters/composited-layer-child-bounds-after-composited-to-sw-shadow-change-expected.txt: Added.
+        * platform/chromium/css3/filters/composited-layer-promotion-after-outset-overlap-change-using-composited-shadow-expected.txt: Added.
+        * platform/chromium/css3/filters/composited-layer-promotion-after-outset-overlap-change-using-sw-shadow-expected.txt: Added.
+
+            We need different expectations for Chromium for the new tests because layer bounds
+            include filter outsets on Chromium but not on Safari.
+
+        * platform/chromium/css3/filters/filter-change-repaint-composited-expected.png: Added.
+        * platform/qt/TestExpectations:
+
+            Note that we need baselines on Qt for the new and updated tests.
+
 2013-04-02  Benjamin Poulain  <benjamin@webkit.org>
 
         Unreviewed, rolling out r147423.

@@ -1,3 +1,89 @@
+2013-04-02  Max Vujovic  <mvujovic@adobe.com>
+
+        [CSS Filters] Filter outsets clipped on composited layers when filter is applied after first layout
+        https://bugs.webkit.org/show_bug.cgi?id=109098
+
+        Reviewed by Dean Jackson.
+
+        This patch addresses the following issues:
+        (1) Compositors who can compute their own filter outsets don't need WebKit to inflate the
+            composited layer bounds. Eventually, all platforms' compositors should be able to
+            compute their own filter outsets.
+        (2) When filter outsets change, we need to update composited layer bounds if the filters are
+            painted in software.
+        (3) When filter outsets change, we need to recompute the overlap map to promote the correct
+            layers to composited layers on all platforms.
+
+        Tests: css3/filters/composited-layer-bounds-after-sw-blur-animation.html
+               css3/filters/composited-layer-bounds-with-composited-blur.html
+               css3/filters/composited-layer-child-bounds-after-composited-to-sw-shadow-change.html
+               css3/filters/composited-layer-promotion-after-outset-overlap-change-using-composited-shadow.html
+               css3/filters/composited-layer-promotion-after-outset-overlap-change-using-sw-shadow.html
+
+        * platform/graphics/IntRectExtent.h:
+        (WebCore::IntRectExtent::isZero):
+        (IntRectExtent):
+
+            Make isZero public on IntRectExtent.
+
+        * rendering/RenderLayer.cpp:
+        (WebCore::hasOrHadFilters):
+
+            Helper function used to exit early from filters related code.
+
+        (WebCore::RenderLayer::updateFilters):
+
+            Move filter updating code from RenderLayer::styleChanged into this new method.
+
+            This method calls RenderLayerBacking::updateFilters instead of
+            RenderLayerBacking::updateGraphicsLayerGeometry. RenderLayerBacking::updateFilters lets
+            us know whether there was a filter paint mode change (i.e. the filters were painted in
+            software and are now painted in the compositor, or vice-versa). We need to know this
+            earlier, in RenderLayer::styleChanged, because we may need to rebuild the compositing
+            layers due to a filter paint mode change.
+
+        (WebCore::RenderLayer::styleChanged):
+
+            Add a condition for filters for setCompositingLayersNeedRebuild. If the filter outsets
+            on a layer changed, we need to rebuild the compositing layers because there could be new
+            overlap. Likewise, if there are or were filter outsets and the filter paint mode changed
+            the layer bounds (and child positions) may have changed. In either case, we don't
+            rebuild the compositing layers if there is an accelerated filter animation running.
+
+            Remove old code to detect a filter paint mode change from the end of
+            RenderLayer::styleChanged because it could never be executed. The old code counted on
+            RenderLayerBacking::canCompositeFilters to change on its own, but it doesn't change
+            unless updateFilters gets called. Thus, we could never enter the if statement that
+            calls setBackingNeedsRepaint.
+
+        * rendering/RenderLayerBacking.cpp:
+        (WebCore::RenderLayerBacking::updateFilters):
+
+            Now return true if there was a filter paint mode change, so RenderLayer::styleChanged
+            can decide if it should rebuild the compositing layers.
+
+            Call updateOrRemoveFilterEffectRenderer and setContentsNeedDisplay if there was a
+            render mode change. We need to either destroy or create the software renderer and we
+            need to repaint the layer contents if there was a render mode change.
+
+        (WebCore::RenderLayerBacking::updateGraphicsLayerGeometry):
+
+            Don't call updateFilters here. Call it earlier in RenderLayer::styleChanged, for reasons
+            explained above.
+
+        * rendering/RenderLayerBacking.h:
+        (RenderLayerBacking):
+
+            Make updateFilters public so RenderLayer::styleChanged can call it.
+
+        * rendering/RenderLayerCompositor.cpp:
+        (WebCore::RenderLayerCompositor::calculateCompositedBounds):
+
+            If the platform's compositor computes filter outsets for its layers internally, do not
+            inflate WebKit's composited bounds for filter outsets. This results in smaller layers
+            on Safari. Note that we still need to include filter outsets in layer bounds for other
+            situations like overlap testing in WebKit and when we're painting filters in software.
+
 2013-04-02  Martin Robinson  <mrobinson@igalia.com>
 
         [GTK] Make libsecret optional
