@@ -44,14 +44,14 @@ public:
     WTF_EXPORT_PRIVATE void cycle();
     
 private:
-#if PLATFORM(MAC)
+#if OS(DARWIN)
     int m_iterationLimit;
     int m_iterationCount;
     NSAutoreleasePool* m_pool;
 #endif
 };
 
-#if !PLATFORM(MAC)
+#if !OS(DARWIN)
 inline AutodrainedPool::AutodrainedPool(int) { }
 inline AutodrainedPool::~AutodrainedPool() { }
 inline void AutodrainedPool::cycle() { }
