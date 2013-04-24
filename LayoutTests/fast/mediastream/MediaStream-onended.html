@@ -26,39 +26,20 @@ function getUserMedia(dictionary, callback) {
 
 var stream;
 
-function streamEnded2() {
+function streamEnded() {
     testPassed('streamEnded was called.');
     shouldBeTrue('stream.ended');
     finishJSTest();
 }
 
-function gotStream2(s) {
+function gotStream(s) {
     stream = new webkitMediaStream(s);
     shouldBeFalse('stream.ended');
     try {
-        stream.onended = streamEnded2;
+        stream.onended = streamEnded;
         s.stop();
     } catch (e) {
-        testFailed('MediaStream threw exception :' + e);
-        finishJSTest();
-    }
-}
-
-function streamEnded() {
-    testPassed('streamEnded was called.');
-    shouldBeTrue('stream.ended');
-
-    getUserMedia({audio:true, video:true}, gotStream2);
-}
-
-function gotStream(s) {
-    stream = s;
-    shouldBeFalse('stream.ended');
-    try {
-        stream.onended = streamEnded;
-        stream.stop();
-    } catch (e) {
-        testFailed('MediaStream threw exception :' + e);
+        testFailed('LocalMediaStream threw exception :' + e);
         finishJSTest();
     }
 }
