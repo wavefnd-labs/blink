@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Google Inc. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -32,42 +32,32 @@
 #define CustomElementConstructor_h
 
 #include "core/dom/ContextDestructionObserver.h"
-#include "core/dom/Document.h"
+#include "core/dom/ExceptionCode.h"
 #include "core/dom/QualifiedName.h"
 #include <wtf/Forward.h>
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
-#include <wtf/text/AtomicString.h>
 
 namespace WebCore {
 
 class Document;
 class Element;
-class ScriptState;
-class ScriptValue;
 
-PassRefPtr<Element> setTypeExtension(PassRefPtr<Element>, const AtomicString& typeExtension);
-
-class CustomElementConstructor : public RefCounted<CustomElementConstructor> , public ContextDestructionObserver {
+class CustomElementConstructor: public RefCounted<CustomElementConstructor>, public ContextDestructionObserver
+{
 public:
-    static PassRefPtr<CustomElementConstructor> create(ScriptState*, Document*, const QualifiedName& typeName, const QualifiedName& localName, const ScriptValue&);
+    static PassRefPtr<CustomElementConstructor> create(Document* document, const QualifiedName& typeName, const QualifiedName& localName);
+    virtual ~CustomElementConstructor() {}
 
-    virtual ~CustomElementConstructor();
-
-    Document* document() const { return static_cast<Document*>(m_scriptExecutionContext); }
-    const QualifiedName& typeName() const { return m_typeName; }
-    const QualifiedName& localName() const { return m_localName; }
-    bool isExtended() const { return m_typeName != m_localName; }
-
-    PassRefPtr<Element> createElement();
+    PassRefPtr<Element> createElement(ExceptionCode&);
 
 private:
-    CustomElementConstructor(Document*, const QualifiedName& typeName, const QualifiedName& localName);
+    explicit CustomElementConstructor(Document* document, const QualifiedName& type, const QualifiedName& name);
+    Document* document() const;
+    bool isForTypeExtension() const { return m_type != m_name; }
 
-    PassRefPtr<Element> createElementInternal();
-
-    QualifiedName m_typeName;
-    QualifiedName m_localName;
+    QualifiedName m_type;
+    QualifiedName m_name;
 };
 
 }
