@@ -32,8 +32,7 @@
 namespace WebCore {
 
 // A base class for any attributes that are needed which would affect
-// the creation of the Canvas's rendering context. Currently only the
-// WebGLRenderingContext uses this mechanism.
+// the creation of the Canvas's rendering context.
 
 class CanvasContextAttributes : public RefCounted<CanvasContextAttributes> {
   public:
