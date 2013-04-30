@@ -29,10 +29,10 @@
  */
 
 #include "config.h"
-#include "WebIDBDatabaseError.h"
+#include <public/WebIDBDatabaseError.h>
 
-#include "modules/indexeddb/IDBDatabaseError.h"
 #include <public/WebString.h>
+#include "modules/indexeddb/IDBDatabaseError.h"
 
 using namespace WebCore;
 
