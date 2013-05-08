@@ -24,12 +24,13 @@
  */
 
 #include "config.h"
-#include "ArrayBuffer.h"
+#include "wtf/ArrayBuffer.h"
 
-#include "ArrayBufferView.h"
-
-#include <wtf/RefPtr.h>
-#include <wtf/Vector.h>
+#include "wtf/ArrayBufferContents.h"
+#include "wtf/ArrayBufferDeallocationObserver.h"
+#include "wtf/ArrayBufferView.h"
+#include "wtf/RefPtr.h"
+#include "wtf/Vector.h"
 
 namespace WTF {
 
