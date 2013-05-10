@@ -32,25 +32,25 @@
 
 namespace WebCore {
 
-    struct KURLHash {
-        static unsigned hash(const KURL& key)
-        {
-            return key.string().impl()->hash();
-        }
+struct KURLHash {
+    static unsigned hash(const KURL& key)
+    {
+        return key.string().impl()->hash();
+    }
 
-        static bool equal(const KURL& a, const KURL& b)
-        {
-            return StringHash::equal(a.string(), b.string());
-        }
+    static bool equal(const KURL& a, const KURL& b)
+    {
+        return StringHash::equal(a.string(), b.string());
+    }
 
-        static const bool safeToCompareToEmptyOrDeleted = false;
-    };
+    static const bool safeToCompareToEmptyOrDeleted = false;
+};
 
 } // namespace WebCore
 
 namespace WTF {
 
-    template<> struct HashTraits<WebCore::KURL> : SimpleClassHashTraits<WebCore::KURL> { };
+template<> struct HashTraits<WebCore::KURL> : SimpleClassHashTraits<WebCore::KURL> { };
 
 } // namespace WTF
 
