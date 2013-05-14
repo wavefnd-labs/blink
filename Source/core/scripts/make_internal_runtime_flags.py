@@ -31,84 +31,23 @@ import os.path
 import sys
 
 import in_generator
-import license
 import make_runtime_features
 
-
-IDL_TEMPLATE = """
-%(license)s
-[
-    ImplementationLacksVTable
-] interface %(class_name)s {
-%(attribute_declarations)s
-};
-"""
-
-HEADER_TEMPLATE = """%(license)s
-#ifndef %(class_name)s_h
-#define %(class_name)s_h
-
-#include "RuntimeEnabledFeatures.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefPtr.h"
-#include "wtf/RefCounted.h"
-
-namespace WebCore {
-
-class %(class_name)s : public RefCounted<%(class_name)s> {
-public:
-    static PassRefPtr<%(class_name)s> create()
-    {
-        return adoptRef(new %(class_name)s);
-    }
-
-%(method_declarations)s
-
-private:
-    %(class_name)s() { }
-};
-
-} // namespace WebCore
-
-#endif // %(class_name)s_h
-"""
 
 # We want exactly the same parsing as RuntimeFeatureWriter
 # but generate different files.
 class InternalRuntimeFlagsWriter(make_runtime_features.RuntimeFeatureWriter):
     class_name = "InternalRuntimeFlags"
 
-    def __init__(self, *args, **kwargs):
-        make_runtime_features.RuntimeFeatureWriter.__init__(self, *args, **kwargs)
-        for feature in self._all_features:
-            feature['idl_attributes'] = "[Conditional=%(condition)s]" % feature if feature['condition'] else ""
-
-    def _attribute_declaration(self, feature):
-        # Currently assuming that runtime flags cannot be changed after startup
-        # it's possible that some can be and should be conditionally readonly.
-        return "    %(idl_attributes)s readonly attribute boolean %(first_lowered_name)sEnabled;" % feature
-
     def generate_idl(self):
-        return IDL_TEMPLATE % {
-            'class_name' : self.class_name,
-            'license' : license.license_for_generated_cpp(),
-            'attribute_declarations': "\n".join(map(self._attribute_declaration, self._non_custom_features))
+        return {
+            'features': self._features,
         }
 
-    def _method_declaration(self, feature):
-        # Setting after startup does not work for most runtime flags, but we
-        # could add an option to print setters for ones which do:
-        # void set%(name)sEnabled(bool isEnabled) { RuntimeEnabledFeatures::set%(name)sEnabled(isEnabled); }
-        # If we do that, we also need to respect Internals::resetToConsistentState.
-        declaration = """    bool %(first_lowered_name)sEnabled() { return RuntimeEnabledFeatures::%(first_lowered_name)sEnabled(); }
-""" % feature
-        return self.wrap_with_condition(declaration, feature['condition'])
-
     def generate_header(self):
-        return HEADER_TEMPLATE % {
-            'class_name' : self.class_name,
-            'license' : license.license_for_generated_cpp(),
-            'method_declarations' : "\n".join(map(self._method_declaration, self._non_custom_features)),
+        return {
+            'features': self._features,
+            'feature_sets': self._feature_sets(),
         }
 
     def generate_implementation(self):
