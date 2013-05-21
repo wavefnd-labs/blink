@@ -60,7 +60,7 @@ void Animation::applyEffects(bool previouslyActiveOrInEffect)
         m_target->addActiveAnimation(this);
         m_isInTargetActiveAnimationsList = true;
     }
-    m_cachedStyle = m_effect->sample(0, currentIteration());
+    m_compositableValues = m_effect->sample(currentIteration(), 0.0);
     m_target->setNeedsStyleRecalc(SyntheticStyleChange);
 }
 
@@ -68,7 +68,7 @@ void Animation::clearEffects()
 {
     m_target->removeActiveAnimation(this);
     m_isInTargetActiveAnimationsList = false;
-    m_cachedStyle.clear();
+    m_compositableValues.clear();
 }
 
 void Animation::updateChildrenAndEffects(bool wasActiveOrInEffect) const
