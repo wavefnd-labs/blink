@@ -49,6 +49,8 @@ public:
         OESElementIndexUintName,
         WebGLCompressedTextureATCName,
         WebGLCompressedTexturePVRTCName,
+        OESTextureFloatLinearName,
+        OESTextureHalfFloatLinearName,
     };
 
     void ref() { m_context->ref(); }
