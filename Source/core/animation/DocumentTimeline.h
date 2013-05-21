@@ -31,14 +31,15 @@
 #ifndef DocumentTimeline_h
 #define DocumentTimeline_h
 
-#include "core/animation/TimedItem.h"
-#include <wtf/RefPtr.h>
-#include <wtf/Vector.h>
+#include "core/animation/Player.h"
+#include "wtf/RefCounted.h"
+#include "wtf/RefPtr.h"
+#include "wtf/Vector.h"
 
 namespace WebCore {
 
 class Document;
-class Element;
+class TimedItem;
 
 // DocumentTimeline is constructed and owned by Document, and tied to its lifecycle.
 class DocumentTimeline : public RefCounted<DocumentTimeline> {
@@ -46,12 +47,14 @@ class DocumentTimeline : public RefCounted<DocumentTimeline> {
 public:
     static PassRefPtr<DocumentTimeline> create(Document*);
     void serviceAnimations(double);
-    void play(PassRefPtr<TimedItem>);
+    PassRefPtr<Player> play(TimedItem*);
+    double currentTime() { return m_currentTime; }
 
 private:
     DocumentTimeline(Document*);
+    double m_currentTime;
     Document* m_document;
-    Vector<RefPtr<TimedItem> > m_children;
+    Vector<RefPtr<Player> > m_players;
 };
 
 } // namespace
