@@ -40,6 +40,9 @@
       '../config.gyp:config',
       '../core/core.gyp/core.gyp:webcore',
     ],
+    'defines': [
+      'WEBKIT_IMPLEMENTATION=1',
+    ],
     'sources': [
       '<@(modules_files)',
     ],
