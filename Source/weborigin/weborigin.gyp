@@ -34,11 +34,16 @@
   ],
   'targets': [{
     'target_name': 'weborigin',
-    'type': 'static_library',
+    'type': '<(component)',
     'dependencies': [
       '../config.gyp:config',
       '../wtf/wtf.gyp:wtf',
       '<(DEPTH)/build/temp_gyp/googleurl.gyp:googleurl',
+      '<(DEPTH)/third_party/icu/icu.gyp:icui18n',
+      '<(DEPTH)/third_party/icu/icu.gyp:icuuc',
+    ],
+    'defines': [
+      'WEBORIGIN_IMPLEMENTATION=1',
     ],
     'sources': [
       '<@(weborigin_files)',
