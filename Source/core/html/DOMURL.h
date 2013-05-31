@@ -39,6 +39,7 @@ class Blob;
 class WebKitMediaSource;
 class MediaStream;
 class ScriptExecutionContext;
+class URLRegistrable;
 
 class DOMURL : public RefCounted<DOMURL> {
 
@@ -51,6 +52,9 @@ public:
     static void revokeObjectURL(ScriptExecutionContext*, const String&);
     static String createObjectURL(ScriptExecutionContext*, WebKitMediaSource*);
     static String createObjectURL(ScriptExecutionContext*, MediaStream*);
+
+private:
+    static String createPublicURL(ScriptExecutionContext*, URLRegistrable*);
 };
 
 } // namespace WebCore

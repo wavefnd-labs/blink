@@ -44,15 +44,17 @@ MediaSourceRegistry& MediaSourceRegistry::registry()
     return instance;
 }
 
-void MediaSourceRegistry::registerMediaSourceURL(const KURL& url, PassRefPtr<WebKitMediaSource> source)
+void MediaSourceRegistry::registerURL(SecurityOrigin*, const KURL& url, URLRegistrable* registrable)
 {
+    ASSERT(&registrable->registry() == this);
     ASSERT(isMainThread());
 
-    source->setPendingActivity(source.get());
+    WebKitMediaSource* source = static_cast<WebKitMediaSource*>(registrable);
+    source->setPendingActivity(source);
     m_mediaSources.set(url.string(), source);
 }
 
-void MediaSourceRegistry::unregisterMediaSourceURL(const KURL& url)
+void MediaSourceRegistry::unregisterURL(const KURL& url)
 {
     ASSERT(isMainThread());
     HashMap<String, RefPtr<WebKitMediaSource> >::iterator iter = m_mediaSources.find(url.string());
