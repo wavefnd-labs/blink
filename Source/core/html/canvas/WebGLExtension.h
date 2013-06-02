@@ -36,6 +36,7 @@ public:
     // Extension names are needed to properly wrap instances in JavaScript objects.
     enum ExtensionName {
         EXTDrawBuffersName,
+        EXTFragDepthName,
         EXTTextureFilterAnisotropicName,
         OESElementIndexUintName,
         OESStandardDerivativesName,
