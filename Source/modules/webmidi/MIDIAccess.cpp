@@ -39,9 +39,9 @@
 
 namespace WebCore {
 
-PassRefPtr<MIDIAccess> MIDIAccess::create(ScriptExecutionContext* context)
+PassRefPtr<MIDIAccess> MIDIAccess::create(ScriptExecutionContext* context, MIDIAccessPromise* promise)
 {
-    RefPtr<MIDIAccess> midiAccess(adoptRef(new MIDIAccess(context)));
+    RefPtr<MIDIAccess> midiAccess(adoptRef(new MIDIAccess(context, promise)));
     midiAccess->suspendIfNeeded();
     return midiAccess.release();
 }
@@ -51,8 +51,9 @@ MIDIAccess::~MIDIAccess()
     stop();
 }
 
-MIDIAccess::MIDIAccess(ScriptExecutionContext* context)
+MIDIAccess::MIDIAccess(ScriptExecutionContext* context, MIDIAccessPromise* promise)
     : ActiveDOMObject(context)
+    , m_promise(promise)
 {
     ScriptWrappable::init(this);
 }

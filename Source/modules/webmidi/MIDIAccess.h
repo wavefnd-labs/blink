@@ -43,11 +43,12 @@
 namespace WebCore {
 
 class ScriptExecutionContext;
+class MIDIAccessPromise;
 
 class MIDIAccess : public RefCounted<MIDIAccess>, public ScriptWrappable, public ActiveDOMObject, public EventTarget {
 public:
     virtual ~MIDIAccess();
-    static PassRefPtr<MIDIAccess> create(ScriptExecutionContext*);
+    static PassRefPtr<MIDIAccess> create(ScriptExecutionContext*, MIDIAccessPromise*);
 
     MIDIInputVector inputs() const { return m_inputs; }
     MIDIOutputVector outputs() const { return m_outputs; }
@@ -66,7 +67,7 @@ public:
     virtual bool canSuspend() const OVERRIDE { return true; }
 
 private:
-    explicit MIDIAccess(ScriptExecutionContext*);
+    explicit MIDIAccess(ScriptExecutionContext*, MIDIAccessPromise*);
 
     // EventTarget
     virtual void refEventTarget() OVERRIDE { ref(); }
@@ -77,6 +78,7 @@ private:
     MIDIInputVector m_inputs;
     MIDIOutputVector m_outputs;
     EventTargetData m_eventTargetData;
+    MIDIAccessPromise* m_promise;
 };
 
 } // namespace WebCore
