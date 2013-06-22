@@ -59,14 +59,14 @@ public:
     static MediaStreamCenter& instance();
 
     bool getMediaStreamTrackSources(PassRefPtr<MediaStreamTrackSourcesRequest>);
-    void didSetMediaStreamTrackEnabled(MediaStreamDescriptor*, MediaStreamComponent*);
-    bool didAddMediaStreamTrack(MediaStreamDescriptor*, MediaStreamComponent*);
-    bool didRemoveMediaStreamTrack(MediaStreamDescriptor*, MediaStreamComponent*);
-    void didStopLocalMediaStream(MediaStreamDescriptor*);
-    void didCreateMediaStream(MediaStreamDescriptor*);
+    void didSetMediaStreamTrackEnabled(WebKit::WebMediaStream, MediaStreamComponent*);
+    bool didAddMediaStreamTrack(WebKit::WebMediaStream, MediaStreamComponent*);
+    bool didRemoveMediaStreamTrack(WebKit::WebMediaStream, MediaStreamComponent*);
+    void didStopLocalMediaStream(WebKit::WebMediaStream);
+    void didCreateMediaStream(WebKit::WebMediaStream);
 
     // WebKit::WebMediaStreamCenterClient
-    virtual void stopLocalMediaStream(const WebKit::WebMediaStream&) OVERRIDE;
+    virtual void stopLocalMediaStream(WebKit::WebMediaStream) OVERRIDE;
 
 private:
     MediaStreamCenter();
