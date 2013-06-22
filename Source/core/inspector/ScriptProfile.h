@@ -41,8 +41,6 @@ class CpuProfile;
 
 namespace WebCore {
 
-class InspectorObject;
-
 class ScriptProfile : public RefCounted<ScriptProfile> {
 public:
     static PassRefPtr<ScriptProfile> create(const v8::CpuProfile* profile, double idleTime)
