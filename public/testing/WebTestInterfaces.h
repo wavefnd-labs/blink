@@ -38,6 +38,8 @@ namespace WebKit {
 class WebFrame;
 class WebMediaStreamCenter;
 class WebMediaStreamCenterClient;
+class WebMIDIAccessor;
+class WebMIDIAccessorClient;
 class WebRTCPeerConnectionHandler;
 class WebRTCPeerConnectionHandlerClient;
 class WebThemeEngine;
@@ -69,6 +71,8 @@ public:
 
     WebKit::WebMediaStreamCenter* createMediaStreamCenter(WebKit::WebMediaStreamCenterClient*);
     WebKit::WebRTCPeerConnectionHandler* createWebRTCPeerConnectionHandler(WebKit::WebRTCPeerConnectionHandlerClient*);
+
+    WebKit::WebMIDIAccessor* createMIDIAccessor(WebKit::WebMIDIAccessorClient*);
 
 #if WEBTESTRUNNER_IMPLEMENTATION
     TestInterfaces* testInterfaces();
