@@ -54,32 +54,14 @@ void CustomElementCallbackQueue::processInElementQueue(ElementQueue caller)
         // dispatch() may cause recursion which steals this callback
         // queue and reenters processInQueue. owner() == caller
         // detects this recursion and cedes processing.
-        dispatch(m_queue[m_index]);
+        m_queue[m_index]->dispatch(m_callbacks.get(), m_element.get());
     }
-
-    // FIXME: While there is only one kind of callback, stealing work
-    // is not possible. Remove this when there is a second kind of
-    // callback plus tests for shifting callback queues between
-    // element queues.
-    ASSERT(owner() == caller);
 
     if (owner() == caller && m_index == m_queue.size()) {
         // This processInQueue exhausted the queue; shrink it.
         m_index = 0;
         m_queue.resize(0);
         m_owner = -1;
-    }
-}
-
-void CustomElementCallbackQueue::dispatch(const Invocation& which)
-{
-    switch (which) {
-    case CustomElementLifecycleCallbacks::Created:
-        m_callbacks->created(m_element.get());
-        break;
-
-    default:
-        ASSERT_NOT_REACHED();
     }
 }
 
