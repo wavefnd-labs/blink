@@ -33,11 +33,12 @@
 
 #include "MediaSourcePrivateImpl.h"
 #include "WebMediaSourceClient.h"
+#include "wtf/PassOwnPtr.h"
 
 namespace WebKit {
 
 
-WebMediaSourceImpl::WebMediaSourceImpl(PassRefPtr<WebCore::MediaSourceBase> mediaSource)
+WebMediaSourceImpl::WebMediaSourceImpl(PassRefPtr<WebCore::HTMLMediaSource> mediaSource)
 {
     m_mediaSource = mediaSource;
 }
