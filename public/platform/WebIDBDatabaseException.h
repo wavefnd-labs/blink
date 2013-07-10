@@ -34,10 +34,10 @@
 namespace WebKit {
 
 enum WebIDBDatabaseException {
-    WebIDBDatabaseExceptionUnknownError = 24,
-    WebIDBDatabaseExceptionConstraintError = 25,
-    WebIDBDatabaseExceptionDataError = 26,
-    WebIDBDatabaseExceptionVersionError = 29,
+    WebIDBDatabaseExceptionUnknownError = 23,
+    WebIDBDatabaseExceptionConstraintError = 24,
+    WebIDBDatabaseExceptionDataError = 25,
+    WebIDBDatabaseExceptionVersionError = 28,
     WebIDBDatabaseExceptionAbortError = 17,
     WebIDBDatabaseExceptionQuotaError = 19,
 };
