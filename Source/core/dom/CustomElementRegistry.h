@@ -33,13 +33,10 @@
 
 #include "core/dom/CustomElementDefinition.h"
 #include "core/dom/CustomElementDescriptor.h"
-#include "core/dom/CustomElementUpgradeCandidateMap.h"
+#include "core/dom/CustomElementDescriptorHash.h"
 #include "core/dom/ExceptionCode.h"
-#include "core/dom/QualifiedName.h"
 #include "wtf/HashMap.h"
 #include "wtf/HashSet.h"
-#include "wtf/PassRefPtr.h"
-#include "wtf/RefCounted.h"
 #include "wtf/RefPtr.h"
 #include "wtf/text/AtomicString.h"
 #include "wtf/text/AtomicStringHash.h"
@@ -48,52 +45,22 @@ namespace WebCore {
 
 class CustomElementConstructorBuilder;
 class Document;
-class Element;
 
-// Element creation
-void setTypeExtension(Element*, const AtomicString& typeExtension);
+class CustomElementRegistry {
+    WTF_MAKE_NONCOPYABLE(CustomElementRegistry);
+protected:
+    friend class ActiveRegistrationContext;
 
-class CustomElementRegistry : public RefCounted<CustomElementRegistry> {
-    WTF_MAKE_NONCOPYABLE(CustomElementRegistry); WTF_MAKE_FAST_ALLOCATED;
-public:
     CustomElementRegistry() { }
     virtual ~CustomElementRegistry() { }
 
-    // Model
-    static bool isCustomTagName(const AtomicString& name) { return isValidTypeName(name); }
-
-    // Registration and definitions
-    void registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& name, ExceptionCode&);
-    CustomElementDefinition* findFor(Element*) const;
-
-    // Element creation
-    PassRefPtr<Element> createCustomTagElement(Document*, const QualifiedName& localName);
-    void didGiveTypeExtension(Element*, const AtomicString&);
-
-    // Lifecycle
-    void customElementWasDestroyed(Element*);
-
-private:
-    // Model
-    static bool isValidTypeName(const AtomicString&);
-    CustomElementDescriptor describe(Element*) const;
-
-    // Registration and definitions
+    CustomElementDefinition* registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& name, ExceptionCode&);
     CustomElementDefinition* find(const CustomElementDescriptor&) const;
 
-    // Lifecycle
-    void didCreateUnresolvedElement(const CustomElementDescriptor&, Element*);
-    void didResolveElement(CustomElementDefinition*, Element*) const;
-
-    // Registration and definitions
+private:
     typedef HashMap<CustomElementDescriptor, RefPtr<CustomElementDefinition> > DefinitionMap;
     DefinitionMap m_definitions;
     HashSet<AtomicString> m_registeredTypeNames;
-
-    // Element creation
-    typedef HashMap<Element*, AtomicString> ElementTypeMap;
-    ElementTypeMap m_elementTypeMap; // Creation-time "is" attribute value.
-    CustomElementUpgradeCandidateMap m_candidates;
 };
 
 } // namespace WebCore
