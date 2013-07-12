@@ -22,11 +22,12 @@
 #ifndef PageRuleCollector_h
 #define PageRuleCollector_h
 
-#include "core/css/resolver/StyleResolver.h"
+#include "core/css/resolver/MatchResult.h"
 #include "wtf/Vector.h"
 
 namespace WebCore {
 
+class StyleResolverState;
 class StyleRulePage;
 
 class PageRuleCollector {
