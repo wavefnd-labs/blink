@@ -37,31 +37,32 @@
 
 namespace WebCore {
 
-    class DedicatedWorkerThread;
+class DedicatedWorkerThread;
+struct WorkerThreadStartupData;
 
-    class DedicatedWorkerGlobalScope : public WorkerGlobalScope {
-    public:
-        typedef WorkerGlobalScope Base;
-        static PassRefPtr<DedicatedWorkerGlobalScope> create(const KURL&, const String& userAgent, DedicatedWorkerThread*, const String& contentSecurityPolicy, ContentSecurityPolicy::HeaderType contentSecurityPolicyType, PassRefPtr<SecurityOrigin> topOrigin, double timeOrigin, PassOwnPtr<WorkerClients>);
-        virtual ~DedicatedWorkerGlobalScope();
+class DedicatedWorkerGlobalScope : public WorkerGlobalScope {
+public:
+    typedef WorkerGlobalScope Base;
+    static PassRefPtr<DedicatedWorkerGlobalScope> create(DedicatedWorkerThread*, PassOwnPtr<WorkerThreadStartupData>, double timeOrigin);
+    virtual ~DedicatedWorkerGlobalScope();
 
-        virtual bool isDedicatedWorkerGlobalScope() const OVERRIDE { return true; }
+    virtual bool isDedicatedWorkerGlobalScope() const OVERRIDE { return true; }
 
-        // Overridden to allow us to check our pending activity after executing imported script.
-        virtual void importScripts(const Vector<String>& urls, ExceptionState&) OVERRIDE;
+    // Overridden to allow us to check our pending activity after executing imported script.
+    virtual void importScripts(const Vector<String>& urls, ExceptionState&) OVERRIDE;
 
-        // EventTarget
-        virtual const AtomicString& interfaceName() const OVERRIDE;
+    // EventTarget
+    virtual const AtomicString& interfaceName() const OVERRIDE;
 
-        void postMessage(PassRefPtr<SerializedScriptValue>, const MessagePortArray*, ExceptionState&);
+    void postMessage(PassRefPtr<SerializedScriptValue>, const MessagePortArray*, ExceptionState&);
 
-        DEFINE_ATTRIBUTE_EVENT_LISTENER(message);
+    DEFINE_ATTRIBUTE_EVENT_LISTENER(message);
 
-        DedicatedWorkerThread* thread();
+    DedicatedWorkerThread* thread();
 
-    private:
-        DedicatedWorkerGlobalScope(const KURL&, const String& userAgent, DedicatedWorkerThread*, PassRefPtr<SecurityOrigin> topOrigin, double timeOrigin, PassOwnPtr<WorkerClients>);
-    };
+private:
+    DedicatedWorkerGlobalScope(const KURL&, const String& userAgent, DedicatedWorkerThread*, PassRefPtr<SecurityOrigin> topOrigin, double timeOrigin, PassOwnPtr<WorkerClients>);
+};
 
 } // namespace WebCore
 
