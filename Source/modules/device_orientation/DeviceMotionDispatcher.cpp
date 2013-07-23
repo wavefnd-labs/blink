@@ -31,11 +31,9 @@
 #include "config.h"
 #include "DeviceMotionDispatcher.h"
 
-#include "core/platform/NotImplemented.h"
 #include "modules/device_orientation/DeviceMotionController.h"
 #include "modules/device_orientation/DeviceMotionData.h"
 #include "public/platform/Platform.h"
-#include "public/platform/WebDeviceMotionData.h"
 
 namespace WebCore {
 
@@ -53,24 +51,14 @@ DeviceMotionDispatcher::~DeviceMotionDispatcher()
 {
 }
 
-void DeviceMotionDispatcher::addController(DeviceMotionController* controller)
+void DeviceMotionDispatcher::addDeviceMotionController(DeviceMotionController* controller)
 {
-    bool wasEmpty = m_controllers.isEmpty();
-    if (!m_controllers.contains(controller))
-        m_controllers.append(controller);
-    if (wasEmpty)
-        startListening();
+    addController(controller);
 }
 
-void DeviceMotionDispatcher::removeController(DeviceMotionController* controller)
+void DeviceMotionDispatcher::removeDeviceMotionController(DeviceMotionController* controller)
 {
-    // Do not actually remove controller from the vector, instead zero them out.
-    // The zeros are removed after didChangeDeviceMotion has dispatched all events.
-    // This is to prevent re-entrancy case when a controller is destroyed while in the
-    // didChangeDeviceMotion method.
-    size_t index = m_controllers.find(controller);
-    if (index != notFound)
-        m_controllers[index] = 0;
+    removeController(controller);
 }
 
 void DeviceMotionDispatcher::startListening()
@@ -89,7 +77,7 @@ void DeviceMotionDispatcher::didChangeDeviceMotion(const WebKit::WebDeviceMotion
     bool needsPurge = false;
     for (size_t i = 0; i < m_controllers.size(); ++i) {
         if (m_controllers[i])
-            m_controllers[i]->didChangeDeviceMotion(m_lastDeviceMotionData.get());
+            static_cast<DeviceMotionController*>(m_controllers[i])->didChangeDeviceMotion(m_lastDeviceMotionData.get());
         else
             needsPurge = true;
     }
@@ -101,21 +89,6 @@ void DeviceMotionDispatcher::didChangeDeviceMotion(const WebKit::WebDeviceMotion
 DeviceMotionData* DeviceMotionDispatcher::latestDeviceMotionData()
 {
     return m_lastDeviceMotionData.get();
-}
-
-void DeviceMotionDispatcher::purgeControllers()
-{
-    size_t i = 0;
-    while (i < m_controllers.size()) {
-        if (!m_controllers[i]) {
-            m_controllers[i] = m_controllers.last();
-            m_controllers.removeLast();
-        } else
-            ++i;
-    }
-
-    if (m_controllers.isEmpty())
-        stopListening();
 }
 
 } // namespace WebCore
