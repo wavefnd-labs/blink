@@ -31,6 +31,8 @@
 #ifndef NormalizeAlgorithm_h
 #define NormalizeAlgorithm_h
 
+#include "wtf/Assertions.h"
+
 namespace WebKit { class WebCryptoAlgorithm; }
 
 namespace WebCore {
