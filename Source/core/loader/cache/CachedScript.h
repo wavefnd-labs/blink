@@ -26,14 +26,14 @@
 #ifndef CachedScript_h
 #define CachedScript_h
 
-#include "core/loader/cache/CachedResource.h"
+#include "core/loader/cache/Resource.h"
 
 namespace WebCore {
 
 class ResourceFetcher;
     class TextResourceDecoder;
 
-    class CachedScript : public CachedResource {
+    class CachedScript : public Resource {
     public:
         CachedScript(const ResourceRequest&, const String& charset);
         virtual ~CachedScript();

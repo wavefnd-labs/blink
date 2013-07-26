@@ -26,7 +26,7 @@
 
 #include "core/css/CSSSVGDocumentValue.h"
 
-#include "CachedResourceInitiatorTypeNames.h"
+#include "FetchInitiatorTypeNames.h"
 #include "core/css/CSSParser.h"
 #include "core/dom/Document.h"
 #include "core/loader/cache/CachedDocument.h"
@@ -53,7 +53,7 @@ CachedDocument* CSSSVGDocumentValue::load(ResourceFetcher* loader)
     if (!m_loadRequested) {
         m_loadRequested = true;
 
-        FetchRequest request(ResourceRequest(loader->document()->completeURL(m_url)), CachedResourceInitiatorTypeNames::css);
+        FetchRequest request(ResourceRequest(loader->document()->completeURL(m_url)), FetchInitiatorTypeNames::css);
         m_document = loader->requestSVGDocument(request);
     }
 
