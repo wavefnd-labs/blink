@@ -44,6 +44,12 @@ static std::ostream& operator<<(std::ostream& out, const String& str)
     return str.isEmpty() ? out : out << str.utf8().data();
 }
 
+// Output stream operator so gtest can print WTF::CString.
+static std::ostream& operator<<(std::ostream& out, const CString& str)
+{
+    return out << str.data();
+}
+
 } // namespace WTF
 
 
