@@ -32,22 +32,29 @@
 #define ActiveAnimations_h
 
 #include "core/animation/AnimationStack.h"
+#include "core/animation/css/CSSAnimations.h"
 #include "wtf/HashMap.h"
 #include "wtf/RefPtr.h"
 #include "wtf/Vector.h"
 
 namespace WebCore {
 
-class AnimationStack;
-
 class ActiveAnimations {
 public:
+    // Animations that are currently active for this element, their effects will be applied
+    // during a style recalc.
     AnimationStack* defaultStack() { return &m_defaultStack; }
-    bool isEmpty() const { return !m_defaultStack.hasActiveAnimations(); }
+    // Tracks the state of active CSS Animations. When active the individual animations will
+    // also be part of the default stack, but the mapping betwen animation name and player
+    // is kept here.
+    CSSAnimations* cssAnimations() { return &m_cssAnimations; }
+    // FIXME: Add AnimationStack for CSS Transitions
+    // CSS Transitions form a separate animation stack as they apply at a different level of
+    // the style cascade. Active transitions will not be present in the default stack.
+    bool isEmpty() const { return m_defaultStack.isEmpty() && m_cssAnimations.isEmpty(); }
 private:
     AnimationStack m_defaultStack;
-    // FIXME: Add AnimationStack for CSS Transitions
-    // FIXME: Add tracking data for CSS Animations
+    CSSAnimations m_cssAnimations;
 };
 
 } // namespace WebCore
