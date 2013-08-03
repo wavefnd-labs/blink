@@ -43,6 +43,7 @@ unsigned short AesKeyGenParams::length() const
 AesKeyGenParams::AesKeyGenParams(const WebKit::WebCryptoAlgorithm& algorithm)
     : Algorithm(algorithm)
 {
+    ASSERT(algorithm.aesKeyGenParams());
     ScriptWrappable::init(this);
 }
 
