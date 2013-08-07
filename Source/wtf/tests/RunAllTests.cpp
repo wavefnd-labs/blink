@@ -28,9 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "wtf/CurrentTime.h"
 #include "wtf/MainThread.h"
-#include "wtf/Threading.h"
+#include "wtf/WTF.h"
 #include <base/test/test_suite.h>
 #include <gmock/gmock.h>
 
