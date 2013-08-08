@@ -34,7 +34,6 @@
 #include "core/html/HTMLImport.h"
 #include "core/html/LinkResource.h"
 #include "core/loader/cache/CachedRawResource.h"
-#include "core/loader/cache/ResourcePtr.h"
 #include "core/platform/Supplementable.h"
 #include "core/platform/Timer.h"
 #include "wtf/FastAllocBase.h"
@@ -46,82 +45,8 @@ namespace WebCore {
 class ScriptExecutionContext;
 class ResourceFetcher;
 class HTMLImportLoader;
-class HTMLImportsController;
-class DocumentWriter;
 
-//
-// A LinkResource subclasss used for @rel=import.
-//
-class LinkImport : public LinkResource {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-
-    static PassRefPtr<LinkImport> create(HTMLLinkElement* owner);
-
-    explicit LinkImport(HTMLLinkElement* owner);
-    virtual ~LinkImport();
-
-    // LinkResource
-    virtual void process() OVERRIDE;
-    virtual Type type() const OVERRIDE { return Import; }
-    virtual void ownerRemoved() OVERRIDE;
-
-    Document* importedDocument() const;
-
-private:
-    RefPtr<HTMLImportLoader> m_loader;
-};
-
-class HTMLImportLoader : public RefCounted<HTMLImportLoader>, public HTMLImport, public CachedRawResourceClient {
-public:
-    enum State {
-        StateLoading,
-        StateWritten,
-        StateError,
-        StateReady
-    };
-
-    static PassRefPtr<HTMLImportLoader> create(HTMLImport* parent, const KURL&, const ResourcePtr<CachedScript>&);
-    virtual ~HTMLImportLoader();
-
-    Document* importedDocument() const;
-    const KURL& url() const { return m_url; }
-
-    void importDestroyed();
-    bool isDone() const { return m_state == StateReady || m_state == StateError; }
-
-    // HTMLImport
-    virtual HTMLImportsController* controller() OVERRIDE;
-    virtual HTMLImport* parent() const OVERRIDE;
-    virtual Document* document() const OVERRIDE;
-    virtual void wasDetachedFromDocument() OVERRIDE;
-    virtual void didFinishParsing() OVERRIDE;
-    virtual bool isProcessing() const OVERRIDE;
-
-private:
-    HTMLImportLoader(HTMLImport*, const KURL&, const ResourcePtr<CachedScript>&);
-
-    // CachedRawResourceClient
-    virtual void responseReceived(Resource*, const ResourceResponse&) OVERRIDE;
-    virtual void dataReceived(Resource*, const char* data, int length) OVERRIDE;
-    virtual void notifyFinished(Resource*) OVERRIDE;
-
-    State startWritingAndParsing(const ResourceResponse&);
-    State finishWriting();
-    State finishParsing();
-
-    void setState(State);
-    void dispose();
-
-    HTMLImport* m_parent;
-    State m_state;
-    KURL m_url;
-    ResourcePtr<CachedRawResource> m_resource;
-    RefPtr<Document> m_importedDocument;
-    RefPtr<DocumentWriter> m_writer;
-};
-
-class HTMLImportsController : public HTMLImport, public Supplement<ScriptExecutionContext> {
+class HTMLImportsController : public HTMLImportRoot, public Supplement<ScriptExecutionContext> {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     static void provideTo(Document*);
@@ -130,14 +55,17 @@ public:
     virtual ~HTMLImportsController();
 
     // HTMLImport
-    virtual HTMLImportsController* controller() OVERRIDE;
+    virtual HTMLImportRoot* root() OVERRIDE;
     virtual HTMLImport* parent() const OVERRIDE;
     virtual Document* document() const OVERRIDE;
     virtual void wasDetachedFromDocument() OVERRIDE;
     virtual void didFinishParsing() OVERRIDE;
     virtual bool isProcessing() const OVERRIDE;
+    // HTMLImportRoot
+    virtual void importWasDisposed() OVERRIDE;
+    virtual HTMLImportsController* toController() { return this; }
 
-    void addImport(PassRefPtr<HTMLImportLoader>);
+    PassRefPtr<HTMLImportLoader> createLoader(HTMLImport* parent, const KURL&, const ResourcePtr<CachedRawResource>&);
     void showSecurityErrorMessage(const String&);
     PassRefPtr<HTMLImportLoader> findLinkFor(const KURL&) const;
     SecurityOrigin* securityOrigin() const;

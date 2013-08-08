@@ -38,6 +38,7 @@ namespace WebCore {
 class Frame;
 class Document;
 class Frame;
+class HTMLImportRoot;
 class HTMLImportsController;
 
 class HTMLImport {
@@ -48,12 +49,13 @@ public:
 
     Frame* frame();
     Document* master();
+    HTMLImportsController* controller();
 
     bool isLoaded() const { return !isBlocked() && !isProcessing(); }
     bool isBlocked() const { return m_blocked; }
     void appendChild(HTMLImport*);
 
-    virtual HTMLImportsController* controller() = 0;
+    virtual HTMLImportRoot* root() = 0;
     virtual HTMLImport* parent() const = 0;
     virtual Document* document() const = 0;
     virtual void wasDetachedFromDocument() = 0;
@@ -79,6 +81,12 @@ private:
 
     Vector<HTMLImport*> m_children;
     bool m_blocked; // If any of decendants or predecessors is in processing, it is blocked.
+};
+
+class HTMLImportRoot : public HTMLImport {
+public:
+    virtual void importWasDisposed() = 0;
+    virtual HTMLImportsController* toController() = 0;
 };
 
 } // namespace WebCore
