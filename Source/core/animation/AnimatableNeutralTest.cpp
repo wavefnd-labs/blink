@@ -50,8 +50,8 @@ TEST(AnimatableNeutral, Add)
     RefPtr<CSSValue> cssValue = CSSArrayFunctionValue::create();
     RefPtr<AnimatableValue> animatableUnknown = AnimatableUnknown::create(cssValue);
 
-    EXPECT_EQ(cssValue, AnimatableValue::add(animatableUnknown.get(), AnimatableValue::neutralValue())->toCSSValue());
-    EXPECT_EQ(cssValue, AnimatableValue::add(AnimatableValue::neutralValue(), animatableUnknown.get())->toCSSValue());
+    EXPECT_EQ(cssValue, toAnimatableUnknown(AnimatableValue::add(animatableUnknown.get(), AnimatableValue::neutralValue()).get())->toCSSValue());
+    EXPECT_EQ(cssValue, toAnimatableUnknown(AnimatableValue::add(AnimatableValue::neutralValue(), animatableUnknown.get()).get())->toCSSValue());
 }
 
 }
