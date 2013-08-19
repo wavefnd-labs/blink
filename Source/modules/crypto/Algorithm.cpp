@@ -33,6 +33,7 @@
 
 #include "modules/crypto/AesCbcParams.h"
 #include "modules/crypto/AesKeyGenParams.h"
+#include "modules/crypto/HmacKeyParams.h"
 #include "modules/crypto/HmacParams.h"
 #include "modules/crypto/RsaKeyGenParams.h"
 #include "modules/crypto/RsaSsaParams.h"
@@ -51,6 +52,8 @@ PassRefPtr<Algorithm> Algorithm::create(const WebKit::WebCryptoAlgorithm& algori
         return AesKeyGenParams::create(algorithm);
     case WebKit::WebCryptoAlgorithmParamsTypeHmacParams:
         return HmacParams::create(algorithm);
+    case WebKit::WebCryptoAlgorithmParamsTypeHmacKeyParams:
+        return HmacKeyParams::create(algorithm);
     case WebKit::WebCryptoAlgorithmParamsTypeRsaSsaParams:
         return RsaSsaParams::create(algorithm);
     case WebKit::WebCryptoAlgorithmParamsTypeRsaKeyGenParams:
