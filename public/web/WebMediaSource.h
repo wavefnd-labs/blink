@@ -28,22 +28,4 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebMediaSource_h
-#define WebMediaSource_h
-
-#include "../platform/WebURL.h"
-#include "WebTimeRange.h"
-
-namespace WebKit {
-
-class WebMediaSourceClient;
-
-class WebMediaSource {
-public:
-    virtual ~WebMediaSource() { };
-    virtual void open(WebMediaSourceClient*) = 0;
-};
-
-} // namespace WebKit
-
-#endif
+#include "../platform/WebMediaSource.h"
