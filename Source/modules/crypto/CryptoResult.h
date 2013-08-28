@@ -51,6 +51,7 @@ public:
     void completeWithBuffer(const WebKit::WebArrayBuffer&);
     void completeWithBoolean(bool);
     void completeWithKey(const WebKit::WebCryptoKey&);
+    void completeWithKeyPair(const WebKit::WebCryptoKey& publicKey, const WebKit::WebCryptoKey& privateKey);
 
     WebKit::WebCryptoResult result()
     {
