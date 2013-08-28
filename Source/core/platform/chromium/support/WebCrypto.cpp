@@ -29,8 +29,10 @@
  */
 
 #include "config.h"
-#include "public/platform/WebArrayBuffer.h"
 #include "public/platform/WebCrypto.h"
+
+#include "modules/crypto/CryptoResult.h"
+#include "public/platform/WebArrayBuffer.h"
 #include <string.h>
 
 namespace WebKit {
@@ -68,6 +70,12 @@ void WebCryptoResult::completeWithKey(const WebCryptoKey& key)
     reset();
 }
 
+WebCryptoResult::WebCryptoResult(const WTF::PassRefPtr<WebCore::CryptoResult>& impl)
+    : m_impl(impl)
+{
+    ASSERT(impl);
+}
+
 void WebCryptoResult::reset()
 {
     m_impl.reset();
@@ -76,11 +84,6 @@ void WebCryptoResult::reset()
 void WebCryptoResult::assign(const WebCryptoResult& o)
 {
     m_impl = o.m_impl;
-}
-
-void WebCryptoResult::assign(WebCryptoResultPrivate* impl)
-{
-    m_impl = impl;
 }
 
 } // namespace WebKit
