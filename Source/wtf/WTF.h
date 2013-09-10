@@ -51,7 +51,6 @@ private:
     static PartitionAllocator<4096> m_bufferAllocator;
 };
 
-
 } // namespace WTF
 
 #endif // WTF_h
