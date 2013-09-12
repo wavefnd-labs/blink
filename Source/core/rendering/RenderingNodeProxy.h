@@ -31,25 +31,40 @@
 #ifndef RenderingNodeProxy_h
 #define RenderingNodeProxy_h
 
+#include "core/rendering/LayoutIndicator.h"
+#include "wtf/Noncopyable.h"
+
 namespace WebCore {
 
 class QualifiedName;
 class Node;
 
+#define STRICT_LAYOUT_THREADING 0
+
 class RenderingNodeProxy {
+    WTF_MAKE_NONCOPYABLE(RenderingNodeProxy);
 public:
     explicit RenderingNodeProxy(Node*);
     ~RenderingNodeProxy();
 
     bool hasTagName(const QualifiedName&) const;
 
-    Node* unsafeNode() const { return m_node; }
+    Node* unsafeNode() const
+    {
+#if STRICT_LAYOUT_THREADING
+        ASSERT(!LayoutIndicator::inLayout());
+#endif
+        return m_node;
+    }
+
     void clear() { m_node = 0; }
     void set(Node* node) { m_node = node; }
 
 private:
     Node* m_node;
 };
+
+#undef STRICT_LAYOUT_THREADING
 
 }
 
