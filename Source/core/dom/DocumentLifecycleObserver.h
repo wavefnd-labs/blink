@@ -28,9 +28,6 @@
 
 #include "core/dom/ContextLifecycleNotifier.h"
 #include "core/dom/ContextLifecycleObserver.h"
-#include "wtf/Assertions.h"
-#include "wtf/PassOwnPtr.h"
-#include "wtf/TemporaryChange.h"
 
 namespace WebCore {
 
@@ -43,42 +40,6 @@ public:
     virtual void documentWasDetached() { }
     virtual void documentWasDisposed() { }
 };
-
-class DocumentLifecycleNotifier : public ContextLifecycleNotifier {
-public:
-    static PassOwnPtr<DocumentLifecycleNotifier> create(ScriptExecutionContext*);
-
-    void notifyDocumentWasDetached();
-    void notifyDocumentWasDisposed();
-
-    virtual void addObserver(LifecycleObserver*) OVERRIDE;
-    virtual void removeObserver(LifecycleObserver*) OVERRIDE;
-
-private:
-    explicit DocumentLifecycleNotifier(ScriptExecutionContext*);
-
-    typedef HashSet<DocumentLifecycleObserver*> DocumentObserverSet;
-    DocumentObserverSet m_documentObservers;
-};
-
-inline PassOwnPtr<DocumentLifecycleNotifier> DocumentLifecycleNotifier::create(ScriptExecutionContext* context)
-{
-    return adoptPtr(new DocumentLifecycleNotifier(context));
-}
-
-inline void DocumentLifecycleNotifier::notifyDocumentWasDetached()
-{
-    TemporaryChange<IterationType> scope(this->m_iterating, IteratingOverDocumentObservers);
-    for (DocumentObserverSet::iterator i = m_documentObservers.begin(); i != m_documentObservers.end(); ++i)
-        (*i)->documentWasDetached();
-}
-
-inline void DocumentLifecycleNotifier::notifyDocumentWasDisposed()
-{
-    TemporaryChange<IterationType> scope(this->m_iterating, IteratingOverDocumentObservers);
-    for (DocumentObserverSet::iterator i = m_documentObservers.begin(); i != m_documentObservers.end(); ++i)
-        (*i)->documentWasDisposed();
-}
 
 } // namespace WebCore
 
