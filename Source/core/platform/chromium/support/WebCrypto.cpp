@@ -31,7 +31,7 @@
 #include "config.h"
 #include "public/platform/WebCrypto.h"
 
-#include "modules/crypto/CryptoResult.h"
+#include "core/platform/CryptoResult.h"
 #include "public/platform/WebArrayBuffer.h"
 #include <string.h>
 
