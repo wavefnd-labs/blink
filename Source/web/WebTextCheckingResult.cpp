@@ -40,12 +40,12 @@ namespace WebKit {
 WebTextCheckingResult::operator TextCheckingResult() const
 {
     TextCheckingResult result;
-    result.type = static_cast<TextCheckingType>(type);
+    result.decoration = static_cast<TextDecorationType>(type);
     result.location = location;
     result.length = length;
     result.replacement = replacement;
     result.hash = hash;
-    if (result.type == TextCheckingTypeGrammar) {
+    if (result.decoration == TextDecorationTypeGrammar) {
         GrammarDetail detail;
         detail.location = 0;
         detail.length = length;
