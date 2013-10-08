@@ -2,15 +2,15 @@
 <head>
 
 <style type="text/css" media="screen">
-@media (max-device-width: 478px) and (max-device-height: 959px) {
+@media (max-device-width: 478px) and (max-device-height: 799px) {
     #main { background: red; }
 }
 
-@media (max-device-width: 480px) and (max-device-height: 960px) {
+@media (max-device-width: 480px) and (max-device-height: 800px) {
     #main { background: green; }
 }
 
-@media (min-device-width: 481px) and (min-device-height: 961px) {
+@media (min-device-width: 481px) and (min-device-height: 801px) {
     #main { background: yellow; }
 }
 
@@ -42,6 +42,7 @@ function getSizes()
 function test()
 {
     var exceededDimension = 10000001;
+    var overridesEnabled = false;
     var originalScreenSize;
 
     function saveSizeCallback(jsonResult)
@@ -64,13 +65,43 @@ function test()
 
     function step1()
     {
+        overrideAndDumpData(800, 480, step2);
+    }
+
+    function step2()
+    {
+        applyOverride(exceededDimension, 800, step3);
+    }
+
+    function step3()
+    {
+        applyOverride(-1, 800, step4);
+    }
+
+    function step4()
+    {
+        applyOverride(480, exceededDimension, step5);
+    }
+
+    function step5()
+    {
+        function callback()
+        {
+            InspectorTest.addResult("Current dimensions:");
+            getAndDumpSizes(step6);
+        }
+        applyOverride(480, -1, callback);
+    }
+
+    function step6()
+    {
         function compareSizeCallback(jsonResult)
         {
             // Check that the screen size reported is the same as the original one.
             var result = JSON.parse(jsonResult.value);
             if (result.screen !== originalScreenSize)
                 InspectorTest.addResult("Original size " + originalScreenSize + " not restored, found: " + result.screen);
-            step2();
+            InspectorTest.completeTest();
         }
 
         function overrideCallback()
@@ -79,82 +110,25 @@ function test()
         }
 
         // Disable overrides.
-        PageAgent.setDeviceMetricsOverride(0, 0, 1, true, overrideCallback);
-    }
-
-    function step2()
-    {
-        overrideAndDumpData(800, 480, step3);
-    }
-
-    function step3()
-    {
-        applyOverride(exceededDimension, 800, step4);
-    }
-
-    function step4()
-    {
-        applyOverride(-1, 800, step5);
-    }
-
-    function step5()
-    {
-        applyOverride(480, exceededDimension, step6);
-    }
-
-    function step6()
-    {
-        function callback()
-        {
-            InspectorTest.addResult("Current dimensions:");
-            getAndDumpSizes(step7);
-        }
-        applyOverride(480, -1, callback);
-    }
-
-    function step7()
-    {
-        function callback(jsonResult)
-        {
-            var value = JSON.parse(jsonResult.value);
-            if (value.screen !== originalScreenSize)
-                InspectorTest.addResult("Screen size not restored, actual: " + value.screen + ", expected: " + originalScreenSize);
-            else
-                InspectorTest.addResult("Screen size same as original - OK");
-            step8();
-        }
-
-        InspectorTest.addResult("Disable PageAgent:");
-        PageAgent.disable();
-        InspectorTest.evaluateInPage("getSizes()", callback);
-    }
-
-    function step8()
-    {
-        function callback(jsonResult)
-        {
-            var value = JSON.parse(jsonResult.value);
-            if (value.screen !== originalScreenSize)
-                InspectorTest.addResult("Screen size not restored, actual: " + value.screen + ", expected: " + originalScreenSize);
-            else
-                InspectorTest.addResult("Screen size same as original - OK");
-            InspectorTest.completeTest();
-        }
-
-        InspectorTest.addResult("Enable PageAgent:");
-        PageAgent.enable();
-        InspectorTest.evaluateInPage("getSizes()", callback);
+        applyOverride(0, 0, overrideCallback);
     }
 
     function applyOverride(width, height, userCallback)
     {
-        function callback(error)
+        function callback(reload, error)
         {
             if (error)
                 InspectorTest.addResult("Override: " + width + "x" + height + " => ERROR");
-            userCallback();
+            if (reload && !error) {
+                InspectorTest.reloadPage(userCallback);
+            } else {
+                userCallback();
+            }
         }
-        PageAgent.setDeviceMetricsOverride(width, height, 1, true, callback);
+        
+        var enabled = width != 0 || height != 0;
+        PageAgent.setDeviceMetricsOverride(width, height, 1, true, callback.bind(null, enabled != overridesEnabled));
+        overridesEnabled = enabled;
     }
 
     function overrideAndDumpData(width, height, callback)
