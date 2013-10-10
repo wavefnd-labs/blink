@@ -27,25 +27,54 @@
 #ifndef DOMURL_h
 #define DOMURL_h
 
+#include "bindings/v8/ScriptWrappable.h"
+#include "core/html/DOMURLUtils.h"
+#include "weborigin/KURL.h"
 #include "wtf/Forward.h"
 #include "wtf/PassRefPtr.h"
 #include "wtf/RefCounted.h"
+#include "wtf/text/WTFString.h"
 
 namespace WebCore {
 
 class Blob;
+class ExceptionState;
 class ScriptExecutionContext;
 class URLRegistrable;
 
-class DOMURL : public RefCounted<DOMURL> {
+class DOMURL : public ScriptWrappable, public DOMURLUtils, public RefCounted<DOMURL> {
 
 public:
-    static PassRefPtr<DOMURL> create() { return adoptRef(new DOMURL); }
+    static PassRefPtr<DOMURL> create(const String& url, ExceptionState& es)
+    {
+        return adoptRef(new DOMURL(url, blankURL(), es));
+    }
+    static PassRefPtr<DOMURL> create(const String& url, const String& base, ExceptionState& es)
+    {
+        return adoptRef(new DOMURL(url, KURL(KURL(), base), es));
+    }
+    static PassRefPtr<DOMURL> create(const String& url, PassRefPtr<DOMURL> base, ExceptionState& es)
+    {
+        ASSERT(base);
+        return adoptRef(new DOMURL(url, base->m_url, es));
+    }
 
     static String createObjectURL(ScriptExecutionContext*, Blob*);
     static void revokeObjectURL(ScriptExecutionContext*, const String&);
 
     static String createPublicURL(ScriptExecutionContext*, URLRegistrable*);
+
+    virtual KURL url() const OVERRIDE { return m_url; }
+    virtual void setURL(const KURL& url) OVERRIDE { m_url = url; }
+
+    virtual String input() const OVERRIDE { return m_input; }
+    virtual void setInput(const String&) OVERRIDE;
+
+private:
+    DOMURL(const String& url, const KURL& base, ExceptionState&);
+
+    KURL m_url;
+    String m_input;
 };
 
 } // namespace WebCore
