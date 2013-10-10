@@ -53,7 +53,7 @@ public:
     virtual WebView* view() const = 0;
 
     // Executes the given task on the main thread.
-    static void dispatchTaskToMainThread(PassOwnPtr<WebCore::ScriptExecutionContext::Task>);
+    static void dispatchTaskToMainThread(PassOwnPtr<WebCore::ExecutionContextTask>);
 };
 
 } // namespace WebKit
