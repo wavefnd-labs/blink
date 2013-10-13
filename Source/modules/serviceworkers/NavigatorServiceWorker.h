@@ -35,12 +35,17 @@
 #include "core/frame/Navigator.h"
 #include "platform/Supplementable.h"
 
+namespace WebKit {
+class WebServiceWorkerProvider;
+class WebServiceWorkerProviderClient;
+}
+
 namespace WebCore {
 
 class ExceptionState;
 class Navigator;
 
-class NavigatorServiceWorker : public Supplement<Navigator> {
+class NavigatorServiceWorker : public Supplement<Navigator>, DOMWindowProperty {
 public:
     virtual ~NavigatorServiceWorker();
     static NavigatorServiceWorker* from(Navigator*);
@@ -55,9 +60,14 @@ private:
 
     explicit NavigatorServiceWorker(Navigator*);
 
+    virtual void willDetachGlobalObjectFromFrame() OVERRIDE;
+
+    WebKit::WebServiceWorkerProvider* ensureProvider();
+
     static const char* supplementName();
 
     Navigator* m_navigator;
+    OwnPtr<WebKit::WebServiceWorkerProvider> m_provider;
 };
 
 } // namespace WebCore
