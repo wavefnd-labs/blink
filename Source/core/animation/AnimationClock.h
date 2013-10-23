@@ -59,6 +59,8 @@ public:
 
     void unfreeze() { m_frozen = false; }
 
+    void resetTimeForTesting() { m_time = 0; m_frozen = true; }
+
 private:
     AnimationClock(WTF::TimeFunction monotonicallyIncreasingTime)
         : monotonicallyIncreasingTime(monotonicallyIncreasingTime)
