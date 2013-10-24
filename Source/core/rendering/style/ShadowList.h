@@ -55,6 +55,8 @@ public:
     bool operator==(const ShadowList& o) const { return m_shadows == o.m_shadows; }
     bool operator!=(const ShadowList& o) const { return !(*this == o); }
 
+    static PassRefPtr<ShadowList> blend(const ShadowList* from, const ShadowList* to, double progress);
+
     void adjustRectForShadow(LayoutRect&, int additionalOutlineSize = 0) const;
     void adjustRectForShadow(FloatRect&, int additionalOutlineSize = 0) const;
 
