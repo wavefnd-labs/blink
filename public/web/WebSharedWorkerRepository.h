@@ -39,6 +39,7 @@ class WebString;
 class WebSharedWorker;
 class WebURL;
 
+// FIXME: Deprecate this.
 class WebSharedWorkerRepository {
 public:
     // Unique identifier for the parent document of a worker (unique within a given process).
