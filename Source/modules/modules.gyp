@@ -30,6 +30,7 @@
 {
   'includes': [
     '../build/win/precompile.gypi',
+    '../config.gypi',
     'modules.gypi',
   ],
   'targets': [{
