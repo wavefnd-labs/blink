@@ -41,20 +41,15 @@
 
 namespace WebCore {
 
-void V8NodeList::resolveWrapperReachability(void* object, const v8::Persistent<v8::Object>& wrapper, v8::Isolate* isolate)
+void* V8NodeList::opaqueRootForGC(void* object, v8::Isolate* isolate)
 {
     NodeList* impl = static_cast<NodeList*>(object);
-    if (!impl->isLiveNodeList()) {
-        setObjectGroup(object, wrapper, isolate);
-        return;
-    }
+    if (!impl->isLiveNodeList())
+        return object;
     Node* owner = static_cast<LiveNodeList*>(impl)->ownerNode();
-    if (!owner) {
-        setObjectGroup(object, wrapper, isolate);
-        return;
-    }
-
-    setObjectGroup(V8GCController::opaqueRootForGC(owner, isolate), wrapper, isolate);
+    if (!owner)
+        return object;
+    return V8GCController::opaqueRootForGC(owner, isolate);
 }
 
 } // namespace WebCore
