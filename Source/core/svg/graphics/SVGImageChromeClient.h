@@ -30,7 +30,7 @@
 #define SVGImageChromeClient_h
 
 #include "core/loader/EmptyClients.h"
-#include "core/platform/graphics/ImageObserver.h"
+#include "platform/graphics/ImageObserver.h"
 
 namespace WebCore {
 
