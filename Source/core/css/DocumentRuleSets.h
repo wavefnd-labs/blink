@@ -23,9 +23,8 @@
 #ifndef DocumentRuleSets_h
 #define DocumentRuleSets_h
 
-#include "core/css/RuleFeature.h"
 #include "core/css/RuleSet.h"
-#include "core/dom/DocumentOrderedList.h"
+#include "core/css/TreeBoundaryCrossingRules.h"
 
 #include "wtf/OwnPtr.h"
 #include "wtf/RefPtr.h"
@@ -33,31 +32,10 @@
 
 namespace WebCore {
 
-class CSSStyleRule;
 class CSSStyleSheet;
-class InspectorCSSOMWrappers;
-class MatchRequest;
 class MediaQueryEvaluator;
-class RuleSet;
+class RuleFeatureSet;
 class StyleEngine;
-
-class TreeBoundaryCrossingRules {
-public:
-    void addRule(StyleRule*, size_t selectorIndex, ContainerNode* scopingNode, AddRuleFlags);
-    void clear() { m_treeBoundaryCrossingRuleSetMap.clear(); }
-    void reset(const ContainerNode* scopingNode);
-    bool isEmpty() const { return m_treeBoundaryCrossingRuleSetMap.isEmpty(); }
-    void collectFeaturesTo(RuleFeatureSet&);
-
-    DocumentOrderedList::iterator begin() { return m_scopingNodes.begin(); }
-    DocumentOrderedList::iterator end() { return m_scopingNodes.end(); }
-    RuleSet* ruleSetScopedBy(const ContainerNode* scopingNode) { return m_treeBoundaryCrossingRuleSetMap.get(scopingNode); }
-
-private:
-    DocumentOrderedList m_scopingNodes;
-    typedef HashMap<const ContainerNode*, OwnPtr<RuleSet> > TreeBoundaryCrossingRuleSetMap;
-    TreeBoundaryCrossingRuleSetMap m_treeBoundaryCrossingRuleSetMap;
-};
 
 class DocumentRuleSets {
 public:
