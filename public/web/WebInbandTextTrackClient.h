@@ -28,24 +28,4 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebInbandTextTrackClient_h
-#define WebInbandTextTrackClient_h
-
-namespace blink {
-
-class WebString;
-
-class WebInbandTextTrackClient {
-public:
-    virtual ~WebInbandTextTrackClient() {}
-
-    virtual void addWebVTTCue(double start,
-                              double end,
-                              const WebString& id,
-                              const WebString& content,
-                              const WebString& settings) = 0;
-};
-
-} // namespace blink
-
-#endif
+#include "public/platform/WebInbandTextTrackClient.h"
