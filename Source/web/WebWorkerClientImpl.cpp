@@ -31,6 +31,7 @@
 #include "config.h"
 #include "WebWorkerClientImpl.h"
 
+#include "DatabaseClientImpl.h"
 #include "LocalFileSystemClient.h"
 #include "WebFrameImpl.h"
 #include "WebPermissionClient.h"
@@ -63,6 +64,7 @@ WorkerGlobalScopeProxy* WebWorkerClientImpl::createWorkerGlobalScopeProxy(Worker
         WebFrameImpl* webFrame = WebFrameImpl::fromFrame(document->frame());
         OwnPtr<WorkerClients> workerClients = WorkerClients::create();
         provideLocalFileSystemToWorker(workerClients.get(), LocalFileSystemClient::create());
+        provideDatabaseClientToWorker(workerClients.get(), DatabaseClientImpl::create());
         providePermissionClientToWorker(workerClients.get(), adoptPtr(webFrame->client()->createWorkerPermissionClientProxy(webFrame)));
         WebWorkerClientImpl* proxy = new WebWorkerClientImpl(worker, webFrame, workerClients.release());
         return proxy;
