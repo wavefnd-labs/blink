@@ -22,18 +22,4 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WebAudioSourceProviderClient_h
-#define WebAudioSourceProviderClient_h
-
-namespace blink {
-
-class WebAudioSourceProviderClient {
-public:
-    virtual void setFormat(size_t numberOfChannels, float sampleRate) = 0;
-protected:
-    virtual ~WebAudioSourceProviderClient() { }
-};
-
-} // WebKit
-
-#endif // WebAudioSourceProviderClient_h
+#include "public/platform/WebAudioSourceProviderClient.h"
