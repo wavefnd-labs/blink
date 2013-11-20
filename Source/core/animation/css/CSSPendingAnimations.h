@@ -40,12 +40,13 @@ namespace WebCore {
 // animations when both classes of CSS Animations are triggered by the same recalc
 class CSSPendingAnimations FINAL {
 public:
-    void add(Player* player) { m_pending.append(player); };
-    void startPendingAnimations();
+    void add(Player*);
+    void startPendingAnimationsAfterStyleRecalc();
+    void startPendingAnimationsAfterCompositingUpdate();
     void notifyCompositorAnimationStarted(double monotonicAnimationStartTime);
 
 private:
-    Vector<RefPtr<Player> > m_pending;
+    Vector<std::pair<RefPtr<Player>, double> > m_pending;
     Vector<RefPtr<Player> > m_waitingForCompositorAnimationStart;
 };
 
