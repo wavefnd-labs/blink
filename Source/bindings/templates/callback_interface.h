@@ -35,9 +35,7 @@
 #ifndef {{v8_class_name}}_h
 #define {{v8_class_name}}_h
 
-{% if conditional_string %}
-#if {{conditional_string}}
-{% endif %}
+{% filter conditional(conditional_string) %}
 {% for filename in header_includes %}
 #include "{{filename}}"
 {% endfor %}
@@ -71,8 +69,5 @@ private:
 };
 
 }
-
-{% if conditional_string %}
-#endif // {{conditional_string}}
-{% endif %}
+{% endfilter %}
 #endif // {{v8_class_name}}_h
