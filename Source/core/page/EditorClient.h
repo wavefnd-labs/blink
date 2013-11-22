@@ -27,6 +27,7 @@
 #ifndef EditorClient_h
 #define EditorClient_h
 
+#include "core/editing/SelectionType.h"
 #include "wtf/Forward.h"
 
 namespace WebCore {
@@ -40,7 +41,7 @@ public:
     virtual ~EditorClient() { }
 
     virtual void respondToChangedContents() = 0;
-    virtual void respondToChangedSelection(Frame*) = 0;
+    virtual void respondToChangedSelection(SelectionType) = 0;
 
     virtual bool canCopyCut(Frame*, bool defaultValue) const = 0;
     virtual bool canPaste(Frame*, bool defaultValue) const = 0;
