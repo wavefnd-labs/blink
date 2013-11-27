@@ -35,15 +35,25 @@
 
 namespace WebCore {
 
+bool LayoutRectRecorder::shouldRecordLayoutRects()
+{
+    bool isTracing;
+    TRACE_EVENT_CATEGORY_GROUP_ENABLED(TRACE_DISABLED_BY_DEFAULT("blink.debug.layout"), &isTracing);
+
+    return RuntimeEnabledFeatures::repaintAfterLayoutEnabled() || isTracing;
+}
+
 LayoutRectRecorder::LayoutRectRecorder(RenderObject& object, bool skipRecording)
     : m_object(object)
     , m_repaintContainer(0)
     , m_skipRecording(skipRecording)
 {
-    if (!RuntimeEnabledFeatures::repaintAfterLayoutEnabled())
+    if (!shouldRecordLayoutRects())
         return;
     if (m_skipRecording)
         return;
+
+    m_object.setLayoutDidGetCalled(true);
 
     m_repaintContainer = m_object.containerForRepaint();
 
@@ -57,7 +67,7 @@ LayoutRectRecorder::LayoutRectRecorder(RenderObject& object, bool skipRecording)
 
 LayoutRectRecorder::~LayoutRectRecorder()
 {
-    if (!RuntimeEnabledFeatures::repaintAfterLayoutEnabled())
+    if (!shouldRecordLayoutRects())
         return;
     if (m_skipRecording)
         return;
