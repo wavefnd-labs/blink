@@ -38,6 +38,7 @@
 
 namespace blink {
 class WebAnimation;
+class WebFilterOperations;
 }
 
 namespace WebCore {
