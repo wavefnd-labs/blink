@@ -34,7 +34,6 @@
 #include "V8TestNamedConstructor.h"
 
 #include "RuntimeEnabledFeatures.h"
-#include "V8Document.h"
 #include "bindings/v8/ExceptionState.h"
 #include "bindings/v8/V8DOMConfiguration.h"
 #include "bindings/v8/V8ObjectConstructor.h"
@@ -102,7 +101,6 @@ static void V8TestNamedConstructorConstructorCallback(const v8::FunctionCallback
     V8TRYCATCH_FOR_V8STRINGRESOURCE_VOID(V8StringResource<>, str1, info[0]);
     V8TRYCATCH_FOR_V8STRINGRESOURCE_VOID(V8StringResource<>, str2, info[1]);
     V8TRYCATCH_FOR_V8STRINGRESOURCE_VOID(V8StringResource<>, str3, argumentOrNull(info, 2));
-
     RefPtr<TestNamedConstructor> impl = TestNamedConstructor::createForJSConstructor(*document, str1, str2, str3, exceptionState);
     v8::Handle<v8::Object> wrapper = info.Holder();
     if (exceptionState.throwIfNeeded())
