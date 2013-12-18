@@ -38,8 +38,10 @@
 #include "V8Interface2.h"
 #include "bindings/v8/ExceptionState.h"
 #include "bindings/v8/V8DOMConfiguration.h"
+#include "bindings/v8/V8GCController.h"
 #include "core/dom/ContextFeatures.h"
 #include "core/dom/Document.h"
+#include "core/dom/Element.h"
 #include "platform/TraceEvent.h"
 
 namespace WebCore {
@@ -71,6 +73,16 @@ namespace TestInterfacePython2V8Internal {
 template <typename T> void V8_USE(T) { }
 
 } // namespace TestInterfacePython2V8Internal
+
+void V8TestInterfacePython2::visitDOMWrapper(void* object, const v8::Persistent<v8::Object>& wrapper, v8::Isolate* isolate)
+{
+    TestInterfacePython2* impl = fromInternalPointer(object);
+    if (Node* owner = impl->ownerNode()) {
+        setObjectGroup(V8GCController::opaqueRootForGC(owner, isolate), wrapper, isolate);
+        return;
+    }
+    setObjectGroup(object, wrapper, isolate);
+}
 
 static v8::Handle<v8::FunctionTemplate> ConfigureV8TestInterfacePython2Template(v8::Handle<v8::FunctionTemplate> functionTemplate, v8::Isolate* isolate, WrapperWorldType currentWorldType)
 {
