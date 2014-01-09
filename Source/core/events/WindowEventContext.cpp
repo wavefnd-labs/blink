@@ -28,9 +28,9 @@
 #include "core/events/WindowEventContext.h"
 
 #include "core/dom/Document.h"
-#include "core/events/Event.h"
-#include "core/events/EventContext.h"
 #include "core/dom/Node.h"
+#include "core/events/Event.h"
+#include "core/events/NodeEventContext.h"
 #include "core/frame/DOMWindow.h"
 
 namespace WebCore {
