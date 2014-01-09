@@ -32,6 +32,7 @@
 #define CustomElementCallbackQueue_h
 
 #include "core/dom/Element.h"
+#include "core/dom/custom/CustomElementBaseElementQueueItem.h"
 #include "core/dom/custom/CustomElementProcessingStep.h"
 #include "wtf/PassOwnPtr.h"
 #include "wtf/PassRefPtr.h"
@@ -41,13 +42,14 @@
 namespace WebCore {
 
 // FIXME: Should be renamed to CustomElementProcessingQueue
-class CustomElementCallbackQueue {
+class CustomElementCallbackQueue : public CustomElementBaseElementQueueItem {
     WTF_MAKE_NONCOPYABLE(CustomElementCallbackQueue);
 public:
     static PassOwnPtr<CustomElementCallbackQueue> create(PassRefPtr<Element>);
 
-    typedef int ElementQueue;
-    ElementQueue owner() { return m_owner; }
+    ElementQueue owner() const { return m_owner; }
+    Element* element() const { return m_element.get(); }
+
     void setOwner(ElementQueue newOwner)
     {
         // ElementCallbackQueues only migrate towards the top of the
@@ -56,8 +58,9 @@ public:
         m_owner = newOwner;
     }
 
+    virtual bool process(ElementQueue queueId) OVERRIDE;
+
     void append(PassOwnPtr<CustomElementProcessingStep> invocation) { m_queue.append(invocation); }
-    void processInElementQueue(ElementQueue);
     bool inCreatedCallback() const { return m_inCreatedCallback; }
 
 private:
