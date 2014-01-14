@@ -56,7 +56,6 @@ public:
     static void customMethodMethodCustom(const v8::FunctionCallbackInfo<v8::Value>&);
     static void customMethodWithArgsMethodCustom(const v8::FunctionCallbackInfo<v8::Value>&);
     static void classMethod2MethodCustom(const v8::FunctionCallbackInfo<v8::Value>&);
-    static void constructorCallback(const v8::FunctionCallbackInfo<v8::Value>&);
     static void customAttrAttributeGetterCustom(const v8::PropertyCallbackInfo<v8::Value>&);
     static void customAttrAttributeSetterCustom(v8::Local<v8::Value>, const v8::PropertyCallbackInfo<void>&);
     static const int eventListenerCacheIndex = v8DefaultWrapperInternalFieldCount + 0;
