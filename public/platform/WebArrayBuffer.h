@@ -41,6 +41,10 @@ template <class T> class Handle;
 
 namespace WTF { class ArrayBuffer; }
 
+#if BLINK_IMPLEMENTATION
+namespace WTF { template <typename T> class PassRefPtr; }
+#endif
+
 namespace blink {
 
 class WebArrayBuffer {
@@ -69,7 +73,7 @@ public:
 
 #if BLINK_IMPLEMENTATION
     WebArrayBuffer(const WTF::PassRefPtr<WTF::ArrayBuffer>&);
-    WebArrayBuffer& operator=(const PassRefPtr<WTF::ArrayBuffer>&);
+    WebArrayBuffer& operator=(const WTF::PassRefPtr<WTF::ArrayBuffer>&);
     operator WTF::PassRefPtr<WTF::ArrayBuffer>() const;
 #endif
 
