@@ -46,36 +46,3 @@ WebInspector.AuditsPanelDescriptor = function()
         }
     );
 }
-
-/**
- * @interface
- */
-WebInspector.AuditCategory = function()
-{
-}
-
-WebInspector.AuditCategory.prototype = {
-    /**
-     * @return {string}
-     */
-    get id()
-    {
-    },
-
-    /**
-     * @return {string}
-     */
-    get displayName()
-    {
-    },
-
-    /**
-     * @param {!Array.<!WebInspector.NetworkRequest>} requests
-     * @param {function(!WebInspector.AuditRuleResult)} ruleResultCallback
-     * @param {function()} categoryDoneCallback
-     * @param {!WebInspector.Progress} progress
-     */
-    run: function(requests, ruleResultCallback, categoryDoneCallback, progress)
-    {
-    }
-}
