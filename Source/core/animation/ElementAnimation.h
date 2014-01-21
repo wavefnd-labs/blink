@@ -35,16 +35,17 @@
 
 namespace WebCore {
 
+class Animation;
 class Dictionary;
 class Element;
 
 class ElementAnimation {
 public:
     static CSSPropertyID camelCaseCSSPropertyNameToID(const String& propertyName);
-    static void animate(Element*, Vector<Dictionary> keyframesDictionaryVector, double duration = 0);
+    static Animation* animate(Element*, Vector<Dictionary> keyframesDictionaryVector, double duration = 0);
 
 private:
-    static void startAnimation(Element*, Vector<Dictionary> keyframesDictionaryVector, double duration = 0);
+    static Animation* startAnimation(Element*, Vector<Dictionary> keyframesDictionaryVector, double duration = 0);
 
     friend class AnimationElementAnimationTest;
 };
