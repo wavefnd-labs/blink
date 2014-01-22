@@ -32,6 +32,7 @@
 
 namespace WebCore {
 
+class Document;
 class Node;
 class StyleSheet;
 
@@ -50,6 +51,7 @@ public:
     { }
 
     bool isXSL() const;
+    bool isImport() const;
     bool isAlternate() const;
     bool isEnabledViaScript() const;
     bool isEnabledAndLoading() const;
@@ -58,6 +60,7 @@ public:
 
     StyleSheet* sheet() const;
     AtomicString title() const;
+    Document* importedDocument() const;
 
 private:
     bool isElement() const { return m_type != Pi; }
