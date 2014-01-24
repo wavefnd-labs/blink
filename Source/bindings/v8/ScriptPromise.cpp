@@ -39,6 +39,14 @@
 
 namespace WebCore {
 
+ScriptPromise ScriptPromise::then(PassOwnPtr<ScriptFunction> onFulfilled, PassOwnPtr<ScriptFunction> onRejected)
+{
+    if (m_promise.hasNoValue() || !m_promise.isObject())
+        return ScriptPromise();
+    v8::Handle<v8::Object> promise = m_promise.v8Value().As<v8::Object>();
+    return ScriptPromise(V8PromiseCustom::then(promise, adoptByGarbageCollector(onFulfilled), adoptByGarbageCollector(onRejected), isolate()), isolate());
+}
+
 ScriptPromise ScriptPromise::createPending(ExecutionContext* context)
 {
     ASSERT(context);
