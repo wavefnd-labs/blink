@@ -38,7 +38,6 @@ namespace WebCore {
 class SVGBoolean : public NewSVGPropertyBase {
 public:
     // SVGBoolean does not have a tear-off type.
-    // The below typedef is used by NewSVGAnimatedProperty.
     typedef void TearOffType;
     typedef bool PrimitiveType;
 
