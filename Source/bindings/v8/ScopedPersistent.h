@@ -77,7 +77,7 @@ public:
         m_handle.Reset();
     }
 
-    bool operator==(const ScopedPersistent<T>& other) const
+    bool operator==(const ScopedPersistent<T>& other)
     {
         return m_handle == other.m_handle;
     }
