@@ -39,14 +39,18 @@ namespace WebCore {
 class DeprecatedStorageQuota;
 class Frame;
 class Navigator;
+class StorageQuota;
 
 class NavigatorStorageQuota FINAL : public Supplement<Navigator>, public DOMWindowProperty {
 public:
     virtual ~NavigatorStorageQuota();
     static NavigatorStorageQuota* from(Navigator*);
 
+    static StorageQuota* storageQuota(Navigator*);
     static DeprecatedStorageQuota* webkitTemporaryStorage(Navigator*);
     static DeprecatedStorageQuota* webkitPersistentStorage(Navigator*);
+
+    StorageQuota* storageQuota() const;
     DeprecatedStorageQuota* webkitTemporaryStorage() const;
     DeprecatedStorageQuota* webkitPersistentStorage() const;
 
@@ -54,6 +58,7 @@ private:
     explicit NavigatorStorageQuota(Frame*);
     static const char* supplementName();
 
+    mutable RefPtr<StorageQuota> m_storageQuota;
     mutable RefPtr<DeprecatedStorageQuota> m_temporaryStorage;
     mutable RefPtr<DeprecatedStorageQuota> m_persistentStorage;
 };

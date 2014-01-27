@@ -33,6 +33,9 @@
 
 #include "WebFrameClient.h"
 #include "WebFrameImpl.h"
+#include "bindings/v8/ScriptPromise.h"
+#include "bindings/v8/ScriptPromiseResolver.h"
+#include "core/dom/DOMError.h"
 #include "core/dom/Document.h"
 #include "core/dom/ExceptionCode.h"
 #include "core/dom/ExecutionContext.h"
@@ -40,6 +43,7 @@
 #include "modules/quota/StorageErrorCallback.h"
 #include "modules/quota/StorageQuotaCallback.h"
 #include "modules/quota/StorageUsageCallback.h"
+#include "modules/quota/WebStorageQuotaCallbacksImpl.h"
 #include "public/platform/WebStorageQuotaType.h"
 #include "wtf/Threading.h"
 
@@ -68,6 +72,25 @@ void StorageQuotaClientImpl::requestQuota(ExecutionContext* executionContext, We
         // Requesting quota in Worker is not supported.
         executionContext->postTask(StorageErrorCallback::CallbackTask::create(errorCallback, NotSupportedError));
     }
+}
+
+ScriptPromise StorageQuotaClientImpl::requestPersistentQuota(ExecutionContext* executionContext, unsigned long long newQuotaInBytes)
+{
+    ASSERT(executionContext);
+
+    ScriptPromise promise = ScriptPromise::createPending(executionContext);
+    RefPtr<ScriptPromiseResolver> resolver = ScriptPromiseResolver::create(promise, executionContext);
+
+    if (executionContext->isDocument()) {
+        Document* document = toDocument(executionContext);
+        WebFrameImpl* webFrame = WebFrameImpl::fromFrame(document->frame());
+        webFrame->client()->requestStorageQuota(webFrame, WebStorageQuotaTypePersistent, newQuotaInBytes, WebStorageQuotaCallbacksImpl::createLeakedPtr(resolver, executionContext));
+    } else {
+        // Requesting quota in Worker is not supported.
+        resolver->reject(DOMError::create(NotSupportedError));
+    }
+
+    return promise;
 }
 
 StorageQuotaClientImpl::StorageQuotaClientImpl()
