@@ -42,7 +42,7 @@ public:
     virtual ~WebServiceWorkerContextProxy() { }
 
     // FIXME: This needs to pass the active service worker info.
-    virtual void dispatchInstallEvent() = 0;
+    virtual void dispatchInstallEvent(int installEventID) = 0;
 
     virtual void resumeWorkerContext() { }
     virtual void attachDevTools() { }
