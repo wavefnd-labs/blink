@@ -31,49 +31,11 @@
 #ifndef WebNodeCollection_h
 #define WebNodeCollection_h
 
-#include "../platform/WebCommon.h"
-
-namespace WebCore { class HTMLCollection; }
-#if BLINK_IMPLEMENTATION
-namespace WTF { template <typename T> class PassRefPtr; }
-#endif
+#include "WebElementCollection.h"
 
 namespace blink {
-class WebElement;
 
-// Provides readonly access to some properties of a DOM node.
-class WebNodeCollection {
-public:
-    ~WebNodeCollection() { reset(); }
-
-    WebNodeCollection() : m_private(0), m_current(0) { }
-    WebNodeCollection(const WebNodeCollection& n) : m_private(0) { assign(n); }
-    WebNodeCollection& operator=(const WebNodeCollection& n)
-    {
-        assign(n);
-        return *this;
-    }
-
-    bool isNull() const { return !m_private; }
-
-    BLINK_EXPORT void reset();
-    BLINK_EXPORT void assign(const WebNodeCollection&);
-
-    BLINK_EXPORT unsigned length() const;
-    BLINK_EXPORT WebElement nextItem() const;
-    BLINK_EXPORT WebElement firstItem() const;
-
-#if BLINK_IMPLEMENTATION
-    WebNodeCollection(const WTF::PassRefPtr<WebCore::HTMLCollection>&);
-#endif
-
-private:
-    void assign(WebCore::HTMLCollection*);
-    WebCore::HTMLCollection* m_private;
-    mutable unsigned m_current;
-
-    friend class WebNodeList;
-};
+typedef WebElementCollection WebNodeCollection;
 
 } // namespace blink
 
