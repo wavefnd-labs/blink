@@ -31,9 +31,11 @@
 #ifndef HTMLImportStateResolver_h
 #define HTMLImportStateResolver_h
 
-#include "core/html/HTMLImport.h"
+#include "core/html/HTMLImportState.h"
 
 namespace WebCore {
+
+class HTMLImport;
 
 class HTMLImportStateResolver {
 public:
@@ -41,13 +43,13 @@ public:
         : m_import(import)
     { }
 
-    HTMLImport::State resolve() const;
+    HTMLImportState resolve() const;
 
 private:
     static bool isBlockingFollowers(HTMLImport*);
 
-    bool isBlockedFromCreatingDocument() const;
-    bool isBlockedFromRunningScript() const;
+    bool shouldBlockDocumentCreation() const;
+    bool shouldBlockScriptExecution() const;
     bool isActive() const;
 
     HTMLImport* m_import;
