@@ -26,7 +26,12 @@
 #ifndef StorageNamespace_h
 #define StorageNamespace_h
 
+#include "wtf/OwnPtr.h"
 #include "wtf/PassOwnPtr.h"
+
+namespace blink {
+class WebStorageNamespace;
+}
 
 namespace WebCore {
 
@@ -36,11 +41,16 @@ class StorageArea;
 
 class StorageNamespace {
 public:
-    static PassOwnPtr<StorageArea> localStorageArea(SecurityOrigin*);
-    static PassOwnPtr<StorageNamespace> sessionStorageNamespace(Page*);
+    explicit StorageNamespace(PassOwnPtr<blink::WebStorageNamespace>);
+    ~StorageNamespace();
 
-    virtual ~StorageNamespace() { }
-    virtual PassOwnPtr<StorageArea> storageArea(SecurityOrigin*) = 0;
+    static PassOwnPtr<StorageArea> localStorageArea(SecurityOrigin*);
+
+    PassOwnPtr<StorageArea> storageArea(SecurityOrigin*);
+    bool isSameNamespace(const blink::WebStorageNamespace& sessionNamespace) const;
+
+private:
+    OwnPtr<blink::WebStorageNamespace> m_webStorageNamespace;
 };
 
 } // namespace WebCore
