@@ -53,9 +53,6 @@ public:
     virtual PassRefPtr<SVGNumber> clone() const;
     virtual PassRefPtr<NewSVGPropertyBase> cloneForAnimation(const String&) const OVERRIDE;
 
-    bool operator==(const SVGNumber&) const;
-    bool operator!=(const SVGNumber& other) const { return !operator==(other); }
-
     float value() const { return m_value; }
     void setValue(float value) { m_value = value; }
 
