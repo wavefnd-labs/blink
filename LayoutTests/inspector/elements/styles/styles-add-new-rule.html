@@ -6,6 +6,12 @@
 
 function test()
 {
+    if (!window.eventSender || !window.textInputController) {
+        document.write("This test does not work in manual mode.");
+        InspectorTest.completeTest();
+        return;
+    }
+
     WebInspector.showPanel("elements");
     InspectorTest.selectNodeAndWaitForStyles("inspected", step1);
     InspectorTest.addSniffer(WebInspector.UISourceCode.prototype, "addRevision", revisionAdded);
@@ -28,9 +34,9 @@ function test()
         var section = WebInspector.panels.elements.sidebarPanes.styles.sections[0][2];
         var newProperty = section.addNewBlankProperty();
         newProperty.startEditing();
-        newProperty.nameElement.textContent = "color";
+        textInputController.insertText("color");
         newProperty.nameElement.dispatchEvent(InspectorTest.createKeyEvent("Enter"));
-        newProperty.valueElement.textContent = "maroon";
+        textInputController.insertText("maroon");
         newProperty.valueElement.dispatchEvent(InspectorTest.createKeyEvent("Enter"));
         InspectorTest.selectNodeAndWaitForStyles("other", step3);
     }
