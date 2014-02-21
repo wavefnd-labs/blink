@@ -37,7 +37,7 @@
 
 namespace WebCore {
 
-class SVGMatrix;
+class SVGMatrixTearOff;
 
 class SVGPointTearOff : public NewSVGPropertyTearOff<SVGPoint>, public ScriptWrappable {
 public:
@@ -51,7 +51,7 @@ public:
     float x() { return target()->x(); }
     float y() { return target()->y(); }
 
-    PassRefPtr<SVGPointTearOff> matrixTransform(SVGMatrix);
+    PassRefPtr<SVGPointTearOff> matrixTransform(PassRefPtr<SVGMatrixTearOff>);
 
 protected:
     SVGPointTearOff(PassRefPtr<SVGPoint>, SVGElement* contextElement, PropertyIsAnimValType, const QualifiedName& attributeName = nullQName());
