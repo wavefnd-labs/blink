@@ -27,45 +27,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""A utility script for starting and stopping the web socket server with the
-   same configuration as used in the layout tests."""
+import webkitpy.common.version_check
 
-import logging
-import optparse
-import tempfile
+from webkitpy.layout_tests.servers import cli_wrapper
+from webkitpy.layout_tests.servers import pywebsocket
 
-from webkitpy.common.host import Host
-from webkitpy.layout_tests.servers import websocket_server
-
-
-def main():
-    option_parser = optparse.OptionParser()
-    option_parser.add_option('--server', type='choice',
-                             choices=['start', 'stop'], default='start',
-                             help='Server action (start|stop).')
-    option_parser.add_option('--output-dir', dest='output_dir',
-                             default=None, help='output directory.')
-    option_parser.add_option('-v', '--verbose', action='store_true',
-                             default=False,
-                             help='Include debug-level logging.')
-    options, args = option_parser.parse_args()
-
-    if not options.output_dir:
-        options.output_dir = tempfile.gettempdir()
-
-    host = Host()
-    port_obj = host.port_factory.get()
-    pywebsocket = websocket_server.PyWebSocket(port_obj, options.output_dir)
-
-    log_level = logging.WARN
-    if options.verbose:
-        log_level = logging.DEBUG
-    logging.basicConfig(level=log_level)
-
-    if 'start' == options.server:
-        pywebsocket.start()
-    else:
-        pywebsocket.stop()
-
-if '__main__' == __name__:
-    main()
+cli_wrapper.main(pywebsocket.PyWebSocket)
