@@ -23,30 +23,7 @@
 #include "config.h"
 #include "core/dom/LiveNodeList.h"
 
-#include "core/dom/Element.h"
-#include "core/html/HTMLCollection.h"
-
 namespace WebCore {
-
-ContainerNode& LiveNodeListBase::rootNode() const
-{
-    if (isRootedAtDocument() && m_ownerNode->inDocument())
-        return m_ownerNode->document();
-    return *m_ownerNode;
-}
-
-void LiveNodeListBase::didMoveToDocument(Document& oldDocument, Document& newDocument)
-{
-    invalidateCache(&oldDocument);
-    oldDocument.unregisterNodeList(this);
-    newDocument.registerNodeList(this);
-}
-
-void LiveNodeListBase::invalidateIdNameCacheMaps() const
-{
-    ASSERT(hasIdNameCache());
-    static_cast<const HTMLCollection*>(this)->invalidateIdNameCacheMaps();
-}
 
 Node* LiveNodeList::virtualOwnerNode() const
 {
