@@ -1,38 +1,30 @@
 <html manifest="resources/resource-redirect.manifest">
-<body>
-<p>Test that a redirect makes resource caching fail.</p>
-<p>Should say SUCCESS:</p>
-<div id=result></div>
+<script src="/js-test-resources/js-test.js"></script>
 <script>
-if (window.testRunner) {
-    testRunner.dumpAsText()
-    testRunner.waitUntilDone();
-}
+var jsTestIsAsync = true;
+description("Test that a redirect makes resource caching fail.");
 
-function log(message)
+function unexpectedCallback(eventName)
 {
-    document.getElementById("result").innerHTML += message + "<br>";
+    testFailed("An unexpected " + eventName + " event was dispatched on window.applicationCache.");
+    finishJSTest();
 }
 
-function cacheCallback()
+function test(e)
 {
-    log("FAIL: An unexpected event was dispatched on window.applicationCache.");
+    shouldBe("window.applicationCache.status", "window.applicationCache.UNCACHED");
+
+    event = e;
+    shouldBeEqualToString("event.reason", "resource");
+    shouldBeEqualToString("event.url", "http://127.0.0.1:8000/appcache/resources/resource-redirect.php");
+    shouldBe("event.status", "307");
+    shouldBeTrue("'message' in event");
+
+    finishJSTest();
 }
 
-function test()
-{
-    // Wait for cache update to finish.
-    if (window.applicationCache.status != window.applicationCache.UNCACHED)
-        log("FAILURE: Unexpected cache status: " + window.applicationCache.status);
-    else
-        log("SUCCESS");
-
-    if (window.testRunner)
-        testRunner.notifyDone();
-}
-
-applicationCache.addEventListener('cached', function() { log("cached"); cacheCallback() }, false);
-applicationCache.addEventListener('noupdate', function() { log("noupdate"); cacheCallback() }, false);
+applicationCache.addEventListener('cached', function() { unexpectedCallback("cached"); }, false);
+applicationCache.addEventListener('noupdate', function() { unexpectedCallback("noupdate"); }, false);
 applicationCache.addEventListener('error', test, false);
 
 </script>
