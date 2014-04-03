@@ -15,9 +15,12 @@
 
 <script>
 
-    description("Tests that accessible inline text boxes update immediately when a static text element changes.");
+    description("Tests that accessible inline text boxes update when a static text node changes.");
 
     if (window.accessibilityController) {
+        testRunner.waitUntilDone();
+        window.jsTestIsAsync = true;
+
         window.axParagraph = accessibilityController.accessibleElementById('p');
         window.axStaticText = axParagraph.childAtIndex(0);
         shouldBe("axStaticText.childrenCount", "2");
@@ -30,17 +33,21 @@
         // Modify the text.
         document.getElementById("p").innerText += ' One more sentence.';
 
-        // Make sure the inline text boxes changed.
-        shouldBe("axStaticText.childrenCount", "3");
-        window.axInlineAfter0 = axStaticText.childAtIndex(0);
-        shouldBe("axInlineAfter0.stringValue",  "'AXValue: This paragraph contains '");
-        window.axInlineAfter1 = axStaticText.childAtIndex(1);
-        shouldBe("axInlineAfter1.stringValue", "'AXValue: two lines of text. One '");
-        window.axInlineAfter2 = axStaticText.childAtIndex(2);
-        shouldBe("axInlineAfter2.stringValue", "'AXValue: more sentence.'");
+        // Wait for a notification on the element before checking the new state.
+        axStaticText.addNotificationListener(function(notification) {
+            // Make sure the inline text boxes changed.
+            shouldBe("axStaticText.childrenCount", "3");
+            window.axInlineAfter0 = axStaticText.childAtIndex(0);
+            shouldBe("axInlineAfter0.stringValue",  "'AXValue: This paragraph contains '");
+            window.axInlineAfter1 = axStaticText.childAtIndex(1);
+            shouldBe("axInlineAfter1.stringValue", "'AXValue: two lines of text. One '");
+            window.axInlineAfter2 = axStaticText.childAtIndex(2);
+            shouldBe("axInlineAfter2.stringValue", "'AXValue: more sentence.'");
 
-        // Make sure the old object pointing to the second text box is no longer valid.
-        shouldBe("axInlineBefore1.stringValue", "'AXValue: '");
+            // Make sure the old object pointing to the second text box is no longer valid.
+            shouldBe("axInlineBefore1.stringValue", "'AXValue: '");
+            finishJSTest();
+        });
     }
 </script>
 
