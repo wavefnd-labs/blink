@@ -31,8 +31,6 @@
 #ifndef WebAutofillClient_h
 #define WebAutofillClient_h
 
-#include "WebFrame.h"
-
 namespace blink {
 
 class WebFormControlElement;
@@ -40,13 +38,14 @@ class WebFormElement;
 class WebInputElement;
 class WebKeyboardEvent;
 class WebNode;
+struct WebAutocompleteParams;
 
 template <typename T> class WebVector;
 
 class WebAutofillClient {
 public:
     // Informs the browser an interactive autocomplete has been requested.
-    virtual void didRequestAutocomplete(WebLocalFrame*, const WebFormElement&) { }
+    virtual void didRequestAutocomplete(const WebFormElement&, const WebAutocompleteParams&) { }
 
     // These methods are called when the users edits a text-field.
     virtual void textFieldDidEndEditing(const WebInputElement&) { }
