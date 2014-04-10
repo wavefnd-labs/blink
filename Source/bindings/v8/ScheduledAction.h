@@ -33,10 +33,9 @@
 
 #include "bindings/v8/ScopedPersistent.h"
 #include "bindings/v8/ScriptSourceCode.h"
-#include "bindings/v8/UnsafePersistent.h"
+#include "bindings/v8/V8PersistentValueVector.h"
 #include <v8.h>
 #include "wtf/Forward.h"
-#include "wtf/Vector.h"
 
 namespace WebCore {
 
@@ -60,7 +59,7 @@ private:
 
     ScopedPersistent<v8::Context> m_context;
     ScopedPersistent<v8::Function> m_function;
-    Vector<UnsafePersistent<v8::Value> > m_info;
+    V8PersistentValueVector<v8::Value> m_info;
     ScriptSourceCode m_code;
     v8::Isolate* m_isolate;
 };
