@@ -1,10 +1,9 @@
 #!/usr/bin/perl -wT
 use strict;
+use Time::HiRes qw(sleep);
 
 print "Content-Type: text/html\n\n";
-# If you want to make things super predictable, this will help for the cost of slowness.
-# In practice, CGI invocation overhead is sufficiently slow.
-# sleep 1;
+sleep 0.2;
 print <<EOF
 <script>
 window.childLoaded = true;
