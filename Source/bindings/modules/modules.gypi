@@ -4,7 +4,7 @@
 
 {
   'includes': [
-    '../bindings.gypi',  # FIXME: factor out bindings_modules http://crbug.com/358074
+    '../bindings.gypi',
     'v8/generated.gypi',
   ],
 
