@@ -32,7 +32,7 @@
 #define CSSAnimatableValueFactory_h
 
 #include "core/CSSPropertyNames.h"
-#include "core/animation/AnimatableValue.h"
+#include "core/animation/animatable/AnimatableValue.h"
 #include "wtf/PassRefPtr.h"
 
 namespace WebCore {
