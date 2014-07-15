@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test asynchronous creation of MediaKeys and MediaKeySession while running garbage collection</title>
+        <script src="encrypted-media-utils.js"></script>
+        <script src="../../resources/testharness.js"></script>
+        <script src="../../resources/testharnessreport.js"></script>
+    </head>
+    <body>
+        <div id="log"></div>
+        <script>
+            async_test(function(test)
+            {
+                // Run garbage collection often.
+                setInterval(asyncGC, 0);
+
+                MediaKeys.create('org.w3.clearkey').then(function(mediaKeys) {
+                    var initDataType = getInitDataType();
+                    return mediaKeys.createSession(initDataType, getInitData(initDataType));
+                }).then(function(mediaKeySession) {
+                    return mediaKeySession.release();
+                }).then(function(result) {
+                    test.done();
+                }).catch(function(error) {
+                    forceTestFailureFromPromise(test, error);
+                });
+            }, 'Test asynchronous creation of MediaKeys and MediaKeySession while running garbage collection.');
+        </script>
+    </body>
+</html>
