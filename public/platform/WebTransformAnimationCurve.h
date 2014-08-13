@@ -25,6 +25,7 @@
 #ifndef WebTransformAnimationCurve_h
 #define WebTransformAnimationCurve_h
 
+#include "WebAnimationCurve.h"
 #include "WebCommon.h"
 #include "WebCompositorAnimationCurve.h"
 #include "WebTransformKeyframe.h"
@@ -32,7 +33,7 @@
 namespace blink {
 
 // A keyframed transform animation curve.
-class WebTransformAnimationCurve : public WebCompositorAnimationCurve {
+class WebTransformAnimationCurve : public WebAnimationCurve {
 public:
     virtual ~WebTransformAnimationCurve() { }
 
