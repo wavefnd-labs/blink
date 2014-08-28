@@ -20,13 +20,11 @@ function runTest()
     if (!window.testRunner)
         return;
 
-    // Click the play button.
-    var playCoords = mediaControlsButtonCoordinates(video, "play-button");
-    var clickX = playCoords[0];
-    var clickY = playCoords[1];
-    eventSender.mouseMoveTo(clickX, clickY);
-    eventSender.mouseDown();
-    eventSender.mouseUp();
+    // Tap the play button
+    var coords = mediaControlsButtonCoordinates(video, "play-button");
+    eventSender.gestureTapDown(coords[0], coords[1]);
+    eventSender.gestureShowPress(coords[0], coords[1]);
+    eventSender.gestureTap(coords[0], coords[1]);
     testExpected("video.paused", false);
 
     runAfterHideMediaControlsTimerFired(function()
@@ -46,7 +44,6 @@ function runTest()
 
     <video id="no-video-media" controls loop oncanplaythrough="runTest()"></video>
     <script>
-        window.internals.settings.setDeviceSupportsMouse(false);
         setSrcById("no-video-media", findMediaFile("video", "content/test"));
     </script>
 </body>
