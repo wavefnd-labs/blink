@@ -1,22 +1,38 @@
 <!DOCTYPE html>
-<html>
-<head>
-<script src="../resources/js-test.js"></script>
-</head>
-<body>
+<title>Tests that all geofencing methods always reject.</title>
+<script src="../resources/testharness.js"></script>
+<script src="../resources/testharnessreport.js"></script>
 <script>
-description("Tests that all geofencing methods always reject.");
-
-function shouldReject(promise)
-{
-    promise.then(
-        function() { testFailed("Promise unexpectedly resolved."); },
-        function() { testPassed("Promise rejected as expected."); });
+// Copied from http/tests/serviceworker/resources/worker-test-harness.js, can be
+// removed once this makes it into testharness.js itself.
+function promise_test(func, name, properties) {
+  properties = properties || {};
+  var test = async_test(name, properties);
+  Promise.resolve(test.step(func, test, test))
+    .then(function() { test.done(); })
+    .catch(test.step_func(function(value) {
+        throw value;
+      }));
 }
 
-shouldReject(navigator.geofencing.registerRegion(new CircularGeofencingRegion({latitude: 37.421999, longitude: -122.084015})));
-shouldReject(navigator.geofencing.unregisterRegion(""));
-shouldReject(navigator.geofencing.getRegisteredRegions());
+promise_test(function(test) {
+    return navigator.geofencing.registerRegion(
+        new CircularGeofencingRegion({latitude: 37.421999,
+                                      longitude: -122.084015}))
+      .then(test.unreached_func('Promise should not have resolved'))
+      .catch(function() { });
+  }, 'registerRegion should fail');
+
+promise_test(function(test) {
+    return navigator.geofencing.unregisterRegion("")
+      .then(test.unreached_func('Promise should not have resolved'))
+      .catch(function() { });
+  }, 'unregisterRegion should fail');
+
+promise_test(function(test) {
+    return navigator.geofencing.getRegisteredRegions()
+      .then(test.unreached_func('Promise should not have resolved'))
+      .catch(function() { });
+  }, 'getRegisteredRegions should fail');
+
 </script>
-</body>
-</html>
