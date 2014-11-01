@@ -42,6 +42,7 @@ public:
 
 private:
     explicit HTMLImageLoader(Element*);
+    virtual void noImageResourceToLoad() override;
 };
 
 }
