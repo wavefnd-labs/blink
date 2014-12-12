@@ -11,6 +11,7 @@
       // Tests that the showNotification() function resolves a promise, and that the
       // notificationclick event gets fired on the Service Worker when we simulate a
       // click on it. This test requires the test runner.
+
       async_test(function (test) {
           var scope = 'resources/scope/service-worker-show-notification-click',
               workerUrl = 'resources/click-forward-service-worker.js';
@@ -44,8 +45,8 @@
               });
           }).then(function () {
               messagePort.addEventListener('message', function(event) {
-                  assert_equals(event.data, 'The notification has been clicked on.');
-                  test.done();
+                  assert_equals(event.data, 'Clicked on Notification: ' + scope);
+                  service_worker_unregister_and_done(test, scope);
               });
 
               testRunner.simulateWebNotificationClick(scope);

@@ -1,4 +1,4 @@
-// Sends a message to all clients when the notificationclick event gets received.
+// Sends a message when the notificationclick event gets received.
 var messagePort = null;
 
 addEventListener('message', function(event) {
@@ -7,6 +7,5 @@ addEventListener('message', function(event) {
 });
 
 addEventListener('notificationclick', function(event) {
-    // FIXME: Include the notification's title in the confirmation reply.
-    messagePort.postMessage('The notification has been clicked on.');
+    messagePort.postMessage('Clicked on Notification: ' + event.notification.title);
 });
