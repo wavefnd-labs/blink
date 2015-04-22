@@ -5,6 +5,7 @@
   <script src="../resources/js-test.js"></script>
   <script src="resources/compatibility.js"></script>
   <script src="resources/audio-testing.js"></script>
+  <script src="resources/audiobuffersource-testing.js"></script>
   <script src="resources/buffer-loader.js"></script>
 </head>
 
@@ -18,42 +19,6 @@
 
     var context = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
     var referenceBuffer;
-
-
-    function generateActual() {
-      // Create a low-frequency oscillator and a gain to modulate playbackRate
-      // parameter.
-      var lfo = context.createOscillator();
-      var amp = context.createGain();
-
-      // Create a sawtooth generator with the signal range of [0, 1].
-      var phasor = context.createBufferSource();
-      var phasorBuffer = context.createBuffer(1, sampleRate, sampleRate);
-      var phasorArray = phasorBuffer.getChannelData(0);
-      var phase = 0, phaseStep = 1 / sampleRate;
-      for (var i = 0; i < phasorArray.length; i++) {
-        phasorArray[i] = phase % 1.0;
-        phase += phaseStep;
-      }
-      phasor.buffer = phasorBuffer;
-      phasor.loop = true;
-
-      // With this setting, The playback rate will be changing continuously and
-      // repeatedly within the range of [0, 200] based on the input from the
-      // oscillator.
-      lfo.frequency.value = 1.0;
-      amp.gain.value = 100;
-      phasor.playbackRate.value = 100;
-
-      // Modulate playbackRate with amplified oscillator output.
-      lfo.connect(amp);
-      amp.connect(phasor.playbackRate);
-      phasor.connect(context.destination);
-
-      lfo.start();
-      phasor.start();
-    }
-
 
     var audit = Audit.createTaskRunner();
 
@@ -73,8 +38,11 @@
 
     // Task: Render the actual buffer and compare with the reference.
     audit.defineTask('generate-verify', function (done) {
-
-      generateActual();
+      
+      // With this setting, the playback rate will be changing continuously and
+      // repeatedly within the range of [0, 200] around 100Hz, based on the
+      // input from the oscillator.
+      createSawtoothWithModulation(context, 'playbackRate', 100, 100);
 
       context.startRendering().then(function (renderedBuffer) {
         var actual = renderedBuffer.getChannelData(0);
@@ -100,7 +68,10 @@
         return;
       }
 
-      generateActual();
+      // With this setting, the playback rate will be changing continuously and
+      // repeatedly within the range of [0, 200] around 100Hz, based on the
+      // input from the oscillator.
+      createSawtoothWithModulation(context, 'playbackRate', 100, 100);
 
       // |finishAudioTest| will automatically create a reference audio file from
       // the OAC rendering if the reference file does not exist.
