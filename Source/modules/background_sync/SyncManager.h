@@ -30,6 +30,7 @@ public:
     ScriptPromise registerFunction(ScriptState*, const SyncRegistrationOptions&);
     ScriptPromise getRegistration(blink::ScriptState*, const String&);
     ScriptPromise getRegistrations(ScriptState*);
+    ScriptPromise permissionState(ScriptState*);
 
     DECLARE_TRACE();
 
