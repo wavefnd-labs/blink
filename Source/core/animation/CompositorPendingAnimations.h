@@ -32,7 +32,7 @@
 #define CompositorPendingAnimations_h
 
 #include "core/CoreExport.h"
-#include "core/animation/AnimationPlayer.h"
+#include "core/animation/Animation.h"
 #include "platform/Timer.h"
 #include "platform/heap/Handle.h"
 #include "wtf/Vector.h"
@@ -53,7 +53,7 @@ public:
         , m_compositorGroup(1)
     { }
 
-    void add(AnimationPlayer*);
+    void add(Animation*);
     // Returns whether we are waiting for an animation to start and should
     // service again on the next frame.
     bool update(bool startOnCompositor = true);
@@ -64,8 +64,8 @@ public:
 private:
     void timerFired(Timer<CompositorPendingAnimations>*) { update(false); }
 
-    WillBeHeapVector<RefPtrWillBeMember<AnimationPlayer>> m_pending;
-    WillBeHeapVector<RefPtrWillBeMember<AnimationPlayer>> m_waitingForCompositorAnimationStart;
+    WillBeHeapVector<RefPtrWillBeMember<Animation>> m_pending;
+    WillBeHeapVector<RefPtrWillBeMember<Animation>> m_waitingForCompositorAnimationStart;
     Timer<CompositorPendingAnimations> m_timer;
     int m_compositorGroup;
 };
