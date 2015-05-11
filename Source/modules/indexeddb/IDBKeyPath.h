@@ -28,7 +28,7 @@
 
 #include "bindings/modules/v8/UnionTypesModules.h"
 #include "modules/ModulesExport.h"
-#include "public/platform/WebIDBKeyPath.h"
+#include "public/platform/modules/indexeddb/WebIDBKeyPath.h"
 #include "wtf/Vector.h"
 #include "wtf/text/WTFString.h"
 
