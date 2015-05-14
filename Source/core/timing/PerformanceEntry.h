@@ -49,6 +49,8 @@ public:
     double duration() const;
 
     virtual bool isResource() { return false; }
+    virtual bool isRender() { return false; }
+    virtual bool isComposite() { return false; }
     virtual bool isMark() { return false; }
     virtual bool isMeasure() { return false; }
 
