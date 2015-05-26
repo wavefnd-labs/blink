@@ -9,7 +9,7 @@
 
 #content {
   width: 750px;
-  height: 750px;
+  height: 10000px;
   background-color: blue;
 }
 
@@ -24,63 +24,37 @@
 jsTestIsAsync = true;
 element = document.getElementById("container");
 
-var testConfigs = [
-  {preciseDeltas: false, expectSmooth: true},
-  {preciseDeltas: true, expectSmooth: false},
-];
-var config;
-var waitingForScroll = false;
+var prevScrollTop;
 var scrollStart;
 
-function nextConfig() {
-    config = testConfigs.shift();
-    if (!config) {
-        finishJSTest();
-        return;
-    }
+function runTest() {
+    internals.settings.setScrollAnimatorEnabled(true);
 
     element.addEventListener("scroll", onElementScroll);
 
     testRunner.layoutAndPaintAsyncThen(function() {
+        // Give the container focus.
         eventSender.mouseMoveTo(100, 100);
-        eventSender.mouseScrollBy(0, -2, /* paged */ false,
-            config.preciseDeltas);
-        scrollStart = performance.now();
+        eventSender.mouseDown();
+        eventSender.mouseUp();
+
+        eventSender.keyDown('end');
     });
 }
 
-function reset() {
-    element.removeEventListener("scroll", onElementScroll);
-    element.scrollTop = 0;
-    waitingForScroll = false;
-    scrollStart = undefined;
-}
-
 function onElementScroll() {
-    if (waitingForScroll) {
-        if (element.scrollTop == 80) {
-            reset();
-            nextConfig();
-        }
-    } else if (!scrollStart) {
-        return;
-    } else if (config.expectSmooth) {
-        shouldNotBe("element.scrollTop", "80");
-        waitingForScroll = true;
+    if (prevScrollTop === undefined) {
+        shouldNotBe("element.scrollTop",
+                    "element.scrollHeight - element.clientHeight");
+        shouldBeGreaterThan("element.scrollTop", "0");
+        prevScrollTop = element.scrollTop;
     } else {
-        shouldBe("element.scrollTop", "80");
-        reset();
-        nextConfig();
+        shouldBeGreaterThan("element.scrollTop", "prevScrollTop");
+        finishJSTest();
     }
 }
 
-function runTest() {
-    internals.settings.setScrollAnimatorEnabled(true);
-    nextConfig();
-}
-
-description("Tests that overflow scrolls are animated, unless the wheel " +
-            "event has precise scrolling deltas.");
+description("Tests that overflow scrolls are animated.");
 
 if (window.eventSender)
     runTest();
