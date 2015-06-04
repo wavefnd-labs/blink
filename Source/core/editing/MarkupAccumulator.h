@@ -27,6 +27,7 @@
 #define MarkupAccumulator_h
 
 #include "core/editing/EditingStrategy.h"
+#include "core/editing/MarkupFormatter.h"
 #include "core/editing/markup.h"
 #include "wtf/HashMap.h"
 #include "wtf/Vector.h"
@@ -39,37 +40,10 @@ class DocumentType;
 class Element;
 class Node;
 
-typedef HashMap<AtomicString, AtomicString> Namespaces;
-
-enum EntityMask {
-    EntityAmp = 0x0001,
-    EntityLt = 0x0002,
-    EntityGt = 0x0004,
-    EntityQuot = 0x0008,
-    EntityNbsp = 0x0010,
-
-    // Non-breaking space needs to be escaped in innerHTML for compatibility reason. See http://trac.webkit.org/changeset/32879
-    // However, we cannot do this in a XML document because it does not have the entity reference defined (See the bug 19215).
-    EntityMaskInCDATA = 0,
-    EntityMaskInPCDATA = EntityAmp | EntityLt | EntityGt,
-    EntityMaskInHTMLPCDATA = EntityMaskInPCDATA | EntityNbsp,
-    EntityMaskInAttributeValue = EntityAmp | EntityQuot | EntityLt | EntityGt,
-    EntityMaskInHTMLAttributeValue = EntityAmp | EntityQuot | EntityNbsp,
-};
-
-enum class SerializationType {
-    AsOwnerDocument,
-    ForcedXML
-};
-
 class MarkupAccumulator {
     WTF_MAKE_NONCOPYABLE(MarkupAccumulator);
     STACK_ALLOCATED();
 public:
-    static void appendComment(StringBuilder&, const String&);
-    static void appendCharactersReplacingEntities(StringBuilder&, const String&, unsigned, unsigned, EntityMask);
-    static size_t totalLength(const Vector<String>&);
-
     MarkupAccumulator(EAbsoluteURLs, SerializationType = SerializationType::AsOwnerDocument);
     virtual ~MarkupAccumulator();
 
@@ -106,12 +80,8 @@ public:
     bool shouldSelfClose(const Element&) const;
 
 private:
-    String resolveURLIfNeeded(const Element&, const String&) const;
-    void appendQuotedURLAttributeValue(StringBuilder&, const Element&, const Attribute&);
-
+    MarkupFormatter m_formatter;
     StringBuilder m_markup;
-    const EAbsoluteURLs m_resolveURLsMethod;
-    SerializationType m_serializationType;
 };
 
 template<typename Strategy>
