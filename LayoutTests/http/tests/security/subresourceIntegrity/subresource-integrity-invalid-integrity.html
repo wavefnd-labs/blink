@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <title>SRI invalid integrity attributes</title>
+        <script src="/resources/testharness.js"></script>
+        <script src="/resources/testharnessreport.js"></script>
+    </head>
     <body>
         <script>
-        if (window.testRunner)
-            testRunner.dumpAsText();
+        var count = 0;
+        function checkDone() {
+            if (count == 2)
+                done();
+            count++;
+        }
+        var success = checkDone;
+        function scriptError() {
+            assert_unreached("Script failed to load.");
+            checkDone();
+        }
         </script>
-        <p>
-        This test passes if no 'FAIL' alert appears.
-        </p>
-        <script src='fail.js' integrity="sha256;yM5ZyzNsyKfaXRY78zSGapeQKtl0oGdpPpYxgwl8XW8="></script>
-        <script src='fail.js' integrity="sha256:yM5ZyzNsyKfaXRY78zSGapeQKtl0oGdpPpYxgwl8XW8="></script>
-        <script src='fail.js' integrity="sha256-(yM5ZyzNsyKfaXRY78zSGapeQKtl0oGdpPpYxgwl8XW8=)"></script>
+        <script src='call-success.js' onerror="scriptError();" integrity="sha256;B0_62fJSJFrdjEFR9ba04m_D-LHQ-zG6PGcaR0Trpxg="></script>
+        <script src='call-success.js' onerror="scriptError();" integrity="sha256:B0_62fJSJFrdjEFR9ba04m_D-LHQ-zG6PGcaR0Trpxg="></script>
+        <script src='call-success.js' onerror="scriptError();" integrity="sha256-(B0_62fJSJFrdjEFR9ba04m_D-LHQ-zG6PGcaR0Trpxg=)"></script>
     </body>
 </html>
