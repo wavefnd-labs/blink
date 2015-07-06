@@ -33,9 +33,6 @@ v8::Local<v8::Object> DOMArrayBuffer::wrap(v8::Isolate* isolate, v8::Local<v8::O
 
 v8::Local<v8::Object> DOMArrayBuffer::associateWithWrapper(v8::Isolate* isolate, const WrapperTypeInfo* wrapperTypeInfo, v8::Local<v8::Object> wrapper)
 {
-    // This function does not set a deallocation observer to the underlying
-    // array buffer.  It's a caller's duty.
-
     return V8DOMWrapper::associateObjectWithWrapper(isolate, this, wrapperTypeInfo, wrapper);
 }
 
