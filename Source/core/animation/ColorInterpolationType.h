@@ -22,6 +22,12 @@ public:
     PassOwnPtr<InterpolationValue> maybeConvertUnderlyingValue(const StyleResolverState&) const final;
     void apply(const InterpolableValue&, const NonInterpolableValue*, StyleResolverState&) const final;
 
+    static PassOwnPtr<InterpolableValue> createInterpolableColor(const Color&);
+    static PassOwnPtr<InterpolableValue> createInterpolableColor(CSSValueID);
+    static PassOwnPtr<InterpolableValue> createInterpolableColor(const StyleColor&);
+    static PassOwnPtr<InterpolableValue> maybeCreateInterpolableColor(const CSSValue&);
+    static Color resolveInterpolableColor(const InterpolableValue& interpolableColor, const StyleResolverState&, bool isVisited = false, bool isTextDecoration = false);
+
 private:
     PassOwnPtr<InterpolationValue> maybeConvertNeutral() const final;
     PassOwnPtr<InterpolationValue> maybeConvertInitial() const final;
