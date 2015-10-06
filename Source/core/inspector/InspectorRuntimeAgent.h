@@ -34,6 +34,7 @@
 #include "core/CoreExport.h"
 #include "core/InspectorFrontend.h"
 #include "core/inspector/InspectorBaseAgent.h"
+#include "core/inspector/v8/V8RuntimeAgent.h"
 #include "wtf/Forward.h"
 #include "wtf/Noncopyable.h"
 
@@ -44,10 +45,14 @@ class InjectedScriptManager;
 class JSONArray;
 class ScriptState;
 class V8Debugger;
+class V8RuntimeAgent;
 
 typedef String ErrorString;
 
-class CORE_EXPORT InspectorRuntimeAgent : public InspectorBaseAgent<InspectorRuntimeAgent, InspectorFrontend::Runtime>, public InspectorBackendDispatcher::RuntimeCommandHandler {
+class CORE_EXPORT InspectorRuntimeAgent
+    : public InspectorBaseAgent<InspectorRuntimeAgent, InspectorFrontend::Runtime>
+    , public InspectorBackendDispatcher::RuntimeCommandHandler
+    , public V8RuntimeAgent::Client {
     WTF_MAKE_NONCOPYABLE(InspectorRuntimeAgent);
 public:
     class Client {
@@ -61,10 +66,15 @@ public:
     ~InspectorRuntimeAgent() override;
     DECLARE_VIRTUAL_TRACE();
 
-    // Part of the protocol.
-    void enable(ErrorString*) override;
-    void disable(ErrorString*) override;
+    // InspectorBaseAgent overrides.
+    void init() override;
+    void setFrontend(InspectorFrontend*) override;
+    void clearFrontend() override;
     void restore() override;
+
+    // Part of the protocol.
+    void enable(ErrorString*) final;
+    void disable(ErrorString*) final;
 
     void evaluate(ErrorString*,
         const String& expression,
@@ -95,6 +105,11 @@ public:
 
 protected:
     InspectorRuntimeAgent(InjectedScriptManager*, V8Debugger*, Client*);
+
+    // V8RuntimeAgent::Client implementation.
+    void didEnableRuntimeAgent() override;
+    void didDisableRuntimeAgent() override;
+
     virtual InjectedScript injectedScriptForEval(ErrorString*, const int* executionContextId) = 0;
 
     virtual void muteConsole() = 0;
@@ -108,6 +123,7 @@ protected:
 private:
     class InjectedScriptCallScope;
 
+    OwnPtr<V8RuntimeAgent> m_v8RuntimeAgent;
     RawPtrWillBeMember<InjectedScriptManager> m_injectedScriptManager;
     V8Debugger* m_debugger;
     Client* m_client;
