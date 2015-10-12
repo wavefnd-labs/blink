@@ -1,30 +1,32 @@
 <html>
 <head>
 <script src="../../http/tests/inspector/inspector-test.js"></script>
-<script src="../../http/tests/inspector/network-test.js"></script>
+<script src="datagrid-test.js"></script>
 <script>
-function initialize_DataGridTest()
-{
-}
-
 function test()
 {
-    function attach(parent, child)
+    function attach(parent, child, index)
     {
         var parentName = parent === root ? "root" : parent.data.id;
-        parent.appendChild(child);
-        InspectorTest.addResult("Attached " + child.data.id + " to " + parentName);
+        if (typeof index === "number")
+            parent.insertChild(child, index);
+        else
+            parent.appendChild(child);
+        InspectorTest.addResult("Attached " + child.data.id + " to " + parentName + (typeof index === "number" ? " at " + index : ""));
+    }
+
+    function detach(parent, child)
+    {
+        var parentName = parent === root ? "root" : parent.data.id;
+        InspectorTest.addResult("Removing " + child.data.id + " from " + parentName);
+        parent.removeChild(child);
     }
 
     function dumpNodes()
     {
         InspectorTest.addResult("");
         InspectorTest.addResult("Tree:");
-        var flatNodes = dataGrid._flatNodesList();
-        for (var i = 0; i < flatNodes.length; ++i) {
-            var node = flatNodes[i];
-            InspectorTest.addResult(" ".repeat(node.depth + 1) + node.data.id);
-        }
+        InspectorTest.dumpAndValidateDataGrid(dataGrid.rootNode());
         InspectorTest.addResult("");
     }
 
@@ -74,6 +76,22 @@ function test()
     dumpNodes();
 
     collapse(a);
+    dumpNodes();
+
+    expand(a);
+    attach(aa, aaa);
+    dumpNodes();
+    attach(aa, aaa);
+    attach(aa, aab);
+    var aac = new WebInspector.ViewportDataGridNode({id: "aac"});
+    attach(aa, aac);
+    dumpNodes();
+    attach(aa, aac, 0);
+    dumpNodes();
+    attach(ab, aac);
+    expand(ab);
+    dumpNodes();
+    detach(ab, aac);
     dumpNodes();
 
     InspectorTest.completeTest();
