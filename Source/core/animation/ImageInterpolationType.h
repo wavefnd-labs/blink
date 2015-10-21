@@ -21,12 +21,13 @@ public:
     void composite(UnderlyingValue&, double underlyingFraction, const InterpolationValue&) const final;
     void apply(const InterpolableValue&, const NonInterpolableValue*, StyleResolverState&) const final;
 
-    static InterpolationComponent maybeConvertCSSValue(const CSSValue&);
-    static InterpolationComponent maybeConvertStyleImage(const StyleImage&);
-    static InterpolationComponent maybeConvertStyleImage(const StyleImage* image) { return image ? maybeConvertStyleImage(*image) : nullptr; }
+    static InterpolationComponent maybeConvertCSSValue(const CSSValue&, bool acceptGradients);
+    static InterpolationComponent maybeConvertStyleImage(const StyleImage&, bool acceptGradients);
+    static InterpolationComponent maybeConvertStyleImage(const StyleImage* image, bool acceptGradients) { return image ? maybeConvertStyleImage(*image, acceptGradients) : nullptr; }
     static PairwiseInterpolationComponent mergeSingleConversionComponents(InterpolationComponent& startValue, InterpolationComponent& endValue);
     static PassRefPtrWillBeRawPtr<CSSValue> createCSSValue(const InterpolableValue&, const NonInterpolableValue*);
     static PassRefPtrWillBeRawPtr<StyleImage> resolveStyleImage(CSSPropertyID, const InterpolableValue&, const NonInterpolableValue*, StyleResolverState&);
+    static bool equalNonInterpolableValues(const NonInterpolableValue*, const NonInterpolableValue*);
 
 private:
     PassOwnPtr<InterpolationValue> maybeConvertNeutral(const UnderlyingValue&, ConversionCheckers&) const final;
