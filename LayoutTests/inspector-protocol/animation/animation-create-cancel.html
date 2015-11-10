@@ -15,10 +15,10 @@ function cancelAnimation()
     player.cancel();
 }
 
-
 function test()
 {
     InspectorTest.eventHandler["Animation.animationCreated"] = onCreated;
+    InspectorTest.eventHandler["Animation.animationCanceled"] = onCanceled;
     InspectorTest.eventHandler["Animation.animationStarted"] = onStarted;
     InspectorTest.sendCommand("Animation.enable", {});
     InspectorTest.evaluateInPage("startAnimation()", function() {});
@@ -31,6 +31,12 @@ function test()
     function onStarted()
     {
         InspectorTest.log("Animation started");
+        InspectorTest.evaluateInPage("cancelAnimation()", function() {});
+    }
+
+    function onCanceled()
+    {
+        InspectorTest.log("Animation canceled");
         InspectorTest.completeTest();
     }
 }
