@@ -28,7 +28,6 @@ public:
     const_iterator end() const { return m_impl.end(); }
 
     void resize(size_t s) { m_impl.resize(s); }
-    size_t find(const T& t) const { return m_impl.find(t); }
     size_t size() const { return m_impl.size(); }
     bool isEmpty() const { return m_impl.isEmpty(); }
     T& operator[](size_t i) { return at(i); }
@@ -40,7 +39,6 @@ public:
     void append(const T& t) { m_impl.append(t); }
     void prepend(const T& t) { m_impl.prepend(t); }
     void remove(size_t i) { m_impl.remove(i); }
-    void insert(size_t i, const T& t) { m_impl.insert(i, t); }
     void clear() { m_impl.clear(); }
     void swap(Vector& other) { m_impl.swap(other.m_impl); }
     void removeLast() { m_impl.removeLast(); }
@@ -66,7 +64,6 @@ public:
     const_iterator end() const { return m_impl.end(); }
 
     void resize(size_t s) { m_impl.resize(s); }
-    size_t find(const T* t) const { return m_impl.find(t); }
     size_t size() const { return m_impl.size(); }
     bool isEmpty() const { return m_impl.isEmpty(); }
     OwnPtr<T>& operator[](size_t i) { return m_impl.at(i); }
@@ -78,7 +75,6 @@ public:
     void append(PassOwnPtr<T> t) { m_impl.append(t); }
     void prepend(PassOwnPtr<T> t) { m_impl.prepend(t); }
     void remove(size_t i) { m_impl.remove(i); }
-    void insert(size_t i, PassOwnPtr<T> t) { m_impl.insert(i, t); }
     void clear() { m_impl.clear(); }
     void swap(Vector& other) { m_impl.swap(other.m_impl); }
     void removeLast() { m_impl.removeLast(); }
@@ -134,12 +130,12 @@ public:
     using iterator = HashMapIterator<K, V, typename WTF::HashMap<K, V>::iterator>;
     using const_iterator = HashMapIterator<K, const V, typename WTF::HashMap<K, V>::const_iterator>;
 
-    iterator begin() { return HashMapIterator<K, V, typename WTF::HashMap<K, V>::iterator>(m_impl.begin()); }
-    iterator end() { return HashMapIterator<K, V, typename WTF::HashMap<K, V>::iterator>(m_impl.end()); }
-    iterator find(const K& k) { return HashMapIterator<K, V, typename WTF::HashMap<K, V>::iterator>(m_impl.find(k)); }
-    const_iterator begin() const { return HashMapIterator<K, const V, typename WTF::HashMap<K, V>::const_iterator>(m_impl.begin()); }
-    const_iterator end() const { return HashMapIterator<K, const V, typename WTF::HashMap<K, V>::const_iterator>(m_impl.end()); }
-    const_iterator find(const K& k) const { return HashMapIterator<K, const V, typename WTF::HashMap<K, V>::const_iterator>(m_impl.find(k)); }
+    iterator begin() { return iterator(m_impl.begin()); }
+    iterator end() { return iterator(m_impl.end()); }
+    iterator find(const K& k) { return iterator(m_impl.find(k)); }
+    const_iterator begin() const { return const_iterator(m_impl.begin()); }
+    const_iterator end() const { return const_iterator(m_impl.end()); }
+    const_iterator find(const K& k) const { return const_iterator(m_impl.find(k)); }
 
     size_t size() const { return m_impl.size(); }
     bool isEmpty() const { return m_impl.isEmpty(); }
@@ -163,12 +159,12 @@ public:
     using iterator = HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::iterator>;
     using const_iterator = HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::const_iterator>;
 
-    iterator begin() { return HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::iterator>(m_impl.begin()); }
-    iterator end() { return HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::iterator>(m_impl.end()); }
-    iterator find(const K& k) { return HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::iterator>(m_impl.find(k)); }
-    const_iterator begin() const { return HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::const_iterator>(m_impl.begin()); }
-    const_iterator end() const { return HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::const_iterator>(m_impl.end()); }
-    const_iterator find(const K& k) const { return HashMapIterator<K, OwnPtr<V>, typename WTF::HashMap<K, OwnPtr<V>>::const_iterator>(m_impl.find(k)); }
+    iterator begin() { return iterator(m_impl.begin()); }
+    iterator end() { return iterator(m_impl.end()); }
+    iterator find(const K& k) { return iterator(m_impl.find(k)); }
+    const_iterator begin() const { return const_iterator(m_impl.begin()); }
+    const_iterator end() const { return const_iterator(m_impl.end()); }
+    const_iterator find(const K& k) const { return const_iterator(m_impl.find(k)); }
 
     size_t size() const { return m_impl.size(); }
     bool isEmpty() const { return m_impl.isEmpty(); }
