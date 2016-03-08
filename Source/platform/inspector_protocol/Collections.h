@@ -5,6 +5,6 @@
 #ifndef Collections_h
 #define Collections_h
 
-#include "CollectionsWTF.h"
+#include "platform/inspector_protocol/CollectionsWTF.h"
 
 #endif // !defined(Collections_h)
