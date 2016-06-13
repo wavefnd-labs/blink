@@ -4,23 +4,14 @@
 
 #include "core/dom/custom/CustomElementUpgradeReaction.h"
 
-#include "core/dom/Element.h"
 #include "core/dom/custom/CustomElementDefinition.h"
 
 namespace blink {
 
 CustomElementUpgradeReaction::CustomElementUpgradeReaction(
     CustomElementDefinition* definition)
-    : m_definition(definition)
+    : CustomElementReaction(definition)
 {
-}
-
-CustomElementUpgradeReaction::~CustomElementUpgradeReaction() = default;
-
-DEFINE_TRACE(CustomElementUpgradeReaction)
-{
-    CustomElementReaction::trace(visitor);
-    visitor->trace(m_definition);
 }
 
 void CustomElementUpgradeReaction::invoke(Element* element)
