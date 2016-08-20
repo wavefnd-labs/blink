@@ -9,7 +9,6 @@
 
 namespace blink {
 
-#ifndef NDEBUG
 TEST(IntRectTest, ToString)
 {
     IntRect emptyRect = IntRect();
@@ -18,6 +17,5 @@ TEST(IntRectTest, ToString)
     IntRect rect(1, 2, 3, 4);
     EXPECT_EQ(String("1,2 3x4"), rect.toString());
 }
-#endif
 
 } // namespace blink
