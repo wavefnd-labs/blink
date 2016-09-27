@@ -27,13 +27,14 @@ DEFINE_TRACE(V8VoidCallbackFunctionInterfaceArg)
 {
 }
 
-bool V8VoidCallbackFunctionInterfaceArg::call(ScriptState* scriptState, ScriptWrappable* scriptWrappable, HTMLDivElement* divElement)
+bool V8VoidCallbackFunctionInterfaceArg::call(ScriptState* scriptState, ScriptWrappable* scriptWrappable, ExceptionState& exceptionState, HTMLDivElement* divElement)
 {
     if (!scriptState->contextIsValid())
         return false;
 
     if (m_callback.isEmpty())
         return false;
+
     ScriptState::Scope scope(scriptState);
 
     v8::Local<v8::Value> divElementArgument = toV8(divElement, scriptState->context()->Global(), scriptState->isolate());

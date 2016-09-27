@@ -9,6 +9,7 @@
 #ifndef V8VoidExperimentalCallbackFunction_h
 #define V8VoidExperimentalCallbackFunction_h
 
+#include "bindings/core/v8/ExceptionState.h"
 #include "bindings/core/v8/ScopedPersistent.h"
 #include "core/CoreExport.h"
 #include "platform/heap/Handle.h"
@@ -29,7 +30,7 @@ public:
 
     DECLARE_TRACE();
 
-    bool call(ScriptState* scriptState, ScriptWrappable* scriptWrappable);
+    bool call(ScriptState* scriptState, ScriptWrappable* scriptWrappable, ExceptionState& exceptionState);
 
     v8::Local<v8::Function> v8Value(v8::Isolate* isolate)
     {
