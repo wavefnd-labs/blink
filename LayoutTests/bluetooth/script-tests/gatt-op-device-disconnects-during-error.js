@@ -17,7 +17,7 @@ promise_test(() => {
         .then(requestDisconnection => {
           requestDisconnection();
           return assert_promise_rejects_with_message(
-            error_characteristic.CALLS([readValue()]),
+            error_characteristic.CALLS([readValue()| writeValue(val)]),
             new DOMException(
               'GATT Server disconnected while performing a GATT operation.',
               'NetworkError'));
