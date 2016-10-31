@@ -11,7 +11,10 @@ promise_test(() => {
         .then(service => service.getCharacteristic('measurement_interval'))
         .then(measurement_interval => {
           let promise = assert_promise_rejects_with_message(
-            measurement_interval.CALLS([readValue()| writeValue(val)]),
+            measurement_interval.CALLS([
+              readValue()|
+              writeValue(val)|
+              startNotifications()]),
             new DOMException(
               'GATT Server disconnected while performing a GATT operation.',
               'NetworkError'));
