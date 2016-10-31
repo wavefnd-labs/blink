@@ -14,7 +14,8 @@ promise_test(() => {
             measurement_interval.CALLS([
               readValue()|
               writeValue(val)|
-              startNotifications()]),
+              startNotifications()|
+              stopNotifications()]),
             new DOMException(
               'GATT Server is disconnected. Cannot perform GATT operations.',
               'NetworkError'));
