@@ -30,6 +30,7 @@
 #include "core/paint/PaintLayerFilterInfo.h"
 
 #include "core/paint/PaintLayer.h"
+#include "core/style/FilterOperations.h"
 #include "platform/graphics/filters/FilterEffect.h"
 
 namespace blink {
@@ -41,34 +42,19 @@ PaintLayerFilterInfo::~PaintLayerFilterInfo() {
   DCHECK(!m_layer);
 }
 
-TreeScope* PaintLayerFilterInfo::treeScope() {
-  DCHECK(m_layer);
-  Node* node = m_layer->layoutObject()->node();
-  return node ? &node->treeScope() : nullptr;
-}
-
-void PaintLayerFilterInfo::resourceContentChanged() {
-  DCHECK(m_layer);
-  m_layer->layoutObject()->setShouldDoFullPaintInvalidation();
-  invalidateFilterChain();
-}
-
-void PaintLayerFilterInfo::resourceElementChanged() {
-  DCHECK(m_layer);
-  m_layer->layoutObject()->setShouldDoFullPaintInvalidation();
-  invalidateFilterChain();
-}
-
 void PaintLayerFilterInfo::setLastEffect(FilterEffect* lastEffect) {
   m_lastEffect = lastEffect;
 }
 
-FilterEffect* PaintLayerFilterInfo::lastEffect() const {
-  return m_lastEffect;
+void PaintLayerFilterInfo::updateReferenceFilterClients(
+    const FilterOperations& operations) {
+  clearFilterReferences();
+  addFilterReferences(operations, m_layer->layoutObject()->document());
 }
 
-void PaintLayerFilterInfo::invalidateFilterChain() {
-  m_lastEffect = nullptr;
+void PaintLayerFilterInfo::filterNeedsInvalidation() {
+  if (m_layer)
+    m_layer->filterNeedsPaintInvalidation();
 }
 
 DEFINE_TRACE(PaintLayerFilterInfo) {
