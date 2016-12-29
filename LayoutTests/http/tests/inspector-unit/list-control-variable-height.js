@@ -30,8 +30,7 @@ class Delegate {
 }
 
 var delegate = new Delegate();
-var list = new UI.ListControl(delegate);
-list.setHeightMode(UI.ListHeightMode.Variable);
+var list = new UI.ListControl(delegate, UI.ListMode.ViewportVariableItems);
 list.element.style.height = '73px';
 UI.inspectorView.element.appendChild(list.element);
 
