@@ -26,8 +26,9 @@ PresentationConnectionCallbacks::PresentationConnectionCallbacks(
 void PresentationConnectionCallbacks::onSuccess(
     const WebPresentationSessionInfo& sessionInfo) {
   if (!m_resolver->getExecutionContext() ||
-      m_resolver->getExecutionContext()->isContextDestroyed())
+      m_resolver->getExecutionContext()->isContextDestroyed()) {
     return;
+  }
   m_resolver->resolve(
       PresentationConnection::take(m_resolver.get(), sessionInfo, m_request));
 }
