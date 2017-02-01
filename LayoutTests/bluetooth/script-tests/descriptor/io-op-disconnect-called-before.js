@@ -15,7 +15,7 @@ promise_test(() => {
             .then(descriptor => {
               gattServer.disconnect();
               return assert_promise_rejects_with_message(
-                  descriptor.CALLS([readValue()]),
+                  descriptor.CALLS([readValue()|writeValue(val)]),
                   new DOMException(
                       'GATT Server is disconnected. Cannot perform GATT operations.',
                       'NetworkError'));

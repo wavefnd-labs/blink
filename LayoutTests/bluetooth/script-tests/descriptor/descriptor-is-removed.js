@@ -1,5 +1,6 @@
 'use strict';
 promise_test(() => {
+  let val = new Uint8Array([1]);
   return setBluetoothFakeAdapter('DisconnectingHealthThermometerAdapter')
       .then(
           () => requestDeviceWithKeyDown(
@@ -14,7 +15,7 @@ promise_test(() => {
                    'MissingDescriptorsDisconnectingHealthThermometerAdapter')
             .then(
                 () => assert_promise_rejects_with_message(
-                    descriptor.CALLS([readValue()]),
+                    descriptor.CALLS([readValue()|writeValue(val)]),
                     new DOMException(
                         'GATT Descriptor no longer exists.',
                         'InvalidStateError'),
