@@ -6,16 +6,12 @@
 
 #include <memory>
 #include <utility>
-#include "platform/weborigin/SecurityOrigin.h"
-#include "public/platform/InterfaceProvider.h"
-#include "public/platform/Platform.h"
-#include "third_party/WebKit/Source/platform/wtf/text/WTFString.h"
 
 namespace blink {
 
 SharedWorkerContentSettingsProxy::SharedWorkerContentSettingsProxy(
     SecurityOrigin* security_origin,
-    mojom::blink::SharedWorkerContentSettingsProxyPtrInfo host_info)
+    mojom::blink::WorkerContentSettingsProxyPtrInfo host_info)
     : security_origin_(security_origin->IsolatedCopy()),
       host_info_(std::move(host_info)) {}
 SharedWorkerContentSettingsProxy::~SharedWorkerContentSettingsProxy() = default;
@@ -34,13 +30,13 @@ bool SharedWorkerContentSettingsProxy::RequestFileSystemAccessSync() {
   return result;
 }
 
-// Use ThreadSpecific to ensure that |sontent_setting_instance_host| is
+// Use ThreadSpecific to ensure that |content_setting_instance_host| is
 // destructed on worker thread.
 // Each worker has a dedicated thread so this is safe.
-mojom::blink::SharedWorkerContentSettingsProxyPtr&
+mojom::blink::WorkerContentSettingsProxyPtr&
 SharedWorkerContentSettingsProxy::GetService() {
   DEFINE_THREAD_SAFE_STATIC_LOCAL(
-      ThreadSpecific<mojom::blink::SharedWorkerContentSettingsProxyPtr>,
+      ThreadSpecific<mojom::blink::WorkerContentSettingsProxyPtr>,
       content_setting_instance_host, ());
   if (!content_setting_instance_host.IsSet()) {
     DCHECK(host_info_.is_valid());
