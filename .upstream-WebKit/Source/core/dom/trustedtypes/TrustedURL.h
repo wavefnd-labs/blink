@@ -23,7 +23,7 @@ class CORE_EXPORT TrustedURL final
  public:
   static TrustedURL* Create(const KURL& url) { return new TrustedURL(url); }
 
-  // CredentialsContainer.idl
+  // TrustedURL.idl
   String toString() const;
   static TrustedURL* create(ScriptState*, const String& url);
   static TrustedURL* unsafelyCreate(ScriptState*, const String& url);
