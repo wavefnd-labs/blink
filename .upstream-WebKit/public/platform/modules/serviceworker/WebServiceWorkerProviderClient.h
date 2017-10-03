@@ -32,14 +32,13 @@
 #define WebServiceWorkerProviderClient_h
 
 #include "public/platform/WebCommon.h"
-#include "public/platform/WebVector.h"
+#include "public/platform/WebMessagePortChannel.h"
 #include "public/platform/modules/serviceworker/WebServiceWorker.h"
 
 #include <memory>
 
 namespace blink {
 
-class MessagePortChannel;
 class WebServiceWorker;
 class WebString;
 
@@ -57,7 +56,7 @@ class WebServiceWorkerProviderClient {
 
   virtual void DispatchMessageEvent(std::unique_ptr<WebServiceWorker::Handle>,
                                     const WebString& message,
-                                    WebVector<MessagePortChannel>) = 0;
+                                    WebMessagePortChannelArray channels) = 0;
   virtual void CountFeature(uint32_t feature) = 0;
 };
 
