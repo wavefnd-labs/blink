@@ -7,6 +7,7 @@
 #include "core/css/parser/CSSParserContext.h"
 #include "core/css/parser/CSSPropertyParserHelpers.h"
 #include "core/css/properties/CSSPropertyMarginUtils.h"
+#include "core/layout/LayoutObject.h"
 
 namespace blink {
 
@@ -18,6 +19,12 @@ const CSSValue* CSSPropertyAPIOffset::ParseSingleValue(
     const CSSParserLocalContext&) const {
   return CSSPropertyMarginUtils::ConsumeMarginOrOffset(
       range, context.Mode(), CSSPropertyParserHelpers::UnitlessQuirk::kAllow);
+}
+
+bool CSSPropertyAPIOffset::IsLayoutDependent(
+    const ComputedStyle* style,
+    LayoutObject* layout_object) const {
+  return layout_object && layout_object->IsBox();
 }
 
 }  // namespace blink
