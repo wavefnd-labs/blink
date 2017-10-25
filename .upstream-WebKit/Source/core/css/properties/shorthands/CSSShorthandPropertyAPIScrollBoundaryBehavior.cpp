@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "core/css/properties/shorthands/CSSShorthandPropertyAPIOverscrollBehavior.h"
+#include "core/css/properties/shorthands/CSSShorthandPropertyAPIScrollBoundaryBehavior.h"
 
 #include "core/StylePropertyShorthand.h"
 #include "core/css/parser/CSSPropertyParserHelpers.h"
 
 namespace blink {
 
-bool CSSShorthandPropertyAPIOverscrollBehavior::ParseShorthand(
+bool CSSShorthandPropertyAPIScrollBoundaryBehavior::ParseShorthand(
     bool important,
     CSSParserTokenRange& range,
     const CSSParserContext& context,
     const CSSParserLocalContext&,
     HeapVector<CSSProperty, 256>& properties) const {
   return CSSPropertyParserHelpers::ConsumeShorthandVia2LonghandAPIs(
-      overscrollBehaviorShorthand(), important, context, range, properties);
+      scrollBoundaryBehaviorShorthand(), important, context, range, properties);
 }
 }  // namespace blink
