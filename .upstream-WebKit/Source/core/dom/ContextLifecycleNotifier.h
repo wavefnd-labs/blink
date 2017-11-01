@@ -34,9 +34,11 @@
 
 namespace blink {
 
-class SuspendableObject;
 class ContextLifecycleObserver;
 class ExecutionContext;
+class PausableObject;
+
+using SuspendableObject = PausableObject;
 
 class CORE_EXPORT ContextLifecycleNotifier
     : public LifecycleNotifier<ExecutionContext, ContextLifecycleObserver> {
