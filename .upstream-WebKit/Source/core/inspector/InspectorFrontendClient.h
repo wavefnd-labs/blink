@@ -39,7 +39,7 @@ namespace blink {
 class ContextMenuProvider;
 class LocalFrame;
 
-class InspectorFrontendClient : public GarbageCollectedMixin {
+class InspectorFrontendClient {
  public:
   virtual ~InspectorFrontendClient() {}
 
