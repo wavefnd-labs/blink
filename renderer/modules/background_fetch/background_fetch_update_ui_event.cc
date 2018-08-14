@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "third_party/blink/renderer/modules/background_fetch/background_fetch_update_event.h"
+#include "third_party/blink/renderer/modules/background_fetch/background_fetch_update_ui_event.h"
 
-#include "third_party/blink/public/platform/modules/background_fetch/web_background_fetch_settled_fetch.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
 #include "third_party/blink/renderer/core/dom/dom_exception.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
 #include "third_party/blink/renderer/core/fetch/request.h"
 #include "third_party/blink/renderer/core/fetch/response.h"
 #include "third_party/blink/renderer/modules/background_fetch/background_fetch_bridge.h"
+#include "third_party/blink/renderer/modules/background_fetch/background_fetch_event_init.h"
 #include "third_party/blink/renderer/modules/background_fetch/background_fetch_icon_loader.h"
+#include "third_party/blink/renderer/modules/background_fetch/background_fetch_registration.h"
 #include "third_party/blink/renderer/modules/background_fetch/background_fetch_settled_fetch.h"
 #include "third_party/blink/renderer/modules/background_fetch/background_fetch_ui_options.h"
 #include "third_party/blink/renderer/modules/event_modules_names.h"
@@ -19,31 +20,29 @@
 
 namespace blink {
 
-BackgroundFetchUpdateEvent::BackgroundFetchUpdateEvent(
+BackgroundFetchUpdateUIEvent::BackgroundFetchUpdateUIEvent(
     const AtomicString& type,
-    const BackgroundFetchSettledEventInit& initializer)
-    : BackgroundFetchSettledEvent(type, initializer) {}
+    const BackgroundFetchEventInit& initializer)
+    : BackgroundFetchEvent(type, initializer, nullptr /* observer */) {}
 
-BackgroundFetchUpdateEvent::BackgroundFetchUpdateEvent(
+BackgroundFetchUpdateUIEvent::BackgroundFetchUpdateUIEvent(
     const AtomicString& type,
-    const BackgroundFetchSettledEventInit& initializer,
-    const String& unique_id,
-    ScriptState* script_state,
+    const BackgroundFetchEventInit& initializer,
     WaitUntilObserver* observer,
     ServiceWorkerRegistration* registration)
-    : BackgroundFetchSettledEvent(type, initializer, unique_id, observer),
-      registration_(registration),
-      loader_(new BackgroundFetchIconLoader) {}
+    : BackgroundFetchEvent(type, initializer, observer),
+      service_worker_registration_(registration) {}
 
-BackgroundFetchUpdateEvent::~BackgroundFetchUpdateEvent() = default;
+BackgroundFetchUpdateUIEvent::~BackgroundFetchUpdateUIEvent() = default;
 
-void BackgroundFetchUpdateEvent::Trace(blink::Visitor* visitor) {
-  visitor->Trace(registration_);
+void BackgroundFetchUpdateUIEvent::Trace(blink::Visitor* visitor) {
+  visitor->Trace(service_worker_registration_);
   visitor->Trace(loader_);
-  BackgroundFetchSettledEvent::Trace(visitor);
+  visitor->Trace(fetches_);
+  BackgroundFetchEvent::Trace(visitor);
 }
 
-ScriptPromise BackgroundFetchUpdateEvent::updateUI(
+ScriptPromise BackgroundFetchUpdateUIEvent::updateUI(
     ScriptState* script_state,
     const BackgroundFetchUIOptions& ui_options) {
   if (update_ui_called_) {
@@ -56,16 +55,18 @@ ScriptPromise BackgroundFetchUpdateEvent::updateUI(
 
   update_ui_called_ = true;
 
-  if (!registration_) {
+  if (!service_worker_registration_) {
     // Return a Promise that will never settle when a developer calls this
-    // method on a BackgroundFetchedEvent instance they created themselves.
+    // method on a BackgroundFetchSuccessEvent instance they created themselves.
+    // TODO(crbug.com/872768): Figure out if this is the right thing to do
+    // vs reacting eagerly.
     return ScriptPromise();
   }
-  DCHECK(!unique_id_.IsEmpty());
+  DCHECK(!registration_->unique_id().IsEmpty());
 
   if (!ui_options.hasTitle() && ui_options.icons().IsEmpty()) {
     // Nothing to update, just return a resolved promise.
-    ScriptPromise::CastUndefined(script_state);
+    return ScriptPromise::CastUndefined(script_state);
   }
 
   ScriptPromiseResolver* resolver = ScriptPromiseResolver::Create(script_state);
@@ -74,26 +75,29 @@ ScriptPromise BackgroundFetchUpdateEvent::updateUI(
   if (ui_options.icons().IsEmpty()) {
     DidGetIcon(resolver, ui_options.title(), SkBitmap());
   } else {
-    loader_->Start(
-        BackgroundFetchBridge::From(registration_),
-        ExecutionContext::From(script_state), ui_options.icons(),
-        WTF::Bind(&BackgroundFetchUpdateEvent::DidGetIcon, WrapPersistent(this),
-                  WrapPersistent(resolver), ui_options.title()));
+    DCHECK(!loader_);
+    loader_ = new BackgroundFetchIconLoader();
+    DCHECK(loader_);
+    loader_->Start(BackgroundFetchBridge::From(service_worker_registration_),
+                   ExecutionContext::From(script_state), ui_options.icons(),
+                   WTF::Bind(&BackgroundFetchUpdateUIEvent::DidGetIcon,
+                             WrapPersistent(this), WrapPersistent(resolver),
+                             ui_options.title()));
   }
 
   return promise;
 }
 
-void BackgroundFetchUpdateEvent::DidGetIcon(ScriptPromiseResolver* resolver,
-                                            const String& title,
-                                            const SkBitmap& icon) {
-  BackgroundFetchBridge::From(registration_)
-      ->UpdateUI(id(), unique_id_, title, icon,
-                 WTF::Bind(&BackgroundFetchUpdateEvent::DidUpdateUI,
+void BackgroundFetchUpdateUIEvent::DidGetIcon(ScriptPromiseResolver* resolver,
+                                              const String& title,
+                                              const SkBitmap& icon) {
+  BackgroundFetchBridge::From(service_worker_registration_)
+      ->UpdateUI(registration_->id(), registration_->unique_id(), title, icon,
+                 WTF::Bind(&BackgroundFetchUpdateUIEvent::DidUpdateUI,
                            WrapPersistent(this), WrapPersistent(resolver)));
 }
 
-void BackgroundFetchUpdateEvent::DidUpdateUI(
+void BackgroundFetchUpdateUIEvent::DidUpdateUI(
     ScriptPromiseResolver* resolver,
     mojom::blink::BackgroundFetchError error) {
   switch (error) {
