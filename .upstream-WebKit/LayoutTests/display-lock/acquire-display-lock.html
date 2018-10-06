@@ -1,5 +1,9 @@
 <!doctype HTML>
 
+<!--
+Runs an acquireDisplayLock, which appends a child.
+-->
+
 <style>
 #parent {
   contain: paint;
@@ -27,18 +31,16 @@ function modifyDom(context) {
   document.getElementById("parent").appendChild(child);
 }
 
+function finishTest(status_string) {
+  document.getElementById("log").innerHTML = status_string;
+  if (window.testRunner)
+    window.testRunner.notifyDone();
+}
+
 function acquire() {
   document.getElementById("parent").acquireDisplayLock(modifyDom).then(
-    () => {
-      document.getElementById("log").innerHTML = "PASS";
-      if (window.testRunner)
-        window.testRunner.notifyDone();
-    },
-    () => {
-      document.getElementById("log").innerHTML = "FAIL";
-      if (window.testRunner)
-        window.testRunner.notifyDone();
-    });
+    () => { finishTest("PASS"); },
+    () => { finishTest("FAIL"); });
 }
 
 window.onload = acquire;
