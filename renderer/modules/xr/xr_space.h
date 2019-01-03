@@ -1,9 +1,9 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_XR_XR_COORDINATE_SYSTEM_H_
-#define THIRD_PARTY_BLINK_RENDERER_MODULES_XR_XR_COORDINATE_SYSTEM_H_
+#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_XR_XR_SPACE_H_
+#define THIRD_PARTY_BLINK_RENDERER_MODULES_XR_XR_SPACE_H_
 
 #include "third_party/blink/renderer/core/dom/events/event_target.h"
 #include "third_party/blink/renderer/core/typed_arrays/dom_typed_array.h"
@@ -13,29 +13,24 @@
 
 namespace blink {
 
-class TransformationMatrix;
 class XRSession;
 
-class XRCoordinateSystem : public EventTargetWithInlineData {
+class XRSpace : public EventTargetWithInlineData {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
-  explicit XRCoordinateSystem(XRSession*);
-  ~XRCoordinateSystem() override;
+  explicit XRSpace(XRSession*);
+  ~XRSpace() override;
 
-  DOMFloat32Array* getTransformTo(XRCoordinateSystem*) const;
+  DOMFloat32Array* getTransformTo(XRSpace*) const;
 
   XRSession* session() const { return session_; }
+
+  DEFINE_ATTRIBUTE_EVENT_LISTENER(reset, kReset);
 
   // EventTarget overrides.
   ExecutionContext* GetExecutionContext() const override;
   const AtomicString& InterfaceName() const override;
-
-  virtual std::unique_ptr<TransformationMatrix> TransformBasePose(
-      const TransformationMatrix& base_pose) = 0;
-  virtual std::unique_ptr<TransformationMatrix> TransformBaseInputPose(
-      const TransformationMatrix& base_input_pose,
-      const TransformationMatrix& base_pose) = 0;
 
   void Trace(blink::Visitor*) override;
 
@@ -45,4 +40,4 @@ class XRCoordinateSystem : public EventTargetWithInlineData {
 
 }  // namespace blink
 
-#endif  // XRWebGLLayer_h
+#endif  // THIRD_PARTY_BLINK_RENDERER_MODULES_XR_XR_SPACE_H_

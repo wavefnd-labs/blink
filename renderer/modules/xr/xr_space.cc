@@ -1,23 +1,21 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "third_party/blink/renderer/modules/xr/xr_coordinate_system.h"
+#include "third_party/blink/renderer/modules/xr/xr_space.h"
 
 #include "third_party/blink/renderer/modules/event_target_modules.h"
 #include "third_party/blink/renderer/modules/xr/xr_session.h"
 
 namespace blink {
 
-XRCoordinateSystem::XRCoordinateSystem(XRSession* session)
-    : session_(session) {}
+XRSpace::XRSpace(XRSession* session) : session_(session) {}
 
-XRCoordinateSystem::~XRCoordinateSystem() = default;
+XRSpace::~XRSpace() = default;
 
 // If possible, get the matrix required to transform between two coordinate
 // systems.
-DOMFloat32Array* XRCoordinateSystem::getTransformTo(
-    XRCoordinateSystem* other) const {
+DOMFloat32Array* XRSpace::getTransformTo(XRSpace* other) const {
   if (session_ != other->session()) {
     // Cannot get relationships between coordinate systems that belong to
     // different sessions.
@@ -30,15 +28,15 @@ DOMFloat32Array* XRCoordinateSystem::getTransformTo(
   return nullptr;
 }
 
-ExecutionContext* XRCoordinateSystem::GetExecutionContext() const {
+ExecutionContext* XRSpace::GetExecutionContext() const {
   return session()->GetExecutionContext();
 }
 
-const AtomicString& XRCoordinateSystem::InterfaceName() const {
-  return event_target_names::kXRCoordinateSystem;
+const AtomicString& XRSpace::InterfaceName() const {
+  return event_target_names::kXRSpace;
 }
 
-void XRCoordinateSystem::Trace(blink::Visitor* visitor) {
+void XRSpace::Trace(blink::Visitor* visitor) {
   visitor->Trace(session_);
   ScriptWrappable::Trace(visitor);
   EventTargetWithInlineData::Trace(visitor);
