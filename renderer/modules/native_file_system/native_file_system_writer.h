@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_FILESYSTEM_FILE_SYSTEM_WRITER_H_
-#define THIRD_PARTY_BLINK_RENDERER_MODULES_FILESYSTEM_FILE_SYSTEM_WRITER_H_
+#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_NATIVE_FILE_SYSTEM_NATIVE_FILE_SYSTEM_WRITER_H_
+#define THIRD_PARTY_BLINK_RENDERER_MODULES_NATIVE_FILE_SYSTEM_NATIVE_FILE_SYSTEM_WRITER_H_
 
-#include "third_party/blink/public/mojom/filesystem/file_writer.mojom-blink.h"
+#include "third_party/blink/public/mojom/native_file_system/native_file_system_error.mojom-blink.h"
 #include "third_party/blink/renderer/bindings/core/v8/array_buffer_or_array_buffer_view_or_blob_or_usv_string.h"
 #include "third_party/blink/renderer/platform/bindings/script_wrappable.h"
 
@@ -18,12 +18,13 @@ class ReadableStream;
 class ScriptPromise;
 class ScriptPromiseResolver;
 class ScriptState;
+class NativeFileSystemFileHandle;
 
-class FileSystemWriter final : public ScriptWrappable {
+class NativeFileSystemWriter final : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
-  explicit FileSystemWriter(mojom::blink::FileWriterPtr);
+  explicit NativeFileSystemWriter(NativeFileSystemFileHandle*);
 
   ScriptPromise write(ScriptState*,
                       uint64_t position,
@@ -43,10 +44,11 @@ class FileSystemWriter final : public ScriptWrappable {
                             ReadableStream* stream,
                             ExceptionState&);
 
-  void WriteComplete(base::File::Error result, uint64_t bytes_written);
-  void TruncateComplete(base::File::Error result);
+  void WriteComplete(mojom::blink::NativeFileSystemErrorPtr result,
+                     uint64_t bytes_written);
+  void TruncateComplete(mojom::blink::NativeFileSystemErrorPtr result);
 
-  mojom::blink::FileWriterPtr writer_;
+  Member<NativeFileSystemFileHandle> file_;
 
   Member<ScriptPromiseResolver> pending_operation_;
   Member<FetchDataLoader> stream_loader_;
@@ -54,4 +56,4 @@ class FileSystemWriter final : public ScriptWrappable {
 
 }  // namespace blink
 
-#endif  // THIRD_PARTY_BLINK_RENDERER_MODULES_FILESYSTEM_FILE_SYSTEM_WRITER_H_
+#endif  // THIRD_PARTY_BLINK_RENDERER_MODULES_NATIVE_FILE_SYSTEM_NATIVE_FILE_SYSTEM_WRITER_H_

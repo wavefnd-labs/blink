@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "third_party/blink/renderer/modules/filesystem/file_system_writer.h"
+#include "third_party/blink/renderer/modules/native_file_system/native_file_system_writer.h"
 
 #include "third_party/blink/renderer/bindings/core/v8/array_buffer_or_array_buffer_view_or_blob_or_usv_string.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise.h"
@@ -14,17 +14,18 @@
 #include "third_party/blink/renderer/core/fileapi/blob.h"
 #include "third_party/blink/renderer/core/fileapi/file_error.h"
 #include "third_party/blink/renderer/core/streams/readable_stream.h"
+#include "third_party/blink/renderer/modules/native_file_system/native_file_system_file_handle.h"
 #include "third_party/blink/renderer/platform/blob/blob_data.h"
 #include "third_party/blink/renderer/platform/wtf/functional.h"
 
 namespace blink {
 
-FileSystemWriter::FileSystemWriter(mojom::blink::FileWriterPtr writer)
-    : writer_(std::move(writer)) {
-  DCHECK(writer_);
+NativeFileSystemWriter::NativeFileSystemWriter(NativeFileSystemFileHandle* file)
+    : file_(file) {
+  DCHECK(file_);
 }
 
-ScriptPromise FileSystemWriter::write(
+ScriptPromise NativeFileSystemWriter::write(
     ScriptState* script_state,
     uint64_t position,
     const ArrayBufferOrArrayBufferViewOrBlobOrUSVString& data,
@@ -56,10 +57,10 @@ ScriptPromise FileSystemWriter::write(
   return WriteBlob(script_state, position, blob);
 }
 
-ScriptPromise FileSystemWriter::WriteBlob(ScriptState* script_state,
-                                          uint64_t position,
-                                          Blob* blob) {
-  if (!writer_ || pending_operation_) {
+ScriptPromise NativeFileSystemWriter::WriteBlob(ScriptState* script_state,
+                                                uint64_t position,
+                                                Blob* blob) {
+  if (!file_ || pending_operation_) {
     return ScriptPromise::RejectWithDOMException(
         script_state,
         DOMException::Create(DOMExceptionCode::kInvalidStateError));
@@ -67,19 +68,20 @@ ScriptPromise FileSystemWriter::WriteBlob(ScriptState* script_state,
   pending_operation_ =
       MakeGarbageCollected<ScriptPromiseResolver>(script_state);
   ScriptPromise result = pending_operation_->Promise();
-  writer_->Write(
+  file_->MojoHandle()->Write(
       position, blob->AsMojoBlob(),
-      WTF::Bind(&FileSystemWriter::WriteComplete, WrapPersistent(this)));
+      WTF::Bind(&NativeFileSystemWriter::WriteComplete, WrapPersistent(this)));
   return result;
 }
 
-class FileSystemWriter::StreamWriterClient
+class NativeFileSystemWriter::StreamWriterClient
     : public GarbageCollectedFinalized<StreamWriterClient>,
       public FetchDataLoader::Client {
   USING_GARBAGE_COLLECTED_MIXIN(StreamWriterClient);
 
  public:
-  explicit StreamWriterClient(FileSystemWriter* writer) : writer_(writer) {}
+  explicit StreamWriterClient(NativeFileSystemWriter* writer)
+      : writer_(writer) {}
 
   void DidFetchDataStartedDataPipe(
       mojo::ScopedDataPipeConsumerHandle data_pipe) override {
@@ -125,15 +127,16 @@ class FileSystemWriter::StreamWriterClient
     Reset();
   }
 
-  void WriteComplete(base::File::Error result, uint64_t bytes_written) {
+  void WriteComplete(mojom::blink::NativeFileSystemErrorPtr result,
+                     uint64_t bytes_written) {
     // Early return if we already completed (with an error) before.
     if (did_complete_)
       return;
     DCHECK(writer_->pending_operation_);
     did_complete_ = true;
-    if (result != base::File::FILE_OK) {
+    if (result->error_code != base::File::FILE_OK) {
       writer_->pending_operation_->Reject(
-          file_error::CreateDOMException(result));
+          file_error::CreateDOMException(result->error_code));
     } else {
       DCHECK(did_finish_writing_to_pipe_);
       writer_->pending_operation_->Resolve();
@@ -152,17 +155,18 @@ class FileSystemWriter::StreamWriterClient
     writer_->stream_loader_ = nullptr;
   }
 
-  Member<FileSystemWriter> writer_;
+  Member<NativeFileSystemWriter> writer_;
   mojo::ScopedDataPipeConsumerHandle data_pipe_;
   bool did_finish_writing_to_pipe_ = false;
   bool did_complete_ = false;
 };
 
-ScriptPromise FileSystemWriter::WriteStream(ScriptState* script_state,
-                                            uint64_t position,
-                                            ReadableStream* stream,
-                                            ExceptionState& exception_state) {
-  if (!writer_ || pending_operation_) {
+ScriptPromise NativeFileSystemWriter::WriteStream(
+    ScriptState* script_state,
+    uint64_t position,
+    ReadableStream* stream,
+    ExceptionState& exception_state) {
+  if (!file_ || pending_operation_) {
     return ScriptPromise::RejectWithDOMException(
         script_state,
         DOMException::Create(DOMExceptionCode::kInvalidStateError));
@@ -182,15 +186,15 @@ ScriptPromise FileSystemWriter::WriteStream(ScriptState* script_state,
   ScriptPromise result = pending_operation_->Promise();
   auto* client = MakeGarbageCollected<StreamWriterClient>(this);
   stream_loader_->Start(consumer, client);
-  writer_->WriteStream(
+  file_->MojoHandle()->WriteStream(
       position, client->TakeDataPipe(),
       WTF::Bind(&StreamWriterClient::WriteComplete, WrapPersistent(client)));
   return result;
 }
 
-ScriptPromise FileSystemWriter::truncate(ScriptState* script_state,
-                                         uint64_t size) {
-  if (!writer_ || pending_operation_) {
+ScriptPromise NativeFileSystemWriter::truncate(ScriptState* script_state,
+                                               uint64_t size) {
+  if (!file_ || pending_operation_) {
     return ScriptPromise::RejectWithDOMException(
         script_state,
         DOMException::Create(DOMExceptionCode::kInvalidStateError));
@@ -198,44 +202,50 @@ ScriptPromise FileSystemWriter::truncate(ScriptState* script_state,
   pending_operation_ =
       MakeGarbageCollected<ScriptPromiseResolver>(script_state);
   ScriptPromise result = pending_operation_->Promise();
-  writer_->Truncate(size, WTF::Bind(&FileSystemWriter::TruncateComplete,
-                                    WrapPersistent(this)));
+  file_->MojoHandle()->Truncate(
+      size, WTF::Bind(&NativeFileSystemWriter::TruncateComplete,
+                      WrapPersistent(this)));
   return result;
 }
 
-ScriptPromise FileSystemWriter::close(ScriptState* script_state) {
-  if (!writer_) {
+ScriptPromise NativeFileSystemWriter::close(ScriptState* script_state) {
+  if (!file_) {
     return ScriptPromise::RejectWithDOMException(
         script_state,
         DOMException::Create(DOMExceptionCode::kInvalidStateError));
   }
-  writer_ = nullptr;
+  file_ = nullptr;
   return ScriptPromise::CastUndefined(script_state);
 }
 
-void FileSystemWriter::Trace(Visitor* visitor) {
+void NativeFileSystemWriter::Trace(Visitor* visitor) {
   ScriptWrappable::Trace(visitor);
+  visitor->Trace(file_);
   visitor->Trace(pending_operation_);
   visitor->Trace(stream_loader_);
 }
 
-void FileSystemWriter::WriteComplete(base::File::Error result,
-                                     uint64_t bytes_written) {
+void NativeFileSystemWriter::WriteComplete(
+    mojom::blink::NativeFileSystemErrorPtr result,
+    uint64_t bytes_written) {
   DCHECK(pending_operation_);
-  if (result == base::File::FILE_OK) {
+  if (result->error_code == base::File::FILE_OK) {
     pending_operation_->Resolve();
   } else {
-    pending_operation_->Reject(file_error::CreateDOMException(result));
+    pending_operation_->Reject(
+        file_error::CreateDOMException(result->error_code));
   }
   pending_operation_ = nullptr;
 }
 
-void FileSystemWriter::TruncateComplete(base::File::Error result) {
+void NativeFileSystemWriter::TruncateComplete(
+    mojom::blink::NativeFileSystemErrorPtr result) {
   DCHECK(pending_operation_);
-  if (result == base::File::FILE_OK) {
+  if (result->error_code == base::File::FILE_OK) {
     pending_operation_->Resolve();
   } else {
-    pending_operation_->Reject(file_error::CreateDOMException(result));
+    pending_operation_->Reject(
+        file_error::CreateDOMException(result->error_code));
   }
   pending_operation_ = nullptr;
 }
