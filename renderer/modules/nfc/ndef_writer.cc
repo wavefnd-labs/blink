@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "third_party/blink/renderer/modules/nfc/nfc_writer.h"
+#include "third_party/blink/renderer/modules/nfc/ndef_writer.h"
 
 #include <utility>
 
@@ -11,7 +11,7 @@
 #include "third_party/blink/renderer/bindings/modules/v8/string_or_array_buffer_or_ndef_message_init.h"
 #include "third_party/blink/renderer/core/dom/abort_signal.h"
 #include "third_party/blink/renderer/core/dom/dom_exception.h"
-#include "third_party/blink/renderer/modules/nfc/nfc_push_options.h"
+#include "third_party/blink/renderer/modules/nfc/ndef_push_options.h"
 #include "third_party/blink/renderer/modules/nfc/nfc_type_converters.h"
 #include "third_party/blink/renderer/modules/nfc/nfc_utils.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
@@ -19,13 +19,13 @@
 namespace blink {
 
 // static
-NFCWriter* NFCWriter::Create(ExecutionContext* context) {
-  return MakeGarbageCollected<NFCWriter>(context);
+NDEFWriter* NDEFWriter::Create(ExecutionContext* context) {
+  return MakeGarbageCollected<NDEFWriter>(context);
 }
 
-NFCWriter::NFCWriter(ExecutionContext* context) : ContextClient(context) {}
+NDEFWriter::NDEFWriter(ExecutionContext* context) : ContextClient(context) {}
 
-void NFCWriter::Trace(blink::Visitor* visitor) {
+void NDEFWriter::Trace(blink::Visitor* visitor) {
   visitor->Trace(nfc_proxy_);
   visitor->Trace(requests_);
   ScriptWrappable::Trace(visitor);
@@ -34,10 +34,10 @@ void NFCWriter::Trace(blink::Visitor* visitor) {
 
 // https://w3c.github.io/web-nfc/#writing-or-pushing-content
 // https://w3c.github.io/web-nfc/#the-push-method
-ScriptPromise NFCWriter::push(ScriptState* script_state,
-                              const NDEFMessageSource& push_message,
-                              const NFCPushOptions* options,
-                              ExceptionState& exception_state) {
+ScriptPromise NDEFWriter::push(ScriptState* script_state,
+                               const NDEFMessageSource& push_message,
+                               const NDEFPushOptions* options,
+                               ExceptionState& exception_state) {
   ExecutionContext* execution_context = GetExecutionContext();
   // https://w3c.github.io/web-nfc/#security-policies
   // WebNFC API must be only accessible from top level browsing context.
@@ -66,7 +66,7 @@ ScriptPromise NFCWriter::push(ScriptState* script_state,
         script_state,
         V8ThrowException::CreateTypeError(
             script_state->GetIsolate(),
-            "Invalid NFCPushOptions.timeout value was provided."));
+            "Invalid NDEFPushOptions.timeout value was provided."));
   }
 
   // Step 10.8: Run "create Web NFC message", if this throws an exception,
@@ -111,32 +111,32 @@ ScriptPromise NFCWriter::push(ScriptState* script_state,
   // If signal is not null, then add the abort steps to signal.
   if (options->hasSignal() && !options->signal()->aborted()) {
     options->signal()->AddAlgorithm(
-        WTF::Bind(&NFCWriter::Abort, WrapPersistent(this), options->target(),
+        WTF::Bind(&NDEFWriter::Abort, WrapPersistent(this), options->target(),
                   WrapPersistent(resolver)));
   }
 
-  auto callback = WTF::Bind(&NFCWriter::OnRequestCompleted,
+  auto callback = WTF::Bind(&NDEFWriter::OnRequestCompleted,
                             WrapPersistent(this), WrapPersistent(resolver));
   nfc_proxy_->Push(std::move(message),
-                   device::mojom::blink::NFCPushOptions::From(options),
+                   device::mojom::blink::NDEFPushOptions::From(options),
                    std::move(callback));
 
   return resolver->Promise();
 }
 
-void NFCWriter::OnMojoConnectionError() {
+void NDEFWriter::OnMojoConnectionError() {
   nfc_proxy_.Clear();
 
   // If the mojo connection breaks, all push requests will be reject with a
   // default error.
   for (ScriptPromiseResolver* resolver : requests_) {
-    resolver->Reject(NFCErrorTypeToDOMException(
-        device::mojom::blink::NFCErrorType::NOT_SUPPORTED));
+    resolver->Reject(NDEFErrorTypeToDOMException(
+        device::mojom::blink::NDEFErrorType::NOT_SUPPORTED));
   }
   requests_.clear();
 }
 
-void NFCWriter::InitNfcProxyIfNeeded() {
+void NDEFWriter::InitNfcProxyIfNeeded() {
   // Init NfcProxy if needed.
   if (nfc_proxy_)
     return;
@@ -149,7 +149,7 @@ void NFCWriter::InitNfcProxyIfNeeded() {
   nfc_proxy_->AddWriter(this);
 }
 
-void NFCWriter::Abort(const String& target, ScriptPromiseResolver* resolver) {
+void NDEFWriter::Abort(const String& target, ScriptPromiseResolver* resolver) {
   // |nfc_proxy_| could be null on Mojo connection failure, simply ignore the
   // abort request in this case.
   if (!nfc_proxy_)
@@ -161,8 +161,8 @@ void NFCWriter::Abort(const String& target, ScriptPromiseResolver* resolver) {
                          device::mojom::blink::NFC::CancelPushCallback());
 }
 
-void NFCWriter::OnRequestCompleted(ScriptPromiseResolver* resolver,
-                                   device::mojom::blink::NFCErrorPtr error) {
+void NDEFWriter::OnRequestCompleted(ScriptPromiseResolver* resolver,
+                                    device::mojom::blink::NDEFErrorPtr error) {
   DCHECK(requests_.Contains(resolver));
 
   requests_.erase(resolver);
@@ -170,7 +170,7 @@ void NFCWriter::OnRequestCompleted(ScriptPromiseResolver* resolver,
   if (error.is_null())
     resolver->Resolve();
   else
-    resolver->Reject(NFCErrorTypeToDOMException(error->error_type));
+    resolver->Reject(NDEFErrorTypeToDOMException(error->error_type));
 }
 
 }  // namespace blink

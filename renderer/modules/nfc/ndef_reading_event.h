@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NFC_READING_EVENT_H_
-#define THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NFC_READING_EVENT_H_
+#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NDEF_READING_EVENT_H_
+#define THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NDEF_READING_EVENT_H_
 
 #include "third_party/blink/renderer/modules/event_modules.h"
 #include "third_party/blink/renderer/platform/heap/handle.h"
@@ -13,21 +13,21 @@ namespace blink {
 
 class ExceptionState;
 class NDEFMessage;
-class NFCReadingEventInit;
+class NDEFReadingEventInit;
 
-class NFCReadingEvent final : public Event {
+class NDEFReadingEvent final : public Event {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
-  static NFCReadingEvent* Create(const AtomicString&,
-                                 const NFCReadingEventInit*,
-                                 ExceptionState&);
+  static NDEFReadingEvent* Create(const AtomicString&,
+                                  const NDEFReadingEventInit*,
+                                  ExceptionState&);
 
-  NFCReadingEvent(const AtomicString&,
-                  const NFCReadingEventInit*,
-                  NDEFMessage*);
-  NFCReadingEvent(const AtomicString&, const String&, NDEFMessage*);
-  ~NFCReadingEvent() override;
+  NDEFReadingEvent(const AtomicString&,
+                   const NDEFReadingEventInit*,
+                   NDEFMessage*);
+  NDEFReadingEvent(const AtomicString&, const String&, NDEFMessage*);
+  ~NDEFReadingEvent() override;
 
   const AtomicString& InterfaceName() const override;
 
@@ -41,14 +41,14 @@ class NFCReadingEvent final : public Event {
   Member<NDEFMessage> message_;
 };
 
-DEFINE_TYPE_CASTS(NFCReadingEvent,
+DEFINE_TYPE_CASTS(NDEFReadingEvent,
                   Event,
                   event,
                   event->InterfaceName() ==
-                      event_interface_names::kNFCReadingEvent,
+                      event_interface_names::kNDEFReadingEvent,
                   event.InterfaceName() ==
-                      event_interface_names::kNFCReadingEvent);
+                      event_interface_names::kNDEFReadingEvent);
 
 }  // namespace blink
 
-#endif  // THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NFC_READING_EVENT_H_
+#endif  // THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NDEF_READING_EVENT_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NFC_WRITER_H_
-#define THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NFC_WRITER_H_
+#ifndef THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NDEF_WRITER_H_
+#define THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NDEF_WRITER_H_
 
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
 #include "third_party/blink/renderer/core/execution_context/context_lifecycle_observer.h"
@@ -13,7 +13,7 @@
 
 namespace blink {
 
-class NFCPushOptions;
+class NDEFPushOptions;
 class ExceptionState;
 class ExecutionContext;
 class ScriptPromise;
@@ -21,22 +21,22 @@ class StringOrArrayBufferOrNDEFMessageInit;
 
 using NDEFMessageSource = StringOrArrayBufferOrNDEFMessageInit;
 
-class NFCWriter : public ScriptWrappable, public ContextClient {
+class NDEFWriter : public ScriptWrappable, public ContextClient {
   DEFINE_WRAPPERTYPEINFO();
-  USING_GARBAGE_COLLECTED_MIXIN(NFCWriter);
+  USING_GARBAGE_COLLECTED_MIXIN(NDEFWriter);
 
  public:
-  static NFCWriter* Create(ExecutionContext*);
+  static NDEFWriter* Create(ExecutionContext*);
 
-  explicit NFCWriter(ExecutionContext*);
-  ~NFCWriter() override = default;
+  explicit NDEFWriter(ExecutionContext*);
+  ~NDEFWriter() override = default;
 
   void Trace(blink::Visitor*) override;
 
   // Pushes NDEFMessageSource asynchronously to NFC tag / peer.
   ScriptPromise push(ScriptState*,
                      const NDEFMessageSource&,
-                     const NFCPushOptions*,
+                     const NDEFPushOptions*,
                      ExceptionState&);
 
   // Called by NFCProxy for notification about connection error.
@@ -46,7 +46,7 @@ class NFCWriter : public ScriptWrappable, public ContextClient {
   void InitNfcProxyIfNeeded();
   void Abort(const String& target, ScriptPromiseResolver* resolver);
   void OnRequestCompleted(ScriptPromiseResolver* resolver,
-                          device::mojom::blink::NFCErrorPtr error);
+                          device::mojom::blink::NDEFErrorPtr error);
 
   // |requests_| are kept here to handle Mojo connection failures because
   // in that case the callback passed to Push() won't be called and
@@ -58,4 +58,4 @@ class NFCWriter : public ScriptWrappable, public ContextClient {
 
 }  // namespace blink
 
-#endif  // THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NFC_WRITER_H_
+#endif  // THIRD_PARTY_BLINK_RENDERER_MODULES_NFC_NDEF_WRITER_H_
