@@ -1,27 +1,10 @@
 'use strict';
 
 promise_test(async t => {
-   const iterator = navigator.fonts.query();
-   assert_true(iterator instanceof Object,
-               'query() should return an Object');
-  assert_true(!!iterator[Symbol.asyncIterator],
-              'query() has an asyncIterator method');
-
-  const availableFonts = [];
-  for await (const f of iterator) {
-    availableFonts.push(f);
-  }
-
-  assert_fonts_exist(availableFonts, getExpectedFontSet());
-}, 'query(): standard fonts returned');
-
-promise_test(async t => {
   const iterator = navigator.fonts.query();
-  assert_true(iterator instanceof Object,
-              'query() should return an Object');
 
-  const expectations = getExpectedFontSet();
-  const expectedFonts = await filterFontSet(iterator, expectations);
+  const expectations = getEnumerationTestSet({labelFilter: [TEST_SIZE_CATEGORY.small]});
+  const expectedFonts = await filterEnumeration(iterator, expectations);
   const additionalExpectedTables = getMoreExpectedTables(expectations);
   for (const f of expectedFonts) {
     const tables = await f.getTables();
@@ -32,14 +15,31 @@ promise_test(async t => {
                              additionalExpectedTables[f.postscriptName]);
     }
   }
-}, 'getTables(): all fonts have expected tables that are not empty');
+}, 'getTables(): small sized fonts have expected non-empty tables');
 
 promise_test(async t => {
   const iterator = navigator.fonts.query();
-  assert_true(iterator instanceof Object,
-              'query() should return an Object');
 
-  const expectedFonts = await filterFontSet(iterator, getExpectedFontSet());
+  const expectations = getEnumerationTestSet({labelFilter: [TEST_SIZE_CATEGORY.medium]});
+  const expectedFonts = await filterEnumeration(iterator, expectations);
+  const additionalExpectedTables = getMoreExpectedTables(expectations);
+  for (const f of expectedFonts) {
+    const tables = await f.getTables();
+    assert_font_has_tables(f.postscriptName, tables, BASE_TABLES);
+    if (f.postscriptName in additionalExpectedTables) {
+      assert_font_has_tables(f.postscriptName,
+                             tables,
+                             additionalExpectedTables[f.postscriptName]);
+    }
+  }
+}, 'getTables(): medium sized fonts have expected non-empty tables');
+
+promise_test(async t => {
+  const iterator = navigator.fonts.query();
+
+  const expectedFonts = await filterEnumeration(iterator,
+                                                getEnumerationTestSet({
+                                                  labelFilter: [TEST_SIZE_CATEGORY.small]}));
   const inputs = [
     ['cmap'], // Single item.
     ['cmap', 'head'], // Multiple items.
@@ -59,10 +59,10 @@ promise_test(async t => {
 
 promise_test(async t => {
   const iterator = navigator.fonts.query();
-  assert_true(iterator instanceof Object,
-              'query() should return an Object');
 
-  const expectedFonts = await filterFontSet(iterator, getExpectedFontSet());
+  const expectedFonts = await filterEnumeration(iterator,
+                                                getEnumerationTestSet({
+                                                  labelFilter: [TEST_SIZE_CATEGORY.small]}));
   const inputs = [
     // Nonexistent Tag.
     ['ABCD'],
@@ -81,10 +81,10 @@ promise_test(async t => {
 
 promise_test(async t => {
   const iterator = navigator.fonts.query();
-  assert_true(iterator instanceof Object,
-              'query() should return an Object');
 
-  const expectedFonts = await filterFontSet(iterator, getExpectedFontSet());
+  const expectedFonts = await filterEnumeration(iterator,
+                                                getEnumerationTestSet({
+                                                  labelFilter: [TEST_SIZE_CATEGORY.small]}));
   const inputs = [
     // empty string
     [''],
@@ -120,10 +120,10 @@ promise_test(async t => {
 
 promise_test(async t => {
   const iterator = navigator.fonts.query();
-  assert_true(iterator instanceof Object,
-              'query() should return an Object');
 
-  const expectedFonts = await filterFontSet(iterator, getExpectedFontSet());
+  const expectedFonts = await filterEnumeration(iterator,
+                                                getEnumerationTestSet({
+                                                  labelFilter: [TEST_SIZE_CATEGORY.small]}));
   const inputs = [
     {
       // One exists, one doesn't.
