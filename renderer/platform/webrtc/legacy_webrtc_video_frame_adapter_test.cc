@@ -331,8 +331,8 @@ TEST(LegacyWebRtcVideoFrameAdapterTest,
   const gfx::Rect kVisibleRect(0, 120, 1280, 720);
   const gfx::Size kNaturalSize(640, 360);
 
-  scoped_refptr<MockSharedResources> resources =
-      base::MakeRefCounted<MockSharedResources>();
+  scoped_refptr<MockLegacySharedResources> resources =
+      base::MakeRefCounted<MockLegacySharedResources>();
 
   // The adapter should report width and height from the natural size for
   // VideoFrame backed by owned memory.
