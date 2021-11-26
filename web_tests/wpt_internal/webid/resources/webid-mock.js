@@ -29,7 +29,6 @@ export class MockFederatedAuthRequest {
     this.idToken_ = null;
     this.status_ = RequestIdTokenStatus.kError;
     this.logoutStatus_ = LogoutStatus.kError;
-    this.revokeStatus_ = RevokeStatus.kError;
   }
 
   // Causes the subsequent `navigator.id.get()` to resolve with the token.
@@ -44,15 +43,6 @@ export class MockFederatedAuthRequest {
       throw new Error("Success is not a valid error");
     this.status_ = toMojoIdTokenStatus(error);
     this.idToken_ = null;
-  }
-
-  // Causes the subsequent `FederatedCredential.revoke` to reject with this
-  // status.
-  revokeReturn(status) {
-    let validated = RevokeStatus[status];
-    if (validated === undefined)
-      throw new Error("Invalid status: " + status);
-    this.revokeStatus_ = validated;
   }
 
   // Implements
@@ -70,17 +60,10 @@ export class MockFederatedAuthRequest {
     });
   }
 
-  async revoke(provider, client_id, account_id) {
-    return Promise.resolve({
-      status: this.revokeStatus_
-    });
-  }
-
   async reset() {
     this.idToken_ = null;
     this.status_ = RequestIdTokenStatus.kError;
     this.logoutStatus_ = LogoutStatus.kError;
-    this.revokeStatus_ = RevokeStatus.kError;
     this.receiver_.$.close();
     this.interceptor_.stop();
 
