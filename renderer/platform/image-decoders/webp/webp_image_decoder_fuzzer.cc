@@ -11,13 +11,14 @@
 #include "third_party/blink/renderer/platform/image-decoders/image_decoder.h"
 #include "third_party/blink/renderer/platform/image-decoders/webp/webp_image_decoder.h"
 #include "third_party/blink/renderer/platform/testing/blink_fuzzer_test_support.h"
+#include "third_party/blink/renderer/platform/wtf/shared_buffer.h"
 #include "third_party/blink/renderer/platform/wtf/wtf_size_t.h"
 
 namespace blink {
 
 std::unique_ptr<ImageDecoder> CreateWEBPDecoder() {
   // TODO(crbug.com/323934468): Initialize decoder settings dynamically using
-  // fuzzer input
+  // fuzzer input.
   return std::make_unique<WEBPImageDecoder>(
       ImageDecoder::kAlphaPremultiplied, ColorBehavior::kTransformToSRGB,
       ImageDecoder::kNoDecodedImageByteLimit);
