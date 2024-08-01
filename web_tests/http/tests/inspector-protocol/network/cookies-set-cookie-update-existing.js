@@ -11,7 +11,7 @@
     value: 'bar1'
   }), 'Result of Network.setCookie: ');
 
-  testRunner.log(await helper.getCookiesLog());
+  testRunner.log('Cookies before update: ' + await helper.getCookiesLog());
 
   testRunner.log(await dp.Network.setCookie({
     url: 'http://127.0.0.1',
@@ -19,7 +19,7 @@
     value: 'second bar2'
   }), 'Result of Network.setCookie to update existing one: ');
 
-  testRunner.log(await helper.getCookiesLog());
+  testRunner.log('Cookies after update: ' + await helper.getCookiesLog());
 
   testRunner.completeTest();
 });
