@@ -32,7 +32,7 @@
 
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
-#include "third_party/blink/renderer/core/timing/global_performance.h"
+#include "third_party/blink/renderer/core/timing/dom_window_performance.h"
 #include "third_party/blink/renderer/core/timing/window_performance.h"
 
 namespace blink {
@@ -47,7 +47,7 @@ VideoPlaybackQuality::VideoPlaybackQuality(const Document& document,
       corrupted_video_frames_(corrupted_video_frames) {
   if (document.domWindow()) {
     creation_time_ =
-        GlobalPerformance::performance(*(document.domWindow()))->now();
+        DOMWindowPerformance::performance(*(document.domWindow()))->now();
   }
 }
 
