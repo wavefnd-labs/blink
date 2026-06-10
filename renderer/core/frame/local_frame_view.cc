@@ -1233,6 +1233,10 @@ std::optional<NaturalSizingInfo> LocalFrameView::GetNaturalDimensions() const {
   return NaturalSizingInfo::MakeSize(unscaled_natural_size);
 }
 
+void LocalFrameView::ClearNaturalDimensions() {
+  natural_size_.reset();
+}
+
 void LocalFrameView::UpdateGeometry() {
   LayoutEmbeddedContent* layout = GetLayoutEmbeddedContent();
   if (!layout)
