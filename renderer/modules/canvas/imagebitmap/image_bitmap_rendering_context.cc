@@ -7,9 +7,12 @@
 #include <utility>
 
 #include "base/metrics/histogram_functions.h"
+#include "build/build_config.h"
 #include "cc/layers/texture_layer.h"
 #include "cc/paint/paint_canvas.h"
 #include "cc/paint/paint_flags.h"
+#include "gpu/command_buffer/common/shared_image_usage.h"
+#include "third_party/blink/public/platform/web_graphics_context_3d_provider.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_union_htmlcanvaselement_offscreencanvas.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_offscreen_rendering_context.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_rendering_context.h"
@@ -28,6 +31,56 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace blink {
+
+// static
+scoped_refptr<StaticBitmapImage> ImageBitmapRenderingContext::MakeAccelerated(
+    const scoped_refptr<StaticBitmapImage>& source,
+    base::WeakPtr<WebGraphicsContext3DProviderWrapper>
+        context_provider_wrapper) {
+  bool can_use_source_directly = source->IsTextureBacked();
+#if BUILDFLAG(IS_MAC)
+  //  On MacOS, if |source| doesn't have SCANOUT usage, it is worth copying it
+  //  to a new buffer with the SCANOUT even when |source| is
+  //  already on the GPU, to keep using delegated compositing.
+  can_use_source_directly =
+      can_use_source_directly &&
+      source->GetSharedImage()->usage().Has(gpu::SHARED_IMAGE_USAGE_SCANOUT);
+#endif
+
+  if (can_use_source_directly) {
+    return source;
+  }
+
+#if BUILDFLAG(IS_LINUX)
+  // TODO(b/330865436): On Linux, CanvasResourceProvider doesn't always check
+  // for SCANOUT support correctly on X11 and it's never supported in
+  // practice. Therefore, don't include it until this flow is reworked.
+  constexpr gpu::SharedImageUsageSet kSharedImageUsageFlags =
+      gpu::SHARED_IMAGE_USAGE_DISPLAY_READ;
+#else
+  // Always request gpu::SHARED_IMAGE_USAGE_SCANOUT when using gpu compositing,
+  // if possible. This is safe because the prerequisite capabilities are checked
+  // downstream in CanvasResourceProvider::CreateSharedImageProvider.
+  constexpr gpu::SharedImageUsageSet kSharedImageUsageFlags =
+      gpu::SHARED_IMAGE_USAGE_DISPLAY_READ | gpu::SHARED_IMAGE_USAGE_SCANOUT;
+#endif  // BUILDFLAG(IS_LINUX)
+  auto provider = CanvasNon2DResourceProviderSharedImage::Create(
+      source->Size(), source->GetSharedImageFormat(), source->GetAlphaType(),
+      source->GetColorSpace(), source->GetHdrMetadata(),
+      context_provider_wrapper, kSharedImageUsageFlags);
+  if (!provider) {
+    return nullptr;
+  }
+
+  const auto paint_image = source->PaintImageForCurrentFrame();
+  return provider->DoExternalOverdrawAndSnapshot(
+      [paint_image](cc::PaintCanvas& canvas) {
+        cc::PaintFlags paint;
+        paint.setBlendMode(SkBlendMode::kSrc);
+        canvas.drawImage(paint_image, 0, 0, SkSamplingOptions(), &paint);
+      },
+      ImageOrientationEnum::kDefault);
+}
 
 ImageBitmapRenderingContext::ImageBitmapRenderingContext(
     CanvasRenderingContextHost* host,

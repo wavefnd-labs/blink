@@ -28,6 +28,7 @@ class ExecutionContext;
 class ImageBitmap;
 class ImageLayerBridge;
 class V8UnionHTMLCanvasElementOrOffscreenCanvas;
+class WebGraphicsContext3DProviderWrapper;
 
 class MODULES_EXPORT ImageBitmapRenderingContext final
     : public ScriptWrappable,
@@ -56,6 +57,11 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
 
   ImageBitmapRenderingContext(CanvasRenderingContextHost*,
                               const CanvasContextCreationAttributesCore&);
+
+  static scoped_refptr<StaticBitmapImage> MakeAccelerated(
+      const scoped_refptr<StaticBitmapImage>& source,
+      base::WeakPtr<WebGraphicsContext3DProviderWrapper>
+          context_provider_wrapper);
 
   void Trace(Visitor*) const override;
 
