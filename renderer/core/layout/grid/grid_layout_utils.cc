@@ -1087,11 +1087,6 @@ LayoutUnit GetSynthesizedLogicalBaseline(
              : synthesized_baseline;
 }
 
-namespace {
-
-// Returns the largest possible per-track contribution that an auto-placed
-// subgrid could impose on any single grid-lanes track, given the subgrid's
-// accumulated start/end extra margins and gutter-size delta.
 LayoutUnit LargestAutoPlacedSubgridContribution(LayoutUnit start_extra_margin,
                                                 LayoutUnit end_extra_margin,
                                                 LayoutUnit gutter_delta,
@@ -1115,8 +1110,6 @@ LayoutUnit LargestAutoPlacedSubgridContribution(LayoutUnit start_extra_margin,
   return std::max({start_extra_margin + half_gutter_delta, gutter_delta,
                    end_extra_margin + half_gutter_delta});
 }
-
-}  // namespace
 
 void AccommodateSubgridExtraMargins(const GridSizingSubtree& sizing_subtree,
                                     GridSizingTrackCollection& track_collection,
