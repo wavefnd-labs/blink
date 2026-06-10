@@ -33,7 +33,6 @@ namespace blink {
 class ExceptionState;
 class ExecutionContext;
 class ImageBitmap;
-class ImageLayerBridge;
 class WebGraphicsSharedImageInterfaceProvider;
 class V8UnionHTMLCanvasElementOrOffscreenCanvas;
 class WebGraphicsContext3DProviderWrapper;
@@ -135,7 +134,7 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
 
   void ResetInternalBitmapToBlackTransparent(int width, int height);
 
-  void SetImageOnImageLayerBridge(scoped_refptr<StaticBitmapImage>);
+  void SetImageInternal(scoped_refptr<StaticBitmapImage>);
   void ResourceReleasedGpu(scoped_refptr<StaticBitmapImage>,
                            const gpu::SyncToken&,
                            bool lost_resource);
@@ -160,7 +159,10 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
 
   Vector<SoftwareResource> recycled_software_resources_;
 
-  Member<ImageLayerBridge> image_layer_bridge_;
+  scoped_refptr<StaticBitmapImage> image_;
+  bool disposed_ = false;
+  bool has_presented_since_last_set_image_ = false;
+  bool is_opaque_ = false;
   scoped_refptr<cc::TextureLayer> layer_;
   std::unique_ptr<CanvasNon2DResourceProviderSharedImage>
       resource_provider_for_offscreen_canvas_;

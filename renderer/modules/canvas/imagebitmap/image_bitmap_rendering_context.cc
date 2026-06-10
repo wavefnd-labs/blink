@@ -26,7 +26,6 @@
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_rendering_context.h"
 #include "third_party/blink/renderer/core/imagebitmap/image_bitmap.h"
 #include "third_party/blink/renderer/core/offscreencanvas/offscreen_canvas.h"
-#include "third_party/blink/renderer/modules/canvas/imagebitmap/image_layer_bridge.h"
 #include "third_party/blink/renderer/platform/bindings/exception_state.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
@@ -95,12 +94,11 @@ ImageBitmapRenderingContext::ImageBitmapRenderingContext(
     CanvasRenderingContextHost* host,
     const CanvasContextCreationAttributesCore& attrs)
     : CanvasRenderingContext(host, attrs, CanvasRenderingAPI::kBitmaprenderer),
-      image_layer_bridge_(MakeGarbageCollected<ImageLayerBridge>(
-          attrs.alpha ? kNonOpaque : kOpaque)) {
+      is_opaque_(!attrs.alpha) {
   layer_ = cc::TextureLayer::Create(this);
   layer_->SetIsDrawable(true);
   layer_->SetHitTestable(true);
-  if (image_layer_bridge_->is_opaque_) {
+  if (is_opaque_) {
     layer_->SetContentsOpaque(true);
     layer_->SetBlendBackgroundColor(false);
   }
@@ -131,8 +129,7 @@ base::ByteSize ImageBitmapRenderingContext::AllocatedBufferSize() const {
   if (!IsPaintable()) {
     return base::ByteSize();
   }
-  base::ByteSize result =
-      image_layer_bridge_->GetImage()->EstimatedSizeInBytes();
+  base::ByteSize result = image_->EstimatedSizeInBytes();
   if (resource_provider_for_offscreen_canvas_) {
     result += resource_provider_for_offscreen_canvas_->EstimatedSizeInBytes();
   }
@@ -140,7 +137,8 @@ base::ByteSize ImageBitmapRenderingContext::AllocatedBufferSize() const {
 }
 
 void ImageBitmapRenderingContext::Stop() {
-  image_layer_bridge_->Dispose();
+  image_ = nullptr;
+  disposed_ = true;
   if (layer_) {
     layer_->ClearClient();
     layer_ = nullptr;
@@ -159,9 +157,9 @@ void ImageBitmapRenderingContext::Dispose() {
   CanvasRenderingContext::Dispose();
 }
 
-void ImageBitmapRenderingContext::SetImageOnImageLayerBridge(
+void ImageBitmapRenderingContext::SetImageInternal(
     scoped_refptr<StaticBitmapImage> image) {
-  if (image_layer_bridge_->disposed_) {
+  if (disposed_) {
     return;
   }
   // There could be the case that the current PaintImage is null, meaning
@@ -171,10 +169,10 @@ void ImageBitmapRenderingContext::SetImageOnImageLayerBridge(
     return;
   }
 
-  image_layer_bridge_->image_ = std::move(image);
-  if (image_layer_bridge_->image_) {
-    const bool image_is_opaque = image_layer_bridge_->image_->IsOpaque();
-    if (image_layer_bridge_->is_opaque_) {
+  image_ = std::move(image);
+  if (image_) {
+    const bool image_is_opaque = image_->IsOpaque();
+    if (is_opaque_) {
       // If we in opaque mode but image might have transparency we need to
       // ensure its opacity is not used.
       layer_->SetForceTextureToOpaque(!image_is_opaque);
@@ -183,7 +181,7 @@ void ImageBitmapRenderingContext::SetImageOnImageLayerBridge(
       layer_->SetBlendBackgroundColor(!image_is_opaque);
     }
   }
-  image_layer_bridge_->has_presented_since_last_set_image_ = false;
+  has_presented_since_last_set_image_ = false;
 }
 
 void ImageBitmapRenderingContext::ResetInternalBitmapToBlackTransparent(
@@ -194,7 +192,7 @@ void ImageBitmapRenderingContext::ResetInternalBitmapToBlackTransparent(
     black_bitmap.eraseARGB(0, 0, 0, 0);
     auto image = SkImages::RasterFromBitmap(black_bitmap);
     if (image) {
-      SetImageOnImageLayerBridge(UnacceleratedStaticBitmapImage::Create(image));
+      SetImageInternal(UnacceleratedStaticBitmapImage::Create(image));
     }
   }
 }
@@ -205,7 +203,7 @@ void ImageBitmapRenderingContext::SetImage(ImageBitmap* image_bitmap) {
   // According to the standard TransferFromImageBitmap(null) has to reset the
   // internal bitmap and create a black transparent one.
   if (image_bitmap) {
-    SetImageOnImageLayerBridge(image_bitmap->BitmapImage());
+    SetImageInternal(image_bitmap->BitmapImage());
   } else {
     ResetInternalBitmapToBlackTransparent(Host()->width(), Host()->height());
   }
@@ -219,15 +217,15 @@ void ImageBitmapRenderingContext::SetImage(ImageBitmap* image_bitmap) {
 }
 
 scoped_refptr<StaticBitmapImage> ImageBitmapRenderingContext::GetImage() {
-  return image_layer_bridge_->GetImage();
+  return image_;
 }
 
 scoped_refptr<StaticBitmapImage>
 ImageBitmapRenderingContext::GetImageAndResetInternal() {
-  if (!image_layer_bridge_->GetImage()) {
+  if (!image_) {
     return nullptr;
   }
-  scoped_refptr<StaticBitmapImage> copy_image = image_layer_bridge_->GetImage();
+  scoped_refptr<StaticBitmapImage> copy_image = image_;
 
   ResetInternalBitmapToBlackTransparent(copy_image->width(),
                                         copy_image->height());
@@ -237,7 +235,7 @@ ImageBitmapRenderingContext::GetImageAndResetInternal() {
 
 void ImageBitmapRenderingContext::SetUV(const gfx::PointF& left_top,
                                         const gfx::PointF& right_bottom) {
-  if (image_layer_bridge_->disposed_) {
+  if (disposed_) {
     return;
   }
   layer_->SetUV(left_top, right_bottom);
@@ -250,27 +248,26 @@ cc::Layer* ImageBitmapRenderingContext::CcLayer() const {
 bool ImageBitmapRenderingContext::PrepareTransferableResource(
     viz::TransferableResource* out_resource,
     viz::ReleaseCallback* out_release_callback) {
-  if (image_layer_bridge_->disposed_) {
+  if (disposed_) {
     return false;
   }
 
-  if (!image_layer_bridge_->image_) {
+  if (!image_) {
     return false;
   }
 
-  if (image_layer_bridge_->has_presented_since_last_set_image_) {
+  if (has_presented_since_last_set_image_) {
     return false;
   }
 
-  image_layer_bridge_->has_presented_since_last_set_image_ = true;
+  has_presented_since_last_set_image_ = true;
 
   const bool gpu_compositing = SharedGpuContext::IsGpuCompositingEnabled();
 
   if (gpu_compositing) {
     scoped_refptr<StaticBitmapImage> image_for_compositor =
         ImageBitmapRenderingContext::MakeAccelerated(
-            image_layer_bridge_->image_,
-            SharedGpuContext::ContextProviderWrapper());
+            image_, SharedGpuContext::ContextProviderWrapper());
     if (!image_for_compositor || !image_for_compositor->ContextProvider()) {
       return false;
     }
@@ -296,23 +293,21 @@ bool ImageBitmapRenderingContext::PrepareTransferableResource(
         WrapWeakPersistent(this), std::move(image_for_compositor));
     *out_release_callback = std::move(func);
   } else {
-    image_layer_bridge_->image_ =
-        image_layer_bridge_->image_->MakeUnaccelerated();
-    if (!image_layer_bridge_->image_) {
+    image_ = image_->MakeUnaccelerated();
+    if (!image_) {
       return false;
     }
 
     sk_sp<SkImage> sk_image =
-        image_layer_bridge_->image_->PaintImageForCurrentFrame().GetSwSkImage();
+        image_->PaintImageForCurrentFrame().GetSwSkImage();
     if (!sk_image) {
       return false;
     }
 
-    const gfx::Size size(image_layer_bridge_->image_->width(),
-                         image_layer_bridge_->image_->height());
+    const gfx::Size size(image_->width(), image_->height());
 
-    SoftwareResource resource = CreateOrRecycleSoftwareResource(
-        size, image_layer_bridge_->image_->GetColorSpace());
+    SoftwareResource resource =
+        CreateOrRecycleSoftwareResource(size, image_->GetColorSpace());
     if (!resource.shared_image) {
       return false;
     }
@@ -410,17 +405,16 @@ void ImageBitmapRenderingContext::ResourceReleasedSoftware(
     SoftwareResource resource,
     const gpu::SyncToken& sync_token,
     bool lost_resource) {
-  if (!image_layer_bridge_->disposed_ && !lost_resource) {
+  if (!disposed_ && !lost_resource) {
     recycled_software_resources_.push_back(std::move(resource));
   }
 }
 
 bool ImageBitmapRenderingContext::IsPaintable() const {
-  return !!image_layer_bridge_->GetImage();
+  return !!image_;
 }
 
 void ImageBitmapRenderingContext::Trace(Visitor* visitor) const {
-  visitor->Trace(image_layer_bridge_);
   ScriptWrappable::Trace(visitor);
   CanvasRenderingContext::Trace(visitor);
 }
@@ -434,7 +428,7 @@ ImageBitmapRenderingContext::GetResourceForPushFrame(
     return nullptr;
   }
 
-  scoped_refptr<StaticBitmapImage> image = image_layer_bridge_->GetImage();
+  scoped_refptr<StaticBitmapImage> image = image_;
   if (!image) {
     return nullptr;
   }
