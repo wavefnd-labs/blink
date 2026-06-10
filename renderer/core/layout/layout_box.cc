@@ -478,12 +478,6 @@ void RecalcFragmentScrollableOverflow(RecalcScrollableOverflowResult& result,
   }
 }
 
-bool IsAppearanceAutoMenuList(const LayoutBox& obj) {
-  return obj.IsMenuList() &&
-         obj.StyleRef().EffectiveAppearance() != AppearanceValue::kBase &&
-         obj.StyleRef().EffectiveAppearance() != AppearanceValue::kBaseSelect;
-}
-
 const PhysicalBoxFragment* FragmentForEdge(const LayoutBox& box,
                                            const PhysicalBoxSides& edges) {
   // Should only be here if there are multiple fragments. There's a fast-path
@@ -2470,13 +2464,10 @@ PhysicalRect LayoutBox::OverflowClipRect(
                       kExcludeScrollbarGutter);
   }
 
-  if (IsAppearanceAutoMenuList(*this)) [[unlikely]] {
-    DCHECK(HasControlClip());
+  if (HasControlClip()) [[unlikely]] {
     PhysicalRect control_clip = PhysicalContentBoxRect();
     control_clip.Move(location);
     clip_rect.Intersect(control_clip);
-  } else {
-    DCHECK(!HasControlClip());
   }
 
   return clip_rect;
@@ -2489,7 +2480,9 @@ PhysicalRect LayoutBox::OverflowClipRectForScrollNode(
 
 bool LayoutBox::HasControlClip() const {
   NOT_DESTROYED();
-  return IsAppearanceAutoMenuList(*this);
+  return !RuntimeEnabledFeatures::SelectUsesUAClipEnabled() && IsMenuList() &&
+         StyleRef().EffectiveAppearance() != AppearanceValue::kBase &&
+         StyleRef().EffectiveAppearance() != AppearanceValue::kBaseSelect;
 }
 
 void LayoutBox::ExcludeScrollbars(
