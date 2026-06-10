@@ -30,9 +30,6 @@ class MODULES_EXPORT ImageLayerBridge
 
   void Dispose();
 
-  bool PrepareResource(viz::TransferableResource* out_resource,
-                       viz::ReleaseCallback* out_release_callback);
-
   scoped_refptr<StaticBitmapImage> GetImage() { return image_; }
 
 

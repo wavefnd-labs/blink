@@ -11,6 +11,7 @@
 #include "cc/layers/texture_layer.h"
 #include "cc/paint/paint_canvas.h"
 #include "cc/paint/paint_flags.h"
+#include "components/viz/common/resources/shared_image_format_utils.h"
 #include "components/viz/common/resources/transferable_resource.h"
 #include "gpu/command_buffer/common/shared_image_usage.h"
 #include "third_party/blink/public/platform/web_graphics_context_3d_provider.h"
@@ -27,6 +28,7 @@
 #include "third_party/blink/renderer/platform/graphics/graphics_context.h"
 #include "third_party/blink/renderer/platform/graphics/static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/graphics/unaccelerated_static_bitmap_image.h"
+#include "third_party/blink/renderer/platform/wtf/functional.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -242,8 +244,98 @@ cc::Layer* ImageBitmapRenderingContext::CcLayer() const {
 bool ImageBitmapRenderingContext::PrepareTransferableResource(
     viz::TransferableResource* out_resource,
     viz::ReleaseCallback* out_release_callback) {
-  return image_layer_bridge_->PrepareResource(out_resource,
-                                              out_release_callback);
+  if (image_layer_bridge_->disposed_) {
+    return false;
+  }
+
+  if (!image_layer_bridge_->image_) {
+    return false;
+  }
+
+  if (image_layer_bridge_->has_presented_since_last_set_image_) {
+    return false;
+  }
+
+  image_layer_bridge_->has_presented_since_last_set_image_ = true;
+
+  const bool gpu_compositing = SharedGpuContext::IsGpuCompositingEnabled();
+
+  if (gpu_compositing) {
+    scoped_refptr<StaticBitmapImage> image_for_compositor =
+        ImageBitmapRenderingContext::MakeAccelerated(
+            image_layer_bridge_->image_,
+            SharedGpuContext::ContextProviderWrapper());
+    if (!image_for_compositor || !image_for_compositor->ContextProvider()) {
+      return false;
+    }
+
+    auto shared_image = image_for_compositor->GetSharedImage();
+
+    if (!shared_image) {
+      return false;
+    }
+
+    viz::TransferableResource::MetadataOverride overrides = {
+        .color_space = gfx::ColorSpace(),
+        .alpha_type = kPremul_SkAlphaType,
+    };
+
+    *out_resource = viz::TransferableResource::Make(
+        shared_image,
+        viz::TransferableResource::ResourceSource::kImageLayerBridge,
+        image_for_compositor->GetSyncToken(), overrides);
+
+    auto func = blink::BindOnce(&ImageLayerBridge::ResourceReleasedGpu,
+                                WrapWeakPersistent(image_layer_bridge_.Get()),
+                                std::move(image_for_compositor));
+    *out_release_callback = std::move(func);
+  } else {
+    image_layer_bridge_->image_ =
+        image_layer_bridge_->image_->MakeUnaccelerated();
+    if (!image_layer_bridge_->image_) {
+      return false;
+    }
+
+    sk_sp<SkImage> sk_image =
+        image_layer_bridge_->image_->PaintImageForCurrentFrame().GetSwSkImage();
+    if (!sk_image) {
+      return false;
+    }
+
+    const gfx::Size size(image_layer_bridge_->image_->width(),
+                         image_layer_bridge_->image_->height());
+
+    ImageLayerBridge::SoftwareResource resource =
+        image_layer_bridge_->CreateOrRecycleSoftwareResource(
+            size, image_layer_bridge_->image_->GetColorSpace());
+    if (!resource.shared_image) {
+      return false;
+    }
+
+    SkImageInfo dst_info =
+        SkImageInfo::Make(size.width(), size.height(),
+                          ToClosestSkColorType(resource.shared_image->format()),
+                          kPremul_SkAlphaType, sk_image->refColorSpace());
+
+    // Copy from SkImage into SharedMemory owned by |resource|.
+    auto dst_mapping = resource.shared_image->Map();
+    if (!sk_image->readPixels(/*context=*/nullptr,
+                              dst_mapping->GetSkPixmapForPlane(0, dst_info), 0,
+                              0)) {
+      return false;
+    }
+
+    *out_resource = viz::TransferableResource::Make(
+        resource.shared_image,
+        viz::TransferableResource::ResourceSource::kImageLayerBridge,
+        resource.sync_token);
+    auto func = BindOnce(&ImageLayerBridge::ResourceReleasedSoftware,
+                         WrapWeakPersistent(image_layer_bridge_.Get()),
+                         std::move(resource));
+    *out_release_callback = std::move(func);
+  }
+
+  return true;
 }
 
 bool ImageBitmapRenderingContext::IsPaintable() const {
