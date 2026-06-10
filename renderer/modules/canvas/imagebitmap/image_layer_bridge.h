@@ -13,10 +13,6 @@
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "ui/gfx/geometry/point_f.h"
 
-namespace cc {
-class TextureLayer;
-}  // namespace cc
-
 namespace gfx {
 class Size;
 }
@@ -71,7 +67,6 @@ class MODULES_EXPORT ImageLayerBridge
                                 bool lost_resource);
 
   scoped_refptr<StaticBitmapImage> image_;
-  scoped_refptr<cc::TextureLayer> layer_;
 
   // SharedMemory resources that can be recycled.
   Vector<SoftwareResource> recycled_software_resources_;

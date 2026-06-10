@@ -20,6 +20,7 @@
 
 namespace cc {
 class Layer;
+class TextureLayer;
 }
 
 namespace blink {
@@ -131,6 +132,7 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
   void SetImageOnImageLayerBridge(scoped_refptr<StaticBitmapImage>);
 
   Member<ImageLayerBridge> image_layer_bridge_;
+  scoped_refptr<cc::TextureLayer> layer_;
   std::unique_ptr<CanvasNon2DResourceProviderSharedImage>
       resource_provider_for_offscreen_canvas_;
 };

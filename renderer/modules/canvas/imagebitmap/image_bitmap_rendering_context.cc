@@ -89,15 +89,14 @@ ImageBitmapRenderingContext::ImageBitmapRenderingContext(
     : CanvasRenderingContext(host, attrs, CanvasRenderingAPI::kBitmaprenderer),
       image_layer_bridge_(MakeGarbageCollected<ImageLayerBridge>(
           attrs.alpha ? kNonOpaque : kOpaque)) {
-  image_layer_bridge_->layer_ = cc::TextureLayer::Create(this);
-  auto& layer = image_layer_bridge_->layer_;
-  layer->SetIsDrawable(true);
-  layer->SetHitTestable(true);
+  layer_ = cc::TextureLayer::Create(this);
+  layer_->SetIsDrawable(true);
+  layer_->SetHitTestable(true);
   if (image_layer_bridge_->is_opaque_) {
-    layer->SetContentsOpaque(true);
-    layer->SetBlendBackgroundColor(false);
+    layer_->SetContentsOpaque(true);
+    layer_->SetBlendBackgroundColor(false);
   }
-  host->InitializeLayerWithCSSProperties(layer.get());
+  host->InitializeLayerWithCSSProperties(layer_.get());
 }
 
 ImageBitmapRenderingContext::~ImageBitmapRenderingContext() = default;
@@ -134,6 +133,10 @@ base::ByteSize ImageBitmapRenderingContext::AllocatedBufferSize() const {
 
 void ImageBitmapRenderingContext::Stop() {
   image_layer_bridge_->Dispose();
+  if (layer_) {
+    layer_->ClearClient();
+    layer_ = nullptr;
+  }
 }
 
 scoped_refptr<StaticBitmapImage>
@@ -166,10 +169,10 @@ void ImageBitmapRenderingContext::SetImageOnImageLayerBridge(
     if (image_layer_bridge_->is_opaque_) {
       // If we in opaque mode but image might have transparency we need to
       // ensure its opacity is not used.
-      image_layer_bridge_->layer_->SetForceTextureToOpaque(!image_is_opaque);
+      layer_->SetForceTextureToOpaque(!image_is_opaque);
     } else {
-      image_layer_bridge_->layer_->SetContentsOpaque(image_is_opaque);
-      image_layer_bridge_->layer_->SetBlendBackgroundColor(!image_is_opaque);
+      layer_->SetContentsOpaque(image_is_opaque);
+      layer_->SetBlendBackgroundColor(!image_is_opaque);
     }
   }
   image_layer_bridge_->has_presented_since_last_set_image_ = false;
@@ -229,11 +232,11 @@ void ImageBitmapRenderingContext::SetUV(const gfx::PointF& left_top,
   if (image_layer_bridge_->disposed_) {
     return;
   }
-  image_layer_bridge_->layer_->SetUV(left_top, right_bottom);
+  layer_->SetUV(left_top, right_bottom);
 }
 
 cc::Layer* ImageBitmapRenderingContext::CcLayer() const {
-  return image_layer_bridge_ ? image_layer_bridge_->layer_.get() : nullptr;
+  return layer_ ? layer_.get() : nullptr;
 }
 
 bool ImageBitmapRenderingContext::PrepareTransferableResource(

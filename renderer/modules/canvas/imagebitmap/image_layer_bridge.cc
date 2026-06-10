@@ -37,10 +37,6 @@ ImageLayerBridge::~ImageLayerBridge() {
 
 
 void ImageLayerBridge::Dispose() {
-  if (layer_) {
-    layer_->ClearClient();
-    layer_ = nullptr;
-  }
   image_ = nullptr;
   disposed_ = true;
 }
