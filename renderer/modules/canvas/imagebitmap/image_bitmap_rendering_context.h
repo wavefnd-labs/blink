@@ -7,6 +7,7 @@
 
 #include "base/byte_size.h"
 #include "base/memory/scoped_refptr.h"
+#include "cc/layers/texture_layer_client.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_typedefs.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_rendering_context.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_rendering_context_factory.h"
@@ -32,7 +33,8 @@ class WebGraphicsContext3DProviderWrapper;
 
 class MODULES_EXPORT ImageBitmapRenderingContext final
     : public ScriptWrappable,
-      public CanvasRenderingContext {
+      public CanvasRenderingContext,
+      public cc::TextureLayerClient {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
@@ -85,6 +87,12 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
       bool& should_call_push_frame) override;
 
   cc::Layer* CcLayer() const final;
+
+  // cc::TextureLayerClient implementation.
+  bool PrepareTransferableResource(
+      viz::TransferableResource* out_resource,
+      viz::ReleaseCallback* out_release_callback) override;
+
   // TODO(junov): handle lost contexts when content is GPU-backed
   void LoseContext(LostContextMode) override {}
 

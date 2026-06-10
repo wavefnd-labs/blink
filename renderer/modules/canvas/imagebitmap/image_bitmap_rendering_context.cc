@@ -11,6 +11,7 @@
 #include "cc/layers/texture_layer.h"
 #include "cc/paint/paint_canvas.h"
 #include "cc/paint/paint_flags.h"
+#include "components/viz/common/resources/transferable_resource.h"
 #include "gpu/command_buffer/common/shared_image_usage.h"
 #include "third_party/blink/public/platform/web_graphics_context_3d_provider.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_union_htmlcanvaselement_offscreencanvas.h"
@@ -88,6 +89,7 @@ ImageBitmapRenderingContext::ImageBitmapRenderingContext(
     : CanvasRenderingContext(host, attrs, CanvasRenderingAPI::kBitmaprenderer),
       image_layer_bridge_(MakeGarbageCollected<ImageLayerBridge>(
           attrs.alpha ? kNonOpaque : kOpaque)) {
+  image_layer_bridge_->layer_ = cc::TextureLayer::Create(this);
   auto& layer = image_layer_bridge_->layer_;
   layer->SetIsDrawable(true);
   layer->SetHitTestable(true);
@@ -232,6 +234,13 @@ void ImageBitmapRenderingContext::SetUV(const gfx::PointF& left_top,
 
 cc::Layer* ImageBitmapRenderingContext::CcLayer() const {
   return image_layer_bridge_ ? image_layer_bridge_->layer_.get() : nullptr;
+}
+
+bool ImageBitmapRenderingContext::PrepareTransferableResource(
+    viz::TransferableResource* out_resource,
+    viz::ReleaseCallback* out_release_callback) {
+  return image_layer_bridge_->PrepareResource(out_resource,
+                                              out_release_callback);
 }
 
 bool ImageBitmapRenderingContext::IsPaintable() const {

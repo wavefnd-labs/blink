@@ -25,20 +25,17 @@ namespace blink {
 class WebGraphicsSharedImageInterfaceProvider;
 
 class MODULES_EXPORT ImageLayerBridge
-    : public GarbageCollected<ImageLayerBridge>,
-      public cc::TextureLayerClient {
+    : public GarbageCollected<ImageLayerBridge> {
  public:
   ImageLayerBridge(OpacityMode);
   ImageLayerBridge(const ImageLayerBridge&) = delete;
   ImageLayerBridge& operator=(const ImageLayerBridge&) = delete;
-  ~ImageLayerBridge() override;
+  ~ImageLayerBridge();
 
   void Dispose();
 
-  // cc::TextureLayerClient implementation.
-  bool PrepareTransferableResource(
-      viz::TransferableResource* out_resource,
-      viz::ReleaseCallback* out_release_callback) override;
+  bool PrepareResource(viz::TransferableResource* out_resource,
+                       viz::ReleaseCallback* out_release_callback);
 
   scoped_refptr<StaticBitmapImage> GetImage() { return image_; }
 

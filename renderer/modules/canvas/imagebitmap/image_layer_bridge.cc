@@ -27,9 +27,7 @@
 namespace blink {
 
 ImageLayerBridge::ImageLayerBridge(OpacityMode opacity_mode)
-    : is_opaque_(opacity_mode == kOpaque) {
-  layer_ = cc::TextureLayer::Create(this);
-}
+    : is_opaque_(opacity_mode == kOpaque) {}
 
 ImageLayerBridge::~ImageLayerBridge() {
   if (!disposed_) {
@@ -47,7 +45,7 @@ void ImageLayerBridge::Dispose() {
   disposed_ = true;
 }
 
-bool ImageLayerBridge::PrepareTransferableResource(
+bool ImageLayerBridge::PrepareResource(
     viz::TransferableResource* out_resource,
     viz::ReleaseCallback* out_release_callback) {
   if (disposed_) {
