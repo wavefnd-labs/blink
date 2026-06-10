@@ -13,7 +13,9 @@
 #include "cc/paint/paint_flags.h"
 #include "components/viz/common/resources/shared_image_format_utils.h"
 #include "components/viz/common/resources/transferable_resource.h"
+#include "gpu/command_buffer/client/gles2_interface.h"
 #include "gpu/command_buffer/common/shared_image_usage.h"
+#include "gpu/command_buffer/common/sync_token.h"
 #include "third_party/blink/public/platform/web_graphics_context_3d_provider.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_union_htmlcanvaselement_offscreencanvas.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_offscreen_rendering_context.h"
@@ -285,9 +287,9 @@ bool ImageBitmapRenderingContext::PrepareTransferableResource(
         viz::TransferableResource::ResourceSource::kImageLayerBridge,
         image_for_compositor->GetSyncToken(), overrides);
 
-    auto func = blink::BindOnce(&ImageLayerBridge::ResourceReleasedGpu,
-                                WrapWeakPersistent(image_layer_bridge_.Get()),
-                                std::move(image_for_compositor));
+    auto func = blink::BindOnce(
+        &ImageBitmapRenderingContext::ResourceReleasedGpu,
+        WrapWeakPersistent(this), std::move(image_for_compositor));
     *out_release_callback = std::move(func);
   } else {
     image_layer_bridge_->image_ =
@@ -336,6 +338,20 @@ bool ImageBitmapRenderingContext::PrepareTransferableResource(
   }
 
   return true;
+}
+
+void ImageBitmapRenderingContext::ResourceReleasedGpu(
+    scoped_refptr<StaticBitmapImage> image,
+    const gpu::SyncToken& token,
+    bool lost_resource) {
+  if (image && image->IsValid()) {
+    DCHECK(image->IsTextureBacked());
+    if (token.HasData() && image->ContextProvider() &&
+        image->ContextProvider()->InterfaceBase()) {
+      image->ContextProvider()->InterfaceBase()->WaitSyncTokenCHROMIUM(
+          token.GetConstData());
+    }
+  }
 }
 
 bool ImageBitmapRenderingContext::IsPaintable() const {

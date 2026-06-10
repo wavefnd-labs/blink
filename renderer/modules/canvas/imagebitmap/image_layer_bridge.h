@@ -55,10 +55,6 @@ class MODULES_EXPORT ImageLayerBridge
       const gfx::Size& size,
       const gfx::ColorSpace& color_space);
 
-  void ResourceReleasedGpu(scoped_refptr<StaticBitmapImage>,
-                           const gpu::SyncToken&,
-                           bool lost_resource);
-
   void ResourceReleasedSoftware(SoftwareResource resource,
                                 const gpu::SyncToken&,
                                 bool lost_resource);

@@ -23,6 +23,10 @@ class Layer;
 class TextureLayer;
 }
 
+namespace gpu {
+struct SyncToken;
+}
+
 namespace blink {
 
 class ExceptionState;
@@ -130,6 +134,9 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
   void ResetInternalBitmapToBlackTransparent(int width, int height);
 
   void SetImageOnImageLayerBridge(scoped_refptr<StaticBitmapImage>);
+  void ResourceReleasedGpu(scoped_refptr<StaticBitmapImage>,
+                           const gpu::SyncToken&,
+                           bool lost_resource);
 
   Member<ImageLayerBridge> image_layer_bridge_;
   scoped_refptr<cc::TextureLayer> layer_;

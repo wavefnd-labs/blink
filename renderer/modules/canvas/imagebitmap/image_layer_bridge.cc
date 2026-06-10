@@ -83,21 +83,6 @@ ImageLayerBridge::CreateOrRecycleSoftwareResource(
   return resource;
 }
 
-void ImageLayerBridge::ResourceReleasedGpu(
-    scoped_refptr<StaticBitmapImage> image,
-    const gpu::SyncToken& token,
-    bool lost_resource) {
-  if (image && image->IsValid()) {
-    DCHECK(image->IsTextureBacked());
-    if (token.HasData() && image->ContextProvider() &&
-        image->ContextProvider()->InterfaceBase()) {
-      image->ContextProvider()->InterfaceBase()->WaitSyncTokenCHROMIUM(
-          token.GetConstData());
-    }
-  }
-  // let 'image' go out of scope to release gpu resources.
-}
-
 void ImageLayerBridge::ResourceReleasedSoftware(
     SoftwareResource resource,
     const gpu::SyncToken& sync_token,
