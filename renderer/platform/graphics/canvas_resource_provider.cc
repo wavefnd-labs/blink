@@ -155,6 +155,7 @@ class CanvasImageProvider : public cc::ImageProvider {
       const cc::DrawImage&) override;
 
   void ReleaseLockedImages() { locked_images_.clear(); }
+  void UnbindTextureBackedImages();
   void SetAnimatedImageFrameIndexes(
       scoped_refptr<const cc::AnimatedImageFrameIndexMap> indexes);
 
@@ -166,6 +167,7 @@ class CanvasImageProvider : public cc::ImageProvider {
   cc::PlaybackImageProvider::RasterMode raster_mode_;
   bool cleanup_task_pending_ = false;
   Vector<ScopedResult> locked_images_;
+  Vector<cc::PaintImage> bound_texture_backed_images_;
   std::optional<cc::PlaybackImageProvider> playback_image_provider_n32_;
   std::optional<cc::PlaybackImageProvider> playback_image_provider_f16_;
 
@@ -1887,6 +1889,14 @@ CanvasImageProvider::CanvasImageProvider(
   }
 }
 
+void CanvasImageProvider::UnbindTextureBackedImages() {
+  for (auto& image : bound_texture_backed_images_) {
+    DCHECK(image.IsTextureBacked());
+    image.UnbindTextureBacking();
+  }
+  bound_texture_backed_images_.clear();
+}
+
 void CanvasImageProvider::SetAnimatedImageFrameIndexes(
     scoped_refptr<const cc::AnimatedImageFrameIndexMap> indexes) {
   if (playback_image_provider_n32_) {
@@ -1907,6 +1917,18 @@ cc::ImageProvider::ScopedResult CanvasImageProvider::GetRasterContent(
             paint_image.deferred_paint_record().get()));
     return cc::ImageProvider::ScopedResult(
         canvas_deferred_paint_record->GetPaintRecord());
+  }
+
+  // Bind texture backing to RasterContextProvider if necessary
+  if (paint_image.IsTextureBacked()) {
+    if (auto context_provider_wrapper =
+            SharedGpuContext::ContextProviderWrapper()) {
+      paint_image.BindTextureBacking(
+          base::MakeRefCounted<viz::RasterContextProviderWrapper>(
+              context_provider_wrapper->ContextProvider()
+                  .RasterContextProvider()));
+      bound_texture_backed_images_.emplace_back(paint_image);
+    }
   }
 
   // TODO(xidachen): Ensure this function works for paint worklet generated
@@ -2144,6 +2166,7 @@ void CanvasNon2DResourceProviderSharedImage::FlushRecording(
   // used multiple times. We can unlock them once the rasterization is complete.
   if (canvas_image_provider_) {
     canvas_image_provider_->ReleaseLockedImages();
+    canvas_image_provider_->UnbindTextureBackedImages();
   }
 }
 
@@ -2168,6 +2191,7 @@ std::optional<cc::PaintRecord> CanvasResourceProvider::Flush(
   // used multiple times. We can unlock them once the rasterization is complete.
   if (canvas_image_provider_) {
     canvas_image_provider_->ReleaseLockedImages();
+    canvas_image_provider_->UnbindTextureBackedImages();
   }
 
   last_recording_ =

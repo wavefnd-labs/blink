@@ -632,9 +632,9 @@ void HTMLVideoElement::RequestVisibility(
 void HTMLVideoElement::PaintCurrentFrame(cc::PaintCanvas* canvas,
                                          const gfx::Rect& dest_rect,
                                          const cc::PaintFlags& flags,
-                                         bool force_pixel_readback) const {
+                                         bool acquire_texture_backing) const {
   if (auto* wmp = GetWebMediaPlayer()) {
-    wmp->Paint(canvas, dest_rect, flags, force_pixel_readback);
+    wmp->Paint(canvas, dest_rect, flags, acquire_texture_backing);
   }
 }
 
