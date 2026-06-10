@@ -9553,11 +9553,25 @@ bool Document::IsSlotAssignmentDirty() const {
 bool Document::IsFocusAllowed(FocusTrigger trigger,
                               const LocalFrame& initiator_frame) const {
   LocalFrame* frame = GetFrame();
-  if (!frame || frame->IsMainFrame() ||
-      LocalFrame::HasTransientUserActivation(frame)) {
+  if (!frame) {
     // 'autofocus' runs Element::focus asynchronously at which point the
     // document might not have a frame (see https://crbug.com/960224).
     return true;
+  }
+
+  const bool blocking_focus_feature_flag_enabled =
+      RuntimeEnabledFeatures::BlockingFocusWithoutUserActivationEnabled(
+          GetExecutionContext());
+  if (blocking_focus_feature_flag_enabled) {
+    // Check activation on the focus initiator, not the target frame. Otherwise
+    // a restricted frame could focus an activated target and bypass the policy.
+    if (LocalFrame::HasTransientUserActivation(&initiator_frame)) {
+      return true;
+    }
+  } else {
+    if (frame->IsMainFrame() || LocalFrame::HasTransientUserActivation(frame)) {
+      return true;
+    }
   }
 
   // Allow focus during prerendering to match same-origin behavior.
@@ -9580,8 +9594,7 @@ bool Document::IsFocusAllowed(FocusTrigger trigger,
   CountUse(uma_type);
 
   // All logic below is part of the BlockingFocusWithoutUserActivation feature.
-  if (!RuntimeEnabledFeatures::BlockingFocusWithoutUserActivationEnabled(
-          GetExecutionContext())) {
+  if (!blocking_focus_feature_flag_enabled) {
     return true;
   }
 

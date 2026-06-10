@@ -2876,7 +2876,7 @@ void LocalFrame::NotifyUserActivation(
 }
 
 // static
-bool LocalFrame::HasTransientUserActivation(LocalFrame* frame) {
+bool LocalFrame::HasTransientUserActivation(const LocalFrame* frame) {
   return frame && frame->Frame::HasTransientUserActivation();
 }
 
