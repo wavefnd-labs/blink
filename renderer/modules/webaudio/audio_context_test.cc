@@ -2288,4 +2288,32 @@ TEST_F(AudioContextTest, AsyncStateUseCountersLogMessage) {
   }
 }
 
+// Tests that kAudioContextAsyncStateTransitions is recorded when
+// an AudioContext is created and begins the initial transition to
+// running, regardless of the feature.
+TEST_F(AudioContextTest, AsyncStateUseCountersInitialTransitionToRunning) {
+  for (bool feature_enabled : {true, false}) {
+    SCOPED_TRACE(testing::Message() << "feature_enabled: " << feature_enabled);
+
+    ScopedAudioContextAsyncStateTransitionsForTest scoped_feature(
+        feature_enabled);
+
+    AudioContextOptions* options = AudioContextOptions::Create();
+
+    ClearAudioContextAsyncStateUseCounters();
+
+    AudioContext::Create(GetFrame().DomWindow(), options, ASSERT_NO_EXCEPTION);
+
+    // kAudioContextAsyncStateTransitions should be recorded when an
+    // AudioContext is created and allowed to start, regardless of the
+    // feature.
+    EXPECT_TRUE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncStateTransitions));
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToRunningStateRead));
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToSuspendedStateRead));
+  }
+}
+
 }  // namespace blink

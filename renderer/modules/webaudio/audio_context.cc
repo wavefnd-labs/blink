@@ -550,14 +550,7 @@ AudioContext* AudioContext::Create(ExecutionContext* context,
     TRACE_EVENT1("webaudio", "AudioContext::Create - allowed to start",
                  "UUID", audio_context->Uuid());
     audio_context->StartRendering();
-    if (RuntimeEnabledFeatures::AudioContextAsyncStateTransitionsEnabled()) {
-      // The state of AudioContext is "suspended" immediately after construction
-      // and transitions to "running" asynchronously.
-      // https://webaudio.github.io/web-audio-api/#AudioContext-constructors
-      audio_context->ScheduleInitialTransitionToRunning();
-    } else {
-      audio_context->SetContextState(V8AudioContextState::Enum::kRunning);
-    }
+    audio_context->ScheduleInitialTransitionToRunning();
   } else {
     TRACE_EVENT1("webaudio", "AudioContext::Create - NOT allowed to start",
                  "UUID", audio_context->Uuid());
@@ -1001,12 +994,22 @@ void AudioContext::ScheduleInitialTransitionToRunning() {
   DCHECK_CALLED_ON_VALID_SEQUENCE(main_thread_sequence_checker_);
   DCHECK(!pending_initial_transition_to_running_);
 
-  pending_initial_transition_to_running_ = true;
-
-  // Track pages creating an AudioContext with async state transitions enabled.
-  // Two other counters will measure state reads during pending transitions.
+  // Record for every AudioContext that starts (begins the initial
+  // transition to running), regardless of the feature, so it can be
+  // the denominator for the two state-read counters.
   UseCounter::Count(GetExecutionContext(),
                     WebFeature::kAudioContextAsyncStateTransitions);
+
+  if (!RuntimeEnabledFeatures::AudioContextAsyncStateTransitionsEnabled()) {
+    SetContextState(V8AudioContextState::Enum::kRunning);
+    return;
+  }
+
+  // The state of AudioContext is "suspended" immediately after construction
+  // and transitions to "running" asynchronously.
+  // https://webaudio.github.io/web-audio-api/#AudioContext-constructors
+
+  pending_initial_transition_to_running_ = true;
 
   GetExecutionContext()
       ->GetTaskRunner(TaskType::kMediaElementEvent)
@@ -1917,12 +1920,7 @@ void AudioContext::ResumeOnPrerenderActivation() {
       if (!suspended_by_user_ &&
           IsAllowedToStart(/*should_suppress_warning=*/true)) {
         StartRendering();
-        if (RuntimeEnabledFeatures::
-                AudioContextAsyncStateTransitionsEnabled()) {
-          ScheduleInitialTransitionToRunning();
-        } else {
-          SetContextState(V8AudioContextState::Enum::kRunning);
-        }
+        ScheduleInitialTransitionToRunning();
       }
       break;
     case V8AudioContextState::Enum::kRunning:
