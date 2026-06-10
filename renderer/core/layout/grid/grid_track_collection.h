@@ -237,6 +237,10 @@ class CORE_EXPORT GridLayoutTrackCollection
 
   // Creates a track collection containing every |Range| with index in the range
   // [begin, end], including their respective |SetGeometry|.
+  //
+  // `is_subgrid_auto_placed` should be true when the subgrid's position in
+  // this parent is not yet known (e.g., it is auto-placed inside a grid-lanes
+  // ancestor).
   GridLayoutTrackCollection* CreateSubgridTrackCollection(
       wtf_size_t begin_range_index,
       wtf_size_t end_range_index,
@@ -244,7 +248,8 @@ class CORE_EXPORT GridLayoutTrackCollection
       const BoxStrut& subgrid_margin,
       const BoxStrut& subgrid_border_scrollbar_padding,
       GridTrackSizingDirection subgrid_track_direction,
-      bool is_opposite_direction_in_root_grid) const;
+      bool is_opposite_direction_in_root_grid,
+      bool is_subgrid_auto_placed = false) const;
 
   // Creates adjusted baselines for a subgrid's span within its parent,
   // accounting for margins, padding, and gutter size differences.

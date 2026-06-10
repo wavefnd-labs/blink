@@ -935,7 +935,8 @@ GridLayoutTrackCollection* CreateSubgridTrackCollection(
       track_direction,
       is_for_columns_in_parent
           ? subgrid_data->is_opposite_direction_in_root_grid_columns
-          : subgrid_data->is_opposite_direction_in_root_grid_rows);
+          : subgrid_data->is_opposite_direction_in_root_grid_rows,
+      subgrid_data->is_auto_placed);
 }
 
 GridTrackBaselines* CreateSubgridBaselines(
@@ -1137,6 +1138,10 @@ void AccommodateSubgridExtraMargins(const GridSizingSubtree& sizing_subtree,
       std::swap(start_extra_margin, end_extra_margin);
     }
 
+    // TODO(almaher): Update the calculation to better reflect the largest
+    // possible subgrid contribution to track sizing in every track. This
+    // is close but not 100% correct. Consider moving the auto placed handling
+    // as a virtual item to simplify the logic.
     if (grid_item.is_auto_placed) {
       // The subgrid is auto-placed (e.g., in grid-lanes where placement
       // happens after track sizing). Walk every possible start track
@@ -1170,6 +1175,10 @@ void AccommodateSubgridExtraMargins(const GridSizingSubtree& sizing_subtree,
     } else {
       // The subgrid has a definite position; accommodate its specific edge
       // sets.
+      //
+      // TODO(almaher): We likely want to include gaps in every track when
+      // we know the position of the subgrid. Update based on the resolution
+      // taken in https://github.com/w3c/csswg-drafts/issues/13983.
       const auto& set_indices = grid_item.SetIndices(track_direction);
       const wtf_size_t set_span_size = set_indices.end - set_indices.begin;
       const wtf_size_t end_position = set_indices.begin + set_span_size - 1;
