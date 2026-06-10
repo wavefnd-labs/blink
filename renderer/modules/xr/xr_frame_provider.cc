@@ -17,6 +17,7 @@
 #include "third_party/blink/renderer/core/frame/navigator.h"
 #include "third_party/blink/renderer/core/imagebitmap/image_bitmap.h"
 #include "third_party/blink/renderer/core/loader/document_loader.h"
+#include "third_party/blink/renderer/core/timing/dom_window_performance.h"
 #include "third_party/blink/renderer/modules/webgpu/gpu_device.h"
 #include "third_party/blink/renderer/modules/webgpu/gpu_texture.h"
 #include "third_party/blink/renderer/modules/xr/xr_gpu_binding.h"
@@ -663,11 +664,8 @@ double XRFrameProvider::UpdateImmersiveFrameTime(
       *first_immersive_frame_time_ + current_frame_time_from_first_frame;
 
   double high_res_now_ms =
-      window->document()
-          ->Loader()
-          ->GetTiming()
-          .MonotonicTimeToZeroBasedDocumentTime(current_frame_time)
-          .InMillisecondsF();
+      DOMWindowPerformance::performance(*window)
+          ->MonotonicTimeToDOMHighResTimeStamp(current_frame_time);
 
   return high_res_now_ms;
 }
