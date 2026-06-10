@@ -150,12 +150,6 @@ BASE_FEATURE(kAudioWorkletThreadPool, base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kAutofillFixFieldsAssociatedWithNestedFormsByParser,
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-// If disabled (default for many years), autofilling triggers KeyDown and
-// KeyUp events that do not send any key codes. If enabled, these events
-// contain the "Unidentified" key.
-BASE_FEATURE(kAutofillSendUnidentifiedKeyAfterFill,
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
 // https://crbug.com/1472970
 BASE_FEATURE(kAutoSpeculationRules, base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE_PARAM(bool,
