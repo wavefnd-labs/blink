@@ -10950,14 +10950,6 @@ Element* Element::GetStyledPseudoElement(
     return nullptr;
   }
 
-  if (!RuntimeEnabledFeatures::ScopedViewTransitionsEnabled()) {
-    // The transition pseudos can currently only exist on the document element
-    // unless scoped view transitions are enabled.
-    if (!IsDocumentElement()) {
-      return nullptr;
-    }
-  }
-
   // This traverses the pseudo-element hierarchy generated in
   // UpdateTransitionPseudoElements to query nested ::view-transition-group
   // ::view-transition-image-pair and

@@ -467,8 +467,6 @@ void ViewTransitionSupplement::ForEachTransition(
     return;
   }
 
-  DCHECK(RuntimeEnabledFeatures::ScopedViewTransitionsEnabled());
-
   // Local copy of the list, since the function may modify the transition map.
   HeapVector<Member<ViewTransition>> transitions;
   if (ViewTransition* document_transition = GetTransition()) {

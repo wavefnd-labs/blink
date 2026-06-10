@@ -1865,8 +1865,6 @@ gfx::Transform ViewTransitionStyleTracker::ComputeTransformForParticipant(
   }
 
   if (!scope_box->IsLayoutView()) {
-    DCHECK(RuntimeEnabledFeatures::ScopedViewTransitionsEnabled());
-
     // Adjust for the scope element's borders and scrollbars.
     transform.Translate(-scope_box->ClientLeft(), -scope_box->ClientTop());
   }
@@ -2650,9 +2648,6 @@ gfx::Transform ViewTransitionStyleTracker::ContainerProperties::
 }
 
 bool ViewTransitionStyleTracker::NeedsSnapshotForCapture() const {
-  if (!RuntimeEnabledFeatures::ScopedViewTransitionsEnabled()) {
-    return !document_->GetFrame()->IsLocalRoot();
-  }
   auto* element = OriginatingElement();
   if (!element) {
     return false;
