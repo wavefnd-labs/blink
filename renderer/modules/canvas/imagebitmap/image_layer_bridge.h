@@ -33,7 +33,6 @@ class MODULES_EXPORT ImageLayerBridge
   ImageLayerBridge& operator=(const ImageLayerBridge&) = delete;
   ~ImageLayerBridge() override;
 
-  void SetImage(scoped_refptr<StaticBitmapImage>);
   void Dispose();
 
   // cc::TextureLayerClient implementation.

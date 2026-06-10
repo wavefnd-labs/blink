@@ -146,6 +146,33 @@ void ImageBitmapRenderingContext::Dispose() {
   CanvasRenderingContext::Dispose();
 }
 
+void ImageBitmapRenderingContext::SetImageOnImageLayerBridge(
+    scoped_refptr<StaticBitmapImage> image) {
+  if (image_layer_bridge_->disposed_) {
+    return;
+  }
+  // There could be the case that the current PaintImage is null, meaning
+  // that something went wrong during the creation of the image and we should
+  // not try and setImage with it
+  if (image && !image->PaintImageForCurrentFrame()) {
+    return;
+  }
+
+  image_layer_bridge_->image_ = std::move(image);
+  if (image_layer_bridge_->image_) {
+    const bool image_is_opaque = image_layer_bridge_->image_->IsOpaque();
+    if (image_layer_bridge_->is_opaque_) {
+      // If we in opaque mode but image might have transparency we need to
+      // ensure its opacity is not used.
+      image_layer_bridge_->layer_->SetForceTextureToOpaque(!image_is_opaque);
+    } else {
+      image_layer_bridge_->layer_->SetContentsOpaque(image_is_opaque);
+      image_layer_bridge_->layer_->SetBlendBackgroundColor(!image_is_opaque);
+    }
+  }
+  image_layer_bridge_->has_presented_since_last_set_image_ = false;
+}
+
 void ImageBitmapRenderingContext::ResetInternalBitmapToBlackTransparent(
     int width,
     int height) {
@@ -154,8 +181,7 @@ void ImageBitmapRenderingContext::ResetInternalBitmapToBlackTransparent(
     black_bitmap.eraseARGB(0, 0, 0, 0);
     auto image = SkImages::RasterFromBitmap(black_bitmap);
     if (image) {
-      image_layer_bridge_->SetImage(
-          UnacceleratedStaticBitmapImage::Create(image));
+      SetImageOnImageLayerBridge(UnacceleratedStaticBitmapImage::Create(image));
     }
   }
 }
@@ -166,7 +192,7 @@ void ImageBitmapRenderingContext::SetImage(ImageBitmap* image_bitmap) {
   // According to the standard TransferFromImageBitmap(null) has to reset the
   // internal bitmap and create a black transparent one.
   if (image_bitmap) {
-    image_layer_bridge_->SetImage(image_bitmap->BitmapImage());
+    SetImageOnImageLayerBridge(image_bitmap->BitmapImage());
   } else {
     ResetInternalBitmapToBlackTransparent(Host()->width(), Host()->height());
   }

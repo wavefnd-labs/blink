@@ -120,6 +120,8 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
 
   void ResetInternalBitmapToBlackTransparent(int width, int height);
 
+  void SetImageOnImageLayerBridge(scoped_refptr<StaticBitmapImage>);
+
   Member<ImageLayerBridge> image_layer_bridge_;
   std::unique_ptr<CanvasNon2DResourceProviderSharedImage>
       resource_provider_for_offscreen_canvas_;

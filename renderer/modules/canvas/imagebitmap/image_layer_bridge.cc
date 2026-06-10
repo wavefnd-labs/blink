@@ -37,32 +37,6 @@ ImageLayerBridge::~ImageLayerBridge() {
   }
 }
 
-void ImageLayerBridge::SetImage(scoped_refptr<StaticBitmapImage> image) {
-  if (disposed_) {
-    return;
-  }
-  // There could be the case that the current PaintImage is null, meaning
-  // that something went wrong during the creation of the image and we should
-  // not try and setImage with it
-  if (image && !image->PaintImageForCurrentFrame()) {
-    return;
-  }
-
-  image_ = std::move(image);
-  if (image_) {
-    const bool image_is_opaque = image_->IsOpaque();
-    if (is_opaque_) {
-      // If we in opaque mode but image might have transparency we need to
-      // ensure its opacity is not used.
-      layer_->SetForceTextureToOpaque(!image_is_opaque);
-    } else {
-      layer_->SetContentsOpaque(image_is_opaque);
-      layer_->SetBlendBackgroundColor(!image_is_opaque);
-    }
-  }
-  has_presented_since_last_set_image_ = false;
-}
-
 
 void ImageLayerBridge::Dispose() {
   if (layer_) {
