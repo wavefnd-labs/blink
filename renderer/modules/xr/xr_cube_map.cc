@@ -101,6 +101,13 @@ WebGLTexture* XRCubeMap::updateWebGLEnvironmentCube(
   ScopedUnpackParametersResetRestore unpack_params(context);
 
   auto* gl = context->ContextGL();
+
+  // Ensure the PIXEL_UNPACK_BUFFER is not set, which would otherwise interfere
+  // with the TexImage2D operations.
+  if (context->IsWebGL2()) {
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  }
+
   texture->SetTarget(GL_TEXTURE_CUBE_MAP);
   gl->BindTexture(GL_TEXTURE_CUBE_MAP, texture->Object());
 
@@ -153,6 +160,9 @@ WebGLTexture* XRCubeMap::updateWebGLEnvironmentCube(
 
   DrawingBuffer::Client* client = static_cast<DrawingBuffer::Client*>(context);
   client->DrawingBufferClientRestoreTextureCubeMapBinding();
+  if (context->IsWebGL2()) {
+    client->DrawingBufferClientRestorePixelUnpackBufferBinding();
+  }
 
   // Debug check for success
   DCHECK(gl->GetError() == GL_NO_ERROR);
