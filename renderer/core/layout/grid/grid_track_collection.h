@@ -213,15 +213,17 @@ class CORE_EXPORT GridLayoutTrackCollection
   LayoutUnit GetSetOffset(wtf_size_t set_index) const;
   wtf_size_t GetSetTrackCount(wtf_size_t set_index) const;
 
-  // Builds a mapping from track index to set index. The vector is sized to
-  // the total number of tracks, where each entry contains the set index
-  // that the track belongs to.
-  Vector<wtf_size_t> BuildTrackToSetMapping() const;
-
   // Returns the accumulated extra margin at the start/end of the specified set;
   // if no index is specified, returns the extra margin of the grid container.
   LayoutUnit StartExtraMargin(wtf_size_t set_index = 0) const;
   LayoutUnit EndExtraMargin(wtf_size_t set_index = kNotFound) const;
+
+  // The accumulated difference between this subgrid's gutter size and its
+  // ancestors' gutter sizes. Positive when the subgrid's gutter is larger than
+  // the parent's gutter.
+  LayoutUnit AccumulatedGutterSizeDelta() const {
+    return accumulated_gutter_size_delta_;
+  }
 
   // Increase by `delta` the offset of the set at `set_index`.
   void AdjustSingleSetOffset(wtf_size_t set_index, LayoutUnit delta);
