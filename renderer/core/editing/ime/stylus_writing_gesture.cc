@@ -484,7 +484,7 @@ bool StylusWritingGestureSelect::MaybeApplyGesture(LocalFrame* frame) {
     Vector<ImeTextSpan> preview_spans;
     // Selection preview highlight color is the same as selection highlight
     // color.
-    Color preview_color = LayoutTheme::TapHighlightColor();
+    Color preview_color = LayoutTheme::GetTheme().TapHighlightColor();
     ImeTextSpan preview_span(
         ImeTextSpan::Type::kPreviewStylusGesture, 0, gesture_range->length(),
         Color::kTransparent, ui::mojom::ImeTextSpanThickness::kNone,

@@ -1183,7 +1183,7 @@ void InputMethodController::SetComposition(
         CompositionEphemeralRange(), Color::kTransparent,
         ui::mojom::ImeTextSpanThickness::kThin,
         ui::mojom::ImeTextSpanUnderlineStyle::kSolid, Color::kTransparent,
-        LayoutTheme::GetTheme().PlatformDefaultCompositionBackgroundColor());
+        LayoutTheme::PlatformDefaultCompositionBackgroundColor());
     return;
   }
 

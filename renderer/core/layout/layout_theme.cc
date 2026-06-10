@@ -825,10 +825,6 @@ Color LayoutTheme::PlatformTextSearchColor(
   return Color::kBlack;
 }
 
-Color LayoutTheme::TapHighlightColor() {
-  return GetTheme().PlatformTapHighlightColor();
-}
-
 void LayoutTheme::SetCustomFocusRingColor(const Color& c) {
   const bool changed =
       !has_custom_focus_ring_color_ || custom_focus_ring_color_ != c;

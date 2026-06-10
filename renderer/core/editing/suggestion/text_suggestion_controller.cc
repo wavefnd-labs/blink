@@ -152,7 +152,7 @@ SuggestionInfosWithNodeAndHighlightColor ComputeSuggestionInfos(
   suggestion_infos_with_node_and_highlight_color.highlight_color =
       (first_suggestion_marker->SuggestionHighlightColor() ==
        Color::kTransparent)
-          ? LayoutTheme::TapHighlightColor()
+          ? LayoutTheme::GetTheme().TapHighlightColor()
           : first_suggestion_marker->SuggestionHighlightColor();
 
   Vector<TextSuggestionInfo>& suggestion_infos =
