@@ -710,7 +710,11 @@ void LayoutBox::StyleDidChange(StyleDifference diff,
           diff.border_radius_changed ||
           (diff.border_shape_changed &&
            (new_style.HasBorderShape() || old_style->HasBorderShape())) ||
-          (HasControlClip() && !old_style->PaddingEqual(new_style))) {
+          (HasControlClip() && !old_style->PaddingEqual(new_style)) ||
+          (new_style.OverflowClipMargin() &&
+           new_style.OverflowClipMargin()->GetReferenceBox() ==
+               StyleOverflowClipMargin::ReferenceBox::kContentBox &&
+           !old_style->PaddingEqual(new_style))) {
         SetNeedsPaintPropertyUpdate();
       }
     }
