@@ -41,63 +41,6 @@ void ImageLayerBridge::Dispose() {
   disposed_ = true;
 }
 
-ImageLayerBridge::SoftwareResource
-ImageLayerBridge::CreateOrRecycleSoftwareResource(
-    const gfx::Size& size,
-    const gfx::ColorSpace& color_space) {
-  // Must call SharedImageInterfaceProvider() first so all base::WeakPtr
-  // restored in |resource.sii_provider| is updated.
-  auto* sii_provider = SharedGpuContext::SharedImageInterfaceProvider();
-  DCHECK(sii_provider);
-  auto it = std::remove_if(
-      recycled_software_resources_.begin(), recycled_software_resources_.end(),
-      [&size, &color_space](const SoftwareResource& resource) {
-        return resource.shared_image->size() != size ||
-               resource.shared_image->color_space() != color_space ||
-               !resource.sii_provider;
-      });
 
-  recycled_software_resources_.Shrink(
-      static_cast<wtf_size_t>(it - recycled_software_resources_.begin()));
-
-  if (!recycled_software_resources_.empty()) {
-    SoftwareResource resource = std::move(recycled_software_resources_.back());
-    recycled_software_resources_.pop_back();
-    return resource;
-  }
-
-  // There are no resources to recycle so allocate a new one.
-  SoftwareResource resource;
-  auto* shared_image_interface = sii_provider->SharedImageInterface();
-  if (!shared_image_interface) {
-    return resource;
-  }
-  resource.shared_image =
-      shared_image_interface->CreateSharedImageForSoftwareCompositor(
-          {viz::SinglePlaneFormat::kBGRA_8888, size, color_space,
-           gpu::SHARED_IMAGE_USAGE_CPU_WRITE_ONLY, "ImageLayerBridgeBitmap"});
-
-  resource.sii_provider = sii_provider->GetWeakPtr();
-  resource.sync_token = shared_image_interface->GenVerifiedSyncToken();
-
-  return resource;
-}
-
-void ImageLayerBridge::ResourceReleasedSoftware(
-    SoftwareResource resource,
-    const gpu::SyncToken& sync_token,
-    bool lost_resource) {
-  if (!disposed_ && !lost_resource) {
-    recycled_software_resources_.push_back(std::move(resource));
-  }
-}
-
-
-ImageLayerBridge::SoftwareResource::SoftwareResource() = default;
-ImageLayerBridge::SoftwareResource::SoftwareResource(SoftwareResource&& other) =
-    default;
-ImageLayerBridge::SoftwareResource&
-ImageLayerBridge::SoftwareResource::operator=(SoftwareResource&& other) =
-    default;
 
 }  // namespace blink

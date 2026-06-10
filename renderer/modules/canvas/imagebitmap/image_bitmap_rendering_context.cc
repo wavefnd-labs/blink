@@ -11,12 +11,16 @@
 #include "cc/layers/texture_layer.h"
 #include "cc/paint/paint_canvas.h"
 #include "cc/paint/paint_flags.h"
+#include "components/viz/common/resources/shared_image_format.h"
 #include "components/viz/common/resources/shared_image_format_utils.h"
 #include "components/viz/common/resources/transferable_resource.h"
 #include "gpu/command_buffer/client/gles2_interface.h"
+#include "gpu/command_buffer/client/shared_image_interface.h"
 #include "gpu/command_buffer/common/shared_image_usage.h"
 #include "gpu/command_buffer/common/sync_token.h"
+#include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/public/platform/web_graphics_context_3d_provider.h"
+#include "third_party/blink/public/platform/web_graphics_shared_image_interface_provider.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_union_htmlcanvaselement_offscreencanvas.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_offscreen_rendering_context.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_rendering_context.h"
@@ -307,9 +311,8 @@ bool ImageBitmapRenderingContext::PrepareTransferableResource(
     const gfx::Size size(image_layer_bridge_->image_->width(),
                          image_layer_bridge_->image_->height());
 
-    ImageLayerBridge::SoftwareResource resource =
-        image_layer_bridge_->CreateOrRecycleSoftwareResource(
-            size, image_layer_bridge_->image_->GetColorSpace());
+    SoftwareResource resource = CreateOrRecycleSoftwareResource(
+        size, image_layer_bridge_->image_->GetColorSpace());
     if (!resource.shared_image) {
       return false;
     }
@@ -331,9 +334,9 @@ bool ImageBitmapRenderingContext::PrepareTransferableResource(
         resource.shared_image,
         viz::TransferableResource::ResourceSource::kImageLayerBridge,
         resource.sync_token);
-    auto func = BindOnce(&ImageLayerBridge::ResourceReleasedSoftware,
-                         WrapWeakPersistent(image_layer_bridge_.Get()),
-                         std::move(resource));
+    auto func =
+        blink::BindOnce(&ImageBitmapRenderingContext::ResourceReleasedSoftware,
+                        WrapWeakPersistent(this), std::move(resource));
     *out_release_callback = std::move(func);
   }
 
@@ -351,6 +354,64 @@ void ImageBitmapRenderingContext::ResourceReleasedGpu(
       image->ContextProvider()->InterfaceBase()->WaitSyncTokenCHROMIUM(
           token.GetConstData());
     }
+  }
+}
+
+ImageBitmapRenderingContext::SoftwareResource::SoftwareResource() = default;
+ImageBitmapRenderingContext::SoftwareResource::SoftwareResource(
+    SoftwareResource&& other) = default;
+ImageBitmapRenderingContext::SoftwareResource&
+ImageBitmapRenderingContext::SoftwareResource::operator=(
+    SoftwareResource&& other) = default;
+
+ImageBitmapRenderingContext::SoftwareResource
+ImageBitmapRenderingContext::CreateOrRecycleSoftwareResource(
+    const gfx::Size& size,
+    const gfx::ColorSpace& color_space) {
+  // Must call SharedImageInterfaceProvider() first so all base::WeakPtr
+  // restored in |resource.sii_provider| is updated.
+  auto* sii_provider = SharedGpuContext::SharedImageInterfaceProvider();
+  DCHECK(sii_provider);
+  auto it = std::remove_if(
+      recycled_software_resources_.begin(), recycled_software_resources_.end(),
+      [&size, &color_space](const SoftwareResource& resource) {
+        return resource.shared_image->size() != size ||
+               resource.shared_image->color_space() != color_space ||
+               !resource.sii_provider;
+      });
+
+  recycled_software_resources_.Shrink(
+      static_cast<wtf_size_t>(it - recycled_software_resources_.begin()));
+
+  if (!recycled_software_resources_.empty()) {
+    SoftwareResource resource = std::move(recycled_software_resources_.back());
+    recycled_software_resources_.pop_back();
+    return resource;
+  }
+
+  // There are no resources to recycle so allocate a new one.
+  SoftwareResource resource;
+  auto* shared_image_interface = sii_provider->SharedImageInterface();
+  if (!shared_image_interface) {
+    return resource;
+  }
+  resource.shared_image =
+      shared_image_interface->CreateSharedImageForSoftwareCompositor(
+          {viz::SinglePlaneFormat::kBGRA_8888, size, color_space,
+           gpu::SHARED_IMAGE_USAGE_CPU_WRITE_ONLY, "ImageLayerBridgeBitmap"});
+
+  resource.sii_provider = sii_provider->GetWeakPtr();
+  resource.sync_token = shared_image_interface->GenVerifiedSyncToken();
+
+  return resource;
+}
+
+void ImageBitmapRenderingContext::ResourceReleasedSoftware(
+    SoftwareResource resource,
+    const gpu::SyncToken& sync_token,
+    bool lost_resource) {
+  if (!image_layer_bridge_->disposed_ && !lost_resource) {
+    recycled_software_resources_.push_back(std::move(resource));
   }
 }
 

@@ -13,12 +13,7 @@
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "ui/gfx/geometry/point_f.h"
 
-namespace gfx {
-class Size;
-}
-
 namespace blink {
-class WebGraphicsSharedImageInterfaceProvider;
 
 class MODULES_EXPORT ImageLayerBridge
     : public GarbageCollected<ImageLayerBridge> {
@@ -35,34 +30,7 @@ class MODULES_EXPORT ImageLayerBridge
 
   void Trace(Visitor* visitor) const {}
 
- public:
-  // Resource holding a software SharedImage. Used only with software
-  // compositing.
-  struct SoftwareResource {
-    SoftwareResource();
-    SoftwareResource(SoftwareResource&& other);
-    SoftwareResource& operator=(SoftwareResource&& other);
-
-    scoped_refptr<gpu::ClientSharedImage> shared_image;
-    gpu::SyncToken sync_token;
-    base::WeakPtr<blink::WebGraphicsSharedImageInterfaceProvider> sii_provider;
-  };
-
-  // Returns a software resource of |size|. Tries to recycle returned resources
-  // first and allocates a new resource if necessary. Note this will delete
-  // recycled resources that are the wrong size.
-  SoftwareResource CreateOrRecycleSoftwareResource(
-      const gfx::Size& size,
-      const gfx::ColorSpace& color_space);
-
-  void ResourceReleasedSoftware(SoftwareResource resource,
-                                const gpu::SyncToken&,
-                                bool lost_resource);
-
   scoped_refptr<StaticBitmapImage> image_;
-
-  // SharedMemory resources that can be recycled.
-  Vector<SoftwareResource> recycled_software_resources_;
 
   bool disposed_ = false;
   bool has_presented_since_last_set_image_ = false;

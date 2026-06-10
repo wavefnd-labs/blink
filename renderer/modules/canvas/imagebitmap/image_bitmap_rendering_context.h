@@ -25,7 +25,8 @@ class TextureLayer;
 
 namespace gpu {
 struct SyncToken;
-}
+class ClientSharedImage;
+}  // namespace gpu
 
 namespace blink {
 
@@ -33,6 +34,7 @@ class ExceptionState;
 class ExecutionContext;
 class ImageBitmap;
 class ImageLayerBridge;
+class WebGraphicsSharedImageInterfaceProvider;
 class V8UnionHTMLCanvasElementOrOffscreenCanvas;
 class WebGraphicsContext3DProviderWrapper;
 
@@ -137,6 +139,26 @@ class MODULES_EXPORT ImageBitmapRenderingContext final
   void ResourceReleasedGpu(scoped_refptr<StaticBitmapImage>,
                            const gpu::SyncToken&,
                            bool lost_resource);
+
+  struct SoftwareResource {
+    SoftwareResource();
+    SoftwareResource(SoftwareResource&& other);
+    SoftwareResource& operator=(SoftwareResource&& other);
+
+    scoped_refptr<gpu::ClientSharedImage> shared_image;
+    gpu::SyncToken sync_token;
+    base::WeakPtr<blink::WebGraphicsSharedImageInterfaceProvider> sii_provider;
+  };
+
+  SoftwareResource CreateOrRecycleSoftwareResource(
+      const gfx::Size& size,
+      const gfx::ColorSpace& color_space);
+
+  void ResourceReleasedSoftware(SoftwareResource resource,
+                                const gpu::SyncToken&,
+                                bool lost_resource);
+
+  Vector<SoftwareResource> recycled_software_resources_;
 
   Member<ImageLayerBridge> image_layer_bridge_;
   scoped_refptr<cc::TextureLayer> layer_;
