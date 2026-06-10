@@ -756,7 +756,10 @@ void ContentSecurityPolicy::AddHashReportIfNeeded(
       }
 
       CSPHashReportBody* body = MakeGarbageCollected<CSPHashReportBody>(
-          url, integrity_hash, "subresource", "script");
+          StripURLForUseInReport(
+              window->GetContentSecurityPolicyDelegate().GetSecurityOrigin(),
+              KURL(url), CSPDirectiveName::DefaultSrc),
+          integrity_hash, "subresource", "script");
       Report* report_to_queue = MakeGarbageCollected<Report>(
           ReportType::kCSPHash,
           StripURLForUseInReport(
