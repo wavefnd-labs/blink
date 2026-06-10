@@ -1408,15 +1408,10 @@ void PointerEventManager::ProcessPendingPointerCapture(
 void PointerEventManager::RemoveTargetFromPointerCapturingMapping(
     PointerCapturingMap& map,
     const Element* target) {
-  // We could have kept a reverse mapping to make this deletion possibly
-  // faster but it adds some code complication which might not be worth of
-  // the performance improvement considering there might not be a lot of
-  // active pointer or pointer captures at the same time.
-  PointerCapturingMap tmp = map;
-  for (PointerCapturingMap::iterator it = tmp.begin(); it != tmp.end(); ++it) {
-    if (it->value == target)
-      map.erase(it->key);
-  }
+  // No reverse (Element -> PointerId) mapping is kept: there are rarely many
+  // active pointers or captures at once, so a linear scan is cheap enough and
+  // avoids the cost of maintaining a second map on every capture change.
+  map.erase_if([target](const auto& entry) { return entry.value == target; });
 }
 
 void PointerEventManager::RemovePointer(PointerEvent* pointer_event) {
