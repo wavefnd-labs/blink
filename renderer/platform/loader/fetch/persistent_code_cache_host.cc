@@ -37,6 +37,26 @@
 
 namespace blink {
 
+namespace {
+
+base::TaskTraits GetTaskTraitsForCodeCacheProcess() {
+  if (features::IsInlineScriptCacheEnabled()) {
+    // `USER_BLOCKING` because when inline script cache is enabled, delaying in
+    // calling `FetchCachedCodeForSourceText()` can directly block the main
+    // thread.
+    return base::TaskTraits{base::MayBlock(),
+                            base::TaskPriority::USER_BLOCKING};
+  } else {
+    // This results in the code cache utility process being started with a
+    // lower priority (`USER_VISIBLE`). This is acceptable because when the
+    // inline script cache is disabled, the cache fetch time will be covered up
+    // by the resource fetch time.
+    return base::TaskTraits{base::MayBlock()};
+  }
+}
+
+}  // namespace
+
 // The implementation of `CodeCacheHost` that lives on a blocking sequence. It
 // manages a single connection to a `CodeCacheHost` in the browser process and
 // a distinct `PersistentCache` instance for each key/cache type.
@@ -374,7 +394,7 @@ class PersistentCodeCacheHost::AsyncCodeCacheHost {
 PersistentCodeCacheHost::PersistentCodeCacheHost(
     mojo::Remote<mojom::blink::CodeCacheHost> remote)
     : async_host_(worker_pool::CreateSequencedTaskRunner(
-                      base::TaskTraits{base::MayBlock()}),
+                      GetTaskTraitsForCodeCacheProcess()),
                   remote.Unbind()) {}
 
 PersistentCodeCacheHost::~PersistentCodeCacheHost() = default;
