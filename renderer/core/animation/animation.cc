@@ -1956,11 +1956,12 @@ void Animation::PlayInternal(AutoRewind auto_rewind,
 }
 
 void Animation::reverse(ExceptionState& exception_state) {
-  ReverseInternal(exception_state);
+  ReverseInternal(AutoRewind::kEnabled, exception_state);
 }
 
 // https://www.w3.org/TR/web-animations-1/#reversing-an-animation-section
-void Animation::ReverseInternal(ExceptionState& exception_state) {
+void Animation::ReverseInternal(AutoRewind auto_rewind,
+                                ExceptionState& exception_state) {
   // 1. If there is no timeline associated with animation, or the associated
   //    timeline is inactive throw an "InvalidStateError" DOMException and abort
   //    these steps.
@@ -1988,7 +1989,7 @@ void Animation::ReverseInternal(ExceptionState& exception_state) {
   //    If the steps to play an animation throw an exception, set animation’s
   //    pending playback rate to original pending playback rate and propagate
   //    the exception.
-  PlayInternal(AutoRewind::kEnabled, exception_state);
+  PlayInternal(auto_rewind, exception_state);
   if (exception_state.HadException())
     pending_playback_rate_ = original_pending_playback_rate;
 }

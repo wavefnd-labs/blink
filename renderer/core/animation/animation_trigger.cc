@@ -57,21 +57,23 @@ void PerformPause(Animation& animation,
 void PerformPlayForwards(Animation& animation,
                          V8AnimationPlayState::Enum play_state,
                          ExceptionState& exception_state) {
-  double playback_rate = std::abs(animation.EffectivePlaybackRate());
-
-  animation.updatePlaybackRate(playback_rate, exception_state);
-
-  animation.PlayInternal(Animation::AutoRewind::kEnabled, exception_state);
+  if (animation.EffectivePlaybackRate() > 0) {
+    animation.PlayInternal(Animation::AutoRewind::kDisabled, exception_state);
+  } else {
+    animation.ReverseInternal(Animation::AutoRewind::kDisabled,
+                              exception_state);
+  }
 }
 
 void PerformPlayBackwards(Animation& animation,
                           V8AnimationPlayState::Enum play_state,
                           ExceptionState& exception_state) {
-  double playback_rate = -std::abs(animation.EffectivePlaybackRate());
-
-  animation.updatePlaybackRate(playback_rate, exception_state);
-
-  animation.PlayInternal(Animation::AutoRewind::kEnabled, exception_state);
+  if (animation.EffectivePlaybackRate() < 0) {
+    animation.PlayInternal(Animation::AutoRewind::kDisabled, exception_state);
+  } else {
+    animation.ReverseInternal(Animation::AutoRewind::kDisabled,
+                              exception_state);
+  }
 }
 
 void PerformPlayOnce(Animation& animation,

@@ -509,7 +509,7 @@ class CORE_EXPORT Animation : public EventTarget,
   using AutoRewind = cc::Animation::AutoRewind;
   void PlayInternal(AutoRewind auto_rewind, ExceptionState& exception_state);
   void PauseInternal(ExceptionState& exception_state);
-  void ReverseInternal(ExceptionState& exception_state);
+  void ReverseInternal(AutoRewind auto_rewind, ExceptionState& exception_state);
 
   void AddTrigger(AnimationTrigger* trigger);
   void RemoveTrigger(AnimationTrigger* trigger);
