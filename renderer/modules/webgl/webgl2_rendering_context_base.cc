@@ -1776,6 +1776,14 @@ void WebGL2RenderingContextBase::texSubImage2D(
     GLenum type,
     HTMLVideoElement* video,
     ExceptionState& exception_state) {
+  if (isContextLost()) {
+    return;
+  }
+  if (bound_pixel_unpack_buffer_) {
+    SynthesizeGLError(GL_INVALID_OPERATION, "texSubImage2D",
+                      "a buffer is bound to PIXEL_UNPACK_BUFFER");
+    return;
+  }
   WebGLRenderingContextBase::texSubImage2D(script_state, target, level, xoffset,
                                            yoffset, format, type, video,
                                            exception_state);
@@ -1791,6 +1799,14 @@ void WebGL2RenderingContextBase::texSubImage2D(
     GLenum type,
     VideoFrame* frame,
     ExceptionState& exception_state) {
+  if (isContextLost()) {
+    return;
+  }
+  if (bound_pixel_unpack_buffer_) {
+    SynthesizeGLError(GL_INVALID_OPERATION, "texSubImage2D",
+                      "a buffer is bound to PIXEL_UNPACK_BUFFER");
+    return;
+  }
   WebGLRenderingContextBase::texSubImage2D(script_state, target, level, xoffset,
                                            yoffset, format, type, frame,
                                            exception_state);
