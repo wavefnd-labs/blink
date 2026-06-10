@@ -1208,7 +1208,7 @@ void CompositeEditCommand::PushAnchorElementDown(Element* anchor_node,
   DCHECK(anchor_node->IsLink()) << anchor_node;
 
   const VisibleSelection& visible_selection = CreateVisibleSelection(
-      SelectionInDOMTree::Builder().SelectAllChildren(*anchor_node).Build());
+      SelectionInDomTree::Builder().SelectAllChildren(*anchor_node).Build());
   SetEndingSelection(
       SelectionForUndoStep::From(visible_selection.AsSelection()));
   if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -1483,7 +1483,7 @@ void CompositeEditCommand::MoveParagraphWithClones(
                                 editing_state);
 
   SetEndingSelection(SelectionForUndoStep::From(
-      SelectionInDOMTree::Builder().Collapse(start).Extend(end).Build()));
+      SelectionInDomTree::Builder().Collapse(start).Extend(end).Build()));
   if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
     SetEndingDomSelection(SelectionForUndoStep::From(
         SelectionInDomTree::Builder().Collapse(start).Extend(end).Build()));
@@ -1694,14 +1694,14 @@ void CompositeEditCommand::MoveParagraphs(
   if (RuntimeEnabledFeatures::
           RemoveSelectionCanonicalizationInMoveParagraphEnabled()) {
     SetEndingSelection(SelectionForUndoStep::From(
-        SelectionInDOMTree::Builder().Collapse(start).Extend(end).Build()));
+        SelectionInDomTree::Builder().Collapse(start).Extend(end).Build()));
     if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
       SetEndingDomSelection(SelectionForUndoStep::From(
           SelectionInDomTree::Builder().Collapse(start).Extend(end).Build()));
     }
   } else {
     const VisibleSelection& selection_to_delete = CreateVisibleSelection(
-        SelectionInDOMTree::Builder().Collapse(start).Extend(end).Build());
+        SelectionInDomTree::Builder().Collapse(start).Extend(end).Build());
     SetEndingSelection(
         SelectionForUndoStep::From(selection_to_delete.AsSelection()));
     if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -1713,7 +1713,7 @@ void CompositeEditCommand::MoveParagraphs(
   if (RuntimeEnabledFeatures::
           PartialCompletionNotAllowedInMoveParagraphsEnabled()) {
     const VisibleSelection& destination_selection = CreateVisibleSelection(
-        SelectionInDOMTree::Builder()
+        SelectionInDomTree::Builder()
             .Collapse(destination.ToPositionWithAffinity())
             .Build());
     if (!destination_selection.RootEditableElement() ||
@@ -1779,7 +1779,7 @@ void CompositeEditCommand::MoveParagraphs(
         TextIteratorBehavior::AllVisiblePositionsRangeLengthBehavior());
   }
   const VisibleSelection& destination_selection =
-      CreateVisibleSelection(SelectionInDOMTree::Builder()
+      CreateVisibleSelection(SelectionInDomTree::Builder()
                                  .Collapse(destination.ToPositionWithAffinity())
                                  .Build());
   if (EndingSelection().IsNone()) {
@@ -1843,7 +1843,7 @@ void CompositeEditCommand::MoveParagraphs(
   if (end_range.IsNull())
     return;
   const VisibleSelection& visible_selection =
-      CreateVisibleSelection(SelectionInDOMTree::Builder()
+      CreateVisibleSelection(SelectionInDomTree::Builder()
                                  .Collapse(start_range.StartPosition())
                                  .Extend(end_range.StartPosition())
                                  .Build());
@@ -1967,7 +1967,7 @@ bool CompositeEditCommand::BreakOutOfEmptyListItem(
     return false;
 
   SetEndingSelection(SelectionForUndoStep::From(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .Collapse(Position::FirstPositionInNode(*new_block))
           .Build()));
   if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -2034,10 +2034,10 @@ bool CompositeEditCommand::BreakOutOfEmptyMailBlockquotedParagraph(
       return false;
     GetDocument().UpdateStyleAndLayout(DocumentUpdateReason::kEditing);
   }
-  SetEndingSelection(SelectionForUndoStep::From(
-      SelectionInDOMTree::Builder()
-          .Collapse(at_br.ToPositionWithAffinity())
-          .Build()));
+  SetEndingSelection(
+      SelectionForUndoStep::From(SelectionInDomTree::Builder()
+                                     .Collapse(at_br.ToPositionWithAffinity())
+                                     .Build()));
   if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
     SetEndingDomSelection(
         SelectionForUndoStep::From(SelectionInDomTree::Builder()
@@ -2320,7 +2320,7 @@ void CompositeEditCommand::AppliedEditing() {
       TextDataForInputEvent(), IsComposingFromCommand(this),
       data_transfer_.Get());
 
-  const SelectionInDOMTree& new_selection =
+  const SelectionInDomTree& new_selection =
       CorrectedSelectionAfterCommand(EndingSelection(), &GetDocument());
 
   // Don't clear the typing style with this selection change. We do those things

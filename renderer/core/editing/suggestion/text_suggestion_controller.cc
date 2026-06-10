@@ -634,7 +634,7 @@ void TextSuggestionController::AttemptToDeleteActiveSuggestionRange() {
 void TextSuggestionController::ReplaceRangeWithText(const EphemeralRange& range,
                                                     const String& replacement) {
   GetFrame().Selection().SetSelectionAndEndTyping(
-      SelectionInDOMTree::Builder().SetBaseAndExtent(range).Build());
+      SelectionInDomTree::Builder().SetBaseAndExtent(range).Build());
 
   InsertTextAndSendInputEventsOfTypeInsertReplacementText(GetFrame(),
                                                           replacement);

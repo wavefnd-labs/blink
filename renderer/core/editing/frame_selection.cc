@@ -149,7 +149,7 @@ const SelectionInDomTree& FrameSelection::GetSelectionInDomTree() const {
   return selection_editor_->GetSelectionInDOMTree();
 }
 
-const SelectionInDOMTree& FrameSelection::GetSelectionInDOMTree() const {
+const SelectionInDomTree& FrameSelection::GetSelectionInDOMTree() const {
   return GetSelectionInDomTree();
 }
 
@@ -210,7 +210,7 @@ void FrameSelection::MoveCaretSelection(const gfx::Point& point) {
 
   const VisiblePosition position = CreateVisiblePosition(
       PositionForContentsPointRespectingEditingBoundary(point, GetFrame()));
-  SelectionInDOMTree::Builder builder;
+  SelectionInDomTree::Builder builder;
   if (position.IsNotNull())
     builder.Collapse(position.ToPositionWithAffinity());
   SetSelection(builder.Build(), SetSelectionOptions::Builder()
@@ -222,7 +222,7 @@ void FrameSelection::MoveCaretSelection(const gfx::Point& point) {
                                     .Build());
 }
 
-void FrameSelection::SetSelection(const SelectionInDOMTree& selection,
+void FrameSelection::SetSelection(const SelectionInDomTree& selection,
                                   const SetSelectionOptions& data) {
   TRACE_EVENT0("blink", "FrameSelection::SetSelection");
   if (SetSelectionDeprecated(selection, data))
@@ -230,14 +230,14 @@ void FrameSelection::SetSelection(const SelectionInDOMTree& selection,
 }
 
 void FrameSelection::SetSelectionAndEndTyping(
-    const SelectionInDOMTree& selection) {
+    const SelectionInDomTree& selection) {
   SetSelection(selection, SetSelectionOptions::Builder()
                               .SetShouldCloseTyping(true)
                               .SetShouldClearTypingStyle(true)
                               .Build());
 }
 
-static void AssertUserSelection(const SelectionInDOMTree& selection,
+static void AssertUserSelection(const SelectionInDomTree& selection,
                                 const SetSelectionOptions& options) {
 // User's selection start/end should have same editability.
 #if DCHECK_IS_ON()
@@ -251,7 +251,7 @@ static void AssertUserSelection(const SelectionInDOMTree& selection,
 }
 
 bool FrameSelection::SetSelectionDeprecated(
-    const SelectionInDOMTree& new_selection,
+    const SelectionInDomTree& new_selection,
     const SetSelectionOptions& passed_options) {
   SetSelectionOptions::Builder options_builder(passed_options);
   if (ShouldAlwaysUseDirectionalSelection(frame_)) {
@@ -271,7 +271,7 @@ bool FrameSelection::SetSelectionDeprecated(
   if (options.ShouldClearTypingStyle())
     frame_->GetEditor().ClearTypingStyle();
 
-  const SelectionInDOMTree old_selection_in_dom_tree =
+  const SelectionInDomTree old_selection_in_dom_tree =
       selection_editor_->GetSelectionInDOMTree();
   const bool is_changed = old_selection_in_dom_tree != new_selection;
   const bool should_show_handle = options.ShouldShowHandle();
@@ -296,7 +296,7 @@ bool FrameSelection::SetSelectionDeprecated(
 }
 
 void FrameSelection::DidSetSelectionDeprecated(
-    const SelectionInDOMTree& new_selection,
+    const SelectionInDomTree& new_selection,
     const SetSelectionOptions& options) {
   Document& current_document = GetDocument();
   const SetSelectionBy set_selection_by = options.GetSetSelectionBy();
@@ -396,7 +396,7 @@ void FrameSelection::DidSetSelectionDeprecated(
 }
 
 void FrameSelection::SetSelectionForAccessibility(
-    const SelectionInDOMTree& selection,
+    const SelectionInDomTree& selection,
     const SetSelectionOptions& options) {
   ClearDocumentCachedRange();
 
@@ -578,7 +578,7 @@ void FrameSelection::Clear() {
   granularity_ = TextGranularity::kCharacter;
   if (granularity_strategy_)
     granularity_strategy_->Clear();
-  SetSelectionAndEndTyping(SelectionInDOMTree());
+  SetSelectionAndEndTyping(SelectionInDomTree());
   is_handle_visible_ = false;
   is_directional_ = ShouldAlwaysUseDirectionalSelection(frame_);
 }
@@ -890,7 +890,7 @@ void FrameSelection::SelectFrameElementInParentIfFullySelected() {
       owner_element->GetDocument() != parent_local_frame->GetDocument())
     return;
   parent_local_frame->Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position::BeforeNode(*owner_element),
                             Position::AfterNode(*owner_element))
           .Build(),
@@ -961,8 +961,8 @@ void FrameSelection::SelectAll(SetSelectionBy set_selection_by,
       return;
   }
 
-  const SelectionInDOMTree& dom_selection =
-      SelectionInDOMTree::Builder().SelectAllChildren(*root).Build();
+  const SelectionInDomTree& dom_selection =
+      SelectionInDomTree::Builder().SelectAllChildren(*root).Build();
   if (canonicalize_selection) {
     GetDocument().UpdateStyleAndLayout(DocumentUpdateReason::kEditing);
   }
@@ -1011,7 +1011,7 @@ void FrameSelection::SelectSubString(const Element& element,
   // known when |start| and |end| are null. Once we get a such case, we check
   // null for |start| and |end|.
   SetSelectionAndEndTyping(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(start.DeepEquivalent(), end.DeepEquivalent())
           .SetAffinity(start.Affinity())
           .Build());
@@ -1042,8 +1042,8 @@ void FrameSelection::NotifyEventHandlerForSelectionChange() {
 
 void FrameSelection::NotifyDisplayLockForSelectionChange(
     Document& document,
-    const SelectionInDOMTree& old_selection,
-    const SelectionInDOMTree& new_selection) {
+    const SelectionInDomTree& old_selection,
+    const SelectionInDomTree& new_selection) {
   if (DisplayLockUtilities::NeedsSelectionChangedUpdate(document) ||
       (!old_selection.IsNone() && old_selection.GetDocument() != document &&
        DisplayLockUtilities::NeedsSelectionChangedUpdate(
@@ -1168,7 +1168,7 @@ void FrameSelection::SetFocusedNodeIfNeeded() {
 }
 
 static EphemeralRangeInFlatTree ComputeRangeForSerialization(
-    const SelectionInDOMTree& selection_in_dom_tree) {
+    const SelectionInDomTree& selection_in_dom_tree) {
   const SelectionInFlatTree& selection =
       ConvertToSelectionInFlatTree(selection_in_dom_tree);
   // TODO(crbug.com/1019152): Once we know the root cause of having
@@ -1319,7 +1319,7 @@ void FrameSelection::SetSelectionFromNone() {
     return;
   if (HTMLBodyElement* body =
           Traversal<HTMLBodyElement>::FirstChild(*document_element)) {
-    SetSelection(SelectionInDOMTree::Builder()
+    SetSelection(SelectionInDomTree::Builder()
                      .Collapse(FirstPositionInOrBeforeNode(*body))
                      .Build(),
                  SetSelectionOptions());
@@ -1377,7 +1377,7 @@ bool FrameSelection::SelectAroundCaret(
   }
 
   SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .Collapse(selection_range.StartPosition())
           .Extend(selection_range.EndPosition())
           .Build(),
@@ -1435,7 +1435,7 @@ void FrameSelection::MoveRangeSelectionExtent(
   }
 
   SetSelection(
-      SelectionInDOMTree::Builder(
+      SelectionInDomTree::Builder(
           GetGranularityStrategy()->UpdateExtent(contents_point, frame_))
           .Build(),
       SetSelectionOptions::Builder()
@@ -1457,7 +1457,7 @@ void FrameSelection::MoveRangeSelection(const gfx::Point& base_point,
       CreateVisiblePosition(PositionForContentsPointRespectingEditingBoundary(
           extent_point, GetFrame()));
   MoveRangeSelectionInternal(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtentDeprecated(base_position.DeepEquivalent(),
                                       extent_position.DeepEquivalent())
           .SetAffinity(base_position.Affinity())
@@ -1466,12 +1466,12 @@ void FrameSelection::MoveRangeSelection(const gfx::Point& base_point,
 }
 
 void FrameSelection::MoveRangeSelectionInternal(
-    const SelectionInDOMTree& new_selection,
+    const SelectionInDomTree& new_selection,
     TextGranularity granularity) {
   if (new_selection.IsNone())
     return;
 
-  const SelectionInDOMTree& selection =
+  const SelectionInDomTree& selection =
       ExpandWithGranularity(new_selection, granularity);
   if (selection.IsNone())
     return;

@@ -111,7 +111,7 @@ bool IsInPasswordFieldWithUnrevealedPassword(const Position& position) {
 
 // When an event handler has moved the selection outside of a text control
 // we should use the target control's selection for this editing operation.
-SelectionInDOMTree Editor::SelectionForCommand(Event* event) {
+SelectionInDomTree Editor::SelectionForCommand(Event* event) {
   const SelectionInDomTree selection =
       GetFrameSelection().GetSelectionInDomTree();
   if (!event)
@@ -127,7 +127,7 @@ SelectionInDOMTree Editor::SelectionForCommand(Event* event) {
   if (!selection.IsNone() &&
       text_control_of_target == text_control_of_selection_start)
     return selection;
-  const SelectionInDOMTree& select = text_control_of_target->Selection();
+  const SelectionInDomTree& select = text_control_of_target->Selection();
   if (select.IsNone())
     return selection;
   return select;
@@ -863,7 +863,7 @@ bool Editor::FindString(LocalFrame& frame,
     return false;
 
   frame.Selection().SetSelectionAndEndTyping(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(EphemeralRange(result_range))
           .Build());
   frame.Selection().RevealSelection();

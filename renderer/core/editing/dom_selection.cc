@@ -74,7 +74,7 @@ bool DomSelection::IsAvailable() const {
 }
 
 void DomSelection::UpdateFrameSelection(
-    const SelectionInDOMTree& selection,
+    const SelectionInDomTree& selection,
     Range* new_cached_range,
     const SetSelectionOptions& passed_options) const {
   DCHECK(DomWindow());
@@ -287,7 +287,7 @@ void DomSelection::collapse(Node* node,
 
   // 6. Set the context object's range to newRange.
   UpdateFrameSelection(
-      SelectionInDOMTree::Builder().Collapse(Position(node, offset)).Build(),
+      SelectionInDomTree::Builder().Collapse(Position(node, offset)).Build(),
       new_range,
       SetSelectionOptions::Builder()
           .SetIsDirectional(Selection().IsDirectional())
@@ -314,7 +314,7 @@ void DomSelection::collapseToEnd(ExceptionState& exception_state) {
     new_range->collapse(false);
 
     // and then set the context object's range to the newly-created range.
-    SelectionInDOMTree::Builder builder;
+    SelectionInDomTree::Builder builder;
     builder.Collapse(new_range->EndPosition());
     UpdateFrameSelection(builder.Build(), new_range, SetSelectionOptions());
   } else {
@@ -346,7 +346,7 @@ void DomSelection::collapseToStart(ExceptionState& exception_state) {
     new_range->collapse(true);
 
     // and then set the context object's range to the newly-created range.
-    SelectionInDOMTree::Builder builder;
+    SelectionInDomTree::Builder builder;
     builder.Collapse(new_range->StartPosition());
     UpdateFrameSelection(builder.Build(), new_range, SetSelectionOptions());
   } else {
@@ -442,7 +442,7 @@ void DomSelection::setBaseAndExtent(Node* base_node,
   }
   // 6. Set this's range to newRange.
   UpdateFrameSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtentDeprecated(base_position, extent_position)
           .Build(),
       new_range, SetSelectionOptions::Builder().SetIsDirectional(true).Build());
@@ -578,7 +578,7 @@ void DomSelection::extend(Node* node,
   }
 
   // 8. Set the context object's range to newRange.
-  SelectionInDOMTree::Builder builder;
+  SelectionInDomTree::Builder builder;
   if (new_range->collapsed())
     builder.Collapse(new_focus);
   else
@@ -764,7 +764,7 @@ void DomSelection::addRange(Range* new_range) {
   }
 
   if (rangeCount() == 0) {
-    UpdateFrameSelection(SelectionInDOMTree::Builder()
+    UpdateFrameSelection(SelectionInDomTree::Builder()
                              .Collapse(new_range->StartPosition())
                              .Extend(new_range->EndPosition())
                              .Build(),

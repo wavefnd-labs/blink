@@ -176,7 +176,7 @@ void MoveCommands::UpdateSelectionForCaretBrowsing(LocalFrame& frame) {
     return;
 
   frame.Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .Collapse(Position::FirstPositionInOrBeforeNode(*activeElement))
           .Build(),
       SetSelectionOptions::Builder()

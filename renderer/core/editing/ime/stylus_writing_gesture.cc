@@ -177,8 +177,8 @@ PlainTextRange ExpandWithWordGranularity(
     EphemeralRange ephemeral_range,
     Element* const root_editable_element,
     InputMethodController& input_method_controller) {
-  SelectionInDOMTree expanded_selection = ExpandWithGranularity(
-      SelectionInDOMTree::Builder().SetBaseAndExtent(ephemeral_range).Build(),
+  SelectionInDomTree expanded_selection = ExpandWithGranularity(
+      SelectionInDomTree::Builder().SetBaseAndExtent(ephemeral_range).Build(),
       TextGranularity::kWord, WordInclusion::kMiddle);
   PlainTextRange expanded_range = PlainTextRange::Create(
       *root_editable_element, expanded_selection.ComputeRange());

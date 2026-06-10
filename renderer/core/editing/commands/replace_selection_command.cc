@@ -254,7 +254,7 @@ ReplacementFragment::ReplacementFragment(Document* document,
 
   const EphemeralRange range =
       CreateVisibleSelection(
-          SelectionInDOMTree::Builder().SelectAllChildren(*holder).Build())
+          SelectionInDomTree::Builder().SelectAllChildren(*holder).Build())
           .ToNormalizedEphemeralRange();
   const TextIteratorBehavior& behavior = TextIteratorBehavior::Builder()
                                              .SetEmitsOriginalText(true)
@@ -1388,7 +1388,7 @@ void ReplaceSelectionCommand::InsertParagraphSeparatorIfNeeds(
           !IsStartOfParagraph(start_after_delete) &&
           !IsEndOfEditableOrNonEditableContent(start_after_delete)) {
         SetEndingSelection(SelectionForUndoStep::From(
-            SelectionInDOMTree::Builder()
+            SelectionInDomTree::Builder()
                 .Collapse(NextPositionOf(start_after_delete).DeepEquivalent())
                 .Build()));
         if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -1411,7 +1411,7 @@ void ReplaceSelectionCommand::InsertParagraphSeparatorIfNeeds(
       if (IsEndOfParagraph(visible_start) &&
           !IsStartOfParagraph(visible_start) && next.IsNotNull()) {
         SetEndingSelection(
-            SelectionForUndoStep::From(SelectionInDOMTree::Builder()
+            SelectionForUndoStep::From(SelectionInDomTree::Builder()
                                            .Collapse(next.DeepEquivalent())
                                            .Build()));
         if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -1463,7 +1463,7 @@ void ReplaceSelectionCommand::InsertParagraphSeparatorIfNeeds(
         return;
       GetDocument().UpdateStyleAndLayout(DocumentUpdateReason::kEditing);
       SetEndingSelection(SelectionForUndoStep::From(
-          SelectionInDOMTree::Builder()
+          SelectionInDomTree::Builder()
               .Collapse(
                   PreviousPositionOf(EndingVisibleSelection().VisibleStart())
                       .DeepEquivalent())
@@ -1943,7 +1943,7 @@ void ReplaceSelectionCommand::DoApply(EditingState* editing_state) {
             return;
         }
         SetEndingSelection(SelectionForUndoStep::From(
-            SelectionInDOMTree::Builder()
+            SelectionInDomTree::Builder()
                 .Collapse(
                     Position::AfterNode(*inserted_nodes.LastLeafInserted()))
                 .Build()));
@@ -1959,7 +1959,7 @@ void ReplaceSelectionCommand::DoApply(EditingState* editing_state) {
             EndingVisibleSelection().VisibleStart().DeepEquivalent();
       } else if (!IsStartOfParagraph(end_of_inserted_content)) {
         SetEndingSelection(SelectionForUndoStep::From(
-            SelectionInDOMTree::Builder()
+            SelectionInDomTree::Builder()
                 .Collapse(end_of_inserted_content.DeepEquivalent())
                 .Build()));
         if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -1978,7 +1978,7 @@ void ReplaceSelectionCommand::DoApply(EditingState* editing_state) {
           if (editing_state->IsAborted())
             return;
           SetEndingSelection(SelectionForUndoStep::From(
-              SelectionInDOMTree::Builder()
+              SelectionInDomTree::Builder()
                   .Collapse(Position::FirstPositionInNode(*new_list_item))
                   .Build()));
           if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -2220,10 +2220,10 @@ void ReplaceSelectionCommand::CompleteHTMLReplacement(
   end_of_inserted_range_ = end;
 
   if (select_replacement_) {
-    SetEndingSelection(SelectionForUndoStep::From(
-        SelectionInDOMTree::Builder()
-            .SetBaseAndExtentDeprecated(start, end)
-            .Build()));
+    SetEndingSelection(
+        SelectionForUndoStep::From(SelectionInDomTree::Builder()
+                                       .SetBaseAndExtentDeprecated(start, end)
+                                       .Build()));
     if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
       SetEndingDomSelection(
           SelectionForUndoStep::From(SelectionInDomTree::Builder()
@@ -2235,9 +2235,7 @@ void ReplaceSelectionCommand::CompleteHTMLReplacement(
 
   if (end.IsNotNull()) {
     SetEndingSelection(SelectionForUndoStep::From(
-        SelectionInDOMTree::Builder()
-            .Collapse(end)
-            .Build()));
+        SelectionInDomTree::Builder().Collapse(end).Build()));
     if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
       SetEndingDomSelection(SelectionForUndoStep::From(
           SelectionInDomTree::Builder().Collapse(end).Build()));
@@ -2620,7 +2618,7 @@ bool ReplaceSelectionCommand::PerformTrivialReplace(
   }
 
   SetEndingSelection(SelectionForUndoStep::From(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtentDeprecated(select_replacement_ ? start : end, end)
           .Build()));
   if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {

@@ -81,7 +81,7 @@ class FrameSelectionTest : public EditingTestBase {
     ASSERT_LE(selection_index,
               static_cast<size_t>(std::numeric_limits<int>::max()));
     Selection().SetSelection(
-        SelectionInDOMTree::Builder()
+        SelectionInDomTree::Builder()
             .Collapse(Position(text, static_cast<int>(selection_index)))
             .Build(),
         SetSelectionOptions());
@@ -99,7 +99,7 @@ class FrameSelectionTest : public EditingTestBase {
                                   const Position& extent,
                                   TextGranularity granularity) {
     Selection().MoveRangeSelectionInternal(
-        SelectionInDOMTree::Builder().SetBaseAndExtent(base, extent).Build(),
+        SelectionInDomTree::Builder().SetBaseAndExtent(base, extent).Build(),
         granularity);
   }
 
@@ -115,7 +115,7 @@ Text* FrameSelectionTest::AppendTextNode(const String& data) {
 
 bool FrameSelectionTest::SelectWordAroundPosition(const Position& position) {
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(position).Build(),
+      SelectionInDomTree::Builder().Collapse(position).Build(),
       SetSelectionOptions());
   return Selection().SelectWordAroundCaret();
 }
@@ -136,7 +136,7 @@ TEST_F(FrameSelectionTest, FirstEphemeralRangeOf) {
   SetBodyContent("<div id=sample>0123456789</div>abc");
   Element* const sample = GetDocument().getElementById(AtomicString("sample"));
   Node* const text = sample->firstChild();
-  Selection().SetSelection(SelectionInDOMTree::Builder()
+  Selection().SetSelection(SelectionInDomTree::Builder()
                                .SetBaseAndExtent(EphemeralRange(
                                    Position(text, 3), Position(text, 6)))
                                .Build(),
@@ -155,7 +155,7 @@ TEST_F(FrameSelectionTest, SetValidSelection) {
   Text* text = AppendTextNode("Hello, World!");
   UpdateAllLifecyclePhasesForTest();
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(text, 0), Position(text, 5))
           .Build(),
       SetSelectionOptions());
@@ -516,7 +516,7 @@ TEST_F(FrameSelectionTest, ModifyExtendWithFlatTree) {
   // Select "two" for selection in DOM tree
   // Select "twoone" for selection in Flat tree
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .Collapse(ToPositionInDomTree(PositionInFlatTree(host, 0)))
           .Extend(
               ToPositionInDomTree(PositionInFlatTree(GetDocument().body(), 2)))
@@ -537,7 +537,7 @@ TEST_F(FrameSelectionTest, ModifyWithUserTriggered) {
   Element* sample = GetDocument().getElementById(AtomicString("sample"));
   const Position end_of_text(sample->firstChild(), 3);
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(end_of_text).Build(),
+      SelectionInDomTree::Builder().Collapse(end_of_text).Build(),
       SetSelectionOptions());
 
   EXPECT_FALSE(Selection().Modify(
@@ -563,7 +563,7 @@ TEST_F(FrameSelectionTest, MoveRangeSelectionTest) {
 
   // Itinitializes with "Foo B|a>r Baz," (| means start and > means end).
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(text, 5), Position(text, 6))
           .Build(),
       SetSelectionOptions());
@@ -613,11 +613,11 @@ TEST_F(FrameSelectionTest, SelectAllWithInputElement) {
   Element* const input = QuerySelector("input");
   Node* const last_child = GetDocument().body()->lastChild();
   Selection().SelectAll();
-  const SelectionInDOMTree& result_in_dom_tree =
+  const SelectionInDomTree& result_in_dom_tree =
       Selection().ComputeVisibleSelectionInDomTree().AsSelection();
   const SelectionInFlatTree& result_in_flat_tree =
       Selection().ComputeVisibleSelectionInFlatTree().AsSelection();
-  EXPECT_EQ(SelectionInDOMTree::Builder(result_in_dom_tree)
+  EXPECT_EQ(SelectionInDomTree::Builder(result_in_dom_tree)
                 .Collapse(Position::BeforeNode(*input))
                 .Extend(Position(last_child, 3))
                 .Build(),
@@ -645,7 +645,7 @@ TEST_F(FrameSelectionTest, SelectAllPreservesHandle) {
   Element* sample = GetDocument().getElementById(AtomicString("sample"));
   const Position end_of_text(sample->firstChild(), 3);
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(end_of_text).Build(),
+      SelectionInDomTree::Builder().Collapse(end_of_text).Build(),
       SetSelectionOptions());
   EXPECT_FALSE(Selection().IsHandleVisible());
   Selection().SelectAll();
@@ -655,7 +655,7 @@ TEST_F(FrameSelectionTest, SelectAllPreservesHandle) {
          "after it.";
 
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(end_of_text).Build(),
+      SelectionInDomTree::Builder().Collapse(end_of_text).Build(),
       SetSelectionOptions::Builder()
           .SetShouldCloseTyping(true)
           .SetShouldClearTypingStyle(true)
@@ -674,7 +674,7 @@ TEST_F(FrameSelectionTest, BoldCommandPreservesHandle) {
   Element* sample = GetDocument().getElementById(AtomicString("sample"));
   const Position end_of_text(sample->firstChild(), 3);
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(end_of_text).Build(),
+      SelectionInDomTree::Builder().Collapse(end_of_text).Build(),
       SetSelectionOptions());
   EXPECT_FALSE(Selection().IsHandleVisible());
   Selection().SelectAll();
@@ -685,7 +685,7 @@ TEST_F(FrameSelectionTest, BoldCommandPreservesHandle) {
          "be present after it.";
 
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(end_of_text).Build(),
+      SelectionInDomTree::Builder().Collapse(end_of_text).Build(),
       SetSelectionOptions::Builder()
           .SetShouldCloseTyping(true)
           .SetShouldClearTypingStyle(true)
@@ -703,7 +703,7 @@ TEST_F(FrameSelectionTest, BoldCommandPreservesHandle) {
 TEST_F(FrameSelectionTest, SelectionOnRangeHidesHandles) {
   Text* text = AppendTextNode("Hello, World!");
   UpdateAllLifecyclePhasesForTest();
-  Selection().SetSelection(SelectionInDOMTree::Builder()
+  Selection().SetSelection(SelectionInDomTree::Builder()
                                .SetBaseAndExtent(EphemeralRange(
                                    Position(text, 0), Position(text, 12)))
                                .Build(),
@@ -713,7 +713,7 @@ TEST_F(FrameSelectionTest, SelectionOnRangeHidesHandles) {
       << "After SetSelection on Range, handles shouldn't be present.";
 
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(text, 0), Position(text, 5))
           .Build(),
       SetSelectionOptions::Builder()
@@ -722,7 +722,7 @@ TEST_F(FrameSelectionTest, SelectionOnRangeHidesHandles) {
           .SetShouldShowHandle(true)
           .Build());
 
-  Selection().SetSelection(SelectionInDOMTree::Builder()
+  Selection().SetSelection(SelectionInDomTree::Builder()
                                .SetBaseAndExtent(EphemeralRange(
                                    Position(text, 0), Position(text, 12)))
                                .Build(),
@@ -739,7 +739,7 @@ TEST_F(FrameSelectionTest, SelectInvalidPositionInFlatTreeDoesntCrash) {
   Element* body = GetDocument().body();
   Element* select = QuerySelector("select");
   Node* foo = body->firstChild();
-  Selection().SetSelection(SelectionInDOMTree::Builder()
+  Selection().SetSelection(SelectionInDomTree::Builder()
                                .Collapse(Position(body, 0))
                                // SELECT@AfterAnchor is invalid in flat tree.
                                .Extend(Position::AfterNode(*select))
@@ -801,7 +801,7 @@ TEST_F(FrameSelectionTest, RangeInShadowTree) {
 
   Node* text_node = shadow_root->firstChild();
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(text_node, 0), Position(text_node, 3))
           .Build(),
       SetSelectionOptions());
@@ -1280,7 +1280,7 @@ TEST_F(FrameSelectionTest, RangeContainsFocus) {
   Element* const start = GetDocument().getElementById(AtomicString("start"));
   Element* const end = GetDocument().getElementById(AtomicString("end"));
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(start, 0), Position(end, 1))
           .Build(),
       SetSelectionOptions());
@@ -1322,7 +1322,7 @@ TEST_F(FrameSelectionTest, RangeOutsideFocus) {
   Element* const start = GetDocument().getElementById(AtomicString("start"));
   Element* const end = GetDocument().getElementById(AtomicString("end"));
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(start, 0), Position(end, 1))
           .Build(),
       SetSelectionOptions());
@@ -1350,7 +1350,7 @@ TEST_F(FrameSelectionTest, InconsistentVisibleSelectionNoCrash) {
   const Position& start = Position::BeforeNode(*anchor);
   const Position& end = Position::AfterNode(*anchor);
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(start).Extend(end).Build(),
+      SelectionInDomTree::Builder().Collapse(start).Extend(end).Build(),
       SetSelectionOptions());
 
   // Shouldn't crash inside.
@@ -1496,7 +1496,7 @@ TEST_F(FrameSelectionTest, HasVisibleTextInShadowTree) {
 
   Node* text_node = shadow_root->firstChild();
   Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(text_node, 0), Position(text_node, 3))
           .Build(),
       SetSelectionOptions());
@@ -1521,8 +1521,8 @@ TEST_F(FrameSelectionTest, PositionDisconnectedInFlatTree) {
     bool flat_base_is_connected = ToPositionInFlatTree(base).IsConnected();
     EXPECT_EQ(base.AnchorNode() == host, flat_base_is_connected);
     for (const Position& extent : positions) {
-      const SelectionInDOMTree& selection =
-          SelectionInDOMTree::Builder().SetBaseAndExtent(base, extent).Build();
+      const SelectionInDomTree& selection =
+          SelectionInDomTree::Builder().SetBaseAndExtent(base, extent).Build();
       Selection().SetSelection(selection, SetSelectionOptions());
       EXPECT_TRUE(extent.IsConnected());
       bool flat_extent_is_connected =
@@ -1546,7 +1546,7 @@ TEST_F(FrameSelectionTest, PaintCaretRecordsSelectionWithNoSelectionHandles) {
 
   Selection().SetCaretEnabled(true);
   Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(Position(text, 0)).Build(),
+      SelectionInDomTree::Builder().Collapse(Position(text, 0)).Build(),
       SetSelectionOptions());
   UpdateAllLifecyclePhasesForTest();
   EXPECT_TRUE(Selection().ComputeVisibleSelectionInDomTree().IsCaret());

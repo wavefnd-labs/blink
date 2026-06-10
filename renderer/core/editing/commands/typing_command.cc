@@ -72,7 +72,7 @@ bool IsValidDocument(const Document& document) {
 }
 
 String DispatchBeforeTextInsertedEvent(const String& text,
-                                       const SelectionInDOMTree& selection,
+                                       const SelectionInDomTree& selection,
                                        EditingState* editing_state) {
   // We use SelectionForUndoStep because it is resilient to DOM
   // mutation.
@@ -119,7 +119,7 @@ DispatchEventResult DispatchTextInputEvent(LocalFrame* frame,
   return result;
 }
 
-PlainTextRange GetSelectionOffsets(const SelectionInDOMTree& selection) {
+PlainTextRange GetSelectionOffsets(const SelectionInDomTree& selection) {
   TRACE_EVENT0("blink", "GetSelectionOffsets");
   const EphemeralRange range = selection.ComputeRange();
   if (range.IsNull())
@@ -130,7 +130,7 @@ PlainTextRange GetSelectionOffsets(const SelectionInDOMTree& selection) {
   return PlainTextRange::Create(*editable, range);
 }
 
-SelectionInDOMTree CreateSelection(const wtf_size_t start,
+SelectionInDomTree CreateSelection(const wtf_size_t start,
                                    const wtf_size_t end,
                                    Element* element) {
   const EphemeralRange& start_range =
@@ -143,14 +143,14 @@ SelectionInDOMTree CreateSelection(const wtf_size_t start,
   DCHECK(end_range.IsNotNull());
   const Position& end_position = end_range.EndPosition();
 
-  const SelectionInDOMTree& selection =
-      SelectionInDOMTree::Builder()
+  const SelectionInDomTree& selection =
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(start_position, end_position)
           .Build();
   return selection;
 }
 
-bool CanAppendNewLineFeedToSelection(const SelectionInDOMTree& selection,
+bool CanAppendNewLineFeedToSelection(const SelectionInDomTree& selection,
                                      EditingState* editing_state) {
   // We use SelectionForUndoStep because it is resilient to DOM
   // mutation.
@@ -391,7 +391,7 @@ void TypingCommand::AdjustSelectionAfterIncrementalInsertion(
   }
 
   const wtf_size_t new_end = selection_start + text_length;
-  const SelectionInDOMTree& selection =
+  const SelectionInDomTree& selection =
       CreateSelection(new_end, new_end, element);
   SetEndingSelection(SelectionForUndoStep::From(selection));
   if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled()) {
@@ -404,7 +404,7 @@ void TypingCommand::AdjustSelectionAfterIncrementalInsertion(
 void TypingCommand::InsertText(
     Document& document,
     const String& text,
-    const SelectionInDOMTree& passed_selection_for_insertion,
+    const SelectionInDomTree& passed_selection_for_insertion,
     Options options,
     EditingState* editing_state,
     PasswordEchoBehavior password_echo_behavior,
@@ -765,8 +765,8 @@ void TypingCommand::InsertTextInternal(const String& text,
       PlainTextRange(selection_start_, selection_start_).CreateRange(*editable);
   const Position current_selection_end = EndingSelection().End();
 
-  const SelectionInDOMTree& new_selection =
-      SelectionInDOMTree::Builder()
+  const SelectionInDomTree& new_selection =
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(new_selection_start_collapsed_range.StartPosition(),
                             current_selection_end)
           .Build();
@@ -873,8 +873,8 @@ bool TypingCommand::MakeEditableRootEmpty(EditingState* editing_state) {
   // The selection is updated prior to the removal of the element
   // that makes the node empty. (see crbug.com/40876506)
   LocalFrame* const frame = GetDocument().GetFrame();
-  const SelectionInDOMTree& new_selection =
-      SelectionInDOMTree::Builder()
+  const SelectionInDomTree& new_selection =
+      SelectionInDomTree::Builder()
           .Collapse(Position::FirstPositionInNode(*root))
           .Build();
   frame->Selection().SetSelection(
@@ -900,7 +900,7 @@ bool TypingCommand::MakeEditableRootEmpty(EditingState* editing_state) {
 // If there are multiple Unicode code points to be deleted, adjust the
 // range to match platform conventions.
 static SelectionForUndoStep AdjustSelectionForBackwardDelete(
-    const SelectionInDOMTree& selection) {
+    const SelectionInDomTree& selection) {
   const Position& anchor = selection.Anchor();
   if (selection.IsCaret()) {
     // TODO(yosin): We should make |DeleteSelectionCommand| to work with
@@ -1033,8 +1033,8 @@ void TypingCommand::DeleteKeyPressed(TextGranularity granularity,
     // If the caret is just after a table, select the table and don't delete
     // anything.
   } else if (Element* table = TableElementJustBefore(visible_start)) {
-    const SelectionInDOMTree& selection =
-        SelectionInDOMTree::Builder()
+    const SelectionInDomTree& selection =
+        SelectionInDomTree::Builder()
             .Collapse(Position::BeforeNode(*table))
             .Extend(EndingSelection().Start())
             .Build();
@@ -1181,8 +1181,8 @@ void TypingCommand::ForwardDeleteKeyPressed(TextGranularity granularity,
   if (IsDisplayInsideTable(downstream_end.ComputeContainerNode()) &&
       downstream_end.ComputeOffsetInContainerNode() <=
           CaretMinOffset(downstream_end.ComputeContainerNode())) {
-    const SelectionInDOMTree& selection =
-        SelectionInDOMTree::Builder()
+    const SelectionInDomTree& selection =
+        SelectionInDomTree::Builder()
             .SetBaseAndExtentDeprecated(
                 EndingSelection().End(),
                 Position::AfterNode(*downstream_end.ComputeContainerNode()))

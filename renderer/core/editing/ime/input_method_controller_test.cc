@@ -2811,7 +2811,7 @@ TEST_F(InputMethodControllerTest, TextInputTypeAtBeforeEditable) {
 
   // Set selection before BODY(editable).
   GetFrame().Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .Collapse(Position(GetDocument().documentElement(), 0))
           .Build(),
       SetSelectionOptions());
@@ -2878,7 +2878,7 @@ TEST_F(InputMethodControllerTest, SetCompositionDeletesMarkupBeforeText) {
       "<div id='div' contenteditable='true'><img />test</div>", "div");
   // Select the contents of the div element.
   GetFrame().Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(EphemeralRange::RangeOfContents(*div))
           .Build(),
       SetSelectionOptions());
@@ -2895,7 +2895,7 @@ TEST_F(InputMethodControllerTest, SetCompositionDeletesMarkupAfterText) {
       "<div id='div' contenteditable='true'>test<img /></div>", "div");
   // Select the contents of the div element.
   GetFrame().Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(EphemeralRange::RangeOfContents(*div))
           .Build(),
       SetSelectionOptions());
@@ -2913,7 +2913,7 @@ TEST_F(InputMethodControllerTest,
       "<div id='div' contenteditable='true'><img />test<img /></div>", "div");
   // Select the contents of the div element.
   GetFrame().Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(EphemeralRange::RangeOfContents(*div))
           .Build(),
       SetSelectionOptions());
@@ -3037,7 +3037,7 @@ TEST_F(InputMethodControllerTest,
 
   // Select "hello".
   GetFrame().Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(EphemeralRange(Position(div->firstChild(), 0),
                                            Position(div->firstChild(), 5)))
           .Build(),
@@ -3190,7 +3190,7 @@ TEST_F(InputMethodControllerTest,
 
   // Select "world".
   GetFrame().Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(EphemeralRange(Position(div->firstChild(), 6),
                                            Position(div->firstChild(), 11)))
           .Build(),
@@ -3222,7 +3222,7 @@ TEST_F(InputMethodControllerTest,
 
   // Select "world".
   GetFrame().Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(EphemeralRange(Position(div->firstChild(), 6),
                                            Position(div->firstChild(), 11)))
           .Build(),
@@ -3706,7 +3706,7 @@ TEST_F(InputMethodControllerTest, SetCompositionAfterNonEditableElement) {
       "<div contenteditable=\"true\" id=\"sample\">"
       "<span contenteditable=\"false\">a</span>^cd|b</div>",
       GetSelectionTextFromBody(
-          SelectionInDOMTree::Builder()
+          SelectionInDomTree::Builder()
               .SetBaseAndExtent(Controller().CompositionEphemeralRange())
               .Build()));
 }
@@ -3876,7 +3876,7 @@ TEST_F(InputMethodControllerTest, SetImeTextSpanForSpellcheckSpellingMarkers) {
       EphemeralRange(Position(text, 0), Position(text, 5)), "hi!\nhello!");
 
   GetDocument().GetFrame()->Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(text, 0), Position(text, 1))
           .Build(),
       SetSelectionOptions());
@@ -3906,7 +3906,7 @@ TEST_F(InputMethodControllerTest, SetImeTextSpanForSpellcheckGrammarMarkers) {
       EphemeralRange(Position(text, 0), Position(text, 5)), "hi!\nhello!");
 
   GetDocument().GetFrame()->Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(Position(text, 0), Position(text, 1))
           .Build(),
       SetSelectionOptions());

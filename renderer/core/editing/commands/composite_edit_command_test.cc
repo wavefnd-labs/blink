@@ -350,8 +350,8 @@ TEST_F(CompositeEditCommandTest, DomLaneSeedsFromRawDomSelection) {
   SetBodyContent("<div contenteditable id='ed'>X<br></div>");
   Element* div = GetElementById("ed");
   const Position raw(div, 1);
-  Selection().SetSelection(
-      SelectionInDOMTree::Builder().Collapse(raw).Build(), SetSelectionOptions());
+  Selection().SetSelection(SelectionInDomTree::Builder().Collapse(raw).Build(),
+                           SetSelectionOptions());
 
   SampleCommand& sample = *MakeGarbageCollected<SampleCommand>(GetDocument());
   EXPECT_EQ(raw, sample.StartingDomSelection().Anchor());

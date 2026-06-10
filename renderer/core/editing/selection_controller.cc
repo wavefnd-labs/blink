@@ -1428,7 +1428,7 @@ void SelectionController::PassMousePressEventToSubframe(
           PositionWithAffinityOfHitTestResult(mev.GetHitTestResult()))
           .ToPositionWithAffinity();
   if (visible_pos.IsNull()) {
-    Selection().SetSelectionAndEndTyping(SelectionInDOMTree());
+    Selection().SetSelectionAndEndTyping(SelectionInDomTree());
     return;
   }
   Selection().SetSelectionAndEndTyping(ConvertToSelectionInDomTree(

@@ -70,7 +70,7 @@ void UndoStep::Unapply() {
       InputEvent::InputType::kHistoryUndo, g_null_atom,
       InputEvent::EventIsComposing::kNotComposing, nullptr);
 
-  const SelectionInDOMTree& new_selection =
+  const SelectionInDomTree& new_selection =
       CorrectedSelectionAfterCommand(StartingSelection(), document_);
   ChangeSelectionAfterCommand(frame, new_selection,
                               SetSelectionOptions::Builder()
@@ -115,7 +115,7 @@ void UndoStep::Reapply() {
       InputEvent::InputType::kHistoryRedo, g_null_atom,
       InputEvent::EventIsComposing::kNotComposing, nullptr);
 
-  const SelectionInDOMTree& new_selection =
+  const SelectionInDomTree& new_selection =
       CorrectedSelectionAfterCommand(EndingSelection(), document_);
   ChangeSelectionAfterCommand(frame, new_selection,
                               SetSelectionOptions::Builder()
