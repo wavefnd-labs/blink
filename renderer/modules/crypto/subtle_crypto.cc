@@ -45,6 +45,7 @@
 #include "third_party/blink/renderer/bindings/modules/v8/v8_encapsulated_key.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_json_web_key.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_arraybuffer_arraybufferview_jsonwebkey.h"
+#include "third_party/blink/renderer/bindings/modules/v8/v8_union_arraybuffer_jsonwebkey.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_cryptokey_cryptokeypair.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
 #include "third_party/blink/renderer/core/typed_arrays/dom_array_buffer.h"
@@ -614,10 +615,11 @@ ScriptPromise<CryptoKey> SubtleCrypto::importKey(
   return promise;
 }
 
-ScriptPromise<IDLAny> SubtleCrypto::exportKey(ScriptState* script_state,
-                                              const String& raw_format,
-                                              CryptoKey* key,
-                                              ExceptionState& exception_state) {
+ScriptPromise<V8UnionArrayBufferOrJsonWebKey> SubtleCrypto::exportKey(
+    ScriptState* script_state,
+    const String& raw_format,
+    CryptoKey* key,
+    ExceptionState& exception_state) {
   // Method described by:
   // https://w3c.github.io/webcrypto/Overview.html#dfn-SubtleCrypto-method-exportKey
 
@@ -634,8 +636,8 @@ ScriptPromise<IDLAny> SubtleCrypto::exportKey(ScriptState* script_state,
     return EmptyPromise();
   }
 
-  auto* resolver =
-      MakeGarbageCollected<ScriptPromiseResolver<IDLAny>>(script_state);
+  auto* resolver = MakeGarbageCollected<
+      ScriptPromiseResolver<V8UnionArrayBufferOrJsonWebKey>>(script_state);
   auto* result = MakeGarbageCollected<CryptoResultImpl>(script_state, resolver);
   auto promise = resolver->Promise();
 
