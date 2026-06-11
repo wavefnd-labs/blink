@@ -801,19 +801,6 @@ void WidgetBase::RequestNewLayerTreeFrameSink(
   // internal begin frame source is started.
   const base::CommandLine& command_line =
       *base::CommandLine::ForCurrentProcess();
-  if (base::FeatureList::IsEnabled(
-          ::features::kInternalBeginFrameSourceOnManyDidNotProduceFrame) &&
-      !params.embedder_params->synthetic_begin_frame_source &&
-      !settings.single_thread_proxy_scheduler &&
-      !settings.using_synchronous_renderer_compositor &&
-      !command_line.HasSwitch(switches::kAllowPreCommitInput)) {
-    static const uint64_t num_did_not_produce_frame = static_cast<uint64_t>(
-        ::features::kNumDidNotProduceFrameBeforeInternalBeginFrameSource.Get());
-    params.embedder_params
-        ->num_did_not_produce_frame_before_internal_begin_frame_source =
-        num_did_not_produce_frame;
-    params.embedder_params->auto_needs_begin_frame = true;
-  }
 
   if (base::FeatureList::IsEnabled(::features::kManualBeginFrame) &&
       !command_line.HasSwitch(switches::kAllowPreCommitInput)) {
