@@ -2410,6 +2410,9 @@ void AXObject::SerializeUnignoredAttributes(ui::AXNodeData* node_data,
     TruncateAndAddStringAttribute(node_data,
                                   ax::mojom::blink::StringAttribute::kValue,
                                   GetValueForControl());
+    TruncateAndAddStringAttribute(
+        node_data, ax::mojom::blink::StringAttribute::kAriaValueText,
+        AriaAttribute(html_names::kAriaValuetextAttr));
 
     if (auto* input = DynamicTo<HTMLInputElement>(element)) {
       String type = element->getAttribute(html_names::kTypeAttr);

@@ -4852,10 +4852,6 @@ String AXNodeObject::GetValueForControl(AXObjectSet& visited) const {
     return masked_text.ToString();
   }
 
-  if (IsRangeValueSupported()) {
-    return AriaAttribute(html_names::kAriaValuetextAttr).GetString();
-  }
-
   // Handle other HTML input elements that aren't text controls, like date and
   // time controls, by returning their value converted to text, with the
   // exception of checkboxes and radio buttons (which would return "on"), and
