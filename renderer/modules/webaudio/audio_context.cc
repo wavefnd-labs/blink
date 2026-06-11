@@ -1000,23 +1000,34 @@ void AudioContext::ScheduleInitialTransitionToRunning() {
   UseCounter::Count(GetExecutionContext(),
                     WebFeature::kAudioContextAsyncStateTransitions);
 
-  if (!RuntimeEnabledFeatures::AudioContextAsyncStateTransitionsEnabled()) {
-    SetContextState(V8AudioContextState::Enum::kRunning);
-    return;
-  }
-
-  // The state of AudioContext is "suspended" immediately after construction
-  // and transitions to "running" asynchronously.
-  // https://webaudio.github.io/web-audio-api/#AudioContext-constructors
-
   pending_initial_transition_to_running_ = true;
+
+  base::OnceClosure callback;
+
+  if (RuntimeEnabledFeatures::AudioContextAsyncStateTransitionsEnabled()) {
+    // The state of AudioContext is "suspended" immediately after construction
+    // and transitions to "running" asynchronously.
+    // https://webaudio.github.io/web-audio-api/#AudioContext-constructors
+    callback = blink::BindOnce(&AudioContext::PerformInitialTransitionToRunning,
+                               WrapWeakPersistent(this));
+  } else {
+    SetContextState(V8AudioContextState::Enum::kRunning);
+    // Clear pending_initial_transition_to_running_ asynchronously for
+    // the kAudioContextAsyncTransitionToRunningStateRead use counter.
+    callback = blink::BindOnce(
+        [](AudioContext* context) {
+          if (context) {
+            DCHECK_CALLED_ON_VALID_SEQUENCE(
+                context->main_thread_sequence_checker_);
+            context->pending_initial_transition_to_running_ = false;
+          }
+        },
+        WrapWeakPersistent(this));
+  }
 
   GetExecutionContext()
       ->GetTaskRunner(TaskType::kMediaElementEvent)
-      ->PostTask(
-          FROM_HERE,
-          blink::BindOnce(&AudioContext::PerformInitialTransitionToRunning,
-                          WrapWeakPersistent(this)));
+      ->PostTask(FROM_HERE, std::move(callback));
 }
 
 void AudioContext::PerformInitialTransitionToRunning() {

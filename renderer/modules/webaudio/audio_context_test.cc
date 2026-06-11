@@ -2316,4 +2316,74 @@ TEST_F(AudioContextTest, AsyncStateUseCountersInitialTransitionToRunning) {
   }
 }
 
+// Tests that kAudioContextAsyncTransitionToRunningStateRead is recorded when
+// AudioContext::state() is called within the window of the initial transition
+// to "running".
+TEST_F(AudioContextTest, AsyncStateUseCountersReadWhileInitialTransition) {
+  for (bool feature_enabled : {true, false}) {
+    SCOPED_TRACE(testing::Message() << "feature_enabled: " << feature_enabled);
+
+    ScopedAudioContextAsyncStateTransitionsForTest scoped_feature(
+        feature_enabled);
+
+    AudioContextOptions* options = AudioContextOptions::Create();
+
+    AudioContext* audio_context = AudioContext::Create(
+        GetFrame().DomWindow(), options, ASSERT_NO_EXCEPTION);
+
+    ClearAudioContextAsyncStateUseCounters();
+
+    // Get state right after the AudioContext is created. When the feature
+    // is enabled, the state is "suspended" after construction but playback
+    // starts immediately. When the feature is disabled the state is already
+    // "running", but ScheduleInitialTransitionToRunning() still posts an
+    // async task that only clears the pending flag, keeping the window open
+    // so a state() read is counted here as well.
+    EXPECT_EQ(audio_context->state().AsEnum(),
+              feature_enabled ? V8AudioContextState::Enum::kSuspended
+                              : V8AudioContextState::Enum::kRunning);
+
+    // kAudioContextAsyncTransitionToRunningStateRead must be recorded
+    // when AudioContext::state() is called within the initial transition
+    // window, regardless of the feature.
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncStateTransitions));
+    EXPECT_TRUE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToRunningStateRead));
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToSuspendedStateRead));
+    ClearAudioContextAsyncStateUseCounters();
+
+    EXPECT_TRUE(audio_context->GetRealtimeAudioDestinationNode()
+                    ->GetOwnHandler()
+                    .get_platform_destination_is_playing_for_testing());
+
+    // Wait until the state becomes "running".
+    ExpectContextBecomesRunningAsync(audio_context);
+
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncStateTransitions));
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToRunningStateRead));
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToSuspendedStateRead));
+    ClearAudioContextAsyncStateUseCounters();
+
+    // Call AudioContext::state() after the initial transition window.
+    EXPECT_EQ(audio_context->state().AsEnum(),
+              V8AudioContextState::Enum::kRunning);
+
+    // kAudioContextAsyncTransitionToRunningStateRead must not be recorded
+    // when AudioContext::state() is called after the initial transition
+    // finished.
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncStateTransitions));
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToRunningStateRead));
+    EXPECT_FALSE(GetDocument().IsUseCounted(
+        WebFeature::kAudioContextAsyncTransitionToSuspendedStateRead));
+    ClearAudioContextAsyncStateUseCounters();
+  }
+}
+
 }  // namespace blink
