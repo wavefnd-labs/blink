@@ -4549,6 +4549,15 @@ void WebFrameWidgetImpl::ClearImeTextSpansByType(uint32_t start,
   focused_frame->ClearImeTextSpansByType(type, start, end);
 }
 
+void WebFrameWidgetImpl::CancelStylusGesturePreview() {
+  LocalFrame* local_frame = FocusedLocalFrameInWidget();
+  if (local_frame) {
+    local_frame->GetInputMethodController().ClearImeTextSpansByType(
+        blink::ImeTextSpan::Type::kPreviewStylusGesture, 0,
+        std::numeric_limits<unsigned>::max());
+  }
+}
+
 void WebFrameWidgetImpl::SetCompositionFromExistingText(
     int32_t start,
     int32_t end,
