@@ -52,7 +52,6 @@ CanvasResourceDispatcher::CanvasResourceDispatcher(
       size_(size),
       change_size_for_next_commit_(false),
       placeholder_canvas_id_(canvas_id),
-      num_pending_placeholder_resources_(0),
       client_(client),
       task_runner_(std::move(task_runner)),
       agent_group_scheduler_compositor_task_runner_(
@@ -91,10 +90,8 @@ CanvasResourceDispatcher::CanvasResourceDispatcher(
 
 CanvasResourceDispatcher::~CanvasResourceDispatcher() = default;
 
-namespace {
-
-static void UpdatePlaceholderImage(
-    base::WeakPtr<CanvasResourceDispatcher> dispatcher,
+void CanvasResourceDispatcher::PlaceholderClient::UpdatePlaceholderImage(
+    base::WeakPtr<CanvasResourceDispatcher::PlaceholderClient> client,
     scoped_refptr<base::SingleThreadTaskRunner> task_runner,
     DOMNodeId placeholder_canvas_id,
     scoped_refptr<blink::ExportedCanvasResource>&& canvas_resource) {
@@ -111,11 +108,13 @@ static void UpdatePlaceholderImage(
   if (placeholder_canvas) {
     placeholder_canvas->SetOffscreenCanvasResource(std::move(canvas_resource));
     task_runner->PostTask(
-        FROM_HERE,
-        base::BindOnce(&CanvasResourceDispatcher::OnMainThreadReceivedImage,
-                       dispatcher));
+        FROM_HERE, base::BindOnce(&CanvasResourceDispatcher::PlaceholderClient::
+                                      OnMainThreadReceivedImage,
+                                  client));
   }
 }
+
+namespace {
 
 void UpdatePlaceholderDispatcher(
     base::WeakPtr<OffscreenCanvasPlaceholder::Client> client,
@@ -132,12 +131,13 @@ void UpdatePlaceholderDispatcher(
 
 }  // namespace
 
-void CanvasResourceDispatcher::PostImageToPlaceholderIfNotBlocked(
-    scoped_refptr<ExportedCanvasResource> exported_resource) {
+void CanvasResourceDispatcher::PlaceholderClient::
+    PostImageToPlaceholderIfNotBlocked(
+        scoped_refptr<ExportedCanvasResource> exported_resource) {
   if (placeholder_canvas_id_ == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
-      // `agent_group_scheduler_compositor_task_runner_` may be null if this
+      // `placeholder_task_runner_` may be null if this
       // was created from a SharedWorker.
-      !agent_group_scheduler_compositor_task_runner_) {
+      !placeholder_task_runner_) {
     exported_resource.reset();
     return;
   }
@@ -158,17 +158,18 @@ void CanvasResourceDispatcher::PostImageToPlaceholderIfNotBlocked(
   }
 }
 
-void CanvasResourceDispatcher::PostImageToPlaceholder(
+void CanvasResourceDispatcher::PlaceholderClient::PostImageToPlaceholder(
     scoped_refptr<ExportedCanvasResource>&& canvas_resource) {
   // After this point, |canvas_resource| can only be used on the main thread,
   // until it is returned.
   canvas_resource->Transfer();
 
-  CHECK(agent_group_scheduler_compositor_task_runner_);
+  CHECK(placeholder_task_runner_);
   PostCrossThreadTask(
-      *agent_group_scheduler_compositor_task_runner_, FROM_HERE,
-      CrossThreadBindOnce(UpdatePlaceholderImage, GetWeakPtr(), task_runner_,
-                          placeholder_canvas_id_, std::move(canvas_resource)));
+      *placeholder_task_runner_, FROM_HERE,
+      CrossThreadBindOnce(UpdatePlaceholderImage, GetWeakPtr(),
+                          canvas_task_runner_, placeholder_canvas_id_,
+                          std::move(canvas_resource)));
 }
 
 void CanvasResourceDispatcher::DispatchFrame(
@@ -186,7 +187,7 @@ void CanvasResourceDispatcher::DispatchFrame(
   // This takes another ref and sends it to the placeholder. The
   // ExternalCanvasResource will be destroyed when both display compositor and
   // placeholder are done with it, returning underlying memory to the owner.
-  PostImageToPlaceholderIfNotBlocked(exported_resource);
+  placeholder_client_->PostImageToPlaceholderIfNotBlocked(exported_resource);
 
   // For frameless canvas, we don't get a valid frame_sink_id and should drop.
   if (!frame_sink_id_.is_valid()) {
@@ -423,7 +424,7 @@ void CanvasResourceDispatcher::ReclaimResources(
   }
 }
 
-void CanvasResourceDispatcher::OnMainThreadReceivedImage() {
+void CanvasResourceDispatcher::PlaceholderClient::OnMainThreadReceivedImage() {
   num_pending_placeholder_resources_--;
 
   // The main thread has become unblocked recently and we have a resource that

@@ -40,10 +40,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
  public:
   static constexpr unsigned kMaxPendingCompositorFrames = 2;
 
-  // We set a limit to the number of placeholder resources that have been posted
-  // to the main thread but not yet received on that thread.
-  static constexpr unsigned kMaxPendingPlaceholderResources = 50;
-
   base::WeakPtr<CanvasResourceDispatcher> GetWeakPtr() {
     return weak_ptr_factory_.GetWeakPtr();
   }
@@ -79,8 +75,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
   void DispatchFrame(scoped_refptr<CanvasResource>&&,
                      const gfx::Rect& damage_rect,
                      bool is_opaque);
-  // virtual for mocking
-  virtual void OnMainThreadReceivedImage();
   void ReplaceBeginFrameAck(const viz::BeginFrameArgs& args) {
     current_begin_frame_ack_ = viz::BeginFrameAck(args, true);
   }
@@ -102,10 +96,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
   void SetFilterQuality(cc::PaintFlags::FilterQuality filter_quality);
 
- protected:
-  // virtual and protected for testing
-  virtual void PostImageToPlaceholder(scoped_refptr<ExportedCanvasResource>&&);
-
  private:
   friend class OffscreenCanvasPlaceholderTest;
   friend class CanvasResourceDispatcherTest;
@@ -114,6 +104,10 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
   class PLATFORM_EXPORT PlaceholderClient
       : public OffscreenCanvasPlaceholder::Client {
    public:
+    // We set a limit to the number of placeholder resources that have been
+    // posted to the main thread but not yet received on that thread.
+    static constexpr unsigned kMaxPendingPlaceholderResources = 50;
+
     PlaceholderClient(
         DOMNodeId placeholder_canvas_id,
         scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner,
@@ -134,7 +128,26 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
     void RegisterWithPlaceholder();
 
+    void PostImageToPlaceholderIfNotBlocked(
+        scoped_refptr<ExportedCanvasResource>);
+
+    // virtual for mocking
+    virtual void OnMainThreadReceivedImage();
+
+   protected:
+    // virtual and protected for testing
+    virtual void PostImageToPlaceholder(
+        scoped_refptr<ExportedCanvasResource>&&);
+
    private:
+    friend class OffscreenCanvasPlaceholderTest;
+
+    static void UpdatePlaceholderImage(
+        base::WeakPtr<CanvasResourceDispatcher::PlaceholderClient> client,
+        scoped_refptr<base::SingleThreadTaskRunner> task_runner,
+        DOMNodeId placeholder_canvas_id,
+        scoped_refptr<blink::ExportedCanvasResource>&& canvas_resource);
+
     base::RepeatingClosure animation_state_callback_;
 
     const DOMNodeId placeholder_canvas_id_;
@@ -147,6 +160,12 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
     OffscreenCanvasPlaceholder::AnimationState animation_state_ =
         OffscreenCanvasPlaceholder::AnimationState::kActive;
+
+    // The latest_unposted_resource_ always refers to the frame
+    // resource used by the latest_unposted_resource_.
+    scoped_refptr<ExportedCanvasResource> latest_unposted_resource_;
+    unsigned num_pending_placeholder_resources_ = 0;
+
     base::WeakPtrFactory<PlaceholderClient> weak_ptr_factory_{this};
   };
 
@@ -178,9 +197,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
   // state has actually changed or not.
   void UpdateBeginFrameSource();
 
-  void PostImageToPlaceholderIfNotBlocked(
-      scoped_refptr<ExportedCanvasResource>);
-
   mojo::Remote<viz::mojom::blink::CompositorFrameSink> sink_;
   mojo::Remote<mojom::blink::SurfaceEmbedder> surface_embedder_;
   mojo::Receiver<viz::mojom::blink::CompositorFrameSinkClient> receiver_{this};
@@ -195,11 +211,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
   ExportedResourceMap exported_resources_;
 
   viz::FrameTokenGenerator next_frame_token_;
-
-  // The latest_unposted_resource_ always refers to the frame
-  // resource used by the latest_unposted_resource_.
-  scoped_refptr<ExportedCanvasResource> latest_unposted_resource_;
-  unsigned num_pending_placeholder_resources_;
 
   viz::BeginFrameAck current_begin_frame_ack_;
 

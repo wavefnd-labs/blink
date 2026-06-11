@@ -26,14 +26,30 @@ namespace blink {
 class MockPlaceholderClient
     : public CanvasResourceDispatcher::PlaceholderClient {
  public:
-  explicit MockPlaceholderClient(DOMNodeId placeholder_id)
+  explicit MockPlaceholderClient(
+      DOMNodeId placeholder_id,
+      scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner)
       : CanvasResourceDispatcher::PlaceholderClient(
             placeholder_id,
-            scheduler::GetSingleThreadTaskRunnerForTesting(),
+            placeholder_task_runner,
             scheduler::GetSingleThreadTaskRunnerForTesting(),
             base::BindRepeating(&MockPlaceholderClient::OnAnimationStateUpdated,
                                 base::Unretained(this))) {}
 
+  void OnMainThreadReceivedImage() override {
+    MainThreadReceivedImage();
+    CanvasResourceDispatcher::PlaceholderClient::OnMainThreadReceivedImage();
+  }
+
+  void PostImageToPlaceholder(
+      scoped_refptr<ExportedCanvasResource>&& resource) override {
+    CanvasResourceDispatcher::PlaceholderClient::PostImageToPlaceholder(
+        std::move(resource));
+    OnPostImageToPlaceholder();
+  }
+
+  MOCK_METHOD0(OnPostImageToPlaceholder, void());
+  MOCK_METHOD0(MainThreadReceivedImage, void());
   MOCK_METHOD0(OnAnimationStateUpdated, void());
 };
 
@@ -58,20 +74,6 @@ class MockCanvasResourceDispatcher : public CanvasResourceDispatcher {
             kSinkId,
             placeholder_id,
             /*canvas_size=*/{kWidth, kHeight}) {}
-
-  void OnMainThreadReceivedImage() override {
-    MainThreadReceivedImage();
-    CanvasResourceDispatcher::OnMainThreadReceivedImage();
-  }
-
-  void PostImageToPlaceholder(
-      scoped_refptr<ExportedCanvasResource>&& resource) override {
-    CanvasResourceDispatcher::PostImageToPlaceholder(std::move(resource));
-    OnPostImageToPlaceholder();
-  }
-
-  MOCK_METHOD0(OnPostImageToPlaceholder, void());
-  MOCK_METHOD0(MainThreadReceivedImage, void());
 };
 
 DOMNodeId GenPlaceholderId() {
@@ -93,18 +95,20 @@ class OffscreenCanvasPlaceholderTest : public Test {
       scoped_refptr<base::SingleThreadTaskRunner>
           agent_group_scheduler_compositor_task_runner =
               scheduler::GetSingleThreadTaskRunnerForTesting());
-  void CreateClient();
+  void CreateClient(
+      scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner =
+          scheduler::GetSingleThreadTaskRunnerForTesting());
 
  protected:
   void SetUp() override;
   void TearDown() override;
 
   unsigned GetNumPendingPlaceholderResources() {
-    return dispatcher_->num_pending_placeholder_resources_;
+    return placeholder_client_->num_pending_placeholder_resources_;
   }
 
   ExportedCanvasResource* GetLatestUnpostedImage() {
-    return dispatcher_->latest_unposted_resource_.get();
+    return placeholder_client_->latest_unposted_resource_.get();
   }
 
  private:
@@ -146,9 +150,15 @@ void OffscreenCanvasPlaceholderTest::CreateDispatcher(
           gfx::HDRMetadata(), test_web_shared_image_interface_provider_.get());
 }
 
-void OffscreenCanvasPlaceholderTest::CreateClient() {
-  placeholder_client_ =
-      std::make_unique<MockPlaceholderClient>(placeholder_id_);
+void OffscreenCanvasPlaceholderTest::CreateClient(
+    scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner) {
+  placeholder_client_ = std::make_unique<MockPlaceholderClient>(
+      placeholder_id_, placeholder_task_runner);
+  resource_provider_ =
+      CanvasNon2DResourceProviderSharedImage::CreateForSoftwareCompositor(
+          gfx::Size(kWidth, kHeight), GetN32FormatForCanvas(),
+          kPremul_SkAlphaType, gfx::ColorSpace::CreateSRGB(),
+          test_web_shared_image_interface_provider_.get());
 }
 
 scoped_refptr<CanvasResource> OffscreenCanvasPlaceholderTest::DrawSomething() {
@@ -159,8 +169,8 @@ scoped_refptr<CanvasResource> OffscreenCanvasPlaceholderTest::DrawSomething() {
 CanvasResource* OffscreenCanvasPlaceholderTest::DispatchOneFrame() {
   scoped_refptr<CanvasResource> resource = DrawSomething();
   CanvasResource* resource_raw_ptr = resource.get();
-  dispatcher_->DispatchFrame(std::move(resource), gfx::Rect(),
-                             /*is_opaque=*/false);
+  placeholder_client_->PostImageToPlaceholderIfNotBlocked(
+      base::MakeRefCounted<ExportedCanvasResource>(std::move(resource)));
   // We avoid holding a ref here to avoid interfering with
   // OffscreenCanvasPlaceholder's ref count logic.  This pointer should only
   // be used for validations.
@@ -173,25 +183,25 @@ TEST_F(OffscreenCanvasPlaceholderTest, OldFrameCleared) {
   // This test verifies that OffscreenCanvasPlaceholder clears
   // the previous frame when it receives a new one.
   ScopedTestingPlatformSupport<TestingPlatformSupport> platform;
-  CreateDispatcher();
+  CreateClient();
 
   DrawSomething();
   CanvasResource* frame1_raw_ptr = DispatchOneFrame();
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(1);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(1);
   // Run task that propagates the frame to the placeholder canvas.
   EXPECT_EQ(placeholder()->OffscreenCanvasFrame(), nullptr);
   platform->RunUntilIdle();
   EXPECT_EQ(placeholder()->OffscreenCanvasFrame()->GetResourceForTesting(),
             frame1_raw_ptr);
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(0);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(0);
   DrawSomething();
   CanvasResource* frame2_raw_ptr = DispatchOneFrame();
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(1);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(1);
   // Propagate second frame to the placeholder, causing frame 1 to be
   // cleared.
   EXPECT_EQ(placeholder()->OffscreenCanvasFrame()->GetResourceForTesting(),
@@ -199,7 +209,7 @@ TEST_F(OffscreenCanvasPlaceholderTest, OldFrameCleared) {
   platform->RunUntilIdle();
   EXPECT_EQ(placeholder()->OffscreenCanvasFrame()->GetResourceForTesting(),
             frame2_raw_ptr);
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 }
 
 TEST_F(OffscreenCanvasPlaceholderTest, OldFrameClearedWithExtraRef) {
@@ -207,12 +217,12 @@ TEST_F(OffscreenCanvasPlaceholderTest, OldFrameClearedWithExtraRef) {
   // the previous frame when it receives a new one regardless of whether there
   // is another ref on that previous frame.
   ScopedTestingPlatformSupport<TestingPlatformSupport> platform;
-  CreateDispatcher();
+  CreateClient();
 
   DrawSomething();
   CanvasResource* frame1_raw_ptr = DispatchOneFrame();
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(1);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(1);
   // Run task that propagates the frame to the placeholder canvas.
   EXPECT_EQ(placeholder()->OffscreenCanvasFrame(), nullptr);
   platform->RunUntilIdle();
@@ -220,29 +230,29 @@ TEST_F(OffscreenCanvasPlaceholderTest, OldFrameClearedWithExtraRef) {
             frame1_raw_ptr);
   scoped_refptr<CanvasResource> extra_ref =
       placeholder()->OffscreenCanvasFrame()->GetResourceForTesting();
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(0);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(0);
   DrawSomething();
   CanvasResource* frame2_raw_ptr = DispatchOneFrame();
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(1);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(1);
   // Propagate second frame to the placeholder. First frame will be cleared.
   EXPECT_EQ(placeholder()->OffscreenCanvasFrame()->GetResourceForTesting(),
             frame1_raw_ptr);
   platform->RunUntilIdle();
   EXPECT_EQ(placeholder()->OffscreenCanvasFrame()->GetResourceForTesting(),
             frame2_raw_ptr);
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(0);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(0);
   extra_ref = nullptr;
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
-  EXPECT_CALL(*(dispatcher()), MainThreadReceivedImage()).Times(0);
+  EXPECT_CALL(*(client()), MainThreadReceivedImage()).Times(0);
   platform->RunUntilIdle();
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 }
 
 TEST_F(OffscreenCanvasPlaceholderTest, DeferredAnimationStateIsApplied) {
@@ -294,94 +304,94 @@ TEST_F(OffscreenCanvasPlaceholderTest,
 }
 
 TEST_F(OffscreenCanvasPlaceholderTest, PlaceholderRunsNormally) {
-  CreateDispatcher();
+  CreateClient();
   // Post first frame
-  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
+  EXPECT_CALL(*(client()), OnPostImageToPlaceholder());
   DispatchOneFrame();
   EXPECT_EQ(1u, GetNumPendingPlaceholderResources());
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
   // Post second frame
-  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
+  EXPECT_CALL(*(client()), OnPostImageToPlaceholder());
   DispatchOneFrame();
   EXPECT_EQ(2u, GetNumPendingPlaceholderResources());
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
   // Post third frame
-  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
+  EXPECT_CALL(*(client()), OnPostImageToPlaceholder());
   DispatchOneFrame();
   EXPECT_EQ(3u, GetNumPendingPlaceholderResources());
   EXPECT_EQ(nullptr, GetLatestUnpostedImage());
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
   // Receive first frame
-  dispatcher()->OnMainThreadReceivedImage();
+  client()->OnMainThreadReceivedImage();
   EXPECT_EQ(2u, GetNumPendingPlaceholderResources());
 
   // Receive second frame
-  dispatcher()->OnMainThreadReceivedImage();
+  client()->OnMainThreadReceivedImage();
   EXPECT_EQ(1u, GetNumPendingPlaceholderResources());
 
   // Receive third frame
-  dispatcher()->OnMainThreadReceivedImage();
+  client()->OnMainThreadReceivedImage();
   EXPECT_EQ(0u, GetNumPendingPlaceholderResources());
 }
 
 TEST_F(OffscreenCanvasPlaceholderTest,
        AgentGroupSchedulerCompositorTaskRunnerIsNull) {
-  CreateDispatcher(nullptr);
+  CreateClient(nullptr);
 
   // When agent_group_scheduler_compositor_task_runner is null,
   // OnPostImageToPlaceholder should not be called.
-  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder()).Times(0);
+  EXPECT_CALL(*(client()), OnPostImageToPlaceholder()).Times(0);
   DispatchOneFrame();
   EXPECT_EQ(0u, GetNumPendingPlaceholderResources());
 }
 
 TEST_F(OffscreenCanvasPlaceholderTest, PlaceholderBeingBlocked) {
-  CreateDispatcher();
+  CreateClient();
   /* When main thread is blocked, attempting to post one more than the max
    * number of pending frames will result in the latest attempt being saved as
    * an unposted resource. */
-  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder())
-      .Times(CanvasResourceDispatcher::kMaxPendingPlaceholderResources);
+  EXPECT_CALL(*(client()), OnPostImageToPlaceholder())
+      .Times(MockPlaceholderClient::kMaxPendingPlaceholderResources);
 
   // Attempt to post kMaxPendingPlaceholderResources+1 times
   for (unsigned i = 0;
-       i < CanvasResourceDispatcher::kMaxPendingPlaceholderResources + 1; i++) {
+       i < MockPlaceholderClient::kMaxPendingPlaceholderResources + 1; i++) {
     DispatchOneFrame();
   }
-  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources,
+  EXPECT_EQ(MockPlaceholderClient::kMaxPendingPlaceholderResources,
             GetNumPendingPlaceholderResources());
   EXPECT_TRUE(GetLatestUnpostedImage());
 
   // Attempt to post again. The latest unposted image will be replaced.
   DispatchOneFrame();
-  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources,
+  EXPECT_EQ(MockPlaceholderClient::kMaxPendingPlaceholderResources,
             GetNumPendingPlaceholderResources());
   EXPECT_TRUE(GetLatestUnpostedImage());
 
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
   /* The main thread becoming unblocked will trigger CanvasResourceDispatcher
    * to post the last saved image. */
-  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
-  dispatcher()->OnMainThreadReceivedImage();
+  EXPECT_CALL(*(client()), OnPostImageToPlaceholder());
+  client()->OnMainThreadReceivedImage();
 
   // The main thread received 1 frame and the dispatcher thread posted 1 frame,
   // so the number of pending placeholder resources should have remained the
   // same.
-  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources,
+  EXPECT_EQ(MockPlaceholderClient::kMaxPendingPlaceholderResources,
             GetNumPendingPlaceholderResources());
   // Not generating new resource Id
   EXPECT_FALSE(GetLatestUnpostedImage());
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 
-  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder()).Times(0);
-  dispatcher()->OnMainThreadReceivedImage();
-  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources - 1,
+  EXPECT_CALL(*(client()), OnPostImageToPlaceholder()).Times(0);
+  client()->OnMainThreadReceivedImage();
+  EXPECT_EQ(MockPlaceholderClient::kMaxPendingPlaceholderResources - 1,
             GetNumPendingPlaceholderResources());
-  Mock::VerifyAndClearExpectations(dispatcher());
+  Mock::VerifyAndClearExpectations(client());
 }
 }  // namespace
 
