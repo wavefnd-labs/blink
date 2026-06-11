@@ -7898,13 +7898,6 @@ void Document::OnLargestContentfulPaintUpdated() {
 void Document::OnPrepareToStopParsing() {
   if (render_blocking_resource_manager_) {
     render_blocking_resource_manager_->ClearPendingParsingElements();
-    if (GetFrame() && GetFrame()->IsLocalRoot() && GetFrame()->GetPage() &&
-        GetFrame()->IsAttached()) {
-      // The frame rate will be implicitly throttled during initialization
-      // if the feature is enabled so unthrottle here.
-      GetFrame()->GetPage()->GetChromeClient().SetShouldThrottleFrameRate(
-          false, *GetFrame());
-    }
   }
   MaybeExecuteDelayedAsyncScripts(
       MilestoneForDelayedAsyncScript::kFinishedParsing);
@@ -10084,10 +10077,6 @@ void Document::OnLocalRootWidgetCreated() {
   base::UmaHistogramBoolean(
       "Blink.ThrottleFrameRate.AllowedBySecurity.DocumentInitialization",
       allowed_by_security);
-  if (allowed_by_security) {
-    GetFrame()->GetPage()->GetChromeClient().SetShouldThrottleFrameRate(
-        true, *GetFrame());
-  }
 }
 
 void Document::ProcessScheduledShadowTreeCreationsNow() {
@@ -10139,10 +10128,6 @@ void Document::UpdateRenderFrameRate() {
   bool allowed_by_security = CanThrottleFrameRate();
   base::UmaHistogramBoolean("Blink.ThrottleFrameRate.AllowedBySecurity.API",
                             allowed_by_security);
-  if (allowed_by_security) {
-    GetFrame()->GetPage()->GetChromeClient().SetShouldThrottleFrameRate(
-        has_frame_rate_blocking_expect_link_elements_, *GetFrame());
-  }
 }
 
 // static
