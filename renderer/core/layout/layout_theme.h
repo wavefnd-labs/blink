@@ -102,7 +102,7 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
   virtual void SetSelectionColors(Color active_background_color,
                                   Color active_foreground_color,
                                   Color inactive_background_color,
-                                  Color inactive_foreground_color) {}
+                                  Color inactive_foreground_color);
 
   // List box selection colors
   Color ActiveListBoxSelectionBackgroundColor(
@@ -206,6 +206,15 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
       const ui::ColorProvider* color_provider) const;
 
  protected:
+  static Color active_selection_background_color_;
+  static Color active_selection_foreground_color_;
+  static Color inactive_selection_background_color_;
+  static Color inactive_selection_foreground_color_;
+  static Color active_list_box_selection_background_color_dark_mode_;
+  static Color active_list_box_selection_foreground_color_dark_mode_;
+  static Color inactive_list_box_selection_background_color_dark_mode_;
+  static Color inactive_list_box_selection_foreground_color_dark_mode_;
+
   // The platform selection color.
   virtual Color PlatformActiveSelectionBackgroundColor(
       mojom::blink::ColorScheme color_scheme) const;
