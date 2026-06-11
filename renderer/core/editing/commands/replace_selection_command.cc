@@ -789,6 +789,8 @@ void ReplaceSelectionCommand::RemoveRedundantStylesAndKeepStyleSpanInline(
     const CSSPropertyValueSet* inline_style = element->InlineStyle();
     EditingStyle* new_inline_style =
         MakeGarbageCollected<EditingStyle>(inline_style);
+    EditingStyle* style_without_parent_context = nullptr;
+
     if (inline_style) {
       auto* html_element = DynamicTo<HTMLElement>(element);
       if (html_element) {
@@ -840,11 +842,38 @@ void ReplaceSelectionCommand::RemoveRedundantStylesAndKeepStyleSpanInline(
         new_inline_style->RemoveStyleFromRulesAndContext(
             element, GetDocument().documentElement());
 
+      const bool is_style_span_during_move =
+          RuntimeEnabledFeatures::
+              MoveParagraphsPreserveInlineStructureEnabled() &&
+          moving_paragraph_ && IsStyleSpanOrSpanWithOnlyStyleAttribute(element);
+      if (is_style_span_during_move) {
+        style_without_parent_context =
+            MakeGarbageCollected<EditingStyle>(inline_style);
+        style_without_parent_context->RemoveStyleFromContext(element, context);
+      }
+
       new_inline_style->RemoveStyleFromRulesAndContext(element, context);
     }
 
-    if (!inline_style || new_inline_style->IsEmpty()) {
-      if (IsStyleSpanOrSpanWithOnlyStyleAttribute(element) ||
+    const bool should_unwrap_style_span_during_move =
+        style_without_parent_context && style_without_parent_context->IsEmpty();
+    const bool is_redundant_nested_span =
+        moving_paragraph_ && IsA<HTMLSpanElement>(element) &&
+        IsA<HTMLSpanElement>(element->parentNode());
+    // During a paragraph move, keep an inline style <span> instead of
+    // unwrapping it so the moved text retains its inline structure. Redundant
+    // style wrappers and nested spans carry no useful context, so they are
+    // still unwrapped.
+    const bool preserve_style_span_during_move =
+        RuntimeEnabledFeatures::
+            MoveParagraphsPreserveInlineStructureEnabled() &&
+        moving_paragraph_ && !should_unwrap_style_span_during_move &&
+        !is_redundant_nested_span;
+
+    if (!inline_style || new_inline_style->IsEmpty() ||
+        should_unwrap_style_span_during_move) {
+      if ((IsStyleSpanOrSpanWithOnlyStyleAttribute(element) &&
+           !preserve_style_span_during_move) ||
           IsEmptyFontTag(element, kAllowNonEmptyStyleAttribute)) {
         inserted_nodes.WillRemoveNodePreservingChildren(*element);
         RemoveNodePreservingChildren(element, editing_state);
@@ -1176,6 +1205,14 @@ void ReplaceSelectionCommand::HandleStyleSpansBeforeInsertion(
   if (GetInputType() != InputEvent::InputType::kInsertFromPaste &&
       FollowBlockElementStyle(node)) {
     fragment.RemoveNodePreservingChildren(wrapping_style_span);
+    return;
+  }
+
+  // For paragraph moves, defer cleanup of spans with inline style until after
+  // insertion, where spans are unwrapped only if that does not change the
+  // rendering of the moved text.
+  if (RuntimeEnabledFeatures::MoveParagraphsPreserveInlineStructureEnabled() &&
+      moving_paragraph_) {
     return;
   }
 
