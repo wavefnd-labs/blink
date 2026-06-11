@@ -118,10 +118,15 @@ void GetTextInfoForGlyphCallback(void* context,
   size_t start_index = static_cast<TextInfoContext*>(context)->start_index;
 
   sk_sp<SkTypeface> typeface = font_data->PlatformData().TypefaceSp();
-  if (results.empty() || results.back().typeface != typeface) {
-    results.emplace_back(std::move(typeface),
-                         std::vector<WebFormControlElement::GlyphInfo>{},
-                         is_horizontal);
+  bool synthetic_bold = font_data->PlatformData().SyntheticBold();
+  bool synthetic_italic = font_data->PlatformData().SyntheticItalic();
+  if (results.empty() || results.back().typeface != typeface ||
+      results.back().is_synthetic_bold != synthetic_bold ||
+      results.back().is_synthetic_italic != synthetic_italic) {
+    results.emplace_back(
+        std::move(typeface), std::vector<WebFormControlElement::GlyphInfo>{},
+        /*is_horizontal=*/is_horizontal, /*is_synthetic_bold=*/synthetic_bold,
+        /*is_synthetic_italic=*/synthetic_italic);
   }
 
   CHECK_EQ(results.back().is_horizontal, is_horizontal);
