@@ -105,8 +105,10 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
  private:
   friend class OffscreenCanvasPlaceholderTest;
   friend class CanvasResourceDispatcherTest;
+  friend class MockPlaceholderClient;
 
-  class PlaceholderClient : public OffscreenCanvasPlaceholder::Client {
+  class PLATFORM_EXPORT PlaceholderClient
+      : public OffscreenCanvasPlaceholder::Client {
    public:
     PlaceholderClient(
         DOMNodeId placeholder_canvas_id,

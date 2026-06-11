@@ -50,6 +50,14 @@ void OffscreenCanvasPlaceholder::SetOffscreenCanvasResource(
   ExportedCanvasResource::OnPlaceholderReleasedResource(
       std::move(placeholder_frame_));
   placeholder_frame_ = std::move(new_frame);
+}
+
+void OffscreenCanvasPlaceholder::SetClient(
+    base::WeakPtr<Client> client,
+    scoped_refptr<base::SingleThreadTaskRunner> task_runner) {
+  DCHECK(IsOffscreenCanvasRegistered());
+  client_ = std::move(client);
+  client_task_runner_ = std::move(task_runner);
 
   if (deferred_animation_state_ &&
       current_animation_state_ != *deferred_animation_state_) {
@@ -59,14 +67,6 @@ void OffscreenCanvasPlaceholder::SetOffscreenCanvasResource(
     current_animation_state_ = *deferred_animation_state_;
     deferred_animation_state_.reset();
   }
-}
-
-void OffscreenCanvasPlaceholder::SetClient(
-    base::WeakPtr<Client> client,
-    scoped_refptr<base::SingleThreadTaskRunner> task_runner) {
-  DCHECK(IsOffscreenCanvasRegistered());
-  client_ = std::move(client);
-  client_task_runner_ = std::move(task_runner);
 }
 
 void OffscreenCanvasPlaceholder::SetSuspendOffscreenCanvasAnimation(
