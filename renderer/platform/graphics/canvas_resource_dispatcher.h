@@ -102,6 +102,10 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
   void SetFilterQuality(cc::PaintFlags::FilterQuality filter_quality);
 
+ protected:
+  // virtual and protected for testing
+  virtual void PostImageToPlaceholder(scoped_refptr<ExportedCanvasResource>&&);
+
  private:
   friend class OffscreenCanvasPlaceholderTest;
   friend class CanvasResourceDispatcherTest;
@@ -176,8 +180,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
   void PostImageToPlaceholderIfNotBlocked(
       scoped_refptr<ExportedCanvasResource>);
-  // virtual for testing
-  virtual void PostImageToPlaceholder(scoped_refptr<ExportedCanvasResource>&&);
 
   mojo::Remote<viz::mojom::blink::CompositorFrameSink> sink_;
   mojo::Remote<mojom::blink::SurfaceEmbedder> surface_embedder_;

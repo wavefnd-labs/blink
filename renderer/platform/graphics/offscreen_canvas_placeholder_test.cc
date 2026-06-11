@@ -46,11 +46,14 @@ constexpr size_t kHeight = 10;
 
 class MockCanvasResourceDispatcher : public CanvasResourceDispatcher {
  public:
-  explicit MockCanvasResourceDispatcher(int placeholder_id)
+  explicit MockCanvasResourceDispatcher(
+      int placeholder_id,
+      scoped_refptr<base::SingleThreadTaskRunner>
+          agent_group_scheduler_compositor_task_runner)
       : CanvasResourceDispatcher(
             /*client=*/nullptr,
             scheduler::GetSingleThreadTaskRunnerForTesting(),
-            scheduler::GetSingleThreadTaskRunnerForTesting(),
+            agent_group_scheduler_compositor_task_runner,
             kClientId,
             kSinkId,
             placeholder_id,
@@ -78,16 +81,24 @@ class OffscreenCanvasPlaceholderTest : public Test {
   MockPlaceholderClient* client() { return placeholder_client_.get(); }
 
   CanvasResource* DispatchOneFrame();
-  viz::ResourceId PeekNextResourceId() {
-    return dispatcher_->id_generator_.PeekNextValueForTesting();
-  }
   scoped_refptr<CanvasResource> DrawSomething();
-  void CreateDispatcher();
+  void CreateDispatcher(
+      scoped_refptr<base::SingleThreadTaskRunner>
+          agent_group_scheduler_compositor_task_runner =
+              scheduler::GetSingleThreadTaskRunnerForTesting());
   void CreateClient();
 
  protected:
   void SetUp() override;
   void TearDown() override;
+
+  unsigned GetNumPendingPlaceholderResources() {
+    return dispatcher_->num_pending_placeholder_resources_;
+  }
+
+  ExportedCanvasResource* GetLatestUnpostedImage() {
+    return dispatcher_->latest_unposted_resource_.get();
+  }
 
  private:
   test::TaskEnvironment task_environment_;
@@ -116,8 +127,11 @@ void OffscreenCanvasPlaceholderTest::TearDown() {
   Test::TearDown();
 }
 
-void OffscreenCanvasPlaceholderTest::CreateDispatcher() {
-  dispatcher_ = std::make_unique<MockCanvasResourceDispatcher>(placeholder_id_);
+void OffscreenCanvasPlaceholderTest::CreateDispatcher(
+    scoped_refptr<base::SingleThreadTaskRunner>
+        agent_group_scheduler_compositor_task_runner) {
+  dispatcher_ = std::make_unique<MockCanvasResourceDispatcher>(
+      placeholder_id_, agent_group_scheduler_compositor_task_runner);
   resource_provider_ =
       CanvasNon2DResourceProviderSharedImage::CreateForSoftwareCompositor(
           gfx::Size(kWidth, kHeight), GetN32FormatForCanvas(),
