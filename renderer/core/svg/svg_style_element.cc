@@ -25,8 +25,6 @@
 #include "base/task/single_thread_task_runner.h"
 #include "third_party/blink/public/platform/task_type.h"
 #include "third_party/blink/renderer/core/css/css_style_sheet.h"
-#include "third_party/blink/renderer/core/css/media_list.h"
-#include "third_party/blink/renderer/core/css/style_engine.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/dom/events/event.h"
 #include "third_party/blink/renderer/core/media_type_names.h"
@@ -97,13 +95,8 @@ void SVGStyleElement::ParseAttribute(
     return;
   }
   if (RuntimeEnabledFeatures::SvgStyleElementReflectTypeAndMediaEnabled()) {
-    // TODO(crbug.com/521205134): Dedup this with the near-identical block
-    // in HTMLStyleElement::ParseAttribute.
-    if (params.name == svg_names::kMediaAttr && isConnected() &&
-        GetDocument().IsActive() && sheet_) {
-      sheet_->SetMediaQueries(
-          MediaQuerySet::Create(params.new_value, GetExecutionContext()));
-      GetDocument().GetStyleEngine().SetNeedsActiveStyleUpdate(GetTreeScope());
+    if (params.name == svg_names::kMediaAttr) {
+      MediaAttributeChanged(*this, params.new_value);
       return;
     }
     if (params.name == svg_names::kTypeAttr) {
