@@ -7,12 +7,10 @@
 
 #include <utility>
 
-#include "base/gtest_prod_util.h"
 #include "base/task/sequenced_task_runner.h"
 #include "mojo/public/cpp/bindings/remote.h"
 #include "third_party/blink/renderer/platform/context_lifecycle_observer.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
-#include "third_party/blink/renderer/platform/heap/prefinalizer.h"
 #include "third_party/blink/renderer/platform/mojo/heap_mojo_wrapper_mode.h"
 
 namespace blink {
@@ -77,17 +75,9 @@ class HeapMojoRemote {
   void Trace(Visitor* visitor) const { visitor->Trace(wrapper_); }
 
  private:
-  FRIEND_TEST_ALL_PREFIXES(HeapMojoRemoteGCWithContextObserverTest,
-                           NoResetOnConservativeGC);
-  FRIEND_TEST_ALL_PREFIXES(HeapMojoRemoteGCWithContextObserverTest, ResetsOnGC);
-  FRIEND_TEST_ALL_PREFIXES(HeapMojoRemoteGCWithoutContextObserverTest,
-                           ResetsOnGC);
-
   // Garbage collected wrapper class to add ContextLifecycleObserver.
   class Wrapper final : public GarbageCollected<Wrapper>,
                         public ContextLifecycleObserver {
-    USING_PRE_FINALIZER(Wrapper, Dispose);
-
    public:
     explicit Wrapper(ContextLifecycleNotifier* notifier) {
       SetContextLifecycleNotifier(notifier);
@@ -100,8 +90,6 @@ class HeapMojoRemote {
     void Trace(Visitor* visitor) const override {
       ContextLifecycleObserver::Trace(visitor);
     }
-
-    void Dispose() { remote_.reset(); }
 
     mojo::Remote<Interface>& remote() { return remote_; }
 
