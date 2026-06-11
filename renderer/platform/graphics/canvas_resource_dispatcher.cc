@@ -447,10 +447,11 @@ void CanvasResourceDispatcher::Reshape(const gfx::Size& size) {
 }
 
 void CanvasResourceDispatcher::PlaceholderClient::RegisterWithPlaceholder() {
-  // `agent_group_scheduler_compositor_task_runner_` may be null if this
-  // was created from a SharedWorker.
-  if (!agent_group_scheduler_compositor_task_runner_)
+  // `placeholder_task_runner_` may be null if this was created from a
+  // SharedWorker.
+  if (!placeholder_task_runner_) {
     return;
+  }
 
   if (placeholder_canvas_id_ == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
       placeholder_canvas_id_ == kInvalidDOMNodeId) {
@@ -461,27 +462,25 @@ void CanvasResourceDispatcher::PlaceholderClient::RegisterWithPlaceholder() {
   // the canvas resource dispatcher directly. So Offscreen Canvas can behave in
   // a more synchronous way when it's on the main thread.
   if (IsMainThread()) {
-    UpdatePlaceholderDispatcher(GetWeakPtr(), task_runner_,
+    UpdatePlaceholderDispatcher(GetWeakPtr(), canvas_task_runner_,
                                 placeholder_canvas_id_);
   } else {
     PostCrossThreadTask(
-        *agent_group_scheduler_compositor_task_runner_, FROM_HERE,
+        *placeholder_task_runner_, FROM_HERE,
         CrossThreadBindOnce(UpdatePlaceholderDispatcher, GetWeakPtr(),
-                            task_runner_, placeholder_canvas_id_));
+                            canvas_task_runner_, placeholder_canvas_id_));
   }
 }
 
 CanvasResourceDispatcher::PlaceholderClient::PlaceholderClient(
     DOMNodeId placeholder_canvas_id,
-    scoped_refptr<base::SingleThreadTaskRunner>
-        agent_group_scheduler_compositor_task_runner,
-    scoped_refptr<base::SingleThreadTaskRunner> task_runner,
+    scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner,
+    scoped_refptr<base::SingleThreadTaskRunner> canvas_task_runner,
     base::RepeatingClosure animation_state_callback)
     : animation_state_callback_(animation_state_callback),
       placeholder_canvas_id_(placeholder_canvas_id),
-      task_runner_(std::move(task_runner)),
-      agent_group_scheduler_compositor_task_runner_(
-          std::move(agent_group_scheduler_compositor_task_runner)) {
+      canvas_task_runner_(std::move(canvas_task_runner)),
+      placeholder_task_runner_(std::move(placeholder_task_runner)) {
   RegisterWithPlaceholder();
 }
 

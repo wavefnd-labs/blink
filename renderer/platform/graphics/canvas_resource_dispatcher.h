@@ -108,11 +108,11 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
   class PlaceholderClient : public OffscreenCanvasPlaceholder::Client {
    public:
-    PlaceholderClient(DOMNodeId placeholder_canvas_id,
-                      scoped_refptr<base::SingleThreadTaskRunner>
-                          agent_group_scheduler_compositor_task_runner,
-                      scoped_refptr<base::SingleThreadTaskRunner> task_runner,
-                      base::RepeatingClosure animation_state_callback);
+    PlaceholderClient(
+        DOMNodeId placeholder_canvas_id,
+        scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner,
+        scoped_refptr<base::SingleThreadTaskRunner> canvas_task_runner,
+        base::RepeatingClosure animation_state_callback);
     ~PlaceholderClient() override;
 
     base::WeakPtr<PlaceholderClient> GetWeakPtr() {
@@ -133,9 +133,11 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
     const DOMNodeId placeholder_canvas_id_;
 
-    scoped_refptr<base::SingleThreadTaskRunner> task_runner_;
-    scoped_refptr<base::SingleThreadTaskRunner>
-        agent_group_scheduler_compositor_task_runner_;
+    // Task runner for the thread where OffscreenCanvas lives.
+    scoped_refptr<base::SingleThreadTaskRunner> canvas_task_runner_;
+    // Task runner for the thread where OffscreenCanvasPlaceholder lives, i.e
+    // main thread.
+    scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner_;
 
     OffscreenCanvasPlaceholder::AnimationState animation_state_ =
         OffscreenCanvasPlaceholder::AnimationState::kActive;
