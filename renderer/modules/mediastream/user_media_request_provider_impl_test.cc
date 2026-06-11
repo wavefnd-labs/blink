@@ -130,7 +130,8 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnError) {
   V8MediaStreamError* error =
       MakeGarbageCollected<V8UnionDOMExceptionOrOverconstrainedError>(
           dom_exception);
-  callbacks->OnError(nullptr, error, nullptr, UserMediaRequestResult());
+  callbacks->OnError(nullptr, error, nullptr,
+                     UserMediaRequestResult::kNotFoundError);
 
   // Check that the error event was fired and the stream event was not
   EXPECT_TRUE(error_listener->fired());
@@ -140,6 +141,39 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnError) {
   ASSERT_TRUE(stored_error);
   EXPECT_EQ(stored_error->name(), "NotFoundError");
   EXPECT_EQ(stored_error->message(), "Some error message");
+}
+
+TEST_F(UserMediaRequestProviderImplTest, CallbacksOnCancel) {
+  V8TestingScope scope;
+  auto* element = MakeGarbageCollected<HTMLUserMediaElement>(GetDocument());
+  auto* callbacks =
+      MakeGarbageCollected<UserMediaRequestProviderCallbacks>(element);
+
+  // Set up event listeners
+  auto* cancel_listener = MakeGarbageCollected<TestEventListener>();
+  auto* error_listener = MakeGarbageCollected<TestEventListener>();
+  auto* stream_listener = MakeGarbageCollected<TestEventListener>();
+  element->addEventListener(event_type_names::kCancel, cancel_listener);
+  element->addEventListener(event_type_names::kError, error_listener);
+  element->addEventListener(event_type_names::kStream, stream_listener);
+
+  EXPECT_FALSE(HTMLUserMediaElementMediaStream::error(*element));
+
+  DOMException* dom_exception =
+      DOMException::Create("User denied", "NotAllowedError");
+  V8MediaStreamError* error =
+      MakeGarbageCollected<V8UnionDOMExceptionOrOverconstrainedError>(
+          dom_exception);
+  callbacks->OnError(nullptr, error, nullptr,
+                     UserMediaRequestResult::kNotAllowedByUserError);
+
+  // Check that the cancel event was fired and others were not
+  EXPECT_TRUE(cancel_listener->fired());
+  EXPECT_FALSE(error_listener->fired());
+  EXPECT_FALSE(stream_listener->fired());
+
+  // Cancel event should NOT set the error attribute on the element
+  EXPECT_FALSE(HTMLUserMediaElementMediaStream::error(*element));
 }
 
 TEST_F(UserMediaRequestProviderImplTest, StartRequestNoConstraintsError) {

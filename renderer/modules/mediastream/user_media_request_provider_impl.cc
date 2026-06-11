@@ -52,19 +52,22 @@ void UserMediaRequestProviderCallbacks::OnError(
     CaptureController* capture_controller,
     UserMediaRequestResult result) {
   if (element_ && element_->GetExecutionContext()) {
-    base::UmaHistogramBoolean(
-        "Blink.CapabilityElement.UserMedia.GumApi.OverconstrainedError",
-        error->IsOverconstrainedError());
-
-    DOMException* dom_exception = nullptr;
-    if (error->IsDOMException()) {
-      dom_exception = error->GetAsDOMException();
-    } else if (error->IsOverconstrainedError()) {
-      dom_exception = error->GetAsOverconstrainedError();
-    }
-    HTMLUserMediaElementMediaStream::From(*element_).SetError(dom_exception);
     element_->ResetMediaStreamRequestTime();
-    element_->DispatchEvent(*Event::Create(event_type_names::kError));
+    if (result == UserMediaRequestResult::kNotAllowedByUserError) {
+      element_->DispatchEvent(*Event::Create(event_type_names::kCancel));
+    } else {
+      base::UmaHistogramBoolean(
+          "Blink.CapabilityElement.UserMedia.GumApi.OverconstrainedError",
+          error->IsOverconstrainedError());
+      DOMException* dom_exception = nullptr;
+      if (error->IsDOMException()) {
+        dom_exception = error->GetAsDOMException();
+      } else if (error->IsOverconstrainedError()) {
+        dom_exception = error->GetAsOverconstrainedError();
+      }
+      HTMLUserMediaElementMediaStream::From(*element_).SetError(dom_exception);
+      element_->DispatchEvent(*Event::Create(event_type_names::kError));
+    }
   }
 }
 

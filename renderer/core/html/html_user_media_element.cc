@@ -90,7 +90,6 @@ Vector<PermissionDescriptorPtr> ParsePermissionDescriptorsFromString(
 
   return Vector<PermissionDescriptorPtr>();
 }
-
 }  // namespace
 
 // static
@@ -183,6 +182,17 @@ void HTMLUserMediaElement::OnPermissionStatusChange(
   if (PermissionsGranted() && HasPendingPermissionRequest() &&
       has_constraints_) {
     StartMediaStreamRequest();
+  }
+}
+
+void HTMLUserMediaElement::OnEmbeddedPermissionsDecided(
+    mojom::blink::EmbeddedPermissionControlResult result) {
+  // TODO(b/519072607): Make sure only the correct events are dispatched for OT
+  // and MVP clients.
+  HTMLCapabilityElementBase::OnEmbeddedPermissionsDecided(result);
+  if (result == mojom::blink::EmbeddedPermissionControlResult::kDismissed ||
+      result == mojom::blink::EmbeddedPermissionControlResult::kDenied) {
+    DispatchEvent(*Event::Create(event_type_names::kCancel));
   }
 }
 

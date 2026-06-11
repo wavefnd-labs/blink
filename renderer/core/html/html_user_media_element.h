@@ -36,6 +36,8 @@ class CORE_EXPORT HTMLUserMediaElement
   // HTMLCapabilityElementBase
   void OnPermissionStatusChange(mojom::blink::PermissionName permission_name,
                                 mojom::blink::PermissionStatus status) override;
+  void OnEmbeddedPermissionsDecided(
+      mojom::blink::EmbeddedPermissionControlResult result) override;
   void DefaultEventHandler(Event& event) override;
   mojom::blink::EmbeddedPermissionRequestDescriptorPtr
   CreateEmbeddedPermissionRequestDescriptor() override;
