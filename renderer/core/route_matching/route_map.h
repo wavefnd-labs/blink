@@ -21,6 +21,7 @@
 namespace blink {
 
 class Document;
+class Element;
 class JSONValue;
 class Route;
 class URLPattern;
@@ -104,7 +105,9 @@ class CORE_EXPORT RouteMap final : public ScriptWrappable,
 
   // Set the URLs that we're navigating between at the start of navigation. This
   // is used to match @route "from" (and "to") rules.
-  void OnNavigationStart(const KURL& previous_url, const KURL& next_url);
+  void OnNavigationStart(const KURL& previous_url,
+                         const KURL& next_url,
+                         Element* source_element);
 
   void OnNavigationTraverse(NavigationState::HistoryTraverseType type);
 

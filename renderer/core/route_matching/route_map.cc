@@ -8,6 +8,7 @@
 #include "base/check_is_test.h"
 #include "third_party/blink/renderer/core/css/style_engine.h"
 #include "third_party/blink/renderer/core/dom/document.h"
+#include "third_party/blink/renderer/core/dom/element.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
 #include "third_party/blink/renderer/core/route_matching/route.h"
 #include "third_party/blink/renderer/core/route_matching/route_event.h"
@@ -243,12 +244,17 @@ void RouteMap::GetActiveRoutesForTesting(NavigationPreposition preposition,
 }
 
 void RouteMap::OnNavigationStart(const KURL& previous_url,
-                                 const KURL& next_url) {
+                                 const KURL& next_url,
+                                 Element* source_element) {
   DCHECK(!navigation_state_);
-  navigation_state_ =
-      MakeGarbageCollected<NavigationState>(previous_url, next_url);
+  navigation_state_ = MakeGarbageCollected<NavigationState>(
+      previous_url, next_url, source_element);
   UpdateActiveRoutes();
   GetDocument().GetStyleEngine().NavigationsMayHaveChanged();
+
+  if (source_element) {
+    source_element->PseudoStateChanged(CSSSelector::kPseudoTriggerLink);
+  }
 }
 
 void RouteMap::OnNavigationTraverse(NavigationState::HistoryTraverseType type) {
@@ -265,6 +271,11 @@ void RouteMap::OnNavigationCommitted() {
 }
 
 void RouteMap::OnNavigationDone() {
+  if (navigation_state_) {
+    if (Element* source_element = navigation_state_->GetSourceElement()) {
+      source_element->PseudoStateChanged(CSSSelector::kPseudoTriggerLink);
+    }
+  }
   navigation_state_ = nullptr;
   UpdateActiveRoutes();
   GetDocument().GetStyleEngine().NavigationsMayHaveChanged();

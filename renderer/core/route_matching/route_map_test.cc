@@ -46,9 +46,10 @@ TEST_F(RouteMapTest, ParseAndMatch) {
   EXPECT_FALSE(route1->Matches(NavigationPreposition::kAt));
   EXPECT_FALSE(route2->Matches(NavigationPreposition::kAt));
 
+  Element* source_element = nullptr;
   KURL from = start_url;
   KURL to = start_url;
-  route_map.OnNavigationStart(from, to);
+  route_map.OnNavigationStart(from, to, source_element);
   EXPECT_TRUE(route1->Matches(NavigationPreposition::kAt));
   EXPECT_FALSE(route2->Matches(NavigationPreposition::kAt));
   route_map.OnNavigationCommitted();
@@ -59,7 +60,7 @@ TEST_F(RouteMapTest, ParseAndMatch) {
   EXPECT_FALSE(route2->Matches(NavigationPreposition::kAt));
 
   to = KURL("https://example.com/bar");
-  route_map.OnNavigationStart(from, to);
+  route_map.OnNavigationStart(from, to, source_element);
   EXPECT_TRUE(route1->Matches(NavigationPreposition::kAt));
   EXPECT_FALSE(route2->Matches(NavigationPreposition::kAt));
   GetDocument().SetURL(to);
@@ -72,7 +73,7 @@ TEST_F(RouteMapTest, ParseAndMatch) {
 
   from = to;
   to = KURL("https://example.com/baz");
-  route_map.OnNavigationStart(from, to);
+  route_map.OnNavigationStart(from, to, source_element);
   EXPECT_FALSE(route1->Matches(NavigationPreposition::kAt));
   EXPECT_TRUE(route2->Matches(NavigationPreposition::kAt));
   GetDocument().SetURL(to);
@@ -113,7 +114,8 @@ TEST_F(RouteMapTest, GetActiveRoutesForTesting) {
 
   KURL from = start_url;
   KURL to = start_url;
-  route_map.OnNavigationStart(from, to);
+  Element* source_element = nullptr;
+  route_map.OnNavigationStart(from, to, source_element);
   route_map.GetActiveRoutesForTesting(NavigationPreposition::kAt, &collection);
   EXPECT_EQ(2u, collection.size());
   GetDocument().SetURL(to);
@@ -126,7 +128,7 @@ TEST_F(RouteMapTest, GetActiveRoutesForTesting) {
   EXPECT_EQ(0u, collection.size());
 
   to = KURL("https://example.com/bar");
-  route_map.OnNavigationStart(from, to);
+  route_map.OnNavigationStart(from, to, source_element);
   route_map.GetActiveRoutesForTesting(NavigationPreposition::kAt, &collection);
   EXPECT_EQ(2u, collection.size());
   GetDocument().SetURL(to);

@@ -7,11 +7,13 @@
 
 #include "third_party/blink/renderer/core/route_matching/navigation_phase.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
+#include "third_party/blink/renderer/platform/heap/member.h"
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 
 namespace blink {
 
 class Document;
+class Element;
 
 // Based on "navigation state":
 // https://drafts.csswg.org/css-navigation-1/#processing-model
@@ -23,8 +25,10 @@ class NavigationState : public GarbageCollected<NavigationState> {
     kForward,
   };
 
-  NavigationState(const KURL& old_url, const KURL& new_url)
-      : old_url_(old_url), new_url_(new_url) {}
+  NavigationState(const KURL& old_url,
+                  const KURL& new_url,
+                  Element* source_element)
+      : old_url_(old_url), new_url_(new_url), source_element_(source_element) {}
 
   static const NavigationState* Get(const Document*);
 
@@ -32,6 +36,7 @@ class NavigationState : public GarbageCollected<NavigationState> {
 
   bool Equal(const NavigationState& other) const {
     return old_url_ == other.old_url_ && new_url_ == other.new_url_ &&
+           source_element_ == other.source_element_ &&
            traverse_type_ == other.traverse_type_ && phase_ == other.phase_ &&
            is_in_preview_ == other.is_in_preview_;
   }
@@ -40,6 +45,9 @@ class NavigationState : public GarbageCollected<NavigationState> {
 
   KURL GetOldURL() const { return old_url_; }
   KURL GetNewURL() const { return new_url_; }
+
+  Element* GetSourceElement() { return source_element_; }
+  const Element* GetSourceElement() const { return source_element_; }
 
   void SetTraverseType(HistoryTraverseType type) { traverse_type_ = type; }
   HistoryTraverseType GetTraverseType() const { return traverse_type_; }
@@ -53,6 +61,8 @@ class NavigationState : public GarbageCollected<NavigationState> {
  private:
   KURL old_url_;
   KURL new_url_;
+
+  Member<Element> source_element_;
 
   HistoryTraverseType traverse_type_ = kNotTraversing;
   NavigationPhase phase_ = NavigationPhase::kLoading;

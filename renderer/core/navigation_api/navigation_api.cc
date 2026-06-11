@@ -873,7 +873,8 @@ NavigationApi::DispatchResult NavigationApi::DispatchNavigateEvent(
   ongoing_navigate_event_ = navigate_event;
 
   if (auto* routemap = RouteMap::Get(window_->document())) {
-    routemap->OnNavigationStart(window_->Url(), params->url);
+    routemap->OnNavigationStart(window_->Url(), params->url,
+                                params->source_element);
     if (params->frame_load_type == WebFrameLoadType::kBackForward &&
         routemap->HasHistoryRules() && destination_entry) {
       int previous_index = GetIndexFor(currentEntry());

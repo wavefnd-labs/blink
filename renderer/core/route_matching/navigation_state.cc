@@ -5,6 +5,7 @@
 #include "third_party/blink/renderer/core/route_matching/navigation_state.h"
 
 #include "third_party/blink/renderer/core/dom/document.h"
+#include "third_party/blink/renderer/core/dom/element.h"
 #include "third_party/blink/renderer/core/route_matching/route_map.h"
 
 namespace blink {
@@ -17,6 +18,8 @@ const NavigationState* NavigationState::Get(const Document* document) {
   return route_map->GetNavigationState();
 }
 
-void NavigationState::Trace(Visitor*) const {}
+void NavigationState::Trace(Visitor* visitor) const {
+  visitor->Trace(source_element_);
+}
 
 }  // namespace blink
