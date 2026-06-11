@@ -64,6 +64,13 @@ class MockCanvasResourceDispatcher : public CanvasResourceDispatcher {
     CanvasResourceDispatcher::OnMainThreadReceivedImage();
   }
 
+  void PostImageToPlaceholder(
+      scoped_refptr<ExportedCanvasResource>&& resource) override {
+    CanvasResourceDispatcher::PostImageToPlaceholder(std::move(resource));
+    OnPostImageToPlaceholder();
+  }
+
+  MOCK_METHOD0(OnPostImageToPlaceholder, void());
   MOCK_METHOD0(MainThreadReceivedImage, void());
 };
 
@@ -286,6 +293,96 @@ TEST_F(OffscreenCanvasPlaceholderTest,
   EXPECT_EQ(deferred_state, client()->GetAnimationState());
 }
 
+TEST_F(OffscreenCanvasPlaceholderTest, PlaceholderRunsNormally) {
+  CreateDispatcher();
+  // Post first frame
+  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
+  DispatchOneFrame();
+  EXPECT_EQ(1u, GetNumPendingPlaceholderResources());
+  Mock::VerifyAndClearExpectations(dispatcher());
+
+  // Post second frame
+  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
+  DispatchOneFrame();
+  EXPECT_EQ(2u, GetNumPendingPlaceholderResources());
+  Mock::VerifyAndClearExpectations(dispatcher());
+
+  // Post third frame
+  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
+  DispatchOneFrame();
+  EXPECT_EQ(3u, GetNumPendingPlaceholderResources());
+  EXPECT_EQ(nullptr, GetLatestUnpostedImage());
+  Mock::VerifyAndClearExpectations(dispatcher());
+
+  // Receive first frame
+  dispatcher()->OnMainThreadReceivedImage();
+  EXPECT_EQ(2u, GetNumPendingPlaceholderResources());
+
+  // Receive second frame
+  dispatcher()->OnMainThreadReceivedImage();
+  EXPECT_EQ(1u, GetNumPendingPlaceholderResources());
+
+  // Receive third frame
+  dispatcher()->OnMainThreadReceivedImage();
+  EXPECT_EQ(0u, GetNumPendingPlaceholderResources());
+}
+
+TEST_F(OffscreenCanvasPlaceholderTest,
+       AgentGroupSchedulerCompositorTaskRunnerIsNull) {
+  CreateDispatcher(nullptr);
+
+  // When agent_group_scheduler_compositor_task_runner is null,
+  // OnPostImageToPlaceholder should not be called.
+  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder()).Times(0);
+  DispatchOneFrame();
+  EXPECT_EQ(0u, GetNumPendingPlaceholderResources());
+}
+
+TEST_F(OffscreenCanvasPlaceholderTest, PlaceholderBeingBlocked) {
+  CreateDispatcher();
+  /* When main thread is blocked, attempting to post one more than the max
+   * number of pending frames will result in the latest attempt being saved as
+   * an unposted resource. */
+  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder())
+      .Times(CanvasResourceDispatcher::kMaxPendingPlaceholderResources);
+
+  // Attempt to post kMaxPendingPlaceholderResources+1 times
+  for (unsigned i = 0;
+       i < CanvasResourceDispatcher::kMaxPendingPlaceholderResources + 1; i++) {
+    DispatchOneFrame();
+  }
+  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources,
+            GetNumPendingPlaceholderResources());
+  EXPECT_TRUE(GetLatestUnpostedImage());
+
+  // Attempt to post again. The latest unposted image will be replaced.
+  DispatchOneFrame();
+  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources,
+            GetNumPendingPlaceholderResources());
+  EXPECT_TRUE(GetLatestUnpostedImage());
+
+  Mock::VerifyAndClearExpectations(dispatcher());
+
+  /* The main thread becoming unblocked will trigger CanvasResourceDispatcher
+   * to post the last saved image. */
+  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder());
+  dispatcher()->OnMainThreadReceivedImage();
+
+  // The main thread received 1 frame and the dispatcher thread posted 1 frame,
+  // so the number of pending placeholder resources should have remained the
+  // same.
+  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources,
+            GetNumPendingPlaceholderResources());
+  // Not generating new resource Id
+  EXPECT_FALSE(GetLatestUnpostedImage());
+  Mock::VerifyAndClearExpectations(dispatcher());
+
+  EXPECT_CALL(*(dispatcher()), OnPostImageToPlaceholder()).Times(0);
+  dispatcher()->OnMainThreadReceivedImage();
+  EXPECT_EQ(CanvasResourceDispatcher::kMaxPendingPlaceholderResources - 1,
+            GetNumPendingPlaceholderResources());
+  Mock::VerifyAndClearExpectations(dispatcher());
+}
 }  // namespace
 
 }  // namespace blink
