@@ -26,6 +26,8 @@
 #ifndef THIRD_PARTY_BLINK_RENDERER_CORE_EDITING_COMMANDS_COMPOSITE_EDIT_COMMAND_H_
 #define THIRD_PARTY_BLINK_RENDERER_CORE_EDITING_COMMANDS_COMPOSITE_EDIT_COMMAND_H_
 
+#include <utility>
+
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/css/css_property_names.h"
 #include "third_party/blink/renderer/core/editing/commands/edit_command.h"
@@ -260,6 +262,17 @@ class CORE_EXPORT CompositeEditCommand : public EditCommand {
 
  private:
   bool IsCompositeEditCommand() const final { return true; }
+
+  // Helpers extracted from MoveParagraphs. VP callers compute the inputs
+  // (Position via `.DeepEquivalent()`).
+  std::pair<Position, Position> ComputeNormalizedMoveRange(
+      const Position& start_of_paragraph,
+      const Position& end_of_paragraph);
+  EditingStyle* CaptureStyleInEmptyParagraph(
+      const Position& start_of_paragraph);
+  // Sets the ending selection to the delete range [start, end]. Mirrors into
+  // the raw-DOM lane when EditingUseDomPositionApi is enabled.
+  void SetEndingSelectionToDelete(const Position& start, const Position& end);
 
   SelectionForUndoStep starting_selection_;
   SelectionForUndoStep ending_selection_;
