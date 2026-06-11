@@ -58,6 +58,7 @@
 #include "third_party/blink/public/mojom/manifest/display_mode.mojom-blink.h"
 #include "third_party/blink/public/mojom/page/widget.mojom-blink.h"
 #include "third_party/blink/public/mojom/scroll/scroll_into_view_params.mojom-blink-forward.h"
+#include "third_party/blink/public/mojom/unbounded_element/unbounded_element.mojom-blink.h"
 #include "third_party/blink/public/platform/cross_variant_mojo_util.h"
 #include "third_party/blink/public/platform/web_drag_data.h"
 #include "third_party/blink/public/web/web_frame_widget.h"

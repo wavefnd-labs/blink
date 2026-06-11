@@ -32,6 +32,7 @@
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/mojom/forms/form_control_type.mojom-blink.h"
 #include "third_party/blink/public/mojom/frame/frame.mojom-blink.h"
+#include "third_party/blink/public/mojom/unbounded_element/unbounded_element.mojom-blink.h"
 #include "third_party/blink/renderer/bindings/core/v8/js_event_handler_for_content_attribute.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_attach_internals_options.h"
