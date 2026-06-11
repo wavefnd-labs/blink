@@ -249,11 +249,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
 
   std::unique_ptr<CanvasImageProvider> canvas_image_provider_;
 
-  const cc::PaintImage::Id snapshot_paint_image_id_;
-  cc::PaintImage::ContentId snapshot_paint_image_content_id_ =
-      cc::PaintImage::kInvalidContentId;
-  uint32_t snapshot_sk_image_id_ = 0u;
-
   bool always_enable_raster_timers_for_testing_ = false;
 
   bool clear_frame_ = true;
@@ -360,6 +355,10 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   raw_ptr<Delegate> delegate_ = nullptr;
   mutable sk_sp<SkSurface> surface_;
   std::unique_ptr<cc::SkiaPaintCanvas> skia_canvas_;
+  const cc::PaintImage::Id snapshot_paint_image_id_;
+  cc::PaintImage::ContentId snapshot_paint_image_content_id_ =
+      cc::PaintImage::kInvalidContentId;
+  uint32_t snapshot_sk_image_id_ = 0u;
 };
 
 // * Subclass of CanvasResourceProvider that is specialized for usage
@@ -616,6 +615,10 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   raw_ptr<Delegate> delegate_ = nullptr;
   mutable sk_sp<SkSurface> surface_;
   std::unique_ptr<cc::SkiaPaintCanvas> skia_canvas_;
+  const cc::PaintImage::Id snapshot_paint_image_id_;
+  cc::PaintImage::ContentId snapshot_paint_image_content_id_ =
+      cc::PaintImage::kInvalidContentId;
+  uint32_t snapshot_sk_image_id_ = 0u;
 
   base::WeakPtrFactory<Canvas2DResourceProviderSharedImage> weak_ptr_factory_{
       this};
