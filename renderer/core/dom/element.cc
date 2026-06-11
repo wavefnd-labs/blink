@@ -8550,11 +8550,11 @@ void Element::UpdateSelectionOnFocus(
     frame->Selection().SetSelection(
         RuntimeEnabledFeatures::RemoveVisibleSelectionInDOMSelectionEnabled()
             ? CreateVisibleSelection(
-                  SelectionInDOMTree::Builder()
+                  SelectionInDomTree::Builder()
                       .Collapse(FirstPositionInOrBeforeNode(*this))
                       .Build())
                   .AsSelection()
-            : SelectionInDOMTree::Builder()
+            : SelectionInDomTree::Builder()
                   .Collapse(FirstPositionInOrBeforeNode(*this))
                   .Build(),
         SetSelectionOptions::Builder()

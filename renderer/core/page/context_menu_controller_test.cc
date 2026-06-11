@@ -2012,7 +2012,7 @@ TEST_F(ContextMenuControllerTest,
   const auto& selected_end = Position(first_paragraph, 9);
 
   GetDocument()->GetFrame()->Selection().SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(selected_start, selected_end)
           .Build(),
       SetSelectionOptions());
@@ -2285,7 +2285,7 @@ TEST_F(ContextMenuControllerTest, SelectUnselectableContent) {
   const auto& start = Position(element->firstChild(), 0);
   const auto& end = Position(element->lastChild(), 2);
   document->GetFrame()->Selection().SetSelection(
-      SelectionInDOMTree::Builder().SetBaseAndExtent(start, end).Build(),
+      SelectionInDomTree::Builder().SetBaseAndExtent(start, end).Build(),
       SetSelectionOptions());
 
   // The context menu should omit the unselectable content from the selected

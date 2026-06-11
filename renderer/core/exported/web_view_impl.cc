@@ -1987,7 +1987,7 @@ void WebViewImpl::SetPageFocus(bool enable) {
           // caret back to the beginning of the text.
           Position position(element, 0);
           focused_frame->Selection().SetSelection(
-              SelectionInDOMTree::Builder().Collapse(position).Build(),
+              SelectionInDomTree::Builder().Collapse(position).Build(),
               SetSelectionOptions());
         }
       }

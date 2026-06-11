@@ -1581,7 +1581,7 @@ void WebLocalFrameImpl::SelectRange(
   const bool selection_not_set_focus =
       selection_set_focus_behavior == kSelectionDoNotSetFocus;
   selection.SetSelection(
-      SelectionInDOMTree::Builder()
+      SelectionInDomTree::Builder()
           .SetBaseAndExtent(range)
           .SetAffinity(TextAffinity::kDefault)
           .Build(),
