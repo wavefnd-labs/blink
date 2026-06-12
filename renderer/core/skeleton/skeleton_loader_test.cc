@@ -9,6 +9,7 @@
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/dom/element.h"
 #include "third_party/blink/renderer/core/dom/pseudo_element.h"
+#include "third_party/blink/renderer/core/html/html_document.h"
 #include "third_party/blink/renderer/core/testing/null_execution_context.h"
 #include "third_party/blink/renderer/core/testing/page_test_base.h"
 #include "third_party/blink/renderer/core/testing/sim/sim_request.h"
@@ -21,10 +22,11 @@ class SkeletonLoaderSimTest : public SimTest {};
 
 class SkeletonLoaderTest : public PageTestBase {
  protected:
-  void InsertSkeletonTree(const String&) {
+  void InsertSkeletonTree(const String& source) {
     ScopedNullExecutionContext execution_context;
-    Document* skeleton_document =
-        Document::CreateForTest(execution_context.GetExecutionContext());
+    HTMLDocument* skeleton_document =
+        HTMLDocument::CreateForTest(execution_context.GetExecutionContext());
+    skeleton_document->SetContent(source);
     SkeletonLoader::Ensure(GetDocument())
         .InsertSkeletonTree(*skeleton_document);
   }
