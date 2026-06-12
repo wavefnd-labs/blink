@@ -64,14 +64,6 @@ void OffscreenCanvasPlaceholder::Client::UpdatePlaceholderImage(
 
 void OffscreenCanvasPlaceholder::Client::DispatchFrame(
     scoped_refptr<ExportedCanvasResource> exported_resource) {
-  if (placeholder_canvas_id_ == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
-      // `placeholder_task_runner_` may be null if this
-      // was created from a SharedWorker.
-      !placeholder_task_runner_) {
-    exported_resource.reset();
-    return;
-  }
-
   // Determines whether the main thread may be blocked. If unblocked, post
   // |canvas_resource|. Otherwise, save it but do not post it.
   if (num_pending_placeholder_resources_ < kMaxPendingPlaceholderResources) {
@@ -80,9 +72,6 @@ void OffscreenCanvasPlaceholder::Client::DispatchFrame(
   } else {
     DCHECK(num_pending_placeholder_resources_ ==
            kMaxPendingPlaceholderResources);
-
-    // The previous unposted resource becomes obsolete now.
-    latest_unposted_resource_.reset();
 
     latest_unposted_resource_ = std::move(exported_resource);
   }
@@ -119,14 +108,7 @@ void OffscreenCanvasPlaceholder::Client::OnMainThreadReceivedImage() {
 }
 
 void OffscreenCanvasPlaceholder::Client::RegisterWithPlaceholder() {
-  // `agent_group_scheduler_compositor_task_runner_` may be null if this
-  // was created from a SharedWorker.
-  if (!placeholder_task_runner_) {
-    return;
-  }
-
-  if (placeholder_canvas_id_ == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
-      placeholder_canvas_id_ == kInvalidDOMNodeId) {
+  if (placeholder_canvas_id_ == kInvalidDOMNodeId) {
     return;
   }
 
@@ -159,6 +141,10 @@ OffscreenCanvasPlaceholder::Client::Client(
       placeholder_canvas_id_(placeholder_canvas_id),
       canvas_task_runner_(std::move(canvas_task_runner)),
       placeholder_task_runner_(std::move(placeholder_task_runner)) {
+  CHECK(canvas_task_runner_);
+  CHECK(placeholder_task_runner_);
+  CHECK_NE(placeholder_canvas_id_, kNoPlaceholderId);
+
   RegisterWithPlaceholder();
 }
 

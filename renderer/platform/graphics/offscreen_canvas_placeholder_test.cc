@@ -24,12 +24,10 @@ namespace blink {
 
 class MockPlaceholderClient : public OffscreenCanvasPlaceholder::Client {
  public:
-  explicit MockPlaceholderClient(
-      DOMNodeId placeholder_id,
-      scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner)
+  explicit MockPlaceholderClient(DOMNodeId placeholder_id)
       : OffscreenCanvasPlaceholder::Client(
             placeholder_id,
-            placeholder_task_runner,
+            scheduler::GetSingleThreadTaskRunnerForTesting(),
             scheduler::GetSingleThreadTaskRunnerForTesting(),
             base::BindRepeating(&MockPlaceholderClient::OnAnimationStateUpdated,
                                 base::Unretained(this))) {}
@@ -66,9 +64,7 @@ class OffscreenCanvasPlaceholderTest : public Test {
 
   CanvasResource* DispatchOneFrame();
   scoped_refptr<CanvasResource> DrawSomething();
-  void CreateClient(
-      scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner =
-          scheduler::GetSingleThreadTaskRunnerForTesting());
+  void CreateClient();
 
  protected:
   void SetUp() override;
@@ -107,10 +103,9 @@ void OffscreenCanvasPlaceholderTest::TearDown() {
   Test::TearDown();
 }
 
-void OffscreenCanvasPlaceholderTest::CreateClient(
-    scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner) {
-  placeholder_client_ = std::make_unique<MockPlaceholderClient>(
-      placeholder_id_, placeholder_task_runner);
+void OffscreenCanvasPlaceholderTest::CreateClient() {
+  placeholder_client_ =
+      std::make_unique<MockPlaceholderClient>(placeholder_id_);
   resource_provider_ =
       CanvasNon2DResourceProviderSharedImage::CreateForSoftwareCompositor(
           gfx::Size(10, 10), GetN32FormatForCanvas(), kPremul_SkAlphaType,
@@ -291,17 +286,6 @@ TEST_F(OffscreenCanvasPlaceholderTest, PlaceholderRunsNormally) {
 
   // Receive third frame
   client()->OnMainThreadReceivedImage();
-  EXPECT_EQ(0u, GetNumPendingPlaceholderResources());
-}
-
-TEST_F(OffscreenCanvasPlaceholderTest,
-       AgentGroupSchedulerCompositorTaskRunnerIsNull) {
-  CreateClient(nullptr);
-
-  // When agent_group_scheduler_compositor_task_runner is null,
-  // OnPostImageToPlaceholder should not be called.
-  EXPECT_CALL(*(client()), OnPostImageToPlaceholder()).Times(0);
-  DispatchOneFrame();
   EXPECT_EQ(0u, GetNumPendingPlaceholderResources());
 }
 
