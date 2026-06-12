@@ -15,24 +15,22 @@
 
 namespace blink {
 
-void RouteLocation::Trace(Visitor* v) const {
-  v->Trace(url_pattern_);
-}
-
 const Route* RouteLocation::FindOrCreateRoute(Document& document) const {
-  if (url_pattern_) {
+  if (type_ == kUrlPattern) {
     // A URLPattern becomes an anonymous route. One route for each unique
     // URLPattern.
-    RouteMap::Ensure(document).AddAnonymousRoute(url_pattern_);
+    RouteMap::Ensure(document).AddAnonymousRoute(value_);
   }
   const auto* route_map = RouteMap::Get(&document);
   if (!route_map) {
     return nullptr;
   }
-  if (url_pattern_) {
-    return route_map->FindRoute(url_pattern_);
+  switch (type_) {
+    case kUrlPattern:
+      return route_map->FindAnonymousRoute(value_);
+    case kRoute:
+      return route_map->FindRoute(value_);
   }
-  return route_map->FindRoute(GetRouteName());
 }
 
 bool RouteLocation::CheckSelectorMatch(
@@ -49,13 +47,16 @@ bool RouteLocation::CheckSelectorMatch(
 }
 
 void RouteLocation::SerializeTo(StringBuilder& builder) const {
-  DCHECK(!string_.IsNull());
-  if (url_pattern_) {
-    builder.Append("url-pattern(");
-    SerializeString(string_, builder);
-    builder.Append(")");
-  } else {
-    SerializeIdentifier(string_, builder);
+  DCHECK(!value_.IsNull());
+  switch (type_) {
+    case kUrlPattern:
+      builder.Append("url-pattern(");
+      SerializeString(value_, builder);
+      builder.Append(")");
+      break;
+    case kRoute:
+      SerializeIdentifier(value_, builder);
+      break;
   }
 }
 

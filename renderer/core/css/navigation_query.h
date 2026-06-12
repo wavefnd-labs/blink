@@ -28,29 +28,18 @@ class URLPattern;
 // url-pattern() - OR url().
 class RouteLocation : public GarbageCollected<RouteLocation> {
  public:
-  explicit RouteLocation(const AtomicString& navigation_name)
-      : string_(navigation_name) {}
-  RouteLocation(URLPattern* url_pattern,
-                const AtomicString& original_url_pattern_string)
-      : url_pattern_(url_pattern), string_(original_url_pattern_string) {}
+  enum Type {
+    kRoute,
+    kUrlPattern,
+  };
 
-  void Trace(Visitor*) const;
+  RouteLocation(Type type, const AtomicString& value)
+      : type_(type), value_(value) {}
 
-  URLPattern* GetURLPattern() const { return url_pattern_; }
+  void Trace(Visitor*) const {}
 
-  const AtomicString& OriginalURLPatternString() const {
-    if (url_pattern_) {
-      return string_;
-    }
-    return g_null_atom;
-  }
-
-  const AtomicString& GetRouteName() const {
-    if (url_pattern_) {
-      return g_null_atom;
-    }
-    return string_;
-  }
+  Type GetType() const { return type_; }
+  const AtomicString& GetValue() const { return value_; }
 
   // Look for a `Route` entry in the route map. Additionally, if this
   // <route-location> is a URLPattern, an entry will be inserted if it's
@@ -63,13 +52,8 @@ class RouteLocation : public GarbageCollected<RouteLocation> {
   void SerializeTo(StringBuilder&) const;
 
  private:
-  Member<URLPattern> url_pattern_;
-
-  // Route name, or, if `url_pattern_` is set, the original URLPattern
-  // string. The reason for storing the original string is for
-  // serialization. The URLPattern API deliberately doesn't support
-  // serialization.
-  AtomicString string_;
+  Type type_;
+  AtomicString value_;
 };
 
 // <navigation-test>
