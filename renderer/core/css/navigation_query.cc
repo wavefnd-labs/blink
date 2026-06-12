@@ -16,9 +16,9 @@
 namespace blink {
 
 const Route* RouteLocation::FindOrCreateRoute(Document& document) const {
-  if (type_ == kUrlPattern) {
-    // A URLPattern becomes an anonymous route. One route for each unique
-    // URLPattern.
+  if (type_ == kUrlPattern || type_ == kUrl) {
+    // url-pattern() and url() become anonymous routes. One route for each
+    // unique entry.
     RouteMap::Ensure(document).AddAnonymousRoute(value_);
   }
   const auto* route_map = RouteMap::Get(&document);
@@ -26,9 +26,10 @@ const Route* RouteLocation::FindOrCreateRoute(Document& document) const {
     return nullptr;
   }
   switch (type_) {
+    case kUrl:
     case kUrlPattern:
       return route_map->FindAnonymousRoute(value_);
-    case kRoute:
+    case kRouteName:
       return route_map->FindRoute(value_);
   }
 }
@@ -54,7 +55,12 @@ void RouteLocation::SerializeTo(StringBuilder& builder) const {
       SerializeString(value_, builder);
       builder.Append(")");
       break;
-    case kRoute:
+    case kUrl:
+      builder.Append("url(");
+      SerializeString(value_, builder);
+      builder.Append(")");
+      break;
+    case kRouteName:
       SerializeIdentifier(value_, builder);
       break;
   }

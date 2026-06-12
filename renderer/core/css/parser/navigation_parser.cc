@@ -129,26 +129,44 @@ RouteLocation* NavigationParser::ParseLocation(CSSParserTokenStream& stream) {
     // <route-name>
     AtomicString route_name(
         stream.ConsumeIncludingWhitespace().Value().ToString());
-    return MakeGarbageCollected<RouteLocation>(RouteLocation::kRoute,
+    return MakeGarbageCollected<RouteLocation>(RouteLocation::kRouteName,
                                                route_name);
   }
 
-  // <url-pattern()>
-  if (stream.Peek().GetType() != kFunctionToken ||
-      stream.Peek().Value() != "url-pattern") {
-    return nullptr;
+  RouteLocation::Type type;
+  AtomicString value;
+  if (stream.Peek().GetType() == kUrlToken) {
+    // Unquoted url().
+    CSSParserToken token = stream.ConsumeIncludingWhitespace();
+    type = RouteLocation::kUrl;
+    value = token.Value().ToAtomicString();
+  } else {
+    // url-pattern() or quoted url().
+    if (stream.Peek().GetType() != kFunctionToken) {
+      return nullptr;
+    }
+    const AtomicString arg(stream.Peek().Value());
+    if (EqualIgnoringAsciiCase(arg, "url-pattern")) {
+      type = RouteLocation::kUrlPattern;
+    } else if (EqualIgnoringAsciiCase(arg, "url")) {
+      type = RouteLocation::kUrl;
+    } else {
+      return nullptr;
+    }
+
+    CSSParserTokenStream::BlockGuard guard(stream);
+    stream.ConsumeWhitespace();
+    if (stream.Peek().GetType() != kStringToken) {
+      return nullptr;
+    }
+    const CSSParserToken& token = stream.ConsumeIncludingWhitespace();
+    if (token.GetType() == kBadStringToken || !stream.UncheckedAtEnd()) {
+      return nullptr;
+    }
+    value = token.Value().ToAtomicString();
   }
-  CSSParserTokenStream::BlockGuard guard(stream);
-  stream.ConsumeWhitespace();
-  if (stream.Peek().GetType() != kStringToken) {
-    return nullptr;
-  }
-  const CSSParserToken& pattern = stream.ConsumeIncludingWhitespace();
-  if (pattern.GetType() == kBadStringToken || !stream.UncheckedAtEnd()) {
-    return nullptr;
-  }
-  return MakeGarbageCollected<RouteLocation>(RouteLocation::kUrlPattern,
-                                             pattern.Value().ToAtomicString());
+
+  return MakeGarbageCollected<RouteLocation>(type, value);
 }
 
 std::optional<NavigationPreposition> NavigationParser::ParsePrepositionIdent(

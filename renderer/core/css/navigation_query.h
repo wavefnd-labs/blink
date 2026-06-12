@@ -23,14 +23,12 @@ class URLPattern;
 // <route-location>
 //
 // https://drafts.csswg.org/css-navigation-1/#typedef-route-location
-//
-// TODO(crbug.com/436805487): Add support for url(). It can be route,
-// url-pattern() - OR url().
 class RouteLocation : public GarbageCollected<RouteLocation> {
  public:
   enum Type {
-    kRoute,
+    kRouteName,
     kUrlPattern,
+    kUrl,
   };
 
   RouteLocation(Type type, const AtomicString& value)
