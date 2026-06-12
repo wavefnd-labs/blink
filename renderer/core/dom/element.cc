@@ -7476,6 +7476,13 @@ bool Element::IsActivatedSubmit() const {
 }
 
 bool Element::CanAttachShadowRoot() const {
+  if (namespaceURI() != html_names::xhtmlNamespaceURI) {
+    UseCounter::Count(GetDocument(),
+                      WebFeature::kElementAttachShadowNonHTMLNamespace);
+    if (RuntimeEnabledFeatures::ShadowRootNamespaceCheckEnabled()) {
+      return false;
+    }
+  }
   const AtomicString& local_name = localName();
   // Checking IsCustomElement() here is just an optimization
   // because IsValidName is not cheap.
@@ -7490,6 +7497,8 @@ const char* Element::ErrorMessageForAttachShadow(
   // https://dom.spec.whatwg.org/#concept-attach-a-shadow-root
   // 1. If shadow host’s namespace is not the HTML namespace, then throw a
   // "NotSupportedError" DOMException.
+  // TODO(crbug.com/521896365): CanAttachShadowRoot() doesn't actually check the
+  // namespace.
   // 2. If shadow host’s local name is not a valid custom element name,
   // "article", "aside", "blockquote", "body", "div", "footer", "h1", "h2",
   // "h3", "h4", "h5", "h6", "header", "main", "nav", "p", "section", or "span",
