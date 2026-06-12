@@ -5410,8 +5410,9 @@ String AXNodeObject::TextAlternative(
     // <img> can be used to indicate that the image is presentational and should
     // be ignored by ATs.
     name_from = ax::mojom::blink::NameFrom::kAttributeExplicitlyEmpty;
+  } else {
+    name_from = ax::mojom::blink::NameFrom::kNone;
   }
-
   return String();
 }
 
@@ -7654,7 +7655,6 @@ String AXNodeObject::GetSavedTextAlternativeFromNameSource(
     ax::mojom::NameFrom& name_from,
     AXRelatedObjectVector* related_objects,
     NameSources* name_sources) {
-  name_from = ax::mojom::blink::NameFrom::kNone;
   if (!name_sources || !found_text_alternative) {
     return String();
   }
