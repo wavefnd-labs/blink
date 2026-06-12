@@ -75,17 +75,21 @@ CanvasResourceDispatcher::CanvasResourceDispatcher(
                                 surface_embedder_.BindNewPipeAndPassReceiver());
   }
 
-  // `OffscreenCanvasPlaceholder::Client` runs callbacks synchronously and lives
-  // on the same thread. Because dispatcher owns client, Unretained is fine.
-  placeholder_client_ = std::make_unique<OffscreenCanvasPlaceholder::Client>(
-      placeholder_canvas_id_, agent_group_scheduler_compositor_task_runner_,
-      task_runner_,
-      base::BindRepeating(
-          [](CanvasResourceDispatcher* dispatcher) {
-            dispatcher->SetAnimationState(
-                dispatcher->placeholder_client_->GetAnimationState());
-          },
-          base::Unretained(this)));
+  if (placeholder_canvas_id_ != OffscreenCanvasPlaceholder::kNoPlaceholderId &&
+      agent_group_scheduler_compositor_task_runner_) {
+    // `OffscreenCanvasPlaceholder::Client` runs callbacks synchronously and
+    // lives on the same thread. Because dispatcher owns client, Unretained is
+    // fine.
+    placeholder_client_ = std::make_unique<OffscreenCanvasPlaceholder::Client>(
+        placeholder_canvas_id_, agent_group_scheduler_compositor_task_runner_,
+        task_runner_,
+        base::BindRepeating(
+            [](CanvasResourceDispatcher* dispatcher) {
+              dispatcher->SetAnimationState(
+                  dispatcher->placeholder_client_->GetAnimationState());
+            },
+            base::Unretained(this)));
+  }
 }
 
 CanvasResourceDispatcher::~CanvasResourceDispatcher() = default;
@@ -102,10 +106,12 @@ void CanvasResourceDispatcher::DispatchFrame(
   auto exported_resource =
       base::MakeRefCounted<ExportedCanvasResource>(std::move(canvas_resource));
 
-  // This takes another ref and sends it to the placeholder. The
-  // ExternalCanvasResource will be destroyed when both display compositor and
-  // placeholder are done with it, returning underlying memory to the owner.
-  placeholder_client_->DispatchFrame(exported_resource);
+  if (placeholder_client_) {
+    // This takes another ref and sends it to the placeholder. The
+    // ExternalCanvasResource will be destroyed when both display compositor and
+    // placeholder are done with it, returning underlying memory to the owner.
+    placeholder_client_->DispatchFrame(exported_resource);
+  }
 
   // For frameless canvas, we don't get a valid frame_sink_id and should drop.
   if (!frame_sink_id_.is_valid()) {
