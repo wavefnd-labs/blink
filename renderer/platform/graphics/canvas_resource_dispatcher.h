@@ -152,8 +152,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
   TaskRunnerTimer<CanvasResourceDispatcher> fake_frame_timer_;
 
-  std::unique_ptr<OffscreenCanvasPlaceholder::Client> placeholder_client_;
-
   base::WeakPtrFactory<CanvasResourceDispatcher> weak_ptr_factory_{this};
 };
 
