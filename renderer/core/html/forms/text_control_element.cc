@@ -956,6 +956,9 @@ Node* TextControlElement::CreatePlaceholderBreakElement() const {
   auto* element = MakeGarbageCollected<HTMLBRElement>(GetDocument());
   element->setAttribute(html_names::kIdAttr,
                         shadow_element_names::kIdPlaceholderBreak);
+  if (RuntimeEnabledFeatures::TextAreaEmptyPlaceholderBreakEnabled()) {
+    element->setAttribute(html_names::kAriaHiddenAttr, keywords::kTrue);
+  }
   return element;
 }
 
@@ -993,6 +996,13 @@ void TextControlElement::AdjustPlaceholderBreakElement() {
       // exists.
       last_child->remove();
     }
+    return;
+  }
+  if (RuntimeEnabledFeatures::TextAreaEmptyPlaceholderBreakEnabled() &&
+      !last_child && IsA<HTMLTextAreaElement>(this)) {
+    // We need a placeholder break for an empty value in order to provide one
+    // line-height and a baseline even if this element is not editable.
+    inner_editor->AppendChild(CreatePlaceholderBreakElement());
     return;
   }
   auto* last_child_text_node = DynamicTo<Text>(last_child);
