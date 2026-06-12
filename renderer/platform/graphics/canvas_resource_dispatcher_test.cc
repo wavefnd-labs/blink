@@ -52,26 +52,6 @@ class MockCanvasResourceDispatcherClient
   MOCK_METHOD(bool, BeginFrame, (), (override));
 };
 
-class MockCanvasResourceDispatcher : public CanvasResourceDispatcher {
- public:
-  explicit MockCanvasResourceDispatcher(
-      scoped_refptr<base::SingleThreadTaskRunner>
-          agent_group_scheduler_compositor_task_runner)
-      : CanvasResourceDispatcher(
-            &client_,
-            /*task_runner=*/scheduler::GetSingleThreadTaskRunnerForTesting(),
-            agent_group_scheduler_compositor_task_runner,
-            kClientId,
-            kSinkId,
-            /*placeholder_canvas_id=*/0,
-            /*canvas_size=*/{kWidth, kHeight}) {}
-
-  MockCanvasResourceDispatcherClient& MockClient() { return client_; }
-
- private:
-  MockCanvasResourceDispatcherClient client_;
-};
-
 }  // namespace
 
 class CanvasResourceDispatcherTest
@@ -95,15 +75,16 @@ class CanvasResourceDispatcherTest
  protected:
   CanvasResourceDispatcherTest() = default;
 
-  void CreateDispatcher(
-      scoped_refptr<base::SingleThreadTaskRunner>
-          agent_group_scheduler_compositor_task_runner =
-              scheduler::GetSingleThreadTaskRunnerForTesting()) {
+  void CreateDispatcher() {
     test_web_shared_image_interface_provider_ =
         TestWebGraphicsSharedImageInterfaceProvider::Create();
 
-    dispatcher_ = std::make_unique<MockCanvasResourceDispatcher>(
-        agent_group_scheduler_compositor_task_runner);
+    dispatcher_ = std::make_unique<CanvasResourceDispatcher>(
+        &client_,
+        /*task_runner=*/scheduler::GetSingleThreadTaskRunnerForTesting(),
+        scheduler::GetSingleThreadTaskRunnerForTesting(), kClientId, kSinkId,
+        /*placeholder_canvas_id=*/0,
+        /*canvas_size=*/gfx::Size(kWidth, kHeight));
     resource_provider_ =
         CanvasNon2DResourceProviderSharedImage::CreateForSoftwareCompositor(
             gfx::Size(kWidth, kHeight), GetN32FormatForCanvas(),
@@ -112,17 +93,19 @@ class CanvasResourceDispatcherTest
             test_web_shared_image_interface_provider_.get());
   }
 
-  MockCanvasResourceDispatcher* dispatcher() { return dispatcher_.get(); }
+  CanvasResourceDispatcher* dispatcher() { return dispatcher_.get(); }
+  MockCanvasResourceDispatcherClient& MockClient() { return client_; }
 
   test::TaskEnvironment& TaskEnvironment() { return task_environment_; }
 
  private:
   test::TaskEnvironment task_environment_{
       base::test::TaskEnvironment::TimeSource::MOCK_TIME};
-  std::unique_ptr<MockCanvasResourceDispatcher> dispatcher_;
+  std::unique_ptr<CanvasResourceDispatcher> dispatcher_;
   std::unique_ptr<CanvasNon2DResourceProviderSharedImage> resource_provider_;
   std::unique_ptr<WebGraphicsSharedImageInterfaceProvider>
       test_web_shared_image_interface_provider_;
+  MockCanvasResourceDispatcherClient client_;
 };
 
 TEST_F(CanvasResourceDispatcherTest, UsesRealOnBeginFrameWhenActive) {
@@ -146,12 +129,12 @@ TEST_F(CanvasResourceDispatcherTest, UsesRealOnBeginFrameWhenActive) {
   platform->RunUntilIdle();
   // Advance time, and verify that there isn't a synthetic OBF generated for the
   // client by the dispatcher.
-  EXPECT_CALL(dispatcher()->MockClient(), BeginFrame()).Times(0);
+  EXPECT_CALL(MockClient(), BeginFrame()).Times(0);
   TaskEnvironment().FastForwardBy(base::Seconds(0.25));
   platform->RunUntilIdle();
 
   // Verify that the client's BeginFrame is called in response to a real OBF.
-  EXPECT_CALL(dispatcher()->MockClient(), BeginFrame()).Times(1);
+  EXPECT_CALL(MockClient(), BeginFrame()).Times(1);
   dispatcher()->OnBeginFrame(/*begin_frame_args=*/{}, /*timing details*/ {},
                              /*resources=*/{});
 }
@@ -178,7 +161,7 @@ TEST_F(CanvasResourceDispatcherTest,
   platform->RunUntilIdle();
   // Advance time and make sure that we still get a CompositorFrame, even though
   // we don't send any OBF.
-  EXPECT_CALL(dispatcher()->MockClient(), BeginFrame()).Times(AtLeast(1));
+  EXPECT_CALL(MockClient(), BeginFrame()).Times(AtLeast(1));
   TaskEnvironment().FastForwardBy(base::Seconds(0.25));
   platform->RunUntilIdle();
 }
@@ -209,7 +192,7 @@ TEST_F(CanvasResourceDispatcherTest, UsesNoOnBeginFrameWhenSuspended) {
   platform->RunUntilIdle();
   // Advance time, and verify that there isn't a synthetic OBF generated for the
   // client by the dispatcher.
-  EXPECT_CALL(dispatcher()->MockClient(), BeginFrame()).Times(0);
+  EXPECT_CALL(MockClient(), BeginFrame()).Times(0);
   TaskEnvironment().FastForwardBy(base::Seconds(0.25));
   platform->RunUntilIdle();
 }

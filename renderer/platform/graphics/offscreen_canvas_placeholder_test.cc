@@ -54,28 +54,6 @@ class MockPlaceholderClient
 };
 
 namespace {
-constexpr uint32_t kClientId = 2;
-constexpr uint32_t kSinkId = 1;
-
-constexpr size_t kWidth = 10;
-constexpr size_t kHeight = 10;
-
-class MockCanvasResourceDispatcher : public CanvasResourceDispatcher {
- public:
-  explicit MockCanvasResourceDispatcher(
-      int placeholder_id,
-      scoped_refptr<base::SingleThreadTaskRunner>
-          agent_group_scheduler_compositor_task_runner)
-      : CanvasResourceDispatcher(
-            /*client=*/nullptr,
-            scheduler::GetSingleThreadTaskRunnerForTesting(),
-            agent_group_scheduler_compositor_task_runner,
-            kClientId,
-            kSinkId,
-            placeholder_id,
-            /*canvas_size=*/{kWidth, kHeight}) {}
-};
-
 DOMNodeId GenPlaceholderId() {
   static DOMNodeId s_id = 0;
   return ++s_id;
@@ -85,16 +63,11 @@ DOMNodeId GenPlaceholderId() {
 
 class OffscreenCanvasPlaceholderTest : public Test {
  public:
-  MockCanvasResourceDispatcher* dispatcher() { return dispatcher_.get(); }
   OffscreenCanvasPlaceholder* placeholder() { return &placeholder_; }
   MockPlaceholderClient* client() { return placeholder_client_.get(); }
 
   CanvasResource* DispatchOneFrame();
   scoped_refptr<CanvasResource> DrawSomething();
-  void CreateDispatcher(
-      scoped_refptr<base::SingleThreadTaskRunner>
-          agent_group_scheduler_compositor_task_runner =
-              scheduler::GetSingleThreadTaskRunnerForTesting());
   void CreateClient(
       scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner =
           scheduler::GetSingleThreadTaskRunnerForTesting());
@@ -115,7 +88,6 @@ class OffscreenCanvasPlaceholderTest : public Test {
   test::TaskEnvironment task_environment_;
   OffscreenCanvasPlaceholder placeholder_;
   std::unique_ptr<MockPlaceholderClient> placeholder_client_;
-  std::unique_ptr<MockCanvasResourceDispatcher> dispatcher_;
   std::unique_ptr<CanvasNon2DResourceProviderSharedImage> resource_provider_;
   std::unique_ptr<WebGraphicsSharedImageInterfaceProvider>
       test_web_shared_image_interface_provider_;
@@ -133,21 +105,8 @@ void OffscreenCanvasPlaceholderTest::SetUp() {
 
 void OffscreenCanvasPlaceholderTest::TearDown() {
   resource_provider_.reset();
-  dispatcher_.reset();
   placeholder_.UnregisterPlaceholderCanvas();
   Test::TearDown();
-}
-
-void OffscreenCanvasPlaceholderTest::CreateDispatcher(
-    scoped_refptr<base::SingleThreadTaskRunner>
-        agent_group_scheduler_compositor_task_runner) {
-  dispatcher_ = std::make_unique<MockCanvasResourceDispatcher>(
-      placeholder_id_, agent_group_scheduler_compositor_task_runner);
-  resource_provider_ =
-      CanvasNon2DResourceProviderSharedImage::CreateForSoftwareCompositor(
-          gfx::Size(kWidth, kHeight), GetN32FormatForCanvas(),
-          kPremul_SkAlphaType, gfx::ColorSpace::CreateSRGB(),
-          gfx::HDRMetadata(), test_web_shared_image_interface_provider_.get());
 }
 
 void OffscreenCanvasPlaceholderTest::CreateClient(
@@ -156,8 +115,8 @@ void OffscreenCanvasPlaceholderTest::CreateClient(
       placeholder_id_, placeholder_task_runner);
   resource_provider_ =
       CanvasNon2DResourceProviderSharedImage::CreateForSoftwareCompositor(
-          gfx::Size(kWidth, kHeight), GetN32FormatForCanvas(),
-          kPremul_SkAlphaType, gfx::ColorSpace::CreateSRGB(),
+          gfx::Size(10, 10), GetN32FormatForCanvas(), kPremul_SkAlphaType,
+          gfx::ColorSpace::CreateSRGB(),
           test_web_shared_image_interface_provider_.get());
 }
 
