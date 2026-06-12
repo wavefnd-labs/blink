@@ -245,6 +245,27 @@ void Canvas2DResourceProviderBitmap::RecordingCleared() {
   clear_frame_ = true;
 }
 
+CanvasImageProvider*
+Canvas2DResourceProviderBitmap::GetOrCreateSWCanvasImageProvider() {
+  if (canvas_image_provider_) {
+    return canvas_image_provider_.get();
+  }
+
+  cc::ImageDecodeCache* cache_f16 = nullptr;
+  if (GetSharedImageFormat() == viz::SinglePlaneFormat::kRGBA_F16) {
+    cache_f16 = &Image::SharedCCDecodeCache(kRGBA_F16_SkColorType);
+  }
+
+  cc::ImageDecodeCache* cache_rgba8 =
+      &Image::SharedCCDecodeCache(kN32_SkColorType);
+
+  canvas_image_provider_ = std::make_unique<CanvasImageProvider>(
+      cache_rgba8, cache_f16, GetColorSpace(), GetSharedImageFormat(),
+      cc::PlaybackImageProvider::RasterMode::kSoftware);
+
+  return canvas_image_provider_.get();
+}
+
 std::unique_ptr<MemoryManagedPaintRecorder>
 Canvas2DResourceProviderBitmap::ReleaseRecorder() {
   auto recorder = std::make_unique<MemoryManagedPaintRecorder>(Size(), this);
@@ -2087,28 +2108,7 @@ void CanvasResourceProvider::NotifyWillTransfer(
   GetFlushForImageListener()->NotifyFlushForImage(content_id);
 }
 
-CanvasImageProvider*
-CanvasResourceProvider::GetOrCreateSWCanvasImageProvider() {
-  if (canvas_image_provider_) {
-    return canvas_image_provider_.get();
-  }
 
-  // Create an ImageDecodeCache for half float images only if the canvas is
-  // using half float back storage.
-  cc::ImageDecodeCache* cache_f16 = nullptr;
-  if (GetSharedImageFormat() == viz::SinglePlaneFormat::kRGBA_F16) {
-    cache_f16 = &Image::SharedCCDecodeCache(kRGBA_F16_SkColorType);
-  }
-
-  cc::ImageDecodeCache* cache_rgba8 =
-      &Image::SharedCCDecodeCache(kN32_SkColorType);
-
-  canvas_image_provider_ = std::make_unique<CanvasImageProvider>(
-      cache_rgba8, cache_f16, GetColorSpace(), GetSharedImageFormat(),
-      cc::PlaybackImageProvider::RasterMode::kSoftware);
-
-  return canvas_image_provider_.get();
-}
 
 
 MemoryManagedPaintCanvas& CanvasResourceProvider::GetCanvasForTesting() {
@@ -2368,6 +2368,27 @@ void Canvas2DResourceProviderSharedImage::InitializeForRecording(
 void Canvas2DResourceProviderSharedImage::RecordingCleared() {
   must_preserve_content_on_copy_on_write_ = false;
   clear_frame_ = true;
+}
+
+CanvasImageProvider*
+Canvas2DResourceProviderSharedImage::GetOrCreateSWCanvasImageProvider() {
+  if (canvas_image_provider_) {
+    return canvas_image_provider_.get();
+  }
+
+  cc::ImageDecodeCache* cache_f16 = nullptr;
+  if (GetSharedImageFormat() == viz::SinglePlaneFormat::kRGBA_F16) {
+    cache_f16 = &Image::SharedCCDecodeCache(kRGBA_F16_SkColorType);
+  }
+
+  cc::ImageDecodeCache* cache_rgba8 =
+      &Image::SharedCCDecodeCache(kN32_SkColorType);
+
+  canvas_image_provider_ = std::make_unique<CanvasImageProvider>(
+      cache_rgba8, cache_f16, GetColorSpace(), GetSharedImageFormat(),
+      cc::PlaybackImageProvider::RasterMode::kSoftware);
+
+  return canvas_image_provider_.get();
 }
 
 Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(

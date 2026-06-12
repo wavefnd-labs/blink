@@ -220,7 +220,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
 
   virtual void RasterRecord(cc::PaintRecord) = 0;
 
-  CanvasImageProvider* GetOrCreateSWCanvasImageProvider();
+  virtual CanvasImageProvider* GetOrCreateSWCanvasImageProvider() = 0;
 
   // Called after the recording was cleared from any draw ops it might have had.
   // Canvas2D-specific, as it is called only when `recorder_` is
@@ -333,6 +333,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
 
   // MemoryManagedPaintRecorder::Client implementation.
   void RecordingCleared() override;
+  CanvasImageProvider* GetOrCreateSWCanvasImageProvider() override;
 
   gfx::Size size_;
   viz::SharedImageFormat format_;
@@ -526,6 +527,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   scoped_refptr<UnacceleratedStaticBitmapImage> UnacceleratedSnapshot(
       ImageOrientation);
   SkSurface* GetSkSurface() const;
+  CanvasImageProvider* GetOrCreateSWCanvasImageProvider() override;
 
  private:
   base::WeakPtr<WebGraphicsContext3DProviderWrapper> ContextProviderWrapper()
