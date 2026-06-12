@@ -35,7 +35,6 @@
 #include "third_party/blink/renderer/core/dom/child_list_mutation_scope.h"
 #include "third_party/blink/renderer/core/dom/class_collection.h"
 #include "third_party/blink/renderer/core/dom/element.h"
-#include "third_party/blink/renderer/core/dom/element_rare_data_vector.h"
 #include "third_party/blink/renderer/core/dom/element_traversal.h"
 #include "third_party/blink/renderer/core/dom/events/event_dispatch_forbidden_scope.h"
 #include "third_party/blink/renderer/core/dom/events/scoped_event_queue.h"
@@ -48,6 +47,7 @@
 #include "third_party/blink/renderer/core/dom/node_child_removal_tracker.h"
 #include "third_party/blink/renderer/core/dom/node_cloning_data.h"
 #include "third_party/blink/renderer/core/dom/node_lists_node_data.h"
+#include "third_party/blink/renderer/core/dom/node_rare_data.h"
 #include "third_party/blink/renderer/core/dom/node_traversal.h"
 #include "third_party/blink/renderer/core/dom/shadow_root.h"
 #include "third_party/blink/renderer/core/dom/slot_assignment_recalc_forbidden_scope.h"
@@ -1740,7 +1740,7 @@ void ContainerNode::InvalidateNodeListCachesInAncestors(
     return;
 
   if (!attr_name || IsAttributeNode()) {
-    if (const ElementRareDataVector* data = RareData()) {
+    if (const NodeRareData* data = RareData()) {
       if (NodeListsNodeData* lists = data->NodeLists()) {
         if (ChildNodeList* child_node_list = lists->GetChildNodeList(*this)) {
           if (change) {

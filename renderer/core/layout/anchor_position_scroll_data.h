@@ -5,8 +5,8 @@
 #ifndef THIRD_PARTY_BLINK_RENDERER_CORE_LAYOUT_ANCHOR_POSITION_SCROLL_DATA_H_
 #define THIRD_PARTY_BLINK_RENDERER_CORE_LAYOUT_ANCHOR_POSITION_SCROLL_DATA_H_
 
-#include "third_party/blink/renderer/core/dom/element_rare_data_field.h"
 #include "third_party/blink/renderer/core/dom/node.h"
+#include "third_party/blink/renderer/core/dom/node_rare_data_field.h"
 #include "third_party/blink/renderer/core/frame/post_layout_snapshot_client.h"
 #include "third_party/blink/renderer/platform/geometry/physical_offset.h"
 #include "third_party/blink/renderer/platform/graphics/compositor_element_id.h"
@@ -50,7 +50,7 @@ class LayoutObject;
 class AnchorPositionScrollData
     : public GarbageCollected<AnchorPositionScrollData>,
       public PostLayoutSnapshotClient,
-      public ElementRareDataField {
+      public NodeRareDataField {
  public:
   explicit AnchorPositionScrollData(Element* anchored_element);
   virtual ~AnchorPositionScrollData();

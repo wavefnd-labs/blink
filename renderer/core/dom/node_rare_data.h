@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef THIRD_PARTY_BLINK_RENDERER_CORE_DOM_ELEMENT_RARE_DATA_VECTOR_H_
-#define THIRD_PARTY_BLINK_RENDERER_CORE_DOM_ELEMENT_RARE_DATA_VECTOR_H_
+#ifndef THIRD_PARTY_BLINK_RENDERER_CORE_DOM_NODE_RARE_DATA_H_
+#define THIRD_PARTY_BLINK_RENDERER_CORE_DOM_NODE_RARE_DATA_H_
 
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/dom/css_pseudo_element.h"
 #include "third_party/blink/renderer/core/dom/element_animation_trigger_data.h"
-#include "third_party/blink/renderer/core/dom/element_rare_data_field.h"
 #include "third_party/blink/renderer/core/dom/explicitly_set_attr_elements_map.h"
 #include "third_party/blink/renderer/core/dom/focusgroup_flags.h"
+#include "third_party/blink/renderer/core/dom/node_rare_data_field.h"
 #include "third_party/blink/renderer/core/dom/pseudo_element.h"
 #include "third_party/blink/renderer/core/dom/pseudo_element_data.h"
 #include "third_party/blink/renderer/platform/heap/trace_traits.h"
@@ -73,7 +73,7 @@ using TemporaryPartsList = HeapDeque<Member<Part>>;
 
 class NodeMutationObserverData final
     : public GarbageCollected<NodeMutationObserverData>,
-      public ElementRareDataField {
+      public NodeRareDataField {
  public:
   NodeMutationObserverData() = default;
   NodeMutationObserverData(const NodeMutationObserverData&) = delete;
@@ -101,20 +101,18 @@ class NodeMutationObserverData final
 
 class ScrollTimelineHashSet final
     : public GarbageCollected<ScrollTimelineHashSet>,
-      public ElementRareDataField {
+      public NodeRareDataField {
  public:
   HeapHashSet<Member<ScrollTimeline>> set_;
 
   void Trace(Visitor* visitor) const override;
 };
 
-// ElementRareDataVector provides sparse storage of fields for Node and Element
-// (most Elements set only 0–3 of the 50+ possible fields). It consists of two
-// parts:
-//
-//  * Fixed bit-fields that are always present (as long as the
-//    ElementRareDataVector is allocated at all), and
-//  * A variable number of Member<ElementRareDataField>s (“slots”).
+// NodeRareData provides sparse storage of fields for Node and Element (most
+// Elements set only 0–3 of the 50+ possible fields). It consists of two parts:
+//  * Fixed bit-fields that are always present (as long as the NodeRareData is
+//    allocated at all), and
+//  * A variable number of Member<NodeRareDataField>s (“slots”).
 //
 // The storage scheme for the latter is very similar to SparseVector (a bit set
 // saying which values exist, and then the actual Members sorted by ID), but
@@ -126,16 +124,14 @@ class ScrollTimelineHashSet final
 // except that there is a minimum size).
 //
 // However, this means that any Set*() or Ensure*() member function can end up
-// having to reallocate the ElementRareDataVector to get more data into
-// AdditionalBytes. Thus, every such function will return the new pointer for
-// ElementRareDataVector (which may be the same as the previous one, or an
-// entirely new object), which means that the caller must update their pointer
-// in case it changed. These are all marked by [[nodiscard]] so that you do not
-// accidentally forget to do so.
-class CORE_EXPORT ElementRareDataVector final
-    : public GarbageCollected<ElementRareDataVector> {
+// having to reallocate the NodeRareData to get more data into AdditionalBytes.
+// Thus, every such function will return the new pointer for NodeRareData (which
+// may be the same as the previous one, or an entirely new object), which means
+// that the caller must update their pointer in case it changed. These are all
+// marked by [[nodiscard]] so that you do not accidentally forget to do so.
+class CORE_EXPORT NodeRareData final : public GarbageCollected<NodeRareData> {
  public:
-  using PassKey = base::PassKey<ElementRareDataVector>;
+  using PassKey = base::PassKey<NodeRareData>;
 
   enum {
     kConnectedFrameCountBits = 10,  // Must fit Page::maxNumberOfFrames.
@@ -143,30 +139,26 @@ class CORE_EXPORT ElementRareDataVector final
     kNumberOfDynamicRestyleFlags = 14
   };
 
-  static ElementRareDataVector* Create() {
-    return MakeGarbageCollected<ElementRareDataVector>(
+  static NodeRareData* Create() {
+    return MakeGarbageCollected<NodeRareData>(
         AdditionalBytes(kMinimumVectorSize * kSlotSizeBytes), PassKey());
   }
 
-  ~ElementRareDataVector();
-  ElementRareDataVector(const ElementRareDataVector&) = delete;
-  ElementRareDataVector& operator=(const ElementRareDataVector&) = delete;
+  ~NodeRareData();
+  NodeRareData(const NodeRareData&) = delete;
+  NodeRareData& operator=(const NodeRareData&) = delete;
 
   void ClearNodeLists() { SetFieldToNullIfExists(FieldId::kNodeLists); }
   NodeListsNodeData* NodeLists() const;
-  // EnsureNodeLists() and a following NodeListsNodeData functions must be
-  // wrapped with a ThreadState::GCForbiddenScope in order to avoid an
-  // initialized node_lists_ is cleared by NodeRareData::TraceAfterDispatch().
-  std::pair<std::reference_wrapper<NodeListsNodeData>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<NodeListsNodeData>, NodeRareData*>
   EnsureNodeLists();
 
   FlatTreeNodeData* GetFlatTreeNodeData() const;
-  std::pair<std::reference_wrapper<FlatTreeNodeData>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<FlatTreeNodeData>, NodeRareData*>
   EnsureFlatTreeNodeData();
 
   NodeMutationObserverData* MutationObserverData();
-  std::pair<std::reference_wrapper<NodeMutationObserverData>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<NodeMutationObserverData>, NodeRareData*>
   EnsureMutationObserverData();
 
   uint16_t ConnectedSubframeCount() const {
@@ -187,22 +179,20 @@ class CORE_EXPORT ElementRareDataVector final
   bool HasRestyleFlags() const { return flags_.restyle_flags_; }
   void ClearRestyleFlags() { flags_.restyle_flags_ = 0u; }
 
-  [[nodiscard]] ElementRareDataVector* RegisterScrollTimeline(ScrollTimeline*);
-  [[nodiscard]] ElementRareDataVector* UnregisterScrollTimeline(
-      ScrollTimeline*);
+  [[nodiscard]] NodeRareData* RegisterScrollTimeline(ScrollTimeline*);
+  [[nodiscard]] NodeRareData* UnregisterScrollTimeline(ScrollTimeline*);
 
   // Mostly for accessibility.
   DOMNodeId NodeId() const {
     auto* value = GetWrappedField<DOMNodeId>(FieldId::kDOMNodeId);
     return value ? *value : 0;
   }
-  [[nodiscard]] std::pair<std::reference_wrapper<DOMNodeId>,
-                          ElementRareDataVector*>
+  [[nodiscard]] std::pair<std::reference_wrapper<DOMNodeId>, NodeRareData*>
   NodeId() {
     return EnsureWrappedField<DOMNodeId>(FieldId::kDOMNodeId);
   }
 
-  [[nodiscard]] ElementRareDataVector* SetPseudoElement(
+  [[nodiscard]] NodeRareData* SetPseudoElement(
       PseudoId,
       PseudoElement*,
       const AtomicString& document_transition_tag = g_null_atom);
@@ -213,98 +203,91 @@ class CORE_EXPORT ElementRareDataVector final
   bool HasScrollButtonOrMarkerGroupPseudos() const;
   PseudoElementData::PseudoElementVector GetPseudoElements() const;
 
-  [[nodiscard]] ElementRareDataVector* AddColumnPseudoElement(
-      ColumnPseudoElement&);
+  [[nodiscard]] NodeRareData* AddColumnPseudoElement(ColumnPseudoElement&);
   const ColumnPseudoElementsVector* GetColumnPseudoElements() const;
   ColumnPseudoElement* GetColumnPseudoElement(wtf_size_t idx) const;
   void ClearColumnPseudoElements(wtf_size_t to_keep);
 
-  std::pair<std::reference_wrapper<CSSStyleDeclaration>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<CSSStyleDeclaration>, NodeRareData*>
   EnsureInlineCSSStyleDeclaration(Element* owner_element);
 
   ShadowRoot* GetShadowRoot() const;
-  [[nodiscard]] ElementRareDataVector* SetShadowRoot(ShadowRoot& shadow_root);
+  [[nodiscard]] NodeRareData* SetShadowRoot(ShadowRoot& shadow_root);
 
   NamedNodeMap* AttributeMap() const;
-  [[nodiscard]] ElementRareDataVector* SetAttributeMap(
-      NamedNodeMap* attribute_map);
+  [[nodiscard]] NodeRareData* SetAttributeMap(NamedNodeMap* attribute_map);
 
   DOMTokenList* GetClassList() const;
-  [[nodiscard]] ElementRareDataVector* SetClassList(DOMTokenList* class_list);
+  [[nodiscard]] NodeRareData* SetClassList(DOMTokenList* class_list);
 
   DOMTokenList* GetFocusgroupTokenList() const;
-  [[nodiscard]] ElementRareDataVector* SetFocusgroupTokenList(
-      DOMTokenList* token_list);
+  [[nodiscard]] NodeRareData* SetFocusgroupTokenList(DOMTokenList* token_list);
 
   DatasetDOMStringMap* Dataset() const;
-  [[nodiscard]] ElementRareDataVector* SetDataset(DatasetDOMStringMap* dataset);
+  [[nodiscard]] NodeRareData* SetDataset(DatasetDOMStringMap* dataset);
 
   ScrollOffset SavedLayerScrollOffset() const;
-  [[nodiscard]] ElementRareDataVector* SetSavedLayerScrollOffset(
-      ScrollOffset offset);
+  [[nodiscard]] NodeRareData* SetSavedLayerScrollOffset(ScrollOffset offset);
 
   ElementAnimations* GetElementAnimations();
-  [[nodiscard]] ElementRareDataVector* SetElementAnimations(
+  [[nodiscard]] NodeRareData* SetElementAnimations(
       ElementAnimations* element_animations);
 
   bool HasPseudoElements() const;
   void ClearPseudoElements();
 
-  std::pair<std::reference_wrapper<AttrNodeList>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<AttrNodeList>, NodeRareData*>
   EnsureAttrNodeList();
   AttrNodeList* GetAttrNodeList();
   void RemoveAttrNodeList();
-  [[nodiscard]] ElementRareDataVector* AddAttr(Attr* attr);
+  [[nodiscard]] NodeRareData* AddAttr(Attr* attr);
 
   ElementIntersectionObserverData* IntersectionObserverData() const;
   std::pair<std::reference_wrapper<ElementIntersectionObserverData>,
-            ElementRareDataVector*>
+            NodeRareData*>
   EnsureIntersectionObserverData();
 
   ContainerQueryEvaluator* GetContainerQueryEvaluator() const;
-  [[nodiscard]] ElementRareDataVector* SetContainerQueryEvaluator(
+  [[nodiscard]] NodeRareData* SetContainerQueryEvaluator(
       ContainerQueryEvaluator* evaluator);
 
   const AtomicString& GetNonce() const;
-  [[nodiscard]] ElementRareDataVector* SetNonce(const AtomicString& nonce);
+  [[nodiscard]] NodeRareData* SetNonce(const AtomicString& nonce);
 
   const AtomicString& IsValue() const;
-  [[nodiscard]] ElementRareDataVector* SetIsValue(const AtomicString& is_value);
+  [[nodiscard]] NodeRareData* SetIsValue(const AtomicString& is_value);
 
   EditContext* GetEditContext() const;
-  [[nodiscard]] ElementRareDataVector* SetEditContext(
-      EditContext* edit_context);
+  [[nodiscard]] NodeRareData* SetEditContext(EditContext* edit_context);
 
-  [[nodiscard]] ElementRareDataVector* SetPart(DOMTokenList* part);
+  [[nodiscard]] NodeRareData* SetPart(DOMTokenList* part);
   DOMTokenList* GetPart() const;
 
-  [[nodiscard]] ElementRareDataVector* SetPartNamesMap(
-      const AtomicString part_names);
+  [[nodiscard]] NodeRareData* SetPartNamesMap(const AtomicString part_names);
   const NamesMap* PartNamesMap() const;
 
-  std::pair<std::reference_wrapper<InlineStylePropertyMap>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<InlineStylePropertyMap>, NodeRareData*>
   EnsureInlineStylePropertyMap(Element* owner_element);
   InlineStylePropertyMap* GetInlineStylePropertyMap();
 
   const ElementInternals* GetElementInternals() const;
-  std::pair<std::reference_wrapper<ElementInternals>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<ElementInternals>, NodeRareData*>
   EnsureElementInternals(HTMLElement& target);
 
-  std::pair<std::reference_wrapper<DisplayLockContext>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<DisplayLockContext>, NodeRareData*>
   EnsureDisplayLockContext(Element* element);
   DisplayLockContext* GetDisplayLockContext() const;
 
-  std::pair<std::reference_wrapper<ContainerQueryData>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<ContainerQueryData>, NodeRareData*>
   EnsureContainerQueryData();
   ContainerQueryData* GetContainerQueryData() const;
   void ClearContainerQueryData();
 
-  std::pair<std::reference_wrapper<StyleScopeData>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<StyleScopeData>, NodeRareData*>
   EnsureStyleScopeData();
   StyleScopeData* GetStyleScopeData() const;
 
-  std::pair<std::reference_wrapper<OutOfFlowData>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<OutOfFlowData>, NodeRareData*>
   EnsureOutOfFlowData();
   OutOfFlowData* GetOutOfFlowData() const;
   void ClearOutOfFlowData();
@@ -313,12 +296,12 @@ class CORE_EXPORT ElementRareDataVector final
   const RegionCaptureCropId* GetRegionCaptureCropId() const;
   // Sets a crop-ID on the item. Must be called at most once. Cannot be used
   // to unset a previously set crop-ID.
-  [[nodiscard]] ElementRareDataVector* SetRegionCaptureCropId(
+  [[nodiscard]] NodeRareData* SetRegionCaptureCropId(
       std::unique_ptr<RegionCaptureCropId> crop_id);
 
   const TrackedElementSubRect* GetTrackedElementSubRect(
       viz::TrackedElementFeature feature) const;
-  [[nodiscard]] ElementRareDataVector* SetTrackedElementSubRect(
+  [[nodiscard]] NodeRareData* SetTrackedElementSubRect(
       viz::TrackedElementFeature feature,
       const TrackedElementSubRect& rect);
   void ClearTrackedElementSubRect(viz::TrackedElementFeature feature);
@@ -332,43 +315,41 @@ class CORE_EXPORT ElementRareDataVector final
   // or nullptr otherwise.
   // Sets an ID backing a RestrictionTarget associated with the Element.
   // Must be called at most once. Cannot be used to unset a previously set IDs.
-  [[nodiscard]] ElementRareDataVector* SetRestrictionTargetId(
+  [[nodiscard]] NodeRareData* SetRestrictionTargetId(
       std::unique_ptr<RestrictionTargetId> id);
 
   using ResizeObserverDataMap =
       HeapHashMap<Member<ResizeObserver>, Member<ResizeObservation>>;
   ResizeObserverDataMap* ResizeObserverData() const;
-  std::pair<std::reference_wrapper<ResizeObserverDataMap>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<ResizeObserverDataMap>, NodeRareData*>
   EnsureResizeObserverData();
 
-  [[nodiscard]] ElementRareDataVector* SetCustomElementDefinition(
+  [[nodiscard]] NodeRareData* SetCustomElementDefinition(
       CustomElementDefinition* definition);
   CustomElementDefinition* GetCustomElementDefinition() const;
 
-  [[nodiscard]] ElementRareDataVector* SetLastRememberedBlockSize(
+  [[nodiscard]] NodeRareData* SetLastRememberedBlockSize(
       std::optional<LayoutUnit> size);
-  [[nodiscard]] ElementRareDataVector* SetLastRememberedInlineSize(
+  [[nodiscard]] NodeRareData* SetLastRememberedInlineSize(
       std::optional<LayoutUnit> size);
   std::optional<LayoutUnit> LastRememberedBlockSize() const;
   std::optional<LayoutUnit> LastRememberedInlineSize() const;
 
   gfx::Rect LastSentUnboundedBounds() const;
-  [[nodiscard]] ElementRareDataVector* SetLastSentUnboundedBounds(
+  [[nodiscard]] NodeRareData* SetLastSentUnboundedBounds(
       const gfx::Rect& bounds);
 
   PopoverData* GetPopoverData() const;
-  std::pair<std::reference_wrapper<PopoverData>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<PopoverData>, NodeRareData*>
   EnsurePopoverData();
   void RemovePopoverData();
 
   InvokerData* GetInvokerData() const;
-  std::pair<std::reference_wrapper<InvokerData>, ElementRareDataVector*>
+  std::pair<std::reference_wrapper<InvokerData>, NodeRareData*>
   EnsureInvokerData();
 
   InterestInvokerTargetData* GetInterestInvokerTargetData() const;
-  std::pair<std::reference_wrapper<InterestInvokerTargetData>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<InterestInvokerTargetData>, NodeRareData*>
   EnsureInterestInvokerTargetData();
   void RemoveInterestInvokerTargetData();
 
@@ -393,43 +374,39 @@ class CORE_EXPORT ElementRareDataVector final
 
   ScrollMarkerGroupData* GetScrollMarkerGroupData() const;
   void RemoveScrollMarkerGroupData();
-  std::pair<std::reference_wrapper<ScrollMarkerGroupData>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<ScrollMarkerGroupData>, NodeRareData*>
   EnsureScrollMarkerGroupData(Element*);
 
-  [[nodiscard]] ElementRareDataVector* SetScrollMarkerGroupContainerData(
+  [[nodiscard]] NodeRareData* SetScrollMarkerGroupContainerData(
       ScrollMarkerGroupData*);
   ScrollMarkerGroupData* GetScrollMarkerGroupContainerData() const;
 
-  [[nodiscard]] ElementRareDataVector*
-  CacheCSSPseudoElement(PseudoId, const AtomicString&, CSSPseudoElement&);
+  [[nodiscard]] NodeRareData* CacheCSSPseudoElement(PseudoId,
+                                                    const AtomicString&,
+                                                    CSSPseudoElement&);
   CSSPseudoElement* GetCSSPseudoElement(PseudoId, const AtomicString&) const;
 
   ExplicitlySetAttrElementsMap* GetExplicitlySetElementsForAttr() const;
-  std::pair<std::reference_wrapper<ExplicitlySetAttrElementsMap>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<ExplicitlySetAttrElementsMap>, NodeRareData*>
   EnsureExplicitlySetElementsForAttr();
 
   AnchorPositionScrollData* GetAnchorPositionScrollData() const;
   void RemoveAnchorPositionScrollData();
-  std::pair<std::reference_wrapper<AnchorPositionScrollData>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<AnchorPositionScrollData>, NodeRareData*>
   EnsureAnchorPositionScrollData(Element*);
 
   bool HasCustomElementRegistrySet() const;
   CustomElementRegistry* GetCustomElementRegistry() const;
-  [[nodiscard]] ElementRareDataVector* SetCustomElementRegistry(
+  [[nodiscard]] NodeRareData* SetCustomElementRegistry(
       CustomElementRegistry* registry);
   void ClearCustomElementRegistry();
 
   ElementAnimationTriggerData* AnimationTriggerData();
-  std::pair<std::reference_wrapper<ElementAnimationTriggerData>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<ElementAnimationTriggerData>, NodeRareData*>
   EnsureAnimationTriggerData();
 
   DisplayAdElementMonitor* GetDisplayAdElementMonitor() const;
-  std::pair<std::reference_wrapper<DisplayAdElementMonitor>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<DisplayAdElementMonitor>, NodeRareData*>
   EnsureDisplayAdElementMonitor(Element*, AdProvenance);
 
   void SetDidAttachInternals() { flags_.did_attach_internals = true; }
@@ -458,16 +435,15 @@ class CORE_EXPORT ElementRareDataVector final
   void SetMayBeImplicitAnchor() { flags_.may_be_implicit_anchor = true; }
 
   FocusgroupData GetFocusgroupData() const;
-  [[nodiscard]] ElementRareDataVector* SetFocusgroupData(FocusgroupData data);
+  [[nodiscard]] NodeRareData* SetFocusgroupData(FocusgroupData data);
   void ClearFocusgroupData();
-  [[nodiscard]] ElementRareDataVector* SetFocusgroupLastFocused(
-      Element* element);
+  [[nodiscard]] NodeRareData* SetFocusgroupLastFocused(Element* element);
   Element* GetFocusgroupLastFocused() const;
   void ClearFocusgroupLastFocused() {
     SetFieldToNullIfExists(FieldId::kFocusgroupLastFocused);
   }
 
-  [[nodiscard]] ElementRareDataVector* SetOverscrollContainer(Element* element);
+  [[nodiscard]] NodeRareData* SetOverscrollContainer(Element* element);
   Element* GetOverscrollContainer() const;
   void ClearOverscrollContainer() {
     SetFieldToNullIfExists(FieldId::kOverscrollContainer);
@@ -549,8 +525,7 @@ class CORE_EXPORT ElementRareDataVector final
   }
 
   ContentData* GetAltContentData() const;
-  [[nodiscard]] ElementRareDataVector* SetAltContentData(
-      ContentData* content_data);
+  [[nodiscard]] NodeRareData* SetAltContentData(ContentData* content_data);
 
   bool WasLastFocusFromUserGesture() const {
     return flags_.was_last_focus_from_user_gesture;
@@ -559,18 +534,17 @@ class CORE_EXPORT ElementRareDataVector final
     flags_.was_last_focus_from_user_gesture = value;
   }
 
-  std::pair<std::reference_wrapper<OverscrollAreaTracker>,
-            ElementRareDataVector*>
+  std::pair<std::reference_wrapper<OverscrollAreaTracker>, NodeRareData*>
   EnsureOverscrollAreaTracker(Element*);
   OverscrollAreaTracker* OverscrollAreaTracker() const;
 
   void Trace(Visitor*) const;
 
-  explicit ElementRareDataVector(PassKey) {}
-  ElementRareDataVector(PassKey, ElementRareDataVector&& other)
+  explicit NodeRareData(PassKey) {}
+  NodeRareData(PassKey, NodeRareData&& other)
       : flags_(other.flags_), fields_bitfield_(other.fields_bitfield_.load()) {
     UNSAFE_BUFFERS(
-        VectorTypeOperations<Member<ElementRareDataField>, HeapAllocator>::Move(
+        VectorTypeOperations<Member<NodeRareDataField>, HeapAllocator>::Move(
             other.ArrayBase(), other.ArrayBase() + other.size(), ArrayBase(),
             VectorOperationOrigin::kConstruction));
 
@@ -584,7 +558,6 @@ class CORE_EXPORT ElementRareDataVector final
   }
 
  private:
-  friend class ElementRareDataVectorTest;
   enum class FieldId : unsigned {
     kDataset = 0,
     kShadowRoot = 1,
@@ -641,45 +614,45 @@ class CORE_EXPORT ElementRareDataVector final
     kNumFields = 52,
   };
 
-  inline const Member<ElementRareDataField>* ArrayBase() const {
-    static_assert(sizeof(*this) % alignof(Member<ElementRareDataField>) == 0,
+  inline const Member<NodeRareDataField>* ArrayBase() const {
+    static_assert(sizeof(*this) % alignof(Member<NodeRareDataField>) == 0,
                   "ValueArray may be improperly aligned");
-    // SAFETY: By funneling all allocation of ElementRareDataVector through
-    // Create(), we guarantee that the array will exist where we expect it.
+    // SAFETY: By funneling all allocation of NodeRareData through Create(), we
+    // guarantee that the array will exist where we expect it.
     return UNSAFE_BUFFERS(
-        reinterpret_cast<const Member<ElementRareDataField>*>(this + 1));
+        reinterpret_cast<const Member<NodeRareDataField>*>(this + 1));
   }
-  inline Member<ElementRareDataField>* ArrayBase() {
-    return const_cast<Member<ElementRareDataField>*>(
-        const_cast<const ElementRareDataVector*>(this)->ArrayBase());
+  inline Member<NodeRareDataField>* ArrayBase() {
+    return const_cast<Member<NodeRareDataField>*>(
+        const_cast<const NodeRareData*>(this)->ArrayBase());
   }
 
-  const Member<ElementRareDataField>& ArraySlot(FieldId field_id) const {
+  const Member<NodeRareDataField>& ArraySlot(FieldId field_id) const {
     // SAFETY: Every modification of fields_bitfield_ goes through
     // SetField(), which makes sure there's always enough room
     // in AdditionalBytes.
     return UNSAFE_BUFFERS(ArrayBase()[GetFieldIndex(field_id)]);
   }
 
-  Member<ElementRareDataField>& ArraySlot(FieldId field_id) {
+  Member<NodeRareDataField>& ArraySlot(FieldId field_id) {
     // SAFETY: Every modification of fields_bitfield_ goes through
     // SetField(), which makes sure there's always enough room
     // in AdditionalBytes.
     return UNSAFE_BUFFERS(ArrayBase()[GetFieldIndex(field_id)]);
   }
 
-  ElementRareDataField* GetField(FieldId field_id) const;
-  [[nodiscard]] ElementRareDataVector* SetField(FieldId field_id,
-                                                ElementRareDataField* field);
+  NodeRareDataField* GetField(FieldId field_id) const;
+  [[nodiscard]] NodeRareData* SetField(FieldId field_id,
+                                       NodeRareDataField* field);
   void SetFieldToNullIfExists(FieldId field_id);
 
   template <typename T>
   class DataFieldWrapper final : public GarbageCollected<DataFieldWrapper<T>>,
-                                 public ElementRareDataField {
+                                 public NodeRareDataField {
    public:
     T& Get() { return data_; }
     void Trace(Visitor* visitor) const override {
-      ElementRareDataField::Trace(visitor);
+      NodeRareDataField::Trace(visitor);
       TraceIfNeeded<T>::Trace(visitor, data_);
     }
 
@@ -688,10 +661,11 @@ class CORE_EXPORT ElementRareDataVector final
   };
 
   template <typename T, typename... Args>
-  [[nodiscard]] std::pair<std::reference_wrapper<T>, ElementRareDataVector*>
-  EnsureField(FieldId field_id, Args&&... args) {
+  [[nodiscard]] std::pair<std::reference_wrapper<T>, NodeRareData*> EnsureField(
+      FieldId field_id,
+      Args&&... args) {
     T* field = static_cast<T*>(GetField(field_id));
-    ElementRareDataVector* vec = this;
+    NodeRareData* vec = this;
     if (!field) {
       field = MakeGarbageCollected<T>(std::forward<Args>(args)...);
       vec = SetField(field_id, field);
@@ -700,15 +674,14 @@ class CORE_EXPORT ElementRareDataVector final
   }
 
   template <typename T>
-  [[nodiscard]] std::pair<std::reference_wrapper<T>, ElementRareDataVector*>
+  [[nodiscard]] std::pair<std::reference_wrapper<T>, NodeRareData*>
   EnsureWrappedField(FieldId field_id) {
     auto [field, vec] = EnsureField<DataFieldWrapper<T>>(field_id);
     return {field.get().Get(), vec};
   }
 
   template <typename T, typename U>
-  [[nodiscard]] ElementRareDataVector* SetWrappedField(FieldId field_id,
-                                                       U data) {
+  [[nodiscard]] NodeRareData* SetWrappedField(FieldId field_id, U data) {
     auto [field, vec] = EnsureField<DataFieldWrapper<T>>(field_id);
     field.get().Get() = std::move(data);
     return vec;
@@ -721,8 +694,8 @@ class CORE_EXPORT ElementRareDataVector final
   }
 
   template <typename T>
-  [[nodiscard]] ElementRareDataVector* SetOptionalField(FieldId field_id,
-                                                        std::optional<T> data) {
+  [[nodiscard]] NodeRareData* SetOptionalField(FieldId field_id,
+                                               std::optional<T> data) {
     if (data) {
       return SetWrappedField<T>(field_id, *data);
     } else {
@@ -742,7 +715,7 @@ class CORE_EXPORT ElementRareDataVector final
   using BitfieldType = uint64_t;
   static constexpr size_t kMaxSize = 64;
 
-  using Slot = Member<ElementRareDataVector>;
+  using Slot = Member<NodeRareDataField>;
   static constexpr size_t kSlotSizeBytes = sizeof(Slot);
 
   // Most RareData vectors seem to have at least one element,
@@ -837,10 +810,10 @@ class CORE_EXPORT ElementRareDataVector final
 };
 
 template <>
-struct ThreadingTrait<blink::ElementRareDataVector> {
+struct ThreadingTrait<blink::NodeRareData> {
   static constexpr ThreadAffinity kAffinity = kMainThreadOnly;
 };
 
 }  // namespace blink
 
-#endif  // THIRD_PARTY_BLINK_RENDERER_CORE_DOM_ELEMENT_RARE_DATA_VECTOR_H_
+#endif  // THIRD_PARTY_BLINK_RENDERER_CORE_DOM_NODE_RARE_DATA_H_

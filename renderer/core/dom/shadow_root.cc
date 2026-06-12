@@ -93,7 +93,7 @@ class ReferenceTargetIdObserver : public IdTargetObserver {
 
 struct SameSizeAsShadowRoot : public DocumentFragment,
                               public TreeScope,
-                              public ElementRareDataField {
+                              public NodeRareDataField {
   Member<void*> member[2];
   AtomicString string_member;
   unsigned flags[1];
@@ -532,7 +532,7 @@ void ShadowRoot::ReferenceTargetChanged() {
 void ShadowRoot::Trace(Visitor* visitor) const {
   visitor->Trace(slot_assignment_);
   visitor->Trace(reference_target_id_observer_);
-  ElementRareDataField::Trace(visitor);
+  NodeRareDataField::Trace(visitor);
   TreeScope::Trace(visitor);
   DocumentFragment::Trace(visitor);
 }

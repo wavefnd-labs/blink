@@ -1362,7 +1362,7 @@ bool DisplayLockContext::DescendantIsAnchorTargetFromOutsideDisplayLock() {
 void DisplayLockContext::Trace(Visitor* visitor) const {
   visitor->Trace(element_);
   visitor->Trace(document_);
-  ElementRareDataField::Trace(visitor);
+  NodeRareDataField::Trace(visitor);
 }
 
 void DisplayLockContext::SetShouldUnlockAutoForPrint(bool flag) {

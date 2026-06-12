@@ -434,7 +434,7 @@ void AnchorPositionScrollData::Trace(Visitor* visitor) const {
   visitor->Trace(position_visibility_observer_);
   visitor->Trace(dependent_anchors_);
   PostLayoutSnapshotClient::Trace(visitor);
-  ElementRareDataField::Trace(visitor);
+  NodeRareDataField::Trace(visitor);
 }
 
 }  // namespace blink

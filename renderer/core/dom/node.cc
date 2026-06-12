@@ -50,7 +50,6 @@
 #include "third_party/blink/renderer/core/dom/document_type.h"
 #include "third_party/blink/renderer/core/dom/dom_node_ids.h"
 #include "third_party/blink/renderer/core/dom/element.h"
-#include "third_party/blink/renderer/core/dom/element_rare_data_vector.h"
 #include "third_party/blink/renderer/core/dom/element_traversal.h"
 #include "third_party/blink/renderer/core/dom/events/add_event_listener_options_resolved.h"
 #include "third_party/blink/renderer/core/dom/events/event.h"
@@ -66,6 +65,7 @@
 #include "third_party/blink/renderer/core/dom/node-inl.h"
 #include "third_party/blink/renderer/core/dom/node_cloning_data.h"
 #include "third_party/blink/renderer/core/dom/node_lists_node_data.h"
+#include "third_party/blink/renderer/core/dom/node_rare_data.h"
 #include "third_party/blink/renderer/core/dom/node_traversal.h"
 #include "third_party/blink/renderer/core/dom/processing_instruction.h"
 #include "third_party/blink/renderer/core/dom/range.h"
@@ -322,7 +322,7 @@ void Node::DumpStatistics() {
             << elements_with_attribute_storage << " x " << sizeof(ElementData)
             << "Bytes\n"
             << "  Number of Elements with RareData: " << elements_with_rare_data
-            << " x " << sizeof(ElementRareDataVector) << "Bytes\n"
+            << " x " << sizeof(NodeRareData) << "Bytes\n"
             << "  Number of Elements with NamedNodeMap: "
             << elements_with_named_node_map << " x " << sizeof(NamedNodeMap)
             << "Bytes";
@@ -360,8 +360,8 @@ Node* Node::FromDomNodeId(DOMNodeId dom_node_id) {
   return DOMNodeIds::NodeForId(dom_node_id);
 }
 
-ElementRareDataVector& Node::CreateRareData() {
-  data_ = ElementRareDataVector::Create();
+NodeRareData& Node::CreateRareData() {
+  data_ = NodeRareData::Create();
   return *data_;
 }
 

@@ -57,7 +57,6 @@
 #include "third_party/blink/renderer/core/dom/document_fragment.h"
 #include "third_party/blink/renderer/core/dom/dom_exception.h"
 #include "third_party/blink/renderer/core/dom/element.h"
-#include "third_party/blink/renderer/core/dom/element_rare_data_vector.h"
 #include "third_party/blink/renderer/core/dom/element_traversal.h"
 #include "third_party/blink/renderer/core/dom/events/event_listener.h"
 #include "third_party/blink/renderer/core/dom/events/scoped_event_queue.h"
@@ -67,6 +66,7 @@
 #include "third_party/blink/renderer/core/dom/id_target_observer.h"
 #include "third_party/blink/renderer/core/dom/invoker_data.h"
 #include "third_party/blink/renderer/core/dom/node_lists_node_data.h"
+#include "third_party/blink/renderer/core/dom/node_rare_data.h"
 #include "third_party/blink/renderer/core/dom/node_traversal.h"
 #include "third_party/blink/renderer/core/dom/popover_data.h"
 #include "third_party/blink/renderer/core/dom/shadow_root.h"
@@ -1671,7 +1671,7 @@ void HTMLElement::SetUnboundedElementActive(bool active) {
 }
 
 gfx::Rect HTMLElement::LastSentUnboundedBounds() const {
-  if (const ElementRareDataVector* data = RareData()) {
+  if (const NodeRareData* data = RareData()) {
     return data->LastSentUnboundedBounds();
   }
   return gfx::Rect();

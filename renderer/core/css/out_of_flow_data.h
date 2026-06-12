@@ -9,7 +9,7 @@
 
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/css/successful_position_fallback.h"
-#include "third_party/blink/renderer/core/dom/element_rare_data_field.h"
+#include "third_party/blink/renderer/core/dom/node_rare_data_field.h"
 #include "third_party/blink/renderer/core/style/position_try_fallbacks.h"
 #include "third_party/blink/renderer/platform/geometry/physical_offset.h"
 #include "third_party/blink/renderer/platform/heap/collection_support/heap_hash_map.h"
@@ -23,9 +23,8 @@ class Element;
 class LayoutBox;
 class LayoutObject;
 
-class CORE_EXPORT OutOfFlowData final
-    : public GarbageCollected<OutOfFlowData>,
-      public ElementRareDataField {
+class CORE_EXPORT OutOfFlowData final : public GarbageCollected<OutOfFlowData>,
+                                        public NodeRareDataField {
  public:
   struct ScrollOffsetPair {
     PhysicalOffset scroll_offset_for_layout;
