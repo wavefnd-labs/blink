@@ -32,7 +32,143 @@ void SetAnimationState(
   }
 }
 
+void UpdatePlaceholderClient(
+    base::WeakPtr<OffscreenCanvasPlaceholder::Client> client,
+    scoped_refptr<base::SingleThreadTaskRunner> task_runner,
+    DOMNodeId placeholder_canvas_id) {
+  OffscreenCanvasPlaceholder* placeholder_canvas =
+      OffscreenCanvasPlaceholder::GetPlaceholderCanvasById(
+          placeholder_canvas_id);
+  // Note that the placeholder canvas may be destroyed when this post task get
+  // to executed.
+  if (placeholder_canvas) {
+    placeholder_canvas->SetClient(client, task_runner);
+  }
+}
+
 }  // unnamed namespace
+
+void OffscreenCanvasPlaceholder::Client::UpdatePlaceholderImage(
+    base::WeakPtr<OffscreenCanvasPlaceholder::Client> client,
+    scoped_refptr<base::SingleThreadTaskRunner> task_runner,
+    DOMNodeId placeholder_canvas_id,
+    scoped_refptr<blink::ExportedCanvasResource>&& canvas_resource) {
+  DCHECK(IsMainThread());
+
+  if (placeholder_canvas_id == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
+      placeholder_canvas_id == kInvalidDOMNodeId) {
+    return;
+  }
+
+  OffscreenCanvasPlaceholder* placeholder_canvas =
+      OffscreenCanvasPlaceholder::GetPlaceholderCanvasById(
+          placeholder_canvas_id);
+  if (placeholder_canvas) {
+    placeholder_canvas->SetOffscreenCanvasResource(std::move(canvas_resource));
+    task_runner->PostTask(
+        FROM_HERE, base::BindOnce(&Client::OnMainThreadReceivedImage, client));
+  }
+}
+
+void OffscreenCanvasPlaceholder::Client::PostImageToPlaceholderIfNotBlocked(
+    scoped_refptr<ExportedCanvasResource> exported_resource) {
+  if (placeholder_canvas_id_ == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
+      // `placeholder_task_runner_` may be null if this
+      // was created from a SharedWorker.
+      !placeholder_task_runner_) {
+    exported_resource.reset();
+    return;
+  }
+
+  // Determines whether the main thread may be blocked. If unblocked, post
+  // |canvas_resource|. Otherwise, save it but do not post it.
+  if (num_pending_placeholder_resources_ < kMaxPendingPlaceholderResources) {
+    PostImageToPlaceholder(std::move(exported_resource));
+    num_pending_placeholder_resources_++;
+  } else {
+    DCHECK(num_pending_placeholder_resources_ ==
+           kMaxPendingPlaceholderResources);
+
+    // The previous unposted resource becomes obsolete now.
+    latest_unposted_resource_.reset();
+
+    latest_unposted_resource_ = std::move(exported_resource);
+  }
+}
+
+void OffscreenCanvasPlaceholder::Client::PostImageToPlaceholder(
+    scoped_refptr<ExportedCanvasResource>&& canvas_resource) {
+  // After this point, |canvas_resource| can only be used on the main thread,
+  // until it is returned.
+  canvas_resource->Transfer();
+
+  CHECK(placeholder_task_runner_);
+  PostCrossThreadTask(
+      *placeholder_task_runner_, FROM_HERE,
+      CrossThreadBindOnce(UpdatePlaceholderImage, GetWeakPtr(),
+                          canvas_task_runner_, placeholder_canvas_id_,
+                          std::move(canvas_resource)));
+}
+
+void OffscreenCanvasPlaceholder::Client::OnMainThreadReceivedImage() {
+  num_pending_placeholder_resources_--;
+
+  // The main thread has become unblocked recently and we have a resource that
+  // has not been posted yet.
+  if (latest_unposted_resource_) {
+    DCHECK(num_pending_placeholder_resources_ ==
+           kMaxPendingPlaceholderResources - 1);
+    PostImageToPlaceholderIfNotBlocked(std::move(latest_unposted_resource_));
+    // To make it safe to use/check latest_unposted_resource_ after using
+    // std::move on it, we need to force a reset because the move above is
+    // elide-able.
+    latest_unposted_resource_.reset();
+  }
+}
+
+void OffscreenCanvasPlaceholder::Client::RegisterWithPlaceholder() {
+  // `agent_group_scheduler_compositor_task_runner_` may be null if this
+  // was created from a SharedWorker.
+  if (!placeholder_task_runner_) {
+    return;
+  }
+
+  if (placeholder_canvas_id_ == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
+      placeholder_canvas_id_ == kInvalidDOMNodeId) {
+    return;
+  }
+
+  // If the offscreencanvas is in the same thread as the canvas, we will update
+  // the canvas resource dispatcher directly. So Offscreen Canvas can behave in
+  // a more synchronous way when it's on the main thread.
+  if (IsMainThread()) {
+    UpdatePlaceholderClient(GetWeakPtr(), canvas_task_runner_,
+                            placeholder_canvas_id_);
+  } else {
+    PostCrossThreadTask(
+        *placeholder_task_runner_, FROM_HERE,
+        CrossThreadBindOnce(UpdatePlaceholderClient, GetWeakPtr(),
+                            canvas_task_runner_, placeholder_canvas_id_));
+  }
+}
+
+void OffscreenCanvasPlaceholder::Client::SetAnimationState(
+    OffscreenCanvasPlaceholder::AnimationState animation_state) {
+  animation_state_ = animation_state;
+  animation_state_callback_.Run();
+}
+
+OffscreenCanvasPlaceholder::Client::Client(
+    DOMNodeId placeholder_canvas_id,
+    scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner,
+    scoped_refptr<base::SingleThreadTaskRunner> canvas_task_runner,
+    base::RepeatingClosure animation_state_callback)
+    : animation_state_callback_(animation_state_callback),
+      placeholder_canvas_id_(placeholder_canvas_id),
+      canvas_task_runner_(std::move(canvas_task_runner)),
+      placeholder_task_runner_(std::move(placeholder_task_runner)) {
+  RegisterWithPlaceholder();
+}
 
 OffscreenCanvasPlaceholder::Client::~Client() = default;
 

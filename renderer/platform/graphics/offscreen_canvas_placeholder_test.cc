@@ -8,7 +8,6 @@
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/blink/public/platform/scheduler/test/renderer_scheduler_test_support.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource.h"
-#include "third_party/blink/renderer/platform/graphics/canvas_resource_dispatcher.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
 #include "third_party/blink/renderer/platform/graphics/exported_canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
@@ -23,13 +22,12 @@ using testing::Test;
 
 namespace blink {
 
-class MockPlaceholderClient
-    : public CanvasResourceDispatcher::PlaceholderClient {
+class MockPlaceholderClient : public OffscreenCanvasPlaceholder::Client {
  public:
   explicit MockPlaceholderClient(
       DOMNodeId placeholder_id,
       scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner)
-      : CanvasResourceDispatcher::PlaceholderClient(
+      : OffscreenCanvasPlaceholder::Client(
             placeholder_id,
             placeholder_task_runner,
             scheduler::GetSingleThreadTaskRunnerForTesting(),
@@ -38,12 +36,12 @@ class MockPlaceholderClient
 
   void OnMainThreadReceivedImage() override {
     MainThreadReceivedImage();
-    CanvasResourceDispatcher::PlaceholderClient::OnMainThreadReceivedImage();
+    OffscreenCanvasPlaceholder::Client::OnMainThreadReceivedImage();
   }
 
   void PostImageToPlaceholder(
       scoped_refptr<ExportedCanvasResource>&& resource) override {
-    CanvasResourceDispatcher::PlaceholderClient::PostImageToPlaceholder(
+    OffscreenCanvasPlaceholder::Client::PostImageToPlaceholder(
         std::move(resource));
     OnPostImageToPlaceholder();
   }

@@ -99,75 +99,6 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
  private:
   friend class OffscreenCanvasPlaceholderTest;
   friend class CanvasResourceDispatcherTest;
-  friend class MockPlaceholderClient;
-
-  class PLATFORM_EXPORT PlaceholderClient
-      : public OffscreenCanvasPlaceholder::Client {
-   public:
-    // We set a limit to the number of placeholder resources that have been
-    // posted to the main thread but not yet received on that thread.
-    static constexpr unsigned kMaxPendingPlaceholderResources = 50;
-
-    PlaceholderClient(
-        DOMNodeId placeholder_canvas_id,
-        scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner,
-        scoped_refptr<base::SingleThreadTaskRunner> canvas_task_runner,
-        base::RepeatingClosure animation_state_callback);
-    ~PlaceholderClient() override;
-
-    base::WeakPtr<PlaceholderClient> GetWeakPtr() {
-      return weak_ptr_factory_.GetWeakPtr();
-    }
-
-    void SetAnimationState(
-        OffscreenCanvasPlaceholder::AnimationState animation_state) override;
-
-    OffscreenCanvasPlaceholder::AnimationState GetAnimationState() {
-      return animation_state_;
-    }
-
-    void RegisterWithPlaceholder();
-
-    void PostImageToPlaceholderIfNotBlocked(
-        scoped_refptr<ExportedCanvasResource>);
-
-    // virtual for mocking
-    virtual void OnMainThreadReceivedImage();
-
-   protected:
-    // virtual and protected for testing
-    virtual void PostImageToPlaceholder(
-        scoped_refptr<ExportedCanvasResource>&&);
-
-   private:
-    friend class OffscreenCanvasPlaceholderTest;
-
-    static void UpdatePlaceholderImage(
-        base::WeakPtr<CanvasResourceDispatcher::PlaceholderClient> client,
-        scoped_refptr<base::SingleThreadTaskRunner> task_runner,
-        DOMNodeId placeholder_canvas_id,
-        scoped_refptr<blink::ExportedCanvasResource>&& canvas_resource);
-
-    base::RepeatingClosure animation_state_callback_;
-
-    const DOMNodeId placeholder_canvas_id_;
-
-    // Task runner for the thread where OffscreenCanvas lives.
-    scoped_refptr<base::SingleThreadTaskRunner> canvas_task_runner_;
-    // Task runner for the thread where OffscreenCanvasPlaceholder lives, i.e
-    // main thread.
-    scoped_refptr<base::SingleThreadTaskRunner> placeholder_task_runner_;
-
-    OffscreenCanvasPlaceholder::AnimationState animation_state_ =
-        OffscreenCanvasPlaceholder::AnimationState::kActive;
-
-    // The latest_unposted_resource_ always refers to the frame
-    // resource used by the latest_unposted_resource_.
-    scoped_refptr<ExportedCanvasResource> latest_unposted_resource_;
-    unsigned num_pending_placeholder_resources_ = 0;
-
-    base::WeakPtrFactory<PlaceholderClient> weak_ptr_factory_{this};
-  };
 
   using ExportedResourceMap =
       HashMap<viz::ResourceId, scoped_refptr<ExportedCanvasResource>>;
@@ -222,7 +153,7 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
 
   TaskRunnerTimer<CanvasResourceDispatcher> fake_frame_timer_;
 
-  std::unique_ptr<PlaceholderClient> placeholder_client_;
+  std::unique_ptr<OffscreenCanvasPlaceholder::Client> placeholder_client_;
 
   base::WeakPtrFactory<CanvasResourceDispatcher> weak_ptr_factory_{this};
 };
