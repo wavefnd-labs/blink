@@ -77,6 +77,10 @@ NavigationTestExpression* NavigationParser::ParseNavigationTest(
     if (!route_location1) {
       return nullptr;
     }
+    stream.ConsumeWhitespace();
+    if (stream.Peek().GetType() != kIdentToken) {
+      return nullptr;
+    }
     CSSParserToken and_token = stream.ConsumeIncludingWhitespace();
     if (and_token.GetType() != kIdentToken ||
         !EqualIgnoringAsciiCase(and_token.Value(), "and")) {
