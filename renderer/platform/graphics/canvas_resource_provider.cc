@@ -181,8 +181,7 @@ Canvas2DResourceProviderBitmap::Canvas2DResourceProviderBitmap(
     const gfx::ColorSpace& color_space,
     const gfx::HDRMetadata& hdr_metadata,
     CanvasResourceProvider::Delegate* delegate)
-    : CanvasResourceProvider(kBitmap),
-      size_(size),
+    : size_(size),
       format_(format),
       alpha_type_(alpha_type),
       color_space_(color_space),
@@ -2071,8 +2070,7 @@ bool CanvasImageProvider::IsHardwareDecodeCache() const {
   return raster_mode_ != cc::PlaybackImageProvider::RasterMode::kSoftware;
 }
 
-CanvasResourceProvider::CanvasResourceProvider(const ResourceProviderType& type)
-    : type_(type) {
+CanvasResourceProvider::CanvasResourceProvider() {
   CanvasMemoryDumpProvider::Instance()->RegisterClient(this);
 }
 
@@ -2266,8 +2264,7 @@ Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(
     bool is_accelerated,
     gpu::SharedImageUsageSet shared_image_usage_flags,
     CanvasResourceProvider::Delegate* delegate)
-    : CanvasResourceProvider(kSharedImage),
-      is_accelerated_(is_accelerated),
+    : is_accelerated_(is_accelerated),
       is_software_(false),
       context_provider_wrapper_(std::move(context_provider_wrapper)),
       size_(size),
@@ -2381,8 +2378,7 @@ Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(
     const gfx::HDRMetadata& hdr_metadata,
     WebGraphicsSharedImageInterfaceProvider* shared_image_interface_provider,
     CanvasResourceProvider::Delegate* delegate)
-    : CanvasResourceProvider(kSharedImage),
-      is_accelerated_(false),
+    : is_accelerated_(false),
       is_software_(true),
       shared_image_interface_provider_(
           shared_image_interface_provider

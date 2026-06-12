@@ -184,7 +184,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
 
   void RestoreBackBuffer(const cc::PaintImage&);
 
-  ResourceProviderType GetType() const { return type_; }
+  virtual ResourceProviderType GetType() const = 0;
 
   virtual void FlushIfRecordingLimitExceeded() = 0;
 
@@ -216,13 +216,11 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual const std::optional<cc::PaintRecord>& LastRecording() = 0;
 
  protected:
-  explicit CanvasResourceProvider(const ResourceProviderType&);
+  CanvasResourceProvider();
 
   virtual void RasterRecord(cc::PaintRecord) = 0;
 
   CanvasImageProvider* GetOrCreateSWCanvasImageProvider();
-
-  ResourceProviderType type_;
 
   // Called after the recording was cleared from any draw ops it might have had.
   // Canvas2D-specific, as it is called only when `recorder_` is
@@ -262,6 +260,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) override;
   const std::optional<cc::PaintRecord>& LastRecording() override;
+  ResourceProviderType GetType() const override { return kBitmap; }
 
   void RasterRecord(cc::PaintRecord last_recording) override;
   bool WritePixels(const SkImageInfo& orig_info,
@@ -495,6 +494,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) override;
   const std::optional<cc::PaintRecord>& LastRecording() override;
+  ResourceProviderType GetType() const override { return kSharedImage; }
   bool WritePixels(const SkImageInfo& orig_info,
                    const void* pixels,
                    size_t row_bytes,
