@@ -1635,7 +1635,7 @@ AXObject* AXObjectCacheImpl::CreateAndInit(Node* node,
   new_obj->UpdateChildrenIfNecessary();
 
   if (auto* canvas = DynamicTo<HTMLCanvasElement>(node)) {
-    canvas->OnAxObjectCreated(new_obj->IsIgnored());
+    canvas->OnAxObjectIgnoredStateChanged(new_obj->IsIgnored());
   }
 
   return new_obj;
