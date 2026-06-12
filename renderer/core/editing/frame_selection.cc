@@ -146,11 +146,7 @@ VisibleSelectionInFlatTree FrameSelection::ComputeVisibleSelectionInFlatTree()
 }
 
 const SelectionInDomTree& FrameSelection::GetSelectionInDomTree() const {
-  return selection_editor_->GetSelectionInDOMTree();
-}
-
-const SelectionInDomTree& FrameSelection::GetSelectionInDOMTree() const {
-  return GetSelectionInDomTree();
+  return selection_editor_->GetSelectionInDomTree();
 }
 
 Element* FrameSelection::RootEditableElementOrDocumentElement() const {
@@ -272,7 +268,7 @@ bool FrameSelection::SetSelectionDeprecated(
     frame_->GetEditor().ClearTypingStyle();
 
   const SelectionInDomTree old_selection_in_dom_tree =
-      selection_editor_->GetSelectionInDOMTree();
+      selection_editor_->GetSelectionInDomTree();
   const bool is_changed = old_selection_in_dom_tree != new_selection;
   const bool should_show_handle = options.ShouldShowHandle();
   if (!is_changed && is_handle_visible_ == should_show_handle &&

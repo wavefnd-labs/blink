@@ -225,8 +225,6 @@ class CORE_EXPORT FrameSelection final
   void DidChangeFocus();
 
   const SelectionInDomTree& GetSelectionInDomTree() const;
-  // New code should use GetSelectionInDomTree(). This will be removed soon.
-  const SelectionInDomTree& GetSelectionInDOMTree() const;
   bool IsDirectional() const;
 
   void DidAttachDocument(Document*);

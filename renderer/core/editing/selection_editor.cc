@@ -112,7 +112,7 @@ bool SelectionEditor::ComputeAbsoluteBounds(gfx::Rect& anchor,
   return has_selection_bounds_;
 }
 
-const SelectionInDomTree& SelectionEditor::GetSelectionInDOMTree() const {
+const SelectionInDomTree& SelectionEditor::GetSelectionInDomTree() const {
   AssertSelectionValid();
   return selection_;
 }
@@ -209,7 +209,7 @@ void SelectionEditor::DidFinishTextChange(const Position& new_anchor,
 
   // See: https://w3c.github.io/selection-api/#selectionchange-event
   TextControlElement* text_control =
-      EnclosingTextControl(GetSelectionInDOMTree().Anchor());
+      EnclosingTextControl(GetSelectionInDomTree().Anchor());
   if (text_control && !text_control->IsInShadowTree()) {
     text_control->ScheduleSelectionchangeEvent();
   } else {

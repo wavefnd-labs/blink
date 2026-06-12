@@ -1403,7 +1403,7 @@ bool WebLocalFrameImpl::IsSelectionAnchorFirst() const {
     return false;
   }
 
-  return selection.GetSelectionInDOMTree().IsAnchorFirst();
+  return selection.GetSelectionInDomTree().IsAnchorFirst();
 }
 
 void WebLocalFrameImpl::SetTextDirectionForTesting(

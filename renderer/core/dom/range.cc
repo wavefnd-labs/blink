@@ -1821,10 +1821,10 @@ void Range::UpdateSelectionIfAddedToSelection() {
   Position end_position = EndPosition();
   switch (update_selection_behavior_) {
     case UpdateSelectionBehavior::kEndOnly:
-      start_position = selection.GetSelectionInDOMTree().ComputeStartPosition();
+      start_position = selection.GetSelectionInDomTree().ComputeStartPosition();
       break;
     case UpdateSelectionBehavior::kStartOnly:
-      end_position = selection.GetSelectionInDOMTree().ComputeEndPosition();
+      end_position = selection.GetSelectionInDomTree().ComputeEndPosition();
       break;
     case UpdateSelectionBehavior::kAll:
       break;

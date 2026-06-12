@@ -45,7 +45,7 @@ class SelectionEditor final : public GarbageCollected<SelectionEditor> {
   SelectionEditor& operator=(const SelectionEditor&) = delete;
   void Dispose();
 
-  const SelectionInDomTree& GetSelectionInDOMTree() const;
+  const SelectionInDomTree& GetSelectionInDomTree() const;
 
   VisibleSelection ComputeVisibleSelectionInDomTree() const;
   VisibleSelectionInFlatTree ComputeVisibleSelectionInFlatTree() const;

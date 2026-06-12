@@ -738,8 +738,9 @@ gfx::Rect WebFrameWidgetImpl::GetAbsoluteCaretBounds() {
   LocalFrame* local_frame = GetPage()->GetFocusController().FocusedFrame();
   if (local_frame) {
     auto& selection = local_frame->Selection();
-    if (selection.GetSelectionInDOMTree().IsCaret())
+    if (selection.GetSelectionInDomTree().IsCaret()) {
       return selection.AbsoluteCaretBounds();
+    }
   }
   return gfx::Rect();
 }
@@ -4998,7 +4999,7 @@ void WebFrameWidgetImpl::CalculateSelectionBounds(
   // Calculate the bounding box of the selection area.
   if (bounding_box_in_root_frame) {
     Range* range =
-        CreateRange(selection.GetSelectionInDOMTree().ComputeRange());
+        CreateRange(selection.GetSelectionInDomTree().ComputeRange());
     // This bounding box is in CSS pixels.
     // TODO(https://issues.chromium.org/515746975) : BoundingRect should be in
     // DIPs.

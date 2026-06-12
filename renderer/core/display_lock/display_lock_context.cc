@@ -1250,7 +1250,7 @@ void DisplayLockContext::DetermineIfSubtreeHasSelection() {
 
   auto range = ToEphemeralRangeInFlatTree(document_->GetFrame()
                                               ->Selection()
-                                              .GetSelectionInDOMTree()
+                                              .GetSelectionInDomTree()
                                               .ComputeRange());
   bool subtree_has_selection = false;
   for (auto& node : range.Nodes()) {
