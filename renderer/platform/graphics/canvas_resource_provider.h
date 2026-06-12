@@ -203,8 +203,8 @@ class PLATFORM_EXPORT CanvasResourceProvider
   // ensure the correct frame indexes are used when rasterizing a particular
   // ElementImage.
   void ApplyAnimatedImageFrameIndexesForId(SkCanvas* canvas, uint32_t id);
-  void SetAnimatedImageFrameIndexes(
-      scoped_refptr<const cc::AnimatedImageFrameIndexMap>);
+  virtual void SetAnimatedImageFrameIndexes(
+      scoped_refptr<const cc::AnimatedImageFrameIndexMap>) = 0;
 
   constexpr static base::TimeDelta kUnusedResourceExpirationTime =
       base::Seconds(5);
@@ -233,8 +233,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   // callsites.
   void ClearAtCreation();
 
-  std::unique_ptr<CanvasImageProvider> canvas_image_provider_;
-
   bool always_enable_raster_timers_for_testing_ = false;
 };
 
@@ -261,6 +259,8 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
       FlushReason = FlushReason::kOther) override;
   const std::optional<cc::PaintRecord>& LastRecording() override;
   ResourceProviderType GetType() const override { return kBitmap; }
+  void SetAnimatedImageFrameIndexes(
+      scoped_refptr<const cc::AnimatedImageFrameIndexMap>) override;
 
   void RasterRecord(cc::PaintRecord last_recording) override;
   bool WritePixels(const SkImageInfo& orig_info,
@@ -335,6 +335,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   void RecordingCleared() override;
   CanvasImageProvider* GetOrCreateSWCanvasImageProvider() override;
 
+  std::unique_ptr<CanvasImageProvider> canvas_image_provider_;
   gfx::Size size_;
   viz::SharedImageFormat format_;
   SkAlphaType alpha_type_;
@@ -496,6 +497,8 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
       FlushReason = FlushReason::kOther) override;
   const std::optional<cc::PaintRecord>& LastRecording() override;
   ResourceProviderType GetType() const override { return kSharedImage; }
+  void SetAnimatedImageFrameIndexes(
+      scoped_refptr<const cc::AnimatedImageFrameIndexMap>) override;
   bool WritePixels(const SkImageInfo& orig_info,
                    const void* pixels,
                    size_t row_bytes,
@@ -571,6 +574,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
     return static_cast<const CanvasResourceSharedImage*>(resource_.get());
   }
 
+  std::unique_ptr<CanvasImageProvider> canvas_image_provider_;
   // If this instance is single-buffered or |resource_recycling_enabled_| is
   // false, |image_pool_| will not recycle resources.
   std::unique_ptr<gpu::SharedImagePool<CanvasResourceSharedImage>> image_pool_;

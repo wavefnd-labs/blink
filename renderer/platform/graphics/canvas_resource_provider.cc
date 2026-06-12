@@ -266,6 +266,12 @@ Canvas2DResourceProviderBitmap::GetOrCreateSWCanvasImageProvider() {
   return canvas_image_provider_.get();
 }
 
+void Canvas2DResourceProviderBitmap::SetAnimatedImageFrameIndexes(
+    scoped_refptr<const cc::AnimatedImageFrameIndexMap> map) {
+  CHECK(canvas_image_provider_);
+  canvas_image_provider_->SetAnimatedImageFrameIndexes(map);
+}
+
 std::unique_ptr<MemoryManagedPaintRecorder>
 Canvas2DResourceProviderBitmap::ReleaseRecorder() {
   auto recorder = std::make_unique<MemoryManagedPaintRecorder>(Size(), this);
@@ -2391,6 +2397,12 @@ Canvas2DResourceProviderSharedImage::GetOrCreateSWCanvasImageProvider() {
   return canvas_image_provider_.get();
 }
 
+void Canvas2DResourceProviderSharedImage::SetAnimatedImageFrameIndexes(
+    scoped_refptr<const cc::AnimatedImageFrameIndexMap> map) {
+  CHECK(canvas_image_provider_);
+  canvas_image_provider_->SetAnimatedImageFrameIndexes(map);
+}
+
 Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(
     gfx::Size size,
     viz::SharedImageFormat format,
@@ -2864,12 +2876,6 @@ void CanvasResourceProvider::ApplyAnimatedImageFrameIndexesForId(
     uint32_t id) {
   CHECK(GetDelegate());
   SetAnimatedImageFrameIndexes(GetDelegate()->GetAnimatedImageFrameIndexes(id));
-}
-
-void CanvasResourceProvider::SetAnimatedImageFrameIndexes(
-    scoped_refptr<const cc::AnimatedImageFrameIndexMap> map) {
-  CHECK(canvas_image_provider_);
-  canvas_image_provider_->SetAnimatedImageFrameIndexes(map);
 }
 
 }  // namespace blink
