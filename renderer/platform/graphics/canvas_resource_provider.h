@@ -213,9 +213,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
     always_enable_raster_timers_for_testing_ = value;
   }
 
-  const std::optional<cc::PaintRecord>& LastRecording() {
-    return last_recording_;
-  }
+  virtual const std::optional<cc::PaintRecord>& LastRecording() = 0;
 
  protected:
   explicit CanvasResourceProvider(const ResourceProviderType&);
@@ -226,21 +224,10 @@ class PLATFORM_EXPORT CanvasResourceProvider
 
   ResourceProviderType type_;
 
-  // Whether the content of the current resource must be transferred to a new
-  // resource on CopyOnWrite. True by default, but can be set to false as an
-  // optimization if the current resource is known to have been cleared.
-  // This is only used for Canvas2D.
-  bool must_preserve_content_on_copy_on_write_ = true;
-
-
- private:
-  friend class FlushForImageListener;
-
-
   // Called after the recording was cleared from any draw ops it might have had.
   // Canvas2D-specific, as it is called only when `recorder_` is
   // instantiated by Canvas2D-specific subclasses.
-  void RecordingCleared() override;
+  void RecordingCleared() override = 0;
 
  protected:
   // Should only be called from static Create*() methods.
@@ -251,9 +238,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   std::unique_ptr<CanvasImageProvider> canvas_image_provider_;
 
   bool always_enable_raster_timers_for_testing_ = false;
-
-  bool clear_frame_ = true;
-  std::optional<cc::PaintRecord> last_recording_;
 };
 
 // Renders canvas2D ops to a Skia RAM-backed bitmap. Mailboxing is not
@@ -277,6 +261,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
       ImageOrientation = ImageOrientationEnum::kDefault) override;
   std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) override;
+  const std::optional<cc::PaintRecord>& LastRecording() override;
 
   void RasterRecord(cc::PaintRecord last_recording) override;
   bool WritePixels(const SkImageInfo& orig_info,
@@ -347,6 +332,9 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   SkSurface* GetSkSurface() const;
   sk_sp<SkSurface> CreateSkSurface() const;
 
+  // MemoryManagedPaintRecorder::Client implementation.
+  void RecordingCleared() override;
+
   gfx::Size size_;
   viz::SharedImageFormat format_;
   SkAlphaType alpha_type_;
@@ -362,6 +350,9 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   cc::PaintImage::ContentId snapshot_paint_image_content_id_ =
       cc::PaintImage::kInvalidContentId;
   uint32_t snapshot_sk_image_id_ = 0u;
+
+  bool clear_frame_ = true;
+  std::optional<cc::PaintRecord> last_recording_;
 };
 
 // * Subclass of CanvasResourceProvider that is specialized for usage
@@ -503,6 +494,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
       ImageOrientation = ImageOrientationEnum::kDefault) override;
   std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) override;
+  const std::optional<cc::PaintRecord>& LastRecording() override;
   bool WritePixels(const SkImageInfo& orig_info,
                    const void* pixels,
                    size_t row_bytes,
@@ -517,6 +509,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   void SetRecorder(
       std::unique_ptr<MemoryManagedPaintRecorder> recorder) override;
   void InitializeForRecording(cc::PaintCanvas* canvas) const override;
+  void RecordingCleared() override;
 
   void SetResourceRecyclingEnabled(bool value);
 
@@ -582,6 +575,11 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
 
   scoped_refptr<CanvasResourceSharedImage> resource_;
 
+  // Whether the content of the current resource must be transferred to a new
+  // resource on CopyOnWrite. True by default, but can be set to false as an
+  // optimization if the current resource is known to have been cleared.
+  bool must_preserve_content_on_copy_on_write_ = true;
+
   bool current_resource_has_write_access_ = false;
 
   cc::PaintImage::ContentId cached_content_id_ =
@@ -624,6 +622,9 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   cc::PaintImage::ContentId snapshot_paint_image_content_id_ =
       cc::PaintImage::kInvalidContentId;
   uint32_t snapshot_sk_image_id_ = 0u;
+
+  bool clear_frame_ = true;
+  std::optional<cc::PaintRecord> last_recording_;
 
   base::WeakPtrFactory<Canvas2DResourceProviderSharedImage> weak_ptr_factory_{
       this};

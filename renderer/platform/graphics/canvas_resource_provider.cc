@@ -242,6 +242,10 @@ void Canvas2DResourceProviderBitmap::InitializeForRecording(
   }
 }
 
+void Canvas2DResourceProviderBitmap::RecordingCleared() {
+  clear_frame_ = true;
+}
+
 std::unique_ptr<MemoryManagedPaintRecorder>
 Canvas2DResourceProviderBitmap::ReleaseRecorder() {
   auto recorder = std::make_unique<MemoryManagedPaintRecorder>(Size(), this);
@@ -331,6 +335,11 @@ std::optional<cc::PaintRecord> Canvas2DResourceProviderBitmap::Flush(
   }
 
   return recording;
+}
+
+const std::optional<cc::PaintRecord>&
+Canvas2DResourceProviderBitmap::LastRecording() {
+  return last_recording_;
 }
 
 sk_sp<SkSurface> Canvas2DResourceProviderBitmap::CreateSkSurface() const {
@@ -1231,6 +1240,11 @@ std::optional<cc::PaintRecord> Canvas2DResourceProviderSharedImage::Flush(
   return recording;
 }
 
+const std::optional<cc::PaintRecord>&
+Canvas2DResourceProviderSharedImage::LastRecording() {
+  return last_recording_;
+}
+
 scoped_refptr<UnacceleratedStaticBitmapImage>
 Canvas2DResourceProviderSharedImage::UnacceleratedSnapshot(
     ImageOrientation orientation) {
@@ -2098,14 +2112,6 @@ CanvasResourceProvider::GetOrCreateSWCanvasImageProvider() {
   return canvas_image_provider_.get();
 }
 
-void CanvasResourceProvider::RecordingCleared() {
-
-  // Since the recording has been cleared, it contains no draw commands and it
-  // is now safe to discard the old copy of canvas content on a subsequent
-  // CopyOnWrite.
-  must_preserve_content_on_copy_on_write_ = false;
-  clear_frame_ = true;
-}
 
 MemoryManagedPaintCanvas& CanvasResourceProvider::GetCanvasForTesting() {
   return Recorder().getRecordingCanvas();
@@ -2360,6 +2366,11 @@ void Canvas2DResourceProviderSharedImage::InitializeForRecording(
   if (delegate_) {
     delegate_->InitializeForRecording(canvas);
   }
+}
+
+void Canvas2DResourceProviderSharedImage::RecordingCleared() {
+  must_preserve_content_on_copy_on_write_ = false;
+  clear_frame_ = true;
 }
 
 Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(
