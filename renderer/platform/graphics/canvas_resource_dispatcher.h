@@ -26,7 +26,6 @@
 
 namespace blink {
 
-class CanvasResource;
 class ExportedCanvasResource;
 
 class CanvasResourceDispatcherClient {
@@ -72,7 +71,7 @@ class PLATFORM_EXPORT CanvasResourceDispatcher
     return animation_state_ ==
            OffscreenCanvasPlaceholder::AnimationState::kSuspended;
   }
-  void DispatchFrame(scoped_refptr<CanvasResource>&&,
+  void DispatchFrame(scoped_refptr<ExportedCanvasResource>&&,
                      const gfx::Rect& damage_rect,
                      bool is_opaque);
   void ReplaceBeginFrameAck(const viz::BeginFrameArgs& args) {

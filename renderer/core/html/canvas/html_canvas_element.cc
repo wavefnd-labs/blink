@@ -758,8 +758,10 @@ void HTMLCanvasElement::PostFinalizeFrame(FlushReason reason) {
             context_->PaintRenderingResultsToResource(kBackBuffer, reason)) {
       const gfx::Rect src_rect(Size());
       dirty_rect_.Intersect(src_rect);
-      frame_dispatcher_->DispatchFrame(std::move(canvas_resource), dirty_rect_,
-                                       IsOpaque());
+      auto exported_resource = base::MakeRefCounted<ExportedCanvasResource>(
+          std::move(canvas_resource));
+      frame_dispatcher_->DispatchFrame(std::move(exported_resource),
+                                       dirty_rect_, IsOpaque());
       dirty_rect_ = gfx::Rect();
     }
   }

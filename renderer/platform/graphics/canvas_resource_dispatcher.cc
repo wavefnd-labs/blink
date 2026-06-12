@@ -95,16 +95,10 @@ CanvasResourceDispatcher::CanvasResourceDispatcher(
 CanvasResourceDispatcher::~CanvasResourceDispatcher() = default;
 
 void CanvasResourceDispatcher::DispatchFrame(
-    scoped_refptr<CanvasResource>&& canvas_resource,
+    scoped_refptr<ExportedCanvasResource>&& exported_resource,
     const gfx::Rect& damage_rect,
     bool is_opaque) {
   TRACE_EVENT0("blink", "CanvasResourceDispatcher::DispatchFrame");
-  if (!canvas_resource) {
-    return;
-  }
-
-  auto exported_resource =
-      base::MakeRefCounted<ExportedCanvasResource>(std::move(canvas_resource));
 
   if (placeholder_client_) {
     // This takes another ref and sends it to the placeholder. The

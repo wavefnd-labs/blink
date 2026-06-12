@@ -42,6 +42,7 @@
 #include "third_party/blink/renderer/platform/graphics/canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_dispatcher.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
+#include "third_party/blink/renderer/platform/graphics/exported_canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/canvas_utils.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/shared_gpu_context.h"
 #include "third_party/blink/renderer/platform/graphics/image.h"
@@ -615,8 +616,12 @@ bool OffscreenCanvas::PushFrame(
   }
   canvas_resource->SetOriginClean(OriginClean());
   current_frame_damage_rect_.Intersect(gfx::Rect(Size()));
+
+  auto exported_resource =
+      base::MakeRefCounted<ExportedCanvasResource>(std::move(canvas_resource));
+
   GetOrCreateResourceDispatcher()->DispatchFrame(
-      std::move(canvas_resource), current_frame_damage_rect_, IsOpaque());
+      std::move(exported_resource), current_frame_damage_rect_, IsOpaque());
   current_frame_damage_rect_ = gfx::Rect();
 
   return true;

@@ -15,6 +15,7 @@
 #include "third_party/blink/public/platform/scheduler/test/renderer_scheduler_test_support.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
+#include "third_party/blink/renderer/platform/graphics/exported_canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
 #include "third_party/blink/renderer/platform/graphics/test/mock_compositor_frame_sink.h"
 #include "third_party/blink/renderer/platform/graphics/test/mock_embedded_frame_sink_provider.h"
@@ -61,7 +62,9 @@ class CanvasResourceDispatcherTest
   void DispatchOneFrame() {
     scoped_refptr<CanvasResource> canvas_resource =
         resource_provider_->ProduceCanvasResource();
-    dispatcher_->DispatchFrame(std::move(canvas_resource), gfx::Rect(),
+    auto exported_resource = base::MakeRefCounted<ExportedCanvasResource>(
+        std::move(canvas_resource));
+    dispatcher_->DispatchFrame(std::move(exported_resource), gfx::Rect(),
                                /*is_opaque=*/false);
   }
 
@@ -282,7 +285,9 @@ TEST_P(CanvasResourceDispatcherTest, DispatchFrame) {
           }));
 
   const gfx::Rect damage_rect(kDamageWidth, kDamageHeight);
-  dispatcher()->DispatchFrame(canvas_resource, damage_rect,
+  auto exported_resource =
+      base::MakeRefCounted<ExportedCanvasResource>(std::move(canvas_resource));
+  dispatcher()->DispatchFrame(std::move(exported_resource), damage_rect,
                               !context_alpha /* is_opaque */);
   platform->RunUntilIdle();
 }
