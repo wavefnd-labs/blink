@@ -6356,11 +6356,14 @@ void AXObjectCacheImpl::GetUpdatesAndEventsForSerialization(
 
     // Provide the expected node count in the last update, so that
     // AXTree::Unserialize() can check for tree consistency on the browser side.
+    // Use the serializers' client tree counts, which match the size of the
+    // id_map_ the browser builds by unserializing these updates.
     if (!updates.back().tree_checks) {
       updates.back().tree_checks.emplace();
     }
     updates.back().tree_checks->node_count =
-        GetIncludedNodeCount() + GetPluginIncludedNodeCount();
+        ax_tree_serializer_->ClientTreeNodeCount() +
+        (plugin_serializer_ ? plugin_serializer_->ClientTreeNodeCount() : 0);
   }
 #endif  // AX_FAIL_FAST_BUILD()
 }
