@@ -65,7 +65,7 @@ void UserMediaRequestProviderCallbacks::OnError(
       } else if (error->IsOverconstrainedError()) {
         dom_exception = error->GetAsOverconstrainedError();
       }
-      HTMLUserMediaElementMediaStream::From(*element_).SetError(dom_exception);
+      element_->SetError(dom_exception);
       element_->DispatchEvent(*Event::Create(event_type_names::kError));
     }
   }
@@ -128,9 +128,8 @@ void UserMediaRequestProviderImpl::StartRequest(
   if (permission_descriptors.size() == 2) {
     // Camera and Microphone element.
     if (!constraints->hasAudio() && !constraints->hasVideo()) {
-      HTMLUserMediaElementMediaStream::From(*element).SetError(
-          MakeGarbageCollected<DOMException>(
-              DOMExceptionCode::kNotSupportedError, "No constraints set"));
+      element->SetError(MakeGarbageCollected<DOMException>(
+          DOMExceptionCode::kNotSupportedError, "No constraints set"));
       element->DispatchEvent(*Event::Create(event_type_names::kError));
       return;
     }
@@ -149,10 +148,8 @@ void UserMediaRequestProviderImpl::StartRequest(
              mojom::blink::PermissionName::AUDIO_CAPTURE) {
     // Audio only element.
     if (!constraints->hasAudio()) {
-      HTMLUserMediaElementMediaStream::From(*element).SetError(
-          MakeGarbageCollected<DOMException>(
-              DOMExceptionCode::kNotSupportedError,
-              "No audio constraints set"));
+      element->SetError(MakeGarbageCollected<DOMException>(
+          DOMExceptionCode::kNotSupportedError, "No audio constraints set"));
       element->DispatchEvent(*Event::Create(event_type_names::kError));
       return;
     }
@@ -165,10 +162,8 @@ void UserMediaRequestProviderImpl::StartRequest(
     CHECK_EQ(permission_descriptors[0]->name,
              mojom::blink::PermissionName::VIDEO_CAPTURE);
     if (!constraints->hasVideo()) {
-      HTMLUserMediaElementMediaStream::From(*element).SetError(
-          MakeGarbageCollected<DOMException>(
-              DOMExceptionCode::kNotSupportedError,
-              "No video constraints set"));
+      element->SetError(MakeGarbageCollected<DOMException>(
+          DOMExceptionCode::kNotSupportedError, "No video constraints set"));
       element->DispatchEvent(*Event::Create(event_type_names::kError));
       return;
     }
@@ -185,9 +180,8 @@ void UserMediaRequestProviderImpl::StartRequest(
       exception_state);
 
   if (exception_state.HadException()) {
-    HTMLUserMediaElementMediaStream::From(*element).SetError(
-        MakeGarbageCollected<DOMException>(DOMExceptionCode::kOperationError,
-                                          "Stream creation failed"));
+    element->SetError(MakeGarbageCollected<DOMException>(
+        DOMExceptionCode::kOperationError, "Stream creation failed"));
     element->DispatchEvent(*Event::Create(event_type_names::kError));
     return;
   }

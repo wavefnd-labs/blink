@@ -123,7 +123,7 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnError) {
   element->addEventListener(event_type_names::kError, error_listener);
   element->addEventListener(event_type_names::kStream, stream_listener);
 
-  EXPECT_FALSE(HTMLUserMediaElementMediaStream::error(*element));
+  EXPECT_FALSE(element->error());
 
   DOMException* dom_exception =
       DOMException::Create("Some error message", "NotFoundError");
@@ -137,7 +137,7 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnError) {
   EXPECT_TRUE(error_listener->fired());
   EXPECT_FALSE(stream_listener->fired());
 
-  DOMException* stored_error = HTMLUserMediaElementMediaStream::error(*element);
+  DOMException* stored_error = element->error();
   ASSERT_TRUE(stored_error);
   EXPECT_EQ(stored_error->name(), "NotFoundError");
   EXPECT_EQ(stored_error->message(), "Some error message");
@@ -157,7 +157,7 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnCancel) {
   element->addEventListener(event_type_names::kError, error_listener);
   element->addEventListener(event_type_names::kStream, stream_listener);
 
-  EXPECT_FALSE(HTMLUserMediaElementMediaStream::error(*element));
+  EXPECT_FALSE(element->error());
 
   DOMException* dom_exception =
       DOMException::Create("User denied", "NotAllowedError");
@@ -173,7 +173,7 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnCancel) {
   EXPECT_FALSE(stream_listener->fired());
 
   // Cancel event should NOT set the error attribute on the element
-  EXPECT_FALSE(HTMLUserMediaElementMediaStream::error(*element));
+  EXPECT_FALSE(element->error());
 }
 
 TEST_F(UserMediaRequestProviderImplTest, StartRequestNoConstraintsError) {
@@ -198,7 +198,7 @@ TEST_F(UserMediaRequestProviderImplTest, StartRequestNoConstraintsError) {
   EXPECT_TRUE(error_listener->fired());
   EXPECT_FALSE(stream_listener->fired());
 
-  DOMException* stored_error = HTMLUserMediaElementMediaStream::error(*element);
+  DOMException* stored_error = element->error();
   ASSERT_TRUE(stored_error);
   EXPECT_EQ(stored_error->name(), "NotSupportedError");
   EXPECT_EQ(stored_error->message(), "No constraints set");
