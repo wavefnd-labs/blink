@@ -4677,7 +4677,33 @@ const InlineBreakToken* LineBreaker::CreateBreakToken(
            ? InlineBreakToken::kIsPastFirstFormattedLine
            : 0);
 
-  return InlineBreakToken::Create(node_, current_style_, current_, flags,
+  InlineItemTextIndex next_start = current_;
+  if (line_info.UseFirstLineStyle()) [[unlikely]] {
+    if (const auto& offset_map = node_.FirstLineOffsetMap()) [[unlikely]] {
+      DCHECK(RuntimeEnabledFeatures::FirstLineTextTransformEnabled());
+      // The `::first-line` style has changed the text length.
+      // Adjust `next_start` to the offset for the text without `::first-line`.
+      next_start.text_offset =
+          offset_map->InverseMapOffset(next_start.text_offset);
+      const auto& base_items = node_.ItemsData(false).items;
+      while (next_start.item_index < base_items.size()) {
+        const auto& item = base_items[next_start.item_index];
+        if (item->Length() > 0 && next_start.text_offset >= item->EndOffset()) {
+          ++next_start.item_index;
+        } else if (item->Length() == 0 &&
+                   next_start.text_offset > item->EndOffset()) {
+          ++next_start.item_index;
+        } else {
+          break;
+        }
+      }
+      if (next_start.item_index >= base_items.size()) {
+        return nullptr;
+      }
+    }
+  }
+
+  return InlineBreakToken::Create(node_, current_style_, next_start, flags,
                                   sub_break_token, ruby_break_token_);
 }
 

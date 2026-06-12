@@ -1836,7 +1836,6 @@ void InlineNode::ShapeTextForFirstLineIfNeeded(InlineNodeData* data) const {
   if (block_style == first_line_style)
     return;
 
-  auto* first_line_items = MakeGarbageCollected<InlineItemsData>();
   String text_content = data->text_content;
   bool needs_reshape = false;
   TextOffsetMap offset_map;
@@ -1864,6 +1863,10 @@ void InlineNode::ShapeTextForFirstLineIfNeeded(InlineNodeData* data) const {
       }
     }
   }
+  auto* first_line_items =
+      offset_map.IsEmpty()
+          ? MakeGarbageCollected<InlineItemsData>()
+          : MakeGarbageCollected<InlineItemsDataWithOffsetMap>();
   first_line_items->text_content = text_content;
 
   // Copy `InlineItems` and update their properties.
@@ -1897,6 +1900,10 @@ void InlineNode::ShapeTextForFirstLineIfNeeded(InlineNodeData* data) const {
   // Re-shape if the font is different.
   if (needs_reshape || FirstLineNeedsReshape(*first_line_style, *block_style))
     ShapeText(first_line_items);
+  if (auto* with_offset_map = DynamicTo<InlineItemsDataWithOffsetMap>(
+          first_line_items)) [[unlikely]] {
+    with_offset_map->offset_map = std::move(offset_map);
+  }
 
   data->first_line_items_ = first_line_items;
   // The score line breaker can't apply different styles by different line
