@@ -27,6 +27,7 @@
 
 #include <memory>
 
+#include "base/feature_list.h"
 #include "base/functional/callback_helpers.h"
 #include "base/metrics/histogram_functions.h"
 #include "cc/layers/layer.h"
@@ -104,6 +105,12 @@ namespace {
 constexpr int kVisibilityThreshold = 10000;
 
 constexpr base::TimeDelta kTemporaryResourceDeletionDelay = base::Seconds(3);
+
+// If enabled, VideoTiming is held as a strong member of HTMLVideoElement.
+BASE_FEATURE(kKeepVideoTimingAlive,
+             "KeepVideoTimingAlive",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 }  // namespace
 
 HTMLVideoElement::HTMLVideoElement(Document& document)
@@ -133,6 +140,7 @@ void HTMLVideoElement::Trace(Visitor* visitor) const {
   visitor->Trace(wake_lock_);
   visitor->Trace(remoting_interstitial_);
   visitor->Trace(picture_in_picture_interstitial_);
+  visitor->Trace(video_timing_);
   visitor->Trace(cache_deleting_timer_);
   Supplementable<HTMLVideoElement>::Trace(visitor);
   HTMLMediaElement::Trace(visitor);
@@ -669,6 +677,12 @@ void HTMLVideoElement::OnFirstFrame(base::TimeTicks frame_time,
         *layout_object, videoVisibleSize(), *video_timing,
         layout_object->FirstFragment().LocalBorderBoxProperties(),
         layout_object->AbsoluteBoundingBoxRect());
+
+    if (base::FeatureList::IsEnabled(kKeepVideoTimingAlive)) {
+      // Keep VideoTiming alive as a strong member so it isn't garbage collected
+      // before being reported as LCP.
+      video_timing_ = video_timing;
+    }
   }
 }
 

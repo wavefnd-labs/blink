@@ -45,6 +45,7 @@ class MediaVideoVisibilityTracker;
 class MediaRemotingInterstitial;
 class PictureInPictureInterstitial;
 class StaticBitmapImage;
+class VideoTiming;
 class VideoWakeLock;
 
 class CORE_EXPORT HTMLVideoElement final
@@ -258,6 +259,9 @@ class CORE_EXPORT HTMLVideoElement final
 
   Member<MediaRemotingInterstitial> remoting_interstitial_;
   Member<PictureInPictureInterstitial> picture_in_picture_interstitial_;
+
+  // TODO(crbug.com/454082773): Remove once MediaTiming lifetime is fixed.
+  Member<VideoTiming> video_timing_;
 
   AtomicString default_poster_url_;
 
