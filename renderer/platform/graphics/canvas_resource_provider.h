@@ -155,7 +155,8 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual Delegate* GetDelegate() const { return nullptr; }
 
   MemoryManagedPaintCanvas& GetCanvasForTesting();
-  std::optional<cc::PaintRecord> Flush(FlushReason = FlushReason::kOther);
+  virtual std::optional<cc::PaintRecord> Flush(
+      FlushReason = FlushReason::kOther) = 0;
   virtual ScopedRasterTimer CreateScopedRasterTimer();
 
   virtual bool IsAccelerated() const = 0;
@@ -274,6 +275,8 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   }
   scoped_refptr<StaticBitmapImage> Snapshot(
       ImageOrientation = ImageOrientationEnum::kDefault) override;
+  std::optional<cc::PaintRecord> Flush(
+      FlushReason = FlushReason::kOther) override;
 
   void RasterRecord(cc::PaintRecord last_recording) override;
   bool WritePixels(const SkImageInfo& orig_info,
@@ -498,6 +501,8 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   }
   scoped_refptr<StaticBitmapImage> Snapshot(
       ImageOrientation = ImageOrientationEnum::kDefault) override;
+  std::optional<cc::PaintRecord> Flush(
+      FlushReason = FlushReason::kOther) override;
   bool WritePixels(const SkImageInfo& orig_info,
                    const void* pixels,
                    size_t row_bytes,

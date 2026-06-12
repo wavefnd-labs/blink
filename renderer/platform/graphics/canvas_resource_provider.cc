@@ -304,6 +304,35 @@ scoped_refptr<StaticBitmapImage> Canvas2DResourceProviderBitmap::Snapshot(
                                                 orientation);
 }
 
+std::optional<cc::PaintRecord> Canvas2DResourceProviderBitmap::Flush(
+    FlushReason reason) {
+  if (!Recorder().HasReleasableDrawOps()) {
+    return std::nullopt;
+  }
+  auto timer = CreateScopedRasterTimer();
+  bool want_to_print = IsPrinting() || reason == FlushReason::kPrinting ||
+                       reason == FlushReason::kCanvasPushFrameWhilePrinting;
+  bool preserve_recording = want_to_print && clear_frame_;
+
+  clear_frame_ = false;
+  cc::PaintRecord recording;
+  recording = Recorder().ReleaseMainRecording();
+  RasterRecord(recording);
+  if (canvas_image_provider_) {
+    canvas_image_provider_->ReleaseLockedImages();
+    canvas_image_provider_->UnbindTextureBackedImages();
+  }
+
+  last_recording_ =
+      preserve_recording ? std::optional(recording) : std::nullopt;
+
+  if (GetDelegate()) {
+    GetDelegate()->DidFlush();
+  }
+
+  return recording;
+}
+
 sk_sp<SkSurface> Canvas2DResourceProviderBitmap::CreateSkSurface() const {
   TRACE_EVENT0("blink", "Canvas2DResourceProviderBitmap::CreateSkSurface");
 
@@ -1171,6 +1200,35 @@ scoped_refptr<StaticBitmapImage> Canvas2DResourceProviderSharedImage::Snapshot(
   DCHECK(cached_snapshot_);
   DCHECK(!current_resource_has_write_access_);
   return cached_snapshot_;
+}
+
+std::optional<cc::PaintRecord> Canvas2DResourceProviderSharedImage::Flush(
+    FlushReason reason) {
+  if (!Recorder().HasReleasableDrawOps()) {
+    return std::nullopt;
+  }
+  auto timer = CreateScopedRasterTimer();
+  bool want_to_print = IsPrinting() || reason == FlushReason::kPrinting ||
+                       reason == FlushReason::kCanvasPushFrameWhilePrinting;
+  bool preserve_recording = want_to_print && clear_frame_;
+
+  clear_frame_ = false;
+  cc::PaintRecord recording;
+  recording = Recorder().ReleaseMainRecording();
+  RasterRecord(recording);
+  if (canvas_image_provider_) {
+    canvas_image_provider_->ReleaseLockedImages();
+    canvas_image_provider_->UnbindTextureBackedImages();
+  }
+
+  last_recording_ =
+      preserve_recording ? std::optional(recording) : std::nullopt;
+
+  if (GetDelegate()) {
+    GetDelegate()->DidFlush();
+  }
+
+  return recording;
 }
 
 scoped_refptr<UnacceleratedStaticBitmapImage>
@@ -2171,39 +2229,6 @@ void CanvasNon2DResourceProviderSharedImage::FlushRecording(
   }
 }
 
-std::optional<cc::PaintRecord> CanvasResourceProvider::Flush(
-    FlushReason reason /*=FlushReason::kOther*/) {
-  if (!Recorder().HasReleasableDrawOps()) {
-    return std::nullopt;
-  }
-  auto timer = CreateScopedRasterTimer();
-  bool want_to_print = IsPrinting() || reason == FlushReason::kPrinting ||
-                       reason == FlushReason::kCanvasPushFrameWhilePrinting;
-  bool preserve_recording = want_to_print && clear_frame_;
-
-  // If a previous flush rasterized some paint ops, we lost part of the
-  // recording and must fallback to raster printing instead of vectorial
-  // printing.
-  clear_frame_ = false;
-  cc::PaintRecord recording;
-  recording = Recorder().ReleaseMainRecording();
-  RasterRecord(recording);
-  // Images are locked for the duration of the rasterization, in case they get
-  // used multiple times. We can unlock them once the rasterization is complete.
-  if (canvas_image_provider_) {
-    canvas_image_provider_->ReleaseLockedImages();
-    canvas_image_provider_->UnbindTextureBackedImages();
-  }
-
-  last_recording_ =
-      preserve_recording ? std::optional(recording) : std::nullopt;
-
-  if (GetDelegate()) {
-    GetDelegate()->DidFlush();
-  }
-
-  return recording;
-}
 
 void Canvas2DResourceProviderSharedImage::NotifyGpuContextLostTask(
     base::WeakPtr<Canvas2DResourceProviderSharedImage> provider) {
