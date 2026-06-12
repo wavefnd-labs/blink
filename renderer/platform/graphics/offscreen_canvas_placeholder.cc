@@ -24,14 +24,6 @@ PlaceholderIdMap& placeholderRegistry() {
   return s_placeholderRegistry;
 }
 
-void SetAnimationState(
-    base::WeakPtr<OffscreenCanvasPlaceholder::Client> client,
-    OffscreenCanvasPlaceholder::AnimationState animation_state) {
-  if (client) {
-    client->SetAnimationState(animation_state);
-  }
-}
-
 void UpdatePlaceholderClient(
     base::WeakPtr<OffscreenCanvasPlaceholder::Client> client,
     scoped_refptr<base::SingleThreadTaskRunner> task_runner,
@@ -70,7 +62,7 @@ void OffscreenCanvasPlaceholder::Client::UpdatePlaceholderImage(
   }
 }
 
-void OffscreenCanvasPlaceholder::Client::PostImageToPlaceholderIfNotBlocked(
+void OffscreenCanvasPlaceholder::Client::DispatchFrame(
     scoped_refptr<ExportedCanvasResource> exported_resource) {
   if (placeholder_canvas_id_ == OffscreenCanvasPlaceholder::kNoPlaceholderId ||
       // `placeholder_task_runner_` may be null if this
@@ -118,7 +110,7 @@ void OffscreenCanvasPlaceholder::Client::OnMainThreadReceivedImage() {
   if (latest_unposted_resource_) {
     DCHECK(num_pending_placeholder_resources_ ==
            kMaxPendingPlaceholderResources - 1);
-    PostImageToPlaceholderIfNotBlocked(std::move(latest_unposted_resource_));
+    DispatchFrame(std::move(latest_unposted_resource_));
     // To make it safe to use/check latest_unposted_resource_ after using
     // std::move on it, we need to force a reset because the move above is
     // elide-able.
@@ -255,7 +247,14 @@ bool OffscreenCanvasPlaceholder::PostSetAnimationStateToOffscreenCanvasThread(
   }
   PostCrossThreadTask(
       *client_task_runner_, FROM_HERE,
-      CrossThreadBindOnce(SetAnimationState, client_, animation_state));
+      CrossThreadBindOnce(
+          [](base::WeakPtr<OffscreenCanvasPlaceholder::Client> client,
+             OffscreenCanvasPlaceholder::AnimationState animation_state) {
+            if (client) {
+              client->SetAnimationState(animation_state);
+            }
+          },
+          client_, animation_state));
   return true;
 }
 

@@ -51,6 +51,22 @@ class PLATFORM_EXPORT OffscreenCanvasPlaceholder {
            base::RepeatingClosure animation_state_callback);
     virtual ~Client();
 
+    void DispatchFrame(scoped_refptr<ExportedCanvasResource>);
+    OffscreenCanvasPlaceholder::AnimationState GetAnimationState() {
+      return animation_state_;
+    }
+
+   protected:
+    // virtual and protected for testing
+    virtual void PostImageToPlaceholder(
+        scoped_refptr<ExportedCanvasResource>&&);
+    // virtual for mocking
+    virtual void OnMainThreadReceivedImage();
+
+   private:
+    friend class OffscreenCanvasPlaceholderTest;
+    friend class OffscreenCanvasPlaceholder;
+
     base::WeakPtr<Client> GetWeakPtr() {
       return weak_ptr_factory_.GetWeakPtr();
     }
@@ -58,25 +74,7 @@ class PLATFORM_EXPORT OffscreenCanvasPlaceholder {
     void SetAnimationState(
         OffscreenCanvasPlaceholder::AnimationState animation_state);
 
-    OffscreenCanvasPlaceholder::AnimationState GetAnimationState() {
-      return animation_state_;
-    }
-
     void RegisterWithPlaceholder();
-
-    void PostImageToPlaceholderIfNotBlocked(
-        scoped_refptr<ExportedCanvasResource>);
-
-    // virtual for mocking
-    virtual void OnMainThreadReceivedImage();
-
-   protected:
-    // virtual and protected for testing
-    virtual void PostImageToPlaceholder(
-        scoped_refptr<ExportedCanvasResource>&&);
-
-   private:
-    friend class OffscreenCanvasPlaceholderTest;
 
     static void UpdatePlaceholderImage(
         base::WeakPtr<Client> client,

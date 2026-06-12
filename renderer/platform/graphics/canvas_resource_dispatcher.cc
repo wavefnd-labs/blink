@@ -105,7 +105,7 @@ void CanvasResourceDispatcher::DispatchFrame(
   // This takes another ref and sends it to the placeholder. The
   // ExternalCanvasResource will be destroyed when both display compositor and
   // placeholder are done with it, returning underlying memory to the owner.
-  placeholder_client_->PostImageToPlaceholderIfNotBlocked(exported_resource);
+  placeholder_client_->DispatchFrame(exported_resource);
 
   // For frameless canvas, we don't get a valid frame_sink_id and should drop.
   if (!frame_sink_id_.is_valid()) {

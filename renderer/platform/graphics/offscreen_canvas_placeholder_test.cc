@@ -126,7 +126,7 @@ scoped_refptr<CanvasResource> OffscreenCanvasPlaceholderTest::DrawSomething() {
 CanvasResource* OffscreenCanvasPlaceholderTest::DispatchOneFrame() {
   scoped_refptr<CanvasResource> resource = DrawSomething();
   CanvasResource* resource_raw_ptr = resource.get();
-  placeholder_client_->PostImageToPlaceholderIfNotBlocked(
+  placeholder_client_->DispatchFrame(
       base::MakeRefCounted<ExportedCanvasResource>(std::move(resource)));
   // We avoid holding a ref here to avoid interfering with
   // OffscreenCanvasPlaceholder's ref count logic.  This pointer should only
