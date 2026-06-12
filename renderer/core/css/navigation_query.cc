@@ -73,6 +73,7 @@ bool NavigationLocationTestExpression::Matches(Document& document) const {
 void NavigationLocationTestExpression::SerializeTo(
     StringBuilder& builder) const {
   SerializePrepositionTo(preposition_, builder);
+  builder.Append(": ");
   route_location_->SerializeTo(builder);
 }
 
@@ -81,16 +82,16 @@ void NavigationLocationTestExpression::SerializePrepositionTo(
     StringBuilder& builder) {
   switch (preposition) {
     case NavigationPreposition::kAt:
-      builder.Append("at: ");
+      builder.Append("at");
       break;
     case NavigationPreposition::kFrom:
-      builder.Append("from: ");
+      builder.Append("from");
       break;
     case NavigationPreposition::kTo:
-      builder.Append("to: ");
+      builder.Append("to");
       break;
     case NavigationPreposition::kWith:
-      builder.Append("with: ");
+      builder.Append("with");
       break;
   }
 }
