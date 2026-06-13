@@ -1004,8 +1004,10 @@ DocumentFragment* Range::createContextualFragment(
   // https://html.spec.whatwg.org/#the-createcontextualfragment()-method
 
   // Step 1: Invoke Get Trusted Type compliant string.
-  String compliant_markup = TrustedTypesCheckForHTML(
-      markup, owner_document_->GetExecutionContext(),
+  FragmentParserOptions resolved_options(
+      FragmentParserOptions::RunScripts::kRunScripts);
+  String compliant_markup = TrustedTypesCheckForFragment(
+      markup, resolved_options, owner_document_->GetExecutionContext(),
       trusted_types_names::kRange,
       trusted_types_names::kCreateContextualFragment, exception_state);
 
@@ -1047,7 +1049,7 @@ DocumentFragment* Range::createContextualFragment(
 
   // Steps 7, 8, 9: Invoke fragment parsing, etc.
   return blink::CreateContextualFragment(compliant_markup, element,
-                                         exception_state);
+                                         resolved_options, exception_state);
 }
 
 void Range::detach() {

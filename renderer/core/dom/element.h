@@ -1454,7 +1454,9 @@ class CORE_EXPORT Element : public ContainerNode {
                                        ExceptionState& = ASSERT_NO_EXCEPTION);
   void SetOuterHTMLWithoutTrustedTypes(const String&,
                                        ExceptionState& = ASSERT_NO_EXCEPTION);
-  void SetOuterHTMLInternal(const String&, ExceptionState&);
+  void SetOuterHTMLInternal(const String&,
+                            const FragmentParserOptions&,
+                            ExceptionState&);
   String innerHTML() const;
   String outerHTML() const;
   void setInnerHTML(const V8UnionStringLegacyNullToEmptyStringOrTrustedHTML*,
@@ -2635,6 +2637,7 @@ class CORE_EXPORT Element : public ContainerNode {
 
   void InsertAdjacentHTMLInternal(const String& where,
                                   const String& input,
+                                  const FragmentParserOptions& options,
                                   ExceptionState& exception_state);
 
   void RemoveAttrNodeList();

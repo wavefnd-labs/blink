@@ -9528,12 +9528,22 @@ void Element::setInnerHTML(
     const V8UnionStringLegacyNullToEmptyStringOrTrustedHTML* html,
     ExceptionState& exception_state) {
   probe::BreakableLocation(GetExecutionContext(), "Element.setInnerHTML");
-  SetInnerHTMLWithoutTrustedTypes(
-      CheckTrustedTypes(html, trusted_types_names::kInnerHTML, exception_state),
-      exception_state);
+  auto [compliant_string, resolved_options] =
+      TrustedTypesCheckForLegacyFragment(
+          html, GetExecutionContext(), trusted_types_names::kElement,
+          trusted_types_names::kInnerHTML, exception_state);
+  if (exception_state.HadException()) {
+    return;
+  }
+  SetInnerHTMLInternal(
+      compliant_string,
+      FragmentParserConfig::ParseDeclarativeShadowRoots::kDontParse,
+      FragmentParserConfig::ForceHtml::kDontForce, Sanitizer::Mode::kUnsafe,
+      resolved_options, trusted_types_names::kInnerHTML, exception_state);
 }
 
 void Element::SetOuterHTMLInternal(const String& html,
+                                   const FragmentParserOptions& options,
                                    ExceptionState& exception_state) {
   if (exception_state.HadException()) {
     return;
@@ -9585,7 +9595,7 @@ void Element::SetOuterHTMLInternal(const String& html,
                             .context_element = context_element,
                             .registry = registry,
                         },
-                        FragmentParserOptions(), exception_state);
+                        options, exception_state);
 
   if (!fragment) {
     return;
@@ -9614,15 +9624,20 @@ void Element::SetOuterHTMLInternal(const String& html,
 
 void Element::SetOuterHTMLWithoutTrustedTypes(const String& html,
                                               ExceptionState& exception_state) {
-  SetOuterHTMLInternal(html, exception_state);
+  SetOuterHTMLInternal(html, FragmentParserOptions(), exception_state);
 }
 
 void Element::setOuterHTML(
     const V8UnionStringLegacyNullToEmptyStringOrTrustedHTML* html,
     ExceptionState& exception_state) {
-  SetOuterHTMLInternal(
-      CheckTrustedTypes(html, trusted_types_names::kOuterHTML, exception_state),
-      exception_state);
+  auto [compliant_string, resolved_options] =
+      TrustedTypesCheckForLegacyFragment(
+          html, GetExecutionContext(), trusted_types_names::kElement,
+          trusted_types_names::kOuterHTML, exception_state);
+  if (exception_state.HadException()) {
+    return;
+  }
+  SetOuterHTMLInternal(compliant_string, resolved_options, exception_state);
 }
 
 // Step 4 of http://domparsing.spec.whatwg.org/#insertadjacenthtml()
@@ -9827,6 +9842,7 @@ void Element::insertAdjacentText(const String& where,
 
 void Element::InsertAdjacentHTMLInternal(const String& where,
                                          const String& html,
+                                         const FragmentParserOptions& options,
                                          ExceptionState& exception_state) {
   if (exception_state.HadException()) {
     return;
@@ -9872,7 +9888,7 @@ void Element::InsertAdjacentHTMLInternal(const String& where,
               .context_element = context_element,
               .registry = registry,
           },
-          FragmentParserOptions(), exception_state)) {
+          options, exception_state)) {
     InsertAdjacent(where, fragment, exception_state);
   }
 }
@@ -9881,17 +9897,23 @@ void Element::InsertAdjacentHTMLWithoutTrustedTypesForTesting(
     const String& where,
     const String& markup,
     ExceptionState& exception_state) {
-  InsertAdjacentHTMLInternal(where, markup, exception_state);
+  InsertAdjacentHTMLInternal(where, markup, FragmentParserOptions(),
+                             exception_state);
 }
 
 void Element::insertAdjacentHTML(const String& where,
                                  const V8UnionStringOrTrustedHTML* html,
                                  ExceptionState& exception_state) {
-  InsertAdjacentHTMLInternal(
-      where,
-      CheckTrustedTypes(html, trusted_types_names::kInsertAdjacentHTML,
-                        exception_state),
+  FragmentParserOptions resolved_options;
+  String compliant_string = TrustedTypesCheckForFragment(
+      html, resolved_options, GetExecutionContext(),
+      trusted_types_names::kElement, trusted_types_names::kInsertAdjacentHTML,
       exception_state);
+  if (exception_state.HadException()) {
+    return;
+  }
+  InsertAdjacentHTMLInternal(where, compliant_string, resolved_options,
+                             exception_state);
 }
 
 void Element::setPointerCapture(PointerId pointer_id,
@@ -13886,13 +13908,19 @@ void Element::SetHTMLUnsafeWithoutTrustedTypes(
 void Element::setHTMLUnsafe(const V8UnionStringOrTrustedHTML* html,
                             ExceptionState& exception_state) {
   UseCounter::Count(GetDocument(), WebFeature::kHTMLUnsafeMethods);
+  FragmentParserOptions resolved_options;
+  String compliant_string = TrustedTypesCheckForFragment(
+      html, resolved_options, GetExecutionContext(),
+      trusted_types_names::kElement, trusted_types_names::kSetHTMLUnsafe,
+      exception_state);
+  if (exception_state.HadException()) {
+    return;
+  }
   SetInnerHTMLInternal(
-      CheckTrustedTypes(html, trusted_types_names::kSetHTMLUnsafe,
-                        exception_state),
+      compliant_string,
       FragmentParserConfig::ParseDeclarativeShadowRoots::kParse,
       FragmentParserConfig::ForceHtml::kForce, Sanitizer::Mode::kUnsafe,
-      FragmentParserOptions(), trusted_types_names::kSetHTMLUnsafe,
-      exception_state);
+      resolved_options, trusted_types_names::kSetHTMLUnsafe, exception_state);
 }
 
 // TODO(nrosenthal): merge these calls once all the flags are merged.
@@ -13902,13 +13930,19 @@ void Element::setHTMLUnsafe(const V8UnionStringOrTrustedHTML* html,
   CHECK(RuntimeEnabledFeatures::SanitizerAPIEnabled());
   UseCounter::Count(GetDocument(), WebFeature::kHTMLUnsafeMethods);
 
+  FragmentParserOptions resolved_options(options);
+  String compliant_string = TrustedTypesCheckForFragment(
+      html, resolved_options, GetExecutionContext(),
+      trusted_types_names::kElement, trusted_types_names::kSetHTMLUnsafe,
+      exception_state);
+  if (exception_state.HadException()) {
+    return;
+  }
   SetInnerHTMLInternal(
-      CheckTrustedTypes(html, trusted_types_names::kSetHTMLUnsafe,
-                        exception_state),
+      compliant_string,
       FragmentParserConfig::ParseDeclarativeShadowRoots::kParse,
       FragmentParserConfig::ForceHtml::kForce, Sanitizer::Mode::kUnsafe,
-      FragmentParserOptions(options), trusted_types_names::kSetHTMLUnsafe,
-      exception_state);
+      resolved_options, trusted_types_names::kSetHTMLUnsafe, exception_state);
 }
 
 void Element::setHTMLUnsafe(const V8UnionStringOrTrustedHTML* html,
@@ -13916,13 +13950,19 @@ void Element::setHTMLUnsafe(const V8UnionStringOrTrustedHTML* html,
                             ExceptionState& exception_state) {
   CHECK(RuntimeEnabledFeatures::TrustedTypesCreateParserOptionsEnabled());
   UseCounter::Count(GetDocument(), WebFeature::kHTMLUnsafeMethods);
+  FragmentParserOptions resolved_options(options);
+  String compliant_string = TrustedTypesCheckForFragment(
+      html, resolved_options, GetExecutionContext(),
+      trusted_types_names::kElement, trusted_types_names::kSetHTMLUnsafe,
+      exception_state);
+  if (exception_state.HadException()) {
+    return;
+  }
   SetInnerHTMLInternal(
-      CheckTrustedTypes(html, trusted_types_names::kSetHTMLUnsafe,
-                        exception_state),
+      compliant_string,
       FragmentParserConfig::ParseDeclarativeShadowRoots::kParse,
       FragmentParserConfig::ForceHtml::kForce, Sanitizer::Mode::kUnsafe,
-      FragmentParserOptions(options), trusted_types_names::kSetHTMLUnsafe,
-      exception_state);
+      resolved_options, trusted_types_names::kSetHTMLUnsafe, exception_state);
 }
 
 void Element::setHTML(const String& html,

@@ -359,6 +359,7 @@
 #include "third_party/blink/renderer/core/timing/render_blocking_metrics_reporter.h"
 #include "third_party/blink/renderer/core/timing/window_performance.h"
 #include "third_party/blink/renderer/core/trustedtypes/trusted_html.h"
+#include "third_party/blink/renderer/core/trustedtypes/trusted_types_util.h"
 #include "third_party/blink/renderer/core/view_transition/page_reveal_event.h"
 #include "third_party/blink/renderer/core/view_transition/view_transition_supplement.h"
 #include "third_party/blink/renderer/core/view_transition/view_transition_utils.h"
@@ -10153,25 +10154,12 @@ Document* Document::parseHTMLUnsafe(ExecutionContext* context,
                                     const V8UnionStringOrTrustedHTML* html,
                                     ExceptionState& exception_state) {
   UseCounter::Count(context, WebFeature::kHTMLUnsafeMethods);
-  String compliant_html = TrustedTypesCheckForHTML(
-      html, context, trusted_types_names::kDocument,
+  FragmentParserOptions fragment_options;
+  String compliant_html = TrustedTypesCheckForFragment(
+      html, fragment_options, context, trusted_types_names::kDocument,
       trusted_types_names::kParseHTMLUnsafe, exception_state);
   if (exception_state.HadException()) {
     return nullptr;
-  }
-
-  FragmentParserOptions fragment_options;
-  if (RuntimeEnabledFeatures::TrustedTypesCreateParserOptionsEnabled()) {
-    auto trusted_options = TrustedTypesCheckForParserOptions(
-        fragment_options, MarkupInsertionMode::kFragment, context,
-        trusted_types_names::kDocument, trusted_types_names::kParseHTMLUnsafe,
-        exception_state);
-    if (exception_state.HadException()) {
-      return nullptr;
-    }
-    if (trusted_options) {
-      fragment_options = *trusted_options;
-    }
   }
 
   auto* streaming_sanitizer =
@@ -10208,24 +10196,12 @@ Document* Document::parseHTMLUnsafe(ExecutionContext* context,
                                     ExceptionState& exception_state) {
   UseCounter::Count(context, WebFeature::kHTMLUnsafeMethods);
   CHECK(RuntimeEnabledFeatures::SanitizerAPIEnabled());
-  String compliant_html = TrustedTypesCheckForHTML(
-      html, context, trusted_types_names::kDocument,
+  FragmentParserOptions fragment_options(options);
+  String compliant_html = TrustedTypesCheckForFragment(
+      html, fragment_options, context, trusted_types_names::kDocument,
       trusted_types_names::kParseHTMLUnsafe, exception_state);
   if (exception_state.HadException()) {
     return nullptr;
-  }
-
-  FragmentParserOptions fragment_options(options);
-  if (RuntimeEnabledFeatures::TrustedTypesCreateParserOptionsEnabled()) {
-    auto trusted_options = TrustedTypesCheckForParserOptions(
-        fragment_options, MarkupInsertionMode::kFragment, context,
-        trusted_types_names::kDocument, trusted_types_names::kParseHTMLUnsafe,
-        exception_state);
-    CHECK_EQ(exception_state.HadException(), !trusted_options);
-    if (!trusted_options) {
-      return nullptr;
-    }
-    fragment_options = *trusted_options;
   }
 
   auto* streaming_sanitizer =
