@@ -95,6 +95,8 @@ class CORE_EXPORT ElementInternals : public ScriptWrappable,
   // resolution. Returns kUnknown if no behaviors are attached.
   ax::mojom::blink::Role BehaviorBasedDefaultRole() const;
 
+  const FrozenArray<Element>* ariaActionsElements() const;
+  void setAriaActionsElements(GCedHeapVector<Member<Element>>* given_elements);
   const FrozenArray<Element>* ariaControlsElements() const;
   void setAriaControlsElements(GCedHeapVector<Member<Element>>* given_elements);
   const FrozenArray<Element>* ariaDescribedByElements() const;

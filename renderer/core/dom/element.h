@@ -433,6 +433,8 @@ class CORE_EXPORT Element : public ContainerNode {
   Element* getElementByIdIncludingDisconnected(const Element& treescope_element,
                                                const AtomicString& id) const;
 
+  FrozenArray<Element>* ariaActionsElements();
+  void setAriaActionsElements(GCedHeapVector<Member<Element>>* given_elements);
   FrozenArray<Element>* ariaControlsElements();
   void setAriaControlsElements(GCedHeapVector<Member<Element>>* given_elements);
   FrozenArray<Element>* ariaDescribedByElements();

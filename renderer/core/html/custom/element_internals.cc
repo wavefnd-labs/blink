@@ -486,6 +486,14 @@ ElementBehavior* ElementInternals::FindBehaviorByType(
   return nullptr;
 }
 
+const FrozenArray<Element>* ElementInternals::ariaActionsElements() const {
+  return GetElementArrayAttribute(html_names::kAriaActionsAttr);
+}
+void ElementInternals::setAriaActionsElements(
+    GCedHeapVector<Member<Element>>* given_elements) {
+  SetElementArrayAttribute(html_names::kAriaActionsAttr, given_elements);
+}
+
 const FrozenArray<Element>* ElementInternals::ariaControlsElements() const {
   return GetElementArrayAttribute(html_names::kAriaControlsAttr);
 }
