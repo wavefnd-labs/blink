@@ -357,7 +357,7 @@ class MockFederatedAuthRequest : public mojom::blink::FederatedAuthRequest {
     run_loop.Run();
   }
 
-  void InvokeRequestTokenCallback(size_t index = 0) {
+  void InvokeRequestTokenCallback(wtf_size_t index = 0) {
     EXPECT_TRUE(receiver_.is_bound());
     EXPECT_LT(index, request_token_callbacks_.size());
 
@@ -371,7 +371,7 @@ class MockFederatedAuthRequest : public mojom::blink::FederatedAuthRequest {
   }
 
   void InvokeRequestTokenCallbackWithError(mojom::RequestTokenStatus status,
-                                           size_t index = 0) {
+                                           wtf_size_t index = 0) {
     EXPECT_TRUE(receiver_.is_bound());
     EXPECT_LT(index, request_token_callbacks_.size());
 

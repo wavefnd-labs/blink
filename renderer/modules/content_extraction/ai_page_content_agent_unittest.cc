@@ -227,7 +227,7 @@ class AIPageContentAgentTest : public testing::Test {
     ASSERT_TRUE(attributes.anchor_data);
     EXPECT_EQ(attributes.anchor_data->url, expected_url);
     ASSERT_EQ(attributes.anchor_data->rel.size(), expected_rels.size());
-    for (size_t i = 0; i < expected_rels.size(); ++i) {
+    for (wtf_size_t i = 0; i < expected_rels.size(); ++i) {
       EXPECT_EQ(attributes.anchor_data->rel[i], expected_rels[i]);
     }
   }
@@ -478,7 +478,7 @@ class AIPageContentAgentTest : public testing::Test {
           *node->content_attributes->dom_node_id == dom_node_id) {
         return node;
       }
-      for (size_t i = node->children_nodes.size(); i > 0; --i) {
+      for (wtf_size_t i = node->children_nodes.size(); i > 0; --i) {
         stack.push_back(node->children_nodes[i - 1].get());
       }
     }
@@ -6734,7 +6734,7 @@ TEST_F(AIPageContentAgentTest, InlineWithOnlyFloatGeometry) {
       break;
     }
     // Push children in reverse so traversal order matches natural order.
-    for (size_t i = node->children_nodes.size(); i > 0; --i) {
+    for (wtf_size_t i = node->children_nodes.size(); i > 0; --i) {
       stack.push_back(node->children_nodes[i - 1].get());
     }
   }
@@ -7122,7 +7122,7 @@ TEST_F(AIPageContentAgentTest, TableTextClippedByScrollerAfterScroll) {
   const auto& fragments = geometry.fragment_visible_bounding_boxes;
   const ComputedStyle& after_style = text->GetLayoutObject()->StyleRef();
   std::string fragments_trace;
-  for (size_t i = 0; i < fragments.size(); ++i) {
+  for (wtf_size_t i = 0; i < fragments.size(); ++i) {
     if (!fragments_trace.empty()) {
       fragments_trace.append("; ");
     }
@@ -7217,7 +7217,7 @@ TEST_F(AIPageContentAgentTest, IframeInlineTextClippedWhenViewportScrolled) {
   const auto& fragments = geometry.fragment_visible_bounding_boxes;
   const ComputedStyle& iframe_style = inner_text->GetLayoutObject()->StyleRef();
   std::string fragments_trace;
-  for (size_t i = 0; i < fragments.size(); ++i) {
+  for (wtf_size_t i = 0; i < fragments.size(); ++i) {
     if (!fragments_trace.empty()) {
       fragments_trace.append("; ");
     }
