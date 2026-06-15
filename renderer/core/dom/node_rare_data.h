@@ -6,19 +6,14 @@
 #define THIRD_PARTY_BLINK_RENDERER_CORE_DOM_NODE_RARE_DATA_H_
 
 #include "third_party/blink/renderer/core/core_export.h"
-#include "third_party/blink/renderer/core/dom/css_pseudo_element.h"
-#include "third_party/blink/renderer/core/dom/element_animation_trigger_data.h"
-#include "third_party/blink/renderer/core/dom/explicitly_set_attr_elements_map.h"
 #include "third_party/blink/renderer/core/dom/focusgroup_flags.h"
 #include "third_party/blink/renderer/core/dom/node_rare_data_field.h"
-#include "third_party/blink/renderer/core/dom/pseudo_element.h"
 #include "third_party/blink/renderer/core/dom/pseudo_element_data.h"
+#include "third_party/blink/renderer/platform/graphics/paint/tracked_element_data.h"
 #include "third_party/blink/renderer/platform/heap/trace_traits.h"
 #include "third_party/blink/renderer/platform/region_capture_crop_id.h"
 #include "third_party/blink/renderer/platform/restriction_target_id.h"
-#include "third_party/blink/renderer/platform/tracked_element_id.h"
 #include "third_party/blink/renderer/platform/wtf/text/atomic_string.h"
-#include "third_party/blink/renderer/platform/wtf/type_traits.h"
 
 namespace viz {
 enum class TrackedElementFeature;
@@ -30,46 +25,47 @@ class Rect;
 
 namespace blink {
 
+class Attr;
+class CSSPseudoElement;
 class CSSStyleDeclaration;
 class ColumnPseudoElement;
+class ContainerQueryData;
+class ContainerQueryEvaluator;
 class ContentData;
-class ShadowRoot;
-class NamedNodeMap;
+class CustomElementDefinition;
 class DOMTokenList;
 class DatasetDOMStringMap;
 class DisplayAdElementMonitor;
-class ElementAnimations;
-class Attr;
-typedef HeapVector<Member<Attr>> AttrNodeList;
-class ElementIntersectionObserverData;
-class ContainerQueryEvaluator;
-class EditContext;
-class InlineStylePropertyMap;
-class ElementInternals;
 class DisplayLockContext;
-class ContainerQueryData;
-class ResizeObserver;
-class ResizeObservation;
-class StyleScopeData;
-class CustomElementDefinition;
-class PopoverData;
-class InvokerData;
-class InterestInvokerTargetData;
-class OutOfFlowData;
-class HTMLElement;
+class EditContext;
 class Element;
+class ElementAnimationTriggerData;
+class ElementAnimations;
+class ElementInternals;
+class ElementIntersectionObserverData;
+class ExplicitlySetAttrElementsMap;
+class FlatTreeNodeData;
+class HTMLElement;
+class InlineStylePropertyMap;
+class InterestInvokerTargetData;
+class InvokerData;
+class MutationObserverRegistration;
+class NamedNodeMap;
+class NodeListsNodeData;
+class OutOfFlowData;
 class OverscrollAreaTracker;
+class PopoverData;
+class PseudoElement;
+class ResizeObservation;
+class ResizeObserver;
+class ScrollTimeline;
+class ShadowRoot;
+class StyleScopeData;
+
 enum class DynamicRestyleFlags;
 enum class ElementFlags;
-class FlatTreeNodeData;
-class MutationObserverRegistration;
-class NodeListsNodeData;
-class Part;
-class ScrollTimeline;
 
-enum class ElementFlags;
-
-using TemporaryPartsList = HeapDeque<Member<Part>>;
+typedef HeapVector<Member<Attr>> AttrNodeList;
 
 class NodeMutationObserverData final
     : public GarbageCollected<NodeMutationObserverData>,
@@ -744,9 +740,9 @@ class CORE_EXPORT NodeRareData final : public GarbageCollected<NodeRareData> {
     return FieldIdMask(upper) - 1;
   }
 
-  // Returns the index in `fields_` that `field_id` is stored in. If `fields_`
-  // isn't storing a field for `field_id`, then this returns the index which
-  // the data for `field_id` should be inserted into.
+  // Returns the index in the trailing array that `field_id` is stored in. If
+  // the array isn't storing a field for `field_id`, then this returns the index
+  // which the data for `field_id` should be inserted into.
   wtf_size_t GetFieldIndex(FieldId field_id) const {
     // Then count the total population of field IDs lower than that one we
     // are looking for. The target field ID should be located at the index of
