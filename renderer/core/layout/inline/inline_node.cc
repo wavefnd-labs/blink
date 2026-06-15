@@ -1468,14 +1468,6 @@ bool InlineNode::IsNGShapeCacheAllowed(const String& text_content,
   //
   // Instead we cache using the raw text, and a restricted set of inline items.
   // This is to avoid caching bugs (e.g. scripts having Arabic joining).
-  //
-  // At the moment we just support:
-  //  - A single text-item.
-  unsigned previous_text_end_offset = 0u;
-  auto is_at_text_start = [&]() { return previous_text_end_offset == 0u; };
-  auto is_at_text_end = [&]() {
-    return previous_text_end_offset == text_content.length();
-  };
 
   // Don't hit the cache if we don't have any text.
   if (text_content.empty()) {
@@ -1483,6 +1475,7 @@ bool InlineNode::IsNGShapeCacheAllowed(const String& text_content,
   }
 
   const Font* font = override_font;
+  unsigned previous_text_end_offset = 0u;
 
   for (const auto& item : items) {
     switch (item->Type()) {
@@ -1492,15 +1485,6 @@ bool InlineNode::IsNGShapeCacheAllowed(const String& text_content,
         if (!font && item->Type() == InlineItem::kText) {
           font = &item->FontWithSvgScaling();
         }
-        if (!RuntimeEnabledFeatures::ExtendedShapeCacheEnabled()) {
-          // Only support a single text-item at the moment.
-          if (!is_at_text_start()) {
-            return false;
-          }
-          if (item->Type() == InlineItem::kControl) {
-            return false;
-          }
-        }
         if (previous_text_end_offset != item->StartOffset()) {
           return false;
         }
@@ -1508,17 +1492,11 @@ bool InlineNode::IsNGShapeCacheAllowed(const String& text_content,
         break;
       case InlineItem::kFloating:
       case InlineItem::kOutOfFlowPositioned:
-        if (!RuntimeEnabledFeatures::ExtendedShapeCacheEnabled()) {
-          return false;
-        }
         // Floats/OOF-positioned objects are transparent to shaping, and just
         // split the text similar to control items (resulting in multiple shape
         // calls with different start/end offsets).
         break;
       case InlineItem::kOpenTag:
-        if (!RuntimeEnabledFeatures::ExtendedShapeCacheEnabled()) {
-          return false;
-        }
         // As we get the font from the first item, we can allow an open tag if
         // its the first.
         if (item != items.front()) {
@@ -1526,9 +1504,6 @@ bool InlineNode::IsNGShapeCacheAllowed(const String& text_content,
         }
         break;
       case InlineItem::kCloseTag:
-        if (!RuntimeEnabledFeatures::ExtendedShapeCacheEnabled()) {
-          return false;
-        }
         // Similarly allow the a close tag if its the last.
         if (item != items.back()) {
           return false;
@@ -1547,7 +1522,7 @@ bool InlineNode::IsNGShapeCacheAllowed(const String& text_content,
   }
 
   // Only allow the cache if the text-item(s) matches the text-content.
-  if (!is_at_text_end()) {
+  if (previous_text_end_offset != text_content.length()) {
     return false;
   }
 
@@ -1556,16 +1531,9 @@ bool InlineNode::IsNGShapeCacheAllowed(const String& text_content,
     return false;
   }
 
-  if (RuntimeEnabledFeatures::ExtendedShapeCacheEnabled()) {
-    // Only allow the cache for features we can cache.
-    if (!font->HasSimpleFontFeatures()) [[unlikely]] {
-      return false;
-    }
-  } else {
-    // Only allow the cache for initial font features.
-    if (font->HasNonInitialFontFeatures()) [[unlikely]] {
-      return false;
-    }
+  // Only allow the cache for features we can cache.
+  if (!font->HasSimpleFontFeatures()) [[unlikely]] {
+    return false;
   }
 
   // We mutate the shape-result if there is spacing, it isn't safe to cache.
