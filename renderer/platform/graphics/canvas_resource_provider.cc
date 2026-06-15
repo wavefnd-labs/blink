@@ -191,9 +191,12 @@ Canvas2DResourceProviderBitmap::Canvas2DResourceProviderBitmap(
   max_recorded_op_bytes_ = static_cast<size_t>(kMaxRecordedOpKB.Get()) * 1024;
   max_pinned_image_bytes_ = static_cast<size_t>(kMaxPinnedImageKB.Get()) * 1024;
   recorder_ = std::make_unique<MemoryManagedPaintRecorder>(Size(), this);
+  CanvasMemoryDumpProvider::Instance()->RegisterClient(this);
 }
 
-Canvas2DResourceProviderBitmap::~Canvas2DResourceProviderBitmap() = default;
+Canvas2DResourceProviderBitmap::~Canvas2DResourceProviderBitmap() {
+  CanvasMemoryDumpProvider::Instance()->UnregisterClient(this);
+}
 
 SkSurface* Canvas2DResourceProviderBitmap::GetSkSurface() const {
   if (!surface_) {
@@ -2101,14 +2104,6 @@ bool CanvasImageProvider::IsHardwareDecodeCache() const {
   return raster_mode_ != cc::PlaybackImageProvider::RasterMode::kSoftware;
 }
 
-CanvasResourceProvider::CanvasResourceProvider() {
-  CanvasMemoryDumpProvider::Instance()->RegisterClient(this);
-}
-
-CanvasResourceProvider::~CanvasResourceProvider() {
-  CanvasMemoryDumpProvider::Instance()->UnregisterClient(this);
-}
-
 
 void CanvasResourceProvider::NotifyWillTransfer(
     cc::PaintImage::ContentId content_id) {
@@ -2361,6 +2356,7 @@ Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(
   if (resource_) {
     EnsureWriteAccess();
   }
+  CanvasMemoryDumpProvider::Instance()->RegisterClient(this);
 }
 
 void Canvas2DResourceProviderSharedImage::InitializeForRecording(
@@ -2438,9 +2434,11 @@ Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(
           kMaxRecycledCanvasResources);
     }
   }
+  CanvasMemoryDumpProvider::Instance()->RegisterClient(this);
 }
 
 Canvas2DResourceProviderSharedImage::~Canvas2DResourceProviderSharedImage() {
+  CanvasMemoryDumpProvider::Instance()->UnregisterClient(this);
   if (context_provider_wrapper_) {
     context_provider_wrapper_->RemoveObserver(this);
   }

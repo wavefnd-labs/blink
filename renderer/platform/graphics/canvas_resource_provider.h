@@ -179,7 +179,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
 
   CanvasResourceProvider(const CanvasResourceProvider&) = delete;
   CanvasResourceProvider& operator=(const CanvasResourceProvider&) = delete;
-  ~CanvasResourceProvider() override;
+  ~CanvasResourceProvider() override = default;
 
   void RestoreBackBuffer(const cc::PaintImage&);
 
@@ -211,7 +211,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual const std::optional<cc::PaintRecord>& LastRecording() = 0;
 
  protected:
-  CanvasResourceProvider();
+  CanvasResourceProvider() = default;
 
   virtual void RasterRecord(cc::PaintRecord) = 0;
 
