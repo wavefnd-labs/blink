@@ -2118,14 +2118,6 @@ void CanvasResourceProvider::NotifyWillTransfer(
   GetFlushForImageListener()->NotifyFlushForImage(content_id);
 }
 
-
-
-
-MemoryManagedPaintCanvas& CanvasResourceProvider::GetCanvasForTesting() {
-  return Recorder().getRecordingCanvas();
-}
-
-
 CanvasImageProvider*
 CanvasNon2DResourceProviderSharedImage::GetOrCreateImageProvider() {
   if (!canvas_image_provider_) {
@@ -2525,6 +2517,11 @@ sk_sp<SkSurface> Canvas2DResourceProviderSharedImage::CreateSkSurface() const {
 SkSurfaceProps Canvas2DResourceProviderSharedImage::GetSkSurfaceProps() const {
   const bool can_use_lcd_text = GetAlphaType() == kOpaque_SkAlphaType;
   return skia::LegacyDisplayGlobals::ComputeSurfaceProps(can_use_lcd_text);
+}
+
+MemoryManagedPaintCanvas&
+Canvas2DResourceProviderSharedImage::GetCanvasForTesting() {
+  return Recorder().getRecordingCanvas();
 }
 
 CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(

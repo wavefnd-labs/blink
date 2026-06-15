@@ -712,8 +712,7 @@ TEST_F(CanvasResourceProviderTest, ImageCacheOnContextLost) {
 }
 
 TEST_F(CanvasResourceProviderTest, FlushCanvasReleasesAllReleasableOps) {
-  std::unique_ptr<CanvasResourceProvider> provider =
-      MakeCanvas2DResourceProvider(context_provider_wrapper_);
+  auto provider = MakeCanvas2DResourceProvider(context_provider_wrapper_);
 
   EXPECT_FALSE(provider->Recorder().HasRecordedDrawOps());
   EXPECT_FALSE(provider->Recorder().HasReleasableDrawOps());
@@ -729,8 +728,7 @@ TEST_F(CanvasResourceProviderTest, FlushCanvasReleasesAllReleasableOps) {
 }
 
 TEST_F(CanvasResourceProviderTest, FlushCanvasReleasesAllOpsOutsideLayers) {
-  std::unique_ptr<CanvasResourceProvider> provider =
-      MakeCanvas2DResourceProvider(context_provider_wrapper_);
+  auto provider = MakeCanvas2DResourceProvider(context_provider_wrapper_);
 
   EXPECT_FALSE(provider->Recorder().HasRecordedDrawOps());
   EXPECT_FALSE(provider->Recorder().HasReleasableDrawOps());

@@ -154,7 +154,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual void SetDelegate(Delegate* delegate) = 0;
   virtual Delegate* GetDelegate() const { return nullptr; }
 
-  MemoryManagedPaintCanvas& GetCanvasForTesting();
   virtual std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) = 0;
 
@@ -522,6 +521,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
     always_enable_raster_timers_for_testing_ = value;
   }
   ScopedRasterTimer CreateScopedRasterTimer();
+  MemoryManagedPaintCanvas& GetCanvasForTesting();
 
  protected:
   scoped_refptr<UnacceleratedStaticBitmapImage> UnacceleratedSnapshot(

@@ -192,7 +192,8 @@ void Draw(TestHibernationHandlerDelegate& delegate) {
   if (!delegate.GetResourceProvider()) {
     delegate.CreateResourceProvider();
   }
-  CanvasResourceProvider* provider = delegate.GetResourceProvider();
+  auto* provider = static_cast<Canvas2DResourceProviderSharedImage*>(
+      delegate.GetResourceProvider());
   provider->GetCanvasForTesting().drawLine(0, 0, 2, 2, cc::PaintFlags());
   provider->Flush(FlushReason::kOther);
 }
