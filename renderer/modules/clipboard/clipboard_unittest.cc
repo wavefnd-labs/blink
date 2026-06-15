@@ -4,8 +4,10 @@
 
 #include "third_party/blink/renderer/modules/clipboard/clipboard.h"
 
+#include "base/functional/bind.h"
 #include "base/memory/scoped_refptr.h"
 #include "base/test/metrics/histogram_tester.h"
+#include "base/test/run_until.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/blink/public/mojom/clipboard/clipboard.mojom-blink.h"
 #include "third_party/blink/public/mojom/permissions/permission.mojom-blink.h"
@@ -13,12 +15,18 @@
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_tester.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_binding_for_testing.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_blob.h"
+#include "third_party/blink/renderer/bindings/core/v8/v8_dom_exception.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_clipboard_read_options.h"
+#include "third_party/blink/renderer/core/clipboard/paste_mode.h"
 #include "third_party/blink/renderer/core/clipboard/system_clipboard.h"
 #include "third_party/blink/renderer/core/dom/dom_exception.h"
+#include "third_party/blink/renderer/core/dom/events/native_event_listener.h"
+#include "third_party/blink/renderer/core/editing/commands/clipboard_commands.h"
+#include "third_party/blink/renderer/core/editing/editor.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
+#include "third_party/blink/renderer/core/html/html_element.h"
 #include "third_party/blink/renderer/core/page/focus_controller.h"
 #include "third_party/blink/renderer/core/testing/page_test_base.h"
 #include "third_party/blink/renderer/modules/clipboard/clipboard_item.h"
@@ -878,6 +886,170 @@ TEST_F(ClipboardTest, ClipboardChangeDuringReadRejectsGetType) {
 
   executionContext->GetBrowserInterfaceBroker().SetBinderForTesting(
       mojom::blink::PermissionService::Name_, {});
+}
+
+class ClipboardPasteTestListener final : public NativeEventListener {
+ public:
+  explicit ClipboardPasteTestListener(base::OnceCallback<void(Event*)> callback)
+      : callback_(std::move(callback)) {}
+
+  void Invoke(ExecutionContext*, Event* event) override {
+    std::move(callback_).Run(event);
+  }
+
+  bool Matches(const EventListener& other) const override {
+    return this == &other;
+  }
+
+ private:
+  base::OnceCallback<void(Event*)> callback_;
+};
+
+TEST_F(ClipboardTest, PasteEventUninterruptedReadText) {
+  V8TestingScope scope;
+  ExecutionContext* executionContext = GetFrame().DomWindow();
+  String initial_string = "InitialStringForClipboardTesting";
+  WritePlainTextToClipboard(initial_string);
+  GetFrame().GetSystemClipboard()->CommitWrite();
+
+  SetSecureOrigin(executionContext);
+  SetPageFocus(true);
+
+  bool listener_called = false;
+  auto* listener =
+      MakeGarbageCollected<ClipboardPasteTestListener>(base::BindOnce(
+          [](ExecutionContext* executionContext, ScriptState* script_state,
+             bool* listener_called, Event* event) {
+            *listener_called = true;
+            DummyExceptionStateForTesting exception_state;
+            ScriptPromise<IDLString> promise =
+                ClipboardPromise::CreateForReadText(
+                    executionContext, script_state, exception_state);
+            ScriptPromiseTester promise_tester(script_state, promise);
+            promise_tester.WaitUntilSettled();
+            EXPECT_TRUE(promise_tester.IsFulfilled());
+            String promise_returned_string;
+            promise_tester.Value().ToString(promise_returned_string);
+            EXPECT_EQ(promise_returned_string,
+                      "InitialStringForClipboardTesting");
+          },
+          WrapPersistent(executionContext),
+          WrapPersistent(scope.GetScriptState()),
+          Unretained(&listener_called)));
+
+  GetFrame().GetDocument()->body()->addEventListener(event_type_names::kPaste,
+                                                     listener);
+
+  ClipboardCommands::DispatchPasteEvent(GetFrame(), PasteMode::kAllMimeTypes,
+                                        EditorCommandSource::kMenuOrKeyBinding);
+
+  EXPECT_TRUE(listener_called);
+  GetFrame().GetDocument()->body()->removeEventListener(
+      event_type_names::kPaste, listener, /*use_capture=*/false);
+}
+
+TEST_F(ClipboardTest, PasteEventInterruptedReadTextRejected) {
+  V8TestingScope scope;
+  ExecutionContext* executionContext = GetFrame().DomWindow();
+  String initial_string = "InitialStringForClipboardTesting";
+  WritePlainTextToClipboard(initial_string);
+  GetFrame().GetSystemClipboard()->CommitWrite();
+
+  SetSecureOrigin(executionContext);
+  SetPageFocus(true);
+
+  bool listener_called = false;
+  auto* listener =
+      MakeGarbageCollected<ClipboardPasteTestListener>(base::BindOnce(
+          [](ExecutionContext* executionContext, ScriptState* script_state,
+             SystemClipboard* system_clipboard, bool* listener_called,
+             Event* event) {
+            *listener_called = true;
+            absl::uint128 initial_sequence = system_clipboard->SequenceNumber();
+            system_clipboard->WritePlainText("SecretExploitString");
+            system_clipboard->CommitWrite();
+            EXPECT_TRUE(base::test::RunUntil([&]() {
+              return system_clipboard->SequenceNumber() != initial_sequence;
+            }));
+
+            DummyExceptionStateForTesting exception_state;
+            ScriptPromise<IDLString> promise =
+                ClipboardPromise::CreateForReadText(
+                    executionContext, script_state, exception_state);
+            ScriptPromiseTester promise_tester(script_state, promise);
+            promise_tester.WaitUntilSettled();
+            EXPECT_TRUE(promise_tester.IsRejected());
+
+            EXPECT_EQ(promise_tester.ValueAsString(),
+                      "DataError: Clipboard contents changed since paste "
+                      "event started.");
+          },
+          WrapPersistent(executionContext),
+          WrapPersistent(scope.GetScriptState()),
+          WrapPersistent(GetFrame().GetSystemClipboard()),
+          Unretained(&listener_called)));
+
+  GetFrame().GetDocument()->body()->addEventListener(event_type_names::kPaste,
+                                                     listener);
+
+  ClipboardCommands::DispatchPasteEvent(GetFrame(), PasteMode::kAllMimeTypes,
+                                        EditorCommandSource::kMenuOrKeyBinding);
+
+  EXPECT_TRUE(listener_called);
+  GetFrame().GetDocument()->body()->removeEventListener(
+      event_type_names::kPaste, listener, /*use_capture=*/false);
+}
+
+TEST_F(ClipboardTest, PasteEventInterruptedReadRejected) {
+  V8TestingScope scope;
+  ExecutionContext* executionContext = GetFrame().DomWindow();
+  String initial_string = "InitialStringForClipboardTesting";
+  WritePlainTextToClipboard(initial_string);
+  GetFrame().GetSystemClipboard()->CommitWrite();
+
+  SetSecureOrigin(executionContext);
+  SetPageFocus(true);
+
+  bool listener_called = false;
+  auto* listener =
+      MakeGarbageCollected<ClipboardPasteTestListener>(base::BindOnce(
+          [](ExecutionContext* executionContext, ScriptState* script_state,
+             SystemClipboard* system_clipboard, bool* listener_called,
+             Event* event) {
+            *listener_called = true;
+            absl::uint128 initial_sequence = system_clipboard->SequenceNumber();
+            system_clipboard->WritePlainText("SecretExploitString");
+            system_clipboard->CommitWrite();
+            EXPECT_TRUE(base::test::RunUntil([&]() {
+              return system_clipboard->SequenceNumber() != initial_sequence;
+            }));
+
+            DummyExceptionStateForTesting exception_state;
+            ScriptPromise<IDLSequence<ClipboardItem>> promise =
+                ClipboardPromise::CreateForRead(executionContext, script_state,
+                                                nullptr, exception_state);
+            ScriptPromiseTester promise_tester(script_state, promise);
+            promise_tester.WaitUntilSettled();
+            EXPECT_TRUE(promise_tester.IsRejected());
+
+            EXPECT_EQ(promise_tester.ValueAsString(),
+                      "DataError: Clipboard contents changed since paste "
+                      "event started.");
+          },
+          WrapPersistent(executionContext),
+          WrapPersistent(scope.GetScriptState()),
+          WrapPersistent(GetFrame().GetSystemClipboard()),
+          Unretained(&listener_called)));
+
+  GetFrame().GetDocument()->body()->addEventListener(event_type_names::kPaste,
+                                                     listener);
+
+  ClipboardCommands::DispatchPasteEvent(GetFrame(), PasteMode::kAllMimeTypes,
+                                        EditorCommandSource::kMenuOrKeyBinding);
+
+  EXPECT_TRUE(listener_called);
+  GetFrame().GetDocument()->body()->removeEventListener(
+      event_type_names::kPaste, listener, /*use_capture=*/false);
 }
 
 }  // namespace blink
