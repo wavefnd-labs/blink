@@ -402,6 +402,13 @@ void Canvas2DResourceProviderBitmap::RestoreBackBuffer(
   WritePixels(map.info(), map.addr(), map.rowBytes(), /*x=*/0, /*y=*/0);
 }
 
+void Canvas2DResourceProviderBitmap::ApplyAnimatedImageFrameIndexesForId(
+    SkCanvas* canvas,
+    uint32_t id) {
+  CHECK(GetDelegate());
+  SetAnimatedImageFrameIndexes(GetDelegate()->GetAnimatedImageFrameIndexes(id));
+}
+
 void Canvas2DResourceProviderBitmap::RasterRecord(
     cc::PaintRecord last_recording) {
   RasterRecord([this, &last_recording](cc::PaintCanvas& canvas) {
@@ -410,8 +417,7 @@ void Canvas2DResourceProviderBitmap::RasterRecord(
       // base::Unretained(this) is safe here because the callback will only be
       // invoked during the scope of skia_canvas_->drawPicture().
       custom_callback = base::BindRepeating(
-          static_cast<void (CanvasResourceProvider::*)(SkCanvas*, uint32_t)>(
-              &CanvasResourceProvider::ApplyAnimatedImageFrameIndexesForId),
+          &Canvas2DResourceProviderBitmap::ApplyAnimatedImageFrameIndexesForId,
           base::Unretained(this));
     }
     skia_canvas_->drawPicture(std::move(last_recording), custom_callback);
@@ -1475,10 +1481,10 @@ void Canvas2DResourceProviderSharedImage::RasterRecord(
     if (delegate_) {
       // base::Unretained(this) is safe here because the callback will only be
       // invoked during the scope of skia_canvas_->drawPicture().
-      custom_callback = base::BindRepeating(
-          static_cast<void (CanvasResourceProvider::*)(SkCanvas*, uint32_t)>(
-              &CanvasResourceProvider::ApplyAnimatedImageFrameIndexesForId),
-          base::Unretained(this));
+      custom_callback =
+          base::BindRepeating(&Canvas2DResourceProviderSharedImage::
+                                  ApplyAnimatedImageFrameIndexesForId,
+                              base::Unretained(this));
     }
     skia_canvas_->drawPicture(std::move(last_recording), custom_callback);
     return;
@@ -1495,11 +1501,10 @@ void Canvas2DResourceProviderSharedImage::RasterRecord(
   if (delegate_) {
     // base::Unretained(this) is safe here because the callback will only be
     // invoked during the scope of RasterCHROMIUM() below.
-    custom_callback = base::BindRepeating(
-        static_cast<void (Canvas2DResourceProviderSharedImage::*)(
-            SkCanvas*, uint32_t)>(&Canvas2DResourceProviderSharedImage::
-                                      ApplyAnimatedImageFrameIndexesForId),
-        base::Unretained(this));
+    custom_callback =
+        base::BindRepeating(&Canvas2DResourceProviderSharedImage::
+                                ApplyAnimatedImageFrameIndexesForId,
+                            base::Unretained(this));
   }
 
   const bool needs_clear = !is_cleared_;
@@ -2548,6 +2553,13 @@ void Canvas2DResourceProviderSharedImage::RestoreBackBuffer(
   WritePixels(map.info(), map.addr(), map.rowBytes(), /*x=*/0, /*y=*/0);
 }
 
+void Canvas2DResourceProviderSharedImage::ApplyAnimatedImageFrameIndexesForId(
+    SkCanvas* canvas,
+    uint32_t id) {
+  CHECK(GetDelegate());
+  SetAnimatedImageFrameIndexes(GetDelegate()->GetAnimatedImageFrameIndexes(id));
+}
+
 CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
     gfx::Size size,
     viz::SharedImageFormat format,
@@ -2877,13 +2889,6 @@ Canvas2DResourceProviderBitmap::CreateForTesting(
   return Canvas2DResourceProviderBitmap::CreateWithClear(
       size, color_params.GetSharedImageFormat(), color_params.GetAlphaType(),
       color_params.GetGfxColorSpace(), color_params.GetGfxHdrMetadata());
-}
-
-void CanvasResourceProvider::ApplyAnimatedImageFrameIndexesForId(
-    SkCanvas* canvas,
-    uint32_t id) {
-  CHECK(GetDelegate());
-  SetAnimatedImageFrameIndexes(GetDelegate()->GetAnimatedImageFrameIndexes(id));
 }
 
 }  // namespace blink

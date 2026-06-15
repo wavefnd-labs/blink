@@ -199,7 +199,8 @@ class PLATFORM_EXPORT CanvasResourceProvider
   // rasterized. The CustomDataOps are emplaced by drawElementImage() to
   // ensure the correct frame indexes are used when rasterizing a particular
   // ElementImage.
-  void ApplyAnimatedImageFrameIndexesForId(SkCanvas* canvas, uint32_t id);
+  virtual void ApplyAnimatedImageFrameIndexesForId(SkCanvas* canvas,
+                                                   uint32_t id) = 0;
   virtual void SetAnimatedImageFrameIndexes(
       scoped_refptr<const cc::AnimatedImageFrameIndexMap>) = 0;
 
@@ -291,6 +292,8 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   void InitializeForRecording(cc::PaintCanvas* canvas) const override;
   ScopedRasterTimer CreateScopedRasterTimer();
   void RestoreBackBuffer(const cc::PaintImage&) override;
+  void ApplyAnimatedImageFrameIndexesForId(SkCanvas* canvas,
+                                           uint32_t id) override;
 
  private:
   friend class CanvasRenderingContext;
@@ -524,6 +527,8 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   ScopedRasterTimer CreateScopedRasterTimer();
   MemoryManagedPaintCanvas& GetCanvasForTesting();
   void RestoreBackBuffer(const cc::PaintImage&) override;
+  void ApplyAnimatedImageFrameIndexesForId(SkCanvas* canvas,
+                                           uint32_t id) override;
 
  protected:
   scoped_refptr<UnacceleratedStaticBitmapImage> UnacceleratedSnapshot(
