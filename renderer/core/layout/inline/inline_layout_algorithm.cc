@@ -48,6 +48,7 @@
 #include "third_party/blink/renderer/core/layout/unpositioned_float.h"
 #include "third_party/blink/renderer/core/style/computed_style.h"
 #include "third_party/blink/renderer/platform/heap/collection_support/clear_collection_scope.h"
+#include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 
 namespace blink {
 
@@ -395,7 +396,11 @@ void InlineLayoutAlgorithm::CreateLine(const LineLayoutOpportunity& opportunity,
 
   const FontHeight& line_box_metrics = box_states_->LineBoxState().metrics;
 
-  if (Node().HasRuby() && !line_info->IsEmptyLine()) [[unlikely]] {
+  const bool has_text_emphasis =
+      RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled() &&
+      Node().HasTextEmphasis();
+  if ((Node().HasRuby() || has_text_emphasis) && !line_info->IsEmptyLine())
+      [[unlikely]] {
     std::optional<FontHeight> annotation_metrics;
     if (!box_states_->RubyColumnList().empty()) {
       HeapVector<Member<LogicalRubyColumn>>& column_list =

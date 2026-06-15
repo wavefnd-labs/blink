@@ -752,23 +752,27 @@ AnnotationMetrics ComputeAnnotationOverflow(
         continue;
       }
     }
-    content_over = std::min(content_over, item_over);
-    content_under = std::max(content_under, item_under);
 
     if (const auto* style = item.Style()) {
       if (style->GetTextEmphasisMark() != TextEmphasisMark::kNone) {
-        if (RuntimeEnabledFeatures::TextEmphasisWithRubyEnabled()) {
+        if (RuntimeEnabledFeatures::TextEmphasisWithRubyEnabled() ||
+            RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled()) {
           float scale = item.text_fit_scale ? item.text_fit_scale->scale : 1.0f;
-          const auto& emphasis_mark_outsets =
+          const auto emphasis_mark_height =
               InlineBoxState::ComputeEmphasisMarkOutsets(
-                  *style, *style->GetFont(), scale);
+                  *style, *style->GetFont(), scale)
+                  .LineHeight();
           if (style->GetTextEmphasisLineLogicalSide() ==
               LineLogicalSide::kOver) {
-            over_emphasis =
-                std::max(emphasis_mark_outsets.LineHeight(), over_emphasis);
+            if (RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled()) {
+              item_over -= emphasis_mark_height;
+            }
+            over_emphasis = std::max(emphasis_mark_height, over_emphasis);
           } else {
-            under_emphasis =
-                std::max(emphasis_mark_outsets.LineHeight(), under_emphasis);
+            if (RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled()) {
+              item_under += emphasis_mark_height;
+            }
+            under_emphasis = std::max(emphasis_mark_height, under_emphasis);
           }
         } else {
           if (style->GetTextEmphasisLineLogicalSide() ==
@@ -780,6 +784,8 @@ AnnotationMetrics ComputeAnnotationOverflow(
         }
       }
     }
+    content_over = std::min(content_over, item_over);
+    content_under = std::max(content_under, item_under);
   }
 
   if (annotation_metrics) {
@@ -822,13 +828,22 @@ AnnotationMetrics ComputeAnnotationOverflow(
     content_under = std::max(content_under, line_under);
   }
 
+  const bool has_over_emphasis =
+      RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled() &&
+      over_emphasis > LayoutUnit();
+  const bool has_under_emphasis =
+      RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled() &&
+      under_emphasis > LayoutUnit();
   // With some fonts, text fragment sizes can exceed line-height.
   // We'd like to set overflow only if we have annotations.
   // This affects fast/ruby/line-height.html on macOS.
-  if (content_over < line_over && !has_over_annotation)
+  if (content_over < line_over && !has_over_annotation && !has_over_emphasis) {
     content_over = line_over;
-  if (content_under > line_under && !has_under_annotation)
+  }
+  if (content_under > line_under && !has_under_annotation &&
+      !has_under_emphasis) {
     content_under = line_under;
+  }
 
   return {(line_over - content_over).ClampNegativeToZero(),
           (content_under - line_under).ClampNegativeToZero(),
