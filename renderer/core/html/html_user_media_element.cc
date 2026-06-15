@@ -205,6 +205,11 @@ void HTMLUserMediaElement::OnEmbeddedPermissionsDecided(
   HTMLCapabilityElementBase::OnEmbeddedPermissionsDecided(result);
   if (result == mojom::blink::EmbeddedPermissionControlResult::kDismissed ||
       result == mojom::blink::EmbeddedPermissionControlResult::kDenied) {
+    SetError(MakeGarbageCollected<DOMException>(
+        DOMExceptionCode::kNotAllowedError,
+        result == mojom::blink::EmbeddedPermissionControlResult::kDismissed
+            ? "Permission dismissed"
+            : "Permission denied"));
     DispatchEvent(*Event::Create(event_type_names::kCancel));
   }
 }

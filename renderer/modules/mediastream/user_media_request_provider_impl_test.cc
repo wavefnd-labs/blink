@@ -172,8 +172,11 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnCancel) {
   EXPECT_FALSE(error_listener->fired());
   EXPECT_FALSE(stream_listener->fired());
 
-  // Cancel event should NOT set the error attribute on the element
-  EXPECT_FALSE(element->error());
+  // Cancel event should set the error attribute on the element
+  DOMException* stored_error = element->error();
+  ASSERT_TRUE(stored_error);
+  EXPECT_EQ(stored_error->name(), "NotAllowedError");
+  EXPECT_EQ(stored_error->message(), "User denied");
 }
 
 TEST_F(UserMediaRequestProviderImplTest, StartRequestNoConstraintsError) {
