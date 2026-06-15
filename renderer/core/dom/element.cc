@@ -4811,6 +4811,10 @@ void Element::DetachLayoutTree(bool performing_reattach) {
 void Element::DetachDescendantsNeedingReattachDuringSkip() {
   for (Node* child = FlatTreeTraversal::FirstChild(*this); child;
        child = FlatTreeTraversal::NextSibling(*child)) {
+    // We only detach children that need reattachment. DetachLayoutTree()
+    // clears the ForceReattachLayoutTree flag (via ClearNeedsStyleRecalc()),
+    // so we must restore it here to ensure the node is reattached when the
+    // subtree is no longer skipped.
     if (child->GetForceReattachLayoutTree()) {
       child->DetachLayoutTree();
       child->SetForceReattachLayoutTree();
@@ -14074,8 +14078,8 @@ void Element::ClearOverscrollContainer() {
 }
 
 void Element::DetachOverscroll() {
-  if (auto* container = GetOverscrollContainer()) {
-    auto* tracker = container->GetOverscrollAreaTracker();
+  if (Element* container = GetOverscrollContainer()) {
+    OverscrollAreaTracker* tracker = container->GetOverscrollAreaTracker();
     CHECK(tracker);
     tracker->RemoveOverscroll(this);
   }
