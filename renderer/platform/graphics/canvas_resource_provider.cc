@@ -359,8 +359,8 @@ std::optional<cc::PaintRecord> Canvas2DResourceProviderBitmap::Flush(
   last_recording_ =
       preserve_recording ? std::optional(recording) : std::nullopt;
 
-  if (GetDelegate()) {
-    GetDelegate()->DidFlush();
+  if (delegate_) {
+    delegate_->DidFlush();
   }
 
   return recording;
@@ -405,8 +405,20 @@ void Canvas2DResourceProviderBitmap::RestoreBackBuffer(
 void Canvas2DResourceProviderBitmap::ApplyAnimatedImageFrameIndexesForId(
     SkCanvas* canvas,
     uint32_t id) {
-  CHECK(GetDelegate());
-  SetAnimatedImageFrameIndexes(GetDelegate()->GetAnimatedImageFrameIndexes(id));
+  CHECK(delegate_);
+  SetAnimatedImageFrameIndexes(delegate_->GetAnimatedImageFrameIndexes(id));
+}
+
+void Canvas2DResourceProviderBitmap::ClearAtCreation() {
+  DCHECK(IsValid());
+  MemoryManagedPaintRecorder recorder(Size(), this);
+  if (GetAlphaType() == kOpaque_SkAlphaType) {
+    recorder.getRecordingCanvas().clear(SkColors::kBlack);
+  } else {
+    recorder.getRecordingCanvas().clear(SkColors::kTransparent);
+  }
+
+  RasterRecord(recorder.ReleaseMainRecording());
 }
 
 void Canvas2DResourceProviderBitmap::RasterRecord(
@@ -1289,8 +1301,8 @@ std::optional<cc::PaintRecord> Canvas2DResourceProviderSharedImage::Flush(
   last_recording_ =
       preserve_recording ? std::optional(recording) : std::nullopt;
 
-  if (GetDelegate()) {
-    GetDelegate()->DidFlush();
+  if (delegate_) {
+    delegate_->DidFlush();
   }
 
   return recording;
@@ -2556,8 +2568,20 @@ void Canvas2DResourceProviderSharedImage::RestoreBackBuffer(
 void Canvas2DResourceProviderSharedImage::ApplyAnimatedImageFrameIndexesForId(
     SkCanvas* canvas,
     uint32_t id) {
-  CHECK(GetDelegate());
-  SetAnimatedImageFrameIndexes(GetDelegate()->GetAnimatedImageFrameIndexes(id));
+  CHECK(delegate_);
+  SetAnimatedImageFrameIndexes(delegate_->GetAnimatedImageFrameIndexes(id));
+}
+
+void Canvas2DResourceProviderSharedImage::ClearAtCreation() {
+  DCHECK(IsValid());
+  MemoryManagedPaintRecorder recorder(Size(), this);
+  if (GetAlphaType() == kOpaque_SkAlphaType) {
+    recorder.getRecordingCanvas().clear(SkColors::kBlack);
+  } else {
+    recorder.getRecordingCanvas().clear(SkColors::kTransparent);
+  }
+
+  RasterRecord(recorder.ReleaseMainRecording());
 }
 
 CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
@@ -2864,23 +2888,7 @@ sk_sp<SkSurface> CanvasNon2DResourceProviderSharedImage::CreateSkSurface()
 
 
 
-void CanvasResourceProvider::ClearAtCreation() {
-  // Clear the background transparent or opaque, as required. This should only
-  // be called when a new resource provider is created to ensure that we're
-  // not leaking data or displaying bad pixels (in the case of kOpaque
-  // canvases). Instead of adding these commands to our deferred queue, we'll
-  // send them directly through to Skia so that they're not replayed for
-  // printing operations. See crbug.com/1003114
-  DCHECK(IsValid());
-  MemoryManagedPaintRecorder recorder(Size(), this);
-  if (GetAlphaType() == kOpaque_SkAlphaType) {
-    recorder.getRecordingCanvas().clear(SkColors::kBlack);
-  } else {
-    recorder.getRecordingCanvas().clear(SkColors::kTransparent);
-  }
 
-  RasterRecord(recorder.ReleaseMainRecording());
-}
 
 std::unique_ptr<CanvasResourceProvider>
 Canvas2DResourceProviderBitmap::CreateForTesting(

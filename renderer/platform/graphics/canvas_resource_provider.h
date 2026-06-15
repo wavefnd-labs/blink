@@ -142,9 +142,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
   };
 #pragma GCC diagnostic pop
 
-  virtual Canvas2DResourceProviderSharedImage* AsSharedImageProvider() {
-    return nullptr;
-  }
+  virtual Canvas2DResourceProviderSharedImage* AsSharedImageProvider() = 0;
 
   // The ImageOrientationEnum conveys the desired orientation of the image, and
   // should be derived from the source of the bitmap data.
@@ -152,7 +150,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
       ImageOrientation = ImageOrientationEnum::kDefault) = 0;
 
   virtual void SetDelegate(Delegate* delegate) = 0;
-  virtual Delegate* GetDelegate() const { return nullptr; }
 
   virtual std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) = 0;
@@ -165,9 +162,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual const gfx::HDRMetadata& GetHdrMetadata() const = 0;
   virtual SkAlphaType GetAlphaType() const = 0;
   virtual gfx::Size Size() const = 0;
-  virtual base::ByteSize EstimatedSizeInBytes() const {
-    return base::ByteSize(GetSharedImageFormat().EstimatedSizeInBytes(Size()));
-  }
+  virtual base::ByteSize EstimatedSizeInBytes() const = 0;
 
   virtual bool WritePixels(const SkImageInfo& orig_info,
                            const void* pixels,
@@ -220,12 +215,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   // Canvas2D-specific, as it is called only when `recorder_` is
   // instantiated by Canvas2D-specific subclasses.
   void RecordingCleared() override = 0;
-
- protected:
-  // Should only be called from static Create*() methods.
-  // TODO(crbug.com/352263194): Eliminate this method by inlining its body at
-  // callsites.
-  void ClearAtCreation();
 };
 
 // Renders canvas2D ops to a Skia RAM-backed bitmap. Mailboxing is not
@@ -241,7 +230,6 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   bool IsAccelerated() const override { return false; }
   bool IsGpuContextLost() const override { return true; }
   void SetDelegate(Delegate* delegate) override { delegate_ = delegate; }
-  Delegate* GetDelegate() const override { return delegate_; }
   bool IsPrinting() const override {
     return delegate_ && delegate_->IsPrinting();
   }
@@ -279,6 +267,12 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   }
   SkAlphaType GetAlphaType() const override { return alpha_type_; }
   gfx::Size Size() const override { return size_; }
+  Canvas2DResourceProviderSharedImage* AsSharedImageProvider() override {
+    return nullptr;
+  }
+  base::ByteSize EstimatedSizeInBytes() const override {
+    return base::ByteSize(format_.EstimatedSizeInBytes(size_));
+  }
 
   void FlushIfRecordingLimitExceeded() override;
 
@@ -299,6 +293,11 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   friend class CanvasRenderingContext;
   friend class CanvasRenderingContext2D;
   friend class OffscreenCanvasRenderingContext2D;
+
+  // Should only be called from static Create*() methods.
+  // TODO(crbug.com/352263194): Eliminate this method by inlining its body at
+  // callsites.
+  void ClearAtCreation();
 
   // The returned instance will have been cleared at creation.
   static std::unique_ptr<Canvas2DResourceProviderBitmap> CreateWithClear(
@@ -447,7 +446,6 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   bool IsSoftware() const { return is_software_; }
   bool IsGpuContextLost() const override;
   void SetDelegate(Delegate* delegate) override { delegate_ = delegate; }
-  Delegate* GetDelegate() const override { return delegate_; }
   bool IsPrinting() const override {
     return delegate_ && delegate_->IsPrinting();
   }
@@ -541,6 +539,11 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
       const {
     return context_provider_wrapper_;
   }
+
+  // Should only be called from static Create*() methods.
+  // TODO(crbug.com/352263194): Eliminate this method by inlining its body at
+  // callsites.
+  void ClearAtCreation();
 
   // viz::ContextLostObserver implementation.
   void OnContextLost() override;
