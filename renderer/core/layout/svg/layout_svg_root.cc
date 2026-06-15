@@ -59,6 +59,7 @@ namespace blink {
 LayoutSVGRoot::LayoutSVGRoot(SVGElement* node)
     : LayoutReplaced(node),
       needs_transform_update_(true),
+      container_scale_changed_(false),
       has_non_isolated_blending_descendants_(false),
       has_non_isolated_blending_descendants_dirty_(false) {}
 
@@ -192,12 +193,10 @@ void LayoutSVGRoot::LayoutRoot(const PhysicalRect& content_rect) {
       SelfNeedsFullLayout() || old_content_size != content_rect.size;
 
   SVGLayoutInfo layout_info;
-  // TODO(dmangal): Track a `container_scale_changed_` bit to avoid
-  // signaling scale_factor_changed on every layout when the scale is not (1,1).
   layout_info.scale_factor_changed =
-      screen_scale_factor_changed ||
-      container_scale_ != gfx::Vector2dF(1.f, 1.f);
+      screen_scale_factor_changed || container_scale_changed_;
   layout_info.viewport_changed = viewport_may_have_changed;
+  container_scale_changed_ = false;
 
   const SVGLayoutResult content_result = content_.Layout(layout_info);
 

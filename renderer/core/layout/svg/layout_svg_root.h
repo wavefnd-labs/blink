@@ -105,6 +105,7 @@ class CORE_EXPORT LayoutSVGRoot final : public LayoutReplaced {
   void SetContainerScale(const gfx::Vector2dF& container_scale) {
     NOT_DESTROYED();
     if (container_scale_ != container_scale) {
+      container_scale_changed_ = true;
       SetNeedsLayoutAndFullPaintInvalidation(
           layout_invalidation_reason::kSvgChanged);
     }
@@ -239,6 +240,7 @@ class CORE_EXPORT LayoutSVGRoot final : public LayoutReplaced {
   const PhysicalSize* new_content_size_ = nullptr;
 
   bool needs_transform_update_ : 1;
+  bool container_scale_changed_ : 1;
   mutable bool has_non_isolated_blending_descendants_ : 1;
   mutable bool has_non_isolated_blending_descendants_dirty_ : 1;
 };
