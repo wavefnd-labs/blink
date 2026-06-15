@@ -7360,27 +7360,19 @@
     {
       name: "continue",
       property_methods: ["CSSValueFromComputedStyleInternal"],
-      field_group: "*",
-      field_template: "keyword",
       keywords: ["normal", "collapse", "-webkit-legacy"],
-      default_value: "normal",
       typedom_types: ["Keyword"],
-      invalidate: ["layout", "paint"],
-      runtime_flag: "CSSLineClamp",
+      stored_on_extra_field: ["Continue"],
+      runtime_flag: "CSSLineClampAsShorthand",
     },
     {
       name: "max-lines",
       property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
-      field_group: "*",
-      field_template: "external",
-      include_paths: ["third_party/blink/renderer/core/style/max_lines_data.h"],
-      default_value: "MaxLinesData(0, true)",
-      type_name: "MaxLinesData",
       converter: "ConvertMaxLines",
       keywords: ["auto"],
       typedom_types: ["Number", "Keyword"],
-      invalidate: ["layout", "paint"],
-      runtime_flag: "CSSLineClamp",
+      stored_on_extra_field: ["MaxLines"],
+      runtime_flag: "CSSLineClampAsShorthand",
     },
     {
       name: "block-ellipsis",
@@ -7392,15 +7384,39 @@
       default_value: "no-ellipsis",
       typedom_types: ["Keyword"],
       invalidate: ["layout", "paint"],
-      runtime_flag: "CSSLineClamp",
+      runtime_flag: "CSSLineClampAsShorthand",
     },
     {
+      // This is a longhand that behaves like the spec'd shorthand, so we store it in extra fields
+      // corresponding to each of the longhands, which are also used for those longhands proper with
+      // the `CSSLineClampAsShorthand` runtime flag.
+      // However, the spec's `block-ellipsis` longhand is inherited, while the rest of longhands
+      // aren't; so to avoid issues, we avoid sharing its state with the longhand.
       name: "line-clamp",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      style_builder_custom_functions: ["initial", "inherit", "value"],
+      keywords: ["none", "auto", "ellipsis", "no-ellipsis", "-webkit-legacy"],
+      typedom_types: ["Keyword", "Number"],
+      stored_on_extra_field: [
+        "Continue",
+        "MaxLines",
+        "LineClampInternalBlockEllipsis"
+      ],
+      // overlaps with -alternative-webkit-line-clamp
+      overlapping: true,
+      runtime_flag: "CSSLineClamp"
+    },
+    {
+      // True shorthand for `line-clamp`
+      name: "-alternative-line-clamp-shorthand",
+      alternative_of: "line-clamp",
       property_methods: ["ParseShorthand", "CSSValueFromComputedStyleInternal"],
       longhands: ["max-lines", "block-ellipsis", "continue"],
-      runtime_flag: "CSSLineClamp",
+      runtime_flag: "CSSLineClampAsShorthand",
     },
     {
+      // Standalone (legacy) version of the -webkit-line-clamp property, when no
+      // related runtime flags are enabled.
       name: "-webkit-line-clamp",
       property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
       field_group: "*",
@@ -7413,11 +7429,33 @@
       name_for_methods: "WebkitLineClamp",
     },
     {
-      name: "-alternative-webkit-line-clamp",
+      // Longhand version of -webkit-line-clamp which stores its values in extra
+      // fields, used when the CSSLineClamp is enabled (so there *is* a
+      // `line-clamp` property) but when CSSLineClampAsShorthand is disabled (so
+      // `line-clamp` is a longhand, not a shorthand).
+      name: "-alternative-webkit-line-clamp-longhand",
       alternative_of: "-webkit-line-clamp",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      style_builder_custom_functions: ["initial", "inherit", "value"],
+      keywords: ["none"],
+      typedom_types: ["Keyword", "Number"],
+      stored_on_extra_field: [
+        "Continue",
+        "MaxLines",
+        "LineClampInternalBlockEllipsis"
+      ],
+      // overlaps with line-clamp
+      legacy_overlapping: true,
+      runtime_flag: "CSSLineClamp",
+    },
+    {
+      // Shorthand version of -webkit-line-clamp, corresponding to the
+      // `-alternative-line-clamp-shorthand` definition.
+      name: "-alternative-webkit-line-clamp-shorthand",
+      alternative_of: "-alternative-webkit-line-clamp-longhand",
       property_methods: ["ParseShorthand", "CSSValueFromComputedStyleInternal"],
       longhands: ["max-lines", "block-ellipsis", "continue"],
-      runtime_flag: "CSSLineClamp",
+      runtime_flag: "CSSLineClampAsShorthand",
     },
     {
       name: "-webkit-mask-box-image-outset",
