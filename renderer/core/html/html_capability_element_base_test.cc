@@ -201,6 +201,7 @@ class HTMLCapabilityElementBaseTestBase : public PageTestBase {
 
  private:
   ScopedUserMediaElementForTest scoped_feature_{true};
+  ScopedUserMediaElementLegacyForTest legacy_enabled_{true};
 };
 
 TEST_F(HTMLCapabilityElementBaseTestBase, GetTypeAttribute) {
@@ -755,6 +756,7 @@ class HTMLCapabilityElementBaseSimTest : public SimTest {
   PermissionElementTestPermissionService permission_service_;
   ScopedTestingPlatformSupport<LocalePlatformSupport> support;
   ScopedUserMediaElementForTest scoped_feature_{true};
+  ScopedUserMediaElementLegacyForTest legacy_enabled_{true};
 };
 
 TEST_F(HTMLCapabilityElementBaseSimTest, InitializeGrantedText) {

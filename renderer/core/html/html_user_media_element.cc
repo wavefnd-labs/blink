@@ -113,6 +113,10 @@ void HTMLUserMediaElement::Trace(Visitor* visitor) const {
 }
 
 bool HTMLUserMediaElement::IsLegacyMode() const {
+  if (!RuntimeEnabledFeatures::UserMediaElementLegacyEnabled(
+          GetExecutionContext())) {
+    return false;
+  }
   // If the 'type' attribute is explicitly defined, we fallback to legacy
   // behavior.
   return FastHasAttribute(html_names::kTypeAttr);
@@ -149,6 +153,11 @@ void HTMLUserMediaElement::OnConstraintsSet(bool has_video, bool has_audio) {
 void HTMLUserMediaElement::AttributeChanged(
     const AttributeModificationParams& params) {
   if (params.name == html_names::kTypeAttr) {
+    if (!RuntimeEnabledFeatures::UserMediaElementLegacyEnabled(
+            GetExecutionContext())) {
+      HTMLCapabilityElementBase::AttributeChanged(params);
+      return;
+    }
     // `type` should only take effect once, when is added to the permission
     // element. Removing, or modifying the attribute has no effect.
     if (!type_.IsNull()) {
