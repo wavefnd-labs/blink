@@ -130,6 +130,8 @@ class ScrollTimelineHashSet final
 // that the caller must update their pointer in case it changed. These are all
 // marked by [[nodiscard]] so that you do not accidentally forget to do so.
 class CORE_EXPORT NodeRareData final : public GarbageCollected<NodeRareData> {
+  friend class NodeRareDataTest;
+
  public:
   using PassKey = base::PassKey<NodeRareData>;
 
