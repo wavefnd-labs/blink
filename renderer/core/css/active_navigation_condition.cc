@@ -56,7 +56,7 @@ void ActiveNavigationCondition::SerializeTo(StringBuilder& builder) const {
   if (route_location_) {
     route_location_->SerializeTo(builder);
   } else {
-    // TODO(crbug.com/436805487): Serialize "link-href". And write tests, too.
+    builder.Append("link-href");
   }
 }
 

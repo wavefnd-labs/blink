@@ -220,8 +220,10 @@ ActiveNavigationCondition* CSSSelectorParser::ParseActiveNavigationCondition(
   // [ <route-location> | link-href ]?
   if (!stream.AtEnd()) {
     // Leave route_location as nullptr if "link-href".
-    if (stream.Peek().GetType() != kIdentToken ||
-        stream.Peek().Value().ToString() != "link-href") {
+    if (stream.Peek().GetType() == kIdentToken &&
+        EqualIgnoringAsciiCase(stream.Peek().Value(), "link-href")) {
+      stream.ConsumeIncludingWhitespace();
+    } else {
       route_location = NavigationParser::ParseLocation(stream);
       if (!route_location) {
         return nullptr;
