@@ -36,6 +36,7 @@
 
 #include "base/auto_reset.h"
 #include "base/containers/adapters.h"
+#include "base/dcheck_is_on.h"
 #include "base/debug/dump_without_crashing.h"
 #include "base/i18n/time_formatting.h"
 #include "base/metrics/histogram_functions.h"
@@ -427,8 +428,7 @@ class IntrinsicSizeResizeObserverDelegate : public ResizeObserver::Delegate {
   bool SkipNonAtomicInlineObservations() const final;
 };
 
-// TODO(crbug.com/522516536): Migrate to DCHECK_IS_ON() instead of NDEBUG.
-#ifndef NDEBUG
+#if DCHECK_IS_ON()
 using WeakDocumentSet = blink::HeapHashSet<blink::WeakMember<blink::Document>>;
 
 WeakDocumentSet& LiveDocumentSet() {
@@ -1127,7 +1127,7 @@ Document::Document(const DocumentInit& initializer,
   DCHECK(!ParentDocument() ||
          !ParentDocument()->domWindow()->IsContextPaused());
 
-#ifndef NDEBUG
+#if DCHECK_IS_ON()
   LiveDocumentSet().insert(this);
 #endif
 }
@@ -10372,7 +10372,7 @@ template class CORE_TEMPLATE_EXPORT Supplement<Document>;
 
 }  // namespace blink
 
-#ifndef NDEBUG
+#if DCHECK_IS_ON()
 void ShowLiveDocumentInstances() {
   blink::WeakDocumentSet& set = blink::LiveDocumentSet();
   fprintf(stderr, "There are %u documents currently alive:\n", set.size());

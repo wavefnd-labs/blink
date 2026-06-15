@@ -3352,7 +3352,7 @@ struct DowncastTraits<Document> {
 
 }  // namespace blink
 
-#ifndef NDEBUG
+#if DCHECK_IS_ON()
 // Outside the blink namespace for ease of invocation from gdb.
 CORE_EXPORT void ShowLiveDocumentInstances();
 #endif
