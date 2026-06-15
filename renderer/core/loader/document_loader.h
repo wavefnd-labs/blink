@@ -115,7 +115,6 @@ class Element;
 class Frame;
 class FrameLoader;
 class HistoryItem;
-class LocalDOMWindow;
 class LocalFrame;
 class LocalFrameClient;
 class MHTMLArchive;

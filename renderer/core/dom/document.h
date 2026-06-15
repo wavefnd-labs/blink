@@ -199,7 +199,6 @@ class FontFaceSet;
 class FormController;
 class FragmentDirective;
 class FrameCallback;
-class FrameScheduler;
 class HTMLAllCollection;
 class HTMLBodyElement;
 class HTMLCollection;

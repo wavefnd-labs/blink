@@ -18,7 +18,6 @@ namespace blink {
 class Document;
 class Element;
 class Route;
-class URLPattern;
 
 // <route-location>
 //
