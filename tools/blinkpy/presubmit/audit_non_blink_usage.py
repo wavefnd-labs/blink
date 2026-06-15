@@ -798,6 +798,7 @@ _CONFIG = [
             'cc::SnapStrictness',
             'cc::TargetSnapAreaElementIds',
             'ui::ScrollGranularity',
+            'ui::ScrollInputType',
 
             # View transitions
             'cc::ViewTransitionContentLayer',
