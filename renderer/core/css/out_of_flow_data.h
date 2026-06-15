@@ -18,6 +18,8 @@
 
 namespace blink {
 
+enum class RememberedScrollOffsetType { kLayout, kRangeAdjustment };
+
 class CSSPropertyValueSet;
 class Element;
 class LayoutBox;
@@ -51,17 +53,22 @@ class CORE_EXPORT OutOfFlowData final : public GarbageCollected<OutOfFlowData>,
       return it != offsets_.end() ? std::make_optional(it->value)
                                   : std::nullopt;
     }
-    std::optional<PhysicalOffset> GetOffsetForAnchor(
-        const Element* anchor) const {
+    std::optional<PhysicalOffset> GetOffset(const Element* anchor,
+                                            RememberedScrollOffsetType type,
+                                            bool needs_x,
+                                            bool needs_y) const {
       if (const auto& offsets = GetOffsetsForAnchor(anchor)) {
-        return offsets->scroll_offset_for_layout;
-      }
-      return std::nullopt;
-    }
-    std::optional<PhysicalOffset> GetOffsetForAnchorForRangeAdjustment(
-        const Element* anchor) const {
-      if (const auto& offsets = GetOffsetsForAnchor(anchor)) {
-        return offsets->scroll_offset_for_range_adjustment;
+        PhysicalOffset result =
+            type == RememberedScrollOffsetType::kLayout
+                ? offsets->scroll_offset_for_layout
+                : offsets->scroll_offset_for_range_adjustment;
+        if (!needs_x) {
+          result.left = LayoutUnit();
+        }
+        if (!needs_y) {
+          result.top = LayoutUnit();
+        }
+        return result;
       }
       return std::nullopt;
     }

@@ -17,6 +17,7 @@
 
 namespace blink {
 
+enum class RememberedScrollOffsetType;
 class AnchorPositionVisibilityObserver;
 class Element;
 class LayoutObject;
@@ -194,6 +195,7 @@ class AnchorPositionScrollData
  private:
   enum class SnapshotDiff { kNone, kScrollersOrFallbackPosition, kOffsetOnly };
 
+  PhysicalOffset GetFilteredRememberedOffset(RememberedScrollOffsetType) const;
   AdjustmentData ComputeDefaultAnchorAdjustmentData() const;
   // Takes an up-to-date snapshot, and compares it with the existing one.
   // If `update` is true, also rewrites the existing snapshot.
