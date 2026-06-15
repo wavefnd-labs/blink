@@ -385,6 +385,11 @@ sk_sp<SkSurface> Canvas2DResourceProviderBitmap::CreateSkSurface() const {
   return SkSurfaces::Raster(info, &props);
 }
 
+SkSurfaceProps Canvas2DResourceProviderBitmap::GetSkSurfaceProps() const {
+  const bool can_use_lcd_text = GetAlphaType() == kOpaque_SkAlphaType;
+  return skia::LegacyDisplayGlobals::ComputeSurfaceProps(can_use_lcd_text);
+}
+
 void Canvas2DResourceProviderBitmap::RasterRecord(
     cc::PaintRecord last_recording) {
   RasterRecord([this, &last_recording](cc::PaintCanvas& canvas) {
@@ -2121,11 +2126,6 @@ MemoryManagedPaintCanvas& CanvasResourceProvider::GetCanvasForTesting() {
 }
 
 
-SkSurfaceProps CanvasResourceProvider::GetSkSurfaceProps() const {
-  const bool can_use_lcd_text = GetAlphaType() == kOpaque_SkAlphaType;
-  return skia::LegacyDisplayGlobals::ComputeSurfaceProps(can_use_lcd_text);
-}
-
 CanvasImageProvider*
 CanvasNon2DResourceProviderSharedImage::GetOrCreateImageProvider() {
   if (!canvas_image_provider_) {
@@ -2520,6 +2520,11 @@ sk_sp<SkSurface> Canvas2DResourceProviderSharedImage::CreateSkSurface() const {
   // current resource's backing SharedImage before dispatching that SharedImage
   // to the display compositor.
   return SkSurfaces::Raster(resource_->CreateSkImageInfo(), &props);
+}
+
+SkSurfaceProps Canvas2DResourceProviderSharedImage::GetSkSurfaceProps() const {
+  const bool can_use_lcd_text = GetAlphaType() == kOpaque_SkAlphaType;
+  return skia::LegacyDisplayGlobals::ComputeSurfaceProps(can_use_lcd_text);
 }
 
 CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(

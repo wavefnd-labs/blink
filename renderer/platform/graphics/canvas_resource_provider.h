@@ -161,7 +161,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual bool IsAccelerated() const = 0;
   virtual bool IsValid() const = 0;
   virtual bool IsGpuContextLost() const = 0;
-  SkSurfaceProps GetSkSurfaceProps() const;
   virtual viz::SharedImageFormat GetSharedImageFormat() const = 0;
   virtual const gfx::ColorSpace& GetColorSpace() const = 0;
   virtual const gfx::HDRMetadata& GetHdrMetadata() const = 0;
@@ -322,6 +321,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
                                  const gfx::HDRMetadata& hdr_metadata,
                                  Delegate* delegate);
 
+  SkSurfaceProps GetSkSurfaceProps() const;
   SkSurface* GetSkSurface() const;
   sk_sp<SkSurface> CreateSkSurface() const;
 
@@ -552,6 +552,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   void WillDrawUnaccelerated();
   void DisableLineDrawingAsPathsIfNecessary();
 
+  SkSurfaceProps GetSkSurfaceProps() const;
   virtual sk_sp<SkSurface> CreateSkSurface() const;
   gpu::raster::RasterInterface* RasterInterface() const;
 
