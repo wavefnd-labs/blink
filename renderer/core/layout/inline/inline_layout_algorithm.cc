@@ -964,9 +964,11 @@ LayoutUnit InlineLayoutAlgorithm::SetAnnotationOverflow(
     const LogicalLineItems& line_box,
     const FontHeight& line_box_metrics,
     std::optional<FontHeight> annotation_font_height) {
-  AnnotationMetrics annotation_metrics =
-      ComputeAnnotationOverflow(line_box, line_box_metrics,
-                                line_info.LineStyle(), annotation_font_height);
+  AnnotationMetrics annotation_metrics = ComputeAnnotationOverflow(
+      line_box, line_box_metrics,
+      LayoutUnit(line_info.LineStyle().ComputedFontSize() *
+                 line_info.TextFitScale()),
+      annotation_font_height);
   LayoutUnit annotation_overflow_block_start;
   LayoutUnit annotation_overflow_block_end;
   LayoutUnit annotation_space_block_start;
