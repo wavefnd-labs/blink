@@ -368,6 +368,10 @@ Canvas2DResourceProviderBitmap::LastRecording() {
   return last_recording_;
 }
 
+ScopedRasterTimer Canvas2DResourceProviderBitmap::CreateScopedRasterTimer() {
+  return ScopedRasterTimer(nullptr, *this, false);
+}
+
 sk_sp<SkSurface> Canvas2DResourceProviderBitmap::CreateSkSurface() const {
   TRACE_EVENT0("blink", "Canvas2DResourceProviderBitmap::CreateSkSurface");
 
@@ -2125,11 +2129,6 @@ MemoryManagedPaintCanvas& CanvasResourceProvider::GetCanvasForTesting() {
 SkSurfaceProps CanvasResourceProvider::GetSkSurfaceProps() const {
   const bool can_use_lcd_text = GetAlphaType() == kOpaque_SkAlphaType;
   return skia::LegacyDisplayGlobals::ComputeSurfaceProps(can_use_lcd_text);
-}
-
-ScopedRasterTimer CanvasResourceProvider::CreateScopedRasterTimer() {
-  return ScopedRasterTimer(nullptr, *this,
-                           always_enable_raster_timers_for_testing_);
 }
 
 CanvasImageProvider*

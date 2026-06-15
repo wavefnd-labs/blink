@@ -157,7 +157,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   MemoryManagedPaintCanvas& GetCanvasForTesting();
   virtual std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) = 0;
-  virtual ScopedRasterTimer CreateScopedRasterTimer();
 
   virtual bool IsAccelerated() const = 0;
   virtual bool IsValid() const = 0;
@@ -209,10 +208,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   constexpr static base::TimeDelta kUnusedResourceExpirationTime =
       base::Seconds(5);
 
-  void AlwaysEnableRasterTimersForTesting(bool value) {
-    always_enable_raster_timers_for_testing_ = value;
-  }
-
   virtual const std::optional<cc::PaintRecord>& LastRecording() = 0;
 
  protected:
@@ -232,8 +227,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   // TODO(crbug.com/352263194): Eliminate this method by inlining its body at
   // callsites.
   void ClearAtCreation();
-
-  bool always_enable_raster_timers_for_testing_ = false;
 };
 
 // Renders canvas2D ops to a Skia RAM-backed bitmap. Mailboxing is not
@@ -298,6 +291,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   void SetRecorder(
       std::unique_ptr<MemoryManagedPaintRecorder> recorder) override;
   void InitializeForRecording(cc::PaintCanvas* canvas) const override;
+  ScopedRasterTimer CreateScopedRasterTimer();
 
  private:
   friend class CanvasRenderingContext;
@@ -524,7 +518,10 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   // token.
   void TransferBackFromWebGPU(const gpu::SyncToken& webgpu_write_sync_token);
 
-  ScopedRasterTimer CreateScopedRasterTimer() override;
+  void AlwaysEnableRasterTimersForTesting(bool value) {
+    always_enable_raster_timers_for_testing_ = value;
+  }
+  ScopedRasterTimer CreateScopedRasterTimer();
 
  protected:
   scoped_refptr<UnacceleratedStaticBitmapImage> UnacceleratedSnapshot(
@@ -631,6 +628,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
 
   bool clear_frame_ = true;
   std::optional<cc::PaintRecord> last_recording_;
+  bool always_enable_raster_timers_for_testing_ = false;
 
   base::WeakPtrFactory<Canvas2DResourceProviderSharedImage> weak_ptr_factory_{
       this};
