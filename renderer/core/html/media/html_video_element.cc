@@ -54,6 +54,7 @@
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/frame/local_frame_client.h"
+#include "third_party/blink/renderer/core/frame/local_frame_view.h"
 #include "third_party/blink/renderer/core/frame/picture_in_picture_controller.h"
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "third_party/blink/renderer/core/fullscreen/fullscreen.h"
@@ -68,6 +69,7 @@
 #include "third_party/blink/renderer/core/imagebitmap/image_bitmap.h"
 #include "third_party/blink/renderer/core/inspector/console_message.h"
 #include "third_party/blink/renderer/core/intersection_observer/intersection_observer_entry.h"
+#include "third_party/blink/renderer/core/layout/geometry/physical_rect.h"
 #include "third_party/blink/renderer/core/layout/layout_image.h"
 #include "third_party/blink/renderer/core/layout/layout_video.h"
 #include "third_party/blink/renderer/core/layout/layout_view.h"
@@ -90,6 +92,7 @@
 #include "third_party/blink/renderer/platform/scheduler/public/event_loop.h"
 #include "third_party/blink/renderer/platform/web_test_support.h"
 #include "third_party/blink/renderer/platform/wtf/text/string_utf8_adaptor.h"
+#include "ui/gfx/geometry/size.h"
 
 namespace blink {
 
@@ -559,6 +562,27 @@ void HTMLVideoElement::ResetCache(TimerBase*) {
   cached_draw_info_.reset();
 }
 
+bool HTMLVideoElement::MeetsRequestEnterPictureInPictureSizeConstraint(
+    const std::optional<gfx::Size>& min_size) const {
+  if (!min_size.has_value()) {
+    return true;
+  }
+
+  auto* layout_video = DynamicTo<LayoutVideo>(GetLayoutObject());
+  LocalFrameView* view = GetDocument().View();
+  gfx::Size layout_size;
+  if (layout_video && view) {
+    PhysicalRect content_rect = layout_video->ReplacedContentRect();
+    gfx::Rect viewport_rect = view->FrameToViewport(
+        ToEnclosingRect(layout_video->LocalToAbsoluteRect(content_rect)));
+    layout_size = viewport_rect.size();
+  } else {
+    layout_size = BoundsInWidget().size();
+  }
+  return layout_size.width() >= min_size->width() &&
+         layout_size.height() >= min_size->height();
+}
+
 bool HTMLVideoElement::IsPersistent() const {
   return is_persistent_;
 }
@@ -618,7 +642,12 @@ void HTMLVideoElement::UpdateVideoVisibilityTracker() {
   visibility_tracker_->UpdateVisibilityTrackerState();
 }
 
-void HTMLVideoElement::RequestEnterPictureInPicture() {
+void HTMLVideoElement::RequestEnterPictureInPicture(
+    const std::optional<gfx::Size>& min_size) {
+  if (!MeetsRequestEnterPictureInPictureSizeConstraint(min_size)) {
+    return;
+  }
+
   PictureInPictureController::From(GetDocument())
       .EnterPictureInPicture(this, /*promise=*/nullptr);
 }

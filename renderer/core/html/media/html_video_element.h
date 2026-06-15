@@ -36,6 +36,10 @@
 #include "third_party/blink/renderer/platform/graphics/canvas_snapshot_info.h"
 #include "third_party/blink/renderer/platform/timer.h"
 
+namespace gfx {
+class Size;
+}
+
 namespace blink {
 
 class ImageBitmapOptions;
@@ -229,7 +233,8 @@ class CORE_EXPORT HTMLVideoElement final
 
   // Video-specific overrides for part of the media::mojom::MediaPlayer
   // interface, fully implemented in the parent class HTMLMediaElement.
-  void RequestEnterPictureInPicture() final;
+  void RequestEnterPictureInPicture(
+      const std::optional<gfx::Size>& min_size) final;
   void RequestMediaRemoting() final;
   void RequestVisibility(RequestVisibilityCallback request_visibility_cb) final;
 
@@ -251,6 +256,13 @@ class CORE_EXPORT HTMLVideoElement final
   void OnVisibilityRatioReport(double ratio);
 
   void ResetCache(TimerBase*);
+
+  // Returns true if the video element meets the optional minimum size
+  // requirements for entering Picture-in-Picture (calculated in viewport
+  // coordinates, including CSS transforms and page zoom). If no constraint
+  // is provided (`min_size` is `std::nullopt`), this always returns true.
+  bool MeetsRequestEnterPictureInPictureSizeConstraint(
+      const std::optional<gfx::Size>& min_size) const;
 
   Member<HTMLImageLoader> image_loader_;
   Member<MediaCustomControlsFullscreenDetector>
