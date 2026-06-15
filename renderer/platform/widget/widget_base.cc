@@ -1797,7 +1797,8 @@ void WidgetBase::RequestAnimationAfterDelayTimerFired(TimerBase*) {
   bool urgent_for_input =
       input_handler_.handling_input_event() &&
       base::FeatureList::IsEnabled(features::kUrgentMainFrameForInput);
-  client_->ScheduleAnimation(/*urgent=*/urgent_for_input);
+  client_->ScheduleAnimation(cc::BeginMainFrameReason::kDelayedTimerFired,
+                             /*urgent=*/urgent_for_input);
 }
 
 float WidgetBase::GetOriginalDeviceScaleFactor() const {
