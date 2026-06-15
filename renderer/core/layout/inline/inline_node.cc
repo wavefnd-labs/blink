@@ -652,8 +652,10 @@ void InlineNode::PrepareLayoutIfNeeded() const {
 
   if (previous_data) {
     // previous_data is not used from now on but exists until GC happens, so it
-    // is better to eagerly clear HeapVector to improve memory utilization.
+    // is better to eagerly clear HeapVector and Strings to improve memory
+    // utilization.
     previous_data->items.clear();
+    previous_data->text_content = String();
   }
 }
 
@@ -741,8 +743,10 @@ class InlineNodeDataEditor final {
     DCHECK(offset_mapping);
     if (data_) {
       // data_ is not used from now on but exists until GC happens, so it is
-      // better to eagerly clear HeapVector to improve memory utilization.
+      // better to eagerly clear HeapVector and Strings to improve memory
+      // utilization.
       data_->items.clear();
+      data_->text_content = String();
     }
     data_ = block_flow_->TakeInlineNodeData();
     return data_;
