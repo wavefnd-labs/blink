@@ -390,6 +390,18 @@ SkSurfaceProps Canvas2DResourceProviderBitmap::GetSkSurfaceProps() const {
   return skia::LegacyDisplayGlobals::ComputeSurfaceProps(can_use_lcd_text);
 }
 
+void Canvas2DResourceProviderBitmap::RestoreBackBuffer(
+    const cc::PaintImage& image) {
+  DCHECK_EQ(image.height(), Size().height());
+  DCHECK_EQ(image.width(), Size().width());
+
+  auto sk_image = image.GetSwSkImage();
+  DCHECK(sk_image);
+  SkPixmap map;
+  sk_image->peekPixels(&map);
+  WritePixels(map.info(), map.addr(), map.rowBytes(), /*x=*/0, /*y=*/0);
+}
+
 void Canvas2DResourceProviderBitmap::RasterRecord(
     cc::PaintRecord last_recording) {
   RasterRecord([this, &last_recording](cc::PaintCanvas& canvas) {
@@ -2524,6 +2536,18 @@ Canvas2DResourceProviderSharedImage::GetCanvasForTesting() {
   return Recorder().getRecordingCanvas();
 }
 
+void Canvas2DResourceProviderSharedImage::RestoreBackBuffer(
+    const cc::PaintImage& image) {
+  DCHECK_EQ(image.height(), Size().height());
+  DCHECK_EQ(image.width(), Size().width());
+
+  auto sk_image = image.GetSwSkImage();
+  DCHECK(sk_image);
+  SkPixmap map;
+  sk_image->peekPixels(&map);
+  WritePixels(map.info(), map.addr(), map.rowBytes(), /*x=*/0, /*y=*/0);
+}
+
 CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
     gfx::Size size,
     viz::SharedImageFormat format,
@@ -2845,21 +2869,6 @@ void CanvasResourceProvider::ClearAtCreation() {
 
   RasterRecord(recorder.ReleaseMainRecording());
 }
-
-void CanvasResourceProvider::RestoreBackBuffer(const cc::PaintImage& image) {
-  DCHECK_EQ(image.height(), Size().height());
-  DCHECK_EQ(image.width(), Size().width());
-
-  auto sk_image = image.GetSwSkImage();
-  DCHECK(sk_image);
-  SkPixmap map;
-  // We know this SkImage is software backed because it's guaranteed by
-  // PaintImage::GetSwSkImage above
-  sk_image->peekPixels(&map);
-  WritePixels(map.info(), map.addr(), map.rowBytes(), /*x=*/0,
-              /*y=*/0);
-}
-
 
 std::unique_ptr<CanvasResourceProvider>
 Canvas2DResourceProviderBitmap::CreateForTesting(

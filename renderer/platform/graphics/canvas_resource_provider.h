@@ -179,7 +179,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
   CanvasResourceProvider& operator=(const CanvasResourceProvider&) = delete;
   ~CanvasResourceProvider() override = default;
 
-  void RestoreBackBuffer(const cc::PaintImage&);
+  virtual void RestoreBackBuffer(const cc::PaintImage&) = 0;
 
   virtual ResourceProviderType GetType() const = 0;
 
@@ -290,6 +290,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
       std::unique_ptr<MemoryManagedPaintRecorder> recorder) override;
   void InitializeForRecording(cc::PaintCanvas* canvas) const override;
   ScopedRasterTimer CreateScopedRasterTimer();
+  void RestoreBackBuffer(const cc::PaintImage&) override;
 
  private:
   friend class CanvasRenderingContext;
@@ -522,6 +523,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   }
   ScopedRasterTimer CreateScopedRasterTimer();
   MemoryManagedPaintCanvas& GetCanvasForTesting();
+  void RestoreBackBuffer(const cc::PaintImage&) override;
 
  protected:
   scoped_refptr<UnacceleratedStaticBitmapImage> UnacceleratedSnapshot(
