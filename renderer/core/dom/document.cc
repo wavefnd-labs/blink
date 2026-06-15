@@ -427,6 +427,8 @@ class IntrinsicSizeResizeObserverDelegate : public ResizeObserver::Delegate {
   bool SkipNonAtomicInlineObservations() const final;
 };
 
+// TODO(crbug.com/522516536): Migrate to DCHECK_IS_ON() instead of NDEBUG.
+#ifndef NDEBUG
 using WeakDocumentSet = blink::HeapHashSet<blink::WeakMember<blink::Document>>;
 
 WeakDocumentSet& LiveDocumentSet() {
@@ -435,6 +437,7 @@ WeakDocumentSet& LiveDocumentSet() {
                       (blink::MakeGarbageCollected<WeakDocumentSetHolder>()));
   return holder->Value();
 }
+#endif
 
 // Returns true if any of <object> ancestors don't start loading or are loading
 // plugins/frames/images. If there are no <object> ancestors, this function
@@ -1063,12 +1066,6 @@ Document::Document(const DocumentInit& initializer,
             network::mojom::PermissionsPolicyFeature::kVerticalScroll);
     cached_top_frame_site_for_visited_links_ =
         net::SchemefulSite(TopFrameOrigin()->ToUrlOrigin());
-    // The WidgetCreationObserver can be only added during initialization
-    // of the local root. The observer is added to lower the frate rate
-    // during the loading of the page.
-    if (frame->IsLocalRoot() && !frame->GetWidgetForLocalRoot()) {
-      frame->AddWidgetCreationObserver(this);
-    }
   } else {
     // We disable fetches for frame-less Documents.
     // See https://crbug.com/961614 for details.
@@ -1130,7 +1127,9 @@ Document::Document(const DocumentInit& initializer,
   DCHECK(!ParentDocument() ||
          !ParentDocument()->domWindow()->IsContextPaused());
 
+#ifndef NDEBUG
   LiveDocumentSet().insert(this);
+#endif
 }
 
 Document::~Document() {
@@ -10068,16 +10067,6 @@ void Document::HandlePaymentLink(const KURL& href) {
 }
 #endif  // BUILDFLAG(IS_ANDROID)
 
-void Document::OnLocalRootWidgetCreated() {
-  if (!features::kThrottleFrameRateOnInitialization.Get() || !GetFrame() ||
-      !GetFrame()->GetPage() || !GetFrame()->IsAttached()) {
-    return;
-  }
-  bool allowed_by_security = CanThrottleFrameRate();
-  base::UmaHistogramBoolean(
-      "Blink.ThrottleFrameRate.AllowedBySecurity.DocumentInitialization",
-      allowed_by_security);
-}
 
 void Document::ProcessScheduledShadowTreeCreationsNow() {
   if (elements_needing_shadow_tree_.empty()) {
@@ -10105,30 +10094,8 @@ void Document::ScheduleSelectionchangeEvent() {
 
 void Document::SetHasRenderBlockingExpectLinkElements(bool flag) {
   has_render_blocking_expect_link_elements_ = flag;
-  has_pending_expect_link_elements_ =
-      has_render_blocking_expect_link_elements_ ||
-      has_frame_rate_blocking_expect_link_elements_;
 }
 
-void Document::SetHasFullFrameRateBlockingExpectLinkElements(bool flag) {
-  if (flag == has_frame_rate_blocking_expect_link_elements_) {
-    return;
-  }
-  has_frame_rate_blocking_expect_link_elements_ = flag;
-  has_pending_expect_link_elements_ =
-      has_render_blocking_expect_link_elements_ ||
-      has_frame_rate_blocking_expect_link_elements_;
-  UpdateRenderFrameRate();
-}
-
-void Document::UpdateRenderFrameRate() {
-  if (!GetFrame() || !GetFrame()->GetPage() || !GetFrame()->IsAttached()) {
-    return;
-  }
-  bool allowed_by_security = CanThrottleFrameRate();
-  base::UmaHistogramBoolean("Blink.ThrottleFrameRate.AllowedBySecurity.API",
-                            allowed_by_security);
-}
 
 // static
 Document* Document::parseHTMLInternal(ExecutionContext* context,
@@ -10332,22 +10299,6 @@ net::SchemefulSite Document::GetCachedTopFrameSite(VisitedLinkPassKey) {
   return cached_top_frame_site_for_visited_links_.value();
 }
 
-bool Document::CanThrottleFrameRate() {
-  // To prevent side-channel attacks by monitoring the frame rate to detect
-  // page loads from other origins, we only allow the frame rate to be throttled
-  // if the renderer process is only hosting pages from one origin.
-  CHECK(GetExecutionContext());
-  const SecurityOrigin* expected_security_origin =
-      GetExecutionContext()->GetSecurityOrigin();
-  for (blink::Document* document : blink::LiveDocumentSet()) {
-    if (!document->GetExecutionContext() ||
-        !document->GetExecutionContext()->GetSecurityOrigin()->IsSameOriginWith(
-            expected_security_origin)) {
-      return false;
-    }
-  }
-  return true;
-}
 
 CustomElementRegistry* Document::EffectiveGlobalCustomElementRegistry() const {
   DCHECK(RuntimeEnabledFeatures::ScopedCustomElementRegistryEnabled());

@@ -363,7 +363,6 @@ struct UnloadEventTimingInfo {
 class CORE_EXPORT Document : public ContainerNode,
                              public TreeScope,
                              public UseCounter,
-                             public WidgetCreationObserver,
                              public Supplementable<Document> {
   DEFINE_WRAPPERTYPEINFO();
 
@@ -2139,19 +2138,11 @@ class CORE_EXPORT Document : public ContainerNode,
     return has_render_blocking_expect_link_elements_;
   }
 
-  void SetHasFullFrameRateBlockingExpectLinkElements(bool flag);
-
-  bool HasFullFrameRateBlockingExpectLinkElements() const {
-    return has_frame_rate_blocking_expect_link_elements_;
-  }
-
   // Whether the document has any pending elements that need to be tracked for
-  // full render blocking or full frame rate blocking.
+  // full render blocking.
   bool HasPendingExpectLinkElements() const {
-    return has_pending_expect_link_elements_;
+    return has_render_blocking_expect_link_elements_;
   }
-
-  void UpdateRenderFrameRate();
 
   // Called when a previously render-blocking resource is no longer render-
   // blocking, due to it has finished loading or has given up render-blocking.
@@ -2337,8 +2328,6 @@ class CORE_EXPORT Document : public ContainerNode,
   void HandlePaymentLink(const KURL& href);
 #endif
 
-  // WidgetCreationObserver implementation
-  void OnLocalRootWidgetCreated() override;
 
   // https://dom.spec.whatwg.org/#effective-global-custom-element-registry
   // A document's effective global custom element registry is its own registry
@@ -2678,7 +2667,6 @@ class CORE_EXPORT Document : public ContainerNode,
                                      StreamingSanitizer* sanitizer,
                                      ExceptionState& exception_state);
 
-  bool CanThrottleFrameRate();
 
   // Called upon prerender activation.
   // Note that not all prerendering pages block script execution; prerendering
@@ -2883,9 +2871,6 @@ class CORE_EXPORT Document : public ContainerNode,
 
   bool has_render_blocking_expect_link_elements_ = false;
 
-  bool has_frame_rate_blocking_expect_link_elements_ = false;
-
-  bool has_pending_expect_link_elements_ = false;
 
   // Set to true whenever shadow root is attached to document. Does not
   // get reset if all roots are removed.
