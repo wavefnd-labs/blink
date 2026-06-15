@@ -1935,21 +1935,6 @@ void WebFrameWidgetImpl::UpdateVisualProperties(
         visual_properties.screen_infos.current().device_scale_factor);
   }
 
-  bool capture_sequence_number_changed =
-      visual_properties.capture_sequence_number !=
-      last_capture_sequence_number_;
-  if (capture_sequence_number_changed) {
-    last_capture_sequence_number_ = visual_properties.capture_sequence_number;
-
-    // Send the capture sequence number to RemoteFrames that are below the
-    // local root for this widget.
-    ForEachRemoteFrameControlledByWidget(
-        [capture_sequence_number = visual_properties.capture_sequence_number](
-            RemoteFrame* remote_frame) {
-          remote_frame->UpdateCaptureSequenceNumber(capture_sequence_number);
-        });
-  }
-
   if (!View()->AutoResizeMode()) {
     // This needs to run before ApplyVisualPropertiesSizing below,
     // which updates the current set of screen_infos from visual properties.

@@ -1251,7 +1251,6 @@ class CORE_EXPORT WebFrameWidgetImpl
   Vector<mojom::blink::EditCommandPtr> edit_commands_;
 
   std::optional<gfx::Point> host_context_menu_location_;
-  uint32_t last_capture_sequence_number_ = 0u;
 
   // Indicates whether tab-initiated fullscreen was granted.
   bool is_fullscreen_granted_ = false;
