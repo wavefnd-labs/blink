@@ -4662,8 +4662,11 @@ const InlineBreakToken* LineBreaker::CreateBreakToken(
     sub_break_token = block_in_inline_fragment.GetBreakToken();
   }
 
-  bool is_past_first_formatted_line =
+  const bool is_past_first_formatted_line =
       !is_first_formatted_line_ || !line_info.IsEmptyLine();
+
+  const bool is_line_clamp_displaced_line =
+      line_clamp_ellipsis_width_ && line_info.Results().empty();
 
   DCHECK_EQ(line_info.HasForcedBreak(), is_forced_break_);
   unsigned flags =
@@ -4675,6 +4678,9 @@ const InlineBreakToken* LineBreaker::CreateBreakToken(
            : 0) |
       (is_past_first_formatted_line
            ? InlineBreakToken::kIsPastFirstFormattedLine
+           : 0) |
+      (is_line_clamp_displaced_line
+           ? InlineBreakToken::kIsLineClampDisplacedLine
            : 0);
 
   InlineItemTextIndex next_start = current_;

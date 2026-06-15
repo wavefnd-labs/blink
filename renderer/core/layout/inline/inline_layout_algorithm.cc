@@ -278,9 +278,11 @@ void InlineLayoutAlgorithm::PrepareBoxStates(
 
   // Check if the box states in InlineChildLayoutContext is valid for this line.
   // If the previous line was ::first-line, always rebuild because box states
-  // have ::first-line styles.
+  // have ::first-line styles. If the previous line was a line-clamp displaced
+  // line, we also rebuild because the box states might have the wrong metrics.
   const InlineItems& items = line_info.ItemsData().items;
-  if (!break_token->UseFirstLineStyle() && !apply_text_fit_) {
+  if (!break_token->UseFirstLineStyle() &&
+      !break_token->IsLineClampDisplacedLine() && !apply_text_fit_) {
     box_states_ = context_->BoxStatesIfValidForItemIndex(
         items, break_token->StartItemIndex());
     if (box_states_) {
@@ -320,7 +322,10 @@ void InlineLayoutAlgorithm::CheckBoxStates(
                      should_scale_line_height)
       .RebuildBoxStates(line_info, 0u, GetBreakToken()->StartItemIndex());
   LogicalLineItems& line_box = context_->AcquireTempLogicalLineItems();
-  rebuilt.OnBeginPlaceItems(Node(), line_info, baseline_type_, quirks_mode_,
+  const bool is_only_line_clamp_ellipsis =
+      line_clamp_ellipsis_.has_value() && line_info.Results().empty();
+  rebuilt.OnBeginPlaceItems(Node(), line_info, baseline_type_,
+                            quirks_mode_ || is_only_line_clamp_ellipsis,
                             should_scale_line_height, &line_box);
   DCHECK(box_states_);
   box_states_->CheckSame(rebuilt);
