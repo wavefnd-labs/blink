@@ -2455,6 +2455,7 @@ _CONFIG = [
             'third_party/blink/renderer/core/layout/layout_theme.cc',
             'third_party/blink/renderer/core/layout/layout_theme.h',
             'third_party/blink/renderer/core/scroll/',
+            'third_party/blink/renderer/core/skeleton/skeleton_pseudo_element.cc',
             'third_party/blink/renderer/modules/canvas/canvas2d/canvas_2d_recorder_context.cc',
             'third_party/blink/renderer/modules/canvas/canvas2d/canvas_2d_recorder_context.h',
         ],
