@@ -751,20 +751,15 @@ BASE_FEATURE(kFadeInScrollbarWhenMouseWheelMayBegin,
              base::FEATURE_DISABLED_BY_DEFAULT);
 #endif
 
-// TODO(blee) Disabled deferring scrollbar fade out.
-// Similar to kFadeInScrollbarWhenMouseWheelMayBegin, this should work
-// only on macOS. (So the parameter would not needed)
-// Currently, the began and cancelled wheel events are forwarded from
-// compositor thread to main thread, so that the deferred scrollbar
-// fade-out are triggered on the main thread.
-// But this extra wheel events forwarded to the main thread generate an
-// unintended DOM event dispatch, which introduce a regression on mouse
-// wheel event over a focused spin button element. See crbug.com/508306805
+// Defer scrollbar fade out until began or cancelled wheel event.
+// Callers must gate this on kFadeInScrollbarWhenMouseWheelMayBegin,
+// which is macOS-only by default, so the value is unused when the
+// feature is off.
 BASE_FEATURE_PARAM(bool,
                    kDeferFadeOutScrollbarUntilMouseWheelEnded,
                    &kFadeInScrollbarWhenMouseWheelMayBegin,
                    "defer_fade_out",
-                   false);
+                   true);
 
 // Enable the <fencedframe> element; see crbug.com/1123606. Note that enabling
 // this feature does not automatically expose this element to the web, it only
