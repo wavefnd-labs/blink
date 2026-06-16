@@ -189,7 +189,7 @@ TEST_F(CompositeEditCommandTest,
 }
 
 TEST_F(CompositeEditCommandTest,
-       MoveParagraphContentsToNewBlockWithUAShadowDOM1) {
+       MoveParagraphContentsToNewBlockWithUAShadowDom1) {
   SetBodyContent("<object contenteditable><input></object>");
   base::RunLoop().RunUntilIdle();
 
@@ -206,7 +206,7 @@ TEST_F(CompositeEditCommandTest,
 }
 
 TEST_F(CompositeEditCommandTest,
-       MoveParagraphContentsToNewBlockWithUAShadowDOM2) {
+       MoveParagraphContentsToNewBlockWithUAShadowDom2) {
   GetDocument().setDesignMode("on");
   SetBodyContent("<span></span><button><meter></meter></button>");
 

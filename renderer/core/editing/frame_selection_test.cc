@@ -55,7 +55,7 @@ class FrameSelectionTest : public EditingTestBase {
   PaintChunk::Id root_paint_chunk_id_;
 
  protected:
-  VisibleSelection VisibleSelectionInDOMTree() const {
+  VisibleSelection VisibleSelectionInDomTree() const {
     return Selection().ComputeVisibleSelectionInDomTree();
   }
   VisibleSelectionInFlatTree GetVisibleSelectionInFlatTree() const {
@@ -528,8 +528,8 @@ TEST_F(FrameSelectionTest, ModifyExtendWithFlatTree) {
   Selection().Modify(SelectionModifyAlteration::kExtend,
                      SelectionModifyDirection::kForward, TextGranularity::kWord,
                      SetSelectionBy::kSystem);
-  EXPECT_EQ(Position(two, 0), VisibleSelectionInDOMTree().Start());
-  EXPECT_EQ(Position(two, 3), VisibleSelectionInDOMTree().End());
+  EXPECT_EQ(Position(two, 0), VisibleSelectionInDomTree().Start());
+  EXPECT_EQ(Position(two, 3), VisibleSelectionInDomTree().End());
   EXPECT_EQ(PositionInFlatTree(two, 0),
             GetVisibleSelectionInFlatTree().Start());
   EXPECT_EQ(PositionInFlatTree(two, 3), GetVisibleSelectionInFlatTree().End());
@@ -1464,7 +1464,7 @@ TEST_F(FrameSelectionTest, HasVisibleText) {
   Selection().SetSelection(
       SetSelectionTextToBody("<div contenteditable>^foo|</div>"),
       SetSelectionOptions());
-  EXPECT_FALSE(VisibleSelectionInDOMTree().IsNone());
+  EXPECT_FALSE(VisibleSelectionInDomTree().IsNone());
   EXPECT_TRUE(Selection().HasVisibleText());
   EXPECT_EQ_SELECTED_TEXT("foo");
 }
@@ -1473,22 +1473,22 @@ TEST_F(FrameSelectionTest, HasVisibleTextWithInput) {
   // File
   Selection().SetSelection(SetSelectionTextToBody("^<input type=file>|"),
                            SetSelectionOptions());
-  EXPECT_FALSE(VisibleSelectionInDOMTree().IsNone());
+  EXPECT_FALSE(VisibleSelectionInDomTree().IsNone());
   EXPECT_FALSE(Selection().HasVisibleText());
   // Checkbox
   Selection().SetSelection(SetSelectionTextToBody("^<input type=checkbox>|"),
                            SetSelectionOptions());
-  EXPECT_FALSE(VisibleSelectionInDOMTree().IsNone());
+  EXPECT_FALSE(VisibleSelectionInDomTree().IsNone());
   EXPECT_FALSE(Selection().HasVisibleText());
   // Radio
   Selection().SetSelection(SetSelectionTextToBody("^<input type=radio>|"),
                            SetSelectionOptions());
-  EXPECT_FALSE(VisibleSelectionInDOMTree().IsNone());
+  EXPECT_FALSE(VisibleSelectionInDomTree().IsNone());
   EXPECT_FALSE(Selection().HasVisibleText());
   // Date
   Selection().SetSelection(SetSelectionTextToBody("^<input type=date>|"),
                            SetSelectionOptions());
-  EXPECT_FALSE(VisibleSelectionInDOMTree().IsNone());
+  EXPECT_FALSE(VisibleSelectionInDomTree().IsNone());
   EXPECT_FALSE(Selection().HasVisibleText());
 }
 

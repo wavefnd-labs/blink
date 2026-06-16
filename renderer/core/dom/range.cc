@@ -435,7 +435,7 @@ int16_t Range::compareBoundaryPoints(Node* container_a,
                                      unsigned offset_b,
                                      ExceptionState& exception_state) {
   bool disconnected = false;
-  int16_t result = ComparePositionsInDOMTree(container_a, offset_a, container_b,
+  int16_t result = ComparePositionsInDomTree(container_a, offset_a, container_b,
                                              offset_b, &disconnected);
   if (disconnected) {
     exception_state.ThrowDOMException(

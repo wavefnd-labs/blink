@@ -430,7 +430,7 @@ bool ClipboardCommands::ExecuteCut(LocalFrame& frame,
                                    EditorCommandSource source,
                                    const String&) {
   // document.execCommand("cut") is a no-op in EditContext
-  if (source == EditorCommandSource::kDOM &&
+  if (source == EditorCommandSource::kDom &&
       frame.GetInputMethodController().GetActiveEditContext()) {
     return true;
   }
@@ -565,7 +565,7 @@ void ClipboardCommands::Paste(LocalFrame& frame, EditorCommandSource source) {
   DCHECK(frame.GetDocument());
 
   // document.execCommand("paste") is a no-op in EditContext
-  if (source == EditorCommandSource::kDOM &&
+  if (source == EditorCommandSource::kDom &&
       frame.GetInputMethodController().GetActiveEditContext()) {
     return;
   }

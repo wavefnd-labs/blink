@@ -546,7 +546,7 @@ TEST_F(TextOffsetMappingTest, RangeWithSelect2) {
 }
 
 // http://crbug.com//832350
-TEST_F(TextOffsetMappingTest, RangeWithShadowDOM) {
+TEST_F(TextOffsetMappingTest, RangeWithShadowDom) {
   EXPECT_EQ("<div><slot>^abc|</slot></div>",
             GetRange("<div>"
                      "<template data-mode='open'><slot></slot></template>"
