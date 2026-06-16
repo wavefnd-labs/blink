@@ -1328,9 +1328,9 @@ bool AXObjectCacheImpl::IsRelevantSlotElement(const HTMLSlotElement& slot) {
   DCHECK(AXObject::CanSafelyUseFlatTreeTraversalNow(slot.GetDocument()));
   DCHECK(slot.SupportsAssignment());
 
-  if (slot.IsInUserAgentShadowRoot() &&
-      IsA<HTMLSelectElement>(slot.OwnerShadowHost()) &&
-      slot.GetIdAttribute() == shadow_element_names::kSelectPopoverOptions) {
+  if (auto* select = DynamicTo<HTMLSelectElement>(slot.OwnerShadowHost());
+      select && select->UsesMenuList() && slot.IsInUserAgentShadowRoot() &&
+      slot.GetIdAttribute() == shadow_element_names::kSelectOptions) {
     return true;
   }
 
