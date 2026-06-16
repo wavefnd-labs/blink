@@ -86,7 +86,6 @@ class MutationObserverRegistration;
 class NodeCloningData;
 class NodeList;
 class NodeListsNodeData;
-class Part;
 class QualifiedName;
 class RegisteredEventListener;
 class ScrollTimeline;
@@ -105,8 +104,6 @@ class V8UnionSetHTMLUnsafeOptionsOrTrustedParserOptions;
 class WebPluginContainerImpl;
 class WritableStream;
 struct PhysicalRect;
-
-using PartsList = HeapDeque<Member<Part>>;
 
 const int kElementNamespaceTypeShift = 5;
 const int kNodeStyleChangeShift = 16;
