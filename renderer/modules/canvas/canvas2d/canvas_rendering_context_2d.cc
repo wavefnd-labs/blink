@@ -1163,6 +1163,16 @@ CanvasResourceProvider* CanvasRenderingContext2D::GetResourceProvider() const {
   return resource_provider_.get();
 }
 
+Canvas2DResourceProviderSharedImage*
+CanvasRenderingContext2D::GetSharedImageProvider() const {
+  return resource_provider_ ? resource_provider_->AsSharedImageProvider()
+                            : nullptr;
+}
+
+bool CanvasRenderingContext2D::HasResourceProvider() const {
+  return resource_provider_ != nullptr;
+}
+
 CanvasResourceProvider*
 CanvasRenderingContext2D::GetOrCreateResourceProvider() {
   HTMLCanvasElement* const element = canvas();
