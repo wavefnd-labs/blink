@@ -8710,7 +8710,7 @@ bool Element::CanBeKeyboardFocusableScroller(
   }
   DocumentLifecycle::DisallowTransitionScope disallow_transition(
       GetDocument().Lifecycle());
-  return IsScrollableNode(this);
+  return IsScrollableNode(this, SpatialNavigationDirection::kNone);
 }
 
 bool Element::ContainsKeyboardFocusableElementsSlow(
