@@ -1941,6 +1941,7 @@ void DocumentLoader::ProcessDataBuffer(BodyData* data) {
   //   invocations, so iterate until the buffers are completely consumed
   // - for any given instance of `DocumentLoader`, only one of `data_buffer_`
   //   or `decoded_data_buffer_` will ever be used.
+  DCHECK(data_buffer_->empty() || decoded_data_buffer_.empty());
   while (!data_buffer_->empty()) {
     scoped_refptr<SharedBuffer> data_buffer =
         std::exchange(data_buffer_, SharedBuffer::Create());
