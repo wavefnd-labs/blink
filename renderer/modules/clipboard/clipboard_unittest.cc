@@ -328,9 +328,10 @@ TEST_F(ClipboardTest, ReadOnlyMimeTypesInClipboardRead) {
 
   // Check that only type enumeration was called, not data reading
   // This proves that CreateForRead implements lazy loading correctly
-  EXPECT_GT(mock_clipboard_host()->ReadAvailableFormatsCallCount(), 0);
-  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCount(), 0);
-  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCount(), 0);
+  EXPECT_GT(mock_clipboard_host()->ReadAvailableFormatsCallCountForTesting(),
+            0);
+  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCountForTesting(), 0);
+  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCountForTesting(), 0);
 }
 
 TEST_F(ClipboardTest, ClipboardItemGetTypeTest) {
@@ -368,9 +369,10 @@ TEST_F(ClipboardTest, ClipboardItemGetTypeTest) {
 
   // Verify that CreateForRead implemented lazy loading and didn't trigger
   // ReadText/ReadHtml yet
-  EXPECT_EQ(mock_clipboard_host()->ReadAvailableFormatsCallCount(), 1);
-  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCount(), 0);
-  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCount(), 0);
+  EXPECT_EQ(mock_clipboard_host()->ReadAvailableFormatsCallCountForTesting(),
+            1);
+  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCountForTesting(), 0);
+  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCountForTesting(), 0);
 
   // Chain with ClipboardItemGetType to call getType()
   auto* get_type_helper =
@@ -402,8 +404,8 @@ TEST_F(ClipboardTest, ClipboardItemGetTypeTest) {
       << "Blob size should match expected content size";
 
   // Verify first getType() triggered a single ReadText call.
-  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCount(), 1);
-  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCount(), 0);
+  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCountForTesting(), 1);
+  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCountForTesting(), 0);
 
   // Call getType() again on the same ClipboardItem type and verify it uses the
   // cached promise/value rather than reading from OS clipboard again.
@@ -419,8 +421,8 @@ TEST_F(ClipboardTest, ClipboardItemGetTypeTest) {
       << "Second ClipboardItemGetType should succeed";
 
   // Cached getType() should not trigger another ReadText call.
-  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCount(), 1);
-  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCount(), 0);
+  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCountForTesting(), 1);
+  EXPECT_EQ(mock_clipboard_host()->ReadHtmlCallCountForTesting(), 0);
 }
 
 // Tests that Blink.Clipboard.LazyRead.NullBlobResolved boolean histogram is
@@ -691,7 +693,7 @@ TEST_F(ClipboardTest, ReaderProcessedDataNull_EmptyText) {
 
   // Force text/plain to be advertised but leave the actual text data empty.
   // This simulates the OS clipboard reporting a format but returning no data.
-  mock_clipboard_host()->AddFormatWithoutData("text/plain");
+  mock_clipboard_host()->AddFormatWithoutDataForTesting("text/plain");
 
   EXPECT_CALL(permission_service_, RequestPermission)
       .WillOnce(WithArg<1>(
@@ -749,7 +751,7 @@ TEST_F(ClipboardTest, LazyReadGetTypeRejected_Histogram) {
   ASSERT_TRUE(read_tester.IsFulfilled());
 
   // Change clipboard so getType() will be rejected.
-  mock_clipboard_host()->Reset();
+  mock_clipboard_host()->ResetForTesting();
   WritePlainTextToClipboard("ChangedContent");
   GetFrame().GetSystemClipboard()->CommitWrite();
   // Flush pending mojo messages so the mock processes CommitWrite and updates
@@ -795,7 +797,7 @@ TEST_F(ClipboardTest, ReadTextIsAsyncWhenClipboardReadIsSlow) {
   SetPageFocus(true);
 
   // Defer the host's ReadText reply to simulate a slow OS clipboard read.
-  mock_clipboard_host()->SetReadTextCallbackDeferred(true);
+  mock_clipboard_host()->SetReadTextCallbackDeferredForTesting(true);
 
   ScriptPromise<IDLString> promise = ClipboardPromise::CreateForReadText(
       executionContext, scope.GetScriptState(), scope.GetExceptionState());
@@ -806,13 +808,13 @@ TEST_F(ClipboardTest, ReadTextIsAsyncWhenClipboardReadIsSlow) {
   test::RunPendingTasks();
 
   // The host received the request, but the promise is still pending.
-  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCount(), 1);
-  EXPECT_TRUE(mock_clipboard_host()->HasDeferredReadTextCallback());
+  EXPECT_EQ(mock_clipboard_host()->ReadTextCallCountForTesting(), 1);
+  EXPECT_TRUE(mock_clipboard_host()->HasDeferredReadTextCallbackForTesting());
   EXPECT_FALSE(promise_tester.IsFulfilled());
   EXPECT_FALSE(promise_tester.IsRejected());
 
   // Let the host respond; the promise must fulfill with the text.
-  mock_clipboard_host()->RunDeferredReadTextCallback();
+  mock_clipboard_host()->RunDeferredReadTextCallbackForTesting();
   promise_tester.WaitUntilSettled();
   EXPECT_TRUE(promise_tester.IsFulfilled());
   String returned_string;
