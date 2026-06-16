@@ -2357,8 +2357,8 @@ Canvas2DResourceProviderSharedImage::Canvas2DResourceProviderSharedImage(
 
       std::optional<base::TimeDelta> expiration_time =
           (base::FeatureList::IsEnabled(kCanvas2DReclaimUnusedResources))
-              ? std::make_optional(
-                    CanvasResourceProvider::kUnusedResourceExpirationTime)
+              ? std::make_optional(Canvas2DResourceProviderSharedImage::
+                                       kUnusedResourceExpirationTime)
               : std::nullopt;
       bool is_single_buffered = shared_image_usage_flags.Has(
           gpu::SHARED_IMAGE_USAGE_CONCURRENT_READ_WRITE);
@@ -2665,8 +2665,8 @@ CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
 
       std::optional<base::TimeDelta> expiration_time =
           (base::FeatureList::IsEnabled(kCanvas2DReclaimUnusedResources))
-              ? std::make_optional(
-                    CanvasResourceProvider::kUnusedResourceExpirationTime)
+              ? std::make_optional(Canvas2DResourceProviderSharedImage::
+                                       kUnusedResourceExpirationTime)
               : std::nullopt;
       bool is_single_buffered = shared_image_usage_flags.Has(
           gpu::SHARED_IMAGE_USAGE_CONCURRENT_READ_WRITE);

@@ -199,9 +199,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual void SetAnimatedImageFrameIndexes(
       scoped_refptr<const cc::AnimatedImageFrameIndexMap>) = 0;
 
-  constexpr static base::TimeDelta kUnusedResourceExpirationTime =
-      base::Seconds(5);
-
   virtual const std::optional<cc::PaintRecord>& LastRecording() = 0;
 
  protected:
@@ -362,6 +359,9 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
       public viz::ContextLostObserver,
       public BitmapGpuChannelLostObserver {
  public:
+  constexpr static base::TimeDelta kUnusedResourceExpirationTime =
+      base::Seconds(5);
+
   // The returned instance will have been cleared at creation.
   static std::unique_ptr<Canvas2DResourceProviderSharedImage> CreateWithClear(
       gfx::Size size,
