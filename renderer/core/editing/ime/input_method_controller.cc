@@ -76,6 +76,7 @@
 #include "third_party/blink/renderer/core/layout/layout_theme.h"
 #include "third_party/blink/renderer/core/page/focus_controller.h"
 #include "third_party/blink/renderer/core/page/page.h"
+#include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 
 namespace blink {
@@ -1860,12 +1861,33 @@ int InputMethodController::TextInputFlags() const {
     }
   }
 
-  if (const AtomicString& autocorrect =
-          element->FastGetAttribute(html_names::kAutocorrectAttr)) {
-    if (EqualIgnoringAsciiCase(autocorrect, keywords::kOn)) {
-      flags |= kWebTextInputFlagAutocorrectOn;
-    } else if (EqualIgnoringAsciiCase(autocorrect, keywords::kOff)) {
-      flags |= kWebTextInputFlagAutocorrectOff;
+  if (RuntimeEnabledFeatures::AutocorrectByDefaultEnabled()) {
+    if (auto* html_element = DynamicTo<HTMLElement>(element)) {
+      // https://html.spec.whatwg.org/multipage/interaction.html#autocorrection
+      // The used autocorrection state is always On or Off (HTMLElement::
+      // autocorrect()), but several IME backends honor only the Off flag and
+      // otherwise apply their own (enabled) default. Treat Off as authoritative
+      // while emitting On only when the element explicitly requests it.
+      if (!html_element->autocorrect()) {
+        flags |= kWebTextInputFlagAutocorrectOff;
+      } else if (html_element->FastHasAttribute(html_names::kAutocorrectAttr)) {
+        // An explicit attribute that is present here resolves to On: an "off"
+        // value (or a URL/Email/Password type) already took the Off branch
+        // above, and the attribute's invalid and empty value defaults are both
+        // On.
+        flags |= kWebTextInputFlagAutocorrectOn;
+      }
+    }
+  } else {
+    // Without the feature, only an explicit autocorrect attribute sets a flag;
+    // the used-state defaulting and form-owner inheritance are not applied.
+    if (const AtomicString& autocorrect =
+            element->FastGetAttribute(html_names::kAutocorrectAttr)) {
+      if (EqualIgnoringAsciiCase(autocorrect, keywords::kOn)) {
+        flags |= kWebTextInputFlagAutocorrectOn;
+      } else if (EqualIgnoringAsciiCase(autocorrect, keywords::kOff)) {
+        flags |= kWebTextInputFlagAutocorrectOff;
+      }
     }
   }
 

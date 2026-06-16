@@ -3366,6 +3366,58 @@ void HTMLElement::setAutocapitalize(const AtomicString& value) {
   setAttribute(html_names::kAutocapitalizeAttr, value);
 }
 
+bool HTMLElement::IsAutocapitalizeOrAutocorrectInheriting() const {
+  // https://html.spec.whatwg.org/multipage/interaction.html#autocapitalize-and-autocorrect-inheriting-element
+  // The set is exactly button, fieldset, input, output, select, and textarea,
+  // which are the instantiable HTMLFormControlElement subclasses in Blink.
+  return IsA<HTMLFormControlElement>(*this);
+}
+
+bool HTMLElement::autocorrect() const {
+  // https://html.spec.whatwg.org/multipage/interaction.html#autocorrection
+  // return true if the element's used autocorrection state is On and false if
+  // the element's used autocorrection state is Off.
+
+  // 1. If element is an input element whose type attribute is in one of the
+  // URL, Email, or Password states, then return Off.
+  if (auto* input_element = DynamicTo<HTMLInputElement>(*this)) {
+    switch (input_element->FormControlType()) {
+      case FormControlType::kInputUrl:
+      case FormControlType::kInputEmail:
+      case FormControlType::kInputPassword:
+        return false;
+      default:
+        break;
+    }
+  }
+
+  // 2. If the autocorrect content attribute is present on element, then return
+  // the state of the attribute.
+  if (FastHasAttribute(html_names::kAutocorrectAttr)) {
+    const AtomicString& value = FastGetAttribute(html_names::kAutocorrectAttr);
+    // The attribute's invalid value default, missing value default, and empty
+    // value default are all the On state.
+    return !EqualIgnoringAsciiCase(value, keywords::kOff);
+  }
+
+  // 3. If element is an autocapitalize-and-autocorrect inheriting element and
+  // has a non-null form owner, then return the state of element's form owner's
+  // autocorrect attribute.
+  if (IsAutocapitalizeOrAutocorrectInheriting()) {
+    if (const HTMLFormElement* form = formOwner()) {
+      return form->autocorrect();
+    }
+  }
+
+  // 4. Return On.
+  return true;
+}
+
+void HTMLElement::setAutocorrect(bool enable) {
+  setAttribute(html_names::kAutocorrectAttr,
+               enable ? keywords::kOn : keywords::kOff);
+}
+
 bool HTMLElement::isContentEditableForBinding() const {
   return IsEditableOrEditingHost(*this);
 }
