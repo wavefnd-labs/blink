@@ -267,7 +267,8 @@ class CORE_EXPORT HTMLFrameOwnerElement : public HTMLElement,
   std::optional<NaturalSizingInfo> last_natural_sizing_info_;
   bool should_lazy_load_children_;
   bool is_swapping_frames_{false};
-  mojom::blink::PreferredColorScheme preferred_color_scheme_;
+  mojom::blink::PreferredColorScheme preferred_color_scheme_{
+      mojom::blink::PreferredColorScheme::kLight};
 };
 
 class SubframeLoadingDisabler {
