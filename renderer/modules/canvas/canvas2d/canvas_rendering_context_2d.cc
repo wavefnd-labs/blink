@@ -474,27 +474,37 @@ const MemoryManagedPaintCanvas* CanvasRenderingContext2D::GetPaintCanvas()
   if (isContextLost()) [[unlikely]] {
     return nullptr;
   }
-  const CanvasResourceProvider* provider = GetResourceProvider();
-  if (!provider) [[unlikely]] {
+  const MemoryManagedPaintRecorder* recorder = Recorder();
+  if (!recorder) [[unlikely]] {
     return nullptr;
   }
-  return &Recorder()->getRecordingCanvas();
+  return &recorder->getRecordingCanvas();
 }
 
 const MemoryManagedPaintRecorder* CanvasRenderingContext2D::Recorder() const {
-  const CanvasResourceProvider* provider = GetResourceProvider();
-  if (provider == nullptr) [[unlikely]] {
+  if (!canvas()) {
     return nullptr;
   }
-  return &provider->Recorder();
+  if (shared_image_provider_) {
+    return &shared_image_provider_->Recorder();
+  }
+  if (bitmap_provider_) {
+    return &bitmap_provider_->Recorder();
+  }
+  return nullptr;
 }
 
 MemoryManagedPaintRecorder* CanvasRenderingContext2D::Recorder() {
-  CanvasResourceProvider* provider = GetResourceProvider();
-  if (provider == nullptr) [[unlikely]] {
+  if (!canvas()) {
     return nullptr;
   }
-  return &provider->Recorder();
+  if (shared_image_provider_) {
+    return &shared_image_provider_->Recorder();
+  }
+  if (bitmap_provider_) {
+    return &bitmap_provider_->Recorder();
+  }
+  return nullptr;
 }
 
 void CanvasRenderingContext2D::WillDraw(
@@ -841,7 +851,7 @@ ExecutionContext* CanvasRenderingContext2D::GetTopExecutionContext() const {
 }
 
 bool CanvasRenderingContext2D::IsPaintable() const {
-  return GetResourceProvider();
+  return canvas() && HasResourceProvider();
 }
 
 bool CanvasRenderingContext2D::IsHibernating() const {
