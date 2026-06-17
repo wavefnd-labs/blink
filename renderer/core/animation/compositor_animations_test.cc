@@ -73,6 +73,7 @@
 #include "third_party/blink/renderer/core/css/resolver/style_resolver.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/dom/dom_token_list.h"
+#include "third_party/blink/renderer/core/dom/static_node_list.h"
 #include "third_party/blink/renderer/core/execution_context/agent.h"
 #include "third_party/blink/renderer/core/execution_context/security_context.h"
 #include "third_party/blink/renderer/core/frame/frame_test_helpers.h"
@@ -2446,18 +2447,22 @@ TEST_P(AnimationCompositorAnimationsTest,
   EXPECT_TRUE(cc_transform->is_currently_animating);
 }
 
-// Regression test for https://crbug.com/781305. When we have a transform
-// animation on a SVG element, the effect can be started on compositor but the
-// element itself cannot.
 TEST_P(AnimationCompositorAnimationsTest,
-       CannotStartElementOnCompositorEffectSVG) {
+       TransformsOnSVGChildrenStartOnCompositor) {
   LoadTestData("transform-animation-on-svg.html");
   Document* document = GetFrame()->GetDocument();
-  Element* target = document->getElementById(AtomicString("dots"));
-  EXPECT_TRUE(
-      CheckCanStartElementOnCompositor(*target, *keyframe_animation_effect2_) &
-      CompositorAnimations::kTargetHasInvalidCompositingState);
   EXPECT_EQ(document->Timeline().AnimationsNeedingUpdateCount(), 4u);
+  StaticElementList* rects = document->QuerySelectorAll(AtomicString("rect"));
+  for (unsigned i = 0; i < rects->length(); ++i) {
+    Element* rect = rects->item(i);
+    Animation* animation =
+        rect->GetElementAnimations()->Animations().begin()->key;
+    EXPECT_EQ(CompositorAnimations::kNoFailure,
+              animation->CheckCanStartAnimationOnCompositor(
+                  document->View()->GetPaintArtifactCompositor(),
+                  StartOnCompositorReason::kGeneric));
+    EXPECT_TRUE(animation->HasActiveAnimationsOnCompositor());
+  }
 }
 
 // Regression test for https://crbug.com/999333. We were relying on the Document
