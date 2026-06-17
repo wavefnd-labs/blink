@@ -1075,6 +1075,31 @@ void BaseRenderingContext2D::DrawTextInternal(
 
   location.Offset(0, TextMetrics::GetFontBaseline(baseline, *font_data));
 
+  if (host && host->ShouldCaptureRenderedText()) {
+    gfx::RectF exact_bounds = bounds;
+    // If the text is scaled horizontally to fit maxWidth, scale the bounding
+    // box by the same factor.
+    if (use_max_width) {
+      float scale_x = width / font_width;
+      exact_bounds.set_x(exact_bounds.x() * scale_x);
+      exact_bounds.set_width(exact_bounds.width() * scale_x);
+    }
+
+    // Offset the bounding box to the actual draw location.
+    exact_bounds.Offset(location.x(), location.y());
+
+    // Inflate the bounding box to account for stroke width if we are stroking.
+    if (paint_type == CanvasRenderingContext2DState::kStrokePaintType) {
+      InflateStrokeRect(exact_bounds);
+    }
+
+    // Map the bounds to the canvas coordinate system and record the text.
+    exact_bounds = state.GetTransform().MapRect(exact_bounds);
+    host->RecordRenderedText(text.substr(run_start, run_end - run_start),
+                             exact_bounds,
+                             font_data->GetFontMetrics().FloatHeight());
+  }
+
   bounds.Offset(location.x(), location.y());
   if (paint_type == CanvasRenderingContext2DState::kStrokePaintType) {
     InflateStrokeRect(bounds);

@@ -55,9 +55,14 @@
 #include "third_party/blink/renderer/platform/instrumentation/histogram.h"
 #include "third_party/blink/renderer/platform/instrumentation/tracing/trace_event.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
+#include "third_party/blink/renderer/platform/scheduler/public/post_cross_thread_task.h"
 #include "third_party/blink/renderer/platform/supplementable.h"
+#include "third_party/blink/renderer/platform/wtf/cross_thread_copier.h"
+#include "third_party/blink/renderer/platform/wtf/cross_thread_functional.h"
 #include "third_party/blink/renderer/platform/wtf/math_extras.h"
+#include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "ui/accessibility/accessibility_features.h"
 #include "ui/gfx/geometry/skia_conversions.h"
 
 namespace blink {
@@ -97,6 +102,35 @@ class OffscreenCanvasRegistry
 };
 const char OffscreenCanvasRegistry::kSupplementName[] =
     "OffscreenCanvasRegistry";
+
+void RecordRenderedTextOnMainThread(int placeholder_canvas_id,
+                                    const String text,
+                                    const gfx::RectF bounds,
+                                    float font_height) {
+  DCHECK(IsMainThread());
+  if (auto* placeholder = OffscreenCanvasPlaceholder::GetPlaceholderCanvasById(
+          placeholder_canvas_id)) {
+    placeholder->RecordRenderedText(text, bounds, font_height);
+  }
+}
+
+void ClearRenderedTextOnMainThread(int placeholder_canvas_id,
+                                   const gfx::RectF rect) {
+  DCHECK(IsMainThread());
+  if (auto* placeholder = OffscreenCanvasPlaceholder::GetPlaceholderCanvasById(
+          placeholder_canvas_id)) {
+    placeholder->ClearRenderedText(rect);
+  }
+}
+
+void ClearAllRenderedTextOnMainThread(int placeholder_canvas_id) {
+  DCHECK(IsMainThread());
+  if (auto* placeholder = OffscreenCanvasPlaceholder::GetPlaceholderCanvasById(
+          placeholder_canvas_id)) {
+    placeholder->ClearRenderedText();
+  }
+}
+
 }  // namespace
 
 OffscreenCanvas::OffscreenCanvas(ExecutionContext* context,
@@ -152,6 +186,10 @@ OffscreenCanvas::OffscreenCanvas(ExecutionContext* context,
       animation_frame_provider->RegisterOffscreenCanvas(this);
     }
   }
+
+  // TODO(crbug.com/498093320): Try to get this from placeholder canvas.
+  should_capture_rendered_text_ =
+      base::FeatureList::IsEnabled(::features::kAccessibilityCanvas);
 }
 
 OffscreenCanvas* OffscreenCanvas::Create(ScriptState* script_state,
@@ -737,6 +775,71 @@ void OffscreenCanvas::SetParentVisibility(bool visible) {
   is_parent_visible_ = visible;
   if (context_) {
     context_->PageVisibilityChanged();
+  }
+}
+
+void OffscreenCanvas::RecordRenderedText(const String& text,
+                                         const gfx::RectF& bounds,
+                                         float font_height) {
+  if (placeholder_canvas_id_ == kInvalidDOMNodeId) {
+    return;
+  }
+
+  if (IsMainThread()) {
+    RecordRenderedTextOnMainThread(placeholder_canvas_id_, text, bounds,
+                                   font_height);
+  } else {
+    // Accessibility only runs on the main thread. If this OffscreenCanvas is
+    // running on a worker thread, we must post a task to the main thread to
+    // record the rendered text on the placeholder canvas.
+    if (auto* context = GetTopExecutionContext()) {
+      if (auto task_runner =
+              context->GetAgentGroupSchedulerCompositorTaskRunner()) {
+        PostCrossThreadTask(*task_runner, FROM_HERE,
+                            CrossThreadBindOnce(&RecordRenderedTextOnMainThread,
+                                                placeholder_canvas_id_, text,
+                                                bounds, font_height));
+      }
+    }
+  }
+}
+
+void OffscreenCanvas::ClearRenderedText(const gfx::RectF& rect) {
+  if (placeholder_canvas_id_ == kInvalidDOMNodeId) {
+    return;
+  }
+
+  if (IsMainThread()) {
+    ClearRenderedTextOnMainThread(placeholder_canvas_id_, rect);
+  } else {
+    if (auto* context = GetTopExecutionContext()) {
+      if (auto task_runner =
+              context->GetAgentGroupSchedulerCompositorTaskRunner()) {
+        PostCrossThreadTask(*task_runner, FROM_HERE,
+                            CrossThreadBindOnce(&ClearRenderedTextOnMainThread,
+                                                placeholder_canvas_id_, rect));
+      }
+    }
+  }
+}
+
+void OffscreenCanvas::ClearRenderedText() {
+  if (placeholder_canvas_id_ == kInvalidDOMNodeId) {
+    return;
+  }
+
+  if (IsMainThread()) {
+    ClearAllRenderedTextOnMainThread(placeholder_canvas_id_);
+  } else {
+    if (auto* context = GetTopExecutionContext()) {
+      if (auto task_runner =
+              context->GetAgentGroupSchedulerCompositorTaskRunner()) {
+        PostCrossThreadTask(
+            *task_runner, FROM_HERE,
+            CrossThreadBindOnce(&ClearAllRenderedTextOnMainThread,
+                                placeholder_canvas_id_));
+      }
+    }
   }
 }
 

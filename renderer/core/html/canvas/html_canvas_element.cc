@@ -776,6 +776,10 @@ void HTMLCanvasElement::PostFinalizeFrame(FlushReason reason) {
     NotifyListenersCanvasChanged();
   did_notify_listeners_for_current_frame_ = false;
 
+  if (accessibility_manager_ && should_capture_rendered_text_) {
+    accessibility_manager_->UpdateAnnotation();
+  }
+
   NotifyCachesOfSwitchingFrame();
 }
 
@@ -1992,6 +1996,10 @@ void HTMLCanvasElement::SetOffscreenCanvasResource(
   OffscreenCanvasPlaceholder::SetOffscreenCanvasResource(std::move(image));
   SetSize(OffscreenCanvasFrame()->Size());
   NotifyListenersCanvasChanged();
+
+  if (accessibility_manager_ && should_capture_rendered_text_) {
+    accessibility_manager_->UpdateAnnotation();
+  }
 }
 
 bool HTMLCanvasElement::IsOpaque() const {
@@ -2116,6 +2124,40 @@ void HTMLCanvasElement::OnAxObjectIgnoredStateChanged(bool is_ignored) {
   accessibility_manager_ = MakeGarbageCollected<HTMLCanvasAccessibilityManager>(
       GetDocument().GetTaskRunner(TaskType::kInternalDefault), is_ignored,
       this);
+  UpdateCaptureRenderedText();
+}
+
+void HTMLCanvasElement::RecordRenderedText(const String& text,
+                                           const gfx::RectF& bounds,
+                                           float font_height) {
+  if (accessibility_manager_) {
+    accessibility_manager_->RecordRenderedText(text, bounds, font_height);
+  }
+}
+
+void HTMLCanvasElement::ClearRenderedText(const gfx::RectF& rect) {
+  if (accessibility_manager_) {
+    accessibility_manager_->ClearRenderedText(rect);
+  }
+}
+
+void HTMLCanvasElement::ClearRenderedText() {
+  if (accessibility_manager_) {
+    accessibility_manager_->ClearRenderedText();
+  }
+}
+
+void HTMLCanvasElement::UpdateCaptureRenderedText() {
+  should_capture_rendered_text_ =
+      accessibility_manager_ &&
+      accessibility_manager_->ShouldCaptureRenderedText();
+}
+
+String HTMLCanvasElement::CanvasAnnotation() const {
+  if (accessibility_manager_) {
+    return accessibility_manager_->CanvasAnnotation();
+  }
+  return String();
 }
 
 }  // namespace blink

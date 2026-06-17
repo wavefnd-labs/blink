@@ -1982,6 +1982,15 @@ void AXObject::SerializeOtherScreenReaderAttributes(
         ax::mojom::blink::BoolAttribute::kCanvasHasFallback, true);
   }
 
+  if (node_data->role == ax::mojom::blink::Role::kCanvas) {
+    String canvas_annotation = CanvasAnnotation();
+    if (!canvas_annotation.empty()) {
+      TruncateAndAddStringAttribute(
+          node_data, ax::mojom::blink::StringAttribute::kCanvasAnnotation,
+          canvas_annotation);
+    }
+  }
+
   if (IsRangeValueSupported()) {
     float value;
     if (ValueForRange(&value)) {
