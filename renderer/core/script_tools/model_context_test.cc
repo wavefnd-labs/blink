@@ -179,7 +179,6 @@ class ModelContextTest : public ModelContextTestBase {
 
  private:
   ScopedWebMCPForTest scoped_webmcp_{true};
-  ScopedWebMCPTestingForTest scoped_webmcp_testing_{true};
 };
 
 TEST_F(ModelContextTest, ExecuteTool) {
@@ -844,7 +843,6 @@ class ModelContextOriginTrialTest : public ModelContextTestBase {
 
  private:
   ScopedWebMCPForTest scoped_webmcp_{false};
-  ScopedWebMCPTestingForTest scoped_webmcp_testing_{false};
   ScopedWebMCPDeclarativeFileInputForTest scoped_webmcp_file_feature_{false};
   ScopedWebMCPFormAssociatedCustomElementsForTest scoped_webmcp_face_feature_{
       false};
@@ -1596,7 +1594,7 @@ TEST_F(ModelContextTest, ExecuteDeclarativeFormTool_ToolChangeOnNameChange) {
       </form>
       <script>
         window.toolchangeCount = 0;
-        navigator.modelContextTesting.addEventListener('toolchange', () => {
+        navigator.modelContext.addEventListener('toolchange', () => {
           window.toolchangeCount++;
         });
 
@@ -1666,7 +1664,7 @@ TEST_F(ModelContextTest,
     </form>
     <script>
       window.toolchangeCount = 0;
-      navigator.modelContextTesting.addEventListener('toolchange', () => {
+      navigator.modelContext.addEventListener('toolchange', () => {
         window.toolchangeCount++;
       });
     </script>
@@ -1717,7 +1715,7 @@ TEST_F(ModelContextTest,
 
   MainFrame().ExecuteScript(WebScriptSource(
       "window.toolchangeCount = 0;"
-      "navigator.modelContextTesting.addEventListener('toolchange', () => {"
+      "navigator.modelContext.addEventListener('toolchange', () => {"
       "  window.toolchangeCount++;"
       "});"
       "document.getElementById('input1').setAttribute('data-unrelated', "
@@ -1745,7 +1743,7 @@ TEST_F(ModelContextTest,
 
   MainFrame().ExecuteScript(WebScriptSource(
       "window.toolchangeCount = 0;"
-      "navigator.modelContextTesting.addEventListener('toolchange', () => {"
+      "navigator.modelContext.addEventListener('toolchange', () => {"
       "  window.toolchangeCount++;"
       "});"
       "const input = document.getElementById('input1');"
