@@ -861,6 +861,9 @@ TEST_P(AnimationCompositorAnimationsTest,
 
   // Cannot composite due to side effect.
   SetCustomProperty("opacity", "var(--foo)");
+  // We can't run lifecycle, so we clear the needs recalc flag to avoid
+  // kAnimationHasNoVisibleChange.
+  element_->ClearNeedsStyleRecalc();
   EXPECT_TRUE(
       CreateKeyframeListAndTestIsCandidateOnResult(keyframe1, keyframe2) &
       CompositorAnimations::kUnsupportedCSSProperty);
@@ -883,6 +886,9 @@ TEST_P(AnimationCompositorAnimationsTest,
   // Implicitly initial values are not supported when the property
   // has been referenced.
   SetCustomProperty("opacity", "var(--z)");
+  // Again, clear flag to avoid kAnimationHasNoVisibleChange.
+  element_->ClearNeedsStyleRecalc();
+
   StringKeyframe* z_keyframe = CreateReplaceOpKeyframe("--z", "1000", 1);
   StringKeyframeVector keyframe_vector2;
   keyframe_vector2.push_back(z_keyframe);
@@ -1120,9 +1126,7 @@ TEST_P(AnimationCompositorAnimationsTest,
   auto* keyframe_effect1 =
       MakeGarbageCollected<KeyframeEffect>(element_, animation_effect, timing);
   Animation* animation = timeline_->Play(keyframe_effect1);
-  const auto& style = GetDocument().GetStyleResolver().InitialStyle();
-  animation_effect->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(),
-                                                              style, nullptr);
+  UpdateAllLifecyclePhasesForTest();
 
   // Now we can check that we are set up correctly.
   EXPECT_EQ(CheckCanStartEffectOnCompositor(timing, *element_.Get(), animation,
@@ -1134,6 +1138,7 @@ TEST_P(AnimationCompositorAnimationsTest,
                                             *animation_effect),
             CompositorAnimations::kNoFailure);
   timing.end_delay = Timing::Delay(ANIMATION_TIME_DELTA_FROM_SECONDS(1.0));
+  UpdateAllLifecyclePhasesForTest();
   EXPECT_TRUE(CheckCanStartEffectOnCompositor(timing, *element_.Get(),
                                               animation, *animation_effect) &
               CompositorAnimations::kEffectHasUnsupportedTimingParameters);
@@ -1267,11 +1272,14 @@ TEST_P(AnimationCompositorAnimationsTest, CheckCanStartForceReduceMotion) {
   auto* keyframe_effect =
       MakeGarbageCollected<KeyframeEffect>(element_, effect, timing);
   Animation* animation = timeline_->Play(keyframe_effect);
+  UpdateAllLifecyclePhasesForTest();
+
   // The animation should not run on the compositor since we are forcing reduced
   // motion.
-  EXPECT_NE(CheckCanStartEffectOnCompositor(timing_, *element_.Get(), animation,
-                                            *effect),
-            CompositorAnimations::kNoFailure);
+  EXPECT_EQ(CheckCanStartEffectOnCompositor(timing_, *element_.Get(), animation,
+                                            *effect) |
+                CheckCanStartElementOnCompositor(*element_.Get(), *effect),
+            CompositorAnimations::kAcceleratedAnimationsDisabled);
 }
 
 TEST_P(AnimationCompositorAnimationsTest,
@@ -1362,9 +1370,7 @@ TEST_P(AnimationCompositorAnimationsTest,
       MakeGarbageCollected<KeyframeEffect>(element_.Get(), effect1, timing_);
 
   Animation* animation1 = timeline_->Play(keyframe_effect1);
-  const auto& style = GetDocument().GetStyleResolver().InitialStyle();
-  effect1->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
-                                                     nullptr);
+  UpdateAllLifecyclePhasesForTest();
 
   // Now we can check that we are set up correctly.
   EXPECT_EQ(CheckCanStartEffectOnCompositor(timing_, *element_.Get(),
@@ -1380,8 +1386,7 @@ TEST_P(AnimationCompositorAnimationsTest,
       MakeGarbageCollected<KeyframeEffect>(element_.Get(), effect2, timing_);
 
   Animation* animation2 = timeline_->Play(keyframe_effect2);
-  effect2->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
-                                                     nullptr);
+  UpdateAllLifecyclePhasesForTest();
   EXPECT_TRUE(CheckCanStartEffectOnCompositor(timing_, *element_.Get(),
                                               animation2, *effect2) &
               CompositorAnimations::kFilterRelatedPropertyMayMovePixels);
@@ -1445,15 +1450,15 @@ TEST_P(AnimationCompositorAnimationsTest,
       MakeGarbageCollected<KeyframeEffect>(element_.Get(), effect2, timing_);
 
   Animation* animation2 = timeline_->Play(keyframe_effect2);
-  effect1->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
+  effect2->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
                                                      nullptr);
 
   // Make sure unsupported properties are reported
   PropertyHandleSet unsupported_properties_for_tracing2;
-  EXPECT_TRUE(CheckCanStartEffectOnCompositor(
-                  timing_, *inline_.Get(), animation2, *effect2,
-                  &unsupported_properties_for_tracing2) &
-              CompositorAnimations::kUnsupportedCSSProperty);
+  EXPECT_EQ(CheckCanStartEffectOnCompositor(
+                timing_, *inline_.Get(), animation2, *effect2,
+                &unsupported_properties_for_tracing2),
+            CompositorAnimations::kUnsupportedCSSProperty);
   EXPECT_EQ(unsupported_properties_for_tracing2.size(), 1U);
   EXPECT_EQ(unsupported_properties_for_tracing2.begin()
                 ->GetCSSPropertyName()
@@ -1478,10 +1483,10 @@ TEST_P(AnimationCompositorAnimationsTest,
       MakeGarbageCollected<KeyframeEffect>(element_.Get(), effect3, timing_);
 
   Animation* animation3 = timeline_->Play(keyframe_effect3);
-  effect1->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
+  effect3->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
                                                      nullptr);
 
-  // Make sure only the unsupported properties are reported
+  // Make sure none of the supported properties are reported as unsupported
   PropertyHandleSet unsupported_properties_for_tracing3;
   EXPECT_TRUE(CheckCanStartEffectOnCompositor(
                   timing_, *inline_.Get(), animation3, *effect3,
@@ -2127,9 +2132,11 @@ TEST_P(AnimationCompositorAnimationsTest,
   const auto& style = GetDocument().GetStyleResolver().InitialStyle();
   animation_effect1->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(),
                                                                style, nullptr);
+  UpdateAllLifecyclePhasesForTest();
   EXPECT_EQ(CheckCanStartEffectOnCompositor(timing, *element_.Get(), animation1,
                                             *animation_effect1),
             CompositorAnimations::kNoFailure);
+  animation1->NotifyReady(ANIMATION_TIME_DELTA_FROM_MILLISECONDS(0));
 
   // The second animation for opacity is not ok to run on compositor.
   auto* keyframe_effect2 = MakeGarbageCollected<KeyframeEffect>(
@@ -2448,6 +2455,54 @@ TEST_P(AnimationCompositorAnimationsTest,
 }
 
 TEST_P(AnimationCompositorAnimationsTest,
+       ContentVisibilityHiddenChildElementIsNOOP) {
+  SetBodyInnerHTML(R"HTML(
+    <style>
+      body {
+        content-visibility: hidden;
+      }
+    </style>
+    <div>
+      <div id="target"></div>
+    </div>
+  )HTML");
+  UpdateAllLifecyclePhasesForTest();
+  Element* target = GetDocument().getElementById(AtomicString("target"));
+
+  // We will not get a layout object if our parent has content-visibility:
+  // hidden.
+  EXPECT_EQ(target->GetLayoutObject(), nullptr);
+
+  // Page may force layout anyway, for example by polling clientHeight in
+  // javascript, or other layout properties.
+  GetDocument().UpdateStyleAndLayoutForNode(target,
+                                            DocumentUpdateReason::kTest);
+  UpdateAllLifecyclePhasesForTest();
+
+  // Our LO will attach at this point.
+  EXPECT_NE(target->GetLayoutObject(), nullptr);
+
+  // Typical animation started by WAAPI.
+  StringKeyframeEffectModel* effect = CreateKeyframeEffectModel(
+      CreateReplaceOpKeyframe(CSSPropertyID::kOpacity, "0", 0),
+      CreateReplaceOpKeyframe(CSSPropertyID::kOpacity, "1", 1.0));
+  Timing timing;
+  timing.iteration_duration = ANIMATION_TIME_DELTA_FROM_SECONDS(2);
+  auto* keyframe_effect =
+      MakeGarbageCollected<KeyframeEffect>(element_, effect, timing);
+  Animation* animation = timeline_->Play(keyframe_effect);
+  UpdateAllLifecyclePhasesForTest();
+
+  // The animation should not start because it is no-op.
+  // TODO(clchambers): Invalid compositing state should be removed from here.
+  EXPECT_EQ(CompositorAnimations::kAnimationHasNoVisibleChange |
+                CompositorAnimations::kTargetHasInvalidCompositingState,
+            animation->CheckCanStartAnimationOnCompositor(
+                GetDocument().View()->GetPaintArtifactCompositor(),
+                StartOnCompositorReason::kGeneric));
+}
+
+TEST_P(AnimationCompositorAnimationsTest,
        TransformsOnSVGChildrenStartOnCompositor) {
   LoadTestData("transform-animation-on-svg.html");
   Document* document = GetFrame()->GetDocument();
@@ -2720,8 +2775,6 @@ TEST_P(AnimationCompositorAnimationsTest, Fragmented) {
 
 TEST_P(AnimationCompositorAnimationsTest,
        CancelIncompatibleTransformCompositorAnimation) {
-  const auto& style = GetDocument().GetStyleResolver().InitialStyle();
-
   // The first animation for transform is ok to run on the compositor.
   StringKeyframeEffectModel* effect1 = CreateKeyframeEffectModel(
       CreateReplaceOpKeyframe(CSSPropertyID::kTransform, "none", 0.0),
@@ -2729,12 +2782,10 @@ TEST_P(AnimationCompositorAnimationsTest,
   auto* keyframe_effect1 =
       MakeGarbageCollected<KeyframeEffect>(element_.Get(), effect1, timing_);
   Animation* animation1 = timeline_->Play(keyframe_effect1);
-  effect1->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
-                                                     nullptr);
+  UpdateAllLifecyclePhasesForTest();
   EXPECT_EQ(CheckCanStartEffectOnCompositor(timing_, *element_.Get(),
                                             animation1, *effect1),
             CompositorAnimations::kNoFailure);
-  UpdateAllLifecyclePhasesForTest();
   EXPECT_TRUE(animation1->HasActiveAnimationsOnCompositor());
 
   // The animation for rotation is ok to run on the compositor as it is a
@@ -2745,12 +2796,10 @@ TEST_P(AnimationCompositorAnimationsTest,
   KeyframeEffect* keyframe_effect2 =
       MakeGarbageCollected<KeyframeEffect>(element_.Get(), effect2, timing_);
   Animation* animation2 = timeline_->Play(keyframe_effect2);
-  effect2->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
-                                                     nullptr);
+  UpdateAllLifecyclePhasesForTest();
   EXPECT_EQ(CheckCanStartEffectOnCompositor(timing_, *element_.Get(),
                                             animation2, *effect2),
             CompositorAnimations::kNoFailure);
-  UpdateAllLifecyclePhasesForTest();
   EXPECT_TRUE(animation1->HasActiveAnimationsOnCompositor());
   EXPECT_TRUE(animation2->HasActiveAnimationsOnCompositor());
 
@@ -2762,12 +2811,10 @@ TEST_P(AnimationCompositorAnimationsTest,
   KeyframeEffect* keyframe_effect3 =
       MakeGarbageCollected<KeyframeEffect>(element_.Get(), effect3, timing_);
   Animation* animation3 = timeline_->Play(keyframe_effect3);
-  effect3->SnapshotAllCompositorKeyframesIfNecessary(*element_.Get(), style,
-                                                     nullptr);
+  UpdateAllLifecyclePhasesForTest();
   EXPECT_EQ(CheckCanStartEffectOnCompositor(timing_, *element_.Get(),
                                             animation3, *effect3),
             CompositorAnimations::kTargetHasIncompatibleAnimations);
-  UpdateAllLifecyclePhasesForTest();
   EXPECT_FALSE(animation1->HasActiveAnimationsOnCompositor());
   EXPECT_TRUE(animation2->HasActiveAnimationsOnCompositor());
   EXPECT_FALSE(animation3->HasActiveAnimationsOnCompositor());
