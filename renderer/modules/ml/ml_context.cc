@@ -1654,6 +1654,12 @@ ScriptPromise<IDLUndefined> MLContext::readTensor(
     return EmptyPromise();
   }
 
+  if (!src_tensor->Usage().Has(webnn::MLTensorUsageFlags::kRead)) {
+    exception_state.ThrowTypeError(
+        "The source tensor doesn't have read access.");
+    return EmptyPromise();
+  }
+
   // TODO(crbug.com/378604909): When `dst_data` is an ArrayBufferView, check its
   // element type being compatible with the MLTensor data type.
 
