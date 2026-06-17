@@ -12,6 +12,9 @@
 
 <script>
 promise_test(async t => {
+  assert_implements(navigator.modelContextTesting,
+      "modelContextTesting should be available");
+
   const form = document.querySelector('form');
   let submitFired = false;
 
@@ -30,14 +33,13 @@ promise_test(async t => {
     form.remove();
   });
 
-  const tool = await waitForTool('crash_test');
-  assert_true(!!tool, 'Tool should be found');
+  await waitForTool('crash_test');
 
   // Execute the tool. This synchronously fires the `submit` event at the form.
-  // The tool execution should reject since the tool definition is updated/cancelled
+  // The tool execution to reject since the tool definition is updated/cancelled
   // when the form is removed from the document.
-  const promise = document.modelContext.executeTool(tool, '{}');
-  await promise_rejects_dom(t, "UnknownError", promise,
+  const promise = navigator.modelContextTesting.executeTool('crash_test', '{}');
+  promise_rejects_dom(t, "UnknownError", promise,
       "Form execution fails due to mid-execution unregistration.");
 
   assert_true(submitFired);

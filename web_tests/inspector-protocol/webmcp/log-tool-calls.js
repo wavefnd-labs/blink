@@ -67,70 +67,45 @@
           inputSchema
         });
 
-        async function getTool(name) {
-          let tools = await document.modelContext.getTools();
-          let tool = tools.find(t => t.name === name);
-          if (tool) return tool;
-          return new Promise(resolve => {
-            const handler = async () => {
-              tools = await document.modelContext.getTools();
-              tool = tools.find(t => t.name === name);
-              if (tool) {
-                document.modelContext.removeEventListener('toolchange', handler);
-                resolve(tool);
-              }
-            };
-            document.modelContext.addEventListener('toolchange', handler);
-          });
-        }
-
         window.executeImperative = async function() {
-          const tool = await getTool("imperative_tool");
-          await document.modelContext.executeTool(tool, JSON.stringify({text: "hello"}));
+          await navigator.modelContextTesting.executeTool("imperative_tool", JSON.stringify({text: "hello"}));
         };
 
         window.executeDeclarative = async function() {
-          const tool = await getTool("declarative_tool");
-          await document.modelContext.executeTool(tool, JSON.stringify({text: "hello"}));
+          await navigator.modelContextTesting.executeTool("declarative_tool", JSON.stringify({text: "hello"}));
         };
 
         window.executeDeclarativeArray = async function() {
-          const tool = await getTool("declarative_array_tool");
-          const result = await document.modelContext.executeTool(tool, JSON.stringify({text: "hello"}));
+          const result = await navigator.modelContextTesting.executeTool("declarative_array_tool", JSON.stringify({text: "hello"}));
           return JSON.stringify(result);
         };
 
         window.executeDeclarativeString = async function() {
-          const tool = await getTool("declarative_string_tool");
-          const result = await document.modelContext.executeTool(tool, JSON.stringify({text: "hello"}));
+          const result = await navigator.modelContextTesting.executeTool("declarative_string_tool", JSON.stringify({text: "hello"}));
           return JSON.stringify(result);
         };
 
         window.executeDeclarativeNumber = async function() {
-          const tool = await getTool("declarative_number_tool");
-          const result = await document.modelContext.executeTool(tool, JSON.stringify({text: "hello"}));
+          const result = await navigator.modelContextTesting.executeTool("declarative_number_tool", JSON.stringify({text: "hello"}));
           return JSON.stringify(result);
         };
 
         window.executeFailingJS = async function() {
           try {
-            const tool = await getTool("failing_js_tool");
-            await document.modelContext.executeTool(tool, JSON.stringify({text: "hello"}));
+            await navigator.modelContextTesting.executeTool("failing_js_tool", JSON.stringify({text: "hello"}));
           } catch(e) {}
         };
 
         window.executeFailingModelContext = async function() {
           try {
-            const tool = await getTool("imperative_tool");
-            await document.modelContext.executeTool(tool, "invalid json");
+            await navigator.modelContextTesting.executeTool("imperative_tool", "invalid json");
           } catch(e) {}
         };
 
         window.executeCancelled = async function() {
           try {
             const controller = new AbortController();
-            const tool = await getTool("abortable_tool");
-            const promise = document.modelContext.executeTool(tool, JSON.stringify({text: "hello"}), {signal: controller.signal});
+            const promise = navigator.modelContextTesting.executeTool("abortable_tool", JSON.stringify({text: "hello"}), {signal: controller.signal});
             controller.abort();
             await promise;
           } catch(e) {}

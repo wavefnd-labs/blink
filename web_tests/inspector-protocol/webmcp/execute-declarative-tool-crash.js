@@ -10,26 +10,9 @@
       </form>
 
       <script>
-        async function getTool(name) {
-          let tools = await document.modelContext.getTools();
-          let tool = tools.find(t => t.name === name);
-          if (tool) return tool;
-          return new Promise(resolve => {
-            const handler = async () => {
-              tools = await document.modelContext.getTools();
-              tool = tools.find(t => t.name === name);
-              if (tool) {
-                document.modelContext.removeEventListener('toolchange', handler);
-                resolve(tool);
-              }
-            };
-            document.modelContext.addEventListener('toolchange', handler);
-          });
-        }
         window.executeDeclarative = async function() {
-          const tool = await getTool("declarative_tool");
-          await document.modelContext.executeTool(
-            tool, JSON.stringify({text: "hello"}));
+          await navigator.modelContextTesting.executeTool(
+            "declarative_tool", JSON.stringify({text: "hello"}));
         };
       </script>
       `,

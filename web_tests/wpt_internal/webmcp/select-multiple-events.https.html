@@ -23,8 +23,7 @@
 
 <script>
 promise_test(async t => {
-  const tool = await waitForTool('select_fruits');
-  assert_true(!!tool, 'Tool should be registered');
+  await waitForTool('select_fruits');
 
   let fruits = document.getElementById('fruits');
   let inputEventCount = 0;
@@ -40,7 +39,7 @@ promise_test(async t => {
   let inputArgs = JSON.stringify({ fruits: ['apple', 'banana'] });
 
   // This should dispatch events.
-  await document.modelContext.executeTool(tool, inputArgs);
+  await navigator.modelContextTesting.executeTool('select_fruits', inputArgs);
 
   assert_true(fruits.options[0].selected);
   assert_false(fruits.options[1].selected);
@@ -50,7 +49,7 @@ promise_test(async t => {
   assert_equals(changeEventCount, 1);
 
   // Executing with the same arguments again does not trigger events.
-  await document.modelContext.executeTool(tool, inputArgs);
+  await navigator.modelContextTesting.executeTool('select_fruits', inputArgs);
 
   assert_equals(inputEventCount, 1);
   assert_equals(changeEventCount, 1);

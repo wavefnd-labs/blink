@@ -15,8 +15,8 @@
       <input id="text1" name="text1" type="text">
     </form>
     <script>
-      if (window.document.modelContext) {
-        window.document.modelContext.getTools();
+      if (window.navigator.modelContextTesting) {
+        window.navigator.modelContextTesting.listTools();
       }
     </script>
   `);
