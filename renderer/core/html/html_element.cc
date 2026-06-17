@@ -236,7 +236,7 @@ class PopoverCloseWatcherEventListener : public NativeEventListener {
 class NameInHeapSnapshotBuilder : public MarkupAccumulator {
  public:
   NameInHeapSnapshotBuilder()
-      : MarkupAccumulator(kDoNotResolveURLs,
+      : MarkupAccumulator(ResolveUrls::kNone,
                           SerializationType::kHTML,
                           ShadowRootInclusion(),
                           MarkupAccumulator::AttributesMode::kUnsynchronized) {}

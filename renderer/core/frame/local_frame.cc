@@ -3973,7 +3973,7 @@ String CreateMarkupInRect(LocalFrame* frame,
   const CreateMarkupOptions create_markup_options =
       CreateMarkupOptions::Builder()
           .SetShouldAnnotateForInterchange(true)
-          .SetShouldResolveURLs(kResolveNonLocalURLs)
+          .SetShouldResolveUrls(ResolveUrls::kNonLocal)
           .Build();
   if (start_position.CompareTo(end_position) <= 0) {
     return CreateMarkup(start_position, end_position, create_markup_options);

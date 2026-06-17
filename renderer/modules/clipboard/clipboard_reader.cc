@@ -179,7 +179,7 @@ class ClipboardHtmlReader final : public ClipboardReader {
     String final_html =
         sanitize_html_ ? CreateStrictlyProcessedMarkupWithContext(
                              *frame->GetDocument(), html_string, fragment_start,
-                             fragment_end, url, kIncludeNode, kResolveAllURLs)
+                             fragment_end, url, kIncludeNode, ResolveUrls::kAll)
                        : html_string;
     base::UmaHistogramBoolean("Blink.Clipboard.Reader.ProcessedDataNull",
                               final_html.empty());
@@ -262,7 +262,7 @@ class ClipboardSvgReader final : public ClipboardReader {
     unsigned fragment_start = 0;
     String strictly_processed_svg = CreateStrictlyProcessedMarkupWithContext(
         *frame->GetDocument(), svg_string, fragment_start, svg_string.length(),
-        url, kIncludeNode, kResolveAllURLs);
+        url, kIncludeNode, ResolveUrls::kAll);
 
     base::UmaHistogramBoolean("Blink.Clipboard.Reader.ProcessedDataNull",
                               strictly_processed_svg.empty());
