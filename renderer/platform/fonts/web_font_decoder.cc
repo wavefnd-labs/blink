@@ -68,7 +68,6 @@ class BlinkOTSContext final : public ots::OTSContext {
   void AppendErrorMessage(const String& new_error_string);
 
   StringBuilder accumulated_error_string_;
-  bool stopped_accepting_messages_ = false;
 };
 
 void BlinkOTSContext::Message(int level, const char* format, ...) {
@@ -101,24 +100,16 @@ void BlinkOTSContext::Message(int level, const char* format, ...) {
 
 void BlinkOTSContext::AppendErrorMessage(const String& new_error_string) {
   // OTS can emit a large number of warnings for malformed fonts. Keep enough
-  // text for diagnostics, but avoid unbounded string growth. Once a message
-  // would push the accumulated string past the budget, stop accepting further
-  // messages entirely rather than truncating individual ones.
+  // text for diagnostics, but avoid unbounded string growth. Once the
+  // accumulated string reaches the budget, stop accepting further messages
+  // entirely rather than truncating individual ones.
   static constexpr unsigned kMaxAccumulatedErrorStringLength = 4096;
 
-  if (stopped_accepting_messages_) {
+  if (accumulated_error_string_.length() >= kMaxAccumulatedErrorStringLength) {
     return;
   }
 
-  const unsigned separator_length = accumulated_error_string_.empty() ? 0u : 1u;
-  if (accumulated_error_string_.length() + separator_length +
-          new_error_string.length() >
-      kMaxAccumulatedErrorStringLength) {
-    stopped_accepting_messages_ = true;
-    return;
-  }
-
-  if (separator_length) {
+  if (!accumulated_error_string_.empty()) {
     accumulated_error_string_.Append('\n');
   }
   accumulated_error_string_.Append(new_error_string);
