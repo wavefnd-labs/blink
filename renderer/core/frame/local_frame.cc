@@ -3375,7 +3375,7 @@ void LocalFrame::FinishedLoading(FrameLoader::NavigationFinishState state) {
   DomWindow()->FinishedLoading(state);
 }
 
-void LocalFrame::UpdateFaviconURL() {
+void LocalFrame::UpdateFaviconURL(mojom::blink::FaviconUpdateReason reason) {
   if (!IsMainFrame())
     return;
 
@@ -3402,7 +3402,7 @@ void LocalFrame::UpdateFaviconURL() {
   }
   DCHECK_EQ(icon_urls.size(), urls.size());
 
-  GetLocalFrameHostRemote().UpdateFaviconURL(std::move(urls));
+  GetLocalFrameHostRemote().UpdateFaviconURL(std::move(urls), reason);
 
   if (GetPage())
     GetPage()->GetPageScheduler()->OnTitleOrFaviconUpdated();
