@@ -3911,15 +3911,21 @@ void LayoutObject::WillBeDestroyed() {
   NOT_DESTROYED();
   DCHECK(!IsText());
 
+  const LocalFrame* frame = GetFrame();
+  if (frame) {
+    frame->GetInputMethodController().LayoutObjectWillBeDestroyed(*this);
+  }
+
   // Destroy any leftover anonymous children.
   LayoutObjectChildList* children = VirtualChildren();
   if (children)
     children->DestroyLeftoverChildren();
 
-  if (LocalFrame* frame = GetFrame()) {
+  if (frame) {
     // If this layoutObject is being autoscrolled, stop the autoscrolling.
-    if (frame->GetPage())
-      frame->GetPage()->GetAutoscrollController().StopAutoscrollIfNeeded(this);
+    if (const Page* page = frame->GetPage()) {
+      page->GetAutoscrollController().StopAutoscrollIfNeeded(this);
+    }
   }
 
   Remove();
