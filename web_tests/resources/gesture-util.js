@@ -778,6 +778,20 @@ function raf() {
   });
 }
 
+
+// If the condition doesn't hold, the tests should be skipped.
+// The test harness requires at least one subtest to be added, so
+// a placeholder test is added to report a [Pass] on the condition
+// check.
+function shouldSkipTests(condition, message) {
+  if (condition) {
+    test(() => {}, message);
+    return true;
+  }
+  return false;
+}
+
+
 // Resets the scroll position to (x,y). If a scroll is required, then the
 // promise is not resolved until the scrollend event is received.
 async function waitForScrollReset(scroller = document.scrollingElement,
