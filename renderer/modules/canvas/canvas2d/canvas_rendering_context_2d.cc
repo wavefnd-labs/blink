@@ -330,8 +330,19 @@ bool CanvasRenderingContext2D::WritePixels(const SkImageInfo& orig_info,
                                            size_t row_bytes,
                                            int x,
                                            int y) {
-  CanvasResourceProvider* provider = resource_provider();
-  if (!provider || !canvas() || isContextLost() || !provider->IsValid()) {
+  if (!canvas() || isContextLost()) {
+    return false;
+  }
+
+  if (shared_image_provider_) {
+    if (!shared_image_provider_->IsValid()) {
+      return false;
+    }
+  } else if (bitmap_provider_) {
+    if (!bitmap_provider_->IsValid()) {
+      return false;
+    }
+  } else {
     return false;
   }
 
@@ -353,15 +364,24 @@ bool CanvasRenderingContext2D::WritePixels(const SkImageInfo& orig_info,
       recorder->RestartRecording();
     }
   } else {
-    provider->Flush();
-
-    // Short-circuit out if an error occurred while flushing the recording.
-    if (!provider->IsValid()) {
-      return false;
+    if (shared_image_provider_) {
+      shared_image_provider_->Flush();
+      if (!shared_image_provider_->IsValid()) {
+        return false;
+      }
+    } else {
+      bitmap_provider_->Flush();
+      if (!bitmap_provider_->IsValid()) {
+        return false;
+      }
     }
   }
 
-  return provider->WritePixels(orig_info, pixels, row_bytes, x, y);
+  if (shared_image_provider_) {
+    return shared_image_provider_->WritePixels(orig_info, pixels, row_bytes, x,
+                                               y);
+  }
+  return bitmap_provider_->WritePixels(orig_info, pixels, row_bytes, x, y);
 }
 
 bool CanvasRenderingContext2D::ShouldAntialias() const {
@@ -523,20 +543,28 @@ void CanvasRenderingContext2D::WillDraw(
   }
 
   // Always draw everything during printing.
-  if (CanvasResourceProvider* provider = GetResourceProvider();
-      layer_count_ == 0 && provider != nullptr) [[likely]] {
+  if (layer_count_ == 0) [[likely]] {
     // TODO(crbug.com/1246486): Make auto-flushing layer friendly.
-    provider->FlushIfRecordingLimitExceeded();
+    if (shared_image_provider_) {
+      shared_image_provider_->FlushIfRecordingLimitExceeded();
+    } else if (bitmap_provider_) {
+      bitmap_provider_->FlushIfRecordingLimitExceeded();
+    }
   }
 }
 
 std::optional<cc::PaintRecord> CanvasRenderingContext2D::FlushCanvas(
     FlushReason reason) {
-  CanvasResourceProvider* provider = GetResourceProvider();
-  if (provider == nullptr) [[unlikely]] {
+  if (!canvas()) {
     return std::nullopt;
   }
-  return provider->Flush(reason);
+  if (shared_image_provider_) {
+    return shared_image_provider_->Flush(reason);
+  }
+  if (bitmap_provider_) {
+    return bitmap_provider_->Flush(reason);
+  }
+  return std::nullopt;
 }
 
 bool CanvasRenderingContext2D::WillSetFont() const {
@@ -753,11 +781,16 @@ CanvasRenderingContext2D::PaintRenderingResultsToResource(
 
 const std::optional<cc::PaintRecord>&
 CanvasRenderingContext2D::GetLastRecording() {
-  auto* provider = GetResourceProvider();
-  if (!provider) {
+  if (!canvas()) {
     return empty_recording_;
   }
-  return provider->LastRecording();
+  if (shared_image_provider_) {
+    return shared_image_provider_->LastRecording();
+  }
+  if (bitmap_provider_) {
+    return bitmap_provider_->LastRecording();
+  }
+  return empty_recording_;
 }
 
 bool CanvasRenderingContext2D::CanCreateResourceProvider() {
@@ -770,12 +803,25 @@ scoped_refptr<StaticBitmapImage> blink::CanvasRenderingContext2D::GetImage() {
         GetHibernationHandler()->GetImage());
   }
 
-  if (!IsResourceProviderValid()) {
+  if (!canvas()) {
     return nullptr;
   }
 
-  resource_provider()->Flush();
-  return resource_provider()->Snapshot();
+  if (shared_image_provider_) {
+    if (!shared_image_provider_->IsValid()) {
+      return nullptr;
+    }
+    shared_image_provider_->Flush();
+    return shared_image_provider_->Snapshot();
+  }
+  if (bitmap_provider_) {
+    if (!bitmap_provider_->IsValid()) {
+      return nullptr;
+    }
+    bitmap_provider_->Flush();
+    return bitmap_provider_->Snapshot();
+  }
+  return nullptr;
 }
 
 ImageData* CanvasRenderingContext2D::getImageDataInternal(
