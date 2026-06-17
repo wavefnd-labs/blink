@@ -676,32 +676,19 @@ static bool NeedsPaintOffsetTranslation(
       return true;
   }
 
-  // Though we don't treat hidden backface as a direct compositing reason, it's
-  // very likely that the object will be composited, so a paint offset
-  // translation will be beneficial.
-  bool has_paint_offset_compositing_reason =
-      direct_compositing_reasons != CompositingReason::kNone ||
-      box_model.StyleRef().BackfaceVisibility() == EBackfaceVisibility::kHidden;
-  if (has_paint_offset_compositing_reason) {
-    // Don't let paint offset cross composited layer boundaries when possible,
-    // to avoid unnecessary full layer paint/raster invalidation when paint
-    // offset in ancestor transform node changes which should not affect the
-    // descendants of the composited layer.
-    if (RuntimeEnabledFeatures::PaintOffsetTranslationForCompositedEnabled()) {
-      // For now a LayoutInline applies paint properties only if it has a
-      // self-painting layer. See https://crbug.com/495746269.
-      return !box_model.IsLayoutInline() || box_model.HasSelfPaintingLayer();
-    }
-    if (box_model.IsLayoutBlock() || object.IsLayoutReplaced() ||
-        // Inline elements with backdrop-filter are also included to fix paint
-        // offset issue (see crbug.com/40716515).
-        (!object.StyleRef().BackdropFilter().IsEmpty() &&
-         object.IsLayoutInline()) ||
-        (direct_compositing_reasons &
-         CompositingReason::kViewTransitionElement) ||
-        (direct_compositing_reasons & CompositingReason::kElementCapture)) {
-      return true;
-    }
+  // Don't let paint offset cross composited layer boundaries when possible,
+  // to avoid unnecessary full layer paint/raster invalidation when paint
+  // offset in ancestor transform node changes which should not affect the
+  // descendants of the composited layer.
+  if (direct_compositing_reasons != CompositingReason::kNone ||
+      // Though we don't treat hidden backface as a direct compositing reason,
+      // it's very likely that the object will be composited, so a paint offset
+      // translation will be beneficial.
+      box_model.StyleRef().BackfaceVisibility() ==
+          EBackfaceVisibility::kHidden) {
+    // For now a LayoutInline applies paint properties only if it has a
+    // self-painting layer. See https://crbug.com/495746269.
+    return !box_model.IsLayoutInline() || box_model.HasSelfPaintingLayer();
   }
 
   return false;
