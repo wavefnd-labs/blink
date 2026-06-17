@@ -353,14 +353,14 @@ void WidgetInputHandlerManager::SetVizHost(
         std::move(viz_host), compositor_thread_default_task_runner_);
     viz_host_.set_disconnect_handler(
         base::BindOnce(&WidgetInputHandlerManager::OnVizHostDisconnected,
-                       AsWeakPtr()),
+                       scoped_refptr<WidgetInputHandlerManager>(this)),
         compositor_thread_default_task_runner_);
   } else {
     viz_host_ = mojo::SharedRemote<mojom::blink::WidgetInputHandlerHost>(
         std::move(viz_host));
     viz_host_.set_disconnect_handler(
         base::BindOnce(&WidgetInputHandlerManager::OnVizHostDisconnected,
-                       AsWeakPtr()),
+                       scoped_refptr<WidgetInputHandlerManager>(this)),
         base::SequencedTaskRunner::GetCurrentDefault());
   }
 }
@@ -379,12 +379,16 @@ void WidgetInputHandlerManager::InitInputHandler() {
   uses_input_handler_ = true;
   base::OnceClosure init_closure = base::BindOnce(
       &WidgetInputHandlerManager::InitOnInputHandlingThread,
-      weak_ptr_factory_.GetWeakPtr(),
+      scoped_refptr<WidgetInputHandlerManager>(this),
       widget_->LayerTreeHost()->GetDelegateForInput(), sync_compositing);
   InputThreadTaskRunner()->PostTask(FROM_HERE, std::move(init_closure));
 }
 
-WidgetInputHandlerManager::~WidgetInputHandlerManager() = default;
+WidgetInputHandlerManager::~WidgetInputHandlerManager() {
+  if (destruction_callback_for_testing_) {
+    std::move(destruction_callback_for_testing_).Run();
+  }
+}
 
 void WidgetInputHandlerManager::AddInterface(
     mojo::PendingReceiver<mojom::blink::WidgetInputHandler> receiver) {
@@ -572,13 +576,13 @@ void WidgetInputHandlerManager::ObserveGestureEventOnMainThread(
 void WidgetInputHandlerManager::PostHandwritingRadiusToInputThread(
     int handwriting_radius) {
   base::OnceClosure init_closure = base::BindOnce(
-      [](base::WeakPtr<WidgetInputHandlerManager> weak_ptr, int radius) {
-        if (weak_ptr && weak_ptr->input_handler_proxy_) {
-          weak_ptr->input_handler_proxy_->SetHandwritingRadiusOnInputThread(
+      [](scoped_refptr<WidgetInputHandlerManager> manager, int radius) {
+        if (manager->input_handler_proxy_) {
+          manager->input_handler_proxy_->SetHandwritingRadiusOnInputThread(
               radius);
         }
       },
-      weak_ptr_factory_.GetWeakPtr(), handwriting_radius);
+      scoped_refptr<WidgetInputHandlerManager>(this), handwriting_radius);
   InputThreadTaskRunner()->PostTask(FROM_HERE, std::move(init_closure));
 }
 
@@ -788,7 +792,7 @@ static void WaitForInputProcessedFromMain(base::WeakPtr<WidgetBase> widget) {
 
   auto redraw_complete_callback =
       base::BindOnce(&WidgetInputHandlerManager::InvokeInputProcessedCallback,
-                     manager->AsWeakPtr());
+                     scoped_refptr<WidgetInputHandlerManager>(manager));
 
   // Since wheel-events can kick off animations, we can not consider
   // all observable effects of an input gesture to be processed
@@ -1207,6 +1211,14 @@ WidgetInputHandlerManager::GetSynchronousCompositorRegistry() {
 
 void WidgetInputHandlerManager::ClearClient() {
   input_event_queue_->ClearClient();
+  {
+    base::AutoLock lock(viz_host_lock_);
+    if (viz_host_) {
+      viz_host_.Disconnect();
+    }
+    viz_host_.reset();
+  }
+  host_.reset();
 }
 
 void WidgetInputHandlerManager::UpdateBrowserControlsState(
