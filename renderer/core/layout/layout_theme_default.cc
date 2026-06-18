@@ -50,18 +50,6 @@ LayoutThemeDefault::LayoutThemeDefault() : painter_(*this) {}
 
 LayoutThemeDefault::~LayoutThemeDefault() = default;
 
-gfx::Size LayoutThemeDefault::SliderTickSize() const {
-  // The value should be synchronized with a -webkit-slider-container rule in
-  // html.css.
-  return gfx::Size(1, 4);
-}
-
-int LayoutThemeDefault::SliderTickOffsetFromTrackCenter() const {
-  // The value should be synchronized with a -webkit-slider-container rule in
-  // html.css and LayoutThemeAndroid::ExtraDefaultStyleSheet().
-  return 7;
-}
-
 void LayoutThemeDefault::AdjustSliderThumbSize(
     ComputedStyleBuilder& builder) const {
   gfx::Size size = WebThemeEngineHelper::GetNativeThemeEngine()->GetSize(
