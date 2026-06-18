@@ -121,6 +121,7 @@
 #include "third_party/blink/renderer/core/inspector/console_message.h"
 #include "third_party/blink/renderer/core/inspector/inspector_trace_events.h"
 #include "third_party/blink/renderer/core/inspector/main_thread_debugger.h"
+#include "third_party/blink/renderer/core/layout/layout_replaced.h"
 #include "third_party/blink/renderer/core/lcp_critical_path_predictor/lcp_critical_path_predictor.h"
 #include "third_party/blink/renderer/core/loader/alternate_signed_exchange_resource_info.h"
 #include "third_party/blink/renderer/core/loader/frame_client_hints_preferences_context.h"
@@ -2978,7 +2979,39 @@ void DocumentLoader::CommitNavigation() {
       const SecurityOrigin* new_origin =
           frame_->DomWindow()->GetSecurityOrigin();
       if (!old_origin->IsSameOriginWith(new_origin)) {
-        frame_->Owner()->ClearAllNaturalSizingInfo();
+        // In addition to clearing the natural size, resize the view to the
+        // default size, to prevent leaking the previous size.
+        // 1. Ideally this is needed only if the previous `Document` had
+        //    `responsive_embedded_sizing_`. Getting the value involves multiple
+        //    IPCs, so we only check the value of the `frame-sizing` CSS
+        //    property of the frame owner (`<iframe>`).
+        // 2. Ideally the view should be resized to the size of the frame owner
+        //    without the natural size. Use the default size because getting it
+        //    would block until the parent layout is complete.
+        switch (frame_->Owner()->GetResponsiveSizing()) {
+          case mojom::blink::FrameResponsiveSizing::kNone:
+            break;
+          case mojom::blink::FrameResponsiveSizing::kWidth:
+            if (LocalFrameView* frame_view = frame_->View()) {
+              const double zoom = frame_->LayoutZoomFactor();
+              const int height = frame_view->Size().height();
+              const int width =
+                  static_cast<int>(LayoutReplaced::kDefaultWidth * zoom);
+              frame_view->Resize(width, height);
+            }
+            frame_->Owner()->ClearAllNaturalSizingInfo();
+            break;
+          case mojom::blink::FrameResponsiveSizing::kHeight:
+            if (LocalFrameView* frame_view = frame_->View()) {
+              const double zoom = frame_->LayoutZoomFactor();
+              const int width = frame_view->Size().width();
+              const int height =
+                  static_cast<int>(LayoutReplaced::kDefaultHeight * zoom);
+              frame_view->Resize(width, height);
+            }
+            frame_->Owner()->ClearAllNaturalSizingInfo();
+            break;
+        }
       }
     }
   }
