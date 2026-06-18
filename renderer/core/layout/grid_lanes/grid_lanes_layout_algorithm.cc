@@ -9,6 +9,7 @@
 #include "third_party/blink/renderer/core/layout/grid/grid_data.h"
 #include "third_party/blink/renderer/core/layout/grid/grid_item.h"
 #include "third_party/blink/renderer/core/layout/grid/grid_layout_utils.h"
+#include "third_party/blink/renderer/core/layout/grid/grid_node.h"
 #include "third_party/blink/renderer/core/layout/grid/grid_track_collection.h"
 #include "third_party/blink/renderer/core/layout/grid_lanes/grid_lanes_running_positions.h"
 #include "third_party/blink/renderer/core/layout/grid_lanes/layout_grid_lanes.h"
@@ -289,6 +290,46 @@ LayoutUnit CalculateSynthesizedBaselineShim(
   return shared_baseline -
          GetSynthesizedLogicalBaseline(grid_item, block_size, track_direction) -
          extra_margin;
+}
+
+// Rebuilds inherited track collections and invalidates min/max caches for
+// the given subgrid and all nested subgrids in its subtree.
+void RebuildNestedSubgridLayoutData(
+    const SubgriddedItemData& subgridded_item_data,
+    const GridSizingSubtree& sizing_subtree,
+    const GridLayoutAlgorithm& algorithm,
+    SizingConstraint sizing_constraint) {
+  const GridItemData& item = *subgridded_item_data;
+  GridLayoutData& layout_data = sizing_subtree.LayoutData();
+
+  // Rebuild inherited track collections for each subgridded axis.
+  auto UpdateSubgridTrackCollectionForDirection =
+      [&](GridTrackSizingDirection direction) {
+        if (!layout_data.HasSubgriddedAxis(direction)) {
+          return;
+        }
+        layout_data.SetTrackCollection(CreateSubgridTrackCollection(
+            subgridded_item_data, item.node.Style(),
+            algorithm.GetConstraintSpace(), algorithm.BorderScrollbarPadding(),
+            algorithm.GetGridAvailableSize(), direction));
+      };
+  UpdateSubgridTrackCollectionForDirection(kForColumns);
+  UpdateSubgridTrackCollectionForDirection(kForRows);
+
+  // The subgrid's min/max sizes were cached during initial sizing against
+  // stale inherited tracks. Invalidate the cache so the standalone axis
+  // re-sizing recomputes them with the updated track collection.
+  To<GridNode>(item.node).InvalidateSubgridMinMaxSizesCache();
+
+  // Continue recursing into deeper nested subgrids.
+  ForEachSubgrid(sizing_subtree, algorithm,
+                 [&](const GridLayoutAlgorithm& nested_algorithm,
+                     const GridSizingSubtree& nested_subtree,
+                     const SubgriddedItemData& nested_subgrid_data) {
+                   RebuildNestedSubgridLayoutData(
+                       nested_subgrid_data, nested_subtree, nested_algorithm,
+                       sizing_constraint);
+                 });
 }
 
 }  // namespace
@@ -667,10 +708,6 @@ void GridLanesLayoutAlgorithm::RunGridLanesPlacementPhase(
     // The updates are written to the sizing tree's `GridLayoutData`, which is
     // the single source of truth. A fresh layout subtree is finalized from it
     // below, so the subgrid's layout sees the resolved data.
-    //
-    // TODO(almaher): What about nested subgrids? Those won't be updated
-    // correctly. Will this require a separate pass, or do we just need to
-    // make this update for the rest of its subtree, as well?
     if (is_subgrid && grid_lanes_item.is_auto_placed &&
         grid_lanes_item.StartLine(grid_axis_direction) !=
             grid_axis_start_offset) {
@@ -1977,8 +2014,8 @@ void GridLanesLayoutAlgorithm::RebuildSubgridLayoutDataForResolvedPlacement(
     GridTrackSizingDirection subgrid_axis_direction,
     SizingConstraint sizing_constraint) const {
   CHECK(child_sizing_subtree);
-  GridLayoutData& child_layout_data = child_sizing_subtree.LayoutData();
-  CHECK(child_layout_data.HasSubgriddedAxis(subgrid_axis_direction));
+  CHECK(child_sizing_subtree.LayoutData().HasSubgriddedAxis(
+      subgrid_axis_direction));
 
   const SubgriddedItemData subgridded_item_data(
       subgrid_item, &parent_layout_data, GetConstraintSpace().GetWritingMode());
@@ -1989,12 +2026,11 @@ void GridLanesLayoutAlgorithm::RebuildSubgridLayoutDataForResolvedPlacement(
 
   const GridLayoutAlgorithm subgrid_algorithm(
       {subgrid_item.node, subgrid_fragment_geometry, subgrid_space});
-  GridLayoutTrackCollection* new_subgridded_collection =
-      CreateSubgridTrackCollection(
-          subgridded_item_data, subgrid_item.node.Style(), subgrid_space,
-          subgrid_algorithm.BorderScrollbarPadding(),
-          subgrid_algorithm.GetGridAvailableSize(), subgrid_axis_direction);
-  child_layout_data.SetTrackCollection(new_subgridded_collection);
+
+  // Rebuild inherited track collections and invalidate min/max caches for
+  // this subgrid and all nested subgrids in its subtree.
+  RebuildNestedSubgridLayoutData(subgridded_item_data, child_sizing_subtree,
+                                 subgrid_algorithm, sizing_constraint);
 
   // Only grid subgrids of a grid-lanes container have a standalone axis to
   // re-size here; grid-lanes subgrids only have one grid axis, which will never
