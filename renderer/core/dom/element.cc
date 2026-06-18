@@ -6113,7 +6113,6 @@ void Element::RebuildOverscrollAreaLayoutTree(
     PseudoElement* pseudo_element =
         overscroll_area->GetPseudoElement(kPseudoIdOverscrollAreaParent);
     pseudo_element->RebuildLayoutTree(whitespace_attacher);
-    CHECK(pseudo_element->GetLayoutObject());
   }
 }
 
@@ -6131,7 +6130,6 @@ void Element::AttachOverscrollPseudoElements(AttachContext& context) {
     PseudoElement* pseudo_element =
         overscroll_area->GetPseudoElement(kPseudoIdOverscrollAreaParent);
     pseudo_element->AttachLayoutTree(context);
-    CHECK(pseudo_element->GetLayoutObject());
   }
 }
 

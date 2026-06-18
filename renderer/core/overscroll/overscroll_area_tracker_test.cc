@@ -1224,6 +1224,44 @@ TEST_P(OverscrollAreaTrackerPageTest,
   EXPECT_EQ(menu->GetLayoutObject()->Parent(), container->GetLayoutObject());
 }
 
+TEST_F(OverscrollAreaTrackerTest,
+       DisplayContentsContainerNoPseudoLayoutObject) {
+  SetInnerHTML(R"HTML(
+    <div id="parent">
+      <div id="container" style="display: contents;" overscrollcontainer>
+        <div id="menu" overscrollarea></div>
+      </div>
+    </div>
+  )HTML");
+
+  UpdateAllLifecyclePhasesForTest();
+
+  Element* parent = GetDocument().getElementById(AtomicString("parent"));
+  Element* container = GetDocument().getElementById(AtomicString("container"));
+  Element* menu = GetDocument().getElementById(AtomicString("menu"));
+
+  ASSERT_TRUE(parent);
+  ASSERT_TRUE(container);
+  ASSERT_TRUE(menu);
+
+  // Container has no layout object because of display: contents.
+  EXPECT_FALSE(container->GetLayoutObject());
+
+  // Menu's pseudo-element ::-internal-overscroll-area-parent exists.
+  PseudoElement* overscroll_area_parent =
+      menu->GetPseudoElement(kPseudoIdOverscrollAreaParent);
+  ASSERT_TRUE(overscroll_area_parent);
+
+  // But the pseudo-element has no layout object because container has no box.
+  EXPECT_FALSE(overscroll_area_parent->GetLayoutObject());
+
+  // Menu itself (originating element) is attached correctly to the parent's
+  // layout object.
+  LayoutObject* menu_layout = menu->GetLayoutObject();
+  ASSERT_TRUE(menu_layout);
+  EXPECT_EQ(menu_layout->Parent(), parent->GetLayoutObject());
+}
+
 INSTANTIATE_TEST_SUITE_P(All,
                          OverscrollAreaTrackerPageTest,
                          ::testing::Values(0, 1, 2));

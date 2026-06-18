@@ -3289,11 +3289,16 @@ void FragmentPaintPropertyTreeBuilder::UpdateContentTranslation() {
       return;
     }
 
-    gfx::Point scroll_origin =
-        overscroll_area_tracker->DOMSortedElements()[index - 1]
-            ->GetPseudoElement(kPseudoIdOverscrollAreaParent)
-            ->GetLayoutBox()
-            ->ScrollOrigin();
+    gfx::Point scroll_origin;
+    for (wtf_size_t i = index; i > 0; --i) {
+      PseudoElement* pseudo =
+          overscroll_area_tracker->DOMSortedElements()[i - 1]->GetPseudoElement(
+              kPseudoIdOverscrollAreaParent);
+      if (LayoutBox* layout_box = pseudo->GetLayoutBox()) {
+        scroll_origin = layout_box->ScrollOrigin();
+        break;
+      }
+    }
 
     TransformPaintPropertyNode::State state{
         {gfx::Transform::MakeTranslation(scroll_origin.OffsetFromOrigin())}};
