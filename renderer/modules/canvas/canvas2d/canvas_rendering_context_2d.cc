@@ -1214,13 +1214,6 @@ CanvasResourceProvider* CanvasRenderingContext2D::GetResourceProvider() const {
   return bitmap_provider_.get();
 }
 
-CanvasResourceProvider* CanvasRenderingContext2D::resource_provider() const {
-  if (shared_image_provider_) {
-    return shared_image_provider_.get();
-  }
-  return bitmap_provider_.get();
-}
-
 Canvas2DResourceProviderSharedImage*
 CanvasRenderingContext2D::GetSharedImageProvider() const {
   return shared_image_provider_.get();

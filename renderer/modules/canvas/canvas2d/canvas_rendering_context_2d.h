@@ -240,10 +240,6 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   // callsites and make this method private.
   CanvasHibernationHandler* GetHibernationHandler() const;
 
-  CanvasResourceProvider* GetResourceProviderForTesting() const {
-    return GetResourceProvider();
-  }
-
   void EnableAccelerationIfPossible() override;
 
  protected:
@@ -270,7 +266,6 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   void ResetInternal() override;
 
   CanvasResourceProvider* GetResourceProvider() const override;
-  CanvasResourceProvider* resource_provider() const;
   void Dispose() override;
 
   void CreateCanvasResourceProvider();
