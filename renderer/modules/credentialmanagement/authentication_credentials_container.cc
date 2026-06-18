@@ -35,8 +35,6 @@
 #include "third_party/blink/renderer/bindings/modules/v8/v8_authentication_extensions_prf_inputs.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_authentication_extensions_prf_outputs.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_authentication_extensions_prf_values.h"
-#include "third_party/blink/renderer/bindings/modules/v8/v8_authentication_extensions_supplemental_pub_keys_inputs.h"
-#include "third_party/blink/renderer/bindings/modules/v8/v8_authentication_extensions_supplemental_pub_keys_outputs.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_authenticator_selection_criteria.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_credential_creation_options.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_credential_properties_output.h"
@@ -704,11 +702,6 @@ void OnMakePublicKeyCredentialComplete(
         AuthenticationExtensionsLargeBlobOutputs::Create();
     large_blob_outputs->setSupported(credential->supports_large_blob);
     extension_outputs->setLargeBlob(large_blob_outputs);
-  }
-  if (credential->supplemental_pub_keys) {
-    extension_outputs->setSupplementalPubKeys(
-        ConvertTo<AuthenticationExtensionsSupplementalPubKeysOutputs*>(
-            credential->supplemental_pub_keys));
   }
   if (credential->payment) {
     extension_outputs->setPayment(
