@@ -2127,6 +2127,30 @@ void HTMLCanvasElement::OnAxObjectIgnoredStateChanged(bool is_ignored) {
   UpdateCaptureRenderedText();
 }
 
+// TODO(crbug.com/475512055): Remove this function once UKM collection is
+// not needed anymore.
+bool HTMLCanvasElement::GetNeedsAccessibilitySupportHeuristic() {
+  if (accessibility_manager_) {
+    return accessibility_manager_->NeedsA11ySupport();
+  }
+
+  // Estimate is_ignored when accessibility is not enabled.
+  // True "is_ignored" needs AXObjectCache, so we approximate here by
+  // checking display/visibility and lack of the aria-hidden attribute.
+  bool is_visible = IsDisplayed();
+  bool has_aria_hidden = FastHasAttribute(html_names::kAriaHiddenAttr);
+  bool is_ignored = !(is_visible && !has_aria_hidden);
+
+  auto* manager = MakeGarbageCollected<HTMLCanvasAccessibilityManager>(
+      GetDocument().GetTaskRunner(TaskType::kInternalDefault), is_ignored, this,
+      /*is_for_ukm_only=*/true);
+
+  // The temporary manager is a GarbageCollected object allocated via Oilpan.
+  // Since we do not retain a persistent reference to it, it will automatically
+  // be garbage-collected once it goes out of scope and this function returns.
+  return manager->NeedsA11ySupport();
+}
+
 void HTMLCanvasElement::RecordRenderedText(const String& text,
                                            const gfx::RectF& bounds,
                                            float font_height) {

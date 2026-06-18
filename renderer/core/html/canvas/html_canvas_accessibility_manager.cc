@@ -58,11 +58,13 @@ bool SufficientlyOverlapping(const gfx::RectF& a, const gfx::RectF& b) {
 HTMLCanvasAccessibilityManager::HTMLCanvasAccessibilityManager(
     scoped_refptr<base::SingleThreadTaskRunner> task_runner,
     bool is_ignored,
-    HTMLCanvasElement* canvas_element)
+    HTMLCanvasElement* canvas_element,
+    bool is_for_ukm_only)
     : is_ignored_(is_ignored),
       uma_timer_(std::move(task_runner),
                  this,
                  &HTMLCanvasAccessibilityManager::RecordUma),
+      is_for_ukm_only_(is_for_ukm_only),
       canvas_element_(canvas_element) {
   UpdateHasFallbackElementContent();
 
@@ -75,7 +77,11 @@ HTMLCanvasAccessibilityManager::HTMLCanvasAccessibilityManager(
 }
 
 void HTMLCanvasAccessibilityManager::SetIgnored(bool is_ignored) {
-  if (is_ignored_ == is_ignored) {
+  // If the manager is in `is_for_ukm_only` mode, exit the mode and update
+  // anyway.
+  if (is_for_ukm_only_) {
+    is_for_ukm_only_ = false;
+  } else if (is_ignored_ == is_ignored) {
     return;
   }
   // The manager is only created if the canvas is initially not ignored. If it
@@ -183,12 +189,13 @@ void HTMLCanvasAccessibilityManager::SetHeuristicResult(
   }
   heuristic_result_ = result;
 
-  if (!is_uma_recorded_) {
+  if (!is_uma_recorded_ && !is_for_ukm_only_) {
     uma_timer_.StartOneShot(kUMATimerDelay, FROM_HERE);
   }
 
   if (heuristic_result_ == HeuristicResult::kNeedsA11ySupport &&
-      base::FeatureList::IsEnabled(::features::kAccessibilityCanvas)) {
+      base::FeatureList::IsEnabled(::features::kAccessibilityCanvas) &&
+      !is_for_ukm_only_) {
     should_capture_rendered_text_ = true;
   } else if (should_capture_rendered_text_) {
     should_capture_rendered_text_ = false;

@@ -195,6 +195,7 @@ class CORE_EXPORT HTMLCanvasElement final
   HTMLCanvasAccessibilityManager* GetAccessibilityManagerForTesting() {
     return accessibility_manager_.Get();
   }
+  bool GetNeedsAccessibilitySupportHeuristic();
   void ClearCanvas2DLayerTexture() override;
 
   void SetNeedsPushProperties();

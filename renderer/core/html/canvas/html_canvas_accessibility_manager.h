@@ -30,11 +30,18 @@ class CORE_EXPORT HTMLCanvasAccessibilityManager
   HTMLCanvasAccessibilityManager(
       scoped_refptr<base::SingleThreadTaskRunner> task_runner,
       bool is_ignored,
-      HTMLCanvasElement* canvas_element);
+      HTMLCanvasElement* canvas_element,
+      bool is_for_ukm_only = false);
   HTMLCanvasAccessibilityManager(const HTMLCanvasAccessibilityManager&) =
       delete;
   HTMLCanvasAccessibilityManager& operator=(
       const HTMLCanvasAccessibilityManager&) = delete;
+
+  bool NeedsA11ySupport() const {
+    return heuristic_result_ == HeuristicResult::kNeedsA11ySupport;
+  }
+
+  bool IsForUkmOnly() const { return is_for_ukm_only_; }
 
   void Trace(Visitor* visitor) const;
 
@@ -77,7 +84,7 @@ class CORE_EXPORT HTMLCanvasAccessibilityManager
   void ClearRenderedText();
   const String& CanvasAnnotation() const { return canvas_annotation_; }
   bool ShouldCaptureRenderedText() const {
-    return should_capture_rendered_text_;
+    return should_capture_rendered_text_ && !is_for_ukm_only_;
   }
   void UpdateAnnotation();
 
@@ -121,6 +128,10 @@ class CORE_EXPORT HTMLCanvasAccessibilityManager
   HeapTaskRunnerTimer<HTMLCanvasAccessibilityManager> uma_timer_;
   bool is_uma_recorded_ = false;
   bool is_initialized_ = false;
+
+  // If true, the manager is created only to record UKMs and not to add
+  // accessibility support.
+  bool is_for_ukm_only_ = false;
 
   // Owns this object and should outlive it.
   Member<HTMLCanvasElement> canvas_element_;
