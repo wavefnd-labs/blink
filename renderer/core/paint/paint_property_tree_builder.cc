@@ -3418,6 +3418,16 @@ void FragmentPaintPropertyTreeBuilder::UpdateScrollNode() {
                              static_cast<cc::OverscrollBehavior::Type>(
                                  box.StyleRef().OverscrollBehaviorY()));
 
+  // Reset overscroll-behavior to 'auto' on non-scrollable axes so they do not
+  // block scroll chaining or trigger local overscroll effects.
+  PhysicalAxes scrollable_axes = scrollable_area->ScrollableAxes();
+  if (!(scrollable_axes & kPhysicalAxesHorizontal)) {
+    state.overscroll_behavior.x = cc::OverscrollBehavior::Type::kAuto;
+  }
+  if (!(scrollable_axes & kPhysicalAxesVertical)) {
+    state.overscroll_behavior.y = cc::OverscrollBehavior::Type::kAuto;
+  }
+
   state.prevent_scroll_axis_locking =
       (box.StyleRef().ScrollAxisLock() == EScrollAxisLock::kNone);
 
