@@ -424,6 +424,10 @@ size_t WebDocument::ActiveResourceRequestCount() const {
   return ConstUnwrap<Document>()->Fetcher()->ActiveRequestCount();
 }
 
+uint64_t WebDocument::CookieModificationCount() const {
+  return ConstUnwrap<Document>()->CookieModificationCount();
+}
+
 bool WebDocument::ExecuteScriptTool(
     const base::UnguessableToken& invocation_id,
     const WebString& name,

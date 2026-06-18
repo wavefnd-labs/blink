@@ -2342,6 +2342,11 @@ class CORE_EXPORT Document : public ContainerNode,
     return scoped_custom_element_registry_used_;
   }
 
+  uint64_t CookieModificationCount() const {
+    return cookie_modification_count_;
+  }
+  void IncrementCookieModificationCount() { cookie_modification_count_++; }
+
   ViewTransitionSupplement* GetViewTransitionsIfExists() const {
     return view_transitions_;
   }
@@ -3267,6 +3272,12 @@ class CORE_EXPORT Document : public ContainerNode,
   // access-controlled media to not load when it is the top-level URL when
   // third-party cookie blocking is enabled.
   bool override_site_for_cookies_for_csp_media_ = false;
+
+  // Tracks the number of times cookies have been modified (e.g., via
+  // document.cookie or CookieStore) within this document. Used to detect if
+  // cookies have changed since a renderer-initiated navigation started, in
+  // which case subsequent duplicate navigations are not ignored.
+  uint64_t cookie_modification_count_ = 0;
 
   // See description in ScheduleShadowTreeCreation().
   HeapHashSet<Member<HTMLInputElement>> elements_needing_shadow_tree_;
