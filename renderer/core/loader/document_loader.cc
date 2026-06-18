@@ -631,6 +631,7 @@ DocumentLoader::DocumentLoader(
               perfetto::Flow::FromPointer(this));
   DCHECK(frame_);
   DCHECK(params_);
+  is_secure_context_root_ = params_->is_secure_context_root;
 
   // See `archive_` attribute documentation.
   if (!frame_->IsMainFrame()) {
@@ -2920,6 +2921,10 @@ void DocumentLoader::InitializeWindow(Document* owner_document) {
   // wants to inspect sandbox flags.
   SecurityContext& security_context = frame_->DomWindow()->GetSecurityContext();
   security_context.SetSecurityOrigin(std::move(security_origin));
+  // Mirror the browser's `IsSecureContextRoot()` verdict onto this frame's
+  // SecurityContext so same-process descendants see it in
+  // HasInsecureContextInAncestors().
+  security_context.SetIsSecureContextRoot(is_secure_context_root_);
   // Requires SecurityOrigin to be initialized.
   OriginTrialContext::AddTokensFromHeader(
       frame_->DomWindow(), response_.HttpHeaderField(http_names::kOriginTrial));
