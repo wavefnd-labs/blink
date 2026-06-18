@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "third_party/blink/renderer/core/animation/timeline_trigger.h"
+
 #include "base/strings/stringprintf.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -11,7 +13,6 @@
 #include "third_party/blink/renderer/core/animation/css/css_animation.h"
 #include "third_party/blink/renderer/core/animation/element_animations.h"
 #include "third_party/blink/renderer/core/animation/scroll_timeline.h"
-#include "third_party/blink/renderer/core/animation/timeline_trigger.h"
 #include "third_party/blink/renderer/core/css/css_numeric_literal_value.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/page/page_animator.h"
@@ -27,7 +28,6 @@ void ExpectRelativeErrorWithinEpsilon(double expected, double observed) {
 
 }  // namespace
 
-// TODO(crbug.com/390314945): Rename this file timeline_trigger_test.cc
 class TimelineTriggerTest : public PaintTestConfigurations,
                             public RenderingTest {
  public:
