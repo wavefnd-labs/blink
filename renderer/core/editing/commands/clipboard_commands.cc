@@ -778,7 +778,7 @@ class CORE_EXPORT PasteImageResourceObserver final
   const KURL src_;
 };
 
-void ClipboardCommands::PasteFromImageURL(LocalFrame& frame,
+void ClipboardCommands::PasteFromImageUrl(LocalFrame& frame,
                                           EditorCommandSource source,
                                           const String src) {
   DCHECK(frame.GetDocument());
@@ -882,11 +882,11 @@ bool ClipboardCommands::ExecutePasteAndMatchStyle(LocalFrame& frame,
   return true;
 }
 
-bool ClipboardCommands::ExecutePasteFromImageURL(LocalFrame& frame,
+bool ClipboardCommands::ExecutePasteFromImageUrl(LocalFrame& frame,
                                                  Event*,
                                                  EditorCommandSource source,
                                                  const String& src) {
-  PasteFromImageURL(frame, source, src);
+  PasteFromImageUrl(frame, source, src);
   return true;
 }
 
