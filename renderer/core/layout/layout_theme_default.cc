@@ -110,11 +110,6 @@ void LayoutThemeDefault::AdjustInnerSpinButtonStyle(
   }
 }
 
-Color LayoutThemeDefault::PlatformFocusRingColor() const {
-  constexpr Color focus_ring_color = Color::FromRGBA32(0xFFE59700);
-  return focus_ring_color;
-}
-
 void LayoutThemeDefault::AdjustButtonStyle(
     ComputedStyleBuilder& builder) const {
   // Ignore line-height.

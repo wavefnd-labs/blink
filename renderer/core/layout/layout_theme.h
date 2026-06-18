@@ -53,7 +53,7 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
   USING_FAST_MALLOC(LayoutTheme);
 
  protected:
-  LayoutTheme();
+  LayoutTheme() = default;
 
  public:
   virtual ~LayoutTheme() = default;
@@ -133,8 +133,8 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
                                 bool can_expose_accent_color) const;
 
   virtual Color FocusRingColor(mojom::blink::ColorScheme color_scheme) const;
-  virtual Color PlatformFocusRingColor() const { return Color(0, 0, 0); }
   void SetCustomFocusRingColor(const Color&);
+
   virtual Color TapHighlightColor() const { return kDefaultTapHighlightColor; }
 
   static Color PlatformDefaultCompositionBackgroundColor() {
@@ -245,8 +245,9 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
   virtual void AdjustSliderThumbStyle(ComputedStyleBuilder&) const;
   virtual void AdjustSearchFieldCancelButtonStyle(ComputedStyleBuilder&) const;
 
-  bool HasCustomFocusRingColor() const;
-  Color GetCustomFocusRingColor() const;
+  std::optional<Color> CustomFocusRingColor() const {
+    return custom_focus_ring_color_;
+  }
 
   Color DefaultSystemColor(CSSValueID,
                            mojom::blink::ColorScheme color_scheme,
@@ -271,8 +272,7 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
 
   void UpdateForcedColorsState();
 
-  Color custom_focus_ring_color_;
-  bool has_custom_focus_ring_color_;
+  std::optional<Color> custom_focus_ring_color_;
   base::TimeDelta caret_blink_interval_ = base::Milliseconds(500);
 
   // This color is expected to be drawn on a semi-transparent overlay,

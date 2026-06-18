@@ -190,8 +190,6 @@ Color LayoutTheme::inactive_list_box_selection_background_color_dark_mode_ =
 Color LayoutTheme::inactive_list_box_selection_foreground_color_dark_mode_ =
     Color::FromRGBA32(0xFF323232);
 
-LayoutTheme::LayoutTheme() : has_custom_focus_ring_color_(false) {}
-
 AppearanceValue LayoutTheme::AdjustAppearanceWithAuthorStyle(
     AppearanceValue appearance,
     const ComputedStyleBuilder& builder) {
@@ -865,19 +863,17 @@ Color LayoutTheme::PlatformTextSearchColor(
 }
 
 void LayoutTheme::SetCustomFocusRingColor(const Color& c) {
-  const bool changed =
-      !has_custom_focus_ring_color_ || custom_focus_ring_color_ != c;
-  custom_focus_ring_color_ = c;
-  has_custom_focus_ring_color_ = true;
-  if (changed) {
-    Page::PlatformColorsChanged();
+  if (c == custom_focus_ring_color_) {
+    return;
   }
+  custom_focus_ring_color_ = c;
+  Page::PlatformColorsChanged();
 }
 
 Color LayoutTheme::FocusRingColor(
     mojom::blink::ColorScheme color_scheme) const {
-  return has_custom_focus_ring_color_ ? custom_focus_ring_color_
-                                      : GetTheme().PlatformFocusRingColor();
+  constexpr Color default_focus_ring_color = Color::FromRGBA32(0xFFE59700);
+  return custom_focus_ring_color_.value_or(default_focus_ring_color);
 }
 
 String LayoutTheme::DisplayNameForFile(const File& file) const {
@@ -908,14 +904,6 @@ void LayoutTheme::AdjustControlPartStyle(ComputedStyleBuilder& builder) {
     default:
       break;
   }
-}
-
-bool LayoutTheme::HasCustomFocusRingColor() const {
-  return has_custom_focus_ring_color_;
-}
-
-Color LayoutTheme::GetCustomFocusRingColor() const {
-  return custom_focus_ring_color_;
 }
 
 bool LayoutTheme::IsAccentColorCustomized(
