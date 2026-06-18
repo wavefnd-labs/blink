@@ -46,7 +46,9 @@ namespace blink {
 namespace {
 
 HTMLLegendElement* FirstChildLegend(const HTMLOptGroupElement& optgroup) {
-  return Traversal<HTMLLegendElement>::FirstChild(optgroup);
+  // The legend element is only valid if it is the first element child as per
+  // the content model in the HTML spec.
+  return DynamicTo<HTMLLegendElement>(ElementTraversal::FirstChild(optgroup));
 }
 
 }  // namespace
@@ -220,21 +222,36 @@ void HTMLOptGroupElement::AccessKeyAction(
 }
 
 void HTMLOptGroupElement::DidAddUserAgentShadowRoot(ShadowRoot& root) {
+  legend_slot_ = MakeGarbageCollected<HTMLSlotElement>(GetDocument());
+  root.AppendChild(legend_slot_);
   label_ = MakeGarbageCollected<HTMLDivElement>(GetDocument());
   label_->setAttribute(html_names::kAriaHiddenAttr, keywords::kTrue);
   label_->SetShadowPseudoId(shadow_element_names::kIdOptGroupLabel);
-  root.AppendChild(label_);
+  legend_slot_->AppendChild(label_);
   opt_group_slot_ = MakeGarbageCollected<HTMLSlotElement>(GetDocument());
   root.AppendChild(opt_group_slot_);
 }
 
 void HTMLOptGroupElement::ManuallyAssignSlots() {
   HeapVector<Member<Node>> opt_group_nodes;
+  Element* first_element = nullptr;
   for (Node& child : NodeTraversal::ChildrenOf(*this)) {
     if (!child.IsSlotable())
       continue;
+    if (!first_element) {
+      if (auto* element = DynamicTo<Element>(child)) {
+        first_element = element;
+        if (IsA<HTMLLegendElement>(element)) {
+          continue;
+        }
+      }
+    }
     opt_group_nodes.push_back(child);
   }
+  // As per the content model in the HTML spec, the legend element is only
+  // allowed if it is the first child of the optgroup.
+  legend_slot_->Assign(IsA<HTMLLegendElement>(first_element) ? first_element
+                                                             : nullptr);
   opt_group_slot_->Assign(opt_group_nodes);
 }
 
@@ -243,20 +260,6 @@ void HTMLOptGroupElement::UpdateGroupLabel() {
   HTMLDivElement& label = OptGroupLabelElement();
   label.setTextContent(label_text);
   label.setAttribute(html_names::kAriaLabelAttr, AtomicString(label_text));
-
-  // If the author provides a <legend> element to replace the label attribute,
-  // then don't render the label element because it would result in an unwanted
-  // empty line. Otherwise, always render the label element, even if it results
-  // in an empty line. See fast/forms/select/listbox-appearance-basic.html.
-  if (FirstChildLegend(*this)) {
-    // TODO(crbug.com/383841336): Consider replacing this with UA style rules
-    // if we can make the label attribute become a part like pseudo-element,
-    // and add more tests for the label attribute with base appearance
-    // rendering.
-    label.SetInlineStyleProperty(CSSPropertyID::kDisplay, "none");
-  } else {
-    label.RemoveInlineStyleProperty(CSSPropertyID::kDisplay);
-  }
 }
 
 HTMLDivElement& HTMLOptGroupElement::OptGroupLabelElement() const {
@@ -264,6 +267,7 @@ HTMLDivElement& HTMLOptGroupElement::OptGroupLabelElement() const {
 }
 
 void HTMLOptGroupElement::Trace(Visitor* visitor) const {
+  visitor->Trace(legend_slot_);
   visitor->Trace(opt_group_slot_);
   visitor->Trace(label_);
   visitor->Trace(owner_select_);
