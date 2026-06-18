@@ -5870,4 +5870,312 @@ TEST_F(CompositorTimelineTriggerBehaviorTest,
             current_time_to_match);
 }
 
+TEST_F(CompositorTimelineTriggerBehaviorTest, PerformResetOnRunningPositive) {
+  Initialize("reset", "none");
+
+  // Play the animation.
+  blink_animation_->play(ASSERT_NO_EXCEPTION);
+  DoBeginFrame();
+
+  cc::KeyframeModel* impl_keyframe_model = GetImplKeyframeModel();
+  cc::KeyframeModel* main_keyframe_model = GetMainKeyframeModel();
+
+  base::TimeTicks play_start_time = Compositor().LastFrameTime();
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /* hold_time=*/std::nullopt,
+                    /* start_time=*/play_start_time);
+
+  DoBeginFrame();
+  TestKeyframeModel(main_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /* hold_time=*/std::nullopt,
+                    /* start_time=*/play_start_time);
+
+  // Simulate trigger activation (reset).
+  base::TimeTicks trigger_time = play_start_time + base::Milliseconds(50);
+  std::unique_ptr<cc::AnimationEvents> animation_events =
+      PerformImplActivate(trigger_time);
+
+  CheckAndDispatchEvents(*animation_events,
+                         {cc::AnimationTriggerEvent::Type::kActivate});
+
+  // On Impl thread, it should still be running (reset is not handled on
+  // compositor) until the next commit.
+  // TODO(451238244): Implement reset on the compositor thread.
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /* hold_time=*/std::nullopt,
+                    /* start_time=*/play_start_time);
+
+  // Verify blink animation current time is 0.
+  EXPECT_NEAR(blink_animation_->CurrentTimeInternal().value().InMillisecondsF(),
+              0.0, 1.0);
+  EXPECT_TRUE(blink_animation_->PausedForTrigger());
+
+  // Run a frame to let it recreate.
+  DoBeginFrame();
+
+  // Get pointers again because they will have been recreated.
+  impl_keyframe_model = GetImplKeyframeModel();
+  main_keyframe_model = GetMainKeyframeModel();
+
+  // Both should be PAUSED_EXCLUSIVE at 0.
+  TestKeyframeModel(main_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+}
+
+TEST_F(CompositorTimelineTriggerBehaviorTest, PerformResetOnRunningNegative) {
+  Initialize("reset", "none");
+
+  // Play the animation backwards.
+  blink_animation_->updatePlaybackRate(-1);
+  blink_animation_->play(ASSERT_NO_EXCEPTION);
+  DoBeginFrame();
+
+  cc::KeyframeModel* impl_keyframe_model = GetImplKeyframeModel();
+  cc::KeyframeModel* main_keyframe_model = GetMainKeyframeModel();
+
+  base::TimeTicks frame_time_at_start = Compositor().LastFrameTime();
+  base::TimeTicks play_start_time =
+      frame_time_at_start + base::Milliseconds(kAnimationDurationMilliSeconds);
+
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /* hold_time=*/std::nullopt,
+                    /* start_time=*/play_start_time);
+  EXPECT_EQ(impl_keyframe_model->playback_rate(), -1);
+
+  DoBeginFrame();
+  TestKeyframeModel(main_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /* hold_time=*/std::nullopt,
+                    /* start_time=*/play_start_time);
+  EXPECT_EQ(main_keyframe_model->playback_rate(), -1);
+
+  // Simulate trigger activation (reset).
+  base::TimeTicks trigger_time = frame_time_at_start + base::Milliseconds(50);
+  std::unique_ptr<cc::AnimationEvents> animation_events =
+      PerformImplActivate(trigger_time);
+
+  CheckAndDispatchEvents(*animation_events,
+                         {cc::AnimationTriggerEvent::Type::kActivate});
+
+  // On Impl thread, it should still be running (reset is not handled on
+  // compositor) until the next commit.
+  // TODO(451238244): Implement reset on the compositor thread.
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /* hold_time=*/std::nullopt,
+                    /* start_time=*/play_start_time);
+
+  // Verify blink animation current time is effect end.
+  EXPECT_NEAR(blink_animation_->CurrentTimeInternal().value().InMillisecondsF(),
+              kAnimationDurationMilliSeconds, 1.0);
+  EXPECT_TRUE(blink_animation_->PausedForTrigger());
+
+  // Run a frame to let it recreate.
+  DoBeginFrame();
+
+  // Re-evaluate pointers because they might have been recreated.
+  impl_keyframe_model = GetImplKeyframeModel();
+  main_keyframe_model = GetMainKeyframeModel();
+
+  // Both should be PAUSED_EXCLUSIVE at effect end.
+  TestKeyframeModel(
+      main_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+      /* hold_time=*/base::Milliseconds(kAnimationDurationMilliSeconds),
+      /* start_time=*/std::nullopt);
+  TestKeyframeModel(
+      impl_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+      /* hold_time=*/base::Milliseconds(kAnimationDurationMilliSeconds),
+      /* start_time=*/std::nullopt);
+}
+
+TEST_F(CompositorTimelineTriggerBehaviorTest, PerformResetOnFinishedPositive) {
+  Initialize("reset", "none");
+
+  // Finish the animation.
+  blink_animation_->finish(ASSERT_NO_EXCEPTION);
+  EXPECT_EQ(blink_animation_->CalculateAnimationPlayState(),
+            V8AnimationPlayState::Enum::kFinished);
+  DoBeginFrame();
+
+  cc::KeyframeModel* impl_keyframe_model = GetImplKeyframeModel();
+  cc::KeyframeModel* main_keyframe_model = GetMainKeyframeModel();
+
+  TestKeyframeModel(
+      impl_keyframe_model, gfx::KeyframeModel::PAUSED,
+      /* hold_time=*/
+      base::TimeDelta(base::Milliseconds(kAnimationDurationMilliSeconds)),
+      /* start_time=*/std::nullopt);
+
+  // Simulate trigger activation (reset).
+  base::TimeTicks trigger_time = base::TimeTicks() + base::Seconds(1000);
+  std::unique_ptr<cc::AnimationEvents> animation_events =
+      PerformImplActivate(trigger_time);
+
+  CheckAndDispatchEvents(*animation_events,
+                         {cc::AnimationTriggerEvent::Type::kActivate});
+
+  // On Impl thread, it should still be PAUSED (reset is not handled on
+  // compositor) until the next commit.
+  // TODO(451238244): Implement reset on the compositor thread.
+  TestKeyframeModel(
+      impl_keyframe_model, gfx::KeyframeModel::PAUSED,
+      /* hold_time=*/
+      base::TimeDelta(base::Milliseconds(kAnimationDurationMilliSeconds)),
+      /* start_time=*/std::nullopt);
+
+  // Verify blink animation current time is 0.
+  EXPECT_NEAR(blink_animation_->CurrentTimeInternal().value().InMillisecondsF(),
+              0.0, 1.0);
+  EXPECT_TRUE(blink_animation_->PausedForTrigger());
+
+  // Run a frame to let it recreate.
+  DoBeginFrame();
+
+  // Re-evaluate pointers because they might have been recreated.
+  impl_keyframe_model = GetImplKeyframeModel();
+  main_keyframe_model = GetMainKeyframeModel();
+
+  // Both should be PAUSED_EXCLUSIVE at 0.
+  TestKeyframeModel(main_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+}
+
+TEST_F(CompositorTimelineTriggerBehaviorTest, PerformResetOnFinishedNegative) {
+  Initialize("reset", "none");
+
+  // Finish the animation backwards.
+  blink_animation_->updatePlaybackRate(-1);
+  blink_animation_->finish(ASSERT_NO_EXCEPTION);
+  EXPECT_EQ(blink_animation_->CalculateAnimationPlayState(),
+            V8AnimationPlayState::Enum::kFinished);
+  DoBeginFrame();
+
+  cc::KeyframeModel* impl_keyframe_model = GetImplKeyframeModel();
+  cc::KeyframeModel* main_keyframe_model = GetMainKeyframeModel();
+
+  // For negative playback rate, finishing puts it at 0.
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::PAUSED,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+
+  // Simulate trigger activation (reset).
+  base::TimeTicks trigger_time = base::TimeTicks() + base::Seconds(1000);
+  std::unique_ptr<cc::AnimationEvents> animation_events =
+      PerformImplActivate(trigger_time);
+
+  CheckAndDispatchEvents(*animation_events,
+                         {cc::AnimationTriggerEvent::Type::kActivate});
+
+  // On Impl thread, it should still be PAUSED (reset is not handled on
+  // compositor) until the next commit.
+  // TODO(451238244): Implement reset on the compositor thread.
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::PAUSED,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+
+  // Verify blink animation current time is effect end.
+  EXPECT_NEAR(blink_animation_->CurrentTimeInternal().value().InMillisecondsF(),
+              kAnimationDurationMilliSeconds, 1.0);
+  EXPECT_TRUE(blink_animation_->PausedForTrigger());
+
+  // Run a frame to let it recreate.
+  DoBeginFrame();
+
+  // Re-evaluate pointers because they might have been recreated.
+  impl_keyframe_model = GetImplKeyframeModel();
+  main_keyframe_model = GetMainKeyframeModel();
+
+  // Both should be PAUSED_EXCLUSIVE at effect end.
+  TestKeyframeModel(
+      main_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+      /* hold_time=*/base::Milliseconds(kAnimationDurationMilliSeconds),
+      /* start_time=*/std::nullopt);
+  TestKeyframeModel(
+      impl_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+      /* hold_time=*/base::Milliseconds(kAnimationDurationMilliSeconds),
+      /* start_time=*/std::nullopt);
+}
+
+TEST_F(CompositorTimelineTriggerBehaviorTest, PlayReset) {
+  Initialize("play", "reset");
+
+  cc::KeyframeModel* impl_keyframe_model = GetImplKeyframeModel();
+
+  // Scroll to trigger play.
+  source_->scrollIntoView(nullptr);
+
+  // commit scroll to CC, CC starts playing.
+  DoBeginFrame();
+  impl_keyframe_model = GetImplKeyframeModel();
+  base::TimeTicks play_start_time = Compositor().LastFrameTime();
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /*hold_time=*/std::nullopt,
+                    /*start_time=*/play_start_time);
+  EXPECT_EQ(blink_animation_->CalculateAnimationPlayState(),
+            V8AnimationPlayState::Enum::kPaused);
+
+  // notify main thread of trigger activation, blink animation starts playing.
+  DoBeginFrame();
+  impl_keyframe_model = GetImplKeyframeModel();
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /*hold_time=*/std::nullopt,
+                    /*start_time=*/play_start_time);
+  EXPECT_EQ(blink_animation_->CalculateAnimationPlayState(),
+            V8AnimationPlayState::Enum::kRunning);
+
+  cc::KeyframeModel* main_keyframe_model = GetMainKeyframeModel();
+
+  // Scroll to trigger reset.
+  scroller_->scrollTo(nullptr, 0, 0);
+
+  // commit scroll to CC, CC deactivates trigger.
+  // However, since reset is no-op on CC, it should still be running on CC until
+  // the next commit.
+  // TODO(451238244): Implement reset on the compositor thread.
+  DoBeginFrame();
+  impl_keyframe_model = GetImplKeyframeModel();
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /*hold_time=*/std::nullopt,
+                    /*start_time=*/play_start_time);
+  // Main thread hasn't received the event yet.
+  EXPECT_EQ(blink_animation_->CalculateAnimationPlayState(),
+            V8AnimationPlayState::Enum::kRunning);
+  TestKeyframeModel(main_keyframe_model, gfx::KeyframeModel::RUNNING,
+                    /*hold_time=*/std::nullopt,
+                    /*start_time=*/impl_keyframe_model->start_time());
+
+  // Ensure current time has advanced.
+  EXPECT_GT(blink_animation_->CurrentTimeInternal().value().InMillisecondsF(),
+            0.0);
+
+  // notify main thread of trigger deactivation, main performs reset (pauses at
+  // 0), commits to CC. CC should now also be paused at 0.
+  DoBeginFrame();
+  EXPECT_EQ(blink_animation_->CalculateAnimationPlayState(),
+            V8AnimationPlayState::Enum::kPaused);
+  // Verify blink animation current time is 0.
+  EXPECT_NEAR(blink_animation_->CurrentTimeInternal().value().InMillisecondsF(),
+              0.0, 1.0);
+  EXPECT_TRUE(blink_animation_->PausedForTrigger());
+
+  impl_keyframe_model = GetImplKeyframeModel();
+  main_keyframe_model = GetMainKeyframeModel();
+
+  // On Main thread, it should be PAUSED_EXCLUSIVE at 0.
+  TestKeyframeModel(main_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+
+  // On Impl thread, it should also be PAUSED_EXCLUSIVE at 0 (synced from main).
+  TestKeyframeModel(impl_keyframe_model, gfx::KeyframeModel::PAUSED_EXCLUSIVE,
+                    /* hold_time=*/base::TimeDelta(),
+                    /* start_time=*/std::nullopt);
+}
+
 }  // namespace blink

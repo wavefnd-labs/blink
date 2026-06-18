@@ -224,9 +224,8 @@ bool AnimationTrigger::CanCompositeBehavior(Behavior behavior) {
     case Behavior::kPlayOnce:
     case Behavior::kPlayForwards:
     case Behavior::kPlayBackwards:
-      return true;
     case Behavior::kReset:
-      return false;
+      return true;
   }
   NOTREACHED();
 }
