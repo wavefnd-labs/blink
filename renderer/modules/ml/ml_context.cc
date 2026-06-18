@@ -223,7 +223,8 @@ base::expected<void, std::string> IsValidTensorSize(
       return base::unexpected("Tensor size is too large.");
     }
     if (descriptor.Rank() > 1) {
-      int height = descriptor.NumberOfElements() / width;
+      int height =
+          base::checked_cast<int>(descriptor.NumberOfElements() / width);
       if (height > max_texture_size) {
         return base::unexpected("Tensor size is too large.");
       }
