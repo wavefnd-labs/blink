@@ -37,8 +37,6 @@ namespace blink {
 
 class CORE_EXPORT LayoutThemeDefault : public LayoutTheme {
  public:
-  String ExtraDefaultStyleSheet() override;
-
   gfx::Size SliderTickSize() const override;
   int SliderTickOffsetFromTrackCenter() const override;
   void AdjustSliderThumbSize(ComputedStyleBuilder&) const override;

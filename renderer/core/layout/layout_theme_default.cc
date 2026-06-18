@@ -50,22 +50,6 @@ LayoutThemeDefault::LayoutThemeDefault() : painter_(*this) {}
 
 LayoutThemeDefault::~LayoutThemeDefault() = default;
 
-// Use the Windows style sheets to match their metrics.
-String LayoutThemeDefault::ExtraDefaultStyleSheet() {
-  String extra_style_sheet = LayoutTheme::ExtraDefaultStyleSheet();
-  String multiple_fields_style_sheet =
-      RuntimeEnabledFeatures::InputMultipleFieldsUIEnabled()
-          ? UncompressResourceAsASCIIString(
-                IDR_UASTYLE_THEME_INPUT_MULTIPLE_FIELDS_CSS)
-          : String();
-  StringBuilder builder;
-  builder.ReserveCapacity(extra_style_sheet.length() +
-                          multiple_fields_style_sheet.length());
-  builder.Append(extra_style_sheet);
-  builder.Append(multiple_fields_style_sheet);
-  return builder.ToString();
-}
-
 gfx::Size LayoutThemeDefault::SliderTickSize() const {
   // The value should be synchronized with a -webkit-slider-container rule in
   // html.css.
