@@ -639,6 +639,27 @@ void OffscreenCanvas::DidDraw(const gfx::Rect& rect) {
   if (HasPlaceholderCanvas()) {
     needs_push_frame_ = true;
     if (!inside_worker_raf_) {
+      // If the offscreencanvas is in the same tread as the canvas, and we are
+      // trying for a second time to request the being frame, and we are in a
+      // capture_stream scenario, we will call a BeginFrame right away. So
+      // Offscreen Canvas can behave in a more synchronous way when it's on the
+      // main thread.
+      if (GetOrCreateResourceDispatcher()->NeedsBeginFrame() &&
+          IsMainThread()) {
+        if (placeholder_canvas_id_ !=
+                OffscreenCanvasPlaceholder::kNoPlaceholderId &&
+            placeholder_canvas_id_ != kInvalidDOMNodeId) {
+          OffscreenCanvasPlaceholder* placeholder_canvas =
+              OffscreenCanvasPlaceholder::GetPlaceholderCanvasById(
+                  placeholder_canvas_id_);
+          if (placeholder_canvas &&
+              placeholder_canvas->IsOffscreenCanvasRegistered() &&
+              placeholder_canvas->HasCanvasCapture()) {
+            BeginFrame();
+          }
+        }
+      }
+
       GetOrCreateResourceDispatcher()->SetNeedsBeginFrame(true);
     }
   }
