@@ -245,8 +245,7 @@ OffscreenCanvasRenderingContext2D::GetOrCreateResourceProvider() {
             shared_image_usage_flags, host);
   } else if (host->HasPlaceholderCanvas()) {
     // using the software compositor
-    base::WeakPtr<CanvasResourceDispatcher> dispatcher_weakptr =
-        host->GetOrCreateResourceDispatcher()->GetWeakPtr();
+    host->GetOrCreateResourceDispatcher();
     shared_image_provider_ = Canvas2DResourceProviderSharedImage::
         CreateWithClearForSoftwareCompositor(
             host->Size(), format, alpha_type, color_space, hdr_metadata,

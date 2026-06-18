@@ -1524,13 +1524,8 @@ CanvasResourceDispatcher* HTMLCanvasElement::GetOrCreateResourceDispatcher() {
       context_->CreationAttributes().desynchronized) {
     frame_dispatcher_ = std::make_unique<CanvasResourceDispatcher>(
         nullptr, GetDocument().GetTaskRunner(TaskType::kInternalDefault),
-        GetPage()
-            ->GetPageScheduler()
-            ->GetAgentGroupScheduler()
-            .CompositorTaskRunner(),
         surface_layer_bridge_->GetFrameSinkId().client_id(),
-        surface_layer_bridge_->GetFrameSinkId().sink_id(), kNoPlaceholderId,
-        Size());
+        surface_layer_bridge_->GetFrameSinkId().sink_id(), Size());
   }
   return frame_dispatcher_.get();
 }

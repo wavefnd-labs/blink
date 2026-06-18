@@ -604,9 +604,7 @@ CanvasResourceDispatcher* OffscreenCanvas::GetOrCreateResourceDispatcher() {
     // (either main or worker) to the GPU process and will have to be recreated
     // if the GPU channel is lost.
     frame_dispatcher_ = std::make_unique<CanvasResourceDispatcher>(
-        this, dispatcher_task_runner,
-        agent_group_scheduler_compositor_task_runner, client_id_, sink_id_,
-        placeholder_canvas_id_, Size());
+        this, dispatcher_task_runner, client_id_, sink_id_, Size());
 
     if (placeholder_canvas_id_ !=
             OffscreenCanvasPlaceholder::kNoPlaceholderId &&

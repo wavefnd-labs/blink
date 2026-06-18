@@ -42,21 +42,14 @@ namespace blink {
 CanvasResourceDispatcher::CanvasResourceDispatcher(
     CanvasResourceDispatcherClient* client,
     scoped_refptr<base::SingleThreadTaskRunner> task_runner,
-    scoped_refptr<base::SingleThreadTaskRunner>
-        agent_group_scheduler_compositor_task_runner,
     uint32_t client_id,
     uint32_t sink_id,
-    DOMNodeId canvas_id,
     const gfx::Size& size)
     : frame_sink_id_(viz::FrameSinkId(client_id, sink_id)),
       size_(size),
       change_size_for_next_commit_(false),
-      placeholder_canvas_id_(canvas_id),
       client_(client),
-      task_runner_(std::move(task_runner)),
-      agent_group_scheduler_compositor_task_runner_(
-          std::move(agent_group_scheduler_compositor_task_runner)),
-      fake_frame_timer_(task_runner_,
+      fake_frame_timer_(std::move(task_runner),
                         this,
                         &CanvasResourceDispatcher::OnFakeFrameTimer) {
   // Frameless canvas pass an invalid |frame_sink_id_|; don't create mojo
