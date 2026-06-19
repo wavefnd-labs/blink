@@ -70,7 +70,6 @@ class CORE_EXPORT HTMLOptGroupElement final : public HTMLElement {
   String LabelAttributeText() const;
   void UpdateGroupLabel();
 
-  Member<HTMLSlotElement> legend_slot_;
   Member<HTMLSlotElement> opt_group_slot_;
   Member<HTMLDivElement> label_;
   Member<HTMLSelectElement> owner_select_;
