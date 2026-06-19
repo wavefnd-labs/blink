@@ -266,7 +266,8 @@ OffscreenCanvasRenderingContext2D::GetOrCreateResourceProvider() {
   Host()->UpdateMemoryUsage();
 
   CanvasResourceProvider* provider = GetResourceProvider();
-  if (provider && provider->IsValid()) {
+  if (provider) {
+    CHECK(provider->IsValid());
     base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
                               provider->IsAccelerated());
     base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
