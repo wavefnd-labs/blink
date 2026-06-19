@@ -1065,7 +1065,7 @@ Document::Document(const DocumentInit& initializer,
         !dom_window_->IsFeatureEnabled(
             network::mojom::PermissionsPolicyFeature::kVerticalScroll);
     cached_top_frame_site_for_visited_links_ =
-        net::SchemefulSite(TopFrameOrigin()->ToUrlOrigin());
+        TopFrameOrigin()->GetSchemefulSite();
   } else {
     // We disable fetches for frame-less Documents.
     // See https://crbug.com/961614 for details.
@@ -7014,20 +7014,20 @@ net::SiteForCookies Document::SiteForCookies() const {
   // like images or video. We do so because when third-party cookie blocking is
   // enabled, access-controlled media cannot be rendered. We only make this
   // exception in this special case to minimize security/privacy risk.
-  url::Origin url_origin = origin->ToUrlOrigin();
-
-  if (override_site_for_cookies_for_csp_media_ && url_origin.opaque() &&
-      !url_origin.GetTupleOrPrecursorTupleIfOpaque().host().empty()) {
-    return net::SiteForCookies::FromOrigin(url::Origin::Create(
-        url_origin.GetTupleOrPrecursorTupleIfOpaque().GetURL()));
+  if (override_site_for_cookies_for_csp_media_ && origin->IsOpaque()) {
+    url::Origin url_origin = origin->ToUrlOrigin();
+    if (!url_origin.GetTupleOrPrecursorTupleIfOpaque().host().empty()) {
+      return net::SiteForCookies::FromOrigin(url::Origin::Create(
+          url_origin.GetTupleOrPrecursorTupleIfOpaque().GetURL()));
+    }
   }
 
-  net::SiteForCookies candidate = net::SiteForCookies::FromOrigin(url_origin);
+  net::SiteForCookies candidate(origin->GetSchemefulSite());
 
-  // If true, CompareWithFrameTreeOriginAndRevise() is skipped if the
-  // SecurityOrigin of the the frames is the same. If any frame has a different
+  // If true, CompareWithFrameTreeSiteAndRevise() is skipped if the
+  // SecurityOrigin of the frames is the same. If any frame has a different
   // SecurityOrigin, then this is set to false so that
-  // CompareWithFrameTreeOriginAndRevise() is called for all remaining frames.
+  // CompareWithFrameTreeSiteAndRevise() is called for all remaining frames.
   bool can_avoid_revise_if_security_origins_match = true;
 
   if (SchemeRegistry::ShouldTreatURLSchemeAsFirstPartyWhenTopLevel(
@@ -7049,8 +7049,10 @@ net::SiteForCookies Document::SiteForCookies() const {
     // If possible, skip revising frames that have the same security origin.
     if (!can_avoid_revise_if_security_origins_match ||
         current_frame_security_origin != origin) {
-      if (!candidate.CompareWithFrameTreeOriginAndRevise(
-              current_frame_security_origin->ToUrlOrigin())) {
+      const bool candidate_still_matches =
+          candidate.CompareWithFrameTreeSiteAndRevise(
+              current_frame_security_origin->GetSchemefulSite());
+      if (!candidate_still_matches) {
         return candidate;
       }
       can_avoid_revise_if_security_origins_match = false;
