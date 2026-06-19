@@ -24,11 +24,8 @@
 
 namespace blink {
 
-TimelineTrigger::TimelineTrigger(TimelineTriggerRangeList* ranges,
-                                 Element* owning_element)
+TimelineTrigger::TimelineTrigger(TimelineTriggerRangeList* ranges)
     : ranges_(ranges) {
-  owning_element_ = owning_element;
-
   // TODO(crbug.com/473568234): Support multiple timelines.
   if (AnimationTimeline* timeline = Timeline()) {
     timeline->GetDocument()->GetDocumentAnimations().AddAnimationTrigger(*this);

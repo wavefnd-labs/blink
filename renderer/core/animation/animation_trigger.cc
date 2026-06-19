@@ -456,7 +456,6 @@ bool AnimationTrigger::IsTriggeredOnCompositor(
 
 void AnimationTrigger::Trace(Visitor* visitor) const {
   visitor->Trace(animation_behavior_map_);
-  visitor->Trace(owning_element_);
   ScriptWrappable::Trace(visitor);
 }
 
