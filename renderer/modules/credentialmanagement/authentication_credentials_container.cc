@@ -2001,12 +2001,22 @@ AuthenticationCredentialsContainer::preventSilentAccess(
 
   // TODO(https://crbug.com/1441075): Unify the implementation for
   // different CredentialTypes and avoid the duplication eventually.
-  auto* auth_request =
-      CredentialManagerProxy::From(script_state)->FederatedAuthRequest();
-  auth_request->PreventSilentAccess(
-      BindOnce(&OnPreventSilentAccessComplete,
-               std::make_unique<ScopedPromiseResolver>(
-                   resolver, ScopedPromiseResolver::ConnectionType::kFedCm)));
+  if (RuntimeEnabledFeatures::FedCmMultipleRequestsEnabled(
+          ExecutionContext::From(script_state))) {
+    auto* service =
+        CredentialManagerProxy::From(script_state)->FederatedRequestService();
+    service->PreventSilentAccess(
+        BindOnce(&OnPreventSilentAccessComplete,
+                 std::make_unique<ScopedPromiseResolver>(
+                     resolver, ScopedPromiseResolver::ConnectionType::kFedCm)));
+  } else {
+    auto* auth_request =
+        CredentialManagerProxy::From(script_state)->FederatedAuthRequest();
+    auth_request->PreventSilentAccess(
+        BindOnce(&OnPreventSilentAccessComplete,
+                 std::make_unique<ScopedPromiseResolver>(
+                     resolver, ScopedPromiseResolver::ConnectionType::kFedCm)));
+  }
 
   return promise;
 }
