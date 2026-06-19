@@ -194,10 +194,25 @@ void JXLImageDecoder::ScanFrames() {
       if (result.bytes_consumed > 0 && scanner_input_offset_ < data_size) {
         continue;
       }
-      if (all_input) {
-        SetFailed();
+      if (!all_input) {
+        return;
       }
-      return;
+
+      // A truncated still image can contain enough data to render a partial
+      // frame. Let the pixel decoder try to output that partial frame.
+      if (!(*scanner_)->has_basic_info()) {
+        SetFailed();
+        return;
+      }
+      if (!SetBasicInfo()) {
+        return;
+      }
+      if (basic_info_->have_animation) {
+        SetFailed();
+        return;
+      }
+      scanner_done_ = true;
+      break;
     }
 
     if (!(*scanner_)->has_more_frames()) {
@@ -444,9 +459,10 @@ void JXLImageDecoder::Decode(wtf_size_t index, bool only_size) {
       }
       // We've exhausted all available data or made no progress.
       if (all_input) {
-        // All network data received and fed, but decoder still wants more.
-        // This is a truncated or corrupt file.
-        SetFailed();
+        // Truncated still images may have a useful partial frame.
+        if (!flush_partial_frame(next_frame_to_decode_)) {
+          SetFailed();
+        }
         return;
       }
       // If we got here, the frame scanner has found basic info.
@@ -458,7 +474,6 @@ void JXLImageDecoder::Decode(wtf_size_t index, bool only_size) {
       // reach the first visible frame.
       if (!flush_partial_frame(next_frame_to_decode_)) {
         SetFailed();
-        return;
       }
       return;
     }
