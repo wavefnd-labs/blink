@@ -15,9 +15,11 @@
 #include "third_party/blink/renderer/core/animation/scroll_timeline.h"
 #include "third_party/blink/renderer/core/css/css_numeric_literal_value.h"
 #include "third_party/blink/renderer/core/dom/document.h"
+#include "third_party/blink/renderer/core/frame/settings.h"
+#include "third_party/blink/renderer/core/frame/web_feature.h"
 #include "third_party/blink/renderer/core/page/page_animator.h"
+#include "third_party/blink/renderer/core/script/classic_script.h"
 #include "third_party/blink/renderer/core/testing/core_unit_test_helper.h"
-#include "third_party/blink/renderer/platform/testing/paint_test_configurations.h"
 
 namespace blink {
 namespace {
@@ -28,8 +30,7 @@ void ExpectRelativeErrorWithinEpsilon(double expected, double observed) {
 
 }  // namespace
 
-class TimelineTriggerTest : public PaintTestConfigurations,
-                            public RenderingTest {
+class TimelineTriggerTest : public RenderingTest {
  public:
   TimelineTriggerTest()
       : RenderingTest(base::test::TaskEnvironment::TimeSource::MOCK_TIME) {
@@ -58,9 +59,7 @@ class TimelineTriggerTest : public PaintTestConfigurations,
   }
 };
 
-INSTANTIATE_PAINT_TEST_SUITE_P(TimelineTriggerTest);
-
-TEST_P(TimelineTriggerTest, ComputeBoundariesTest) {
+TEST_F(TimelineTriggerTest, ComputeBoundariesTest) {
   using RangeBoundary = TimelineTrigger::RangeBoundary;
   using TriggerBoundaries = TimelineTrigger::TriggerBoundaries;
   SetBodyInnerHTML(R"HTML(
@@ -228,9 +227,7 @@ class TimelineTriggerPlayBackwardsForwardsTest : public TimelineTriggerTest {
   }
 };
 
-INSTANTIATE_PAINT_TEST_SUITE_P(TimelineTriggerPlayBackwardsForwardsTest);
-
-TEST_P(TimelineTriggerPlayBackwardsForwardsTest, BackwardsInterruptsForwards) {
+TEST_F(TimelineTriggerPlayBackwardsForwardsTest, BackwardsInterruptsForwards) {
   Initialize("play-forwards play-backwards");
 
   Element* target = GetDocument().getElementById(AtomicString("target"));
@@ -286,7 +283,7 @@ TEST_P(TimelineTriggerPlayBackwardsForwardsTest, BackwardsInterruptsForwards) {
   EXPECT_EQ(animation->CurrentTimeInternal().value(), AnimationTimeDelta());
 }
 
-TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
+TEST_F(TimelineTriggerPlayBackwardsForwardsTest,
        PlayForwardsFinishedAtEndNoOp) {
   Initialize("play-forwards");
 
@@ -314,7 +311,7 @@ TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
             ANIMATION_TIME_DELTA_FROM_SECONDS(5));
 }
 
-TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
+TEST_F(TimelineTriggerPlayBackwardsForwardsTest,
        PlayForwardsReversesFinishedAtStart) {
   Initialize("play-forwards");
 
@@ -347,7 +344,7 @@ TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
             ANIMATION_TIME_DELTA_FROM_SECONDS(1));
 }
 
-TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
+TEST_F(TimelineTriggerPlayBackwardsForwardsTest,
        PlayBackwardsFinishedAtStartNoOp) {
   Initialize("play-backwards");
 
@@ -376,7 +373,7 @@ TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
             ANIMATION_TIME_DELTA_FROM_SECONDS(0));
 }
 
-TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
+TEST_F(TimelineTriggerPlayBackwardsForwardsTest,
        PlayBackwardsReversesFinishedAtEnd) {
   Initialize("play-backwards");
 
@@ -406,6 +403,38 @@ TEST_P(TimelineTriggerPlayBackwardsForwardsTest,
   UpdateAllLifecyclePhasesForTest();
   EXPECT_EQ(animation->CurrentTimeInternal().value(),
             ANIMATION_TIME_DELTA_FROM_SECONDS(4));
+}
+
+TEST_F(TimelineTriggerTest, CSSUseCounter) {
+  EXPECT_FALSE(GetDocument().IsUseCounted(WebFeature::kTimelineTrigger));
+
+  SetBodyInnerHTML(R"HTML(
+    <style>
+      #scroller {
+        overflow-y: scroll; width: 100px; height: 100px;
+      }
+      #target {
+        timeline-trigger: --trigger scroll();
+      }
+    </style>
+    <div id='scroller'></div>
+    <div id='target'></div>
+  )HTML");
+
+  UpdateAllLifecyclePhasesForTest();
+
+  EXPECT_TRUE(GetDocument().IsUseCounted(WebFeature::kTimelineTrigger));
+}
+
+TEST_F(TimelineTriggerTest, JSUseCounter) {
+  EXPECT_FALSE(GetDocument().IsUseCounted(WebFeature::kTimelineTrigger));
+  GetDocument().GetSettings()->SetScriptEnabled(true);
+
+  ClassicScript::CreateUnspecifiedScript(
+      "new TimelineTrigger([{timeline: document.timeline}]);")
+      ->RunScript(GetDocument().domWindow());
+
+  EXPECT_TRUE(GetDocument().IsUseCounted(WebFeature::kTimelineTrigger));
 }
 
 }  // namespace blink

@@ -10,7 +10,9 @@
 #include "third_party/blink/renderer/core/animation/animation.h"
 #include "third_party/blink/renderer/core/animation/animation_timeline.h"
 #include "third_party/blink/renderer/core/animation/css/css_animation.h"
+#include "third_party/blink/renderer/core/frame/web_feature.h"
 #include "third_party/blink/renderer/platform/animation/compositor_animation.h"
+#include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
 #include "ui/gfx/animation/keyframe/keyframe_model.h"
 
 namespace blink {
