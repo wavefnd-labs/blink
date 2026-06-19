@@ -4235,8 +4235,12 @@ void LineBreaker::HandleOverflow(LineInfo* line_info) {
   disable_bisect_line_break_ = true;
 
   // Restore the hyphenation states to before the loop if needed.
+  // The loop above may have shrunk `item_results` via `Rewind()` (e.g. when
+  // handling a ruby column), so the saved index can be stale. Only restore
+  // the hyphen if the item it referenced still exists. See crbug.com/435058045.
   DCHECK(!HasHyphen());
-  if (hyphen_index_before) [[unlikely]] {
+  if (hyphen_index_before && *hyphen_index_before < item_results->size())
+      [[unlikely]] {
     position_ += AddHyphen(item_results, *hyphen_index_before);
   }
 
