@@ -175,6 +175,10 @@ class TestRenderingContext2D final
     return true;
   }
 
+  base::ByteSize AllocatedBufferSize() const override {
+    return base::ByteSize();
+  }
+
   CanvasResourceProvider* GetResourceProvider() const override {
     return nullptr;
   }

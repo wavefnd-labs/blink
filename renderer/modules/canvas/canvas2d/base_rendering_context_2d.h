@@ -90,14 +90,6 @@ class MODULES_EXPORT BaseRenderingContext2D : public CanvasRenderingContext,
 
   void ResetInternal() override;
 
-  base::ByteSize AllocatedBufferSize() const override {
-    auto* provider = GetResourceProvider();
-    if (provider) {
-      return provider->EstimatedSizeInBytes();
-    }
-    return base::ByteSize();
-  }
-
   CanvasRenderingContext2DSettings* getContextAttributes() const;
 
   ImageData* createImageData(ImageData*, ExceptionState&) const;

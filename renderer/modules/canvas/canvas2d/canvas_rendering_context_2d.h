@@ -241,6 +241,7 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   CanvasHibernationHandler* GetHibernationHandler() const;
 
   void EnableAccelerationIfPossible() override;
+  base::ByteSize AllocatedBufferSize() const override;
 
  protected:
   HTMLCanvasElement* HostAsHTMLCanvasElement() const final;

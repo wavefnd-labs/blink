@@ -322,6 +322,16 @@ OffscreenCanvasRenderingContext2D::ReplaceResourceProvider(
   return old_resource_provider;
 }
 
+base::ByteSize OffscreenCanvasRenderingContext2D::AllocatedBufferSize() const {
+  if (shared_image_provider_) {
+    return shared_image_provider_->EstimatedSizeInBytes();
+  }
+  if (bitmap_provider_) {
+    return bitmap_provider_->EstimatedSizeInBytes();
+  }
+  return base::ByteSize();
+}
+
 CanvasResourceProvider* OffscreenCanvasRenderingContext2D::GetResourceProvider()
     const {
   if (shared_image_provider_) {
