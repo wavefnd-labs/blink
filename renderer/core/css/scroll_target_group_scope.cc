@@ -184,7 +184,10 @@ void OrderedScope<HTMLAnchorElement>::OnScopeCreated(
 
     // Check if this is an anchor element we should attach.
     if (auto* anchor = DynamicTo<HTMLAnchorElement>(element)) {
-      anchor->UpdateScrollTargetGroupMembership();
+      if (anchor->ScrollTargetElement()) {
+        DCHECK(!anchor->GetScrollTargetGroupContainerData());
+        scope->AttachItem(*anchor);
+      }
     }
 
     node = LayoutTreeBuilderTraversal::Next(*node, scope_root);
