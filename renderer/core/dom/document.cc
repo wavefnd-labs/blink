@@ -2371,8 +2371,7 @@ Document::CalculateStyleAndLayoutTreeUpdateForThisDocument() const {
   if (!IsActive() || !View())
     return StyleAndLayoutTreeUpdate::kNone;
 
-  if (style_engine_->NeedsFullStyleUpdate() ||
-      OverscrollCommandTargetsDirty()) {
+  if (style_engine_->NeedsFullStyleUpdate()) {
     return StyleAndLayoutTreeUpdate::kFull;
   }
   if (!use_elements_needing_update_.empty())
@@ -2705,8 +2704,6 @@ void Document::UpdateStyleAndLayoutTreeForThisDocument() {
   document_animations_->UpdateAnimationTimingIfNeeded();
   EvaluateMediaQueryListIfNeeded();
   UpdateUseShadowTreesIfNeeded();
-
-  UpdateOverscrollCommandTargets();
 
   style_engine.UpdateActiveStyle();
   style_engine.UpdateCounterStyles();
@@ -9527,8 +9524,7 @@ void Document::Trace(Visitor* visitor) const {
   visitor->Trace(payment_link_handler_);
 #endif  // BUILDFLAG(IS_ANDROID)
   visitor->Trace(view_transitions_);
-  visitor->Trace(overscroll_command_targets_);
-  visitor->Trace(overscroll_command_invokers_);
+
   visitor->Trace(menu_safe_triangle_);
   Supplementable<Document>::Trace(visitor);
   TreeScope::Trace(visitor);
@@ -10313,64 +10309,7 @@ CustomElementRegistry* Document::EffectiveGlobalCustomElementRegistry() const {
   return nullptr;
 }
 
-const HeapHashSet<Member<const Element>>& Document::OverscrollCommandTargets() {
-  UpdateOverscrollCommandTargets();
-  return overscroll_command_targets_;
-}
 
-void Document::UpdateOverscrollCommandTargets() {
-  if (!overscroll_command_targets_dirty_) {
-    return;
-  }
-
-  if (overscroll_command_invokers_.empty() &&
-      overscroll_command_targets_.empty()) {
-    overscroll_command_targets_dirty_ = false;
-    return;
-  }
-
-  HeapHashSet<Member<const Element>> new_targets;
-  for (Element* element : overscroll_command_invokers_) {
-    if (auto* html_element = DynamicTo<HTMLElement>(element)) {
-      if (Element* target = html_element->commandForElement()) {
-        new_targets.insert(target);
-      }
-    }
-  }
-
-  // Calculate the difference and call OverscrollTargetStateChanged.
-  for (auto& entry : overscroll_command_targets_) {
-    if (!new_targets.Contains(entry)) {
-      const_cast<Element*>(entry.Get())->OverscrollTargetStateChanged();
-    }
-  }
-  for (auto& entry : new_targets) {
-    if (!overscroll_command_targets_.Contains(entry)) {
-      const_cast<Element*>(entry.Get())->OverscrollTargetStateChanged();
-    }
-  }
-
-  overscroll_command_targets_ = std::move(new_targets);
-  overscroll_command_targets_dirty_ = false;
-}
-
-// We require either the invokers list to be non-empty (so we have some invokers
-// to process) or the existing targets list to be non-empty (because we might
-// have some "old" targets that need re-processing).
-bool Document::OverscrollCommandTargetsDirty() const {
-  return overscroll_command_targets_dirty_ &&
-         (!overscroll_command_invokers_.empty() ||
-          !overscroll_command_targets_.empty());
-}
-void Document::MarkOverscrollCommandTargetsDirty() {
-  overscroll_command_targets_dirty_ = true;
-}
-void Document::AddOverscrollCommandInvoker(Element& invoker) {
-  overscroll_command_invokers_.insert(&invoker);
-}
-void Document::RemoveOverscrollCommandInvoker(Element& invoker) {
-  overscroll_command_invokers_.erase(&invoker);
-}
 
 template class CORE_TEMPLATE_EXPORT Supplement<Document>;
 

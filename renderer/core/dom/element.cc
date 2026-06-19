@@ -1403,9 +1403,6 @@ void Element::SetElementAttribute(const QualifiedName& name, Element* element) {
     if (AXObjectCache* cache = GetDocument().ExistingAXObjectCache()) {
       cache->HandleAttributeChanged(name, this);
     }
-    if (name == html_names::kCommandforAttr) {
-      GetDocument().MarkOverscrollCommandTargetsDirty();
-    }
   }
 }
 
@@ -3825,10 +3822,6 @@ void Element::AttributeChanged(const AttributeModificationParams& params) {
           ->RemovePendingParsingElement(GetIdAttribute(), this);
     }
 
-    if (isConnected() &&
-        (!params.old_value.empty() || !params.new_value.empty())) {
-      GetDocument().MarkOverscrollCommandTargetsDirty();
-    }
   } else if (name == html_names::kClassAttr) {
     if (params.old_value == params.new_value &&
         params.reason != AttributeModificationReason::kByMoveToNewDocument &&
@@ -4363,10 +4356,6 @@ Node::InsertionNotificationRequest Element::InsertedInto(
     }
   }
 
-  if (insertion_point.isConnected() && !GetIdAttribute().empty()) {
-    GetDocument().MarkOverscrollCommandTargetsDirty();
-  }
-
   return kInsertionDone;
 }
 
@@ -4555,9 +4544,6 @@ void Element::RemovedFrom(ContainerNode& insertion_point) {
     tracker->RemoveAllOverscroll();
   }
 
-  if (was_in_document && !GetIdAttribute().empty()) {
-    document.MarkOverscrollCommandTargetsDirty();
-  }
 }
 
 void Element::AttachColumnPseudoElements(AttachContext& context) {
@@ -8942,14 +8928,6 @@ void Element::ActiveViewTransitionTypeStateChanged() {
           style_change_reason::kPseudoClass,
           style_change_extra_data::g_active_view_transition_type));
   PseudoStateChanged(CSSSelector::kPseudoActiveViewTransitionType);
-}
-
-void Element::OverscrollTargetStateChanged() {
-  SetNeedsStyleRecalc(kLocalStyleChange,
-                      StyleChangeReasonForTracing::CreateWithExtraData(
-                          style_change_reason::kPseudoClass,
-                          style_change_extra_data::g_overscroll_target));
-  PseudoStateChanged(CSSSelector::kPseudoOverscrollTarget);
 }
 
 bool Element::MatchesOverscrollOpen() const {

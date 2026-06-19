@@ -860,29 +860,12 @@ void HTMLElement::AttributeChanged(const AttributeModificationParams& params) {
     return;
   }
 
-  if (params.reason != AttributeModificationReason::kDirectly) {
-    return;
+  if (params.name == html_names::kOverscrollareaAttr) {
+    PseudoStateChanged(CSSSelector::kPseudoOverscrollTarget);
   }
 
-  if (params.name == html_names::kCommandAttr) {
-    bool old_is_overscroll = IsOverscrollCommand(
-        GetCommandEventType(params.old_value, GetExecutionContext()));
-    bool new_is_overscroll = IsOverscrollCommand(
-        GetCommandEventType(params.new_value, GetExecutionContext()));
-    if (isConnected() && old_is_overscroll != new_is_overscroll) {
-      if (new_is_overscroll) {
-        GetDocument().AddOverscrollCommandInvoker(*this);
-      } else {
-        GetDocument().RemoveOverscrollCommandInvoker(*this);
-      }
-      GetDocument().MarkOverscrollCommandTargetsDirty();
-    }
-  } else if (params.name == html_names::kCommandforAttr) {
-    if (isConnected() && IsOverscrollCommand(GetCommandEventType(
-                             FastGetAttribute(html_names::kCommandAttr),
-                             GetExecutionContext()))) {
-      GetDocument().MarkOverscrollCommandTargetsDirty();
-    }
+  if (params.reason != AttributeModificationReason::kDirectly) {
+    return;
   }
 
   // adjustedFocusedElementInTreeScope() is not trivial. We should check
@@ -3698,13 +3681,6 @@ Node::InsertionNotificationRequest HTMLElement::InsertedInto(
   if (IsFormAssociatedCustomElement())
     EnsureElementInternals().InsertedInto(insertion_point);
 
-  if (insertion_point.isConnected() &&
-      IsOverscrollCommand(GetCommandEventType(
-          FastGetAttribute(html_names::kCommandAttr), GetExecutionContext()))) {
-    GetDocument().AddOverscrollCommandInvoker(*this);
-    GetDocument().MarkOverscrollCommandTargetsDirty();
-  }
-
   return kInsertionDone;
 }
 
@@ -3731,13 +3707,6 @@ void HTMLElement::RemovedFrom(ContainerNode& insertion_point) {
   Element::RemovedFrom(insertion_point);
   if (IsFormAssociatedCustomElement())
     EnsureElementInternals().RemovedFrom(insertion_point);
-
-  if (was_in_document &&
-      IsOverscrollCommand(GetCommandEventType(
-          FastGetAttribute(html_names::kCommandAttr), GetExecutionContext()))) {
-    GetDocument().RemoveOverscrollCommandInvoker(*this);
-    GetDocument().MarkOverscrollCommandTargetsDirty();
-  }
 }
 
 void HTMLElement::DidMoveToNewDocument(Document& old_document) {
