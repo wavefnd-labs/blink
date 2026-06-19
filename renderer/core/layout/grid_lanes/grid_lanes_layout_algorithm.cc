@@ -771,7 +771,7 @@ void GridLanesLayoutAlgorithm::RunGridLanesPlacementPhase(
                   CalculateItemInlineContribution(
                       sizing_subtree, grid_lanes_item, *sizing_constraint),
                   /*make_grid_axis_definite=*/true,
-                  /*is_for_min_max_sizing=*/true);
+                  /*is_for_min_max_sizing=*/true, child_layout_subtree);
 
     const auto& item_node = grid_lanes_item.node;
     const auto& item_style = item_node.Style();
@@ -2431,7 +2431,8 @@ ConstraintSpace GridLanesLayoutAlgorithm::CreateConstraintSpaceForMeasure(
     const SubgriddedItemData& subgridded_item,
     std::optional<LayoutUnit> opt_fixed_inline_size,
     bool make_grid_axis_definite,
-    bool is_for_min_max_sizing) const {
+    bool is_for_min_max_sizing,
+    const GridLayoutSubtree* opt_layout_subtree) const {
   LogicalSize containing_size = grid_lanes_available_size_;
   const auto writing_mode = GetConstraintSpace().GetWritingMode();
   const auto grid_axis_direction = Style().GridLanesTrackSizingDirection();
@@ -2534,9 +2535,9 @@ ConstraintSpace GridLanesLayoutAlgorithm::CreateConstraintSpaceForMeasure(
     }
   }
 
-  return CreateConstraintSpace(*subgridded_item, containing_size,
-                               fixed_available_size,
-                               LayoutResultCacheSlot::kMeasure);
+  return CreateConstraintSpace(
+      *subgridded_item, containing_size, fixed_available_size,
+      LayoutResultCacheSlot::kMeasure, opt_layout_subtree);
 }
 
 // static

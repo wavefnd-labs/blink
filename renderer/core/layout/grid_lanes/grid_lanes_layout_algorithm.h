@@ -331,7 +331,8 @@ class CORE_EXPORT GridLanesLayoutAlgorithm
       const SubgriddedItemData& subgridded_item,
       std::optional<LayoutUnit> opt_fixed_inline_size = std::nullopt,
       bool make_grid_axis_definite = false,
-      bool is_for_min_max_sizing = false) const;
+      bool is_for_min_max_sizing = false,
+      const GridLayoutSubtree* opt_layout_subtree = nullptr) const;
 
   // Computes the shared baseline for items within a single virtual item group
   // (i.e., items that share the same span and baseline alignment). Returns the
