@@ -459,9 +459,14 @@ void JXLImageDecoder::Decode(wtf_size_t index, bool only_size) {
       }
       // We've exhausted all available data or made no progress.
       if (all_input) {
-        // Truncated still images may have a useful partial frame.
-        if (!flush_partial_frame(next_frame_to_decode_)) {
-          SetFailed();
+        // Truncated still images may have a useful partial frame, but only
+        // once the decoder has reached the state where the output pixel
+        // format is set. Flushing before that point is an API misuse that
+        // the jxl-rs decoder cannot handle. See crbug.com/526010666.
+        if (decoder_state_ >= DecoderState::kHaveBasicInfo) {
+          if (!flush_partial_frame(next_frame_to_decode_)) {
+            SetFailed();
+          }
         }
         return;
       }
