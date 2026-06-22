@@ -1972,6 +1972,10 @@ bool Element::InterestGained(Element* target, InterestState state) {
 
   Event* interest_event = InterestEvent::Create(event_type_names::kInterest,
                                                 this, Event::Cancelable::kYes);
+  if (RuntimeEnabledFeatures::ShadowRootReferenceTargetEnabled(
+          GetExecutionContext())) {
+    interest_event->SetComposed(true);
+  }
   target->DispatchEvent(*interest_event);
   if (interest_event->defaultPrevented()) {
     return false;
@@ -2017,6 +2021,10 @@ bool Element::InterestLost(Element* target,
                             cancelable == InterestLostCancelable::kCancelable
                                 ? Event::Cancelable::kYes
                                 : Event::Cancelable::kNo);
+  if (RuntimeEnabledFeatures::ShadowRootReferenceTargetEnabled(
+          GetExecutionContext())) {
+    lose_interest_event->SetComposed(true);
+  }
   target->DispatchEvent(*lose_interest_event);
   if (lose_interest_event->defaultPrevented()) {
     return false;

@@ -1754,6 +1754,10 @@ void HTMLElement::ShowPopoverInternal(Element* invoker,
   auto* event = ToggleEvent::Create(
       event_type_names::kBeforetoggle, Event::Cancelable::kYes,
       /*old_state*/ keywords::kClosed, /*new_state*/ keywords::kOpen, invoker);
+  if (invoker && RuntimeEnabledFeatures::ShadowRootReferenceTargetEnabled(
+                     invoker->GetExecutionContext())) {
+    event->SetComposed(true);
+  }
   CHECK(!event->bubbles());
   CHECK(event->cancelable());
   CHECK_EQ(event->oldState(), keywords::kClosed);
@@ -1992,6 +1996,10 @@ void HTMLElement::ShowPopoverInternal(Element* invoker,
   ToggleEvent* after_event = ToggleEvent::Create(
       event_type_names::kToggle, Event::Cancelable::kNo, old_state,
       /*new_state*/ keywords::kOpen, invoker);
+  if (invoker && RuntimeEnabledFeatures::ShadowRootReferenceTargetEnabled(
+                     invoker->GetExecutionContext())) {
+    after_event->SetComposed(true);
+  }
   CHECK_EQ(after_event->newState(), keywords::kOpen);
   CHECK_EQ(after_event->oldState(), old_state);
   CHECK(!after_event->bubbles());
@@ -2345,6 +2353,10 @@ PopoverHideResult HTMLElement::HidePopoverInternal(
     auto* event = ToggleEvent::Create(
         event_type_names::kBeforetoggle, Event::Cancelable::kNo,
         /*old_state*/ keywords::kOpen, /*new_state*/ keywords::kClosed, invoker);
+    if (invoker && RuntimeEnabledFeatures::ShadowRootReferenceTargetEnabled(
+                       invoker->GetExecutionContext())) {
+      event->SetComposed(true);
+    }
     CHECK(!event->bubbles());
     CHECK(!event->cancelable());
     CHECK_EQ(event->oldState(), keywords::kOpen);
@@ -2415,6 +2427,10 @@ PopoverHideResult HTMLElement::HidePopoverInternal(
     ToggleEvent* after_event = ToggleEvent::Create(
         event_type_names::kToggle, Event::Cancelable::kNo, old_state,
         /*new_state*/ keywords::kClosed, invoker);
+    if (invoker && RuntimeEnabledFeatures::ShadowRootReferenceTargetEnabled(
+                       invoker->GetExecutionContext())) {
+      after_event->SetComposed(true);
+    }
     CHECK_EQ(after_event->newState(), keywords::kClosed);
     CHECK_EQ(after_event->oldState(), old_state);
     CHECK(!after_event->bubbles());
@@ -3152,6 +3168,10 @@ bool HTMLElement::HandleCommandForActivation() {
   }
   Event* command_event =
       CommandEvent::Create(event_type_names::kCommand, action, this);
+  if (RuntimeEnabledFeatures::ShadowRootReferenceTargetEnabled(
+          GetExecutionContext())) {
+    command_event->SetComposed(true);
+  }
   command_target->DispatchEvent(*command_event);
   if (!command_event->defaultPrevented() &&
       command_event_type != CommandEventType::kCustom) {
