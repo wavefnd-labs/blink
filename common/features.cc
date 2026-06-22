@@ -1090,6 +1090,11 @@ BASE_FEATURE_PARAM(bool,
                    "enable_for_default_hint",
                    true);
 
+// Gating the migration of Android IME cursor anchor updates from Mojo IPC to
+// RenderFrameMetadata.
+BASE_FEATURE(kInputCursorAnchorInfoMigration,
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kInputPredictorTypeChoice, base::FEATURE_DISABLED_BY_DEFAULT);
 
 // When enabled, wake ups from throttleable TaskQueues are limited to 1 per
