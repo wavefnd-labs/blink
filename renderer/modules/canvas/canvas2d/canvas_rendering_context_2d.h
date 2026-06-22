@@ -183,6 +183,8 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   scoped_refptr<CanvasResource> PaintRenderingResultsToResource(
       SourceDrawingBuffer source_buffer,
       FlushReason reason) override;
+  scoped_refptr<StaticBitmapImage> PaintRenderingResultsToSnapshot(
+      SourceDrawingBuffer source_buffer) override;
   const std::optional<cc::PaintRecord>& GetLastRecording() override;
 
   int Width() const final;
@@ -243,7 +245,7 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   void EnableAccelerationIfPossible() override;
   base::ByteSize AllocatedBufferSize() const override;
 
-  bool IsResourceProviderValid() const override;
+  bool IsResourceProviderValid() const;
 
  protected:
   HTMLCanvasElement* HostAsHTMLCanvasElement() const final;

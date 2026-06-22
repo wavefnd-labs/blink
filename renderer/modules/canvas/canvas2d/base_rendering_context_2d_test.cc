@@ -187,10 +187,12 @@ class TestRenderingContext2D final
     return nullptr;
   }
 
-  bool IsResourceProviderValid() const override { return false; }
-
   // Implementing pure virtual functions from CanvasRenderingContext.
   scoped_refptr<StaticBitmapImage> GetImage() override { return nullptr; }
+  scoped_refptr<StaticBitmapImage> PaintRenderingResultsToSnapshot(
+      SourceDrawingBuffer) override {
+    return nullptr;
+  }
   std::unique_ptr<CanvasResourceProvider> ReplaceResourceProvider(
       std::unique_ptr<CanvasResourceProvider>) override {
     return nullptr;

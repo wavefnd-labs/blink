@@ -779,6 +779,23 @@ CanvasRenderingContext2D::PaintRenderingResultsToResource(
   return si_provider->ProduceCanvasResource(reason);
 }
 
+scoped_refptr<StaticBitmapImage>
+CanvasRenderingContext2D::PaintRenderingResultsToSnapshot(
+    SourceDrawingBuffer source_buffer) {
+  if (!IsResourceProviderValid()) {
+    return nullptr;
+  }
+  if (shared_image_provider_) {
+    shared_image_provider_->Flush();
+    return shared_image_provider_->Snapshot();
+  }
+  if (bitmap_provider_) {
+    bitmap_provider_->Flush();
+    return bitmap_provider_->Snapshot();
+  }
+  return nullptr;
+}
+
 const std::optional<cc::PaintRecord>&
 CanvasRenderingContext2D::GetLastRecording() {
   if (!canvas()) {

@@ -169,16 +169,6 @@ bool OffscreenCanvasRenderingContext2D::CanCreateResourceProvider() {
   return !!GetOrCreateResourceProvider();
 }
 
-bool OffscreenCanvasRenderingContext2D::IsResourceProviderValid() const {
-  if (shared_image_provider_) {
-    return shared_image_provider_->IsValid();
-  }
-  if (bitmap_provider_) {
-    return bitmap_provider_->IsValid();
-  }
-  return false;
-}
-
 CanvasResourceProvider*
 OffscreenCanvasRenderingContext2D::GetOrCreateResourceProvider() {
   DCHECK(Host() && Host()->IsOffscreenCanvas());
@@ -429,6 +419,26 @@ scoped_refptr<StaticBitmapImage> OffscreenCanvasRenderingContext2D::GetImage() {
     return shared_image_provider_->Snapshot();
   }
   return bitmap_provider_->Snapshot();
+}
+
+scoped_refptr<StaticBitmapImage>
+OffscreenCanvasRenderingContext2D::PaintRenderingResultsToSnapshot(
+    SourceDrawingBuffer source_buffer) {
+  if (shared_image_provider_) {
+    if (!shared_image_provider_->IsValid()) {
+      return nullptr;
+    }
+    shared_image_provider_->Flush();
+    return shared_image_provider_->Snapshot();
+  }
+  if (bitmap_provider_) {
+    if (!bitmap_provider_->IsValid()) {
+      return nullptr;
+    }
+    bitmap_provider_->Flush();
+    return bitmap_provider_->Snapshot();
+  }
+  return nullptr;
 }
 
 V8RenderingContext* OffscreenCanvasRenderingContext2D::AsV8RenderingContext() {

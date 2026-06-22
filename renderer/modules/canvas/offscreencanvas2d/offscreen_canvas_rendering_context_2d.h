@@ -65,6 +65,8 @@ class MODULES_EXPORT OffscreenCanvasRenderingContext2D final
   V8OffscreenRenderingContext* AsV8OffscreenRenderingContext() final;
   void Stop() final { NOTREACHED(); }
   scoped_refptr<StaticBitmapImage> GetImage() final;
+  scoped_refptr<StaticBitmapImage> PaintRenderingResultsToSnapshot(
+      SourceDrawingBuffer source_buffer) override;
   void Reset() override;
   // CanvasRenderingContext - ActiveScriptWrappable
   // This method will avoid this class to be garbage collected, as soon as
@@ -85,7 +87,6 @@ class MODULES_EXPORT OffscreenCanvasRenderingContext2D final
   int Height() const final;
 
   bool CanCreateResourceProvider() final;
-  bool IsResourceProviderValid() const override;
 
   // Offscreen canvas doesn't have any notion of image orientation.
   RespectImageOrientationEnum RespectImageOrientation() const final {

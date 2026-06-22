@@ -739,18 +739,6 @@ void BaseRenderingContext2D::Reset() {
   ResetInternal();
 }
 
-scoped_refptr<StaticBitmapImage>
-BaseRenderingContext2D::PaintRenderingResultsToSnapshot(
-    SourceDrawingBuffer source_buffer) {
-  if (!IsResourceProviderValid()) {
-    return nullptr;
-  }
-
-  CanvasResourceProvider* provider = GetResourceProvider();
-  provider->Flush();
-  return provider->Snapshot();
-}
-
 void BaseRenderingContext2D::WillUseCurrentFont() const {
   if (HTMLCanvasElement* canvas = HostAsHTMLCanvasElement();
       canvas != nullptr) {
