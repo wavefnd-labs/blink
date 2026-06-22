@@ -118,7 +118,7 @@ class MarkupFormatter final {
 
   EntityMask EntityMaskForText(const Text&) const;
   bool ShouldSelfClose(const Element&) const;
-  String ResolveURLIfNeeded(const Element&, const Attribute& attribute) const;
+  String ResolveUrlIfNeeded(const Element&, const Attribute& attribute) const;
 
  private:
   const ResolveUrls resolve_urls_method_;

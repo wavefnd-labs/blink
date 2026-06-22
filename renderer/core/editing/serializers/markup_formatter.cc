@@ -162,7 +162,7 @@ MarkupFormatter::MarkupFormatter(ResolveUrls resolve_urls_method,
     : resolve_urls_method_(resolve_urls_method),
       serialization_type_(serialization_type) {}
 
-String MarkupFormatter::ResolveURLIfNeeded(const Element& element,
+String MarkupFormatter::ResolveUrlIfNeeded(const Element& element,
                                            const Attribute& attribute) const {
   String value = attribute.Value();
   switch (resolve_urls_method_) {

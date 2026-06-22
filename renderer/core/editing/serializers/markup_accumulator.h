@@ -132,7 +132,7 @@ class CORE_EXPORT MarkupAccumulator {
   AtomicString RetrievePreferredPrefixString(const AtomicString& ns,
                                              const AtomicString& prefix);
   void AddPrefix(const AtomicString& prefix, const AtomicString& namespace_uri);
-  AtomicString LookupNamespaceURI(const AtomicString& prefix);
+  AtomicString LookupNamespaceUri(const AtomicString& prefix);
   AtomicString GeneratePrefix(const AtomicString& new_namespace);
 
   virtual void AppendCustomAttributes(const Element&);

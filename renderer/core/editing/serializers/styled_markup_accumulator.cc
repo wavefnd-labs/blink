@@ -177,7 +177,7 @@ void StyledMarkupAccumulator::AppendElement(StringBuilder& out,
 void StyledMarkupAccumulator::AppendAttribute(StringBuilder& result,
                                               const Element& element,
                                               const Attribute& attribute) {
-  String value = formatter_.ResolveURLIfNeeded(element, attribute);
+  String value = formatter_.ResolveUrlIfNeeded(element, attribute);
   if (formatter_.SerializeAsHTML()) {
     MarkupFormatter::AppendAttributeAsHTML(result, attribute, value);
   } else {
