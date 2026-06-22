@@ -345,14 +345,6 @@ base::ByteSize OffscreenCanvasRenderingContext2D::AllocatedBufferSize() const {
   return base::ByteSize();
 }
 
-CanvasResourceProvider* OffscreenCanvasRenderingContext2D::GetResourceProvider()
-    const {
-  if (shared_image_provider_) {
-    return shared_image_provider_.get();
-  }
-  return bitmap_provider_.get();
-}
-
 void OffscreenCanvasRenderingContext2D::Reset() {
   shared_image_provider_ = nullptr;
   bitmap_provider_ = nullptr;

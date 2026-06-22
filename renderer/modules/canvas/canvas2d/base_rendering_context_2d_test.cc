@@ -179,10 +179,6 @@ class TestRenderingContext2D final
     return base::ByteSize();
   }
 
-  CanvasResourceProvider* GetResourceProvider() const override {
-    return nullptr;
-  }
-
   CanvasResourceProvider* GetOrCreateResourceProvider() override {
     return nullptr;
   }

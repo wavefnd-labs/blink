@@ -487,8 +487,17 @@ MemoryManagedPaintCanvas* CanvasRenderingContext2D::GetOrCreatePaintCanvas() {
   if (isContextLost()) [[unlikely]] {
     return nullptr;
   }
+  if (!canvas()) {
+    return nullptr;
+  }
 
-  CanvasResourceProvider* provider = GetResourceProvider();
+  CanvasResourceProvider* provider = nullptr;
+  if (shared_image_provider_) {
+    provider = shared_image_provider_.get();
+  } else if (bitmap_provider_) {
+    provider = bitmap_provider_.get();
+  }
+
   if (provider != nullptr) [[likely]] {
     // If we already had a provider, we can check whether it recorded ops passed
     // the autoflush limit.
@@ -903,7 +912,12 @@ void CanvasRenderingContext2D::FinalizeFrame(FlushReason reason) {
   HTMLCanvasElement* host = canvas();
   CHECK(host);
 
-  GetResourceProvider()->Flush(reason);
+  if (shared_image_provider_) {
+    shared_image_provider_->Flush(reason);
+  } else {
+    DCHECK(bitmap_provider_);
+    bitmap_provider_->Flush(reason);
+  }
   if (reason == FlushReason::kCanvasPushFrame) {
     if (host->IsDisplayed()) {
       // Make sure the GPU is never more than two animation frames behind.
@@ -1260,16 +1274,6 @@ bool CanvasRenderingContext2D::IsResourceProviderValid() const {
     return bitmap_provider_->IsValid();
   }
   return false;
-}
-
-CanvasResourceProvider* CanvasRenderingContext2D::GetResourceProvider() const {
-  if (!canvas()) {
-    return nullptr;
-  }
-  if (shared_image_provider_) {
-    return shared_image_provider_.get();
-  }
-  return bitmap_provider_.get();
 }
 
 Canvas2DResourceProviderSharedImage*

@@ -300,7 +300,6 @@ class MODULES_EXPORT BaseRenderingContext2D : public CanvasRenderingContext,
 
  private:
   virtual bool IsHibernating() const { return false; }
-  virtual CanvasResourceProvider* GetResourceProvider() const { NOTREACHED(); }
   virtual void EnableAccelerationIfPossible() {}
   void DrawTextInternal(const String& text,
                         double x,

@@ -271,7 +271,6 @@ class MODULES_EXPORT CanvasRenderingContext2D final
 
   void ResetInternal() override;
 
-  CanvasResourceProvider* GetResourceProvider() const override;
   void Dispose() override;
 
   void CreateCanvasResourceProvider();
