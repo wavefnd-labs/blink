@@ -40,7 +40,6 @@ class CORE_EXPORT LayoutThemeDefault : public LayoutTheme {
   void AdjustSliderThumbSize(ComputedStyleBuilder&) const override;
 
   void AdjustInnerSpinButtonStyle(ComputedStyleBuilder&) const override;
-  void AdjustButtonStyle(ComputedStyleBuilder&) const override;
 
   void AdjustSearchFieldCancelButtonStyle(ComputedStyleBuilder&) const override;
 

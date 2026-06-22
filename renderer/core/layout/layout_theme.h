@@ -173,9 +173,6 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
 
   virtual bool SupportsSelectionForegroundColors() const { return true; }
 
-  // Adjust style as per platform selection.
-  virtual void AdjustControlPartStyle(ComputedStyleBuilder&);
-
   virtual bool IsAccentColorCustomized(
       mojom::blink::ColorScheme color_scheme) const;
 
@@ -228,13 +225,13 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
       mojom::blink::ColorScheme color_scheme) const;
 
   // Methods for each appearance value.
-  virtual void AdjustCheckboxStyle(ComputedStyleBuilder&) const;
-  virtual void AdjustRadioStyle(ComputedStyleBuilder&) const;
+  void AdjustCheckboxStyle(ComputedStyleBuilder&) const;
+  void AdjustRadioStyle(ComputedStyleBuilder&) const;
 
-  virtual void AdjustButtonStyle(ComputedStyleBuilder&) const;
+  void AdjustPushButtonStyle(ComputedStyleBuilder&) const;
   virtual void AdjustInnerSpinButtonStyle(ComputedStyleBuilder&) const;
 
-  virtual void AdjustMenuListStyle(ComputedStyleBuilder&) const;
+  void AdjustMenuListStyle(ComputedStyleBuilder&) const;
   virtual void AdjustSliderThumbStyle(ComputedStyleBuilder&) const;
   virtual void AdjustSearchFieldCancelButtonStyle(ComputedStyleBuilder&) const;
 

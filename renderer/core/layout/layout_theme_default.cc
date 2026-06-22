@@ -82,14 +82,6 @@ void LayoutThemeDefault::AdjustInnerSpinButtonStyle(
   }
 }
 
-void LayoutThemeDefault::AdjustButtonStyle(
-    ComputedStyleBuilder& builder) const {
-  // Ignore line-height.
-  if (builder.EffectiveAppearance() == AppearanceValue::kPushButton) {
-    builder.SetLineHeight(ComputedStyleInitialValues::InitialLineHeight());
-  }
-}
-
 void LayoutThemeDefault::AdjustSearchFieldCancelButtonStyle(
     ComputedStyleBuilder& builder) const {
   // Scale the button size based on the font size

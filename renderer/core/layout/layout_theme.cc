@@ -317,14 +317,19 @@ void LayoutTheme::AdjustStyle(const Element& element,
   // After this point, a Node must be non-null Element if
   // EffectiveAppearance() != AppearanceValue::kNone.
 
-  AdjustControlPartStyle(builder);
-
-  // Call the appropriate style adjustment method based off the appearance
-  // value.
+  // Call the appropriate style adjustment method based off the appearance.
   switch (appearance) {
+    case AppearanceValue::kCheckbox:
+      return AdjustCheckboxStyle(builder);
+    case AppearanceValue::kInnerSpinButton:
+      return AdjustInnerSpinButtonStyle(builder);
     case AppearanceValue::kMenulist:
     case AppearanceValue::kMenulistButton:
       return AdjustMenuListStyle(builder);
+    case AppearanceValue::kPushButton:
+      return AdjustPushButtonStyle(builder);
+    case AppearanceValue::kRadio:
+      return AdjustRadioStyle(builder);
     case AppearanceValue::kSliderThumbHorizontal:
     case AppearanceValue::kSliderThumbVertical:
       return AdjustSliderThumbStyle(builder);
@@ -538,7 +543,9 @@ void LayoutTheme::AdjustRadioStyle(ComputedStyleBuilder& builder) const {
   builder.SetInlineBlockBaselineEdge(EInlineBlockBaselineEdge::kBorderBox);
 }
 
-void LayoutTheme::AdjustButtonStyle(ComputedStyleBuilder&) const {}
+void LayoutTheme::AdjustPushButtonStyle(ComputedStyleBuilder& builder) const {
+  builder.SetLineHeight(ComputedStyleInitialValues::InitialLineHeight());
+}
 
 void LayoutTheme::AdjustInnerSpinButtonStyle(ComputedStyleBuilder&) const {}
 
@@ -889,25 +896,6 @@ bool LayoutTheme::SupportsCalendarPicker(InputType::Type type) const {
   return type == InputType::Type::kTime || type == InputType::Type::kDate ||
          type == InputType::Type::kDateTimeLocal ||
          type == InputType::Type::kMonth || type == InputType::Type::kWeek;
-}
-
-void LayoutTheme::AdjustControlPartStyle(ComputedStyleBuilder& builder) {
-  // Call the appropriate style adjustment method based off the appearance
-  // value.
-  switch (builder.EffectiveAppearance()) {
-    case AppearanceValue::kCheckbox:
-      return AdjustCheckboxStyle(builder);
-    case AppearanceValue::kRadio:
-      return AdjustRadioStyle(builder);
-    case AppearanceValue::kPushButton:
-    case AppearanceValue::kSquareButton:
-    case AppearanceValue::kButton:
-      return AdjustButtonStyle(builder);
-    case AppearanceValue::kInnerSpinButton:
-      return AdjustInnerSpinButtonStyle(builder);
-    default:
-      break;
-  }
 }
 
 bool LayoutTheme::IsAccentColorCustomized(
