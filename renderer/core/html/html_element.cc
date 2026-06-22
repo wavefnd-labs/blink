@@ -4169,6 +4169,16 @@ void HTMLElement::OnNonceAttrChanged(
 
 void HTMLElement::OnContainerTimingAttrChanged(
     const AttributeModificationParams& params) {
+  // Count attribute adoption, but ignore attributes in user agent shadow DOM
+  // (consistent with the generic attribute use-counting in ParseAttribute).
+  if (!params.new_value.IsNull() && !IsInUserAgentShadowRoot()) {
+    UseCounter::Count(GetDocument(), WebFeature::kContainerTimingAttribute);
+    if (!params.new_value.empty()) {
+      UseCounter::Count(GetDocument(),
+                        WebFeature::kContainerTimingAttributeHasRootName);
+    }
+  }
+
   if (!RuntimeEnabledFeatures::ContainerTimingEnabled(GetExecutionContext())) {
     return;
   }
@@ -4198,6 +4208,11 @@ void HTMLElement::OnContainerTimingAttrChanged(
 
 void HTMLElement::OnContainerTimingIgnoreAttrChanged(
     const AttributeModificationParams& params) {
+  if (!params.new_value.IsNull() && !IsInUserAgentShadowRoot()) {
+    UseCounter::Count(GetDocument(),
+                      WebFeature::kContainerTimingIgnoreAttribute);
+  }
+
   if (!RuntimeEnabledFeatures::ContainerTimingEnabled(GetExecutionContext())) {
     return;
   }
