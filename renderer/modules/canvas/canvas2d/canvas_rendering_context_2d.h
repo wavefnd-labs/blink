@@ -180,6 +180,7 @@ class MODULES_EXPORT CanvasRenderingContext2D final
 
   // CanvasRenderingContext implementation
   bool IsComposited() const override;
+  bool Is2DCanvasAccelerated() const override;
   scoped_refptr<CanvasResource> PaintRenderingResultsToResource(
       SourceDrawingBuffer source_buffer,
       FlushReason reason) override;

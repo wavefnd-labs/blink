@@ -236,7 +236,6 @@ class MODULES_EXPORT BaseRenderingContext2D : public CanvasRenderingContext,
     return color_params_.GetAlphaType() == kOpaque_SkAlphaType;
   }
   void DisableAccelerationForCanvas2D() final { DisableAcceleration(); }
-  bool Is2DCanvasAccelerated() const final;
   void PageVisibilityChanged() override {}
   void RestoreCanvasMatrixClipStack(cc::PaintCanvas* c) const final;
   void Reset() override;

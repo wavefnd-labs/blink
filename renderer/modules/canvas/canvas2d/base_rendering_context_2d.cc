@@ -274,7 +274,6 @@ void BaseRenderingContext2D::RestoreFromInvalidSizeIfNeeded() {
       !host) {
     return;
   }
-  DCHECK(!GetResourceProvider());
 
   if (host->IsValidImageSize()) {
     // The size was restored. Fire a contextrestored event, but only if there's
@@ -718,20 +717,6 @@ void BaseRenderingContext2D::Trace(Visitor* visitor) const {
   visitor->Trace(try_restore_context_event_timer_);
   CanvasRenderingContext::Trace(visitor);
   Canvas2DRecorderContext::Trace(visitor);
-}
-
-bool BaseRenderingContext2D::Is2DCanvasAccelerated() const {
-  if (IsHibernating()) {
-    return false;
-  }
-
-  auto* resource_provider = GetResourceProvider();
-  if (!resource_provider && !Host()) {
-    return false;
-  }
-
-  return resource_provider ? resource_provider->IsAccelerated()
-                           : Host()->ShouldTryToUseGpuRaster();
 }
 
 void BaseRenderingContext2D::RestoreCanvasMatrixClipStack(

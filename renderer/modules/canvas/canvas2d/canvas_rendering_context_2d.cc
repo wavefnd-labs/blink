@@ -250,6 +250,24 @@ bool CanvasRenderingContext2D::IsComposited() const {
   return true;
 }
 
+bool CanvasRenderingContext2D::Is2DCanvasAccelerated() const {
+  if (IsHibernating()) {
+    return false;
+  }
+  if (canvas()) {
+    if (shared_image_provider_) {
+      return shared_image_provider_->IsAccelerated();
+    }
+    if (bitmap_provider_) {
+      return false;
+    }
+  }
+  if (!Host()) {
+    return false;
+  }
+  return Host()->ShouldTryToUseGpuRaster();
+}
+
 void CanvasRenderingContext2D::Stop() {
   // Never attempt to restore the context because the page is being torn down.
   context_restorable_ = false;

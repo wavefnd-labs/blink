@@ -169,6 +169,19 @@ bool OffscreenCanvasRenderingContext2D::CanCreateResourceProvider() {
   return !!GetOrCreateResourceProvider();
 }
 
+bool OffscreenCanvasRenderingContext2D::Is2DCanvasAccelerated() const {
+  if (shared_image_provider_) {
+    return shared_image_provider_->IsAccelerated();
+  }
+  if (bitmap_provider_) {
+    return false;
+  }
+  if (!Host()) {
+    return false;
+  }
+  return Host()->ShouldTryToUseGpuRaster();
+}
+
 CanvasResourceProvider*
 OffscreenCanvasRenderingContext2D::GetOrCreateResourceProvider() {
   DCHECK(Host() && Host()->IsOffscreenCanvas());

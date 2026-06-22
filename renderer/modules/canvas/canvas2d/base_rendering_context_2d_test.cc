@@ -187,6 +187,8 @@ class TestRenderingContext2D final
     return nullptr;
   }
 
+  bool Is2DCanvasAccelerated() const override { return false; }
+
   // Implementing pure virtual functions from CanvasRenderingContext.
   scoped_refptr<StaticBitmapImage> GetImage() override { return nullptr; }
   scoped_refptr<StaticBitmapImage> PaintRenderingResultsToSnapshot(
