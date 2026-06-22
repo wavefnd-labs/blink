@@ -307,6 +307,10 @@ bool CopyVideoFrameTexturesToGLTextureViaIntermediateSI(
 
   // Wait for mailbox creation on canvas context before consuming it and
   // copying from it on the consumer context.
+  destination_gl->BindTexture(target, texture);
+  destination_gl->TexImage2D(
+      target, level, internal_format, video_frame->visible_rect().width(),
+      video_frame->visible_rect().height(), 0, format, type, nullptr);
   gpu::SyncToken dest_sync_token =
       destination_gl->CopySharedImageToGLTextureViaTextureCopy(
           video_frame->visible_rect(), rgb_shared_image.get(), sync_token,
