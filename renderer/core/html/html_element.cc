@@ -860,10 +860,6 @@ void HTMLElement::AttributeChanged(const AttributeModificationParams& params) {
     return;
   }
 
-  if (params.name == html_names::kOverscrollareaAttr) {
-    PseudoStateChanged(CSSSelector::kPseudoOverscrollTarget);
-  }
-
   if (params.reason != AttributeModificationReason::kDirectly) {
     return;
   }
