@@ -169,6 +169,16 @@ bool OffscreenCanvasRenderingContext2D::CanCreateResourceProvider() {
   return !!GetOrCreateResourceProvider();
 }
 
+bool OffscreenCanvasRenderingContext2D::IsResourceProviderValid() const {
+  if (shared_image_provider_) {
+    return shared_image_provider_->IsValid();
+  }
+  if (bitmap_provider_) {
+    return bitmap_provider_->IsValid();
+  }
+  return false;
+}
+
 CanvasResourceProvider*
 OffscreenCanvasRenderingContext2D::GetOrCreateResourceProvider() {
   DCHECK(Host() && Host()->IsOffscreenCanvas());

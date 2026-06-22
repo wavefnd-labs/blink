@@ -751,10 +751,6 @@ BaseRenderingContext2D::PaintRenderingResultsToSnapshot(
   return provider->Snapshot();
 }
 
-bool BaseRenderingContext2D::IsResourceProviderValid() {
-  return GetResourceProvider() && GetResourceProvider()->IsValid();
-}
-
 void BaseRenderingContext2D::WillUseCurrentFont() const {
   if (HTMLCanvasElement* canvas = HostAsHTMLCanvasElement();
       canvas != nullptr) {

@@ -1214,6 +1214,19 @@ base::ByteSize CanvasRenderingContext2D::AllocatedBufferSize() const {
   return base::ByteSize();
 }
 
+bool CanvasRenderingContext2D::IsResourceProviderValid() const {
+  if (!canvas()) {
+    return false;
+  }
+  if (shared_image_provider_) {
+    return shared_image_provider_->IsValid();
+  }
+  if (bitmap_provider_) {
+    return bitmap_provider_->IsValid();
+  }
+  return false;
+}
+
 CanvasResourceProvider* CanvasRenderingContext2D::GetResourceProvider() const {
   if (!canvas()) {
     return nullptr;
