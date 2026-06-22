@@ -153,7 +153,7 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
                             const ui::ColorProvider* color_provider,
                             bool can_expose_accent_color) const;
 
-  virtual void AdjustSliderThumbSize(ComputedStyleBuilder&) const;
+  void AdjustSliderThumbSize(ComputedStyleBuilder&) const;
 
   virtual int PopupInternalPaddingStart(const ComputedStyle&) const {
     return 0;
@@ -232,7 +232,7 @@ class CORE_EXPORT LayoutTheme : public RefCounted<LayoutTheme> {
   virtual void AdjustInnerSpinButtonStyle(ComputedStyleBuilder&) const;
 
   void AdjustMenuListStyle(ComputedStyleBuilder&) const;
-  virtual void AdjustSliderThumbStyle(ComputedStyleBuilder&) const;
+  void AdjustSliderThumbStyle(ComputedStyleBuilder&) const;
   virtual void AdjustSearchFieldCancelButtonStyle(ComputedStyleBuilder&) const;
 
   std::optional<Color> CustomFocusRingColor() const {
