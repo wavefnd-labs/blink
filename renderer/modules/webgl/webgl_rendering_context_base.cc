@@ -6626,6 +6626,11 @@ void WebGLRenderingContextBase::TexImageHelperMediaVideoFrame(
               media::IsOpaque(media_video_frame->format()), shared_image.get(),
               params.target, adjusted_internalformat, params.type, params.level,
               dst_alpha_type)) {
+        gl->BindTexture(params.target, texture->Object());
+        gl->TexImage2D(params.target, params.level, adjusted_internalformat,
+                       media_video_frame->visible_rect().width(),
+                       media_video_frame->visible_rect().height(), 0,
+                       params.format, params.type, nullptr);
         std::unique_ptr<gpu::RasterScopedAccess> destination_access =
             gl->CopySharedImageDirectlyToGLTexture(
                 media_video_frame->visible_rect(), shared_image.get(),
