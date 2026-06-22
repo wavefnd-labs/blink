@@ -726,6 +726,10 @@ bool BaseRenderingContext2D::Is2DCanvasAccelerated() const {
   }
 
   auto* resource_provider = GetResourceProvider();
+  if (!resource_provider && !Host()) {
+    return false;
+  }
+
   return resource_provider ? resource_provider->IsAccelerated()
                            : Host()->ShouldTryToUseGpuRaster();
 }
