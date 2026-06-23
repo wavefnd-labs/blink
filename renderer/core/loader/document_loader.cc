@@ -57,6 +57,7 @@
 #include "services/network/public/cpp/no_vary_search_header_parser.h"
 #include "services/network/public/cpp/permissions_policy/permissions_policy_declaration.h"
 #include "services/network/public/cpp/web_sandbox_flags.h"
+#include "services/network/public/mojom/timing_allow_origin.mojom-blink.h"
 #include "services/network/public/mojom/url_response_head.mojom-shared.h"
 #include "services/network/public/mojom/web_sandbox_flags.mojom-blink.h"
 #include "third_party/blink/public/common/client_hints/client_hints.h"
@@ -1552,6 +1553,19 @@ void DocumentLoader::HandleRedirect(
 
   DCHECK(!GetTiming().FetchStart().is_null());
   GetTiming().AddRedirect(url_before_redirect, url_after_redirect);
+
+  // Record this redirect response's `Timing-Allow-Origin` values in the
+  // navigation's "navigation timing allow check list". This is later used,
+  // together with the navigation's destination origin, to decide whether
+  // redirect timing is exposed for cross-origin redirect chains.
+  // https://fetch.spec.whatwg.org/#append-to-a-requests-navigation-timing-allow-check-list
+  network::mojom::blink::TimingAllowOriginPtr tao;
+  const AtomicString& tao_header =
+      redirect_response.HttpHeaderField(http_names::kTimingAllowOrigin);
+  if (!tao_header.IsNull()) {
+    tao = ParseTimingAllowOrigin(tao_header);
+  }
+  GetTiming().AppendToNavigationTimingAllowCheckList(std::move(tao));
 }
 
 void DocumentLoader::ConsoleError(const String& message) {
