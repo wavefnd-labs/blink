@@ -295,6 +295,15 @@ class PLATFORM_EXPORT FontCache final {
       FontFallbackPriority);
 #endif
 
+  static sk_sp<SkTypeface> MatchFamilyStyle(const char* family_name,
+                                            const SkFontStyle&);
+
+  static sk_sp<SkTypeface> MatchFamilyStyleCharacter(const char* family_name,
+                                                     const SkFontStyle&,
+                                                     const char* bcp47[],
+                                                     int bcp47_count,
+                                                     UChar32 character);
+
   const SimpleFontData* FallbackOnStandardFontStyle(const FontDescription&,
                                                     UChar32);
 
