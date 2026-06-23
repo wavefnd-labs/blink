@@ -772,6 +772,12 @@ BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kIndexedDBCompressValuesWithSnappy);
 BLINK_COMMON_EXPORT extern const base::FeatureParam<int>
     kIndexedDBCompressValuesWithSnappyCompressionThreshold;
 
+// Enables connection deduplication for IndexedDB
+BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kIndexedDBConnectionDeduplication);
+
+// Enables external memory accounting for IndexedDB databases.
+BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kIDBDatabaseExternalMemoryAccounting);
+
 // Always use `IsInlineScriptCacheEnabled()` rather than checking this feature
 // directly.
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kInlineScriptCache);

@@ -1075,6 +1075,12 @@ constexpr base::FeatureParam<int>
         /*name=*/"compression-threshold",
         /*default_value=*/-1};
 
+BASE_FEATURE(kIndexedDBConnectionDeduplication,
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kIDBDatabaseExternalMemoryAccounting,
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kInlineScriptCache, base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE_PARAM(size_t,
