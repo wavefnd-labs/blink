@@ -7058,9 +7058,9 @@ void Element::RecalcCustomHighlightPseudoStyle(
       const ComputedStyle* highlight_style = StyleForHighlightPseudoElement(
           style_recalc_context, highlight_parent, originating_style,
           kPseudoIdHighlight, highlight_name);
-      if (highlight_style) {
-        highlights.SetCustomHighlight(highlight_name, highlight_style);
-      }
+
+      // Always update, even when there is no longer a matching style.
+      highlights.SetCustomHighlight(highlight_name, highlight_style);
     }
   }
 }
