@@ -179,9 +179,7 @@ class TestRenderingContext2D final
     return base::ByteSize();
   }
 
-  CanvasResourceProvider* GetOrCreateResourceProvider() override {
-    return nullptr;
-  }
+  bool InitializeResourceProvider() override { return false; }
 
   bool Is2DCanvasAccelerated() const override { return false; }
 

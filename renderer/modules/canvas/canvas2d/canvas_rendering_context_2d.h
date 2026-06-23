@@ -161,6 +161,9 @@ class MODULES_EXPORT CanvasRenderingContext2D final
 
   // CanvasHibernationHandler::Delegate implementation
   Canvas2DResourceProviderSharedImage* GetSharedImageProvider() const override;
+  Canvas2DResourceProviderBitmap* GetBitmapProviderForTesting() const {
+    return bitmap_provider_.get();
+  }
   bool HasResourceProvider() const override;
   bool IsContextLost() const override { return isContextLost(); }
   bool IsPageVisible() const override {
@@ -234,7 +237,7 @@ class MODULES_EXPORT CanvasRenderingContext2D final
 
   void SendContextLostEventIfNeeded() override;
 
-  CanvasResourceProvider* GetOrCreateResourceProvider() override;
+  bool InitializeResourceProvider() override;
   void SetCanvas2DResourceProviderForTesting(
       std::unique_ptr<Canvas2DResourceProviderSharedImage> provider,
       const gfx::Size& size);

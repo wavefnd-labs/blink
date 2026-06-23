@@ -507,8 +507,7 @@ MemoryManagedPaintCanvas* CanvasRenderingContext2D::GetOrCreatePaintCanvas() {
     }
   } else {
     // If we have no provider, try creating one.
-    provider = GetOrCreateResourceProvider();
-    if (provider == nullptr) [[unlikely]] {
+    if (!InitializeResourceProvider()) [[unlikely]] {
       return nullptr;
     }
   }
@@ -838,7 +837,7 @@ CanvasRenderingContext2D::GetLastRecording() {
 }
 
 bool CanvasRenderingContext2D::CanCreateResourceProvider() {
-  return GetOrCreateResourceProvider();
+  return InitializeResourceProvider();
 }
 
 scoped_refptr<StaticBitmapImage> blink::CanvasRenderingContext2D::GetImage() {
@@ -899,7 +898,7 @@ void CanvasRenderingContext2D::PreFinalizeFrame() {
   // TODO(crbug.com/40280152): Analyze whether this call is redundant (i.e.,
   // whether the CRP is guaranteed to always be present).
   if (canvas() && canvas()->LowLatencyEnabled() && canvas()->IsDirty()) {
-    GetOrCreateResourceProvider();
+    InitializeResourceProvider();
   }
 }
 
@@ -1017,7 +1016,7 @@ void CanvasRenderingContext2D::PageVisibilityChanged() {
   }
 
   if (page_is_visible && IsHibernating()) {
-    GetOrCreateResourceProvider();  // Rude awakening
+    InitializeResourceProvider();  // Rude awakening
   }
 
   if (!element->IsPageVisible()) {
@@ -1285,17 +1284,16 @@ bool CanvasRenderingContext2D::HasResourceProvider() const {
   return shared_image_provider_ != nullptr || bitmap_provider_ != nullptr;
 }
 
-CanvasResourceProvider*
-CanvasRenderingContext2D::GetOrCreateResourceProvider() {
+bool CanvasRenderingContext2D::InitializeResourceProvider() {
   HTMLCanvasElement* const element = canvas();
   if (!element) [[unlikely]] {
-    return nullptr;
+    return false;
   }
 
   if (isContextLost() && !IsContextBeingRestored()) {
     DCHECK(!shared_image_provider_);
     DCHECK(!bitmap_provider_);
-    return nullptr;
+    return false;
   }
 
   if (shared_image_provider_) {
@@ -1311,19 +1309,19 @@ CanvasRenderingContext2D::GetOrCreateResourceProvider() {
       // early return here, trying to re-create the provider right away would
       // just fail. We need to let `TryRestoreContextEvent` wait for the GPU
       // process to up again.
-      return nullptr;
+      return false;
     }
-    return shared_image_provider_.get();
+    return true;
   }
   if (bitmap_provider_) {
     if (!bitmap_provider_->IsValid()) {
-      return nullptr;
+      return false;
     }
-    return bitmap_provider_.get();
+    return true;
   }
 
   if (did_fail_to_create_resource_provider_) {
-    return nullptr;
+    return false;
   }
 
   if (!canvas()->IsValidImageSize()) {
@@ -1331,7 +1329,7 @@ CanvasRenderingContext2D::GetOrCreateResourceProvider() {
     if (!canvas()->Size().IsEmpty()) {
       LoseContext(CanvasRenderingContext::kInvalidCanvasSize);
     }
-    return nullptr;
+    return false;
   }
 
   canvas()->UpdatePreferred2DRasterMode();
@@ -1346,10 +1344,7 @@ CanvasRenderingContext2D::GetOrCreateResourceProvider() {
 
   canvas()->SetNeedsCompositingUpdate();
 
-  if (shared_image_provider_) {
-    return shared_image_provider_.get();
-  }
-  return bitmap_provider_.get();
+  return HasResourceProvider();
 }
 
 void CanvasRenderingContext2D::ResetResourceProvider() {

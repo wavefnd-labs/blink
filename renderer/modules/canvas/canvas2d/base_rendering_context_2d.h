@@ -126,7 +126,7 @@ class MODULES_EXPORT BaseRenderingContext2D : public CanvasRenderingContext,
                     ExceptionState&);
 
   virtual bool CanCreateResourceProvider() = 0;
-  virtual CanvasResourceProvider* GetOrCreateResourceProvider() = 0;
+  virtual bool InitializeResourceProvider() = 0;
 
   String lang() const;
   void setLang(const String&);
