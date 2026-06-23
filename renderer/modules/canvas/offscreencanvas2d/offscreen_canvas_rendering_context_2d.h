@@ -147,8 +147,6 @@ class MODULES_EXPORT OffscreenCanvasRenderingContext2D final
   scoped_refptr<CanvasResource> ProduceCanvasResource(FlushReason);
 
   CanvasResourceProvider* GetOrCreateResourceProvider() override;
-  std::unique_ptr<CanvasResourceProvider> ReplaceResourceProvider(
-      std::unique_ptr<CanvasResourceProvider>) override;
 
   std::unique_ptr<Canvas2DResourceProviderSharedImage> shared_image_provider_;
   std::unique_ptr<Canvas2DResourceProviderBitmap> bitmap_provider_;

@@ -191,10 +191,6 @@ class TestRenderingContext2D final
       SourceDrawingBuffer) override {
     return nullptr;
   }
-  std::unique_ptr<CanvasResourceProvider> ReplaceResourceProvider(
-      std::unique_ptr<CanvasResourceProvider>) override {
-    return nullptr;
-  }
 
   bool IsComposited() const override { return false; }
   bool IsPaintable() const override { return true; }

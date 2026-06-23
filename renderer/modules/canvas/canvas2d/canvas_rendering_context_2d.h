@@ -166,7 +166,7 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   bool IsPageVisible() const override {
     return canvas() && canvas()->IsPageVisible();
   }
-  void ResetResourceProvider() override { ReplaceResourceProvider(nullptr); }
+  void ResetResourceProvider() override;
   void SetNeedsCompositingUpdate() override {
     if (canvas()) {
       canvas()->SetNeedsCompositingUpdate();
@@ -299,9 +299,6 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   cc::Layer* CcLayer() const override;
 
   void ColorSchemeMayHaveChanged() override;
-
-  std::unique_ptr<CanvasResourceProvider> ReplaceResourceProvider(
-      std::unique_ptr<CanvasResourceProvider>) override;
 
   // If the ResourceProvider currently exists, replaces it with a newly-created
   // CanvasResourceProvider.

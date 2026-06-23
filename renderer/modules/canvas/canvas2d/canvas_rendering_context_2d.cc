@@ -1352,36 +1352,18 @@ CanvasRenderingContext2D::GetOrCreateResourceProvider() {
   return bitmap_provider_.get();
 }
 
-std::unique_ptr<CanvasResourceProvider>
-CanvasRenderingContext2D::ReplaceResourceProvider(
-    std::unique_ptr<CanvasResourceProvider> provider) {
-  std::unique_ptr<CanvasResourceProvider> old_resource_provider;
-  if (shared_image_provider_) {
-    old_resource_provider = std::move(shared_image_provider_);
-  } else {
-    old_resource_provider = std::move(bitmap_provider_);
+void CanvasRenderingContext2D::ResetResourceProvider() {
+  auto old_shared = std::move(shared_image_provider_);
+  auto old_bitmap = std::move(bitmap_provider_);
+  if (canvas()) {
+    canvas()->UpdateMemoryUsage();
   }
-
-  shared_image_provider_ = nullptr;
-  bitmap_provider_ = nullptr;
-
-  if (provider) {
-    if (provider->GetType() == CanvasResourceProviderType::kBitmap) {
-      bitmap_provider_ = std::unique_ptr<Canvas2DResourceProviderBitmap>(
-          static_cast<Canvas2DResourceProviderBitmap*>(provider.release()));
-    } else {
-      shared_image_provider_ =
-          std::unique_ptr<Canvas2DResourceProviderSharedImage>(
-              static_cast<Canvas2DResourceProviderSharedImage*>(
-                  provider.release()));
-    }
+  if (old_shared) {
+    old_shared->SetDelegate(nullptr);
   }
-
-  canvas()->UpdateMemoryUsage();
-  if (old_resource_provider) {
-    old_resource_provider->SetDelegate(nullptr);
+  if (old_bitmap) {
+    old_bitmap->SetDelegate(nullptr);
   }
-  return old_resource_provider;
 }
 
 void CanvasRenderingContext2D::DropAndRecreateExistingResourceProvider() {
@@ -1403,7 +1385,7 @@ void CanvasRenderingContext2D::DropAndRecreateExistingResourceProvider() {
     recorder = bitmap_provider_->ReleaseRecorder();
   }
   canvas()->ResetLayer();
-  ReplaceResourceProvider(nullptr);
+  ResetResourceProvider();
 
   // Bail out if the context is lost.
   if (isContextLost() && !IsContextBeingRestored()) {
@@ -1510,7 +1492,8 @@ void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
   canvas()->DiscardResources();
   canvas()->SetSize(size);
   hibernation_handler_ = std::make_unique<CanvasHibernationHandler>(*this);
-  ReplaceResourceProvider(std::move(provider));
+  ResetResourceProvider();
+  shared_image_provider_ = std::move(provider);
 }
 
 void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
@@ -1519,7 +1502,8 @@ void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
   canvas()->DiscardResources();
   canvas()->SetSize(size);
   hibernation_handler_ = std::make_unique<CanvasHibernationHandler>(*this);
-  ReplaceResourceProvider(std::move(provider));
+  ResetResourceProvider();
+  bitmap_provider_ = std::move(provider);
 }
 
 void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
@@ -1528,7 +1512,7 @@ void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
   canvas()->DiscardResources();
   canvas()->SetSize(size);
   hibernation_handler_ = std::make_unique<CanvasHibernationHandler>(*this);
-  ReplaceResourceProvider(nullptr);
+  ResetResourceProvider();
 }
 
 }  // namespace blink

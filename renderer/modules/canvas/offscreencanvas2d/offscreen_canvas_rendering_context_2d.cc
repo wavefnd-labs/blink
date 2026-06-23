@@ -303,38 +303,6 @@ OffscreenCanvasRenderingContext2D::GetOrCreateResourceProvider() {
   return nullptr;
 }
 
-std::unique_ptr<CanvasResourceProvider>
-OffscreenCanvasRenderingContext2D::ReplaceResourceProvider(
-    std::unique_ptr<CanvasResourceProvider> provider) {
-  std::unique_ptr<CanvasResourceProvider> old_resource_provider;
-  if (shared_image_provider_) {
-    old_resource_provider = std::move(shared_image_provider_);
-  } else {
-    old_resource_provider = std::move(bitmap_provider_);
-  }
-
-  shared_image_provider_ = nullptr;
-  bitmap_provider_ = nullptr;
-
-  if (provider) {
-    if (provider->GetType() == CanvasResourceProviderType::kBitmap) {
-      bitmap_provider_ = std::unique_ptr<Canvas2DResourceProviderBitmap>(
-          static_cast<Canvas2DResourceProviderBitmap*>(provider.release()));
-    } else {
-      shared_image_provider_ =
-          std::unique_ptr<Canvas2DResourceProviderSharedImage>(
-              static_cast<Canvas2DResourceProviderSharedImage*>(
-                  provider.release()));
-    }
-  }
-
-  Host()->UpdateMemoryUsage();
-  if (old_resource_provider) {
-    old_resource_provider->SetDelegate(nullptr);
-  }
-  return old_resource_provider;
-}
-
 base::ByteSize OffscreenCanvasRenderingContext2D::AllocatedBufferSize() const {
   if (shared_image_provider_) {
     return shared_image_provider_->EstimatedSizeInBytes();
