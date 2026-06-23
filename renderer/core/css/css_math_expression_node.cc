@@ -1136,10 +1136,9 @@ CSSMathExpressionNode* MaybeSimplifySumOrProductNode(
       CSSPrimitiveValue::UnitType unit_type =
           node->ResolvedUnitTypeForSimplification();
       // Skip already used unit types, as they have been already combined.
-      if (used_units.Contains(unit_type)) {
+      if (!used_units.insert(unit_type).is_new_entry) {
         continue;
       }
-      used_units.insert(unit_type);
     }
 
     if (!final_node) {
