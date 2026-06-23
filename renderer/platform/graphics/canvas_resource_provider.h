@@ -95,6 +95,26 @@ enum class RasterMode {
 //   2) use Canvas() to get a drawing interface
 //   3) Call Snapshot() to acquire a bitmap with the rendered image in it.
 
+// These values are persisted to logs. Entries should not be renumbered and
+// numeric values should never be reused.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+enum class CanvasResourceProviderType {
+  kTexture [[deprecated]] = 0,
+  kBitmap = 1,
+  kSharedBitmap [[deprecated]] = 2,
+  kTextureGpuMemoryBuffer [[deprecated]] = 3,
+  kBitmapGpuMemoryBuffer [[deprecated]] = 4,
+  kSharedImage = 5,
+  kDirectGpuMemoryBuffer [[deprecated]] = 6,
+  kPassThrough [[deprecated]] = 7,
+  kSwapChain [[deprecated]] = 8,
+  kSkiaDawnSharedImage [[deprecated]] = 9,
+  kExternalBitmap [[deprecated]] = 10,
+  kMaxValue = kExternalBitmap,
+};
+#pragma GCC diagnostic pop
+
 class PLATFORM_EXPORT CanvasResourceProviderDelegate {
  public:
   virtual ~CanvasResourceProviderDelegate() = default;
@@ -122,26 +142,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
       public MemoryManagedPaintRecorder::Client,
       public ScopedRasterTimer::Host {
  public:
-  // These values are persisted to logs. Entries should not be renumbered and
-  // numeric values should never be reused.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  enum ResourceProviderType {
-    kTexture [[deprecated]] = 0,
-    kBitmap = 1,
-    kSharedBitmap [[deprecated]] = 2,
-    kTextureGpuMemoryBuffer [[deprecated]] = 3,
-    kBitmapGpuMemoryBuffer [[deprecated]] = 4,
-    kSharedImage = 5,
-    kDirectGpuMemoryBuffer [[deprecated]] = 6,
-    kPassThrough [[deprecated]] = 7,
-    kSwapChain [[deprecated]] = 8,
-    kSkiaDawnSharedImage [[deprecated]] = 9,
-    kExternalBitmap [[deprecated]] = 10,
-    kMaxValue = kExternalBitmap,
-  };
-#pragma GCC diagnostic pop
-
   virtual Canvas2DResourceProviderSharedImage* AsSharedImageProvider() = 0;
 
   // The ImageOrientationEnum conveys the desired orientation of the image, and
@@ -176,7 +176,7 @@ class PLATFORM_EXPORT CanvasResourceProvider
 
   virtual void RestoreBackBuffer(const cc::PaintImage&) = 0;
 
-  virtual ResourceProviderType GetType() const = 0;
+  virtual CanvasResourceProviderType GetType() const = 0;
 
   virtual void FlushIfRecordingLimitExceeded() = 0;
 
@@ -237,7 +237,9 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) override;
   const std::optional<cc::PaintRecord>& LastRecording() override;
-  ResourceProviderType GetType() const override { return kBitmap; }
+  CanvasResourceProviderType GetType() const override {
+    return CanvasResourceProviderType::kBitmap;
+  }
   void SetAnimatedImageFrameIndexes(
       scoped_refptr<const cc::AnimatedImageFrameIndexMap>) override;
 
@@ -495,7 +497,9 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   std::optional<cc::PaintRecord> Flush(
       FlushReason = FlushReason::kOther) override;
   const std::optional<cc::PaintRecord>& LastRecording() override;
-  ResourceProviderType GetType() const override { return kSharedImage; }
+  CanvasResourceProviderType GetType() const override {
+    return CanvasResourceProviderType::kSharedImage;
+  }
   void SetAnimatedImageFrameIndexes(
       scoped_refptr<const cc::AnimatedImageFrameIndexMap>) override;
   bool WritePixels(const SkImageInfo& orig_info,
@@ -765,8 +769,8 @@ class PLATFORM_EXPORT CanvasNon2DResourceProviderSharedImage
   bool IsSoftware() const { return is_software_; }
   bool IsGpuContextLost() const;
 
-  CanvasResourceProvider::ResourceProviderType GetType() const {
-    return CanvasResourceProvider::kSharedImage;
+  CanvasResourceProviderType GetType() const {
+    return CanvasResourceProviderType::kSharedImage;
   }
 
   CanvasImageProvider* GetOrCreateImageProvider();

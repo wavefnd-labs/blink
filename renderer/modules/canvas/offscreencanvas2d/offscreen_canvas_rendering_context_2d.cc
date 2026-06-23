@@ -317,7 +317,7 @@ OffscreenCanvasRenderingContext2D::ReplaceResourceProvider(
   bitmap_provider_ = nullptr;
 
   if (provider) {
-    if (provider->GetType() == CanvasResourceProvider::kBitmap) {
+    if (provider->GetType() == CanvasResourceProviderType::kBitmap) {
       bitmap_provider_ = std::unique_ptr<Canvas2DResourceProviderBitmap>(
           static_cast<Canvas2DResourceProviderBitmap*>(provider.release()));
     } else {
