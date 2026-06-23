@@ -1682,9 +1682,10 @@ GridSizingTree GridLanesLayoutAlgorithm::ComputeGridLanesSizingTree(
   // want to return early here.
 
   bool needs_intrinsic_track_size = false;
+  bool needs_additional_pass = false;
   ComputeSizingTreeInGridAxis(
       sizing_constraint, should_apply_inline_size_containment, &sizing_tree,
-      needs_intrinsic_track_size, opt_oof_children);
+      needs_intrinsic_track_size, opt_oof_children, &needs_additional_pass);
 
   // We have a repeat() track definition with an intrinsic sized track(s). The
   // previous track sizing pass was used to find the track size to apply
@@ -1695,9 +1696,10 @@ GridSizingTree GridLanesLayoutAlgorithm::ComputeGridLanesSizingTree(
   // https://www.w3.org/TR/css-grid-3/#masonry-intrinsic-repeat
   if (needs_intrinsic_track_size) {
     CalculateIntrinsicTrackSizes(sizing_tree);
-    ComputeSizingTreeInGridAxis(sizing_constraint,
-                                should_apply_inline_size_containment,
-                                &sizing_tree, needs_intrinsic_track_size);
+    ComputeSizingTreeInGridAxis(
+        sizing_constraint, should_apply_inline_size_containment, &sizing_tree,
+        needs_intrinsic_track_size, /*opt_oof_children=*/nullptr,
+        &needs_additional_pass);
   }
 
   const auto& container_style = Style();
@@ -1741,9 +1743,11 @@ GridSizingTree GridLanesLayoutAlgorithm::ComputeGridLanesSizingTree(
                   (block_size - BorderScrollbarPadding().BlockSum())
                       .ClampNegativeToZero();
 
-      if (NeedsAdditionalLayoutPass(container_style, constraint_space, Node(),
-                                    BorderPadding(), track_collection,
-                                    container_builder_.InlineSize())) {
+      needs_additional_pass |= NeedsAdditionalLayoutPass(
+          container_style, constraint_space, Node(), BorderPadding(),
+          track_collection, container_builder_.InlineSize());
+
+      if (needs_additional_pass) {
         // TODO(yanlingwang): The auto-repeat count is preserved from the first
         // pass. Recomputing it here would require re-running
         // `ComputeSizingTreeInGridAxis`, which is expensive and rarely needed,
@@ -1928,7 +1932,8 @@ void GridLanesLayoutAlgorithm::InitializeTrackSizes(
 void GridLanesLayoutAlgorithm::CompleteTrackSizingAlgorithm(
     const GridSizingSubtree& sizing_subtree,
     SizingConstraint sizing_constraint,
-    bool needs_intrinsic_track_size) const {
+    bool needs_intrinsic_track_size,
+    bool* opt_needs_additional_pass) const {
   const auto& style = Style();
   const auto grid_axis_direction = style.GridLanesTrackSizingDirection();
   auto& track_collection =
@@ -1964,19 +1969,20 @@ void GridLanesLayoutAlgorithm::CompleteTrackSizingAlgorithm(
   // TODO(almaher): We will eventually need to handle this in a different
   // way once we support grid lanes subgrids.
   if (grid_axis_direction != kForRows) {
-    CompleteTrackSizingAlgorithmForEachSubgrid(
-        sizing_subtree, *this, kForColumns, sizing_constraint,
-        /*opt_needs_additional_pass=*/nullptr);
+    CompleteTrackSizingAlgorithmForEachSubgrid(sizing_subtree, *this,
+                                               kForColumns, sizing_constraint,
+                                               opt_needs_additional_pass);
   }
-  CompleteTrackSizingAlgorithmForEachSubgrid(
-      sizing_subtree, *this, kForRows, sizing_constraint,
-      /*opt_needs_additional_pass=*/nullptr);
+  CompleteTrackSizingAlgorithmForEachSubgrid(sizing_subtree, *this, kForRows,
+                                             sizing_constraint,
+                                             opt_needs_additional_pass);
 }
 
 void GridLanesLayoutAlgorithm::CompleteTrackSizingAlgorithm(
     SizingConstraint sizing_constraint,
     GridSizingTree* sizing_tree,
-    bool needs_intrinsic_track_size) const {
+    bool needs_intrinsic_track_size,
+    bool* opt_needs_additional_pass) const {
   const auto sizing_subtree = GridSizingSubtree(sizing_tree);
 
   ValidateMinMaxSizesCache(Node(), sizing_subtree,
@@ -1988,7 +1994,8 @@ void GridLanesLayoutAlgorithm::CompleteTrackSizingAlgorithm(
   // subgrid.
 
   CompleteTrackSizingAlgorithm(sizing_subtree, sizing_constraint,
-                               needs_intrinsic_track_size);
+                               needs_intrinsic_track_size,
+                               opt_needs_additional_pass);
 }
 
 void GridLanesLayoutAlgorithm::CompleteTrackSizingAlgorithmInStandaloneAxis(
@@ -2156,7 +2163,8 @@ void GridLanesLayoutAlgorithm::ComputeSizingTreeInGridAxis(
     const bool should_apply_inline_size_containment,
     GridSizingTree* sizing_tree,
     bool& needs_intrinsic_track_size,
-    HeapVector<Member<LayoutBox>>* opt_oof_children) {
+    HeapVector<Member<LayoutBox>>* opt_oof_children,
+    bool* opt_needs_additional_pass) {
   DCHECK(sizing_tree);
   const ComputedStyle& style = Style();
 
@@ -2184,7 +2192,8 @@ void GridLanesLayoutAlgorithm::ComputeSizingTreeInGridAxis(
   MeasureVirtualGridLanesItems(sizing_subtree, sizing_constraint,
                                needs_intrinsic_track_size);
   CompleteTrackSizingAlgorithm(sizing_constraint, sizing_tree,
-                               needs_intrinsic_track_size);
+                               needs_intrinsic_track_size,
+                               opt_needs_additional_pass);
 }
 
 void GridLanesLayoutAlgorithm::CalculateIntrinsicTrackSizes(
