@@ -2138,9 +2138,7 @@ bool CanvasImageProvider::IsHardwareDecodeCache() const {
   return raster_mode_ != cc::PlaybackImageProvider::RasterMode::kSoftware;
 }
 
-
-void CanvasResourceProvider::NotifyWillTransfer(
-    cc::PaintImage::ContentId content_id) {
+void NotifyImageBitmapWillTransfer(cc::PaintImage::ContentId content_id) {
   // This is called when an ImageBitmap is about to be transferred. All
   // references to such a bitmap on the current thread must be released, which
   // means that DisplayItemLists that reference it must be flushed.

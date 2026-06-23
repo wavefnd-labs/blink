@@ -136,6 +136,9 @@ class PLATFORM_EXPORT CanvasResourceProviderDelegate {
   virtual void DidFlush() {}
 };
 
+PLATFORM_EXPORT void NotifyImageBitmapWillTransfer(
+    cc::PaintImage::ContentId content_id);
+
 class PLATFORM_EXPORT CanvasResourceProvider
     : public base::CheckedObserver,
       public CanvasMemoryDumpClient,
@@ -187,8 +190,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
       std::unique_ptr<MemoryManagedPaintRecorder> recorder) = 0;
 
   virtual bool IsPrinting() const = 0;
-
-  static void NotifyWillTransfer(cc::PaintImage::ContentId content_id);
 
   // This is called via a CustomDataRasterCallback when a CustomDataOp is
   // rasterized. The CustomDataOps are emplaced by drawElementImage() to
