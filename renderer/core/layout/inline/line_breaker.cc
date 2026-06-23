@@ -2693,7 +2693,7 @@ bool LineBreaker::ComputeTrailingCollapsibleSpaceHelper(LineInfo& line_info) {
       }
 
       InlineItemResults* results = line_info.MutableResults();
-      wtf_size_t index = std::distance(results->data(), &item_result);
+      wtf_size_t index = CheckedDistance(results->data(), &item_result);
       if (!trailing_collapsible_space_.has_value() ||
           trailing_collapsible_space_->item_results != results ||
           trailing_collapsible_space_->item_result_index != index) {
