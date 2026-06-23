@@ -6631,7 +6631,7 @@ void WebGLRenderingContextBase::TexImageHelperMediaVideoFrame(
                        media_video_frame->visible_rect().width(),
                        media_video_frame->visible_rect().height(), 0,
                        params.format, params.type, nullptr);
-        std::unique_ptr<gpu::RasterScopedAccess> destination_access =
+        base::OnceCallback<gpu::SyncToken()> sync_callback =
             gl->CopySharedImageDirectlyToGLTexture(
                 media_video_frame->visible_rect(), shared_image.get(),
                 media_video_frame->acquire_sync_token(),
@@ -6643,7 +6643,7 @@ void WebGLRenderingContextBase::TexImageHelperMediaVideoFrame(
         media::PaintCanvasVideoRenderer::SynchronizeVideoFrameRead(
             std::move(media_video_frame), gl,
             raster_context_provider->ContextSupport(),
-            std::move(destination_access));
+            std::move(sync_callback));
         return;
       }
 
