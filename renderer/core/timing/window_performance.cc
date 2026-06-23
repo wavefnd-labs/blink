@@ -100,6 +100,7 @@
 #include "third_party/blink/renderer/core/timing/performance_soft_navigation.h"
 #include "third_party/blink/renderer/core/timing/performance_timing.h"
 #include "third_party/blink/renderer/core/timing/performance_timing_for_reporting.h"
+#include "third_party/blink/renderer/core/timing/preconnect_data.h"
 #include "third_party/blink/renderer/core/timing/preload_data.h"
 #include "third_party/blink/renderer/core/timing/responsiveness_metrics.h"
 #include "third_party/blink/renderer/core/timing/soft_navigation_context.h"
@@ -1606,7 +1607,7 @@ SpeculationData* WindowPerformance::getSpeculations() {
   LocalDOMWindow* window = DomWindow();
   if (!window || !window->document()) {
     return MakeGarbageCollected<SpeculationData>(
-        HeapVector<Member<PreloadData>>(),
+        HeapVector<Member<PreloadData>>(), HeapVector<Member<PreconnectData>>(),
         HeapVector<Member<SpeculationNavigationData>>(), KURL());
   }
 
@@ -1614,11 +1615,20 @@ SpeculationData* WindowPerformance::getSpeculations() {
 
   // Collect preloads.
   HeapVector<Member<PreloadData>> preloads;
+  HeapVector<Member<PreconnectData>> preconnects;
   if (document->Fetcher()) {
     const auto& preload_records = document->Fetcher()->GetPreloadRecords();
     for (const auto& [url, info] : preload_records) {
       preloads.push_back(MakeGarbageCollected<PreloadData>(
           url, info.as, info.crossorigin, info.early_hints, info.used_time));
+    }
+
+    // Collect preconnects.
+    const auto& preconnect_records =
+        document->Fetcher()->GetPreconnectRecords();
+    for (const auto& [key, info] : preconnect_records) {
+      preconnects.push_back(MakeGarbageCollected<PreconnectData>(
+          info.origin, info.crossorigin, info.early_hints));
     }
   }
 
@@ -1641,7 +1651,8 @@ SpeculationData* WindowPerformance::getSpeculations() {
   }
 
   return MakeGarbageCollected<SpeculationData>(
-      std::move(preloads), std::move(navigations), navigation_destination_url_);
+      std::move(preloads), std::move(preconnects), std::move(navigations),
+      navigation_destination_url_);
 }
 
 uint64_t WindowPerformance::interactionCount() const {
