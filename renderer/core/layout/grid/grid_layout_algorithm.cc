@@ -1045,6 +1045,10 @@ void GridLayoutAlgorithm::InitializeTrackSizes(
         track_collection.FinalizeSetsGeometry(first_set_geometry.start_offset,
                                               first_set_geometry.gutter_size);
       } else {
+        if (opt_subgrid_data) {
+          sizing_subtree.SetSubgridHasIndefiniteStandaloneAxis();
+        }
+
         track_collection.CacheInitializedSetsGeometry(
             (track_direction == kForColumns)
                 ? border_scrollbar_padding.inline_start

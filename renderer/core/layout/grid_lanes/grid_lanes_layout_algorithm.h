@@ -184,12 +184,15 @@ class CORE_EXPORT GridLanesLayoutAlgorithm
                            LayoutUnit block_size,
                            HeapVector<Member<LayoutBox>>& oof_children);
 
-  // Initializes the track sizes of a grid-lanes sizing subtree.
+  // Initializes the track sizes of a grid-lanes sizing subtree. If
+  // `only_for_grid_axis` is true, only the grid axis is re-initialized.
   void InitializeTrackSizes(const GridSizingSubtree& sizing_subtree,
-                            const SubgriddedItemData& opt_subgrid_data) const;
+                            const SubgriddedItemData& opt_subgrid_data,
+                            bool only_for_grid_axis = false) const;
 
   // Helper that calls the method above for the entire grid sizing tree.
-  void InitializeTrackSizes(GridSizingTree* sizing_tree) const;
+  void InitializeTrackSizes(GridSizingTree* sizing_tree,
+                            bool only_for_grid_axis = false) const;
 
   // Creates a sizing tree based on the given `sizing_constraint` and
   // populates `sizing_tree` with the result. If
@@ -208,11 +211,13 @@ class CORE_EXPORT GridLanesLayoutAlgorithm
       bool* opt_needs_additional_pass = nullptr);
 
   // Completes the track sizing algorithm for non-definite tracks of a
-  // grid-lanes sizing subtree.
+  // grid-lanes sizing subtree. If `only_for_grid_axis` is true, only the
+  // subgrids' grid-axis tracks are re-completed.
   void CompleteTrackSizingAlgorithm(
       const GridSizingSubtree& sizing_subtree,
       SizingConstraint sizing_constraint,
       bool needs_intrinsic_track_size,
+      bool only_for_grid_axis = false,
       bool* opt_needs_additional_pass = nullptr) const;
 
   // Helper that calls the method above for the entire grid sizing tree.
@@ -220,6 +225,7 @@ class CORE_EXPORT GridLanesLayoutAlgorithm
       SizingConstraint sizing_constraint,
       GridSizingTree* sizing_tree,
       bool needs_intrinsic_track_size,
+      bool only_for_grid_axis = false,
       bool* opt_needs_additional_pass = nullptr) const;
 
   // Completes track sizing for the standalone axis of subgrids in
@@ -227,9 +233,6 @@ class CORE_EXPORT GridLanesLayoutAlgorithm
   // (or when the standalone axis is columns); for column grid-lanes the
   // standalone-axis (row) sizing is handled later because Grid requires columns
   // to be sized before rows.
-  //
-  // TODO(almaher): Can we get the column case working as well? Will that
-  // require an additional pass?
   void CompleteTrackSizingAlgorithmInStandaloneAxis(
       const GridSizingSubtree& sizing_subtree,
       SizingConstraint sizing_constraint) const;
