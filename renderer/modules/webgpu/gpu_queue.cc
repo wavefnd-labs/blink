@@ -951,8 +951,7 @@ void GPUQueue::CopyFromVideoElement(
   // Create External Texture with dst color space. No color space conversion
   // happens during copy step.
   ExternalTexture external_texture =
-      CreateExternalTexture(device_, dst_color_space, source.media_video_frame,
-                            source.video_renderer);
+      CreateExternalTexture(device_, dst_color_space, source.media_video_frame);
 
   wgpu::CopyTextureForBrowserOptions options = {
       // Extracting contents from HTMLVideoElement (e.g.
