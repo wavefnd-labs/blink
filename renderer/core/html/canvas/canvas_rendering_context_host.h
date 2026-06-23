@@ -49,7 +49,7 @@ enum class RasterModeHint {
 
 class CORE_EXPORT CanvasRenderingContextHost
     : public GarbageCollectedMixin,
-      public CanvasResourceProvider::Delegate,
+      public CanvasResourceProviderDelegate,
       public CanvasImageSource,
       public ImageBitmapSource {
  public:

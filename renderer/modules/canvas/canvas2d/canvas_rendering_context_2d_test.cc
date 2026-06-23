@@ -583,7 +583,7 @@ class FakeCanvasResourceProvider : public Canvas2DResourceProviderSharedImage {
  public:
   FakeCanvasResourceProvider(gfx::Size size,
                              RasterModeHint hint,
-                             CanvasResourceProvider::Delegate* delegate)
+                             CanvasResourceProviderDelegate* delegate)
       : Canvas2DResourceProviderSharedImage(
             size,
             GetN32FormatForCanvas(),

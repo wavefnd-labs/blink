@@ -253,7 +253,7 @@ class CORE_EXPORT HTMLCanvasElement final
 
   bool IsPageVisible() const override;
 
-  // CanvasResourceProvider::Delegate implementation
+  // CanvasResourceProviderDelegate implementation
   void NotifyGpuContextLost() override;
   bool IsPrinting() const override;
 
