@@ -110,6 +110,9 @@ BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kAndroidDesktopUAPlatform);
 // If enabled, the user agent platform will be ChromeOS instead of Linux for
 // desktop Android devices, when kAndroidDesktopUAPlatform is disabled.
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kAndroidDesktopUASpoofAsChromeOS);
+
+// Gated prewarming of system fonts on Android to background threads.
+BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kAndroidSystemFontPrewarming);
 #endif
 
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(

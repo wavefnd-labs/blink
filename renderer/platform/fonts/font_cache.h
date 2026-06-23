@@ -136,7 +136,7 @@ class PLATFORM_EXPORT FontCache final {
 
   void Invalidate();
 
-#if BUILDFLAG(IS_WIN)
+#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_ANDROID)
   static WebFontPrewarmer* GetFontPrewarmer() { return prewarmer_; }
   static void SetFontPrewarmer(WebFontPrewarmer* prewarmer) {
     prewarmer_ = prewarmer;
@@ -307,8 +307,11 @@ class PLATFORM_EXPORT FontCache final {
   const SimpleFontData* FallbackOnStandardFontStyle(const FontDescription&,
                                                     UChar32);
 
-#if BUILDFLAG(IS_WIN)
+#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_ANDROID)
   static WebFontPrewarmer* prewarmer_;
+#endif
+
+#if BUILDFLAG(IS_WIN)
   static bool antialiased_text_enabled_;
   static bool lcd_text_enabled_;
   // The system font metrics cache.
