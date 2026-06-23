@@ -240,7 +240,7 @@ AtomicString MarkupAccumulator::AppendElement(const Element& element) {
       attributes_mode_ == AttributesMode::kSynchronized
           ? element.Attributes()
           : element.AttributesWithoutUpdate();
-  if (SerializeAsHTML()) {
+  if (SerializeAsHtml()) {
     // https://html.spec.whatwg.org/C/#html-fragment-serialisation-algorithm
 
     // 3.2. Element: If current node's is value is not null, and the
@@ -286,7 +286,7 @@ MarkupAccumulator::ElementSerializationData
 MarkupAccumulator::AppendStartTagOpen(const Element& element) {
   ElementSerializationData data;
   data.serialized_prefix_ = element.prefix();
-  if (SerializeAsHTML()) {
+  if (SerializeAsHtml()) {
     formatter_.AppendStartTagOpen(markup_, element);
     return data;
   }
@@ -411,14 +411,14 @@ void MarkupAccumulator::AppendStartTagClose(const Element& element) {
 void MarkupAccumulator::AppendAttribute(const Element& element,
                                         const Attribute& attribute) {
   String value = formatter_.ResolveUrlIfNeeded(element, attribute);
-  if (SerializeAsHTML()) {
-    MarkupFormatter::AppendAttributeAsHTML(markup_, attribute, value);
+  if (SerializeAsHtml()) {
+    MarkupFormatter::AppendAttributeAsHtml(markup_, attribute, value);
   } else {
-    AppendAttributeAsXMLWithNamespace(element, attribute, value);
+    AppendAttributeAsXmlWithNamespace(element, attribute, value);
   }
 }
 
-void MarkupAccumulator::AppendAttributeAsXMLWithNamespace(
+void MarkupAccumulator::AppendAttributeAsXmlWithNamespace(
     const Element& element,
     const Attribute& attribute,
     const String& value) {
@@ -508,8 +508,9 @@ EntityMask MarkupAccumulator::EntityMaskForText(const Text& text) const {
 }
 
 void MarkupAccumulator::PushNamespaces(const Element& element) {
-  if (SerializeAsHTML())
+  if (SerializeAsHtml()) {
     return;
+  }
   DCHECK_GT(namespace_stack_.size(), 0u);
   // TODO(tkent): Avoid to copy the whole map.
   // We can't do |namespace_stack_.emplace_back(namespace_stack_.back())|
@@ -519,8 +520,9 @@ void MarkupAccumulator::PushNamespaces(const Element& element) {
 }
 
 void MarkupAccumulator::PopNamespaces(const Element& element) {
-  if (SerializeAsHTML())
+  if (SerializeAsHtml()) {
     return;
+  }
   namespace_stack_.pop_back();
 }
 
@@ -596,8 +598,8 @@ AtomicString MarkupAccumulator::GeneratePrefix(
   return generated_prefix;
 }
 
-bool MarkupAccumulator::SerializeAsHTML() const {
-  return formatter_.SerializeAsHTML();
+bool MarkupAccumulator::SerializeAsHtml() const {
+  return formatter_.SerializeAsHtml();
 }
 
 // This serializes the shadow root of this element, if present. The behavior
@@ -717,7 +719,7 @@ void MarkupAccumulator::SerializeNodesWithNamespaces(
     prefix_override = AppendElement(target_element);
 
   bool has_end_tag =
-      !(SerializeAsHTML() && ElementCannotHaveEndTag(target_element));
+      !(SerializeAsHtml() && ElementCannotHaveEndTag(target_element));
   if (has_end_tag) {
     if (emit_choice != EmitElementChoice::kEmitButIgnoreChildren) {
       const Node* parent = &target_element;
@@ -764,7 +766,7 @@ template <typename Strategy>
 CORE_EXPORT String
 MarkupAccumulator::SerializeNodes(const Node& target_node,
                                   ChildrenOnly children_only) {
-  if (!SerializeAsHTML()) {
+  if (!SerializeAsHtml()) {
     // https://w3c.github.io/DOM-Parsing/#dfn-xml-serialization
     DCHECK_EQ(namespace_stack_.size(), 0u);
     // 2. Let prefix map be a new namespace prefix map.

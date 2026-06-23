@@ -237,7 +237,7 @@ class NameInHeapSnapshotBuilder : public MarkupAccumulator {
  public:
   NameInHeapSnapshotBuilder()
       : MarkupAccumulator(ResolveUrls::kNone,
-                          SerializationType::kHTML,
+                          SerializationType::kHtml,
                           ShadowRootInclusion(),
                           MarkupAccumulator::AttributesMode::kUnsynchronized) {}
   String GetStartTag(const Element& element) {

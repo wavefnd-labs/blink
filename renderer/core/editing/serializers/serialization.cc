@@ -522,8 +522,8 @@ String CreateMarkup(const Node* node,
 
   MarkupAccumulator accumulator(should_resolve_urls,
                                 IsA<HTMLDocument>(node->GetDocument())
-                                    ? SerializationType::kHTML
-                                    : SerializationType::kXML,
+                                    ? SerializationType::kHtml
+                                    : SerializationType::kXml,
                                 shadow_root_inclusion);
   return accumulator.SerializeNodes<EditingStrategy>(*node, children_only);
 }

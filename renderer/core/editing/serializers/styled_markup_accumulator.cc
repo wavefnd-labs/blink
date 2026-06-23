@@ -56,8 +56,8 @@ StyledMarkupAccumulator::StyledMarkupAccumulator(
     Document* document,
     const CreateMarkupOptions& options)
     : formatter_(options.ShouldResolveUrls(),
-                 IsA<HTMLDocument>(document) ? SerializationType::kHTML
-                                             : SerializationType::kXML),
+                 IsA<HTMLDocument>(document) ? SerializationType::kHtml
+                                             : SerializationType::kXml),
       start_(start),
       end_(end),
       document_(document),
@@ -121,7 +121,7 @@ void StyledMarkupAccumulator::AppendTextWithInlineStyle(
         use_rendered_text ? RenderedText(text) : StringValueForRange(text);
     StringBuilder buffer;
     MarkupFormatter::AppendCharactersReplacingEntities(buffer, content,
-                                                       kEntityMaskInPCDATA);
+                                                       kEntityMaskInPcdata);
     // Keep collapsible white spaces as is during markup sanitization.
     const String text_to_append =
         IsForMarkupSanitization()
@@ -178,10 +178,10 @@ void StyledMarkupAccumulator::AppendAttribute(StringBuilder& result,
                                               const Element& element,
                                               const Attribute& attribute) {
   String value = formatter_.ResolveUrlIfNeeded(element, attribute);
-  if (formatter_.SerializeAsHTML()) {
-    MarkupFormatter::AppendAttributeAsHTML(result, attribute, value);
+  if (formatter_.SerializeAsHtml()) {
+    MarkupFormatter::AppendAttributeAsHtml(result, attribute, value);
   } else {
-    MarkupFormatter::AppendAttributeAsXMLWithoutNamespace(result, attribute,
+    MarkupFormatter::AppendAttributeAsXmlWithoutNamespace(result, attribute,
                                                           value);
   }
 }

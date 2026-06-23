@@ -102,7 +102,7 @@ class CORE_EXPORT MarkupAccumulator {
   ShadowRootInclusion shadow_root_inclusion_;
 
  private:
-  bool SerializeAsHTML() const;
+  bool SerializeAsHtml() const;
   String ToString() { return markup_.ToString(); }
 
   void AppendString(const String&);
@@ -118,7 +118,7 @@ class CORE_EXPORT MarkupAccumulator {
   void AppendStartTagClose(const Element&);
   void AppendNamespace(const AtomicString& prefix,
                        const AtomicString& namespace_uri);
-  void AppendAttributeAsXMLWithNamespace(const Element& element,
+  void AppendAttributeAsXmlWithNamespace(const Element& element,
                                          const Attribute& attribute,
                                          const String& value);
   bool ShouldAddNamespaceAttribute(const Attribute& attribute,
