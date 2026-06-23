@@ -1437,7 +1437,7 @@ int64_t WebGLRenderingContextWebGPUBase::getVertexAttribOffset(GLuint index,
 }
 
 void WebGLRenderingContextWebGPUBase::hint(GLenum target, GLenum mode) {
-  NOTIMPLEMENTED();
+  driver_gl_.fn.glHintFn(target, mode);
 }
 
 bool WebGLRenderingContextWebGPUBase::isBuffer(WebGLBuffer*) {
