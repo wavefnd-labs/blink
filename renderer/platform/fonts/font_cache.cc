@@ -29,6 +29,8 @@
 
 #include "third_party/blink/renderer/platform/fonts/font_cache.h"
 
+#include <unicode/uscript.h>
+
 #include <limits>
 #include <memory>
 
@@ -218,7 +220,14 @@ const SimpleFontData* FontCache::FallbackFontForCharacter(
   base::ElapsedTimer timer;
   const SimpleFontData* result = PlatformFallbackFontForCharacter(
       description, lookup_char, font_data_to_substitute, fallback_priority);
-  FontPerformance::AddSystemFallbackFontTime(timer.Elapsed());
+  base::TimeDelta elapsed = timer.Elapsed();
+  bool is_emoji = IsNonTextFallbackPriority(fallback_priority);
+  UErrorCode err = U_ZERO_ERROR;
+  UScriptCode script = uscript_getScript(lookup_char, &err);
+  if (U_FAILURE(err)) {
+    script = USCRIPT_INVALID_CODE;
+  }
+  FontPerformance::AddSystemFallbackFontTime(script, is_emoji, elapsed);
   return result;
 }
 
