@@ -1637,13 +1637,13 @@ TEST_P(WindowPerformanceTest, EventTimingTraceEvents) {
   EXPECT_FALSE(click_begin->other_event->HasDictArg("data"));
 }
 
-TEST_P(WindowPerformanceTest, SlowInteractionToNextPaintTraceEvents) {
+TEST_P(WindowPerformanceTest, UserInteractionTraceEvents) {
   using trace_analyzer::Query;
   trace_analyzer::Start("*");
 
   constexpr ui::DomCode kKeyCode = ui::DomCode::US_A;
 
-  // Short, untraced keyboard event.
+  // Short, untraced keyboard event (duration ~100ms).
   {
     // Keydown.
     auto* event1 = CreateKeyboardEvent(
@@ -1720,23 +1720,40 @@ TEST_P(WindowPerformanceTest, SlowInteractionToNextPaintTraceEvents) {
   analyzer->AssociateAsyncBeginEndEvents();
 
   trace_analyzer::TraceEventVector events;
-  Query q = Query::EventNameIs("SlowInteractionToNextPaint") &&
+  Query q = Query::EventNameIs(
+                "Blink.Responsiveness.UserInteraction.MaxEventDuration") &&
             Query::EventPhaseIs(TRACE_EVENT_PHASE_NESTABLE_ASYNC_BEGIN);
   analyzer->FindEvents(q, &events);
 
-  EXPECT_EQ(3u, events.size());
+  ASSERT_EQ(events.size(), 8u);
 
-  ASSERT_TRUE(events[0]->has_other_event());
-  EXPECT_EQ(events[0]->category, "latency");
-  EXPECT_EQ(base::ClampRound(events[0]->GetAbsTimeToOtherEvent()), 101000);
+  for (size_t i = 0; i < events.size(); ++i) {
+    ASSERT_TRUE(events[i]->has_other_event());
+  }
 
-  ASSERT_TRUE(events[1]->has_other_event());
-  EXPECT_EQ(events[1]->category, "latency");
-  EXPECT_EQ(base::ClampRound(events[1]->GetAbsTimeToOtherEvent()), 1000000);
+  // Event 0 (Block 1 keydown): 20ms
+  EXPECT_NEAR(events[0]->GetAbsTimeToOtherEvent(), 20000.0, 1000.0);
 
-  ASSERT_TRUE(events[2]->has_other_event());
-  EXPECT_EQ(events[2]->category, "latency");
-  EXPECT_EQ(base::ClampRound(events[2]->GetAbsTimeToOtherEvent()), 600000);
+  // Event 1 (Block 1 keyup): 100ms
+  EXPECT_NEAR(events[1]->GetAbsTimeToOtherEvent(), 100000.0, 1000.0);
+
+  // Event 2 (Block 2 keydown): 20ms
+  EXPECT_NEAR(events[2]->GetAbsTimeToOtherEvent(), 20000.0, 1000.0);
+
+  // Event 3 (Block 2 keyup): 101ms
+  EXPECT_NEAR(events[3]->GetAbsTimeToOtherEvent(), 101000.0, 1000.0);
+
+  // Event 4 (Block 3 keydown 5): 10ms
+  EXPECT_NEAR(events[4]->GetAbsTimeToOtherEvent(), 10000.0, 1000.0);
+
+  // Event 5 (Block 3 keyup 6): 1000ms
+  EXPECT_NEAR(events[5]->GetAbsTimeToOtherEvent(), 1000000.0, 1000.0);
+
+  // Event 6 (Block 3 keydown 7): 10ms
+  EXPECT_NEAR(events[6]->GetAbsTimeToOtherEvent(), 10000.0, 1000.0);
+
+  // Event 7 (Block 3 keyup 8): 600ms
+  EXPECT_NEAR(events[7]->GetAbsTimeToOtherEvent(), 600000.0, 1000.0);
 }
 
 TEST_P(WindowPerformanceTest, ContainerTimingTraceEvent) {
