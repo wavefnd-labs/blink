@@ -53,6 +53,17 @@ const PhysicalLineBoxFragment* FindBlockInInlineLineBoxFragment(
   return nullptr;
 }
 
+const FragmentItem* FindFragmentItemByText(const LayoutBlockFlow& block,
+                                           StringView text) {
+  InlineCursor cursor(block);
+  for (; cursor; cursor.MoveToNext()) {
+    if (cursor.Current()->IsText() && cursor.Current().Text(cursor) == text) {
+      return cursor.CurrentItem();
+    }
+  }
+  return nullptr;
+}
+
 class InlineLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
  protected:
   static std::string AsFragmentItemsString(const LayoutBlockFlow& root) {
@@ -79,6 +90,8 @@ class InlineLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
     return PhysicalRect(cursor.Current().OffsetInContainerFragment(),
                         cursor.Current().Size());
   }
+
+  void TestRubyTextEmphasisAnnotationMetricsVertical(WritingMode writing_mode);
 };
 
 TEST_F(InlineLayoutAlgorithmTest, Types) {
@@ -1114,6 +1127,178 @@ TEST_F(InlineLayoutAlgorithmTest, TextEmphasisAsRuby) {
     // because the annotation overflow (emphasis marks) should be accommodated
     // by the block layout.
     EXPECT_GT(container->LogicalHeight(), LayoutUnit(20));
+  }
+}
+
+void InlineLayoutAlgorithmTest::TestRubyTextEmphasisAnnotationMetricsVertical(
+    WritingMode writing_mode) {
+  ScopedTextEmphasisAsRubyForTest enable_text_emphasis_as_ruby(true);
+  ScopedTextEmphasisWithRubyForTest enable_text_emphasis_with_ruby(true);
+
+  LoadAhem();
+
+  String writing_mode_str = (writing_mode == WritingMode::kVerticalRl)
+                                ? "vertical-rl"
+                                : "vertical-lr";
+
+  SetBodyInnerHTML(
+      "<style>"
+      "  #test1, #test2, #test3 {"
+      "    font: 20px Ahem;"
+      "    writing-mode: " +
+      writing_mode_str +
+      ";"
+      "  }"
+      "  ruby.under {"
+      "    ruby-position: under;"
+      "  }"
+      "  em.under {"
+      "    text-emphasis: filled circle;"
+      "    text-emphasis-position: under left;"
+      "  }"
+      "  ruby.over {"
+      "    ruby-position: over;"
+      "  }"
+      "  em.over {"
+      "    text-emphasis: filled circle;"
+      "    text-emphasis-position: over right;"
+      "  }"
+      "</style>"
+      "<div id='test1'><em class='under'><ruby "
+      "class='under'>A<rt>a</rt></ruby></em></div>"
+      "<div id='test2'><em class='over'><ruby "
+      "class='over'>B<rt>b</rt></ruby></em></div>"
+      "<div id='test3'><em class='under'>C</em></div>");
+
+  // 1. Ruby and Emphasis both Under (Left)
+  {
+    LayoutBlockFlow* test1 = GetLayoutBlockFlowByElementId("test1");
+    FontHeight metrics =
+        FindFragmentItemByText(*test1, "A")->AnnotationMetrics();
+    EXPECT_EQ(metrics.ascent, LayoutUnit(0));
+    EXPECT_EQ(metrics.descent, LayoutUnit(10));
+  }
+
+  // 2. Ruby and Emphasis both Over (Right)
+  {
+    LayoutBlockFlow* test2 = GetLayoutBlockFlowByElementId("test2");
+    FontHeight metrics =
+        FindFragmentItemByText(*test2, "B")->AnnotationMetrics();
+    EXPECT_EQ(metrics.ascent, LayoutUnit(10));
+    EXPECT_EQ(metrics.descent, LayoutUnit(0));
+  }
+
+  // 3. Base only with Emphasis Under (Left)
+  {
+    LayoutBlockFlow* test3 = GetLayoutBlockFlowByElementId("test3");
+    FontHeight metrics =
+        FindFragmentItemByText(*test3, "C")->AnnotationMetrics();
+    EXPECT_EQ(metrics.ascent, LayoutUnit(0));
+    EXPECT_EQ(metrics.descent, LayoutUnit(0));
+  }
+}
+
+TEST_F(InlineLayoutAlgorithmTest, RubyTextEmphasisAnnotationMetricsVerticalLr) {
+  TestRubyTextEmphasisAnnotationMetricsVertical(WritingMode::kVerticalLr);
+}
+
+TEST_F(InlineLayoutAlgorithmTest, RubyTextEmphasisAnnotationMetricsVerticalRl) {
+  TestRubyTextEmphasisAnnotationMetricsVertical(WritingMode::kVerticalRl);
+}
+
+TEST_F(InlineLayoutAlgorithmTest, RubyTextEmphasisAnnotationMetricsHorizontal) {
+  ScopedTextEmphasisAsRubyForTest enable_text_emphasis_as_ruby(true);
+  ScopedTextEmphasisWithRubyForTest enable_text_emphasis_with_ruby(true);
+
+  LoadAhem();
+
+  constexpr LayoutUnit kBaseSize = LayoutUnit(20);
+  SetBodyInnerHTML(R"HTML(
+    <style>
+      #test1, #test2, #test3, #test4 {
+        font: 20px/1 Ahem;
+        writing-mode: horizontal-tb;
+      }
+      rt {
+        x-line-height: 1;
+      }
+      ruby.under {
+        ruby-position: under;
+      }
+      em.under {
+        text-emphasis: 'x';
+        text-emphasis-position: under;
+      }
+      ruby.over {
+        ruby-position: over;
+      }
+      em.over {
+        text-emphasis: 'x';
+        text-emphasis-position: over;
+      }
+    </style>
+    <div id='test1'><em class='under'>before<ruby class='under'>A<rt>a</rt></ruby>after</em></div>
+    <div id='test2'><em class='over'><ruby class='over'>B<rt>b</rt></ruby></em></div>
+    <div id='test3'><em class='under'>C</em></div>
+    <div id='test4'>
+      <em class='over'><ruby><ruby style="ruby-position:under">A<rt>a</rt></ruby><rt style="font-size:20px">AA</rt></ruby></em>
+      &nbsp;
+      <em class='over'><ruby><ruby style="ruby-position:under">B<rt style="font-size:20px">b</rt></ruby><rt>BB</rt></ruby></em>
+    </div>
+  )HTML");
+
+  // 1. Ruby and Emphasis both Under
+  {
+    LayoutBlockFlow* test1 = GetLayoutBlockFlowByElementId("test1");
+    FontHeight metrics =
+        FindFragmentItemByText(*test1, "A")->AnnotationMetrics();
+    EXPECT_EQ(metrics.ascent, LayoutUnit());
+    EXPECT_EQ(metrics.descent, kBaseSize / 2);
+
+    FontHeight metrics_after =
+        FindFragmentItemByText(*test1, "after")->AnnotationMetrics();
+    EXPECT_EQ(metrics_after.ascent, LayoutUnit());
+    EXPECT_EQ(metrics_after.descent, LayoutUnit());
+  }
+
+  // 2. Ruby and Emphasis both Over
+  {
+    LayoutBlockFlow* test2 = GetLayoutBlockFlowByElementId("test2");
+    FontHeight metrics =
+        FindFragmentItemByText(*test2, "B")->AnnotationMetrics();
+    EXPECT_EQ(metrics.ascent, kBaseSize / 2);
+    EXPECT_EQ(metrics.descent, LayoutUnit(0));
+  }
+
+  // 3. Base only with Emphasis Under
+  {
+    LayoutBlockFlow* test3 = GetLayoutBlockFlowByElementId("test3");
+    FontHeight metrics =
+        FindFragmentItemByText(*test3, "C")->AnnotationMetrics();
+    EXPECT_EQ(metrics.ascent, LayoutUnit(0));
+    EXPECT_EQ(metrics.descent, LayoutUnit(0));
+  }
+
+  // 4. Multiple columns in the same line with different heights
+  //
+  //  "AA" 20px    "BB" 10px
+  //  "A"          "B"
+  //  "a"  10px    "b" 20px
+  {
+    LayoutBlockFlow* test4 = GetLayoutBlockFlowByElementId("test4");
+    {
+      FontHeight metrics =
+          FindFragmentItemByText(*test4, "A")->AnnotationMetrics();
+      EXPECT_EQ(metrics.ascent, LayoutUnit(20));
+      EXPECT_EQ(metrics.descent, LayoutUnit(0));
+    }
+    {
+      FontHeight metrics =
+          FindFragmentItemByText(*test4, "B")->AnnotationMetrics();
+      // "BB"'s ascent (8px) + "AA"'s descent (4px)
+      EXPECT_EQ(metrics.ascent, LayoutUnit(12));
+      EXPECT_EQ(metrics.descent, LayoutUnit(0));
+    }
   }
 }
 
