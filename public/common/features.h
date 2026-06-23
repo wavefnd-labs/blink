@@ -1432,6 +1432,10 @@ BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE_PARAM(
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kMHTML_Improvements);
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kMixedContentAutoupgrade);
 
+// Kill switch for the dedicated MoveWindowTo / ResizeWindowTo IPCs; falls back
+// to SetWindowRect when disabled. https://crbug.com/512533947.
+BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kMoveResizeWindowToIPCs);
+
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kNavigationPredictor);
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE_PARAM(
     int,
