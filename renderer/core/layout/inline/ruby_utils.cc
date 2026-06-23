@@ -729,6 +729,8 @@ AnnotationMetrics ComputeAnnotationOverflow(
 
   bool has_over_annotation = false;
   bool has_under_annotation = false;
+  bool has_over_emphasis = false;
+  bool has_under_emphasis = false;
 
   const LayoutUnit line_under = line_over + line_box_metrics.LineHeight();
   LayoutUnit over_emphasis;
@@ -742,8 +744,10 @@ AnnotationMetrics ComputeAnnotationOverflow(
       continue;
     }
     UsedFont used_font = item.GetUsedFont();
-    LayoutUnit item_over = line_box_metrics.ascent + item.BlockOffset();
-    LayoutUnit item_under = line_box_metrics.ascent + item.BlockEndOffset();
+    LayoutUnit text_box_over = line_box_metrics.ascent + item.BlockOffset();
+    LayoutUnit text_box_under = line_box_metrics.ascent + item.BlockEndOffset();
+    LayoutUnit item_over = text_box_over;
+    LayoutUnit item_under = text_box_under;
     if (item.shape_result) {
       if (const auto* style = item.Style()) {
         std::tie(item_over, item_under) = AdjustTextOverUnderOffsetsForEmHeight(
@@ -760,22 +764,30 @@ AnnotationMetrics ComputeAnnotationOverflow(
 
     if (const auto* style = item.Style()) {
       if (style->GetTextEmphasisMark() != TextEmphasisMark::kNone) {
-        if (RuntimeEnabledFeatures::TextEmphasisWithRubyEnabled() ||
-            RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled()) {
+        if (RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled()) {
           const auto emphasis_mark_height =
               InlineBoxState::ComputeEmphasisMarkOutsets(
                   *style, used_font.GetFont(), used_font.ScalingFactor())
                   .LineHeight();
           if (style->GetTextEmphasisLineLogicalSide() ==
               LineLogicalSide::kOver) {
-            if (RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled()) {
-              item_over -= emphasis_mark_height;
-            }
+            item_over = text_box_over -
+                        (emphasis_mark_height + item.annotation_metrics.ascent);
+            has_over_emphasis = true;
+          } else {
+            item_under = text_box_under + emphasis_mark_height +
+                         item.annotation_metrics.descent;
+            has_under_emphasis = true;
+          }
+        } else if (RuntimeEnabledFeatures::TextEmphasisWithRubyEnabled()) {
+          const auto emphasis_mark_height =
+              InlineBoxState::ComputeEmphasisMarkOutsets(
+                  *style, used_font.GetFont(), used_font.ScalingFactor())
+                  .LineHeight();
+          if (style->GetTextEmphasisLineLogicalSide() ==
+              LineLogicalSide::kOver) {
             over_emphasis = std::max(emphasis_mark_height, over_emphasis);
           } else {
-            if (RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled()) {
-              item_under += emphasis_mark_height;
-            }
             under_emphasis = std::max(emphasis_mark_height, under_emphasis);
           }
         } else {
@@ -834,12 +846,6 @@ AnnotationMetrics ComputeAnnotationOverflow(
     }
   }
 
-  const bool has_over_emphasis =
-      RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled() &&
-      over_emphasis > LayoutUnit();
-  const bool has_under_emphasis =
-      RuntimeEnabledFeatures::TextEmphasisAsRubyEnabled() &&
-      under_emphasis > LayoutUnit();
   // With some fonts, text fragment sizes can exceed line-height.
   // We'd like to set overflow only if we have annotations.
   // This affects fast/ruby/line-height.html on macOS.

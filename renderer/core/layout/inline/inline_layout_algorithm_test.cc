@@ -1302,5 +1302,39 @@ TEST_F(InlineLayoutAlgorithmTest, RubyTextEmphasisAnnotationMetricsHorizontal) {
   }
 }
 
+TEST_F(InlineLayoutAlgorithmTest, RubyTextEmphasisHeight) {
+  ScopedTextEmphasisAsRubyForTest enable_text_emphasis_as_ruby(true);
+  LoadAhem();
+
+  SetBodyInnerHTML(R"HTML(
+    <style>
+      p, rt {
+        font-family: Ahem;
+      }
+      p {
+        font-size: 80px;
+        line-height: 1;
+        display: inline-block;
+        border: 1px solid gray;
+      }
+    </style>
+    <p id="p1"><span style="text-emphasis:'x'">emp</span></p>
+    <p id="p2"><ruby>ruby<rt>x</ruby><span style="text-emphasis:'x'">emp</span></span></p>
+    <p id="p3"><ruby>ruby<rt>x</ruby></span></p>
+  )HTML");
+
+  LayoutBlockFlow* emp = GetLayoutBlockFlowByElementId("p1");
+  LayoutBlockFlow* both = GetLayoutBlockFlowByElementId("p2");
+  LayoutBlockFlow* ruby = GetLayoutBlockFlowByElementId("p3");
+  ASSERT_NE(emp, nullptr);
+  ASSERT_NE(both, nullptr);
+  ASSERT_NE(ruby, nullptr);
+
+  EXPECT_EQ(emp->GetPhysicalFragment(0)->Size().height,
+            both->GetPhysicalFragment(0)->Size().height);
+  EXPECT_EQ(emp->GetPhysicalFragment(0)->Size().height,
+            ruby->GetPhysicalFragment(0)->Size().height);
+}
+
 }  // namespace
 }  // namespace blink
