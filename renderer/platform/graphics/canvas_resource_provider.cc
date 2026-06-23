@@ -2884,11 +2884,7 @@ sk_sp<SkSurface> CanvasNon2DResourceProviderSharedImage::CreateSkSurface()
   return SkSurfaces::Raster(resource_->CreateSkImageInfo(), &props);
 }
 
-
-
-
-
-std::unique_ptr<CanvasResourceProvider>
+std::unique_ptr<Canvas2DResourceProviderBitmap>
 Canvas2DResourceProviderBitmap::CreateForTesting(
     gfx::Size size,
     const Canvas2DColorParams& color_params) {

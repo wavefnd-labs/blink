@@ -236,8 +236,13 @@ class MODULES_EXPORT CanvasRenderingContext2D final
 
   CanvasResourceProvider* GetOrCreateResourceProvider() override;
   void SetCanvas2DResourceProviderForTesting(
-      std::unique_ptr<CanvasResourceProvider> provider,
+      std::unique_ptr<Canvas2DResourceProviderSharedImage> provider,
       const gfx::Size& size);
+  void SetCanvas2DResourceProviderForTesting(
+      std::unique_ptr<Canvas2DResourceProviderBitmap> provider,
+      const gfx::Size& size);
+  void SetCanvas2DResourceProviderForTesting(std::nullptr_t,
+                                             const gfx::Size& size);
 
   // TODO(crbug.com/352263194): Migrate canvas_rendering_context_2d_test.cc
   // callsites and make this method private.

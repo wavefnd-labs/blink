@@ -256,7 +256,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   void OnMemoryDump(base::trace_event::ProcessMemoryDump*) override;
   size_t GetSize() const override;
 
-  static std::unique_ptr<CanvasResourceProvider> CreateForTesting(
+  static std::unique_ptr<Canvas2DResourceProviderBitmap> CreateForTesting(
       gfx::Size size,
       const Canvas2DColorParams& color_params);
 

@@ -1505,12 +1505,30 @@ void CanvasRenderingContext2D::WakeUpFromHibernation() {
 }
 
 void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
-    std::unique_ptr<CanvasResourceProvider> provider,
+    std::unique_ptr<Canvas2DResourceProviderSharedImage> provider,
     const gfx::Size& size) {
   canvas()->DiscardResources();
   canvas()->SetSize(size);
   hibernation_handler_ = std::make_unique<CanvasHibernationHandler>(*this);
   ReplaceResourceProvider(std::move(provider));
+}
+
+void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
+    std::unique_ptr<Canvas2DResourceProviderBitmap> provider,
+    const gfx::Size& size) {
+  canvas()->DiscardResources();
+  canvas()->SetSize(size);
+  hibernation_handler_ = std::make_unique<CanvasHibernationHandler>(*this);
+  ReplaceResourceProvider(std::move(provider));
+}
+
+void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
+    std::nullptr_t provider,
+    const gfx::Size& size) {
+  canvas()->DiscardResources();
+  canvas()->SetSize(size);
+  hibernation_handler_ = std::make_unique<CanvasHibernationHandler>(*this);
+  ReplaceResourceProvider(nullptr);
 }
 
 }  // namespace blink
