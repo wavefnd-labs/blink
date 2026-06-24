@@ -10022,6 +10022,7 @@ void Element::SetShadowPseudoId(const AtomicString& id) {
            type == CSSSelector::kPseudoBlinkInternalElement ||
            type == CSSSelector::kPseudoDetailsContent ||
            type == CSSSelector::kPseudoPermissionIcon ||
+           type == CSSSelector::kPseudoSelectListbox ||
            id == shadow_element_names::kPickerSelect)
         << "type: " << type << ", id: " << id;
   }

@@ -2583,6 +2583,23 @@ select optgroup optgroup {
   option:filtered {
     display: none;
   }
+
+  /* When select elements contain a filtering input and the structure of the
+   * shadow root changes, we should move the scrollbar from the entire
+   * container which now contains the input and the options to just the listbox
+   * of options because the filtering input should not be part of the scroller. */
+  select:-internal-list-box:-internal-select-contains-input,
+  select:-internal-select-contains-input::picker(select):popover-open {
+    overflow: clip;
+    display: inline-flex;
+    flex-direction: column;
+    block-size: -internal-auto-base(initial, calc(max(24px, 1lh) * (1 + attr(size type(<integer>), 4))));
+  }
+  select::select-listbox {
+    overflow: auto;
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 @supports blink-feature(FilterableSelect) {

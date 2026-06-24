@@ -2173,6 +2173,7 @@ void HTMLSelectElement::InputInserted(HTMLInputElement* input,
   // some input elements, hence the == 1 check here.
   if (num_descendant_inputs_ == 1) {
     UpdateUserAgentShadowTree(*UserAgentShadowRoot());
+    PseudoStateChanged(CSSSelector::kPseudoSelectContainsInput);
   }
 }
 
@@ -2181,6 +2182,7 @@ void HTMLSelectElement::InputRemoved(HTMLInputElement* input,
   CountedElementRemoved(input, nearest_ancestor_select_child);
   if (!num_descendant_inputs_) {
     UpdateUserAgentShadowTree(*UserAgentShadowRoot());
+    PseudoStateChanged(CSSSelector::kPseudoSelectContainsInput);
   }
 }
 

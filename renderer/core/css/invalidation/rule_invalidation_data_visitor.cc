@@ -159,10 +159,12 @@ bool SupportsInvalidation(CSSSelector::PseudoType type) {
     case CSSSelector::kPseudoOverscrollOpen:
     case CSSSelector::kPseudoDialogInTopLayer:
     case CSSSelector::kPseudoPicker:
+    case CSSSelector::kPseudoSelectListbox:
     case CSSSelector::kPseudoPopoverInTopLayer:
     case CSSSelector::kPseudoPopoverOpen:
     case CSSSelector::kPseudoMenulistPopoverWithMenubarAnchor:
     case CSSSelector::kPseudoMenulistPopoverWithMenulistAnchor:
+    case CSSSelector::kPseudoSelectContainsInput:
     case CSSSelector::kPseudoSelectHasSlottedButton:
     case CSSSelector::kPseudoSlotted:
     case CSSSelector::kPseudoUnboundedElementInactive:

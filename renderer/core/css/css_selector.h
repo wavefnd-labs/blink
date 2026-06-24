@@ -324,6 +324,8 @@ class CORE_EXPORT CSSSelector {
     kPseudoSearchText,
     kPseudoPickerIcon,
     kPseudoPicker,
+    kPseudoSelectListbox,
+    kPseudoSelectContainsInput,
     kPseudoSelectHasSlottedButton,
     kPseudoSelection,
     kPseudoSingleButton,

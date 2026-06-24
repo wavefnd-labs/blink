@@ -769,6 +769,7 @@ SelectorChecker::FeaturelessMatch SelectorChecker::MatchShadowHost(
     case CSSSelector::kPseudoSearchText:
     case CSSSelector::kPseudoPickerIcon:
     case CSSSelector::kPseudoPicker:
+    case CSSSelector::kPseudoSelectListbox:
     case CSSSelector::kPseudoSelection:
     case CSSSelector::kPseudoSingleButton:
     case CSSSelector::kPseudoStart:
@@ -842,6 +843,7 @@ SelectorChecker::FeaturelessMatch SelectorChecker::MatchShadowHost(
     case CSSSelector::kPseudoScrollMarkerGroup:
     case CSSSelector::kPseudoScrollButton:
     case CSSSelector::kPseudoOverscrollAreaParent:
+    case CSSSelector::kPseudoSelectContainsInput:
     case CSSSelector::kPseudoSelectHasSlottedButton:
       // These pseudos are not allowed to match featureless elements. When
       // adding new pseudos here, they would typically be allowed if they are
@@ -2498,6 +2500,12 @@ bool SelectorChecker::CheckPseudoClass(const SelectorCheckingContext& context,
       }
       return selector.MatchNth(NthIndexCache::NthLastOfTypeIndex(element));
     }
+    case CSSSelector::kPseudoSelectContainsInput:
+      DCHECK(RuntimeEnabledFeatures::FilterableSelectEnabled());
+      if (auto* select = DynamicTo<HTMLSelectElement>(element)) {
+        return select->NumDescendantInputs() > 0;
+      }
+      return false;
     case CSSSelector::kPseudoSelectHasSlottedButton:
       if (auto* select = DynamicTo<HTMLSelectElement>(element)) {
         return select->SlottedButton();
@@ -3338,6 +3346,10 @@ bool SelectorChecker::CheckPseudoElement(const SelectorCheckingContext& context,
       } else {
         return false;
       }
+    case CSSSelector::kPseudoSelectListbox:
+      DCHECK(RuntimeEnabledFeatures::FilterableSelectEnabled());
+      return MatchesUAShadowElement(element,
+                                    shadow_element_names::kSelectListbox);
     case CSSSelector::kPseudoPlaceholder:
       return MatchesUAShadowElement(
           element, shadow_element_names::kPseudoInputPlaceholder);
