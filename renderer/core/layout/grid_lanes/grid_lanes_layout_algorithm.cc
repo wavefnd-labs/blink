@@ -154,12 +154,12 @@ const LayoutResult* GridLanesLayoutAlgorithm::Layout() {
 
   auto* layout_data = &sizing_tree.LayoutData();
   const auto grid_axis_direction = Style().GridLanesTrackSizingDirection();
+  const bool is_for_columns = grid_axis_direction == kForColumns;
 
   if (!grid_items->IsEmpty()) {
     const auto& style = Style();
-    const auto& track_collection = grid_axis_direction == kForColumns
-                                       ? layout_data->Columns()
-                                       : layout_data->Rows();
+    const auto& track_collection =
+        is_for_columns ? layout_data->Columns() : layout_data->Rows();
 
     GridLanesRunningPositions running_positions(
         track_collection, style,
@@ -192,6 +192,30 @@ const LayoutResult* GridLanesLayoutAlgorithm::Layout() {
       container_builder_.InlineSize());
   container_builder_.SetFragmentsTotalBlockSize(block_size);
   container_builder_.SetIntrinsicBlockSize(intrinsic_block_size_);
+
+  // For scrollable overflow purposes, set the inflow-bounds to the grid-lanes
+  // track area, matching grid's behavior. The grid axis dimension comes from
+  // the track sizes, and the stacking axis dimension comes from the placed
+  // items.
+  if (node.IsScrollContainer()) {
+    const auto& track_collection =
+        is_for_columns ? layout_data->Columns() : layout_data->Rows();
+
+    LogicalOffset offset;
+    LogicalSize size;
+    if (is_for_columns) {
+      offset = {track_collection.GetSetOffset(0),
+                BorderScrollbarPadding().block_start};
+      size = {track_collection.CalculateSetSpanSize(), stacking_axis_size_};
+    } else {
+      offset = {BorderScrollbarPadding().inline_start,
+                track_collection.GetSetOffset(0)};
+      size = {stacking_axis_size_, track_collection.CalculateSetSpanSize()};
+    }
+
+    container_builder_.SetInflowBounds(LogicalRect(offset, size));
+  }
+  container_builder_.SetMayHaveDescendantAboveBlockStart(false);
 
   // Place out-of-flow items after setting the intrinsic block size, since
   // out-of-flow items don't contribute to the intrinsic size of the container.
@@ -424,7 +448,7 @@ void GridLanesLayoutAlgorithm::PlaceGridLanesItems(
 
   // Determine intrinsic size of the grid-lanes container. For the stacking
   // axis, remove the last gap that was added, since there is no item after it.
-  const LayoutUnit stacking_axis_size =
+  stacking_axis_size_ =
       running_positions.GetMaxPositionForSpan(
           GridSpan::TranslatedDefiniteGridSpan(
               /*start_line=*/0,
@@ -437,7 +461,7 @@ void GridLanesLayoutAlgorithm::PlaceGridLanesItems(
   // grid-lanes, `intrinsic_block_size_` is already set in
   // `ComputeGridLanesGeometry` from the track collection.
   if (is_for_columns) {
-    intrinsic_block_size_ = stacking_axis_size;
+    intrinsic_block_size_ = stacking_axis_size_;
   }
 
   const auto child_available_size = ChildAvailableSize();
@@ -447,7 +471,7 @@ void GridLanesLayoutAlgorithm::PlaceGridLanesItems(
   const LayoutUnit effective_stacking_axis_size =
       container_stacking_axis_available_size != kIndefiniteSize
           ? container_stacking_axis_available_size
-          : stacking_axis_size;
+          : stacking_axis_size_;
 
   ApplyStackingAxisAlignment(running_positions, effective_stacking_axis_size,
                              stacking_axis_gap);
@@ -471,7 +495,7 @@ void GridLanesLayoutAlgorithm::PlaceGridLanesItems(
   if (content_alignment != ComputedStyleInitialValues::InitialAlignContent() ||
       apply_fill_reverse_to_children) {
     const LayoutUnit intrinsic_inline_size =
-        is_for_columns ? grid_axis_size : stacking_axis_size;
+        is_for_columns ? grid_axis_size : stacking_axis_size_;
 
     // For definite stacking axis, use the container's available size to
     // compute alignment. For indefinite stacking axis, use the intrinsic

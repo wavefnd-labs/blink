@@ -389,6 +389,7 @@ class CORE_EXPORT GridLanesLayoutAlgorithm
 
   std::optional<LayoutUnit> contain_intrinsic_block_size_;
   LayoutUnit intrinsic_block_size_;
+  LayoutUnit stacking_axis_size_;
 
   LogicalSize grid_lanes_available_size_;
   LogicalSize grid_lanes_min_available_size_;
