@@ -4146,7 +4146,6 @@ void LineBreaker::HandleOverflow(LineInfo* line_info) {
         BreakText(item_result, item, *item.TextShapeResult(),
                   std::min(item_available_width, min_available_width),
                   item_available_width, line_info);
-        DCHECK_LE(item_result->EndOffset(), item_result_before.EndOffset());
 #if DCHECK_IS_ON()
         item_result->CheckConsistency(true);
 #endif
@@ -4176,6 +4175,13 @@ void LineBreaker::HandleOverflow(LineInfo* line_info) {
         }
 
         // Failed to break to fit. Restore to the original state.
+        //
+        // Generally, breaking at a smaller width should result in a shorter or
+        // equal end offset; i.e., `item_result->EndOffset()` should be
+        // `<= item_result_before.EndOffset()`.
+        // However, due to reshaping (especially at huge font sizes) or
+        // float-to-LayoutUnit rounding mismatches, the `EndOffset()` becoming
+        // larger is possible.
         if (HasHyphen()) [[unlikely]] {
           RemoveHyphen(item_results);
         }
