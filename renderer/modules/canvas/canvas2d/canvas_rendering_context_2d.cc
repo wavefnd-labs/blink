@@ -491,19 +491,15 @@ MemoryManagedPaintCanvas* CanvasRenderingContext2D::GetOrCreatePaintCanvas() {
     return nullptr;
   }
 
-  CanvasResourceProvider* provider = nullptr;
   if (shared_image_provider_) {
-    provider = shared_image_provider_.get();
-  } else if (bitmap_provider_) {
-    provider = bitmap_provider_.get();
-  }
-
-  if (provider != nullptr) [[likely]] {
-    // If we already had a provider, we can check whether it recorded ops passed
-    // the autoflush limit.
     if (layer_count_ == 0) [[likely]] {
       // TODO(crbug.com/1246486): Make auto-flushing layer friendly.
-      provider->FlushIfRecordingLimitExceeded();
+      shared_image_provider_->FlushIfRecordingLimitExceeded();
+    }
+  } else if (bitmap_provider_) {
+    if (layer_count_ == 0) [[likely]] {
+      // TODO(crbug.com/1246486): Make auto-flushing layer friendly.
+      bitmap_provider_->FlushIfRecordingLimitExceeded();
     }
   } else {
     // If we have no provider, try creating one.
