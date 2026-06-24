@@ -311,7 +311,7 @@ bool CopyVideoFrameTexturesToGLTextureViaIntermediateSI(
   destination_gl->TexImage2D(
       target, level, internal_format, video_frame->visible_rect().width(),
       video_frame->visible_rect().height(), 0, format, type, nullptr);
-  gpu::SyncToken dest_sync_token =
+  base::OnceCallback<gpu::SyncToken()> sync_callback =
       destination_gl->CopySharedImageToGLTextureViaTextureCopy(
           video_frame->visible_rect(), rgb_shared_image.get(), sync_token,
           target, texture, internal_format, format, type, level, dst_alpha_type,
@@ -319,7 +319,7 @@ bool CopyVideoFrameTexturesToGLTextureViaIntermediateSI(
 
   // Update the `rgb_sync_token` to be waited upon based on gles tasks
   // performed earlier.
-  rgb_si_cache->UpdateSyncToken(dest_sync_token);
+  rgb_si_cache->UpdateSyncToken(std::move(sync_callback).Run());
 
   // We do not need to synchronize video frame read here since it's already
   // taken care of earlier.
