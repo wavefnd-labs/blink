@@ -671,6 +671,28 @@ void LineBreaker::ComputeBaseDirection() {
       Character::IsLineFeed);
 }
 
+inline LayoutUnit LineBreaker::ComputeFloatOffset() const {
+  if (constraint_space_.AvailableSize().inline_size == kIndefiniteSize) {
+    return LayoutUnit();
+  }
+  const LayoutUnit left = line_opportunity_.line_left_offset;
+  const LayoutUnit bfc_left = constraint_space_.GetBfcOffset().line_offset;
+  const LayoutUnit right = line_opportunity_.line_right_offset;
+  const LayoutUnit bfc_right = constraint_space_.GetBfcOffset().line_offset +
+                               constraint_space_.AvailableSize().inline_size;
+  if (IsLtr(base_direction_)) {
+    if (left <= bfc_left) {
+      return LayoutUnit();
+    }
+    return left - bfc_left;
+  } else {
+    if (right >= bfc_right) {
+      return LayoutUnit();
+    }
+    return bfc_right - right;
+  }
+}
+
 void LineBreaker::RecalcClonedBoxDecorations() {
   cloned_box_decorations_count_ = 0u;
   cloned_box_decorations_initial_size_ = LayoutUnit();
@@ -2943,7 +2965,10 @@ void LineBreaker::HandleControlItem(const InlineItem& item,
                              : style.GetFont();
       const ShapeResult* shape_result =
           ShapeResult::CreateForTabulationCharacters(
-              font, item.Direction(), style.GetTabSize(), position_,
+              font, item.Direction(), style.GetTabSize(),
+              RuntimeEnabledFeatures::TabAlignmentWithFloatsEnabled()
+                  ? position_ + ComputeFloatOffset()
+                  : position_,
               item.StartOffset(), item.Length());
       HandleText(item, *shape_result, line_info);
       return;
