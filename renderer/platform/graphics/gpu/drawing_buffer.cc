@@ -2074,12 +2074,7 @@ scoped_refptr<DrawingBuffer::ColorBuffer> DrawingBuffer::CreateColorBuffer(
   // First see if creating a SharedImage that can be used as an overlay is
   // feasible.
   if (SharedGpuContext::IsGpuCompositingEnabled()) {
-#if BUILDFLAG(IS_WIN)
-    // TODO(crbug.com/488937356): Fold this into the below.
-    bool use_as_overlay = can_use_low_latency_;
-#else
     bool use_as_overlay = UseOverlaysForWebGL() || can_use_low_latency_;
-#endif
     if (use_as_overlay) {
 #if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_WIN)
       // Android's SharedImage backing for ChromiumImage does not support BGRX,

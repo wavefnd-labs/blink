@@ -383,14 +383,7 @@ TEST_F(
   // Produce a resource. The created resource should be an overlay candidate.
   EXPECT_TRUE(drawing_buffer_->PrepareTransferableResource(&resource,
                                                            &release_callback));
-#if BUILDFLAG(IS_WIN)
-  // Note: On Windows, DrawingBuffer does not query UseOverlaysForWebGL() at
-  // all but adds SCANOUT only via directly querying whether swapchain-backed
-  // SIs are supported when low-latency is enabled.
-  EXPECT_FALSE(resource.GetIsOverlayCandidate());
-#else
   EXPECT_TRUE(resource.GetIsOverlayCandidate());
-#endif
 
   drawing_buffer_->BeginDestruction();
 }
