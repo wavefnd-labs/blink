@@ -145,7 +145,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
       public MemoryManagedPaintRecorder::Client,
       public ScopedRasterTimer::Host {
  public:
-  virtual Canvas2DResourceProviderSharedImage* AsSharedImageProvider() = 0;
 
   // The ImageOrientationEnum conveys the desired orientation of the image, and
   // should be derived from the source of the bitmap data.
@@ -269,9 +268,6 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
   }
   SkAlphaType GetAlphaType() const override { return alpha_type_; }
   gfx::Size Size() const override { return size_; }
-  Canvas2DResourceProviderSharedImage* AsSharedImageProvider() override {
-    return nullptr;
-  }
   base::ByteSize EstimatedSizeInBytes() const override {
     return base::ByteSize(format_.EstimatedSizeInBytes(size_));
   }
@@ -490,9 +486,6 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
   void OnFlushForImage(cc::PaintImage::ContentId content_id) override;
   void RasterRecord(cc::PaintRecord last_recording) override;
   bool IsValid() const override;
-  Canvas2DResourceProviderSharedImage* AsSharedImageProvider() final {
-    return this;
-  }
   scoped_refptr<StaticBitmapImage> Snapshot(
       ImageOrientation = ImageOrientationEnum::kDefault) override;
   std::optional<cc::PaintRecord> Flush(
