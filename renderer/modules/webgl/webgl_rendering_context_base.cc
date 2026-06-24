@@ -1410,8 +1410,6 @@ scoped_refptr<DrawingBuffer> WebGLRenderingContextBase::CreateDrawingBuffer(
                                                       ? DrawingBuffer::kPreserve
                                                       : DrawingBuffer::kDiscard;
 
-  const bool is_offscreen_canvas = Host()->IsOffscreenCanvas();
-
   gl::GpuPreference gpu_preference =
       PowerPreferenceToGpuPreference(attrs.power_preference);
 
@@ -1420,8 +1418,7 @@ scoped_refptr<DrawingBuffer> WebGLRenderingContextBase::CreateDrawingBuffer(
       std::move(context_provider), context_info, this, ClampedCanvasSize(),
       premultiplied_alpha, want_alpha_channel, want_depth_buffer,
       want_stencil_buffer, want_antialiasing, desynchronized, preserve,
-      context_type_, is_offscreen_canvas, drawing_buffer_color_space_,
-      gpu_preference);
+      context_type_, drawing_buffer_color_space_, gpu_preference);
 }
 
 void WebGLRenderingContextBase::InitializeNewContext() {

@@ -176,7 +176,6 @@ scoped_refptr<DrawingBuffer> DrawingBuffer::Create(
     bool desynchronized,
     PreserveDrawingBuffer preserve,
     Platform::WebGLContextType webgl_version,
-    bool is_offscreen_canvas,
     PredefinedColorSpace color_space,
     gl::GpuPreference gpu_preference) {
   if (g_should_fail_drawing_buffer_creation_for_testing) {
@@ -234,7 +233,7 @@ scoped_refptr<DrawingBuffer> DrawingBuffer::Create(
           std::move(extensions_util), client, discard_framebuffer_supported,
           texture_storage_enabled, want_alpha_channel, premultiplied_alpha,
           preserve, webgl_version, want_depth_buffer, want_stencil_buffer,
-          is_offscreen_canvas, color_space, gpu_preference));
+          color_space, gpu_preference));
   if (!drawing_buffer->Initialize(size, multisample_supported)) {
     drawing_buffer->BeginDestruction();
     return scoped_refptr<DrawingBuffer>();
@@ -256,7 +255,6 @@ DrawingBuffer::DrawingBuffer(
     Platform::WebGLContextType webgl_version,
     bool want_depth,
     bool want_stencil,
-    bool is_offscreen_canvas,
     PredefinedColorSpace color_space,
     gl::GpuPreference gpu_preference)
     : client_(client),
@@ -280,7 +278,6 @@ DrawingBuffer::DrawingBuffer(
       want_depth_(want_depth),
       want_stencil_(want_stencil),
       color_space_(PredefinedColorSpaceToGfxColorSpace(color_space)),
-      is_offscreen_canvas_(is_offscreen_canvas),
       opengl_flip_y_extension_(
           ContextProvider()->GetCapabilities().mesa_framebuffer_flip_y),
       initial_gpu_(gpu_preference),
