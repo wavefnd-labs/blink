@@ -392,7 +392,8 @@ TEST_F(KeyframeEffectTest, CheckCanStartAnimationOnCompositorNoKeyframes) {
     auto* keyframe_effect = MakeGarbageCollected<KeyframeEffect>(
         element, CreateEmptyEffectModel(), timing);
     EXPECT_TRUE(keyframe_effect->CheckCanStartAnimationOnCompositor(
-                    nullptr, animation_playback_rate) &
+                    nullptr, animation_playback_rate,
+                    StartOnCompositorReason::kGeneric) &
                 CompositorAnimations::kInvalidAnimationOrEffect);
   }
 
@@ -409,7 +410,8 @@ TEST_F(KeyframeEffectTest, CheckCanStartAnimationOnCompositorNoKeyframes) {
     auto* keyframe_effect =
         MakeGarbageCollected<KeyframeEffect>(element, effect_model, timing);
     EXPECT_TRUE(keyframe_effect->CheckCanStartAnimationOnCompositor(
-                    nullptr, animation_playback_rate) &
+                    nullptr, animation_playback_rate,
+                    StartOnCompositorReason::kGeneric) &
                 CompositorAnimations::kInvalidAnimationOrEffect);
   }
 }
@@ -435,9 +437,10 @@ TEST_F(KeyframeEffectTest, CheckCanStartAnimationOnCompositorNoTarget) {
 
   auto* keyframe_effect =
       MakeGarbageCollected<KeyframeEffect>(nullptr, effect_model, timing);
-  EXPECT_TRUE(keyframe_effect->CheckCanStartAnimationOnCompositor(
-                  nullptr, animation_playback_rate) &
-              CompositorAnimations::kInvalidAnimationOrEffect);
+  EXPECT_TRUE(
+      keyframe_effect->CheckCanStartAnimationOnCompositor(
+          nullptr, animation_playback_rate, StartOnCompositorReason::kGeneric) &
+      CompositorAnimations::kInvalidAnimationOrEffect);
 }
 
 TEST_F(KeyframeEffectTest, CheckCanStartAnimationOnCompositorBadTarget) {
@@ -468,9 +471,10 @@ TEST_F(KeyframeEffectTest, CheckCanStartAnimationOnCompositorBadTarget) {
   UpdateAllLifecyclePhasesForTest();
 
   ASSERT_TRUE(element->GetComputedStyle()->HasOffset());
-  EXPECT_TRUE(keyframe_effect->CheckCanStartAnimationOnCompositor(
-                  nullptr, animation_playback_rate) &
-              CompositorAnimations::kTargetHasCSSOffset);
+  EXPECT_TRUE(
+      keyframe_effect->CheckCanStartAnimationOnCompositor(
+          nullptr, animation_playback_rate, StartOnCompositorReason::kGeneric) &
+      CompositorAnimations::kTargetHasCSSOffset);
 }
 
 TEST_F(KeyframeEffectTest, TranslationTransformsPreserveAxisAlignment) {

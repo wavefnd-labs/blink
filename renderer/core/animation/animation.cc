@@ -2489,7 +2489,7 @@ Animation::CheckCanStartAnimationOnCompositor(
       reasons |= CompositorAnimations::kInvalidAnimationOrEffect;
     }
     reasons |= keyframe_effect->CheckCanStartAnimationOnCompositor(
-        paint_artifact_compositor, playback_rate_,
+        paint_artifact_compositor, playback_rate_, start_reason,
         unsupported_properties_for_tracing);
   }
   return reasons;

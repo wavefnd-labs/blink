@@ -461,6 +461,7 @@ CompositorAnimations::FailureReasons
 KeyframeEffect::CheckCanStartAnimationOnCompositor(
     const PaintArtifactCompositor* paint_artifact_compositor,
     double animation_playback_rate,
+    StartOnCompositorReason start_reason,
     PropertyHandleSet* unsupported_properties_for_tracing) const {
   CompositorAnimations::FailureReasons reasons =
       CompositorAnimations::kNoFailure;
@@ -474,7 +475,8 @@ KeyframeEffect::CheckCanStartAnimationOnCompositor(
   // no visual result.
   if (!effect_target_) {
     reasons |= CompositorAnimations::kInvalidAnimationOrEffect;
-  } else if (IsCurrent()) {
+  } else if (IsCurrent() ||
+             start_reason == StartOnCompositorReason::kAnimationTrigger) {
     if (effect_target_->GetComputedStyle() &&
         effect_target_->GetComputedStyle()->HasOffset())
       reasons |= CompositorAnimations::kTargetHasCSSOffset;
