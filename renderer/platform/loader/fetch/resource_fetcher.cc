@@ -133,18 +133,6 @@ String LinkAsAttributeToString(network::mojom::LinkAsAttribute as) {
   }
 }
 
-CrossOriginAttributeValue CrossOriginAttributeToBlink(
-    network::mojom::CrossOriginAttribute attr) {
-  switch (attr) {
-    case network::mojom::CrossOriginAttribute::kAnonymous:
-      return kCrossOriginAttributeAnonymous;
-    case network::mojom::CrossOriginAttribute::kUseCredentials:
-      return kCrossOriginAttributeUseCredentials;
-    case network::mojom::CrossOriginAttribute::kUnspecified:
-      return kCrossOriginAttributeNotSet;
-  }
-}
-
 constexpr base::TimeDelta kKeepaliveLoadersTimeout = base::Seconds(30);
 
 // Timeout for link preloads to be used after window.onload
