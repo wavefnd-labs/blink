@@ -89,12 +89,6 @@ namespace blink {
 
 namespace {
 
-#if !BUILDFLAG(IS_WIN)
-// Controls whether offscreen canvases are allowed to be placed into overlays.
-BASE_FEATURE(kAllowOverlaysForOffscreenCanvas,
-             base::FEATURE_ENABLED_BY_DEFAULT);
-#endif
-
 const float kResourceAdjustedRatio = 0.5;
 
 bool g_should_fail_drawing_buffer_creation_for_testing = false;
@@ -2081,26 +2075,10 @@ scoped_refptr<DrawingBuffer::ColorBuffer> DrawingBuffer::CreateColorBuffer(
   // feasible.
   if (SharedGpuContext::IsGpuCompositingEnabled()) {
 #if BUILDFLAG(IS_WIN)
-    // TODO(crbug.com/488937356): Fold this into the below once the killswitch
-    // on the below is removed (that condition was historically never checked
-    // on Windows).
+    // TODO(crbug.com/488937356): Fold this into the below.
     bool use_as_overlay = can_use_low_latency_;
 #else
-    bool use_as_overlay = false;
-    // On Mac OS, DrawingBuffer is using an IOSurface as its backing storage,
-    // this allows WebGL-rendered canvases to be composited by the OS rather
-    // than Chrome.  IOSurfaces are only compatible with the
-    // GL_TEXTURE_RECTANGLE_ARB binding target. So to avoid the knowledge of
-    // GL_TEXTURE_RECTANGLE_ARB type textures being introduced into more areas
-    // of the code, we use the code path of non-WebGLImageChromium for
-    // OffscreenCanvas. See detailed discussion in crbug.com/649668.
-    // TODO(crbug.com/488937356): Eliminate this workaround post-rollout of the
-    // killswitch; the workaround should no longer be necessary
-    // post-SharedImage.
-    if (!is_offscreen_canvas_ ||
-        base::FeatureList::IsEnabled(kAllowOverlaysForOffscreenCanvas)) {
-      use_as_overlay = UseOverlaysForWebGL() || can_use_low_latency_;
-    }
+    bool use_as_overlay = UseOverlaysForWebGL() || can_use_low_latency_;
 #endif
     if (use_as_overlay) {
 #if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_WIN)
