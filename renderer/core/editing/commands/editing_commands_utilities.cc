@@ -274,6 +274,15 @@ bool LineBreakExistsAtPosition(const Position& position) {
       position.AtFirstEditingPositionForNode())
     return true;
 
+  // Parent-anchored caret immediately after a <br>: equivalent to a caret
+  // anchored on the <br> itself. The VP path catches this implicitly via
+  // CreateVisiblePosition re-anchoring onto the <br>; on the raw-DOM path
+  // we have to detect the sibling explicitly.
+  if (RuntimeEnabledFeatures::EditingUseDomPositionApiEnabled() &&
+      IsA<HTMLBRElement>(position.ComputeNodeBeforePosition())) {
+    return true;
+  }
+
   if (!position.AnchorNode()->GetLayoutObject())
     return false;
 
