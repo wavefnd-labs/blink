@@ -139,11 +139,7 @@ class PLATFORM_EXPORT CanvasResourceProviderDelegate {
 PLATFORM_EXPORT void NotifyImageBitmapWillTransfer(
     cc::PaintImage::ContentId content_id);
 
-class PLATFORM_EXPORT CanvasResourceProvider
-    : public base::CheckedObserver,
-      public CanvasMemoryDumpClient,
-      public MemoryManagedPaintRecorder::Client,
-      public ScopedRasterTimer::Host {
+class PLATFORM_EXPORT CanvasResourceProvider : public base::CheckedObserver {
  public:
 
   // The ImageOrientationEnum conveys the desired orientation of the image, and
@@ -207,11 +203,6 @@ class PLATFORM_EXPORT CanvasResourceProvider
   virtual void RasterRecord(cc::PaintRecord) = 0;
 
   virtual CanvasImageProvider* GetOrCreateSWCanvasImageProvider() = 0;
-
-  // Called after the recording was cleared from any draw ops it might have had.
-  // Canvas2D-specific, as it is called only when `recorder_` is
-  // instantiated by Canvas2D-specific subclasses.
-  void RecordingCleared() override = 0;
 };
 
 // Renders canvas2D ops to a Skia RAM-backed bitmap. Mailboxing is not
@@ -219,7 +210,10 @@ class PLATFORM_EXPORT CanvasResourceProvider
 // as a last-case resort when it is not possible to create
 // CanvasResourceProviderSharedImage.
 class PLATFORM_EXPORT Canvas2DResourceProviderBitmap
-    : public CanvasResourceProvider {
+    : public CanvasResourceProvider,
+      public CanvasMemoryDumpClient,
+      public MemoryManagedPaintRecorder::Client,
+      public ScopedRasterTimer::Host {
  public:
   ~Canvas2DResourceProviderBitmap() override;
 
@@ -358,7 +352,10 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
       public FlushForImageObserver,
       public WebGraphicsContext3DProviderWrapper::DestructionObserver,
       public viz::ContextLostObserver,
-      public BitmapGpuChannelLostObserver {
+      public BitmapGpuChannelLostObserver,
+      public CanvasMemoryDumpClient,
+      public MemoryManagedPaintRecorder::Client,
+      public ScopedRasterTimer::Host {
  public:
   constexpr static base::TimeDelta kUnusedResourceExpirationTime =
       base::Seconds(5);
