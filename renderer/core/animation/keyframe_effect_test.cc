@@ -345,8 +345,8 @@ TEST_F(KeyframeEffectTest, TimeToEffectChange) {
   // Beginning of the animation.
   EXPECT_TIMEDELTA(ANIMATION_TIME_DELTA_FROM_SECONDS(100),
                    keyframe_effect->TimeToForwardsEffectChange());
-  EXPECT_EQ(AnimationTimeDelta::Max(),
-            keyframe_effect->TimeToReverseEffectChange());
+  EXPECT_TIMEDELTA(ANIMATION_TIME_DELTA_FROM_SECONDS(0),
+                   keyframe_effect->TimeToReverseEffectChange());
 
   // End of the before phase.
   animation->setCurrentTime(MakeGarbageCollected<V8CSSNumberish>(100000),

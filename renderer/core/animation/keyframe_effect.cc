@@ -839,11 +839,16 @@ AnimationTimeDelta KeyframeEffect::CalculateTimeToEffectChange(
     case Timing::kPhaseNone:
       return AnimationTimeDelta::Max();
     case Timing::kPhaseBefore:
+      if (!forwards) {
+        // If the animation is reversed and we have a start delay, we need an
+        // additional tick to ensure the finished promise is resolved.
+        return start_time > local_time
+                   ? std::max(local_time.value(), AnimationTimeDelta())
+                   : AnimationTimeDelta::Max();
+      }
       // Return value is clamped at 0 to prevent unexpected results that could
       // be caused by returning negative values.
-      return forwards ? std::max(start_time - local_time.value(),
-                                 AnimationTimeDelta())
-                      : AnimationTimeDelta::Max();
+      return std::max(start_time - local_time.value(), AnimationTimeDelta());
     case Timing::kPhaseActive:
       if (forwards) {
         // Need service to apply fill / fire events.
