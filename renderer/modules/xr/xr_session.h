@@ -173,7 +173,7 @@ class XRSession final : public EventTarget,
 
   const FrozenArray<IDLString>& enabledFeatures() const;
 
-  bool isSystemKeyboardSupported() const;
+  bool isSystemKeyboardSupported() const { return false; }
 
   uint16_t maxRenderLayers() const { return device_config_->max_render_layers; }
 
