@@ -309,8 +309,18 @@ MinMaxSizesResult GridLayoutAlgorithm::ComputeMinMaxSizes(
     return grid_sizing_tree.LayoutData().Columns().CalculateSetSpanSize();
   };
 
-  MinMaxSizes sizes{ComputeTotalColumnSize(SizingConstraint::kMinContent),
-                    ComputeTotalColumnSize(SizingConstraint::kMaxContent)};
+  // If we have text within "auto" column (or similar), it is sized at both
+  // min-content and max-content within the `ComputeTotalColumnSize` passes.
+  //
+  // This will result in two different *row* sizes (min-content having a larger
+  // size than max-content).
+  //
+  // Additionally if we have something with an aspect-ratio, we will trigger
+  // the additional pass logic, and as a result can cause the min-content to be
+  // larger than the max-content. Encompass in this situation.
+  MinMaxSizes sizes;
+  sizes.max_size = ComputeTotalColumnSize(SizingConstraint::kMaxContent);
+  sizes.Encompass(ComputeTotalColumnSize(SizingConstraint::kMinContent));
   sizes += BorderScrollbarPadding().InlineSum();
   return {sizes, depends_on_block_constraints};
 }
