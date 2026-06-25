@@ -1173,9 +1173,8 @@ class FedCmRequestAbortAlgorithm final : public AbortSignal::Algorithm {
 
   // Abort an ongoing FederatedCredential get() operation.
   void Run() override {
-    // Just reset the remote to close the pipe, which signals the browser to
-    // abort.
-    federated_request_.reset();
+    // Call the explicit Abort() Mojo method to abort the request session.
+    federated_request_->Abort();
   }
 
   void Trace(Visitor* visitor) const override {
