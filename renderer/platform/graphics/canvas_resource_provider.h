@@ -152,7 +152,6 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap final
   ~Canvas2DResourceProviderBitmap();
 
   bool IsValid() const { return GetSkSurface(); }
-  bool IsAccelerated() const { return false; }
   bool IsGpuContextLost() const { return true; }
   void SetDelegate(CanvasResourceProviderDelegate* delegate) {
     delegate_ = delegate;

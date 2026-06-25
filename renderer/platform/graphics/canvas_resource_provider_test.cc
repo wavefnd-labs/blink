@@ -524,7 +524,6 @@ TEST_F(CanvasResourceProviderTest, Canvas2DResourceProviderBitmap) {
 
   EXPECT_EQ(provider->Size(), kSize);
   EXPECT_TRUE(provider->IsValid());
-  EXPECT_FALSE(provider->IsAccelerated());
   EXPECT_TRUE(GetSkImageInfo(provider.get()) == kInfo);
 }
 
