@@ -233,7 +233,7 @@ GPUCanvasContext::GetOrCreateCanvasResourceProvider() {
     }
     if (!provider) {
       did_fail_to_create_resource_provider_ = true;
-    } else if (provider->IsValid()) {
+    } else {
       base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
                                 true);
       base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
