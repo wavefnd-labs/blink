@@ -2213,12 +2213,10 @@ WebGLRenderingContextBase::GetSharedImageResourceProvider() {
     return nullptr;
   }
 
-  if (resource_provider_->IsValid()) {
-    base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
-                              !resource_provider_->IsSoftware());
-    base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
-                                  CanvasResourceProviderType::kSharedImage);
-  }
+  base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
+                            !resource_provider_->IsSoftware());
+  base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
+                                CanvasResourceProviderType::kSharedImage);
 
   return resource_provider_.get();
 }
