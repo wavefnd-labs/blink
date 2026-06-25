@@ -6108,7 +6108,9 @@ void Element::RebuildOverscrollAreaLayoutTree(
        overscroll_area_tracker->DOMSortedElements()) {
     PseudoElement* pseudo_element =
         overscroll_area->GetPseudoElement(kPseudoIdOverscrollAreaParent);
-    pseudo_element->RebuildLayoutTree(whitespace_attacher);
+    if (pseudo_element) {
+      pseudo_element->RebuildLayoutTree(whitespace_attacher);
+    }
   }
 }
 
@@ -6125,7 +6127,9 @@ void Element::AttachOverscrollPseudoElements(AttachContext& context) {
        overscroll_area_tracker->DOMSortedElements()) {
     PseudoElement* pseudo_element =
         overscroll_area->GetPseudoElement(kPseudoIdOverscrollAreaParent);
-    pseudo_element->AttachLayoutTree(context);
+    if (pseudo_element) {
+      pseudo_element->AttachLayoutTree(context);
+    }
   }
 }
 
@@ -6139,7 +6143,9 @@ void Element::DetachOverscrollPseudoElements(bool performing_reattach) {
        overscroll_area_tracker->DOMSortedElements()) {
     PseudoElement* pseudo_element =
         overscroll_area->GetPseudoElement(kPseudoIdOverscrollAreaParent);
-    pseudo_element->DetachLayoutTree(performing_reattach);
+    if (pseudo_element) {
+      pseudo_element->DetachLayoutTree(performing_reattach);
+    }
   }
 }
 
