@@ -2044,38 +2044,68 @@ void WebGLRenderingContextWebGPUBase::validateProgram(WebGLProgram* program) {
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib1f(GLuint index, GLfloat x) {
-  NOTIMPLEMENTED();
+  driver_gl_.fn.glVertexAttrib1fFn(index, x);
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib1fv(
     GLuint index,
     base::span<const GLfloat> values) {
-  NOTIMPLEMENTED();
+  // WebGL allows larger spans (reusing an array for different sizes to
+  // avoid repeated allocations). Extra elements are ignored.
+  if (values.size() < 1) {
+    InsertGLError(GL_INVALID_VALUE, "vertexAttrib1fv", "invalid size");
+    return;
+  }
+  driver_gl_.fn.glVertexAttrib1fvFn(index, values.data());
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib2f(GLuint index,
                                                      GLfloat x,
                                                      GLfloat y) {
-  NOTIMPLEMENTED();
+  driver_gl_.fn.glVertexAttrib2fFn(index, x, y);
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib2fv(
     GLuint index,
     base::span<const GLfloat> values) {
-  NOTIMPLEMENTED();
+  // WebGL allows larger spans (reusing an array for different sizes to
+  // avoid repeated allocations). Extra elements are ignored.
+  if (values.size() < 2) {
+    InsertGLError(GL_INVALID_VALUE, "vertexAttrib2fv", "invalid size");
+    return;
+  }
+  driver_gl_.fn.glVertexAttrib2fvFn(index, values.data());
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib3f(GLuint index,
                                                      GLfloat x,
                                                      GLfloat y,
                                                      GLfloat z) {
-  NOTIMPLEMENTED();
+  driver_gl_.fn.glVertexAttrib3fFn(index, x, y, z);
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib3fv(
     GLuint index,
     base::span<const GLfloat> values) {
-  NOTIMPLEMENTED();
+  // WebGL allows larger spans (reusing an array for different sizes to
+  // avoid repeated allocations). Extra elements are ignored.
+  if (values.size() < 3) {
+    InsertGLError(GL_INVALID_VALUE, "vertexAttrib3fv", "invalid size");
+    return;
+  }
+  driver_gl_.fn.glVertexAttrib3fvFn(index, values.data());
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib4f(GLuint index,
@@ -2083,13 +2113,23 @@ void WebGLRenderingContextWebGPUBase::vertexAttrib4f(GLuint index,
                                                      GLfloat y,
                                                      GLfloat z,
                                                      GLfloat w) {
-  NOTIMPLEMENTED();
+  driver_gl_.fn.glVertexAttrib4fFn(index, x, y, z, w);
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttrib4fv(
     GLuint index,
     base::span<const GLfloat> values) {
-  NOTIMPLEMENTED();
+  // WebGL allows larger spans (reusing an array for different sizes to
+  // avoid repeated allocations). Extra elements are ignored.
+  if (values.size() < 4) {
+    InsertGLError(GL_INVALID_VALUE, "vertexAttrib4fv", "invalid size");
+    return;
+  }
+  driver_gl_.fn.glVertexAttrib4fvFn(index, values.data());
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttribPointer(GLuint index,
@@ -3240,13 +3280,23 @@ void WebGLRenderingContextWebGPUBase::vertexAttribI4i(GLuint index,
                                                       GLint y,
                                                       GLint z,
                                                       GLint w) {
-  NOTIMPLEMENTED();
+  driver_gl_.fn.glVertexAttribI4iFn(index, x, y, z, w);
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttribI4iv(
     GLuint index,
     base::span<const GLint> v) {
-  NOTIMPLEMENTED();
+  // WebGL allows larger spans (reusing an array for different sizes to
+  // avoid repeated allocations). Extra elements are ignored.
+  if (v.size() < 4) {
+    InsertGLError(GL_INVALID_VALUE, "vertexAttribI4iv", "invalid size");
+    return;
+  }
+  driver_gl_.fn.glVertexAttribI4ivFn(index, v.data());
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttribI4ui(GLuint index,
@@ -3254,13 +3304,23 @@ void WebGLRenderingContextWebGPUBase::vertexAttribI4ui(GLuint index,
                                                        GLuint y,
                                                        GLuint z,
                                                        GLuint w) {
-  NOTIMPLEMENTED();
+  driver_gl_.fn.glVertexAttribI4uiFn(index, x, y, z, w);
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttribI4uiv(
     GLuint index,
     base::span<const GLuint> v) {
-  NOTIMPLEMENTED();
+  // WebGL allows larger spans (reusing an array for different sizes to
+  // avoid repeated allocations). Extra elements are ignored.
+  if (v.size() < 4) {
+    InsertGLError(GL_INVALID_VALUE, "vertexAttribI4uiv", "invalid size");
+    return;
+  }
+  driver_gl_.fn.glVertexAttribI4uivFn(index, v.data());
+  // TODO(crbug.com/413078308): Track the type of the array so the correct
+  // typed array is returned for getVertexAttrib(index, CURRENT_VERTEX_ATTRIB).
 }
 
 void WebGLRenderingContextWebGPUBase::vertexAttribIPointer(GLuint index,
