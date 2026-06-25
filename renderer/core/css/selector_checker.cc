@@ -844,6 +844,7 @@ SelectorChecker::FeaturelessMatch SelectorChecker::MatchShadowHost(
     case CSSSelector::kPseudoScrollButton:
     case CSSSelector::kPseudoOverscrollAreaParent:
     case CSSSelector::kPseudoSelectContainsInput:
+    case CSSSelector::kPseudoOverscrollBackdrop:
     case CSSSelector::kPseudoSelectHasSlottedButton:
       // These pseudos are not allowed to match featureless elements. When
       // adding new pseudos here, they would typically be allowed if they are

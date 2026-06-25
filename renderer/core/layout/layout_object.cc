@@ -5421,9 +5421,7 @@ void LayoutObject::InvalidateSubtreePositionTry(bool mark_style_dirty) {
 bool LayoutObject::IsBackdropForOverscrollAreaParent() const {
   NOT_DESTROYED();
   const auto* pseudo = DynamicTo<PseudoElement>(GetNode());
-  return pseudo && pseudo->GetPseudoId() == kPseudoIdBackdrop &&
-         pseudo->UltimateOriginatingElement().GetPseudoElement(
-             kPseudoIdOverscrollAreaParent);
+  return pseudo && pseudo->GetPseudoId() == kPseudoIdOverscrollBackdrop;
 }
 
 }  // namespace blink

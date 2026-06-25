@@ -422,6 +422,8 @@ PseudoId CSSSelector::GetPseudoId(PseudoType type) {
       return kPseudoIdViewTransitionNew;
     case kPseudoOverscrollAreaParent:
       return kPseudoIdOverscrollAreaParent;
+    case kPseudoOverscrollBackdrop:
+      return kPseudoIdOverscrollBackdrop;
     case kPseudoAnimatedImage:
     case kPseudoActive:
     case kPseudoActiveNavigation:
@@ -702,6 +704,7 @@ constexpr static NameToPseudoStruct kPseudoTypeWithoutArgumentsMap[] = {
     {"open", CSSSelector::kPseudoOpen},
     {"optional", CSSSelector::kPseudoOptional},
     {"out-of-range", CSSSelector::kPseudoOutOfRange},
+    {"overscroll-backdrop", CSSSelector::kPseudoOverscrollBackdrop},
     {"overscroll-open", CSSSelector::kPseudoOverscrollOpen},
     {"past", CSSSelector::kPseudoPastCue},
     {"paused", CSSSelector::kPseudoPaused},
@@ -892,6 +895,7 @@ CSSSelector::PseudoType CSSSelector::NameToPseudoType(
   }
 
   if ((match->type == CSSSelector::kPseudoOverscrollAreaParent ||
+       match->type == CSSSelector::kPseudoOverscrollBackdrop ||
        match->type == CSSSelector::kPseudoOverscrollOpen) &&
       !RuntimeEnabledFeatures::OverscrollGesturesEnabled()) {
     return CSSSelector::kPseudoUnknown;
@@ -997,6 +1001,7 @@ void CSSSelector::UpdatePseudoType(const AtomicString& value,
     case kPseudoInterestButton:
     case kPseudoCheckMark:
     case kPseudoBackdrop:
+    case kPseudoOverscrollBackdrop:
     case kPseudoCue:
     case kPseudoMarker:
     case kPseudoPart:
@@ -1785,6 +1790,7 @@ bool CSSSelector::IsTreeAbidingPseudoElement() const {
           GetPseudoType() == kPseudoPlaceholder ||
           GetPseudoType() == kPseudoFileSelectorButton ||
           GetPseudoType() == kPseudoBackdrop ||
+          GetPseudoType() == kPseudoOverscrollBackdrop ||
           GetPseudoType() == kPseudoViewTransition ||
           GetPseudoType() == kPseudoViewTransitionGroup ||
           GetPseudoType() == kPseudoViewTransitionGroupChildren ||
@@ -1835,6 +1841,7 @@ bool CSSSelector::IsAllowedAfterPart() const {
     case kPseudoSpellingError:
     case kPseudoGrammarError:
     case kPseudoBackdrop:
+    case kPseudoOverscrollBackdrop:
     case kPseudoCue:
     case kPseudoMarker:
     case kPseudoResizer:

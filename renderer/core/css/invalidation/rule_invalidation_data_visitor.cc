@@ -106,6 +106,7 @@ bool SupportsInvalidation(CSSSelector::PseudoType type) {
     case CSSSelector::kPseudoDir:
     case CSSSelector::kPseudoNot:
     case CSSSelector::kPseudoOverscrollAreaParent:
+    case CSSSelector::kPseudoOverscrollBackdrop:
     case CSSSelector::kPseudoPlaceholder:
     case CSSSelector::kPseudoDetailsContent:
     case CSSSelector::kPseudoPermissionIcon:

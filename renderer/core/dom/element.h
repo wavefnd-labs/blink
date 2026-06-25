@@ -2371,9 +2371,12 @@ class CORE_EXPORT Element : public ContainerNode {
   };
 
   bool ShouldUpdateBackdropPseudoElement(const StyleRecalcChange);
-
   void UpdateBackdropPseudoElement(const StyleRecalcChange,
                                    const StyleRecalcContext&);
+
+  bool ShouldUpdateOverscrollBackdropPseudoElement(const StyleRecalcChange);
+  void UpdateOverscrollBackdropPseudoElement(const StyleRecalcChange,
+                                             const StyleRecalcContext&);
 
   void UpdateFirstLetterPseudoElement(StyleUpdatePhase,
                                       const StyleRecalcContext&);
