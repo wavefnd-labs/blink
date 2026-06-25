@@ -48,6 +48,7 @@
 #include "third_party/blink/renderer/core/html_names.h"
 #include "third_party/blink/renderer/platform/bindings/exception_state.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
+#include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 
 // Uncomment to run the SelectorQueryTests for stats in a release build.
 // #define RELEASE_QUERY_STATS
@@ -258,6 +259,14 @@ bool SelectorQuery::MatchCompound(const Element& element,
       // localName().
       element.SynchronizeAttribute(compound.attr_needed.LocalName());
     }
+    // Legacy case-insensitive value matching only applies to HTML elements
+    // in HTML documents; an explicit flag applies everywhere.
+    const bool case_insensitive =
+        compound.match_type_case_insensitive ||
+        (compound.legacy_case_insensitive && is_html_doc &&
+         (!RuntimeEnabledFeatures::
+              CSSAttributeValueCaseSensitiveNonHTMLEnabled() ||
+          element.IsHTMLElement()));
     AttributeCollection attributes = element.AttributesWithoutUpdate();
     bool match_attr = false;
     for (const auto& attribute_item : attributes) {
@@ -278,7 +287,7 @@ bool SelectorQuery::MatchCompound(const Element& element,
         }
       }
       if (AttributeValueMatchesExact(attribute_item, compound.attr_value,
-                                     compound.attr_case_insensitive)) {
+                                     case_insensitive)) {
         match_attr = true;
         break;
       }
@@ -869,8 +878,7 @@ void SelectorQuery::BuildCompounds(const CSSSelector* first_selector) {
 
   for (unsigned compound_idx = compounds_.size(); compound_idx-- > 0;) {
     const Compound& compound = compounds_[compound_idx];
-    // NOTE: compound.attr_case_insensitive has not been set yet,
-    // so we use a more conservative test.
+    // The document and element are unknown here, so use a conservative test.
     if (compound.id_needed || (compound.attr_needed == html_names::kIdAttr &&
                                !compound.match_type_case_insensitive &&
                                !compound.legacy_case_insensitive)) {
@@ -917,18 +925,8 @@ void SelectorQuery::BuildCompounds(const CSSSelector* first_selector) {
 
 // Fill in attribute data that we can only fill in when we know the document.
 void SelectorQuery::FillMissingData(const ContainerNode& root_node) const {
-  const bool is_html_doc = IsA<HTMLDocument>(root_node.GetDocument());
   for (const Compound& compound : compounds_) {
     if (!compound.attr_needed.IsNull()) {
-      // Legacy dictates that values of some attributes should be compared
-      // in a case-insensitive manner regardless of whether the case
-      // insensitive flag is set or not (but an explicit case sensitive flag
-      // will override that, by causing LegacyCaseInsensitiveMatch() never
-      // to be set).
-      compound.attr_case_insensitive =
-          compound.match_type_case_insensitive ||
-          (compound.legacy_case_insensitive && is_html_doc);
-
       // SynchronizeAttribute() is rather expensive to call. We can
       // determine ahead of time if it's needed.
       compound.needs_synchronize_attribute = Element::IsExcludedAttribute(

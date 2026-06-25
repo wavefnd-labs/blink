@@ -193,13 +193,12 @@ class CORE_EXPORT SelectorQuery : public GarbageCollected<SelectorQuery> {
     // exact attribute selector (i.e., [foo=bar]).
     QualifiedName attr_needed = QualifiedName::Null();
     AtomicString attr_value;
-    // Whether attr_value is matched case-insensitively or not.
     // Filled in only once we know the document.
-    mutable bool attr_case_insensitive;
-    mutable bool needs_synchronize_attribute;  // Same.
-    bool match_type_case_insensitive;          // Used to calculate
-                                               // attr_case_insensitive.
-    bool legacy_case_insensitive;  // Used to calculate attr_case_insensitive.
+    mutable bool needs_synchronize_attribute;
+    // Set for an explicit case-insensitive flag (e.g. [foo=bar i]).
+    bool match_type_case_insensitive;
+    // Set when attr_needed is in the legacy case-insensitive attribute list.
+    bool legacy_case_insensitive;
 
     unsigned nth_child = 0;  // If 0, no :nth-child() will be tested.
 
