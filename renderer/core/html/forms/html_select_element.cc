@@ -465,8 +465,8 @@ void HTMLSelectElement::ParseAttribute(
   }
 }
 
-void HTMLSelectElement::DisabledAttributeChanged() {
-  HTMLFormControlElementWithState::DisabledAttributeChanged();
+void HTMLSelectElement::DisabledAttributeChanged(DisabledChangedReason reason) {
+  HTMLFormControlElementWithState::DisabledAttributeChanged(reason);
   if (RuntimeEnabledFeatures::OptionDisablednessCheckAncestorsEnabled()) {
     for (auto& item : GetListItems()) {
       // This will unnecessarily call PseudoStateChanged on <hr> elements, but
