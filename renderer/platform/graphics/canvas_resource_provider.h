@@ -649,7 +649,6 @@ class PLATFORM_EXPORT CanvasNon2DResourceProviderSharedImage
       const gfx::ColorSpace&,
       const gfx::HDRMetadata&,
       base::WeakPtr<WebGraphicsContext3DProviderWrapper>,
-      bool is_accelerated,
       gpu::SharedImageUsageSet shared_image_usage_flags,
       CanvasResourceProviderDelegate*);
   CanvasNon2DResourceProviderSharedImage(

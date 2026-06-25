@@ -1926,8 +1926,7 @@ CanvasNon2DResourceProviderSharedImage::Create(
 
   auto provider = std::make_unique<CanvasNon2DResourceProviderSharedImage>(
       size, format, alpha_type, color_space, hdr_metadata,
-      context_provider_wrapper,
-      /*is_accelerated=*/true, shared_image_usage_flags, delegate);
+      context_provider_wrapper, shared_image_usage_flags, delegate);
 
   return provider->IsValid() ? std::move(provider) : nullptr;
 }
@@ -2589,7 +2588,6 @@ CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
     const gfx::ColorSpace& color_space,
     const gfx::HDRMetadata& hdr_metadata,
     base::WeakPtr<WebGraphicsContext3DProviderWrapper> context_provider_wrapper,
-    bool is_accelerated,
     gpu::SharedImageUsageSet shared_image_usage_flags,
     CanvasResourceProviderDelegate* delegate)
     : size_(size),
@@ -2598,7 +2596,7 @@ CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
       color_space_(color_space),
       hdr_metadata_(hdr_metadata),
       delegate_(delegate),
-      is_accelerated_(is_accelerated),
+      is_accelerated_(true),
       is_software_(false),
       snapshot_paint_image_id_(cc::PaintImage::GetNextId()),
       recorder_for_external_draws_(
