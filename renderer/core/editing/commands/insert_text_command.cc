@@ -119,7 +119,7 @@ Position InsertTextCommand::PositionInsideTextNode(
                 : Position::InParentAfterNode(*wbr);
     }
   }
-  if (IsTabHTMLSpanElementTextNode(pos.AnchorNode())) {
+  if (IsTabSpanElementTextNode(pos.AnchorNode())) {
     Text* text_node = GetDocument().CreateEditingTextNode("");
     InsertNodeAtTabSpanPosition(text_node, pos, editing_state);
     if (editing_state->IsAborted())
@@ -483,7 +483,7 @@ Position InsertTextCommand::InsertTab(const Position& pos,
   unsigned offset = text_node ? insert_pos.OffsetInContainerNode() : 0;
 
   // keep tabs coalesced in tab span
-  if (IsTabHTMLSpanElementTextNode(node)) {
+  if (IsTabSpanElementTextNode(node)) {
     InsertTextIntoNode(text_node, offset, "\t",
                        PasswordEchoBehavior::kDoNotEcho);
     return Position(text_node, offset + 1);

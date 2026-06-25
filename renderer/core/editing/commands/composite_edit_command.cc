@@ -647,8 +647,9 @@ Position CompositeEditCommand::ReplaceSelectedTextInNode(
   const Position& end = EndingSelection().End();
   auto* text_node = DynamicTo<Text>(start.ComputeContainerNode());
   if (!text_node || text_node != end.ComputeContainerNode() ||
-      IsTabHTMLSpanElementTextNode(text_node))
+      IsTabSpanElementTextNode(text_node)) {
     return Position();
+  }
 
   ReplaceTextInNode(text_node, start.OffsetInContainerNode(),
                     end.OffsetInContainerNode() - start.OffsetInContainerNode(),
@@ -659,7 +660,7 @@ Position CompositeEditCommand::ReplaceSelectedTextInNode(
 
 Position CompositeEditCommand::PositionOutsideTabSpan(const Position& pos) {
   Node* anchor_node = pos.AnchorNode();
-  if (!IsTabHTMLSpanElementTextNode(anchor_node)) {
+  if (!IsTabSpanElementTextNode(anchor_node)) {
     return pos;
   }
 
@@ -2024,7 +2025,7 @@ bool CompositeEditCommand::BreakOutOfEmptyListItem(
     // If emptyListItem follows another list item or nested list, split the list
     // node.
     if (IsListItemTag(previous_list_node) ||
-        IsHTMLListElement(previous_list_node)) {
+        IsHtmlListElement(previous_list_node)) {
       SplitElement(To<Element>(list_node), empty_list_item);
     }
 
@@ -2097,7 +2098,7 @@ bool CompositeEditCommand::BreakOutOfEmptyMailBlockquotedParagraph(
 
   VisiblePosition caret = EndingVisibleSelection().VisibleStart();
   auto* highest_blockquote = To<HTMLQuoteElement>(HighestEnclosingNodeOfType(
-      caret.DeepEquivalent(), &IsMailHTMLBlockquoteElement));
+      caret.DeepEquivalent(), &IsMailHtmlBlockquoteElement));
   if (!highest_blockquote)
     return false;
 
@@ -2109,8 +2110,9 @@ bool CompositeEditCommand::BreakOutOfEmptyMailBlockquotedParagraph(
   // Only move forward if there's nothing before the caret, or if there's
   // unquoted content before it.
   if (EnclosingNodeOfType(previous.DeepEquivalent(),
-                          &IsMailHTMLBlockquoteElement))
+                          &IsMailHtmlBlockquoteElement)) {
     return false;
+  }
 
   auto* br = MakeGarbageCollected<HTMLBRElement>(GetDocument());
   // We want to replace this quoted paragraph with an unquoted one, so insert a

@@ -374,8 +374,9 @@ Position LeadingCollapsibleWhitespacePosition(const Position& position,
 unsigned NumEnclosingMailBlockquotes(const Position& p) {
   unsigned num = 0;
   for (const Node* n = p.AnchorNode(); n; n = n->parentNode()) {
-    if (IsMailHTMLBlockquoteElement(n))
+    if (IsMailHtmlBlockquoteElement(n)) {
       num++;
+    }
   }
   return num;
 }
