@@ -1299,6 +1299,18 @@ void Animation::setTimeline(AnimationTimeline* timeline) {
     }
   }
 
+  if (!start_time_ && !hold_time_) {
+    // When switching from a scroll-timeline to a document timeline and play
+    // or pause-pending, we can have no start or hold time since previously
+    // waiting on an auto-aligned start time. Force a hold time by calling back
+    // into pause or play depending on the pending task.
+    if (pending_pause_) {
+      PauseInternal(ASSERT_NO_EXCEPTION);
+    } else if (pending_play_) {
+      PlayInternal(AutoRewind::kEnabled, ASSERT_NO_EXCEPTION);
+    }
+  }
+
   // 4. If the start time of animation is resolved, make the animation’s hold
   //    time unresolved. This step ensures that the finished play state of the
   //    animation is not “sticky” but is re-evaluated based on its updated
