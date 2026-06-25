@@ -292,15 +292,19 @@ MinMaxSizesResult GridLayoutAlgorithm::ComputeMinMaxSizes(
     CompleteTrackSizingAlgorithm(kForColumns, sizing_constraint,
                                  &grid_sizing_tree, &needs_additional_pass);
 
+    const bool needs_additional_pass_for_column_subtree =
+        grid_sizing_tree.HasSubgridWithIndefiniteStandaloneAxis();
+
     if (needs_additional_pass ||
-        HasBlockSizeDependentGridItem(grid_sizing_tree.GetGridItems())) {
+        HasBlockSizeDependentGridItem(grid_sizing_tree.GetGridItems()) ||
+        needs_additional_pass_for_column_subtree) {
       // If we need to calculate the row geometry, then we have a dependency on
       // our block constraints.
       depends_on_block_constraints = true;
       CompleteTrackSizingAlgorithm(kForRows, sizing_constraint,
                                    &grid_sizing_tree, &needs_additional_pass);
 
-      if (needs_additional_pass) {
+      if (needs_additional_pass || needs_additional_pass_for_column_subtree) {
         InitializeTrackSizes(&grid_sizing_tree, kForColumns);
         CompleteTrackSizingAlgorithm(kForColumns, sizing_constraint,
                                      &grid_sizing_tree);
@@ -480,6 +484,15 @@ const GridLayoutSubtree* GridLayoutAlgorithm::ComputeGridGeometry(
 
     InitializeTrackSizes(&grid_sizing_tree, kForRows);
     CompleteTrackSizingAlgorithm(kForRows, SizingConstraint::kLayout,
+                                 &grid_sizing_tree);
+  } else if (grid_sizing_tree.HasSubgridWithIndefiniteStandaloneAxis()) {
+    // If any subgrid in the tree has an indefinite standalone-axis track
+    // collection at first-pass init, item contributions that fed into the
+    // initial column sizing were computed against indefinite subgrid rows.
+    // The first kForRows pass has now sized those subgrid standalone tracks,
+    // so re-run only the column pass with the now-resolved row sizes.
+    InitializeTrackSizes(&grid_sizing_tree, kForColumns);
+    CompleteTrackSizingAlgorithm(kForColumns, SizingConstraint::kLayout,
                                  &grid_sizing_tree);
   }
 
