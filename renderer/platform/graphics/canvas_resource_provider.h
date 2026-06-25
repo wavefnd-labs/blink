@@ -665,7 +665,6 @@ class PLATFORM_EXPORT CanvasNon2DResourceProviderSharedImage
   gpu::SharedImageUsageSet GetSharedImageUsageFlags() const;
   bool IsSingleBuffered() const;
 
-  bool IsAccelerated() const { return is_accelerated_; }
   bool IsSoftware() const { return is_software_; }
   bool IsGpuContextLost() const;
 
@@ -809,7 +808,7 @@ class PLATFORM_EXPORT CanvasNon2DResourceProviderSharedImage
   const gfx::ColorSpace color_space_;
   const gfx::HDRMetadata hdr_metadata_;
   const raw_ptr<CanvasResourceProviderDelegate> delegate_;
-  const bool is_accelerated_;
+
   const bool is_software_;
 
   mutable sk_sp<SkSurface> surface_;

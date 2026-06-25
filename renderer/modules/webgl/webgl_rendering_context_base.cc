@@ -2081,7 +2081,7 @@ WebGLRenderingContextBase::PaintRenderingResultsToSnapshot(
 
   bool copy_succeeded = false;
   scoped_refptr<StaticBitmapImage> snapshot;
-  if (resource_provider->IsAccelerated()) {
+  if (!resource_provider->IsSoftware()) {
     copy_succeeded = CopyRenderingResultsFromDrawingBufferAccelerated(
         resource_provider, source_buffer);
     if (copy_succeeded) {
@@ -2215,7 +2215,7 @@ WebGLRenderingContextBase::GetSharedImageResourceProvider() {
 
   if (resource_provider_->IsValid()) {
     base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
-                              resource_provider_->IsAccelerated());
+                              !resource_provider_->IsSoftware());
     base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
                                   CanvasResourceProviderType::kSharedImage);
   }
@@ -2250,7 +2250,7 @@ WebGLRenderingContextBase::CopyRenderingResultsFromDrawingBufferToResource(
 
   bool copy_succeeded = false;
   scoped_refptr<CanvasResource> resource;
-  if (resource_provider->IsAccelerated()) {
+  if (!resource_provider->IsSoftware()) {
     copy_succeeded = CopyRenderingResultsFromDrawingBufferAccelerated(
         resource_provider, source_buffer);
     if (copy_succeeded) {
@@ -2288,7 +2288,7 @@ bool WebGLRenderingContextBase::
         SourceDrawingBuffer source_buffer) {
   DCHECK(resource_provider);
   DCHECK(!resource_provider->IsSingleBuffered());
-  CHECK(resource_provider->IsAccelerated());
+  CHECK(!resource_provider->IsSoftware());
 
   // Early-out if the context has been lost.
   if (!GetDrawingBuffer()) {

@@ -558,7 +558,7 @@ CanvasNon2DResourceProviderSharedImage::NewOrRecycledResource() {
           CreateWeakPtr(), shared_image_interface_provider_, hdr_metadata_);
     } else {
       resource->Initialize(CreateWeakPtr(), context_provider_wrapper_,
-                           hdr_metadata_, is_accelerated_);
+                           hdr_metadata_, !is_software_);
     }
     ++num_inflight_resources_;
     if (num_inflight_resources_ > max_inflight_resources_) {
@@ -739,7 +739,7 @@ bool CanvasNon2DResourceProviderSharedImage::ShouldReplaceTargetBuffer(
   // Its possible to have deferred work in skia which uses this resource. Try
   // flushing once to see if that releases the read refs. We can avoid a copy
   // by queuing this work before writing to this resource.
-  if (is_accelerated_) {
+  if (!is_software_) {
     // Another context may have a read reference to this resource. Flush the
     // deferred queue in that context so that we don't need to copy.
     GetFlushForImageListener()->NotifyFlushForImage(content_id);
@@ -761,7 +761,7 @@ CanvasNon2DResourceProviderSharedImage::WillDrawInternal() {
   // Determine if a new resource is needed for accelerated resources. Note that
   // for unaccelerated resources, writes to the SharedImage are deferred to
   // ProduceCanvasResource.
-  if (!is_accelerated_ || !ShouldReplaceTargetBuffer(cached_content_id_)) {
+  if (is_software_ || !ShouldReplaceTargetBuffer(cached_content_id_)) {
     return resource_->BeginAccess(/*readonly=*/false);
   }
 
@@ -878,7 +878,7 @@ bool CanvasNon2DResourceProviderSharedImage::UploadToBackingSharedImage(
     const SkPixmap& pixmap,
     uint32_t src_x,
     uint32_t src_y) {
-  CHECK(is_accelerated_);
+  CHECK(!is_software_);
 
   const int dest_width = Size().width();
   const int dest_height = Size().height();
@@ -937,7 +937,7 @@ bool CanvasNon2DResourceProviderSharedImage::CopyToBackingSharedImage(
     uint32_t src_y,
     const gpu::SyncToken& ready_sync_token,
     gpu::SyncToken& completion_sync_token) {
-  CHECK(is_accelerated_);
+  CHECK(!is_software_);
   gpu::raster::RasterInterface* raster = RasterInterface();
   if (!raster) {
     return false;
@@ -975,7 +975,7 @@ bool CanvasNon2DResourceProviderSharedImage::CopyToBackingSharedImage(
 scoped_refptr<gpu::ClientSharedImage>
 CanvasNon2DResourceProviderSharedImage::BeginExternalOverwrite(
     gpu::SyncToken& internal_access_sync_token) {
-  DCHECK(is_accelerated_);
+  DCHECK(!is_software_);
 
   if (IsGpuContextLost()) {
     return nullptr;
@@ -1354,7 +1354,7 @@ void CanvasNon2DResourceProviderSharedImage::EnsureWriteAccess() {
   DCHECK(resource_);
   // In software mode, we don't need write access to the resource during
   // drawing since it is executed on CPU memory managed by Skia.
-  DCHECK(resource_->HasOneRef() || IsSingleBuffered() || !is_accelerated_)
+  DCHECK(resource_->HasOneRef() || IsSingleBuffered() || is_software_)
       << "Write access requires exclusive access to the resource";
   DCHECK(!resource()->is_cross_thread())
       << "Write access is only allowed on the owning thread";
@@ -1372,7 +1372,7 @@ void CanvasNon2DResourceProviderSharedImage::EndWriteAccess() {
     return;
   }
 
-  if (!is_accelerated_) {
+  if (is_software_) {
     if (ShouldReplaceTargetBuffer()) {
       resource_ = NewOrRecycledResource();
     }
@@ -1396,7 +1396,7 @@ CanvasNon2DResourceProviderSharedImage::Snapshot(ImageOrientation orientation) {
   // rendering results to the resource's SharedImage (e.g., for GPU compositing)
   // while in this case we are simply returning the rendered CPU-side results to
   // the client.
-  if (!is_accelerated_) {
+  if (is_software_) {
     cc::PaintImage paint_image;
 
     auto sk_image = GetSkSurface()->makeImageSnapshot();
@@ -2147,7 +2147,7 @@ void NotifyImageBitmapWillTransfer(cc::PaintImage::ContentId content_id) {
 CanvasImageProvider*
 CanvasNon2DResourceProviderSharedImage::GetOrCreateImageProvider() {
   if (!canvas_image_provider_) {
-    if (is_accelerated_) {
+    if (!is_software_) {
       if (!IsGpuContextLost()) {
         // Create an ImageDecodeCache for half float images only if the canvas
         // is using half float back storage.
@@ -2187,7 +2187,7 @@ CanvasNon2DResourceProviderSharedImage::GetOrCreateImageProvider() {
 
 void CanvasNon2DResourceProviderSharedImage::FlushRecording(
     cc::PaintRecord last_recording) {
-  if (!is_accelerated_) {
+  if (is_software_) {
     if (!skia_canvas_) {
       auto* image_provider = GetOrCreateImageProvider();
       skia_canvas_ = std::make_unique<cc::SkiaPaintCanvas>(
@@ -2596,7 +2596,6 @@ CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
       color_space_(color_space),
       hdr_metadata_(hdr_metadata),
       delegate_(delegate),
-      is_accelerated_(true),
       is_software_(false),
       snapshot_paint_image_id_(cc::PaintImage::GetNextId()),
       recorder_for_external_draws_(
@@ -2640,7 +2639,7 @@ CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
       }
 
       std::optional<gfx::BufferUsage> buffer_usage = std::nullopt;
-      if (!is_accelerated_) {
+      if (is_software_) {
         // Ideally we should add SHARED_IMAGE_USAGE_CPU_WRITE_ONLY to the shared
         // image usage flag here since mailbox will be used for CPU writes by
         // the client. But doing that stops us from using CompoundImagebacking
@@ -2669,7 +2668,7 @@ CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
 
       image_pool_ = gpu::SharedImagePool<CanvasResourceSharedImage>::Create(
           image_info, sii,
-          is_accelerated_ ? "CanvasResourceRaster" : "CanvasResourceRasterGmb",
+          !is_software_ ? "CanvasResourceRaster" : "CanvasResourceRasterGmb",
           is_single_buffered ? 0 : kMaxRecycledCanvasResources,
           expiration_time);
     }
@@ -2697,7 +2696,6 @@ CanvasNon2DResourceProviderSharedImage::CanvasNon2DResourceProviderSharedImage(
       color_space_(color_space),
       hdr_metadata_(hdr_metadata),
       delegate_(delegate),
-      is_accelerated_(false),
       is_software_(true),
       snapshot_paint_image_id_(cc::PaintImage::GetNextId()),
       recorder_for_external_draws_(
@@ -2859,7 +2857,7 @@ sk_sp<SkSurface> CanvasNon2DResourceProviderSharedImage::CreateSkSurface()
   TRACE_EVENT0("blink",
                "CanvasNon2DResourceProviderSharedImage::CreateSkSurface");
 
-  CHECK(!IsAccelerated());
+  CHECK(is_software_);
 
   if (is_software_) {
     const auto props = GetSkSurfaceProps();
