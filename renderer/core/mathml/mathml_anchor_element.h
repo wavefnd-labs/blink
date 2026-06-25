@@ -8,6 +8,7 @@
 #include "third_party/blink/renderer/core/core_export.h"
 #include "third_party/blink/renderer/core/html/rel_list.h"
 #include "third_party/blink/renderer/core/mathml/mathml_element.h"
+#include "third_party/blink/renderer/core/url/dom_origin_utils.h"
 #include "third_party/blink/renderer/core/url/dom_url_utils.h"
 
 namespace blink {
@@ -15,7 +16,8 @@ namespace blink {
 class MouseEvent;
 
 class CORE_EXPORT MathMLAnchorElement : public MathMLElement,
-                                        public DOMURLUtils {
+                                        public DOMURLUtils,
+                                        public DOMOriginUtils {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
@@ -33,6 +35,8 @@ class CORE_EXPORT MathMLAnchorElement : public MathMLElement,
   void DefaultEventHandler(Event&) override;
   bool IsInteractiveContent() const { return true; }
 
+  // DOMOriginUtils overrides:
+  DOMOrigin* GetDOMOrigin(LocalDOMWindow*) const final;
   // DOMURLUtils overrides:
   KURL Url() const override;
   void SetURL(const KURL&) override;

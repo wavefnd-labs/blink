@@ -17,6 +17,7 @@
 #include "third_party/blink/renderer/core/loader/navigation_policy.h"
 #include "third_party/blink/renderer/core/mathml_names.h"
 #include "third_party/blink/renderer/core/page/frame_tree.h"
+#include "third_party/blink/renderer/core/url/dom_origin.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 
 namespace blink {
@@ -58,6 +59,15 @@ void MathMLAnchorElement::ParseAttribute(
 bool MathMLAnchorElement::IsURLAttribute(const Attribute& attribute) const {
   return attribute.GetName() == html_names::kHrefAttr ||
          MathMLElement::IsURLAttribute(attribute);
+}
+
+DOMOrigin* MathMLAnchorElement::GetDOMOrigin(LocalDOMWindow*) const {
+  // No access check is necessary, as anchor elements are not accessible
+  // cross-origin.
+  if (FastHasAttribute(html_names::kHrefAttr)) {
+    return DOMOrigin::Create(SecurityOrigin::Create(Url()));
+  }
+  return nullptr;
 }
 
 KURL MathMLAnchorElement::Url() const {
