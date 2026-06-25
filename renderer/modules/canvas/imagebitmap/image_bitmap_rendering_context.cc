@@ -482,11 +482,7 @@ ImageBitmapRenderingContext::GetResourceForPushFrame(
 
     Host()->UpdateMemoryUsage();
 
-    if (resource_provider_for_offscreen_canvas_.get() &&
-        resource_provider_for_offscreen_canvas_.get()->IsValid()) {
-      // todo(crbug.com/1064363)  Add a separate UMA for Offscreen Canvas usage
-      // and understand if the if (ResourceProvider() &&
-      // ResourceProvider()->IsValid()) is really needed.
+    if (resource_provider_for_offscreen_canvas_.get()) {
       base::UmaHistogramBoolean(
           "Blink.Canvas.ResourceProviderIsAccelerated",
           resource_provider_for_offscreen_canvas_.get()->IsAccelerated());
