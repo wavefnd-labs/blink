@@ -2937,6 +2937,9 @@ _CONFIG = [
             'blink_mojom::.+',
             'webnn::.+',
             'gpu::SharedImageInterface',
+            'gpu::SHARED_IMAGE_USAGE_WEBGPU_READ',
+            'gpu::SHARED_IMAGE_USAGE_WEBGPU_SHARED_BUFFER',
+            'gpu::SHARED_IMAGE_USAGE_WEBGPU_WRITE',
             'viz::SinglePlaneFormat',
         ]
     },
