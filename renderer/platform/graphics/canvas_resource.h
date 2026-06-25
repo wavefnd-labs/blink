@@ -280,7 +280,6 @@ class PLATFORM_EXPORT ExternalCanvasResource final : public CanvasResource {
   bool CreatesAcceleratedTransferableResources() const override { return true; }
   void NotifyResourceLost() override { resource_is_lost_ = true; }
   void WaitSyncToken(const gpu::SyncToken&) override;
-  void ProduceSyncToken();
 
   scoped_refptr<StaticBitmapImage> Bitmap() override;
   const gfx::HDRMetadata& GetHdrMetadata() const override {

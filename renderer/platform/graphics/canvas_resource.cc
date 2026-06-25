@@ -513,7 +513,6 @@ ExternalCanvasResource::~ExternalCanvasResource() {
   }
 
   if (release_callback_) {
-    ProduceSyncToken();
     std::move(release_callback_).Run(sync_token(), resource_is_lost_);
   }
 }
@@ -542,7 +541,6 @@ scoped_refptr<StaticBitmapImage> ExternalCanvasResource::Bitmap() {
       },
       base::RetainedRef(this));
 
-  ProduceSyncToken();
   scoped_refptr<StaticBitmapImage> image =
       AcceleratedStaticBitmapImage::CreateFromCanvasSharedImage(
           GetSharedImage(), sync_token(), alpha_type_, hdr_metadata_,
@@ -556,20 +554,6 @@ void ExternalCanvasResource::WaitSyncToken(const gpu::SyncToken& sync_token) {
     if (auto* interface_base = InterfaceBase()) {
       interface_base->WaitSyncTokenCHROMIUM(sync_token.GetConstData());
     }
-  }
-}
-
-void ExternalCanvasResource::ProduceSyncToken() {
-  // This method is expected to be used both in WebGL and WebGPU, that's why it
-  // uses InterfaceBase.
-  auto sync_token = GetSyncToken();
-  if (!GetSyncToken().HasData()) {
-    auto* interface = InterfaceBase();
-    if (interface)
-      interface->GenSyncTokenCHROMIUM(sync_token.GetData());
-    SetReleaseSyncToken(sync_token);
-  } else {
-    VerifySyncToken();
   }
 }
 
