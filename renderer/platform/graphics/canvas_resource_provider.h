@@ -162,9 +162,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap final
       ImageOrientation = ImageOrientationEnum::kDefault);
   std::optional<cc::PaintRecord> Flush(FlushReason = FlushReason::kOther);
   const std::optional<cc::PaintRecord>& LastRecording();
-  CanvasResourceProviderType GetType() const {
-    return CanvasResourceProviderType::kBitmap;
-  }
+
   void SetAnimatedImageFrameIndexes(
       scoped_refptr<const cc::AnimatedImageFrameIndexMap>);
 
@@ -405,9 +403,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderSharedImage
       ImageOrientation = ImageOrientationEnum::kDefault);
   std::optional<cc::PaintRecord> Flush(FlushReason = FlushReason::kOther);
   const std::optional<cc::PaintRecord>& LastRecording();
-  CanvasResourceProviderType GetType() const {
-    return CanvasResourceProviderType::kSharedImage;
-  }
+
   void SetAnimatedImageFrameIndexes(
       scoped_refptr<const cc::AnimatedImageFrameIndexMap>);
   virtual bool WritePixels(const SkImageInfo& orig_info,
@@ -673,10 +669,6 @@ class PLATFORM_EXPORT CanvasNon2DResourceProviderSharedImage
   bool IsAccelerated() const { return is_accelerated_; }
   bool IsSoftware() const { return is_software_; }
   bool IsGpuContextLost() const;
-
-  CanvasResourceProviderType GetType() const {
-    return CanvasResourceProviderType::kSharedImage;
-  }
 
   CanvasImageProvider* GetOrCreateImageProvider();
   void SetAnimatedImageFrameIndexes(

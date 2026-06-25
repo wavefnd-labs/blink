@@ -490,9 +490,8 @@ ImageBitmapRenderingContext::GetResourceForPushFrame(
       base::UmaHistogramBoolean(
           "Blink.Canvas.ResourceProviderIsAccelerated",
           resource_provider_for_offscreen_canvas_.get()->IsAccelerated());
-      base::UmaHistogramEnumeration(
-          "Blink.Canvas.ResourceProviderType",
-          resource_provider_for_offscreen_canvas_.get()->GetType());
+      base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
+                                    CanvasResourceProviderType::kSharedImage);
       Host()->DidDraw();
     }
   }

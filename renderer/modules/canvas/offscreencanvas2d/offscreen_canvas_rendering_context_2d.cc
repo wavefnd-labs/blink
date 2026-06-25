@@ -285,7 +285,7 @@ bool OffscreenCanvasRenderingContext2D::InitializeResourceProvider() {
     base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
                               shared_image_provider_->IsAccelerated());
     base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
-                                  shared_image_provider_->GetType());
+                                  CanvasResourceProviderType::kSharedImage);
     host->DidDraw();
     return true;
   }
@@ -294,7 +294,7 @@ bool OffscreenCanvasRenderingContext2D::InitializeResourceProvider() {
     base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
                               false);
     base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
-                                  bitmap_provider_->GetType());
+                                  CanvasResourceProviderType::kBitmap);
 
     host->DidDraw();
     return true;
