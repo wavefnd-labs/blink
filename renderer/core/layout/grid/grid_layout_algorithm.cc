@@ -851,7 +851,8 @@ void GridLayoutAlgorithm::BuildSizingCollection(
 
 GridLineResolver GridLayoutAlgorithm::BuildGridLineResolver(
     const GridArea& subgrid_area,
-    const GridLineResolver* opt_parent_line_resolver) const {
+    const GridLineResolver* opt_parent_line_resolver,
+    bool can_inherit_line_names_from_parent) const {
   const auto& style = Style();
   const auto column_auto_repetitions =
       ComputeAutomaticRepetitions(subgrid_area.columns, kForColumns);
@@ -860,7 +861,8 @@ GridLineResolver GridLayoutAlgorithm::BuildGridLineResolver(
 
   if (opt_parent_line_resolver) {
     return GridLineResolver(style, *opt_parent_line_resolver, subgrid_area,
-                            column_auto_repetitions, row_auto_repetitions);
+                            column_auto_repetitions, row_auto_repetitions,
+                            can_inherit_line_names_from_parent);
   }
   return GridLineResolver(style, column_auto_repetitions, row_auto_repetitions);
 }
