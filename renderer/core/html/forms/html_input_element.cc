@@ -1340,6 +1340,7 @@ void HTMLInputElement::SetSuggestedValue(const String& value) {
 }
 
 void HTMLInputElement::DidChangeIsCanvasOrInCanvasSubtree() {
+  TextControlElement::DidChangeIsCanvasOrInCanvasSubtree();
   if (RuntimeEnabledFeatures::CanvasDrawElementEnabled(GetExecutionContext()) &&
       IsInCanvasSubtree()) {
     // Hide suggested values when under canvas, to prevent leaking this
