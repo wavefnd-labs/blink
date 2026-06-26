@@ -293,11 +293,11 @@ MinMaxSizesResult GridLayoutAlgorithm::ComputeMinMaxSizes(
                                  &grid_sizing_tree, &needs_additional_pass);
 
     const bool needs_additional_pass_for_column_subtree =
-        grid_sizing_tree.HasSubgridWithIndefiniteStandaloneAxis();
+        grid_sizing_tree.HasSubgridWithIndefiniteStandaloneAxis() &&
+        grid_sizing_tree.HasBlockSizeDependentGridItem();
 
     if (needs_additional_pass ||
-        HasBlockSizeDependentGridItem(grid_sizing_tree.GetGridItems()) ||
-        needs_additional_pass_for_column_subtree) {
+        grid_sizing_tree.HasBlockSizeDependentGridItem()) {
       // If we need to calculate the row geometry, then we have a dependency on
       // our block constraints.
       depends_on_block_constraints = true;
@@ -485,7 +485,8 @@ const GridLayoutSubtree* GridLayoutAlgorithm::ComputeGridGeometry(
     InitializeTrackSizes(&grid_sizing_tree, kForRows);
     CompleteTrackSizingAlgorithm(kForRows, SizingConstraint::kLayout,
                                  &grid_sizing_tree);
-  } else if (grid_sizing_tree.HasSubgridWithIndefiniteStandaloneAxis()) {
+  } else if (grid_sizing_tree.HasSubgridWithIndefiniteStandaloneAxis() &&
+             grid_sizing_tree.HasBlockSizeDependentGridItem()) {
     // If any subgrid in the tree has an indefinite standalone-axis track
     // collection at first-pass init, item contributions that fed into the
     // initial column sizing were computed against indefinite subgrid rows.
@@ -647,6 +648,7 @@ LayoutUnit GridLayoutAlgorithm::ContributionSizeForGridItem(
     if (grid_item->is_parallel_with_root_grid &&
         result.depends_on_block_constraints) {
       grid_item->is_sizing_dependent_on_block_size = true;
+      sizing_subtree.SetHasBlockSizeDependentGridItem();
     }
 
     const auto content_size =
@@ -681,8 +683,10 @@ LayoutUnit GridLayoutAlgorithm::ContributionSizeForGridItem(
 
     // TODO(ikilpatrick): This check is potentially too broad, i.e. a fixed
     // inline size with no %-padding doesn't need the additional pass.
-    if (is_for_columns)
+    if (is_for_columns) {
       grid_item->is_sizing_dependent_on_block_size = true;
+      sizing_subtree.SetHasBlockSizeDependentGridItem();
+    }
 
     const LayoutResult* result = nullptr;
     if (space.AvailableSize().inline_size == kIndefiniteSize) {
