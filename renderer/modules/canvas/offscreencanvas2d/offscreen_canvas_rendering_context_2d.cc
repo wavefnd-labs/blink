@@ -133,13 +133,14 @@ void OffscreenCanvasRenderingContext2D::FinalizeFrame(FlushReason reason) {
 
   // Make sure surface is ready for painting: fix the rendering mode now
   // because it will be too late during the paint invalidation phase.
-  InitializeResourceProvider();
-  if (shared_image_provider_ && shared_image_provider_->IsValid()) {
-    shared_image_provider_->Flush(reason);
-  } else if (bitmap_provider_ && bitmap_provider_->IsValid()) {
-    bitmap_provider_->Flush(reason);
-  } else {
+  if (!InitializeResourceProvider()) {
     return;
+  }
+
+  if (shared_image_provider_) {
+    shared_image_provider_->Flush(reason);
+  } else {
+    bitmap_provider_->Flush(reason);
   }
   Host()->NotifyCachesOfSwitchingFrame();
 }
