@@ -439,7 +439,7 @@ Animation::Animation(ExecutionContext* execution_context,
       pending_finish_notification_(false),
       has_queued_microtask_(false),
       outdated_(false),
-      finished_(true),
+      inactive_(true),
       committed_finish_notification_(false),
       compositor_state_(nullptr),
       compositor_pending_(false),
@@ -1930,7 +1930,7 @@ void Animation::PlayInternal(AutoRewind auto_rewind,
   pending_play_ = true;
 
   // Blink specific implementation details.
-  finished_ = false;
+  inactive_ = false;
   committed_finish_notification_ = false;
   SetOutdated();
 
@@ -2055,7 +2055,7 @@ void Animation::UpdateFinishedState(UpdateType update_type,
   // for a new start time.
   if (timeline_ && timeline_->IsScrollTimeline() && pending_play_ &&
       auto_align_start_time_) {
-    finished_ = false;
+    inactive_ = false;
     pending_finish_notification_ = false;
     committed_finish_notification_ = false;
     return;
@@ -2140,12 +2140,12 @@ void Animation::UpdateFinishedState(UpdateType update_type,
     // Previously finished animation may restart so they should be added to
     // pending animations to make sure that a compositor animation is re-created
     // during future PreCommit.
-    if (finished_) {
+    if (inactive_) {
       SetCompositorPending(CompositorPendingReason::kPendingUpdate);
     }
     // 6. If not finished but the current finished promise is already resolved,
     //    create a new promise.
-    finished_ = pending_finish_notification_ = committed_finish_notification_ =
+    inactive_ = pending_finish_notification_ = committed_finish_notification_ =
         false;
     if (finished_promise_ &&
         finished_promise_->GetState() == AnimationPromise::kResolved) {
@@ -2368,11 +2368,11 @@ bool Animation::HasPendingActivity() const {
   return pending_finished_event_ || pending_cancelled_event_ ||
          pending_remove_event_ || has_pending_promise || can_trigger ||
          pending_finish_notification_ ||
-         (!finished_ && HasEventListeners(event_type_names::kFinish));
+         (!inactive_ && HasEventListeners(event_type_names::kFinish));
 }
 
 void Animation::ContextDestroyed() {
-  finished_ = true;
+  inactive_ = true;
   pending_finished_event_ = nullptr;
   pending_cancelled_event_ = nullptr;
   pending_remove_event_ = nullptr;
@@ -3265,12 +3265,15 @@ bool Animation::Update(TimingUpdateReason reason) {
     // animation. This is known to occur when a retargeted transition is
     // finished before PreCommit has run the first time and a compositor state
     // has been created.
-    if (!finished_ && !HasActiveAnimationsOnCompositor()) {
+    if (!inactive_ && !HasActiveAnimationsOnCompositor()) {
       UpdateCompositedPaintStatus();
     }
 
-    if (reason == kTimingUpdateForAnimationFrame) {
-      finished_ = true;
+    // Animations linked to scroll-timelines remain active since a scroll update
+    // can effectively roll back time.
+    if (reason == kTimingUpdateForAnimationFrame &&
+        (idle || !timeline_ || timeline_->IsMonotonicallyIncreasing())) {
+      inactive_ = true;
     }
   }
 
@@ -3280,12 +3283,7 @@ bool Animation::Update(TimingUpdateReason reason) {
 
   DCHECK(!outdated_);
 
-  return !finished_ || TimeToEffectChange() ||
-         // Always return true for not idle animations attached to not
-         // monotonically increasing timelines even if the animation is
-         // finished. This is required to accommodate cases where timeline ticks
-         // back in time.
-         (!idle && timeline_ && !timeline_->IsMonotonicallyIncreasing());
+  return !inactive_ || TimeToEffectChange();
 }
 
 void Animation::QueueFinishedEvent() {
