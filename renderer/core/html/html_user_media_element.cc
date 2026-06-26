@@ -121,6 +121,7 @@ bool HTMLUserMediaElement::IsLegacyMode() const {
   // behavior.
   return FastHasAttribute(html_names::kTypeAttr);
 }
+
 void HTMLUserMediaElement::OnConstraintsSet(bool has_video, bool has_audio) {
   has_constraints_ = true;
   // If permission descriptors are already set, we do not need to update them.
@@ -215,23 +216,6 @@ void HTMLUserMediaElement::OnEmbeddedPermissionsDecided(
 }
 
 void HTMLUserMediaElement::DefaultEventHandler(Event& event) {
-  if (event.type() == event_type_names::kDOMActivate) {
-    if (!event.IsFullyTrusted() &&
-        !RuntimeEnabledFeatures::BypassPepcSecurityForTestingEnabled()) {
-      SetError(MakeGarbageCollected<DOMException>(
-          DOMExceptionCode::kInvalidStateError,
-          "The usermedia element activation must be triggered by a user "
-          "gesture."));
-      DispatchEvent(*Event::Create(event_type_names::kError));
-      AuditsIssue::ReportPermissionElementIssue(
-          GetExecutionContext(), GetDomNodeId(),
-          protocol::Audits::PermissionElementIssueTypeEnum::UntrustedEvent,
-          GetType(), /*is_warning=*/false);
-      event.SetDefaultHandled();
-      return;
-    }
-  }
-
   // HTMLCapabilityElementBase::HandleActivation checks that the event is
   // trusted before proceeding with the permission request.
   // If the element only has type attribute and no constraints, we do not want
@@ -245,6 +229,12 @@ void HTMLUserMediaElement::DefaultEventHandler(Event& event) {
     return;
   }
   HTMLCapabilityElementBase::DefaultEventHandler(event);
+}
+
+void HTMLUserMediaElement::OnActivationFailed(const String& error_message) {
+  SetError(MakeGarbageCollected<DOMException>(
+      DOMExceptionCode::kInvalidStateError, error_message));
+  DispatchEvent(*Event::Create(event_type_names::kError));
 }
 
 mojom::blink::EmbeddedPermissionRequestDescriptorPtr

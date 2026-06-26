@@ -46,6 +46,7 @@ class CORE_EXPORT HTMLUserMediaElement
   void DefaultEventHandler(Event& event) override;
   mojom::blink::EmbeddedPermissionRequestDescriptorPtr
   CreateEmbeddedPermissionRequestDescriptor() override;
+  void OnActivationFailed(const String& error_message) override;
 
   Vector<mojom::blink::PermissionDescriptorPtr> ParseType(
       const AtomicString& type);
