@@ -3371,8 +3371,7 @@ void LayoutObject::StyleDidChange(
   if (StyleRef().AnchorName())
     MarkMayContainAnchor();
 
-  if (MayContainAnchor() && old_style &&
-      RuntimeEnabledFeatures::CSSAnchorWithTransformsEnabled()) {
+  if (MayContainAnchor() && old_style) {
     // If there's an anchor here, and the new style might want to run animations
     // on the compositor, anchors may affect layout of the anchored elements.
     // Mark for layout to update the anchor references and thus request main
