@@ -996,6 +996,11 @@ class CORE_EXPORT Document : public ContainerNode,
   const KURL& Url() const { return url_; }
   void SetURL(const KURL&);
 
+  KURL OutgoingReferrerUrl() const;
+  bool IsOutgoingReferrerUrlCachedForTesting() const {
+    return cached_outgoing_referrer_url_.has_value();
+  }
+
   // Bind the url to document.url, if unavailable bind to about:blank.
   KURL urlForBinding() const;
 
@@ -2744,6 +2749,12 @@ class CORE_EXPORT Document : public ContainerNode,
   // The URL cache is mutable because the changes that are made to it during
   // CompleteURLWithOverride() are not observable by callers.
   mutable URLCache url_cache_;
+
+  // Caches the stripped outgoing referrer URL (credentials and fragments
+  // removed) to avoid re-parsing and re-stripping on every subresource request.
+  mutable std::optional<KURL> cached_outgoing_referrer_url_;
+  // Feature flag killswitch for the outgoing referrer URL cache.
+  bool should_cache_outgoing_referrer_ = false;
 
   // Indicates whether all the conditions are met to trigger recording of counts
   // for cases where sandboxed srcdoc documents use their base url to resolve
