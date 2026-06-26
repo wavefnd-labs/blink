@@ -43,7 +43,8 @@ void UserMediaRequestProviderCallbacks::OnSuccess(
   }
   MediaStream* stream = streams[0];
   HTMLUserMediaElementMediaStream::From(*element_).SetMediaStream(stream);
-  element_->DispatchEvent(*Event::Create(event_type_names::kStream));
+  element_->EnqueueEvent(*Event::Create(event_type_names::kStream),
+                         TaskType::kDOMManipulation);
 }
 
 void UserMediaRequestProviderCallbacks::OnError(
@@ -63,12 +64,14 @@ void UserMediaRequestProviderCallbacks::OnError(
     }
     element_->SetError(dom_exception);
     if (result == UserMediaRequestResult::kNotAllowedByUserError) {
-      element_->DispatchEvent(*Event::Create(event_type_names::kCancel));
+      element_->EnqueueEvent(*Event::Create(event_type_names::kCancel),
+                             TaskType::kDOMManipulation);
     } else {
       base::UmaHistogramBoolean(
           "Blink.CapabilityElement.UserMedia.GumApi.OverconstrainedError",
           error->IsOverconstrainedError());
-      element_->DispatchEvent(*Event::Create(event_type_names::kError));
+      element_->EnqueueEvent(*Event::Create(event_type_names::kError),
+                             TaskType::kDOMManipulation);
     }
   }
 }
@@ -132,7 +135,8 @@ void UserMediaRequestProviderImpl::StartRequest(
     if (!constraints->hasAudio() && !constraints->hasVideo()) {
       element->SetError(MakeGarbageCollected<DOMException>(
           DOMExceptionCode::kNotSupportedError, "No constraints set"));
-      element->DispatchEvent(*Event::Create(event_type_names::kError));
+      element->EnqueueEvent(*Event::Create(event_type_names::kError),
+                            TaskType::kDOMManipulation);
       return;
     }
     request_constraints = MediaStreamConstraints::Create();
@@ -152,7 +156,8 @@ void UserMediaRequestProviderImpl::StartRequest(
     if (!constraints->hasAudio()) {
       element->SetError(MakeGarbageCollected<DOMException>(
           DOMExceptionCode::kNotSupportedError, "No audio constraints set"));
-      element->DispatchEvent(*Event::Create(event_type_names::kError));
+      element->EnqueueEvent(*Event::Create(event_type_names::kError),
+                            TaskType::kDOMManipulation);
       return;
     }
     request_constraints = MediaStreamConstraints::Create();
@@ -166,7 +171,8 @@ void UserMediaRequestProviderImpl::StartRequest(
     if (!constraints->hasVideo()) {
       element->SetError(MakeGarbageCollected<DOMException>(
           DOMExceptionCode::kNotSupportedError, "No video constraints set"));
-      element->DispatchEvent(*Event::Create(event_type_names::kError));
+      element->EnqueueEvent(*Event::Create(event_type_names::kError),
+                            TaskType::kDOMManipulation);
       return;
     }
     request_constraints = MediaStreamConstraints::Create();
@@ -184,7 +190,8 @@ void UserMediaRequestProviderImpl::StartRequest(
   if (exception_state.HadException()) {
     element->SetError(MakeGarbageCollected<DOMException>(
         DOMExceptionCode::kOperationError, "Stream creation failed"));
-    element->DispatchEvent(*Event::Create(event_type_names::kError));
+    element->EnqueueEvent(*Event::Create(event_type_names::kError),
+                          TaskType::kDOMManipulation);
     return;
   }
 

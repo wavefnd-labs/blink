@@ -24,6 +24,7 @@
 #include "third_party/blink/renderer/modules/mediastream/user_media_element_constraints.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/testing/testing_platform_support.h"
+#include "third_party/blink/renderer/platform/testing/unit_test_helpers.h"
 
 namespace blink {
 
@@ -105,6 +106,8 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnSuccessWithStream) {
   // The stream should have been set on the element.
   EXPECT_EQ(HTMLUserMediaElementMediaStream::stream(*element), stream);
 
+  test::RunPendingTasks();
+
   // Verify events
   EXPECT_TRUE(stream_listener->fired());
   EXPECT_FALSE(error_listener->fired());
@@ -132,6 +135,8 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnError) {
           dom_exception);
   callbacks->OnError(nullptr, error, nullptr,
                      UserMediaRequestResult::kNotFoundError);
+
+  test::RunPendingTasks();
 
   // Check that the error event was fired and the stream event was not
   EXPECT_TRUE(error_listener->fired());
@@ -167,6 +172,8 @@ TEST_F(UserMediaRequestProviderImplTest, CallbacksOnCancel) {
   callbacks->OnError(nullptr, error, nullptr,
                      UserMediaRequestResult::kNotAllowedByUserError);
 
+  test::RunPendingTasks();
+
   // Check that the cancel event was fired and others were not
   EXPECT_TRUE(cancel_listener->fired());
   EXPECT_FALSE(error_listener->fired());
@@ -196,6 +203,8 @@ TEST_F(UserMediaRequestProviderImplTest, StartRequestNoConstraintsError) {
   element->addEventListener(event_type_names::kStream, stream_listener);
 
   provider->StartRequest(element, element->GetPermissionDescriptors());
+
+  test::RunPendingTasks();
 
   // Verify events
   EXPECT_TRUE(error_listener->fired());

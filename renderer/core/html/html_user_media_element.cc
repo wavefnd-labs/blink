@@ -9,6 +9,7 @@
 #include "third_party/blink/renderer/core/dom/dom_exception.h"
 #include "third_party/blink/renderer/core/dom/events/event.h"
 #include "third_party/blink/renderer/core/dom/space_split_string.h"
+#include "third_party/blink/renderer/core/event_type_names.h"
 #include "third_party/blink/renderer/core/html/user_media_request_provider.h"
 #include "third_party/blink/renderer/core/html_names.h"
 #include "third_party/blink/renderer/core/inspector/console_message.h"
@@ -211,7 +212,8 @@ void HTMLUserMediaElement::OnEmbeddedPermissionsDecided(
         result == mojom::blink::EmbeddedPermissionControlResult::kDismissed
             ? "Permission dismissed"
             : "Permission denied"));
-    DispatchEvent(*Event::Create(event_type_names::kCancel));
+    EnqueueEvent(*Event::Create(event_type_names::kCancel),
+                 TaskType::kDOMManipulation);
   }
 }
 
@@ -234,7 +236,8 @@ void HTMLUserMediaElement::DefaultEventHandler(Event& event) {
 void HTMLUserMediaElement::OnActivationFailed(const String& error_message) {
   SetError(MakeGarbageCollected<DOMException>(
       DOMExceptionCode::kInvalidStateError, error_message));
-  DispatchEvent(*Event::Create(event_type_names::kError));
+  EnqueueEvent(*Event::Create(event_type_names::kError),
+               TaskType::kDOMManipulation);
 }
 
 mojom::blink::EmbeddedPermissionRequestDescriptorPtr
