@@ -4082,6 +4082,7 @@ LayoutUnit BlockLayoutAlgorithm::ComputeInitialBlockStartAnnotationSpace()
   // TODO(crbug.com/445727139): We'd like to add block-end annotation space of
   // the previous sibling IFC.
   if (RuntimeEnabledFeatures::AnnotationSpaceOnStartEnabled() &&
+      !GetConstraintSpace().IsNewFormattingContext() &&
       Borders().block_start == 0 &&
       Style().OverflowBlockDirection() == EOverflow::kVisible) {
     MarginStrut margin_strut = GetConstraintSpace().GetMarginStrut();
