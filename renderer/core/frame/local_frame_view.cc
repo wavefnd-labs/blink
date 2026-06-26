@@ -5041,6 +5041,10 @@ void LocalFrameView::ResetUkmAggregatorForTesting() {
 }
 
 void LocalFrameView::MaybeStopDeferringCommitsWithoutContentfulPaint() {
+  if (!RuntimeEnabledFeatures::
+          ReleasePaintHoldingWithoutContentfulPaintEnabled()) {
+    return;
+  }
   if (!frame_->IsMainFrame()) {
     return;
   }
