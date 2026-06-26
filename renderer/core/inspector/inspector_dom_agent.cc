@@ -449,6 +449,15 @@ PseudoId InspectorDOMAgent::ProtocolPseudoTypeToPseudoId(
   if (type == protocol::DOM::PseudoTypeEnum::SelectListbox) {
     return kPseudoIdSelectListbox;
   }
+  if (type == protocol::DOM::PseudoTypeEnum::ExpandIcon) {
+    return kPseudoIdExpandIcon;
+  }
+  if (type == protocol::DOM::PseudoTypeEnum::PickerIcon) {
+    return kPseudoIdPickerIcon;
+  }
+  if (type == protocol::DOM::PseudoTypeEnum::InterestButton) {
+    return kPseudoIdInterestButton;
+  }
   if (type == protocol::DOM::PseudoTypeEnum::OverscrollBackdrop) {
     return kPseudoIdOverscrollBackdrop;
   }
