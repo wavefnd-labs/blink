@@ -1581,6 +1581,11 @@ ScriptPromise<IDLUndefined> HTMLElement::showUnboundedElement(
   gfx::Rect bounds;
   if (auto* layout_object = GetLayoutObject()) {
     bounds = layout_object->AbsoluteBoundingBoxRect();
+    if (frame) {
+      if (auto* view = frame->View()) {
+        bounds = view->FrameToViewport(bounds);
+      }
+    }
   }
   SetLastSentUnboundedBounds(bounds);
 
@@ -1614,10 +1619,13 @@ ScriptPromise<IDLUndefined> HTMLElement::showUnboundedElement(
       client_receiver;
   auto client_remote = client_receiver.InitWithNewEndpointAndPassRemote();
 
-  if (auto* web_frame = WebLocalFrameImpl::FromFrame(frame)) {
-    if (WebFrameWidgetImpl* widget = web_frame->FrameWidgetImpl()) {
-      widget->RegisterActiveUnboundedElement(this, std::move(client_receiver),
-                                             std::move(host_remote));
+  if (frame) {
+    if (auto* web_frame =
+            WebLocalFrameImpl::FromFrame(&frame->LocalFrameRoot())) {
+      if (WebFrameWidgetImpl* widget = web_frame->FrameWidgetImpl()) {
+        widget->RegisterActiveUnboundedElement(this, std::move(client_receiver),
+                                               std::move(host_remote));
+      }
     }
   }
 
@@ -1640,10 +1648,19 @@ void HTMLElement::SetUnboundedElementActive(bool active) {
     return;
   }
   SetElementFlag(ElementFlags::kIsUnboundedElementActive, active);
-  if (active) {
-    GetDocument().IncrementActiveUnboundedElementCount();
-  } else {
-    GetDocument().DecrementActiveUnboundedElementCount();
+  WebFrameWidgetImpl* widget = nullptr;
+  if (auto* frame = GetDocument().GetFrame()) {
+    if (auto* web_frame =
+            WebLocalFrameImpl::FromFrame(&frame->LocalFrameRoot())) {
+      widget = web_frame->FrameWidgetImpl();
+    }
+  }
+  if (widget) {
+    if (active) {
+      widget->IncrementActiveUnboundedElementCount();
+    } else {
+      widget->DecrementActiveUnboundedElementCount();
+    }
   }
   SetNeedsStyleRecalc(
       kSubtreeStyleChange,

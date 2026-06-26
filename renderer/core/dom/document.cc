@@ -227,6 +227,8 @@
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "third_party/blink/renderer/core/frame/viewport_data.h"
 #include "third_party/blink/renderer/core/frame/visual_viewport.h"
+#include "third_party/blink/renderer/core/frame/web_frame_widget_impl.h"
+#include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
 #include "third_party/blink/renderer/core/html/anchor_element_metrics_sender.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_font_cache.h"
 #include "third_party/blink/renderer/core/html/collection_type.h"
@@ -8706,6 +8708,21 @@ HTMLElement* Document::TopmostPopoverOrHint() const {
     return PopoverAutoStack().back();
   }
   return nullptr;
+}
+
+bool Document::HasActiveUnboundedElements() const {
+  if (!RuntimeEnabledFeatures::UnboundedElementEnabled()) {
+    return false;
+  }
+  if (auto* frame = GetFrame()) {
+    if (auto* web_frame =
+            WebLocalFrameImpl::FromFrame(&frame->LocalFrameRoot())) {
+      if (auto* widget = web_frame->FrameWidgetImpl()) {
+        return widget->HasActiveUnboundedElements();
+      }
+    }
+  }
+  return false;
 }
 void Document::SetPopoverPointerdownTarget(const HTMLElement* popover) {
   CHECK(!RuntimeEnabledFeatures::LightDismissFromClickEnabled());
