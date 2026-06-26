@@ -1965,6 +1965,16 @@ gfx::Rect LayoutObject::AbsoluteBoundingBoxRect(
   return gfx::ToEnclosingRect(result);
 }
 
+gfx::Rect LayoutObject::AbsoluteBoundingBoxRectForUnboundedElement() const {
+  NOT_DESTROYED();
+  DCHECK(RuntimeEnabledFeatures::UnboundedElementEnabled());
+  if (const auto* box_model = DynamicTo<LayoutBoxModelObject>(this)) {
+    PhysicalRect overflow = box_model->VisualOverflowRectIncludingFilters();
+    return ToEnclosingRect(LocalToAbsoluteRect(overflow));
+  }
+  return AbsoluteBoundingBoxRect();
+}
+
 PhysicalRect LayoutObject::AbsoluteBoundingBoxRectHandlingEmptyInline(
     MapCoordinatesFlags flags) const {
   NOT_DESTROYED();

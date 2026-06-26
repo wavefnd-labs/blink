@@ -644,7 +644,8 @@ void PrePaintTreeWalk::WalkInternal(const LayoutObject& object,
       html_element && html_element->IsUnboundedElementActive()) {
     DCHECK(RuntimeEnabledFeatures::UnboundedElementEnabled());
     context.inside_active_unbounded = true;
-    gfx::Rect current_bounds = object.AbsoluteBoundingBoxRect();
+    gfx::Rect current_bounds =
+        object.AbsoluteBoundingBoxRectForUnboundedElement();
     auto* frame = object.GetFrame();
     if (frame) {
       if (auto* view = frame->View()) {

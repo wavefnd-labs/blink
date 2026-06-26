@@ -86,6 +86,7 @@
 #include "third_party/blink/renderer/core/frame/csp/content_security_policy.h"
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
+#include "third_party/blink/renderer/core/frame/local_frame_view.h"
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "third_party/blink/renderer/core/frame/web_frame_widget_impl.h"
 #include "third_party/blink/renderer/core/frame/web_local_frame_impl.h"
@@ -1576,16 +1577,18 @@ ScriptPromise<IDLUndefined> HTMLElement::showUnboundedElement(
     return promise;
   }
 
-  GetDocument().UpdateStyleAndLayoutForNode(this,
-                                            DocumentUpdateReason::kJavaScript);
+  auto* view = GetDocument().View();
+  if (!view || !view->UpdateAllLifecyclePhasesExceptPaint(
+                   DocumentUpdateReason::kJavaScript)) {
+    resolver->Reject(MakeGarbageCollected<DOMException>(
+        DOMExceptionCode::kInvalidStateError,
+        "The element is not in an active document."));
+    return promise;
+  }
   gfx::Rect bounds;
   if (auto* layout_object = GetLayoutObject()) {
-    bounds = layout_object->AbsoluteBoundingBoxRect();
-    if (frame) {
-      if (auto* view = frame->View()) {
-        bounds = view->FrameToViewport(bounds);
-      }
-    }
+    bounds = layout_object->AbsoluteBoundingBoxRectForUnboundedElement();
+    bounds = view->FrameToViewport(bounds);
   }
   SetLastSentUnboundedBounds(bounds);
 
