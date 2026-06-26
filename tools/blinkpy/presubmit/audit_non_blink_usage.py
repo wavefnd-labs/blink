@@ -1715,6 +1715,7 @@ _CONFIG = [
         ],
         'allowed': [
             'color_utils::GetContrastRatio',
+            'color_utils::GetRelativeLuminance4f',
         ],
     },
     {
