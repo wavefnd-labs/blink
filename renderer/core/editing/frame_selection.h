@@ -372,6 +372,7 @@ class CORE_EXPORT FrameSelection final
       const SelectionInDomTree& new_selection);
 
   void FocusedOrActiveStateChanged();
+  void MaybeNotifyEventHandlerForSelectionChange(const SetSelectionOptions&);
 
   GranularityStrategy* GetGranularityStrategy();
 
