@@ -1665,8 +1665,16 @@ void HTMLElement::SetUnboundedElementActive(bool active) {
       widget->DecrementActiveUnboundedElementCount();
     }
   }
+  PseudoStateChanged(CSSSelector::kPseudoUnbounded);
+  // An active unbounded element is treated as stacked (gets its own PaintLayer)
+  // by default, which is managed via LayoutObject::IsStacked. Since this state
+  // is not a CSS property, we must explicitly trigger a local style recalc on
+  // the element itself to ensure its LayoutObject is updated. A local style
+  // change is sufficient because the unbounded state does not affect the style
+  // of the subtree (any CSS rules matching descendants via the :unbounded
+  // pseudo-class are already handled by PseudoStateChanged above).
   SetNeedsStyleRecalc(
-      kSubtreeStyleChange,
+      kLocalStyleChange,
       StyleChangeReasonForTracing::Create(style_change_reason::kPseudoClass));
   if (auto* layout_object = GetLayoutObject()) {
     layout_object->AddSubtreePaintPropertyUpdateReason(

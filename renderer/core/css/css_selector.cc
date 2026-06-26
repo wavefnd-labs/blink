@@ -540,7 +540,7 @@ PseudoId CSSSelector::GetPseudoId(PseudoType type) {
     case kPseudoToolSubmitActive:
     case kPseudoTriggerLink:
     case kPseudoUnknown:
-    case kPseudoUnboundedElementInactive:
+    case kPseudoUnbounded:
     case kPseudoUnparsed:
     case kPseudoUserInvalid:
     case kPseudoUserValid:
@@ -622,8 +622,6 @@ constexpr static NameToPseudoStruct kPseudoTypeWithoutArgumentsMap[] = {
     {"-internal-spatial-navigation-focus",
      CSSSelector::kPseudoSpatialNavigationFocus},
     {"-internal-text-field", CSSSelector::kPseudoTextField},
-    {"-internal-unbounded-element-inactive",
-     CSSSelector::kPseudoUnboundedElementInactive},
     {"-internal-video-persistent", CSSSelector::kPseudoVideoPersistent},
     {"-internal-video-persistent-ancestor",
      CSSSelector::kPseudoVideoPersistentAncestor},
@@ -739,6 +737,7 @@ constexpr static NameToPseudoStruct kPseudoTypeWithoutArgumentsMap[] = {
     {"tool-form-active", CSSSelector::kPseudoToolFormActive},
     {"tool-submit-active", CSSSelector::kPseudoToolSubmitActive},
     {"trigger-link", CSSSelector::kPseudoTriggerLink},
+    {"unbounded", CSSSelector::kPseudoUnbounded},
     {"user-invalid", CSSSelector::kPseudoUserInvalid},
     {"user-valid", CSSSelector::kPseudoUserValid},
     {"valid", CSSSelector::kPseudoValid},
@@ -886,6 +885,11 @@ CSSSelector::PseudoType CSSSelector::NameToPseudoType(
        match->type == CSSSelector::kPseudoToolSubmitActive) &&
       document &&
       !RuntimeEnabledFeatures::WebMCPEnabled(document->GetExecutionContext())) {
+    return CSSSelector::kPseudoUnknown;
+  }
+
+  if (match->type == CSSSelector::kPseudoUnbounded &&
+      !RuntimeEnabledFeatures::UnboundedElementEnabled()) {
     return CSSSelector::kPseudoUnknown;
   }
 
@@ -1058,7 +1062,6 @@ void CSSSelector::UpdatePseudoType(const AtomicString& value,
     case kPseudoMultiSelectFocus:
     case kPseudoSelectContainsInput:
     case kPseudoSpatialNavigationFocus:
-    case kPseudoUnboundedElementInactive:
     case kPseudoVideoPersistent:
     case kPseudoVideoPersistentAncestor:
       if (mode != kUASheetMode) {
@@ -1166,6 +1169,7 @@ void CSSSelector::UpdatePseudoType(const AtomicString& value,
     case kPseudoTextField:
     case kPseudoTriggerLink:
     case kPseudoUnknown:
+    case kPseudoUnbounded:
     case kPseudoUnparsed:
     case kPseudoUserInvalid:
     case kPseudoUserValid:
@@ -1966,7 +1970,7 @@ bool CSSSelector::IsAllowedAfterPart() const {
     case kPseudoToolFormActive:
     case kPseudoToolSubmitActive:
     case kPseudoTriggerLink:
-    case kPseudoUnboundedElementInactive:
+    case kPseudoUnbounded:
     case kPseudoVideoPersistent:
     case kPseudoVideoPersistentAncestor:
       return true;
@@ -2328,6 +2332,7 @@ bool CSSSelector::SupportsPseudoStateChange(PseudoType type) {
     case CSSSelector::kPseudoToolFormActive:
     case CSSSelector::kPseudoToolSubmitActive:
     case CSSSelector::kPseudoTriggerLink:
+    case CSSSelector::kPseudoUnbounded:
     case CSSSelector::kPseudoUserInvalid:
     case CSSSelector::kPseudoUserValid:
     case CSSSelector::kPseudoValid:

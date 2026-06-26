@@ -2761,7 +2761,6 @@ void WebFrameWidgetImpl::UnboundedContextDestroyed() {
     return;
   }
   if (unbounded_surface_state_->active_element_) {
-    DecrementActiveUnboundedElementCount();
     unbounded_surface_state_->active_element_->SetUnboundedElementActive(false);
   }
   unbounded_surface_state_ = nullptr;

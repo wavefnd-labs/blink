@@ -831,7 +831,7 @@ SelectorChecker::FeaturelessMatch SelectorChecker::MatchShadowHost(
     case CSSSelector::kPseudoToolFormActive:
     case CSSSelector::kPseudoToolSubmitActive:
     case CSSSelector::kPseudoTriggerLink:
-    case CSSSelector::kPseudoUnboundedElementInactive:
+    case CSSSelector::kPseudoUnbounded:
     case CSSSelector::kPseudoViewTransition:
     case CSSSelector::kPseudoViewTransitionGroup:
     case CSSSelector::kPseudoViewTransitionGroupChildren:
@@ -2543,6 +2543,11 @@ bool SelectorChecker::CheckPseudoClass(const SelectorCheckingContext& context,
         return form_element->MatchesToolFormActivePseudoClass();
       }
       return false;
+    case CSSSelector::kPseudoUnbounded: {
+      DCHECK(RuntimeEnabledFeatures::UnboundedElementEnabled());
+      auto* html_element = DynamicTo<HTMLElement>(element);
+      return html_element && html_element->IsUnboundedElementActive();
+    }
     case CSSSelector::kPseudoToolSubmitActive:
       if (auto* form_control_element =
               DynamicTo<HTMLFormControlElement>(element)) {
@@ -3150,14 +3155,7 @@ bool SelectorChecker::CheckPseudoClass(const SelectorCheckingContext& context,
     case CSSSelector::kPseudoSpatialNavigationFocus:
       DCHECK(is_ua_rule_);
       return MatchesSpatialNavigationFocusPseudoClass(element);
-    case CSSSelector::kPseudoUnboundedElementInactive: {
-      DCHECK(is_ua_rule_);
-      DCHECK(RuntimeEnabledFeatures::UnboundedElementEnabled());
-      auto* html_element = DynamicTo<HTMLElement>(element);
-      return html_element &&
-             html_element->FastHasAttribute(html_names::kUnboundedAttr) &&
-             !html_element->IsUnboundedElementActive();
-    }
+
     case CSSSelector::kPseudoHasDatalist:
       DCHECK(is_ua_rule_);
       return MatchesHasDatalistPseudoClass(element);
