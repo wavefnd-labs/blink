@@ -1243,7 +1243,7 @@ static String ExtractSelectedText(const FrameSelection& selection,
   return PlainText(range, behavior).Replace(0, "");
 }
 
-String FrameSelection::SelectedHTMLForClipboard() const {
+String FrameSelection::SelectedHtmlForClipboard() const {
   const EphemeralRangeInFlatTree& range =
       ComputeRangeForSerialization(GetSelectionInDomTree());
   return CreateMarkup(range.StartPosition(), range.EndPosition(),
