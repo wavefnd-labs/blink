@@ -1415,13 +1415,11 @@ void CanvasRenderingContext2D::RecreateResourceProvider() {
   }
 
   if (shared_image_provider_) {
-    CHECK(shared_image_provider_->IsValid());
     base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
                               shared_image_provider_->IsAccelerated());
     base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
                                   CanvasResourceProviderType::kSharedImage);
   } else if (bitmap_provider_) {
-    CHECK(bitmap_provider_->IsValid());
     base::UmaHistogramBoolean("Blink.Canvas.ResourceProviderIsAccelerated",
                               false);
     base::UmaHistogramEnumeration("Blink.Canvas.ResourceProviderType",
