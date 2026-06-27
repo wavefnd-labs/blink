@@ -115,6 +115,7 @@
 #include "third_party/blink/renderer/core/html/html_menu_item_element.h"
 #include "third_party/blink/renderer/core/html/html_menu_list_element.h"
 #include "third_party/blink/renderer/core/html/html_slot_element.h"
+#include "third_party/blink/renderer/core/html/html_sub_menu_element.h"
 #include "third_party/blink/renderer/core/html/html_template_element.h"
 #include "third_party/blink/renderer/core/html/menu_safe_triangle.h"
 #include "third_party/blink/renderer/core/html/parser/html_parser_idioms.h"
@@ -1543,6 +1544,13 @@ void MarkPopoverInvokersDirty(const HTMLElement& popover) {
     auto* invoker = To<HTMLElement>(invoker_candidate);
     if (popover == invoker->commandForElement()) {
       cache->MarkElementDirty(invoker);
+    }
+  }
+  if (IsA<HTMLMenuListElement>(popover)) {
+    if (auto* submenu = DynamicTo<HTMLSubMenuElement>(popover.parentNode())) {
+      if (HTMLMenuItemElement* menuitem = submenu->MenuItem()) {
+        cache->MarkElementDirty(menuitem);
+      }
     }
   }
 }
@@ -3022,8 +3030,7 @@ bool HTMLElement::DispatchFocusEvent(
 bool HTMLElement::IsValidBuiltinPopoverCommand(CommandEventType command) {
   return command == CommandEventType::kTogglePopover ||
          command == CommandEventType::kHidePopover ||
-         command == CommandEventType::kShowPopover ||
-         command == CommandEventType::kToggleMenu;
+         command == CommandEventType::kShowPopover;
 }
 
 bool HTMLElement::IsValidBuiltinCommand(HTMLElement& invoker,
@@ -3272,13 +3279,6 @@ CommandEventType HTMLElement::GetCommandEventType(
   }
   if (EqualIgnoringAsciiCase(action, keywords::kRequestClose)) {
     return CommandEventType::kRequestClose;
-  }
-
-  // Menu Cases
-  if (RuntimeEnabledFeatures::MenuElementsEnabled()) {
-    if (EqualIgnoringAsciiCase(action, keywords::kToggleMenu)) {
-      return CommandEventType::kToggleMenu;
-    }
   }
 
   // Overscroll gestures.

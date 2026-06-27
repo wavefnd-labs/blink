@@ -267,8 +267,6 @@ enum class CommandEventType {
   kPause,
   kPlay,
   kToggleMuted,
-  // Menu
-  kToggleMenu,
   // Scroll
   kPageUp,
   kPageDown,

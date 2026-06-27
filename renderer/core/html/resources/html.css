@@ -2448,23 +2448,27 @@ select optgroup optgroup {
     margin-inline-start: auto;
   }
 
-  /* We can use the direct child selector for menuitems in menubars, because the
-   * menubar content model does not allow for fieldset as an intermediate to
-   * group menuitems in menubars. */
-  menubar > menuitem {
+  submenu {
+    display: contents;
+  }
+
+  menuitem {
     display: inline-flex;
     /* menuitems in a menubar do not open on interest (hover), unless a menu
      * is already open (see below) */
     interest-delay-start: calc(infinity * 1s);
   }
-  menulist menuitem {
-    display: flex;
-  }
 
   /* menuitems in a menubar that has an open menu trigger instantly on
-   * interest (hover) */
-  menubar:-internal-has-open-menuitem > menuitem {
+   * interest (hover).  Uses :where() so that the "menulist menuitem"
+   * selector just below overrides it. */
+  menubar:where(:-internal-has-open-menuitem) menuitem {
     interest-delay-start: 0s;
+  }
+
+  menulist menuitem {
+    display: flex;
+    interest-delay-start: normal;
   }
 
   menubar, menulist {

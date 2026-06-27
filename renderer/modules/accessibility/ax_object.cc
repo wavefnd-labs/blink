@@ -2721,8 +2721,7 @@ AXObject* AXObject::GetCommandForElementForDetailsRelation() const {
       html_element->command(), html_element->GetExecutionContext());
   if (action != CommandEventType::kTogglePopover &&
       action != CommandEventType::kShowPopover &&
-      action != CommandEventType::kHidePopover &&
-      action != CommandEventType::kToggleMenu) {
+      action != CommandEventType::kHidePopover) {
     return nullptr;
   }
 
