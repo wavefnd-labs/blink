@@ -507,18 +507,33 @@ void InspectorDOMAgent::RemoveDOMListener(DOMListener* listener) {
 }
 
 void InspectorDOMAgent::NotifyDidAddDocument(Document* document) {
-  for (DOMListener* listener : dom_listeners_)
+  ForEachDOMListener([document](const Member<DOMListener>& listener) {
     listener->DidAddDocument(document);
+  });
 }
 
 void InspectorDOMAgent::NotifyWillRemoveDOMNode(Node* node) {
-  for (DOMListener* listener : dom_listeners_)
+  ForEachDOMListener([node](const Member<DOMListener>& listener) {
     listener->WillRemoveDOMNode(node);
+  });
 }
 
 void InspectorDOMAgent::NotifyDidModifyDOMAttr(Element* element) {
-  for (DOMListener* listener : dom_listeners_)
+  ForEachDOMListener([element](const Member<DOMListener>& listener) {
     listener->DidModifyDOMAttr(element);
+  });
+}
+
+void InspectorDOMAgent::ForEachDOMListener(
+    base::FunctionRef<void(const Member<DOMListener>&)> callback) {
+  // Notifying listeners may pause in debugger and thus cause all kinds of
+  // side effects, including adding/removing listeners, so make a copy.
+  HeapHashSet<Member<DOMListener>> copy(dom_listeners_);
+  for (const Member<DOMListener>& listener : copy) {
+    if (dom_listeners_.Contains(listener)) {
+      callback(listener);
+    }
+  }
 }
 
 void InspectorDOMAgent::SetDocument(Document* doc) {
