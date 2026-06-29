@@ -1656,7 +1656,7 @@ std::unique_ptr<Canvas2DBitmapProvider> Canvas2DBitmapProvider::CreateWithClear(
           size, format, alpha_type, color_space, hdr_metadata, delegate));
   if (provider->IsValid()) {
     provider->ClearAtCreation();
-    // The ClearAtCreation() call cannot turn a CRPBitmap invalid.
+    // The ClearAtCreation() call cannot turn a Canvas2DBitmapProvider invalid.
     CHECK(provider->IsValid());
     return provider;
   }

@@ -753,7 +753,7 @@ TEST_P(CanvasRenderingContext2DTest,
                                 CanvasPixelFormat::kUint8,
                                 /*has_alpha=*/true));
 
-  Context2D()->SetCanvas2DResourceProviderForTesting(std::move(provider), size);
+  Context2D()->SetBitmapProviderForTesting(std::move(provider), size);
 
   CanvasElement().SetIsDisplayed(true);
   EXPECT_FALSE(!!CanvasElement().RateLimiter());

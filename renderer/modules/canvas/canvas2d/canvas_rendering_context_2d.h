@@ -241,7 +241,7 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   void SetCanvas2DResourceProviderForTesting(
       std::unique_ptr<Canvas2DResourceProviderSharedImage> provider,
       const gfx::Size& size);
-  void SetCanvas2DResourceProviderForTesting(
+  void SetBitmapProviderForTesting(
       std::unique_ptr<Canvas2DBitmapProvider> provider,
       const gfx::Size& size);
   void SetCanvas2DResourceProviderForTesting(std::nullptr_t,

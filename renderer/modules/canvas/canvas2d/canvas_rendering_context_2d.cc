@@ -1485,7 +1485,7 @@ void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
   shared_image_provider_ = std::move(provider);
 }
 
-void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
+void CanvasRenderingContext2D::SetBitmapProviderForTesting(
     std::unique_ptr<Canvas2DBitmapProvider> provider,
     const gfx::Size& size) {
   canvas()->DiscardResources();
