@@ -198,6 +198,10 @@ Canvas2DBitmapProvider::~Canvas2DBitmapProvider() {
   CanvasMemoryDumpProvider::Instance()->UnregisterClient(this);
 }
 
+bool Canvas2DBitmapProvider::IsPrinting() const {
+  return delegate_ && delegate_->IsPrinting();
+}
+
 SkSurface* Canvas2DBitmapProvider::GetSkSurface() const {
   if (!surface_) {
     surface_ = CreateSkSurface();
