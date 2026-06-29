@@ -25,7 +25,7 @@ class CORE_EXPORT HTMLUserMediaElement
   explicit HTMLUserMediaElement(Document& document);
   void Trace(Visitor*) const override;
 
-  DOMException* error() const { return error_.Get(); }
+  DOMException* error() const;
   void SetError(DOMException* error) { error_ = error; }
 
   DEFINE_ATTRIBUTE_EVENT_LISTENER(stream, kStream)

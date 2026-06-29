@@ -127,6 +127,13 @@ void UserMediaRequestProviderImpl::StartRequest(
   const HTMLMediaStreamConstraints* constraints =
       UserMediaElementConstraints::From(*element).GetSanitizedConstraints();
 
+  if (!constraints) {
+    element->SetError(MakeGarbageCollected<DOMException>(
+        DOMExceptionCode::kNotSupportedError, "No constraints set"));
+    element->DispatchEvent(*Event::Create(event_type_names::kError));
+    return;
+  }
+
   // Constraints that will be used for the UserMediaRequest.
   MediaStreamConstraints* request_constraints = nullptr;
 

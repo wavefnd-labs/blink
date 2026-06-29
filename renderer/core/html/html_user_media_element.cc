@@ -114,13 +114,17 @@ void HTMLUserMediaElement::Trace(Visitor* visitor) const {
 }
 
 bool HTMLUserMediaElement::IsLegacyMode() const {
-  if (!RuntimeEnabledFeatures::UserMediaElementLegacyEnabled(
-          GetExecutionContext())) {
-    return false;
+  return RuntimeEnabledFeatures::UserMediaElementLegacyEnabled(
+             GetExecutionContext()) &&
+         hasAttribute(html_names::kTypeAttr) &&
+         !has_constraints_;
+}
+
+DOMException* HTMLUserMediaElement::error() const {
+  if (IsLegacyMode()) {
+    return nullptr;
   }
-  // If the 'type' attribute is explicitly defined, we fallback to legacy
-  // behavior.
-  return FastHasAttribute(html_names::kTypeAttr);
+  return error_.Get();
 }
 
 void HTMLUserMediaElement::OnConstraintsSet(bool has_video, bool has_audio) {
@@ -205,6 +209,9 @@ void HTMLUserMediaElement::OnEmbeddedPermissionsDecided(
   // TODO(b/519072607): Make sure only the correct events are dispatched for OT
   // and MVP clients.
   HTMLCapabilityElementBase::OnEmbeddedPermissionsDecided(result);
+  if (IsLegacyMode()) {
+    return;
+  }
   if (result == mojom::blink::EmbeddedPermissionControlResult::kDismissed ||
       result == mojom::blink::EmbeddedPermissionControlResult::kDenied) {
     SetError(MakeGarbageCollected<DOMException>(
@@ -218,6 +225,10 @@ void HTMLUserMediaElement::OnEmbeddedPermissionsDecided(
 }
 
 void HTMLUserMediaElement::DefaultEventHandler(Event& event) {
+  if (IsLegacyMode()) {
+    HTMLCapabilityElementBase::DefaultEventHandler(event);
+    return;
+  }
   // HTMLCapabilityElementBase::HandleActivation checks that the event is
   // trusted before proceeding with the permission request.
   // If the element only has type attribute and no constraints, we do not want
@@ -234,6 +245,9 @@ void HTMLUserMediaElement::DefaultEventHandler(Event& event) {
 }
 
 void HTMLUserMediaElement::OnActivationFailed(const String& error_message) {
+  if (IsLegacyMode()) {
+    return;
+  }
   SetError(MakeGarbageCollected<DOMException>(
       DOMExceptionCode::kInvalidStateError, error_message));
   EnqueueEvent(*Event::Create(event_type_names::kError),

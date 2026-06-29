@@ -77,7 +77,7 @@ class MockUserMediaRequestProvider final
 
 class HTMLUserMediaElementTest : public PageTestBase {
  public:
-  HTMLUserMediaElementTest() : platform_support_() {}
+  HTMLUserMediaElementTest() = default;
 
  protected:
   ScopedTestingPlatformSupport<LocalePlatformSupport> platform_support_;
@@ -105,7 +105,6 @@ TEST_F(HTMLUserMediaElementTest, StartRequestOnClick) {
       MockUserMediaRequestProvider::CreateAndProvideTo(*GetDocument().domWindow());
 
   auto* element = MakeGarbageCollected<HTMLUserMediaElement>(GetDocument());
-  element->setAttribute(html_names::kTypeAttr, AtomicString("camera"));
   element->OnConstraintsSet(/*has_video=*/true, /*has_audio=*/false);
 
   HashMap<mojom::blink::PermissionName, mojom::blink::PermissionStatus> init_map;
@@ -333,7 +332,6 @@ TEST_F(HTMLUserMediaElementTest, ClickWhenStyleIsInvalidFiresError) {
   MockUserMediaRequestProvider::CreateAndProvideTo(*GetDocument().domWindow());
 
   auto* element = MakeGarbageCollected<HTMLUserMediaElement>(GetDocument());
-  element->setAttribute(html_names::kTypeAttr, AtomicString("camera"));
   element->OnConstraintsSet(/*has_video=*/true, /*has_audio=*/false);
 
   // Initialize status to ASK.
@@ -381,7 +379,7 @@ TEST_F(HTMLUserMediaElementTest, UntrustedClickFiresError) {
 
   // Do NOT bypass security.
   auto* element = MakeGarbageCollected<HTMLUserMediaElement>(GetDocument());
-  element->setAttribute(html_names::kTypeAttr, AtomicString("camera"));
+  element->OnConstraintsSet(/*has_video=*/true, /*has_audio=*/false);
 
   EXPECT_EQ(element->error(), nullptr);
 
@@ -395,6 +393,46 @@ TEST_F(HTMLUserMediaElementTest, UntrustedClickFiresError) {
   EXPECT_EQ(
       element->error()->message(),
       "The permission element activation must be triggered by a user gesture.");
+}
+
+TEST_F(HTMLUserMediaElementTest, LegacyModeDoesNotRequestMediaStream) {
+  ScopedBypassPepcSecurityForTestingForTest bypass_pepc(true);
+  MockUserMediaRequestProvider* provider =
+      MockUserMediaRequestProvider::CreateAndProvideTo(*GetDocument().domWindow());
+
+  auto* element = MakeGarbageCollected<HTMLUserMediaElement>(GetDocument());
+  // Set type to enter legacy mode
+  element->setAttribute(html_names::kTypeAttr, AtomicString("camera"));
+  EXPECT_TRUE(element->IsLegacyMode());
+
+  // Initialize permission status
+  HashMap<mojom::blink::PermissionName, mojom::blink::PermissionStatus> init_map;
+  init_map.insert(mojom::blink::PermissionName::VIDEO_CAPTURE,
+                  mojom::blink::PermissionStatus::ASK);
+  element->OnPermissionStatusInitialized(init_map);
+
+  // Click it. It should NOT trigger StartRequest (media stream).
+  EXPECT_CALL(*provider, StartRequest(element, _)).Times(0);
+  element->click();
+  ::testing::Mock::VerifyAndClearExpectations(provider);
+
+  // Grant the permission. It should still NOT trigger StartRequest.
+  EXPECT_CALL(*provider, StartRequest(element, _)).Times(0);
+  element->OnPermissionStatusChange(mojom::blink::PermissionName::VIDEO_CAPTURE,
+                                    mojom::blink::PermissionStatus::GRANTED);
+  ::testing::Mock::VerifyAndClearExpectations(provider);
+}
+
+TEST_F(HTMLUserMediaElementTest, TypeAttributeIgnoredWhenLegacyDisabled) {
+  ScopedUserMediaElementLegacyForTest legacy_disabled(false);
+  auto* element = MakeGarbageCollected<HTMLUserMediaElement>(GetDocument());
+
+  EXPECT_FALSE(element->IsLegacyMode());
+
+  // Set type, should be ignored.
+  element->setAttribute(html_names::kTypeAttr, AtomicString("camera"));
+  EXPECT_FALSE(element->IsLegacyMode());
+  EXPECT_TRUE(element->GetPermissionDescriptors().empty());
 }
 
 }  // namespace blink
