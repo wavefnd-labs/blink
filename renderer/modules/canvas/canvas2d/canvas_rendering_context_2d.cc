@@ -807,15 +807,11 @@ CanvasRenderingContext2D::PaintRenderingResultsToSnapshot(
   if (!IsResourceProviderValid()) {
     return nullptr;
   }
+  FlushCanvas(FlushReason::kOther);
   if (shared_image_provider_) {
-    shared_image_provider_->Flush();
     return shared_image_provider_->Snapshot();
   }
-  if (bitmap_provider_) {
-    bitmap_provider_->Flush();
-    return bitmap_provider_->Snapshot();
-  }
-  return nullptr;
+  return bitmap_provider_->Snapshot();
 }
 
 const std::optional<cc::PaintRecord>&
@@ -842,25 +838,15 @@ scoped_refptr<StaticBitmapImage> blink::CanvasRenderingContext2D::GetImage() {
         GetHibernationHandler()->GetImage());
   }
 
-  if (!canvas()) {
+  if (!IsResourceProviderValid()) {
     return nullptr;
   }
 
+  FlushCanvas(FlushReason::kOther);
   if (shared_image_provider_) {
-    if (!shared_image_provider_->IsValid()) {
-      return nullptr;
-    }
-    shared_image_provider_->Flush();
     return shared_image_provider_->Snapshot();
   }
-  if (bitmap_provider_) {
-    if (!bitmap_provider_->IsValid()) {
-      return nullptr;
-    }
-    bitmap_provider_->Flush();
-    return bitmap_provider_->Snapshot();
-  }
-  return nullptr;
+  return bitmap_provider_->Snapshot();
 }
 
 ImageData* CanvasRenderingContext2D::getImageDataInternal(
@@ -907,12 +893,7 @@ void CanvasRenderingContext2D::FinalizeFrame(FlushReason reason) {
   HTMLCanvasElement* host = canvas();
   CHECK(host);
 
-  if (shared_image_provider_) {
-    shared_image_provider_->Flush(reason);
-  } else {
-    DCHECK(bitmap_provider_);
-    bitmap_provider_->Flush(reason);
-  }
+  FlushCanvas(reason);
   if (reason == FlushReason::kCanvasPushFrame) {
     if (host->IsDisplayed()) {
       // Make sure the GPU is never more than two animation frames behind.
