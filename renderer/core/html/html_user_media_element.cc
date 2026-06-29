@@ -10,6 +10,7 @@
 #include "third_party/blink/renderer/core/dom/events/event.h"
 #include "third_party/blink/renderer/core/dom/space_split_string.h"
 #include "third_party/blink/renderer/core/event_type_names.h"
+#include "third_party/blink/renderer/core/frame/local_frame.h"
 #include "third_party/blink/renderer/core/html/user_media_request_provider.h"
 #include "third_party/blink/renderer/core/html_names.h"
 #include "third_party/blink/renderer/core/inspector/console_message.h"
@@ -229,6 +230,33 @@ void HTMLUserMediaElement::DefaultEventHandler(Event& event) {
     HTMLCapabilityElementBase::DefaultEventHandler(event);
     return;
   }
+
+  if (event.type() == event_type_names::kDOMActivate) {
+    if ((!GetExecutionContext() || !GetExecutionContext()->IsSecureContext()) &&
+        !RuntimeEnabledFeatures::BypassPepcSecurityForTestingEnabled()) {
+      AuditsIssue::ReportPermissionElementIssue(
+          GetExecutionContext(), GetDomNodeId(),
+          protocol::Audits::PermissionElementIssueTypeEnum::NonSecureContext,
+          GetType(), /*is_warning=*/false);
+      event.SetDefaultHandled();
+      return;
+    }
+    if (!GetDocument().GetFrame() ||
+        (!LocalFrame::HasTransientUserActivation(GetDocument().GetFrame()) &&
+         !RuntimeEnabledFeatures::BypassPepcSecurityForTestingEnabled())) {
+      AuditsIssue::ReportPermissionElementIssue(
+          GetExecutionContext(), GetDomNodeId(),
+          protocol::Audits::PermissionElementIssueTypeEnum::
+              MissingTransientUserActivation,
+          GetType(), /*is_warning=*/false);
+      OnActivationFailed(
+          "The permission element activation must be triggered by a user "
+          "gesture.");
+      event.SetDefaultHandled();
+      return;
+    }
+  }
+
   // HTMLCapabilityElementBase::HandleActivation checks that the event is
   // trusted before proceeding with the permission request.
   // If the element only has type attribute and no constraints, we do not want
