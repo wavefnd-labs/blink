@@ -1,7 +1,8 @@
 <!DOCTYPE html>
+<html class="test-wait">
 <meta charset="utf-8">
-<script src="../../resources/testharness.js"></script>
-<script src="../../resources/testharnessreport.js"></script>
+<title>Animating transitioned properties should not crash</title>
+<link rel="help" href="https://crbug.com/40412155">
 <style>
 @keyframes test {
   from {
@@ -21,17 +22,16 @@
 </style>
 <div id="target"></div>
 <script>
-'use strict';
-async_test(t => {
+  'use strict';
   let frameWait = 5;
   function frame() {
     frameWait--;
     if (frameWait) {
       requestAnimationFrame(frame);
     } else {
-      t.done();
+      document.documentElement.classList.remove('test-wait');
     }
   }
   requestAnimationFrame(frame);
-}, 'Don\'t crash when animating transitioned properties');
 </script>
+</html>
