@@ -23,13 +23,13 @@ const char UserMediaElementConstraints::kSupplementName[] =
 
 // Keep the most basic constraints, strip out 'ideal', 'exact', 'min', 'max'
 // from all properties
-MediaTrackConstraints* SanitizeTrackConstraints(
+MediaTrackConstraintSet* SanitizeTrackConstraints(
     const MediaTrackConstraintSet* constraints) {
   if (!constraints) {
     return nullptr;
   }
 
-  MediaTrackConstraints* sanitized = MediaTrackConstraints::Create();
+  MediaTrackConstraintSet* sanitized = MediaTrackConstraintSet::Create();
 
   // 1. Video properties
   // Longs
@@ -127,6 +127,24 @@ void UserMediaElementConstraints::Trace(Visitor* visitor) const {
   Supplement<HTMLUserMediaElement>::Trace(visitor);
 }
 
+const HTMLMediaStreamConstraints*
+UserMediaElementConstraints::GetSanitizedConstraints() const {
+  if (!constraints_) {
+    return nullptr;
+  }
+  HTMLMediaStreamConstraints* result = HTMLMediaStreamConstraints::Create();
+
+  if (constraints_->hasVideo()) {
+    result->setVideo(SanitizeTrackConstraints(constraints_->video()));
+  }
+
+  if (constraints_->hasAudio()) {
+    result->setAudio(SanitizeTrackConstraints(constraints_->audio()));
+  }
+
+  return result;
+}
+
 void UserMediaElementConstraints::setConstraints(
     HTMLUserMediaElement& element,
     const HTMLMediaStreamConstraints* constraints) {
@@ -135,23 +153,11 @@ void UserMediaElementConstraints::setConstraints(
     return;
   }
 
-  HTMLMediaStreamConstraints* sanitized_constraints =
-      HTMLMediaStreamConstraints::Create();
-
-  if (constraints->hasVideo()) {
-    sanitized_constraints->setVideo(
-        SanitizeTrackConstraints(constraints->video()));
-  }
-
-  if (constraints->hasAudio()) {
-    sanitized_constraints->setAudio(
-        SanitizeTrackConstraints(constraints->audio()));
-  }
-
-  self.SetConstraints(sanitized_constraints);
+  self.SetConstraints(constraints);
   self.did_set_constraints_ = true;
-  element.OnConstraintsSet(sanitized_constraints->hasVideo(),
-                           sanitized_constraints->hasAudio());
+  if (constraints) {
+    element.OnConstraintsSet(constraints->hasVideo(), constraints->hasAudio());
+  }
 }
 
 }  // namespace blink

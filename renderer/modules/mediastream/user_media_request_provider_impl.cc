@@ -125,7 +125,7 @@ void UserMediaRequestProviderImpl::StartRequest(
 
   // Constraints that are set on the HTMLUserMediaElement.
   const HTMLMediaStreamConstraints* constraints =
-      UserMediaElementConstraints::From(*element).Constraints();
+      UserMediaElementConstraints::From(*element).GetSanitizedConstraints();
 
   // Constraints that will be used for the UserMediaRequest.
   MediaStreamConstraints* request_constraints = nullptr;

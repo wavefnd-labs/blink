@@ -102,7 +102,7 @@ TEST_F(UserMediaElementTest, SanitizeTrackConstraints) {
   UserMediaElementConstraints::setConstraints(*element, constraints);
 
   const HTMLMediaStreamConstraints* sanitized_constraints =
-      UserMediaElementConstraints::From(*element).Constraints();
+      UserMediaElementConstraints::From(*element).GetSanitizedConstraints();
 
   // Valid constraints should be preserved
   EXPECT_TRUE(sanitized_constraints->video()->hasHeight());
@@ -153,7 +153,7 @@ TEST_F(UserMediaElementTest, SanitizeTrackConstraintsMutatesCopy) {
   UserMediaElementConstraints::setConstraints(*element, constraints);
 
   const HTMLMediaStreamConstraints* sanitized_constraints =
-      UserMediaElementConstraints::From(*element).Constraints();
+      UserMediaElementConstraints::From(*element).GetSanitizedConstraints();
 
   // Test that original constraints are unmodified
   EXPECT_TRUE(constraints->video()->width()->IsConstrainLongRange());
