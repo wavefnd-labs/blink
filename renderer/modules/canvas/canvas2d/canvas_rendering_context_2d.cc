@@ -1242,7 +1242,7 @@ void CanvasRenderingContext2D::CreateCanvasResourceProvider() {
     // The final fallback is to raster into a bitmap that will then either be
     // uploaded into GPU memory (for GPU compositing) or copied into the Viz
     // process (for software compositing).
-    bitmap_provider_ = Canvas2DResourceProviderBitmap::CreateWithClear(
+    bitmap_provider_ = Canvas2DBitmapProvider::CreateWithClear(
         canvas()->Size(), format, alpha_type, color_space, hdr_metadata,
         canvas());
   }
@@ -1486,7 +1486,7 @@ void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
 }
 
 void CanvasRenderingContext2D::SetCanvas2DResourceProviderForTesting(
-    std::unique_ptr<Canvas2DResourceProviderBitmap> provider,
+    std::unique_ptr<Canvas2DBitmapProvider> provider,
     const gfx::Size& size) {
   canvas()->DiscardResources();
   canvas()->SetSize(size);

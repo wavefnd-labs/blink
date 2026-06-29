@@ -285,7 +285,7 @@ scoped_refptr<StaticBitmapImage> CanvasRenderingContext::GetElementImage(
     }
   }
 
-  auto resource_provider = Canvas2DResourceProviderBitmap::CreateWithClear(
+  auto resource_provider = Canvas2DBitmapProvider::CreateWithClear(
       dest_size, GetN32FormatForCanvas(), kPremul_SkAlphaType,
       gfx::ColorSpace::CreateSRGB());
 

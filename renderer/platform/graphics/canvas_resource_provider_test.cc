@@ -509,7 +509,7 @@ TEST_F(CanvasResourceProviderTest,
   EXPECT_EQ(original_shared_image, provider->Snapshot()->GetSharedImage());
 }
 
-TEST_F(CanvasResourceProviderTest, Canvas2DResourceProviderBitmap) {
+TEST_F(CanvasResourceProviderTest, Canvas2DBitmapProvider) {
   const gfx::Size kSize(10, 10);
   const SkImageInfo kInfo =
       SkImageInfo::MakeN32Premul(10, 10, SkColorSpace::MakeSRGB());
@@ -518,8 +518,7 @@ TEST_F(CanvasResourceProviderTest, Canvas2DResourceProviderBitmap) {
                                    gfx::HDRMetadata(),
                                    CanvasPixelFormat::kUint8,
                                    /*has_alpha=*/true);
-  auto provider =
-      Canvas2DResourceProviderBitmap::CreateForTesting(kSize, color_params);
+  auto provider = Canvas2DBitmapProvider::CreateForTesting(kSize, color_params);
 
   EXPECT_EQ(provider->Size(), kSize);
   EXPECT_TRUE(provider && provider->IsValid());
@@ -608,13 +607,13 @@ TEST_F(CanvasResourceProviderTest, DimensionsExceedMaxTextureSize_Bitmap) {
                                    gfx::HDRMetadata(),
                                    CanvasPixelFormat::kUint8,
                                    /*has_alpha=*/true);
-  auto provider = Canvas2DResourceProviderBitmap::CreateForTesting(
+  auto provider = Canvas2DBitmapProvider::CreateForTesting(
       gfx::Size(kMaxTextureSize - 1, kMaxTextureSize), color_params);
   EXPECT_TRUE(provider);
-  provider = Canvas2DResourceProviderBitmap::CreateForTesting(
+  provider = Canvas2DBitmapProvider::CreateForTesting(
       gfx::Size(kMaxTextureSize, kMaxTextureSize), color_params);
   EXPECT_TRUE(provider);
-  provider = Canvas2DResourceProviderBitmap::CreateForTesting(
+  provider = Canvas2DBitmapProvider::CreateForTesting(
       gfx::Size(kMaxTextureSize + 1, kMaxTextureSize), color_params);
   EXPECT_TRUE(provider);
 }

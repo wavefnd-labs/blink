@@ -275,7 +275,7 @@ bool OffscreenCanvasRenderingContext2D::InitializeResourceProvider() {
     // visible on screen, but at least readbacks will work. Failure to create
     // another type of resource prover above is a sign that the graphics
     // pipeline is in a bad state (e.g. gpu process crashed, out of memory)
-    bitmap_provider_ = Canvas2DResourceProviderBitmap::CreateWithClear(
+    bitmap_provider_ = Canvas2DBitmapProvider::CreateWithClear(
         host->Size(), format, alpha_type, color_space, hdr_metadata, host);
   }
 

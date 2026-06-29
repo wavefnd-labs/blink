@@ -59,7 +59,7 @@ PLATFORM_EXPORT BASE_DECLARE_FEATURE(kCanvas2DReclaimUnusedResources);
 class CanvasRenderingContext2D;
 class CanvasResource;
 class CanvasResourceSharedImage;
-class Canvas2DResourceProviderBitmap;
+class Canvas2DBitmapProvider;
 class CanvasNon2DResourceProviderSharedImage;
 class Canvas2DResourceProviderSharedImage;
 class CanvasImageProvider;
@@ -144,12 +144,12 @@ PLATFORM_EXPORT void NotifyImageBitmapWillTransfer(
 // supported : cannot be directly composited. For usage by (Offscreen)Canvas2D
 // as a last-case resort when it is not possible to create
 // CanvasResourceProviderSharedImage.
-class PLATFORM_EXPORT Canvas2DResourceProviderBitmap final
+class PLATFORM_EXPORT Canvas2DBitmapProvider final
     : public CanvasMemoryDumpClient,
       public MemoryManagedPaintRecorder::Client,
       public ScopedRasterTimer::Host {
  public:
-  ~Canvas2DResourceProviderBitmap();
+  ~Canvas2DBitmapProvider();
 
   bool IsValid() const { return GetSkSurface(); }
   bool IsGpuContextLost() const { return true; }
@@ -178,7 +178,7 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap final
   void OnMemoryDump(base::trace_event::ProcessMemoryDump*) override;
   size_t GetSize() const override;
 
-  static std::unique_ptr<Canvas2DResourceProviderBitmap> CreateForTesting(
+  static std::unique_ptr<Canvas2DBitmapProvider> CreateForTesting(
       gfx::Size size,
       const Canvas2DColorParams& color_params);
 
@@ -214,14 +214,14 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap final
   void ClearAtCreation();
 
   // The returned instance will have been cleared at creation.
-  static std::unique_ptr<Canvas2DResourceProviderBitmap> CreateWithClear(
+  static std::unique_ptr<Canvas2DBitmapProvider> CreateWithClear(
       gfx::Size size,
       viz::SharedImageFormat format,
       SkAlphaType alpha_type,
       const gfx::ColorSpace& color_space,
       const gfx::HDRMetadata& hdr_metadata,
       CanvasResourceProviderDelegate* delegate = nullptr);
-  static std::unique_ptr<Canvas2DResourceProviderBitmap> CreateWithClear(
+  static std::unique_ptr<Canvas2DBitmapProvider> CreateWithClear(
       gfx::Size size,
       viz::SharedImageFormat format,
       SkAlphaType alpha_type,
@@ -230,12 +230,12 @@ class PLATFORM_EXPORT Canvas2DResourceProviderBitmap final
     return CreateWithClear(size, format, alpha_type, color_space,
                            gfx::HDRMetadata(), delegate);
   }
-  Canvas2DResourceProviderBitmap(gfx::Size size,
-                                 viz::SharedImageFormat format,
-                                 SkAlphaType alpha_type,
-                                 const gfx::ColorSpace& color_space,
-                                 const gfx::HDRMetadata& hdr_metadata,
-                                 CanvasResourceProviderDelegate* delegate);
+  Canvas2DBitmapProvider(gfx::Size size,
+                         viz::SharedImageFormat format,
+                         SkAlphaType alpha_type,
+                         const gfx::ColorSpace& color_space,
+                         const gfx::HDRMetadata& hdr_metadata,
+                         CanvasResourceProviderDelegate* delegate);
 
   SkSurfaceProps GetSkSurfaceProps() const;
   SkSurface* GetSkSurface() const;
