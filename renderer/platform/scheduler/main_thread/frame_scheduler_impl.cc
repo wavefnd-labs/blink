@@ -148,35 +148,35 @@ FrameSchedulerImpl::FrameSchedulerImpl(
           parent_page_scheduler_ && parent_page_scheduler_->IsPageVisible()
               ? PageVisibilityState::kVisible
               : PageVisibilityState::kHidden,
-          perfetto::StateTrack::FromPointer("FrameScheduler.PageVisibility",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.PageVisibility",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
           PageVisibilityStateToString),
       frame_visible_(
           true,
-          perfetto::StateTrack::FromPointer("FrameScheduler.FrameVisible",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.FrameVisible",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
           VisibilityStateToString),
       is_visible_area_large_(
           true,
-          perfetto::StateTrack::FromPointer("FrameScheduler.IsVisibleAreaLarge",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.IsVisibleAreaLarge",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
           IsVisibleAreaLargeStateToString),
       had_user_activation_(
           false,
-          perfetto::StateTrack::FromPointer("FrameScheduler.HadUserActivation",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.HadUserActivation",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
           UserActivationStateToString),
       frame_paused_(
           false,
-          perfetto::StateTrack::FromPointer("FrameScheduler.FramePaused",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.FramePaused",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
@@ -185,13 +185,13 @@ FrameSchedulerImpl::FrameSchedulerImpl(
           frame_type == FrameType::kMainFrame
               ? FrameOriginType::kMainFrame
               : FrameOriginType::kSameOriginToMainFrame,
-          perfetto::StateTrack::FromPointer("FrameScheduler.Origin",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.Origin",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
           FrameOriginTypeToString),
       subresource_loading_paused_(false,
-                                  perfetto::StateTrack::FromPointer(
+                                  perfetto::NamedTrack::FromPointer(
                                       "FrameScheduler.SubResourceLoadingPaused",
                                       this,
                                       *tracing_track_),
@@ -202,7 +202,7 @@ FrameSchedulerImpl::FrameSchedulerImpl(
                                                    *tracing_track_)),
       throttling_type_(
           ThrottlingType::kNone,
-          perfetto::StateTrack::FromPointer("FrameScheduler.ThrottlingType",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.ThrottlingType",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
@@ -210,7 +210,7 @@ FrameSchedulerImpl::FrameSchedulerImpl(
       aggressive_throttling_opt_out_count_(0),
       opted_out_from_aggressive_throttling_(
           false,
-          perfetto::StateTrack::FromPointer(
+          perfetto::NamedTrack::FromPointer(
               "FrameScheduler.AggressiveThrottlingDisabled",
               this,
               *tracing_track_),
@@ -222,14 +222,14 @@ FrameSchedulerImpl::FrameSchedulerImpl(
                                                     main_thread_scheduler_),
       page_frozen_for_tracing_(
           parent_page_scheduler_ ? parent_page_scheduler_->IsFrozen() : true,
-          perfetto::StateTrack::FromPointer("FrameScheduler.PageFrozen",
+          perfetto::NamedTrack::FromPointer("FrameScheduler.PageFrozen",
                                             this,
                                             *tracing_track_),
           &tracing_controller_,
           FrozenStateToString),
       waiting_for_contentful_paint_(
           true,
-          perfetto::StateTrack::FromPointer(
+          perfetto::NamedTrack::FromPointer(
               "FrameScheduler.WaitingForContentfulPaint",
               this,
               *tracing_track_),
@@ -237,7 +237,7 @@ FrameSchedulerImpl::FrameSchedulerImpl(
           YesNoStateToString),
       waiting_for_meaningful_paint_(
           true,
-          perfetto::StateTrack::FromPointer(
+          perfetto::NamedTrack::FromPointer(
               "FrameScheduler.WaitingForMeaningfulPaint",
               this,
               *tracing_track_),

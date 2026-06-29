@@ -18,7 +18,7 @@ BackForwardCacheDisablingFeatureTracker::
     : parent_track_(parent_track),
       opted_out_from_back_forward_cache_{
           false,
-          perfetto::StateTrack::FromPointer("FrameScheduler."
+          perfetto::NamedTrack::FromPointer("FrameScheduler."
                                             "OptedOutFromBackForwardCache",
                                             this,
                                             parent_track_),
