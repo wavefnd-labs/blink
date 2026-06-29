@@ -5729,11 +5729,11 @@ StyleRecalcChange Element::RecalcOwnStyle(
                                   styles_changed, 1);
     probe::DidUpdateComputedStyle(this, old_style, new_style);
     if (this == GetDocument().documentElement()) {
-      if (GetDocument().GetStyleEngine().UpdateRootFontRelativeUnits(
-              old_style, new_style)) {
-        // Trigger a full document recalc on root font units changes. We could
-        // keep track of which elements depend on root font units like we do for
-        // viewport styles, but we assume root font size changes are rare and
+      if (GetDocument().GetStyleEngine().UpdateRootRelativeUnits(old_style,
+                                                                 new_style)) {
+        // Trigger a full document recalc on root font and lh unit changes.
+        // We could keep track of which elements depend on these units like we
+        // do for viewport styles, but we assume root unit changes are rare and
         // just recalculate everything.
         child_change =
             child_change.EnsureAtLeast(StyleRecalcChange::kRecalcDescendants);
