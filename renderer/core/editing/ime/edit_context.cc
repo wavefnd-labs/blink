@@ -784,14 +784,14 @@ void EditContext::DeleteSurroundingText(int before, int after) {
   const uint32_t update_range_start = OrderedSelectionStart() - clamped_before;
   const uint32_t update_range_end = OrderedSelectionEnd() + clamped_after;
 
-  SetSelection(
-      update_range_start,
-      OrderedSelectionEnd() - (OrderedSelectionStart() - update_range_start));
-  CHECK_GE(selection_end_, selection_start_);
   text_ = StrCat({text_.subview(0, update_range_start),
                   text_.DeprecatedSubstring(selection_start_,
                                             selection_end_ - selection_start_),
                   text_.DeprecatedSubstring(update_range_end)});
+  SetSelection(
+      update_range_start,
+      OrderedSelectionEnd() - (OrderedSelectionStart() - update_range_start));
+  CHECK_GE(selection_end_, selection_start_);
   String update_event_text(text_.DeprecatedSubstring(
       selection_start_, selection_end_ - selection_start_));
 
