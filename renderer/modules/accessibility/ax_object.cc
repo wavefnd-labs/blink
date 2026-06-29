@@ -3632,6 +3632,11 @@ void AXObject::UpdateCachedAttributeValuesIfNeeded(
         << AXObjectCache() << "\n* Object: " << this << parent_chain;
   }
 
+  // Queue children-changed dispatch while this update is on the stack; see
+  // ScopedCachedAttributeValuesUpdate.
+  AXObjectCacheImpl::ScopedCachedAttributeValuesUpdate
+      cached_attribute_values_update_guard(AXObjectCache());
+
 #if DCHECK_IS_ON()  // Required in order to get Lifecycle().ToString()
   DCHECK(!is_computing_role_)
       << "Updating cached values while computing a role is dangerous as it "
@@ -6946,6 +6951,11 @@ void AXObject::UpdateChildrenIfNecessary() {
   }
 
   UpdateCachedAttributeValuesIfNeeded();
+
+  // The cached-value update can remove |this|.
+  if (IsDetached()) {
+    return;
+  }
 
   ClearChildren();
   AddChildren();
