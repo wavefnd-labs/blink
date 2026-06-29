@@ -311,8 +311,6 @@ scoped_refptr<StaticBitmapImage> Canvas2DBitmapProvider::Snapshot(
     return nullptr;
   }
 
-  Flush();
-
   cc::PaintImage paint_image;
 
   auto sk_image = GetSkSurface()->makeImageSnapshot();
@@ -1257,7 +1255,6 @@ scoped_refptr<StaticBitmapImage> Canvas2DResourceProviderSharedImage::Snapshot(
   }
 
   if (!cached_snapshot_) {
-    Flush(FlushReason::kOther);
     EndWriteAccess();
     cached_snapshot_ = resource_->Bitmap();
 
@@ -1320,8 +1317,6 @@ Canvas2DResourceProviderSharedImage::UnacceleratedSnapshot(
   if (!IsValid()) {
     return nullptr;
   }
-
-  Flush();
 
   cc::PaintImage paint_image;
 
