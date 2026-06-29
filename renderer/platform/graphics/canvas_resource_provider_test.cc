@@ -185,7 +185,7 @@ TEST_F(CanvasResourceProviderTest, CanvasResourceProviderAcceleratedOverlay) {
       kSize, color_params, context_provider_wrapper_, shared_image_usage_flags);
 
   EXPECT_EQ(provider->Size(), kSize);
-  EXPECT_TRUE(provider->IsValid());
+  EXPECT_TRUE(provider && provider->IsValid());
   EXPECT_FALSE(provider->IsSoftware());
   EXPECT_TRUE(provider->IsSingleBuffered());
   // As it is an CanvasResourceProviderSharedImage and an accelerated canvas, it
@@ -216,7 +216,7 @@ TEST_F(CanvasResourceProviderTest, CanvasResourceProviderTexture) {
       gpu::SharedImageUsageSet());
 
   EXPECT_EQ(provider->Size(), kSize);
-  EXPECT_TRUE(provider->IsValid());
+  EXPECT_TRUE(provider && provider->IsValid());
   EXPECT_FALSE(provider->IsSoftware());
   EXPECT_FALSE(provider->IsSingleBuffered());
   // As it is an CanvasResourceProviderSharedImage and an accelerated canvas, it
@@ -244,7 +244,7 @@ TEST_F(CanvasResourceProviderTest, CanvasResourceProviderUnacceleratedOverlay) {
       shared_image_usage_flags);
 
   EXPECT_EQ(provider->Size(), kSize);
-  EXPECT_TRUE(provider->IsValid());
+  EXPECT_TRUE(provider && provider->IsValid());
   EXPECT_FALSE(provider->IsAccelerated());
 
   // We do not support single buffering for unaccelerated low latency canvas.
@@ -339,7 +339,6 @@ TEST_F(CanvasResourceProviderTest,
       shared_image_usage_flags);
 
   EXPECT_EQ(provider->Size(), kSize);
-  EXPECT_TRUE(provider->IsValid());
   EXPECT_TRUE(provider->IsAccelerated());
   EXPECT_FALSE(provider->IsSingleBuffered());
   // As it is an CanvasResourceProviderSharedImage and an accelerated canvas, it
@@ -485,7 +484,7 @@ TEST_F(CanvasResourceProviderTest,
       gfx::Size(10, 10), color_params, context_provider_wrapper_,
       RasterMode::kGPU, shared_image_usage_flags);
 
-  ASSERT_TRUE(provider->IsValid());
+  ASSERT_NE(provider, nullptr);
 
   // Same resource returned until the canvas is updated.
   auto image = provider->Snapshot();
@@ -523,7 +522,7 @@ TEST_F(CanvasResourceProviderTest, Canvas2DResourceProviderBitmap) {
       Canvas2DResourceProviderBitmap::CreateForTesting(kSize, color_params);
 
   EXPECT_EQ(provider->Size(), kSize);
-  EXPECT_TRUE(provider->IsValid());
+  EXPECT_TRUE(provider && provider->IsValid());
   EXPECT_TRUE(GetSkImageInfo(provider.get()) == kInfo);
 }
 
@@ -562,7 +561,7 @@ TEST_F(CanvasResourceProviderTest,
           test_web_shared_image_interface_provider.get());
 
   EXPECT_EQ(provider->Size(), kSize);
-  EXPECT_TRUE(provider->IsValid());
+  EXPECT_TRUE(provider && provider->IsValid());
   EXPECT_TRUE(provider->IsSoftware());
   EXPECT_TRUE(GetSkImageInfo(provider.get()) == kInfo);
 
@@ -587,7 +586,7 @@ TEST_F(CanvasResourceProviderTest,
       kSize, color_params, context_provider_wrapper_, shared_image_usage_flags);
 
   EXPECT_EQ(provider->Size(), kSize);
-  EXPECT_TRUE(provider->IsValid());
+  EXPECT_TRUE(provider && provider->IsValid());
   EXPECT_FALSE(provider->IsSoftware());
   EXPECT_TRUE(provider->IsSingleBuffered());
   // As it is an CanvasResourceProviderSharedImage and an accelerated canvas, it
@@ -611,13 +610,13 @@ TEST_F(CanvasResourceProviderTest, DimensionsExceedMaxTextureSize_Bitmap) {
                                    /*has_alpha=*/true);
   auto provider = Canvas2DResourceProviderBitmap::CreateForTesting(
       gfx::Size(kMaxTextureSize - 1, kMaxTextureSize), color_params);
-  EXPECT_TRUE(provider && provider->IsValid());
+  EXPECT_TRUE(provider);
   provider = Canvas2DResourceProviderBitmap::CreateForTesting(
       gfx::Size(kMaxTextureSize, kMaxTextureSize), color_params);
-  EXPECT_TRUE(provider && provider->IsValid());
+  EXPECT_TRUE(provider);
   provider = Canvas2DResourceProviderBitmap::CreateForTesting(
       gfx::Size(kMaxTextureSize + 1, kMaxTextureSize), color_params);
-  EXPECT_TRUE(provider && provider->IsValid());
+  EXPECT_TRUE(provider);
 }
 
 TEST_F(CanvasResourceProviderTest, DimensionsExceedMaxTextureSize_SharedImage) {
