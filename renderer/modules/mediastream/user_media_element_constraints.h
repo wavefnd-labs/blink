@@ -31,7 +31,6 @@ class MODULES_EXPORT UserMediaElementConstraints final
   const HTMLMediaStreamConstraints* Constraints() const {
     return constraints_.Get();
   }
-  const HTMLMediaStreamConstraints* GetSanitizedConstraints() const;
 
   void Trace(Visitor*) const override;
 
