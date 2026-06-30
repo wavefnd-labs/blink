@@ -408,6 +408,7 @@ class CORE_EXPORT HTMLElement : public Element {
 
   // The Unbounded Element API. See crbug.com/508672616.
   ScriptPromise<IDLUndefined> showUnboundedElement(ScriptState*);
+  ScriptPromise<IDLUndefined> hideUnboundedElement(ScriptState*);
   bool IsUnboundedElementActive() const;
   void SetUnboundedElementActive(bool active);
   gfx::Rect LastSentUnboundedBounds() const;

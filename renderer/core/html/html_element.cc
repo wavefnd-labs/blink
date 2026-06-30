@@ -1604,9 +1604,13 @@ ScriptPromise<IDLUndefined> HTMLElement::showUnboundedElement(
     return promise;
   }
 
+  auto* web_frame = WebLocalFrameImpl::FromFrame(&frame->LocalFrameRoot());
+  WebFrameWidgetImpl* widget =
+      web_frame ? web_frame->FrameWidgetImpl() : nullptr;
   auto* view = GetDocument().View();
-  if (!view || !view->UpdateAllLifecyclePhasesExceptPaint(
-                   DocumentUpdateReason::kJavaScript)) {
+  if (!widget || !view ||
+      !view->UpdateAllLifecyclePhasesExceptPaint(
+          DocumentUpdateReason::kJavaScript)) {
     resolver->Reject(MakeGarbageCollected<DOMException>(
         DOMExceptionCode::kInvalidStateError,
         "The element is not in an active document."));
@@ -1649,20 +1653,40 @@ ScriptPromise<IDLUndefined> HTMLElement::showUnboundedElement(
       client_receiver;
   auto client_remote = client_receiver.InitWithNewEndpointAndPassRemote();
 
-  if (frame) {
-    if (auto* web_frame =
-            WebLocalFrameImpl::FromFrame(&frame->LocalFrameRoot())) {
-      if (WebFrameWidgetImpl* widget = web_frame->FrameWidgetImpl()) {
-        widget->RegisterActiveUnboundedElement(this, std::move(client_receiver),
-                                               std::move(host_remote));
-      }
-    }
-  }
-
+  widget->RegisterActiveUnboundedElement(this, std::move(client_receiver),
+                                         std::move(host_remote));
   frame->GetLocalFrameHostRemote().RequestUnboundedSurface(
       std::move(host_receiver), std::move(client_remote), bounds);
   resolver->Resolve();
+  return promise;
+}
 
+ScriptPromise<IDLUndefined> HTMLElement::hideUnboundedElement(
+    ScriptState* script_state) {
+  DCHECK(RuntimeEnabledFeatures::UnboundedElementEnabled());
+  auto* resolver =
+      MakeGarbageCollected<ScriptPromiseResolver<IDLUndefined>>(script_state);
+  auto promise = resolver->Promise();
+
+  if (!IsUnboundedElementActive()) {
+    resolver->Reject(MakeGarbageCollected<DOMException>(
+        DOMExceptionCode::kInvalidStateError,
+        "The element is not an active unbounded element."));
+    return promise;
+  }
+
+  WebFrameWidgetImpl* widget = nullptr;
+  if (auto* frame = GetDocument().GetFrame()) {
+    if (auto* web_frame =
+            WebLocalFrameImpl::FromFrame(&frame->LocalFrameRoot())) {
+      widget = web_frame->FrameWidgetImpl();
+    }
+  }
+  if (widget) {
+    widget->OnDismissed();
+  }
+
+  resolver->Resolve();
   return promise;
 }
 
