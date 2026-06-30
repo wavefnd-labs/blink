@@ -12,6 +12,7 @@
 #include "third_party/blink/renderer/platform/graphics/canvas_2d_bitmap_provider.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
 #include "third_party/blink/renderer/platform/graphics/graphics_context.h"
+#include "third_party/blink/renderer/platform/graphics/paint/paint_image.h"
 #include "third_party/blink/renderer/platform/graphics/web_graphics_context_3d_provider_wrapper.h"
 #include "third_party/blink/renderer/platform/scheduler/public/post_cross_thread_task.h"
 #include "third_party/blink/renderer/platform/scheduler/public/thread.h"
@@ -19,6 +20,7 @@
 #include "third_party/blink/renderer/platform/wtf/cross_thread_copier_skia.h"
 #include "third_party/blink/renderer/platform/wtf/cross_thread_functional.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace blink {
 
@@ -66,7 +68,18 @@ UnacceleratedStaticBitmapImage::CreateFromRaster(
       gfx::ColorSpace::CreateSRGB());
   bitmap_provider->SetAnimatedImageFrameIndexes(animated_image_frame_index_map);
   draw_callback(bitmap_provider->Canvas());
-  return bitmap_provider->Snapshot();
+  sk_sp<SkImage> sk_image =
+      bitmap_provider->GetSkSurface()->makeImageSnapshot();
+  cc::PaintImage paint_image;
+  if (sk_image) {
+    paint_image =
+        PaintImageBuilder::WithDefault()
+            .set_id(cc::PaintImage::GetNextId())
+            .set_image(std::move(sk_image), cc::PaintImage::GetNextContentId())
+            .set_hdr_metadata(bitmap_provider->GetHdrMetadata())
+            .TakePaintImage();
+  }
+  return UnacceleratedStaticBitmapImage::Create(std::move(paint_image));
 }
 
 UnacceleratedStaticBitmapImage::UnacceleratedStaticBitmapImage(
