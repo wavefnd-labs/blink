@@ -50,6 +50,7 @@
 #include "third_party/blink/public/platform/web_graphics_shared_image_interface_provider.h"
 #include "third_party/blink/renderer/platform/graphics/accelerated_static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_deferred_paint_record.h"
+#include "third_party/blink/renderer/platform/graphics/canvas_image_provider.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/canvas_utils.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/shared_gpu_context.h"
@@ -138,41 +139,6 @@ const base::FeatureParam<int> kMaxRecordedOpGraphiteKB(
     &kCanvas2DAutoFlushParams,
     "max_recorded_op_graphite_kb",
     6 * 1024);
-
-class CanvasImageProvider : public cc::ImageProvider {
- public:
-  CanvasImageProvider(cc::ImageDecodeCache* cache_n32,
-                      cc::ImageDecodeCache* cache_f16,
-                      const gfx::ColorSpace& target_color_space,
-                      viz::SharedImageFormat canvas_format,
-                      cc::PlaybackImageProvider::RasterMode raster_mode);
-  CanvasImageProvider(const CanvasImageProvider&) = delete;
-  CanvasImageProvider& operator=(const CanvasImageProvider&) = delete;
-  ~CanvasImageProvider() override = default;
-
-  // cc::ImageProvider implementation.
-  cc::ImageProvider::ScopedResult GetRasterContent(
-      const cc::DrawImage&) override;
-
-  void ReleaseLockedImages() { locked_images_.clear(); }
-  void UnbindTextureBackedImages();
-  void SetAnimatedImageFrameIndexes(
-      scoped_refptr<const cc::AnimatedImageFrameIndexMap> indexes);
-
- private:
-  void CanUnlockImage(ScopedResult);
-  void CleanupLockedImages();
-  bool IsHardwareDecodeCache() const;
-
-  cc::PlaybackImageProvider::RasterMode raster_mode_;
-  bool cleanup_task_pending_ = false;
-  Vector<ScopedResult> locked_images_;
-  Vector<cc::PaintImage> bound_texture_backed_images_;
-  std::optional<cc::PlaybackImageProvider> playback_image_provider_n32_;
-  std::optional<cc::PlaybackImageProvider> playback_image_provider_f16_;
-
-  base::WeakPtrFactory<CanvasImageProvider> weak_factory_{this};
-};
 
 Canvas2DBitmapProvider::Canvas2DBitmapProvider(
     gfx::Size size,
@@ -1995,141 +1961,6 @@ CanvasNon2DResourceProviderSharedImage::CreateForSoftwareCompositor(
       size, color_params.GetSharedImageFormat(), color_params.GetAlphaType(),
       color_params.GetGfxColorSpace(), color_params.GetGfxHdrMetadata(),
       shared_image_interface_provider);
-}
-
-CanvasImageProvider::CanvasImageProvider(
-    cc::ImageDecodeCache* cache_n32,
-    cc::ImageDecodeCache* cache_f16,
-    const gfx::ColorSpace& target_color_space,
-    viz::SharedImageFormat canvas_format,
-    cc::PlaybackImageProvider::RasterMode raster_mode)
-    : raster_mode_(raster_mode) {
-  std::optional<cc::PlaybackImageProvider::Settings> settings =
-      cc::PlaybackImageProvider::Settings();
-  settings->raster_mode = raster_mode_;
-
-  cc::TargetColorParams target_color_params;
-  target_color_params.color_space = target_color_space;
-  playback_image_provider_n32_.emplace(cache_n32, target_color_params,
-                                       std::move(settings));
-  // If the image provider may require to decode to half float instead of
-  // uint8, create a f16 PlaybackImageProvider with the passed cache.
-  if (canvas_format == viz::SinglePlaneFormat::kRGBA_F16) {
-    DCHECK(cache_f16);
-    settings = cc::PlaybackImageProvider::Settings();
-    settings->raster_mode = raster_mode_;
-    playback_image_provider_f16_.emplace(cache_f16, target_color_params,
-                                         std::move(settings));
-  }
-}
-
-void CanvasImageProvider::UnbindTextureBackedImages() {
-  for (auto& image : bound_texture_backed_images_) {
-    DCHECK(image.IsTextureBacked());
-    image.UnbindTextureBacking();
-  }
-  bound_texture_backed_images_.clear();
-}
-
-void CanvasImageProvider::SetAnimatedImageFrameIndexes(
-    scoped_refptr<const cc::AnimatedImageFrameIndexMap> indexes) {
-  if (playback_image_provider_n32_) {
-    playback_image_provider_n32_->SetAnimatedImageFrameIndexes(indexes);
-  }
-  if (playback_image_provider_f16_) {
-    playback_image_provider_f16_->SetAnimatedImageFrameIndexes(indexes);
-  }
-}
-
-cc::ImageProvider::ScopedResult CanvasImageProvider::GetRasterContent(
-    const cc::DrawImage& draw_image) {
-  cc::PaintImage paint_image = draw_image.paint_image();
-  if (paint_image.IsDeferredPaintRecord()) {
-    CHECK(!paint_image.IsPaintWorklet());
-    scoped_refptr<CanvasDeferredPaintRecord> canvas_deferred_paint_record(
-        static_cast<CanvasDeferredPaintRecord*>(
-            paint_image.deferred_paint_record().get()));
-    return cc::ImageProvider::ScopedResult(
-        canvas_deferred_paint_record->GetPaintRecord());
-  }
-
-  // Bind texture backing to RasterContextProvider if necessary
-  if (paint_image.IsTextureBacked()) {
-    if (auto context_provider_wrapper =
-            SharedGpuContext::ContextProviderWrapper()) {
-      paint_image.BindTextureBacking(
-          base::MakeRefCounted<viz::RasterContextProviderWrapper>(
-              context_provider_wrapper->ContextProvider()
-                  .RasterContextProvider()));
-      bound_texture_backed_images_.emplace_back(paint_image);
-    }
-  }
-
-  // TODO(xidachen): Ensure this function works for paint worklet generated
-  // images.
-  // If we like to decode high bit depth image source to half float backed
-  // image, we need to sniff the image bit depth here to avoid double decoding.
-  ImageProvider::ScopedResult scoped_decoded_image;
-  if (playback_image_provider_f16_ &&
-      draw_image.paint_image().is_high_bit_depth()) {
-    scoped_decoded_image =
-        playback_image_provider_f16_->GetRasterContent(draw_image);
-  } else {
-    scoped_decoded_image =
-        playback_image_provider_n32_->GetRasterContent(draw_image);
-  }
-
-  // Holding onto locked images here is a performance optimization for the
-  // gpu image decode cache.  For that cache, it is expensive to lock and
-  // unlock gpu discardable, and so it is worth it to hold the lock on
-  // these images across multiple potential decodes.  In the software case,
-  // locking in this manner makes it easy to run out of discardable memory
-  // (backed by shared memory sometimes) because each per-colorspace image
-  // decode cache has its own limit.  In the software case, just unlock
-  // immediately and let the discardable system manage the cache logic
-  // behind the scenes.
-  if (!scoped_decoded_image.needs_unlock() || !IsHardwareDecodeCache()) {
-    return scoped_decoded_image;
-  }
-
-  constexpr int kMaxLockedImagesCount = 500;
-  if (!scoped_decoded_image.decoded_image().is_budgeted() ||
-      locked_images_.size() > kMaxLockedImagesCount) {
-    // If we have exceeded the budget, ReleaseLockedImages any locked decodes.
-    ReleaseLockedImages();
-  }
-
-  auto decoded_draw_image = scoped_decoded_image.decoded_image();
-  return ScopedResult(decoded_draw_image,
-                      base::BindOnce(&CanvasImageProvider::CanUnlockImage,
-                                     weak_factory_.GetWeakPtr(),
-                                     std::move(scoped_decoded_image)));
-}
-
-void CanvasImageProvider::CanUnlockImage(ScopedResult image) {
-  // We should early out and avoid calling this function for software decodes.
-  DCHECK(IsHardwareDecodeCache());
-
-  // Because these image decodes are being done in javascript calling into
-  // canvas code, there's no obvious time to do the cleanup.  To handle this,
-  // post a cleanup task to run after javascript is done running.
-  if (!cleanup_task_pending_) {
-    cleanup_task_pending_ = true;
-    ThreadScheduler::Current()->CleanupTaskRunner()->PostTask(
-        FROM_HERE, base::BindOnce(&CanvasImageProvider::CleanupLockedImages,
-                                  weak_factory_.GetWeakPtr()));
-  }
-
-  locked_images_.push_back(std::move(image));
-}
-
-void CanvasImageProvider::CleanupLockedImages() {
-  cleanup_task_pending_ = false;
-  ReleaseLockedImages();
-}
-
-bool CanvasImageProvider::IsHardwareDecodeCache() const {
-  return raster_mode_ != cc::PlaybackImageProvider::RasterMode::kSoftware;
 }
 
 void NotifyImageBitmapWillTransfer(cc::PaintImage::ContentId content_id) {
