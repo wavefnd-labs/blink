@@ -45,7 +45,6 @@ class ProcessMemoryDump;
 namespace blink {
 
 class CanvasImageProvider;
-class CanvasRenderingContext;
 class CanvasRenderingContext2D;
 class CanvasResourceProviderDelegate;
 class OffscreenCanvasRenderingContext2D;
@@ -114,9 +113,9 @@ class PLATFORM_EXPORT Canvas2DBitmapProvider final
   void ApplyAnimatedImageFrameIndexesForId(SkCanvas* canvas, uint32_t id);
 
  private:
-  friend class CanvasRenderingContext;
   friend class CanvasRenderingContext2D;
   friend class OffscreenCanvasRenderingContext2D;
+  friend class UnacceleratedStaticBitmapImage;
 
   // Should only be called from static Create*() methods.
   // TODO(crbug.com/352263194): Eliminate this method by inlining its body at

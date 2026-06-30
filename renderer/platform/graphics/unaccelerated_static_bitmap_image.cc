@@ -9,6 +9,7 @@
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/public/platform/web_graphics_context_3d_provider.h"
 #include "third_party/blink/renderer/platform/graphics/accelerated_static_bitmap_image.h"
+#include "third_party/blink/renderer/platform/graphics/canvas_2d_bitmap_provider.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
 #include "third_party/blink/renderer/platform/graphics/graphics_context.h"
 #include "third_party/blink/renderer/platform/graphics/web_graphics_context_3d_provider_wrapper.h"
@@ -52,6 +53,20 @@ UnacceleratedStaticBitmapImage::Create(PaintImage image,
                                        ImageOrientation orientation) {
   return base::AdoptRef(
       new UnacceleratedStaticBitmapImage(std::move(image), orientation));
+}
+
+scoped_refptr<StaticBitmapImage>
+UnacceleratedStaticBitmapImage::CreateFromRaster(
+    const gfx::Size& size,
+    base::FunctionRef<void(cc::PaintCanvas&)> draw_callback,
+    scoped_refptr<const cc::AnimatedImageFrameIndexMap>
+        animated_image_frame_index_map) {
+  auto bitmap_provider = Canvas2DBitmapProvider::CreateWithClear(
+      size, GetN32FormatForCanvas(), kPremul_SkAlphaType,
+      gfx::ColorSpace::CreateSRGB());
+  bitmap_provider->SetAnimatedImageFrameIndexes(animated_image_frame_index_map);
+  bitmap_provider->RasterRecord(draw_callback);
+  return bitmap_provider->Snapshot();
 }
 
 UnacceleratedStaticBitmapImage::UnacceleratedStaticBitmapImage(
