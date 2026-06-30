@@ -76,7 +76,6 @@ UnacceleratedStaticBitmapImage::CreateFromRaster(
         PaintImageBuilder::WithDefault()
             .set_id(cc::PaintImage::GetNextId())
             .set_image(std::move(sk_image), cc::PaintImage::GetNextContentId())
-            .set_hdr_metadata(bitmap_provider->GetHdrMetadata())
             .TakePaintImage();
   }
   return UnacceleratedStaticBitmapImage::Create(std::move(paint_image));
