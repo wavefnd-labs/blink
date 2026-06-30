@@ -1,18 +1,15 @@
 <!DOCTYPE html>
-<meta charset="UTF-8">
-<title>Stress test length interpolation.</title>
+<html class="test-wait">
+<meta charset="utf-8">
+<title>Length interpolation should not crash</title>
+<link rel="help" href="https://crbug.com/40856061">
 <body>
   <marquee id="marquee">
     <wbr id="wbr"></wbr>
   </marquee>
-  <output name="answer">Test passes if there is no crash.</output>
 </body>
-<script type="text/javascript">
-  // Test passes if it does not crash (crbug.com/1349686).
+<script>
   // Lengths created via layout units are clamped to a maximum value.
-  if (window.testRunner)
-    testRunner.dumpAsText();
-
   async function rAF() {
     return new Promise(resolve => {
       requestAnimationFrame(() => {
@@ -23,7 +20,7 @@
     });
   }
 
-  window.onload = async function(){
+  window.onload = async function() {
     const anim = wbr.animate({ right: ['20%', '5e192pt'] },
                              { duration: 1000 });
     anim.currentTime = 900;
@@ -31,5 +28,7 @@
     marquee.animate({ zoom: ['68%', '100%'] },
                     { duration: 1000 }).pause();
     await rAF();
+    document.documentElement.classList.remove('test-wait');
   }
 </script>
+</html>
