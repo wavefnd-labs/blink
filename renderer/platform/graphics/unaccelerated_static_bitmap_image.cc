@@ -65,7 +65,7 @@ UnacceleratedStaticBitmapImage::CreateFromRaster(
       size, GetN32FormatForCanvas(), kPremul_SkAlphaType,
       gfx::ColorSpace::CreateSRGB());
   bitmap_provider->SetAnimatedImageFrameIndexes(animated_image_frame_index_map);
-  bitmap_provider->RasterRecord(draw_callback);
+  draw_callback(bitmap_provider->Canvas());
   return bitmap_provider->Snapshot();
 }
 

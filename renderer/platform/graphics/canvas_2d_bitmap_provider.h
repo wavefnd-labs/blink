@@ -117,6 +117,8 @@ class PLATFORM_EXPORT Canvas2DBitmapProvider final
   friend class OffscreenCanvasRenderingContext2D;
   friend class UnacceleratedStaticBitmapImage;
 
+  cc::PaintCanvas& Canvas();
+
   // Should only be called from static Create*() methods.
   // TODO(crbug.com/352263194): Eliminate this method by inlining its body at
   // callsites.
