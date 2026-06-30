@@ -147,6 +147,7 @@
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/scheduler/public/post_cancellable_task.h"
 #include "third_party/blink/renderer/platform/text/bidi_paragraph.h"
+#include "third_party/blink/renderer/platform/weborigin/scheme_registry.h"
 #include "third_party/blink/renderer/platform/widget/frame_widget.h"
 #include "third_party/blink/renderer/platform/wtf/std_lib_extras.h"
 #include "third_party/blink/renderer/platform/wtf/text/atomic_string.h"
@@ -1575,6 +1576,24 @@ ScriptPromise<IDLUndefined> HTMLElement::showUnboundedElement(
     resolver->Reject(MakeGarbageCollected<DOMException>(
         DOMExceptionCode::kInvalidStateError,
         "The element is not in a document with a valid frame."));
+    return promise;
+  }
+
+  // If you change the preconditions/permissions for unbounded elements, be sure
+  // to update the corresponding browser-side checks in
+  // RenderFrameHostImpl::RequestUnboundedSurface.
+  const SecurityOrigin* security_origin =
+      GetDocument().GetExecutionContext()->GetSecurityOrigin();
+  bool is_privileged =
+      security_origin &&
+      (security_origin->Protocol() == "chrome" ||
+       security_origin->Protocol() == "chrome-untrusted" ||
+       SchemeRegistry::IsWebUIScheme(security_origin->Protocol()));
+  if (!is_privileged &&
+      !RuntimeEnabledFeatures::UnboundedElementOnTheOpenWebEnabled()) {
+    resolver->Reject(MakeGarbageCollected<DOMException>(
+        DOMExceptionCode::kSecurityError,
+        "showUnboundedElement is only supported from privileged contexts."));
     return promise;
   }
 
