@@ -115,9 +115,6 @@ class PLATFORM_EXPORT Canvas2DBitmapProvider final
  private:
   friend class CanvasRenderingContext2D;
   friend class OffscreenCanvasRenderingContext2D;
-  friend class UnacceleratedStaticBitmapImage;
-
-  cc::PaintCanvas& Canvas();
 
   // Should only be called from static Create*() methods.
   // TODO(crbug.com/352263194): Eliminate this method by inlining its body at
@@ -132,15 +129,6 @@ class PLATFORM_EXPORT Canvas2DBitmapProvider final
       const gfx::ColorSpace& color_space,
       const gfx::HDRMetadata& hdr_metadata,
       CanvasResourceProviderDelegate* delegate = nullptr);
-  static std::unique_ptr<Canvas2DBitmapProvider> CreateWithClear(
-      gfx::Size size,
-      viz::SharedImageFormat format,
-      SkAlphaType alpha_type,
-      const gfx::ColorSpace& color_space,
-      CanvasResourceProviderDelegate* delegate = nullptr) {
-    return CreateWithClear(size, format, alpha_type, color_space,
-                           gfx::HDRMetadata(), delegate);
-  }
   Canvas2DBitmapProvider(gfx::Size size,
                          viz::SharedImageFormat format,
                          SkAlphaType alpha_type,

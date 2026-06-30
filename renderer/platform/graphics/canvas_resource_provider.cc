@@ -401,17 +401,13 @@ void Canvas2DBitmapProvider::RasterRecord(cc::PaintRecord last_recording) {
   });
 }
 
-cc::PaintCanvas& Canvas2DBitmapProvider::Canvas() {
+void Canvas2DBitmapProvider::RasterRecord(
+    base::FunctionRef<void(cc::PaintCanvas&)> draw_callback) {
   if (!skia_canvas_) {
     skia_canvas_ = std::make_unique<cc::SkiaPaintCanvas>(
         GetSkSurface()->getCanvas(), GetOrCreateSWCanvasImageProvider());
   }
-  return *skia_canvas_;
-}
-
-void Canvas2DBitmapProvider::RasterRecord(
-    base::FunctionRef<void(cc::PaintCanvas&)> draw_callback) {
-  draw_callback(Canvas());
+  draw_callback(*skia_canvas_);
 }
 
 bool Canvas2DBitmapProvider::WritePixels(const SkImageInfo& orig_info,
