@@ -579,7 +579,7 @@ void ResponsivenessMetrics::RecordUserInteractionUKM(
   base::TimeTicks event_commit_finish = reporting_info->commit_finish_time;
   base::TimeDelta duration = event_end - event_start;
 
-  uint32_t interaction_offset = entry.GetInteractionIdInfo()->offset;
+  uint64_t interaction_offset = entry.GetInteractionIdInfo()->offset;
 
   if (!event_start.is_null() && duration.InMilliseconds() >= 0) {
     if (window->GetFrame()) {
@@ -651,7 +651,7 @@ void ResponsivenessMetrics::FlushAllEvents() {
   last_recorded_frame_index_ = std::nullopt;
 }
 
-uint32_t ResponsivenessMetrics::GetInteractionCount() const {
+uint64_t ResponsivenessMetrics::GetInteractionCount() const {
   auto interaction_count = interaction_id_generator_.GetValue().offset;
   if (!RuntimeEnabledFeatures::NavigationEventTimingEnabled()) {
     interaction_count -= navigation_interaction_count_;
