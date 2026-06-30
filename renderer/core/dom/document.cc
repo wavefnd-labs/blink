@@ -10050,7 +10050,6 @@ void Document::ResetAgent(Agent& agent) {
 }
 
 void Document::EnqueuePageRevealEvent() {
-  CHECK(RuntimeEnabledFeatures::PageRevealEventEnabled());
   CHECK(dom_window_);
 
   dom_window_->SetHasBeenRevealed(false);
