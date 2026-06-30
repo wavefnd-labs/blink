@@ -47,9 +47,9 @@ class CORE_EXPORT GridLanesRunningPositions {
 
     Member<GridItemData> item;
     wtf_size_t item_index{kNotFound};
-    // This is only needed for stretch aligned items only as they will need to
-    // be relaid out once we know the final alignment candidate for a given
-    // track opening.
+    // This is only needed for stretch aligned items as they will need to be
+    // relaid out once we know the final alignment candidate for a given track
+    // opening.
     Member<GridLayoutSubtree> layout_subtree;
     LayoutUnit available_alignment_space;
   };
@@ -120,7 +120,7 @@ class CORE_EXPORT GridLanesRunningPositions {
   // between items if the user has specified one.
   //
   // If stacking axis alignment is enabled, `grid_lanes_item` will be set as the
-  // item above thelast unbounded opening in the track.
+  // item above the last unbounded opening in the track.
   //
   // `max_running_position_for_span` should only be used in the case of
   // dense-packing or the presence of stacking-axis alignment, and it is the

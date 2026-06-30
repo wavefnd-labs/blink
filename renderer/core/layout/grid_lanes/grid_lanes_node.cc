@@ -140,11 +140,16 @@ GridItems* GridLanesNode::ConstructGridItems(
   GridItems* grid_lanes_items = MakeGarbageCollected<GridItems>();
 
   // Check if the container has alignment in the stacking axis set for its
-  // items.
+  // items. The initial value of `align-items` is `kNormal`, but the initial
+  // value of `justify-items` is `kLegacy` (per CSS Box Alignment spec:
+  // https://drafts.csswg.org/css-align-3/#justify-items-property, to enable
+  // legacy keyword inheritance). Both behave as `normal` when not explicitly
+  // set, so we exclude them from triggering stacking axis alignment.
   const bool is_for_columns = (grid_axis_direction == kForColumns);
   const auto& container_alignment =
       is_for_columns ? style.AlignItems() : style.JustifyItems();
-  if (container_alignment.GetPosition() != ItemPosition::kNormal) {
+  if (container_alignment.GetPosition() != ItemPosition::kNormal &&
+      container_alignment.GetPosition() != ItemPosition::kLegacy) {
     grid_lanes_items->SetHasStackingAxisAlignment();
   }
 
