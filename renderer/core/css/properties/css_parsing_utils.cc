@@ -51,6 +51,7 @@
 #include "third_party/blink/renderer/core/css/css_numeric_literal_value.h"
 #include "third_party/blink/renderer/core/css/css_paint_value.h"
 #include "third_party/blink/renderer/core/css/css_palette_mix_value.h"
+#include "third_party/blink/renderer/core/css/css_param_value_pair.h"
 #include "third_party/blink/renderer/core/css/css_path_value.h"
 #include "third_party/blink/renderer/core/css/css_primitive_value.h"
 #include "third_party/blink/renderer/core/css/css_progress_value.h"
@@ -69,6 +70,7 @@
 #include "third_party/blink/renderer/core/css/css_string_value.h"
 #include "third_party/blink/renderer/core/css/css_superellipse_value.h"
 #include "third_party/blink/renderer/core/css/css_timing_function_value.h"
+#include "third_party/blink/renderer/core/css/css_unparsed_declaration_value.h"
 #include "third_party/blink/renderer/core/css/css_unset_value.h"
 #include "third_party/blink/renderer/core/css/css_uri_value.h"
 #include "third_party/blink/renderer/core/css/css_url_pattern_value.h"
@@ -960,6 +962,55 @@ bool IsImageSet(const CSSValueID id) {
   return id == CSSValueID::kWebkitImageSet || id == CSSValueID::kImageSet;
 }
 
+// Consumes a single param(<dashed-ident>, <declaration-value>?) function
+// from |stream|. Returns a CSSParamValuePair on success.
+CSSParamValuePair* ConsumeParam(CSSParserTokenStream& stream,
+                                const CSSParserContext& context,
+                                CSSParserLocalContext& local_context) {
+  if (stream.Peek().FunctionId() != CSSValueID::kParam) {
+    return nullptr;
+  }
+
+  CSSCustomIdentValue* name = nullptr;
+  CSSUnparsedDeclarationValue* value = nullptr;
+  {
+    CSSParserTokenStream::RestoringBlockGuard guard(stream);
+    stream.ConsumeWhitespace();
+
+    // Parse <dashed-ident>.
+    name = ConsumeDashedIdent(stream, context, local_context);
+    if (!name) {
+      return nullptr;
+    }
+
+    // Comma is required per
+    // https://github.com/w3c/csswg-drafts/issues/13767.
+    if (stream.Peek().GetType() != kCommaToken) {
+      return nullptr;
+    }
+    stream.Consume();
+
+    // Parse <declaration-value>? using existing variable parser
+    // infrastructure.
+    bool important = false;
+    CSSVariableData* data = CSSVariableParser::ConsumeUnparsedDeclaration(
+        stream,
+        /*allow_important_annotation=*/false,
+        /*is_animation_tainted=*/false,
+        /*must_contain_variable_reference=*/false,
+        /*restricted_value=*/false,
+        /*comma_ends_declaration=*/false, important, context);
+    if (!data) {
+      return nullptr;
+    }
+    value = MakeGarbageCollected<CSSUnparsedDeclarationValue>(data, &context);
+
+    guard.Release();
+  }
+  stream.ConsumeWhitespace();
+  return MakeGarbageCollected<CSSParamValuePair>(*name, *value);
+}
+
 }  // namespace
 
 void Complete4Sides(std::array<CSSValue*, 4>& side) {
@@ -1739,6 +1790,13 @@ cssvalue::CSSScopedKeywordValue* ConsumeScopedKeywordValue(
   }
   return MakeGarbageCollected<cssvalue::CSSScopedKeywordValue>(
       stream.ConsumeIncludingWhitespace().Id());
+}
+
+CSSValue* ConsumeLinkParameters(CSSParserTokenStream& stream,
+                                const CSSParserContext& context,
+                                CSSParserLocalContext& local_context) {
+  return ConsumeCommaSeparatedList(ConsumeParam, stream, context,
+                                   local_context);
 }
 
 CSSStringValue* ConsumeString(CSSParserTokenStream& stream) {
