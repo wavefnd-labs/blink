@@ -5,6 +5,7 @@
 #include "third_party/blink/renderer/platform/graphics/unaccelerated_static_bitmap_image.h"
 
 #include "base/process/memory.h"
+#include "cc/raster/playback_image_provider.h"
 #include "components/viz/common/gpu/context_provider.h"
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/public/platform/web_graphics_context_3d_provider.h"
@@ -12,6 +13,8 @@
 #include "third_party/blink/renderer/platform/graphics/canvas_2d_bitmap_provider.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
 #include "third_party/blink/renderer/platform/graphics/graphics_context.h"
+#include "third_party/blink/renderer/platform/graphics/image.h"
+#include "third_party/blink/renderer/platform/graphics/paint/paint_canvas.h"
 #include "third_party/blink/renderer/platform/graphics/paint/paint_image.h"
 #include "third_party/blink/renderer/platform/graphics/web_graphics_context_3d_provider_wrapper.h"
 #include "third_party/blink/renderer/platform/scheduler/public/post_cross_thread_task.h"
@@ -66,8 +69,19 @@ UnacceleratedStaticBitmapImage::CreateFromRaster(
   auto bitmap_provider = Canvas2DBitmapProvider::CreateWithClear(
       size, GetN32FormatForCanvas(), kPremul_SkAlphaType,
       gfx::ColorSpace::CreateSRGB());
-  bitmap_provider->SetAnimatedImageFrameIndexes(animated_image_frame_index_map);
-  draw_callback(bitmap_provider->Canvas());
+  cc::TargetColorParams target_color_params;
+  target_color_params.color_space = gfx::ColorSpace::CreateSRGB();
+  cc::PlaybackImageProvider::Settings settings;
+  settings.raster_mode = cc::PlaybackImageProvider::RasterMode::kSoftware;
+
+  cc::PlaybackImageProvider image_provider(
+      &Image::SharedCCDecodeCache(kN32_SkColorType), target_color_params,
+      std::move(settings));
+  image_provider.SetAnimatedImageFrameIndexes(animated_image_frame_index_map);
+
+  cc::SkiaPaintCanvas canvas(bitmap_provider->GetSkSurface()->getCanvas(),
+                             &image_provider);
+  draw_callback(canvas);
   sk_sp<SkImage> sk_image =
       bitmap_provider->GetSkSurface()->makeImageSnapshot();
   cc::PaintImage paint_image;
