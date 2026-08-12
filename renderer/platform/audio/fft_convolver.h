@@ -45,9 +45,15 @@ class FFTConvolver final {
   FFTConvolver(const FFTConvolver&) = delete;
   FFTConvolver& operator=(const FFTConvolver&) = delete;
 
-  // The input to output latency is equal to fftSize / 2.
+  // For now, with multiple calls to Process(), the sizes of the source spans
+  // MUST add up EXACTLY to fftSize / 2
   //
-  // Processing in-place is allowed.
+  // FIXME: Later, we can do more sophisticated buffering to relax this
+  // requirement...
+  //
+  // The input to output latency is equal to fftSize / 2
+  //
+  // Processing in-place is allowed...
   void Process(const FFTFrame* fft_kernel,
                base::span<const float> source,
                base::span<float> dest);
