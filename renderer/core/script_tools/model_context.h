@@ -128,6 +128,7 @@ class CORE_EXPORT ModelContext : public EventTarget,
   ModelContext(Document& document);
 
   DEFINE_ATTRIBUTE_EVENT_LISTENER(toolchange, kToolchange)
+  DEFINE_ATTRIBUTE_EVENT_LISTENER(toolactivated, kToolactivated)
 
   const AtomicString& InterfaceName() const override;
 
