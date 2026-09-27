@@ -32,7 +32,6 @@
 #include "third_party/blink/renderer/core/event_type_names.h"
 #include "third_party/blink/renderer/core/events/tool_activated_event.h"
 #include "third_party/blink/renderer/core/events/tool_cancel_event.h"
-#include "third_party/blink/renderer/core/events/web_mcp_event.h"
 #include "third_party/blink/renderer/core/execution_context/agent.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
@@ -571,10 +570,6 @@ bool ModelContext::ExecuteTool(base::UnguessableToken invocation_id,
   // ExecuteDeclarativeTool(), so by the time the event is fired, the form will
   // be populated.
   // This is a synchronous, non-cancelable event.
-  if (LocalDOMWindow* window = document_->domWindow()) {
-    window->DispatchEvent(
-        *WebMCPEvent::Create(event_type_names::kToolactivated, name));
-  }
   DispatchEvent(
       *ToolActivatedEvent::Create(event_type_names::kToolactivated, name));
 
@@ -643,10 +638,6 @@ bool ModelContext::CancelTool(base::UnguessableToken invocation_id) {
   }
 
   // Dispatch the synchronous toolcancel event for both types of tools.
-  if (LocalDOMWindow* window = document_->domWindow()) {
-    window->DispatchEvent(
-        *WebMCPEvent::Create(event_type_names::kToolcancel, tool_name));
-  }
   DispatchEvent(
       *ToolCancelEvent::Create(event_type_names::kToolcancel, tool_name));
 
