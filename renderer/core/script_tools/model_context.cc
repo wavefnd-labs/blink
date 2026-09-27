@@ -31,6 +31,7 @@
 #include "third_party/blink/renderer/core/event_target_names.h"
 #include "third_party/blink/renderer/core/event_type_names.h"
 #include "third_party/blink/renderer/core/events/tool_activated_event.h"
+#include "third_party/blink/renderer/core/events/tool_cancel_event.h"
 #include "third_party/blink/renderer/core/events/web_mcp_event.h"
 #include "third_party/blink/renderer/core/execution_context/agent.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
@@ -646,6 +647,9 @@ bool ModelContext::CancelTool(base::UnguessableToken invocation_id) {
     window->DispatchEvent(
         *WebMCPEvent::Create(event_type_names::kToolcancel, tool_name));
   }
+  DispatchEvent(
+      *ToolCancelEvent::Create(event_type_names::kToolcancel, tool_name));
+
   return true;
 }
 
