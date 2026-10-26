@@ -146,6 +146,14 @@ source or lock invalidates previous evidence. Uncommitted source changes block
 release readiness, because they cannot be identified by the proposed Git tag.
 The SDK stages both original attribution and notices from the materialized
 dependencies alongside binaries, headers, resources and the pinned source locks.
+Notice collection also follows available `README.chromium` `License File:`
+references, including custom names such as `CREDITS.chromium`, `FTL.TXT` and
+`PATENTS`. Original bytes and source paths are preserved. The SDK manifest
+records declared files missing from the materialized tree, which can also
+contain unused tools and other-platform metadata; this broad inventory does
+not establish the exact linked-library license obligations. The manifest keeps
+`license_audit_completed: false`. Review the actual distributed components and
+their terms before binary release.
 It also includes `notices/blink/ENGINE_NOTICE` for the frame initialization
 reference and `docs/runtime.md`, which documents the implemented ABI and remaining unsupported host integrations.
 SDK staging uses a source/artifact fingerprint in its directory name and never

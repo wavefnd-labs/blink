@@ -200,6 +200,98 @@ def ensure_baseline(root=ROOT):
     subprocess.run([*command, 'cat-file', '-e', tree + '^{tree}'], check=True)
 
 
+def collect_dependency_notices(source_tree):
+    """Collect available upstream notices and explicit README.chromium entries.
+
+    Materialized trees also contain metadata for unused platforms and tools.
+    Report missing declarations for review rather than pretending they all
+    describe linked SDK code, or silently treating collection as a license audit.
+    """
+    source_tree = Path(source_tree)
+    prefixes = ('LICENSE', 'COPYING', 'NOTICE', 'COPYRIGHT', 'AUTHORS')
+    excluded = {'chrome', 'content', 'headless', 'android_webview', 'ios', 'out', 'standalone'}
+    files, metadata = {}, []
+    report = {'schema': 1, 'source_tree_available': source_tree.is_dir(),
+              'metadata_files': 0, 'explicit_references': 0,
+              'missing_declared_files': [], 'not_shipped_declarations': [],
+              'scope': 'Available non-browser notice files and README.chromium License File declarations; not a linked-library inventory or license audit'}
+    if source_tree.is_symlink():
+        raise ValueError('Dependency notice source tree must not be a symlink')
+    if not source_tree.is_dir():
+        return files, report
+    source_tree = source_tree.resolve()
+
+    def add(path):
+        files['notices/dependencies/' + path.relative_to(source_tree).as_posix()] = path
+        if path.name == 'README.chromium':
+            metadata.append(path)
+        if path == source_tree / 'LICENSE':
+            files['notices/chromium/LICENSE'] = path
+
+    for top in sorted(source_tree.iterdir()):
+        if top.is_symlink():
+            continue
+        if top.is_file() and (top.name.startswith(prefixes) or top.name == 'README.chromium'):
+            add(top)
+            continue
+        if top.name in excluded or not top.is_dir() or top.name.startswith('.'):
+            continue
+        for directory, directories, names in os.walk(top, followlinks=False):
+            directories[:] = sorted(name for name in directories if not name.startswith('.') and
+                                    not (Path(directory) / name).is_symlink())
+            for name in sorted(names):
+                path = Path(directory) / name
+                if (name.startswith(prefixes) or name == 'README.chromium') and path.is_file() and not path.is_symlink():
+                    add(path)
+
+    report['metadata_files'] = len(metadata)
+    for readme in metadata:
+        for line in readme.read_text(encoding='utf-8').splitlines():
+            if not line.startswith('License File:'):
+                continue
+            value = line.removeprefix('License File:').strip()
+            if value == 'NOT_SHIPPED':
+                report['not_shipped_declarations'].append(readme.relative_to(source_tree).as_posix())
+                continue
+            for reference in value.split(','):
+                reference = reference.strip()
+                location = readme.relative_to(source_tree).as_posix()
+                if (not reference or '\\' in reference or ':' in reference or
+                        any(ord(character) < 32 or ord(character) == 127 for character in reference)):
+                    raise ValueError(f'Invalid License File reference in {location}: {reference!r}')
+                relative = reference[2:] if reference.startswith('//') else reference
+                if not relative or Path(relative).is_absolute():
+                    raise ValueError(f'Unsafe License File reference in {location}: {reference!r}')
+                # Check the original traversal before reducing parent segments:
+                # link/../LICENSE must not erase a forbidden symlink, hidden
+                # directory or temporary escape outside the source root.
+                path = source_tree if reference.startswith('//') else readme.parent
+                for part in relative.split('/'):
+                    if part in ('', '.'):
+                        continue
+                    if part == '..':
+                        if path == source_tree:
+                            raise ValueError(f'License File reference escapes source tree in {location}: {reference!r}')
+                        path = path.parent
+                        continue
+                    if part.startswith('.'):
+                        raise ValueError(f'Unsafe License File reference in {location}: {reference!r}')
+                    path = path / part
+                    if path.relative_to(source_tree).parts[0] in excluded:
+                        raise ValueError(f'Unsafe License File reference in {location}: {reference!r}')
+                    if path.is_symlink():
+                        raise ValueError(f'License File reference uses a symlink in {location}: {reference!r}')
+                if path == source_tree:
+                    raise ValueError(f'Unsafe License File reference in {location}: {reference!r}')
+                report['explicit_references'] += 1
+                if not path.is_file():
+                    report['missing_declared_files'].append({'metadata': location, 'reference': reference,
+                                                            'source_path': path.relative_to(source_tree).as_posix()})
+                    continue
+                files['notices/dependencies/' + path.relative_to(source_tree).as_posix()] = path
+    return files, report
+
+
 def stage_sdk(output, destination=None, resources=None, root=ROOT):
     """Stage compiled Linux SDK files without building or rewriting any source.
 
@@ -259,29 +351,10 @@ def stage_sdk(output, destination=None, resources=None, root=ROOT):
         files[target] = path
     for name in LOCKS:
         files['provenance/' + name] = root / 'standalone/config' / name
-    # Preserve original notices from the materialized library/dependency tree.
-    # This deliberately errs on the side of retaining extra build-tool notices;
-    # it does not claim a legal audit or replace upstream license requirements.
-    source_tree = root / 'standalone/work/graph/src'
-    notice_prefixes = ('LICENSE', 'COPYING', 'NOTICE', 'COPYRIGHT', 'AUTHORS')
-    excluded = {'chrome', 'content', 'headless', 'android_webview', 'ios', 'out', 'standalone'}
-    for top in sorted(source_tree.iterdir()) if source_tree.is_dir() else []:
-        if top.is_symlink():
-            continue
-        if top.is_file() and (top.name.startswith(notice_prefixes) or top.name == 'README.chromium'):
-            files['notices/dependencies/' + top.name] = top
-            if top.name == 'LICENSE':
-                files['notices/chromium/LICENSE'] = top
-            continue
-        if top.name in excluded or not top.is_dir() or top.name.startswith('.'):
-            continue
-        for directory, directories, names in os.walk(top, followlinks=False):
-            directories[:] = sorted(name for name in directories if not name.startswith('.') and
-                                    not (Path(directory) / name).is_symlink())
-            for name in sorted(names):
-                path = Path(directory) / name
-                if (name.startswith(notice_prefixes) or name == 'README.chromium') and not path.is_symlink():
-                    files['notices/dependencies/' + path.relative_to(source_tree).as_posix()] = path
+    # Include explicitly named licenses such as CREDITS.chromium, FTL.TXT,
+    # MIT.txt and PATENTS, as well as the existing broad notice scan.
+    notices, notice_report = collect_dependency_notices(root / 'standalone/work/graph/src')
+    files.update(notices)
     for name in ('LICENSE', 'README.md'):
         original = root / 'standalone/upstream/chromium' / name
         if original.is_file() and not original.is_symlink():
@@ -290,6 +363,7 @@ def stage_sdk(output, destination=None, resources=None, root=ROOT):
     inventory = {name: {'sha256': sha256(path), 'bytes': path.stat().st_size} for name, path in sorted(files.items())}
     manifest = {'schema': 1, **current, 'snapshot': state, 'resources': resource_paths,
                 'files': inventory, 'license_audit_completed': False,
+                'license_notice_collection': notice_report,
                 'scope': 'Staged SDK binaries, embedding headers, runtime resources, original notices and pinned provenance; no browser application'}
     if destination.exists():
         previous = read_json(destination / 'sdk-manifest.json')

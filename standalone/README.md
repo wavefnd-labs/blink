@@ -32,6 +32,14 @@ choice for the browser application's own code is MPL-2.0; original Blink and
 dependency license notices remain unchanged here. Engine test harnesses serve
 only to validate the extracted engine and embedding API.
 
+The original [Chromium LICENSE](../LICENSE), Blink's
+[LICENSE_FOR_ABOUT_CREDITS](../LICENSE_FOR_ABOUT_CREDITS), and
+[legacy Blink notices](upstream/legacy/) are preserved verbatim. Blink includes
+BSD and LGPL license terms; imported libraries retain their own terms too.
+The root LICENSE does not replace those file and dependency notices. SDK notice
+collection preserves available originals and reports missing declared files;
+it is not a completed license audit.
+
 ## Layout
 
 Existing support:

@@ -260,6 +260,130 @@ class AutomationTests(unittest.TestCase):
         self.assertEqual(by_name['notices/chromium/LICENSE'].read_bytes(), b'original Chromium root license')
         self.assertEqual(by_name['notices/chromium/README.md'].read_bytes(), b'original Chromium README')
 
+    def test_sdk_preserves_declared_license_bytes_and_reports_unmaterialized_entries(self):
+        output, resources = self.sdk_inputs()
+        source = self.root / 'standalone/work/graph/src/third_party/ffmpeg'
+        source.mkdir(parents=True)
+        (source / 'README.chromium').write_text('License File: CREDITS.chromium, src/missing.txt\n')
+        original = b'Original FFmpeg attribution\r\n\xff\n'
+        (source / 'CREDITS.chromium').write_bytes(original)
+        records = automation.stage_sdk(output, resources=resources, root=self.root)
+        credit = next(self.root / row['path'] for row in records if row['path'].endswith('/CREDITS.chromium'))
+        self.assertEqual(credit.read_bytes(), original)
+        manifest_path = next(self.root / row['path'] for row in records if row['path'].endswith('/sdk-manifest.json'))
+        manifest = json.loads(manifest_path.read_text())
+        self.assertEqual(manifest['files']['notices/dependencies/third_party/ffmpeg/CREDITS.chromium']['sha256'],
+                         hashlib.sha256(original).hexdigest())
+        self.assertFalse(manifest['license_audit_completed'])
+        self.assertEqual(manifest['license_notice_collection']['missing_declared_files'],
+                         [{'metadata': 'third_party/ffmpeg/README.chromium', 'reference': 'src/missing.txt',
+                           'source_path': 'third_party/ffmpeg/src/missing.txt'}])
+
+
+class DependencyNoticeTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.source = self.root / 'src'
+        self.source.mkdir()
+
+    def write(self, name, content):
+        path = self.source / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content.encode() if isinstance(content, str) else content)
+        return path
+
+    def test_collects_real_world_nonstandard_names_and_nested_comma_lists(self):
+        originals = {
+            'third_party/ffmpeg/CREDITS.chromium': b'credits\r\n\xff',
+            'third_party/freetype/src/docs/FTL.TXT': b'FreeType terms\n',
+            'third_party/libdrm/MIT.txt': b'MIT terms\n',
+            'third_party/libaom/source/libaom/LICENSE': b'BSD terms\n',
+            'third_party/libaom/source/libaom/PATENTS': b'AOM patent terms\n',
+        }
+        for name, content in originals.items():
+            self.write(name, content)
+        for name, declaration in {
+            'ffmpeg': 'CREDITS.chromium', 'freetype': 'src/docs/FTL.TXT', 'libdrm': 'MIT.txt',
+            'libaom': 'source/libaom/LICENSE, source/libaom/PATENTS',
+        }.items():
+            self.write(f'third_party/{name}/README.chromium', 'License File: ' + declaration + '\n')
+        files, report = automation.collect_dependency_notices(self.source)
+        for name, original in originals.items():
+            self.assertEqual(files['notices/dependencies/' + name].read_bytes(), original)
+        self.assertEqual(report['metadata_files'], 4)
+        self.assertEqual(report['explicit_references'], 5)
+        self.assertEqual(report['missing_declared_files'], [])
+
+    def test_source_root_and_bounded_parent_references_keep_existing_scanning(self):
+        self.write('LICENSE', 'Chromium license')
+        self.write('third_party/shared/MIT.txt', 'Shared terms')
+        self.write('third_party/sample/NOTICE.extra', 'Existing prefix scan')
+        self.write('third_party/sample/README.chromium',
+                   'License File: //LICENSE, ../shared/MIT.txt\nLicense File: //third_party/shared/MIT.txt\n')
+        files, report = automation.collect_dependency_notices(self.source)
+        self.assertIn('notices/chromium/LICENSE', files)
+        self.assertIn('notices/dependencies/third_party/sample/NOTICE.extra', files)
+        self.assertIn('notices/dependencies/third_party/shared/MIT.txt', files)
+        self.assertEqual(report['explicit_references'], 3)
+        self.assertEqual(report['missing_declared_files'], [])
+
+    def test_missing_files_and_not_shipped_are_reported_without_audit_claim(self):
+        self.write('third_party/sample/README.chromium',
+                   'License File: src/absent.txt\nLicense File: NOT_SHIPPED\n')
+        _, report = automation.collect_dependency_notices(self.source)
+        self.assertEqual(report['missing_declared_files'],
+                         [{'metadata': 'third_party/sample/README.chromium', 'reference': 'src/absent.txt',
+                           'source_path': 'third_party/sample/src/absent.txt'}])
+        self.assertEqual(report['not_shipped_declarations'], ['third_party/sample/README.chromium'])
+        self.assertIn('not a linked-library inventory or license audit', report['scope'])
+
+    def test_missing_source_tree_is_explicit(self):
+        files, report = automation.collect_dependency_notices(self.source / 'absent')
+        self.assertEqual(files, {})
+        self.assertFalse(report['source_tree_available'])
+
+    def test_rejects_traversal_absolute_hidden_browser_and_malformed_references(self):
+        self.write('LICENSE', 'Original terms')
+        for reference in ('../../../outside', '//../outside', '../../../src/LICENSE', '//../src/LICENSE',
+                          '/etc/passwd', '///etc/passwd', '//.git/config', '//.git/../LICENSE',
+                          '//chrome/LICENSE', '//chrome/../LICENSE', '../.hidden/terms', '.git/../LICENSE',
+                          'C:\\outside', 'https://example.invalid/LICENSE', '', 'LICENSE,', 'LICENSE\x00'):
+            with self.subTest(reference=reference):
+                self.write('third_party/sample/README.chromium', 'License File: ' + reference + '\n')
+                with self.assertRaises(ValueError):
+                    automation.collect_dependency_notices(self.source)
+
+    def test_rejects_symlink_file_and_directory_references_even_inside_source(self):
+        target = self.write('third_party/shared/MIT.txt', 'Original terms')
+        readme = self.write('third_party/sample/README.chromium', 'License File: link\n')
+        link = readme.parent / 'link'
+        for destination in (target, target.parent, self.root / 'outside'):
+            with self.subTest(destination=str(destination)):
+                link.symlink_to(destination)
+                try:
+                    direct = 'link/MIT.txt' if destination == target.parent else 'link'
+                    for reference in (direct, 'link/../MIT.txt'):
+                        with self.subTest(reference=reference):
+                            readme.write_text('License File: ' + reference + '\n')
+                            with self.assertRaisesRegex(ValueError, 'symlink'):
+                                automation.collect_dependency_notices(self.source)
+                finally:
+                    link.unlink()
+
+    def test_rejects_symlink_source_root_and_ignores_unreferenced_links(self):
+        self.write('LICENSE', 'Original terms')
+        (self.source / 'NOTICE.external').symlink_to(self.root / 'outside')
+        self.write('chrome/README.chromium', 'License File: /etc/passwd\n')
+        alias = self.root / 'alias'
+        alias.symlink_to(self.source, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, 'symlink'):
+            automation.collect_dependency_notices(alias)
+        files, _ = automation.collect_dependency_notices(self.source)
+        self.assertNotIn('notices/dependencies/NOTICE.external', files)
+        self.assertFalse(any('/chrome/' in name for name in files))
+
 
 class SnapshotTests(unittest.TestCase):
     def test_generated_reports_do_not_dirty_sources_but_runtime_edits_do(self):
