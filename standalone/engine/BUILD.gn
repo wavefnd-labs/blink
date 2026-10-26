@@ -1,0 +1,106 @@
+# Copyright 2026 The Blink Standalone Authors. BSD-3-Clause; see /LICENSE.
+import("//tools/v8_context_snapshot/v8_context_snapshot.gni")
+
+shared_library("blink_embed") {
+  output_name = "blink_embed"
+  # Keep allocator/C++ symbols private to this DSO. A host may already have
+  # loaded libc or a different C++ runtime before dlopen() reaches this engine.
+  inputs = [ "exports.map" ]
+  ldflags = [
+    "-Wl,--version-script=" + rebase_path("exports.map", root_build_dir),
+  ]
+  public = [
+    "//standalone/include/blink_engine.h",
+    "//standalone/include/blink_ime.h",
+    "//standalone/include/blink_storage.h",
+  ]
+  sources = [
+    "//standalone/common/ime_validation.h",
+    "//standalone/common/input_validation.h",
+    "//standalone/common/limits.h",
+    "//standalone/common/navigation.h",
+    "//standalone/common/storage.h",
+    "//standalone/platform/host_platform.cc",
+    "//standalone/platform/host_platform.h",
+    "//standalone/platform/host_url_loader.cc",
+    "//standalone/platform/host_url_loader.h",
+    "//standalone/platform/storage_host.cc",
+    "//standalone/platform/storage_host.h",
+    "//standalone/platform/worker.cc",
+    "//standalone/platform/worker.h",
+    "//standalone/platform/worker_fetch_ticket.h",
+    "//standalone/platform/worker_loader.cc",
+    "//standalone/platform/worker_loader.h",
+    "engine.cc",
+    "ime.cc",
+    "ime.h",
+    "input.cc",
+    "input.h",
+    "navigation_policy.cc",
+    "navigation_policy.h",
+    "script.cc",
+    "script.h",
+  ]
+  defines = [ "BLINK_EMBED_IMPLEMENTATION=1" ]
+  configs += [
+    "//third_party/blink/renderer:inside_blink",
+    "//v8:external_startup_data",
+  ]
+  deps = [
+    "//base",
+    "//base:i18n",
+    "//cc/paint",
+    "//gin",
+    "//mojo/core/embedder",
+    "//mojo/public/cpp/bindings",
+    "//net",
+    "//services/metrics/public/cpp:metrics_cpp",
+    "//services/network/public/cpp",
+    "//skia",
+    "//third_party/blink/public:blink",
+    "//third_party/blink/public/common",
+    "//third_party/blink/renderer/core",
+    "//third_party/blink/renderer/modules",
+    "//third_party/blink/renderer/platform",
+    "//tools/v8_context_snapshot:buildflags",
+    "//ui/base",
+    "//ui/color",
+    "//ui/events:dom_keycode_converter",
+    "//ui/gfx/geometry",
+    "//url",
+  ]
+
+  # These are actual runtime data, not merely build-time generators.
+  data_deps = [
+    "//third_party/blink/public:resources",
+    "//third_party/blink/public:scaled_resources",
+    "//third_party/icu:icudata",
+    "//v8:run_mksnapshot_default",
+  ]
+  if (use_v8_context_snapshot) {
+    data_deps += [ "//tools/v8_context_snapshot" ]
+  }
+  assert_no_deps = [
+    "//android_webview/*",
+    "//chrome/*",
+    "//content/*",
+    "//headless/*",
+    "//ios/chrome/*",
+    "//ui/webui/resources:*",
+    "//ui/webui/resources/*",
+    "//components/metrics:metrics",
+    "//components/metrics/private_metrics:private_metrics",
+    "//components/metrics/dwa:dwa_builders",
+    "//components/os_crypt/browser:browser",
+    "//components/os_crypt/async/browser:browser",
+    "//components/keep_alive_registry:keep_alive_registry",
+    "//components/background_task_scheduler:background_task_scheduler",
+    "//ui/resources:resources",
+  ]
+}
+
+# A small engine validation tool. It has no windows, UI or browser services.
+executable("blink_embed_smoke") {
+  sources = [ "smoke.cc" ]
+  deps = [ ":blink_embed" ]
+}

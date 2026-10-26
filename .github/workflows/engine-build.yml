@@ -1,0 +1,79 @@
+name: Trusted standalone engine build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blink-full-engine-main
+  cancel-in-progress: false
+
+jobs:
+  engine:
+    # Never execute pull-request code on this runner. Repository owners opt in
+    # to automatic main builds after provisioning a dedicated ephemeral runner.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' || vars.BLINK_ENABLE_FULL_CI == 'true')
+    runs-on: [self-hosted, linux, x64, blink-engine]
+    environment: blink-engine-build
+    timeout-minutes: 1440
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Check dedicated runner architecture, Python, host tools and disk
+        run: python3 -B standalone/tools/automation.py check-runner
+      - name: Fetch immutable extracted source baseline
+        env:
+          BLINK_BASELINE_GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B standalone/tools/automation.py ensure-baseline
+      - name: Verify upstream source
+        run: python3 -B standalone/tools/blink.py verify
+      - name: Test support tools before dependency restoration
+        run: python3 -B -m unittest discover -s standalone/tests -v
+      - name: Restore exact engine source and tool inputs
+        run: python3 -B standalone/tools/materialize.py --jobs 3
+      - name: Verify reviewed build adaptations
+        run: python3 -B standalone/tools/engine.py verify
+      - name: Compile the engine SDK and embedding harness
+        run: python3 -B standalone/tools/engine.py build --with-smoke --jobs 4
+      - name: Exercise the compiled embedding runtime
+        run: python3 -B standalone/tools/engine.py runtime-smoke
+      - name: Select exactly the SDK validated by this smoke run
+        id: sdk
+        run: >-
+          python3 -B standalone/tools/automation.py sdk-artifact
+          --evidence standalone/reports/linux-x64-runtime-smoke.json
+          --archive
+          --github-output
+      - name: Preserve the validated SDK as a CI artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: ${{ steps.sdk.outputs.archive_path }}
+          archive: false
+          if-no-files-found: error
+          retention-days: 14
+      - name: Resolve official release metadata for compatibility validation
+        run: python3 -B standalone/tools/automation.py upstream
+      - name: Validate compiled SDK release evidence
+        run: >-
+          python3 -B standalone/tools/automation.py release-plan
+          --evidence standalone/reports/linux-x64-runtime-smoke.json
+          --candidate standalone/out/automation/upstream-candidate.json
+          --require-ready
+      - name: Preserve diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: engine-validation-${{ github.sha }}
+          path: |
+            standalone/reports/*.json
+            standalone/out/automation/*.json
+          if-no-files-found: warn
+          retention-days: 30

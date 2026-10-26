@@ -1,0 +1,33 @@
+# Build the standalone SDK and its upstream engine libraries/resources.
+import("//build/config/features.gni")
+
+assert(use_blink, "This build entry point requires Blink.")
+assert(target_os == "linux" && target_cpu == "x64",
+       "Only the recorded Linux x64 engine profile is supported so far.")
+assert(!is_component_build,
+       "The initial engine entry point builds static component libraries.")
+
+group("blink_engine") {
+  deps = [
+    "//standalone/engine:blink_embed",
+    "//third_party/blink/public:blink",
+    "//third_party/blink/public/common",
+  ]
+  assert_no_deps = [
+    "//android_webview/*",
+    "//chrome/*",
+    "//content/*",
+    "//headless/*",
+    "//ios/chrome/*",
+    "//ui/webui/resources:*",
+    "//ui/webui/resources/*",
+    "//components/metrics:metrics",
+    "//components/metrics/private_metrics:private_metrics",
+    "//components/metrics/dwa:dwa_builders",
+    "//components/os_crypt/browser:browser",
+    "//components/os_crypt/async/browser:browser",
+    "//components/keep_alive_registry:keep_alive_registry",
+    "//components/background_task_scheduler:background_task_scheduler",
+    "//ui/resources:resources",
+  ]
+}

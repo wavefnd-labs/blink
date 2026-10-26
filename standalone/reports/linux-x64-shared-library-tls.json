@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "date": "2026-10-24",
+  "chromium_revision": "443fc1cc6746166ba1d0deba6bee26bbd8f7f84c",
+  "failure": {
+    "stage": "Shared engine link after all seven embedding translation units compiled",
+    "relocation": "R_X86_64_TPOFF32",
+    "symbols": [
+      "blink::g_thread_specific_",
+      "v8::internal::g_current_isolate_",
+      "v8::internal::g_current_local_heap_"
+    ],
+    "other_mold_error_types": [],
+    "root_cause": "The non-component Blink and V8 headers explicitly select local-exec TLS, despite the object compile commands already containing -fPIC."
+  },
+  "fix": {
+    "mode": "Upstream shared-library TLS getters selected through two pinned staged GN adaptations only",
+    "blink": "blink_heap_inside_shared_library default true in the engine-only build view",
+    "v8": "V8_TLS_USED_IN_LIBRARY in the upstream internal features config; existing non-monolithic/external-startup-data modes retained",
+    "configs": {
+      "third_party/blink/renderer/platform/heap/BUILD.gn": {
+        "sha256": "21e486645201a6cb801dd99d3f332579318946de6495009314747502f2d52e27",
+        "adapted_sha256": "0887578ee55d322d64d51cff241235fefc10c2388b60aeaf9f08d703d32c0258",
+        "replacements": [
+          {
+            "old": "  blink_heap_inside_shared_library = is_component_build\n",
+            "new": "  # The standalone engine embeds Blink in libblink_embed.so.\n  blink_heap_inside_shared_library = true\n"
+          }
+        ],
+        "purpose": "Select upstream library-safe Blink heap TLS for the non-component shared engine; no C++ implementation or pristine source changes."
+      },
+      "v8/BUILD.gn": {
+        "sha256": "1ec6c7efe4e35951ac4702656282f23fb7f6dcd7d147cb2f2b8c16678c7f98a4",
+        "adapted_sha256": "10cf2897872f3ef16e7b63f4f1516e43c5068b42d62f15ecf1da7d3ee249f339",
+        "replacements": [
+          {
+            "old": "  if (v8_monolithic && v8_monolithic_for_shared_library) {\n    defines += [ \"V8_TLS_USED_IN_LIBRARY\" ]\n  }\n",
+            "new": "  # The standalone engine links these static V8 objects into libblink_embed.so.\n  # Select upstream library TLS without changing monolithic/startup-data modes.\n  defines += [ \"V8_TLS_USED_IN_LIBRARY\" ]\n"
+          }
+        ],
+        "purpose": "Use upstream V8 library TLS in the static libraries linked into the engine DSO; retain non-monolithic V8 and the existing external startup-data/snapshot configuration."
+      }
+    },
+    "reviewed_graph_effects": {
+      "blink_response_file_changes": 1,
+      "v8_define_consumers": 34,
+      "targets_added": 0,
+      "targets_removed": 0
+    }
+  },
+  "configuration": {
+    "recipe": {
+      "path": "standalone/config/engine-adaptations.json",
+      "sha256": "7957cb99271735c9f1205b05b24794f0495ee583ea10d8406c1fb66bddc38acf"
+    },
+    "patch": {
+      "path": "standalone/patches/engine-build-imports.patch",
+      "sha256": "f1d6e33d73462152f198d3660f55756a8d170bc07d2fa833fb14d0e95f522033"
+    },
+    "upgrade_policy": {
+      "path": "standalone/config/engine-view-upgrades.json",
+      "sha256": "8b2f7769812076b97857e4fbe82198f9b0d564a2b614b83cd525b96018019096"
+    },
+    "upgrade_tool": {
+      "path": "standalone/tools/engine_view_upgrade.py",
+      "sha256": "77b5c78ec7def5127232c195d1061be772b43ab46a7c6788994d6aed7c2adad6"
+    },
+    "views": {
+      "release": {
+        "physical_view": "/mnt/hdd/blink/standalone/work/engine/views/4736c9ef1fe07af30e6f/src",
+        "physical_key": "4736c9ef1fe07af30e6f",
+        "configuration_key": "55c6781c8a02a5181340",
+        "previous_configuration_key": "4736c9ef1fe07af30e6f",
+        "profile_upgrade_preserved": true,
+        "receipt": "engine_view_upgrade",
+        "id": "tls-library-v1"
+      },
+      "dev": {
+        "physical_view": "/mnt/hdd/blink/standalone/work/engine/profiles/dev-cache/views/504b89da5a20bf779a7a/src",
+        "physical_key": "504b89da5a20bf779a7a",
+        "configuration_key": "d0d67daadb4f72c7fa25",
+        "previous_configuration_key": "74132e69df82c4ec6682",
+        "profile_upgrade_preserved": true,
+        "receipt": "engine_view_upgrade",
+        "id": "tls-library-v1"
+      }
+    }
+  },
+  "validation": {
+    "graphs": {
+      "release": {
+        "target_count": 6854,
+        "boundary_passed": true,
+        "baseline_parity_passed": true,
+        "runtime_additions_passed": true,
+        "profile_parity_passed": null,
+        "entry": {
+          "path": "standalone/reports/linux-x64-engine-entry.json",
+          "sha256": "fb70caf617a69a7ccc8e889e4cf1ffa17f7b7a4637e03e4a168bd91077c0bbcd"
+        },
+        "generation_log": {
+          "path": "standalone/work/diagnostics/tls-link-20261024/gen-release.log",
+          "sha256": "b701283c42bba4bc016b63426401448eb5531582d7aaaf024ed90925d5739bb1"
+        },
+        "verification_log": {
+          "path": "standalone/work/diagnostics/tls-link-20261024/verify-release.log",
+          "sha256": "d14adb8143e9bf8fa4ac2a3bee5fd022f7354674a0502bdf558195e4b00f0c65"
+        },
+        "replay_log": {
+          "path": "standalone/work/diagnostics/tls-link-20261024/replay-release.log",
+          "sha256": "f979bd0ed765ad7d4975bce68e5aa9b0b86a054696c36e623adde00823eea86c"
+        }
+      },
+      "dev": {
+        "target_count": 6854,
+        "boundary_passed": true,
+        "baseline_parity_passed": true,
+        "runtime_additions_passed": true,
+        "profile_parity_passed": true,
+        "entry": {
+          "path": "standalone/reports/profiles/dev-cache/linux-x64-engine-entry.json",
+          "sha256": "c26bc79b95927b9d057b435ffc9d3c71b0c6e1b069ac6211723ba95d8686f5af"
+        },
+        "generation_log": {
+          "path": "standalone/work/diagnostics/tls-link-20261024/gen-dev.log",
+          "sha256": "c269145658c8dba18a0533474e080b26c6b121042ccab2e5a13fb407c48bc444"
+        },
+        "verification_log": {
+          "path": "standalone/work/diagnostics/tls-link-20261024/verify-dev.log",
+          "sha256": "d14adb8143e9bf8fa4ac2a3bee5fd022f7354674a0502bdf558195e4b00f0c65"
+        },
+        "replay_log": {
+          "path": "standalone/work/diagnostics/tls-link-20261024/replay-dev.log",
+          "sha256": "bb8a0c6b05d503e4c9b44e63f9e66726b14fbdea8431674002f720ac933911ad"
+        }
+      }
+    },
+    "native_object_compiles": {
+      "count": 3,
+      "passed": true,
+      "tpoff32_remaining": 0,
+      "scope": "Exactly three existing translation units; direct Clang only, no Ninja edge execution, link or full build",
+      "checks": {
+        "blink_getter_defined": true,
+        "blink_getter_referenced": true,
+        "no_forbidden_TLS_relocations": true,
+        "no_other_TPOFF32_relocations": true,
+        "three_compiles_successful": true,
+        "three_readelf_successful": true,
+        "v8_getters_referenced": true
+      },
+      "limitation": "Exactly three TUs compiled without linking. Blink getter definition and consumers are object-verified; the two V8 getter definitions are source-verified while api-natives references are object-verified. Full shared-library linking and rendering remain untested.",
+      "receipt": {
+        "path": "standalone/work/diagnostics/tls-link-20261024/native/receipt.json",
+        "sha256": "7d1075665e0fefc10018880b41df77ea4ae952d71777f6d032c2a187e01408f5"
+      }
+    },
+    "tiny_shared_library_probes": {
+      "scope": "Synthetic definition/reference libraries use the exact pinned TLS macros, not the engine ABI. Each corrected mode links and passes late loading and thread isolation; old modes reproduce failure, including with -ftls-model=global-dynamic.",
+      "blink": {
+        "path": "standalone/work/diagnostics/tls-link-20261024/input_audit/experiment.json",
+        "sha256": "a7f6d54502e0ce26d4c24307132472888be9aa3e550cf3586e820b64875b13c4"
+      },
+      "v8": {
+        "path": "standalone/work/diagnostics/tls-link-20261024/input_audit/v8/experiment.json",
+        "sha256": "61b2b58fbce54ffb60417dce5658b3e921b76428747005b16b551d8c449fef69"
+      }
+    },
+    "support_tests": {
+      "command": "python3 -B -m unittest discover -s standalone/tests -v",
+      "passed": 331,
+      "log": {
+        "path": "standalone/work/diagnostics/tls-link-20261024/unittest.log",
+        "sha256": "003350a125ddbd7406e0406c04e130cac3468524153e9cded0d0eb45a7110458"
+      }
+    },
+    "pristine_check": {
+      "path": "standalone/work/diagnostics/tls-link-20261024/verify-pristine.log",
+      "sha256": "5ca8e8249cd1669ab5f843749a018d61b3b2352405f2b897a43cb8583a485bec"
+    },
+    "native_state": {
+      "inventory_entries": 67787,
+      "unchanged_entries": 67743,
+      "changed_entries": 44,
+      "only_gn_metadata_and_view_receipts_changed": true,
+      "objects_generated_headers_pcm_and_ninja_log_deps_preserved": true,
+      "receipt": {
+        "path": "standalone/work/diagnostics/tls-link-20261024/after-gen-native-state.json",
+        "sha256": "9566ce267bb6680f2b7098b54c75240593cb1c17c1de87bd1c250d741eab43ff"
+      }
+    },
+    "dry_run": {
+      "exit_code": 0,
+      "planned_jobs": 8816,
+      "cxx": 8661,
+      "action": 8,
+      "archive": 139,
+      "link": 6,
+      "asm": 1,
+      "shared_link": 1,
+      "log": {
+        "path": "standalone/work/diagnostics/tls-link-20261024/ninja-dry-run.log",
+        "sha256": "288e9391cf648bbadf8c895c411960117b86792f59283d29bf6c95bdccb2bb84"
+      }
+    }
+  },
+  "pristine_blink_and_dependency_sources_modified": false,
+  "browser_application_added": false,
+  "existing_object_outputs_copied_or_deleted": false,
+  "full_engine_compilation_performed": false,
+  "engine_link_performed": false,
+  "engine_runtime_executed": false,
+  "limitations": [
+    "The full engine link and runtime remain unverified.",
+    "TLS definitions and all consumers must be rebuilt consistently; an old local-exec object cannot be repaired by changing only linker flags.",
+    "In-place migration is restricted to the exact recorded old recipe and unchanged profile/cache/GN inputs. A legacy pre-Opus development profile or unrelated configuration change uses a fresh view."
+  ],
+  "resume_command": "python3 -B standalone/tools/engine.py build --profile dev --with-smoke --jobs 12"
+}

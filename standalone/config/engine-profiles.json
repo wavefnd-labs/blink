@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "chromium_revision": "443fc1cc6746166ba1d0deba6bee26bbd8f7f84c",
+  "baseline_profile": "linux-x64-release-static",
+  "baseline_args_sha256": "c92f025c447636d1568ad5c2d57c1f7ed6c3f957722b5547391fc9d936f3c6b8",
+  "profiles": {
+    "release": {
+      "args_gn": "target_os = \"linux\"\ntarget_cpu = \"x64\"\nis_debug = false\nis_component_build = false\nuse_sysroot = true\n",
+      "purpose": "Original release configuration and existing view identity; no profile overlays.",
+      "overlays": {}
+    },
+    "dev": {
+      "args_gn": "target_os = \"linux\"\ntarget_cpu = \"x64\"\nis_debug = false\nis_component_build = false\nuse_sysroot = true\nsymbol_level = 0\nv8_symbol_level = 0\nblink_symbol_level = 0\n",
+      "purpose": "Low optimization development iteration only. Release assertions and target selection stay unchanged; the C/C++ default/max/speed optimization aliases use O0 and Rust opt-level is explicitly zero. Section and linker garbage-collection flags remain enabled. Use release for performance measurements and publication. Opus alone appends -O1 through its private config, after the speed config; other codec and engine diagnostics remain enabled.",
+      "overlays": {
+        "build/config/compiler/BUILD.gn": {
+          "original_mode": "100644",
+          "git_blob": "d0b1e809a2923921e390b18daa22ad9702e8493e",
+          "sha256": "cfd13f4a0bd78150bc058ccf382caa9acd2df5aabc58d2e3e4a8e02cc355f3a0",
+          "adapted_sha256": "76a12003c7777a346c61670d2fef66a435cfdc62ad7880310bece0b056f5b8c2",
+          "replacements": [
+            {
+              "old": "config(\"default_optimization\") {\n  if (is_debug) {\n    configs = [ \":no_optimize\" ]\n  } else if (optimize_for_fuzzing) {\n    assert(!is_win, \"Fuzzing optimize level not supported on Windows\")\n\n    # Coverage build is quite slow. Using \"optimize_for_fuzzing\" makes it even\n    # slower as it uses \"-O1\" instead of \"-O3\". Prevent that from happening.\n    assert(!use_clang_coverage,\n           \"optimize_for_fuzzing=true should not be used with \" +\n               \"use_clang_coverage=true.\")\n    configs = [ \":optimize_fuzzing\" ]\n  } else {\n    configs = [ \":optimize\" ]\n  }\n}",
+              "new": "config(\"default_optimization\") {\n  configs = [ \":optimize\" ]\n}"
+            },
+            {
+              "old": "config(\"optimize\") {\n  if (is_win) {\n    # clang-cl's /O2 corresponds to clang's -O3, and really want -O2 for\n    # consistency with the other platforms.\n    cflags = [\n               \"/O2\",\n               \"/clang:-O2\",\n             ] + common_optimize_on_cflags\n\n    # The `-O3` for clang turns on extra optimizations compared to the standard\n    # `-O2`. But for rust, `-Copt-level=3` is the default and is thus reliable\n    # to use.\n    rustflags = [ \"-Copt-level=3\" ]\n  } else if (optimize_for_size || is_chromeos) {\n    # Favor size over speed.\n    # -Os in clang is more of a size-conscious -O2 than \"size at any cost\"\n    # (AKA -Oz).\n\n    if (is_fuchsia || enable_cast_receiver) {\n      cflags = [ \"-Oz\" ] + common_optimize_on_cflags\n    } else {\n      cflags = [ \"-Os\" ] + common_optimize_on_cflags\n    }\n\n    if (is_clang && use_ml_inliner && is_a_target_toolchain && !is_chromeos &&\n        !is_high_end_android) {\n      cflags += [\n        \"-mllvm\",\n        \"-enable-ml-inliner=release\",\n        \"-mllvm\",\n        \"-ml-inliner-model-selector=arm32-size\",\n      ]\n    }\n\n    # Similar to clang, we optimize with `-Copt-level=s` to keep loop\n    # vectorization while otherwise optimizing for size.\n    rustflags = [ \"-Copt-level=s\" ]\n  } else {\n    cflags = [ \"-O2\" ] + common_optimize_on_cflags\n\n    # The `-O3` for clang turns on extra optimizations compared to the standard\n    # `-O2`. But for rust, `-Copt-level=3` is the default and is thus reliable\n    # to use.\n    rustflags = [ \"-Copt-level=3\" ]\n  }\n  ldflags = common_optimize_on_ldflags\n}",
+              "new": "config(\"optimize\") {\n  cflags = [ \"-O0\" ] + common_optimize_on_cflags\n  ldflags = common_optimize_on_ldflags\n  rustflags = [ \"-Copt-level=0\" ]\n}"
+            },
+            {
+              "old": "config(\"optimize_max\") {\n  ldflags = common_optimize_on_ldflags\n  if (is_win) {\n    # Favor speed over size, /O2 must be before the common flags.\n    # /O2 implies /Ot, /Oi, and /GF.\n    cflags = [ \"/O2\" ] + common_optimize_on_cflags\n  } else if (optimize_for_fuzzing) {\n    cflags = [ \"-O1\" ] + common_optimize_on_cflags\n  } else {\n    cflags = [ \"-O2\" ] + common_optimize_on_cflags\n  }\n  rustflags = [ \"-Copt-level=3\" ]\n}",
+              "new": "config(\"optimize_max\") {\n  cflags = [ \"-O0\" ] + common_optimize_on_cflags\n  ldflags = common_optimize_on_ldflags\n  rustflags = [ \"-Copt-level=0\" ]\n}"
+            },
+            {
+              "old": "config(\"optimize_speed\") {\n  ldflags = common_optimize_on_ldflags\n  if (is_win) {\n    # Favor speed over size, /O2 must be before the common flags.\n    # /O2 implies /Ot, /Oi, and /GF.\n    cflags = [ \"/O2\" ] + common_optimize_on_cflags\n    if (is_clang) {\n      cflags += [ \"/clang:-O3\" ]\n    }\n  } else if (optimize_for_fuzzing) {\n    cflags = [ \"-O1\" ] + common_optimize_on_cflags\n  } else {\n    cflags = [ \"-O3\" ] + common_optimize_on_cflags\n  }\n  rustflags = [ \"-Copt-level=3\" ]\n}",
+              "new": "config(\"optimize_speed\") {\n  cflags = [ \"-O0\" ] + common_optimize_on_cflags\n  ldflags = common_optimize_on_ldflags\n  rustflags = [ \"-Copt-level=0\" ]\n}"
+            }
+          ]
+        },
+        "third_party/opus/BUILD.gn": {
+          "original_mode": "100644",
+          "git_blob": "9b1fb42edc2bb02857270771aa880c56b4305148",
+          "sha256": "436f0bfedbfc18c2a46f39f10667fe815e0aca6bf097e999930bfc36118deb33",
+          "adapted_sha256": "adc4968826f344516ef502ad79a12d3c0eb6c58e84f1ee8f860ff4ecd198f1dc",
+          "replacements": [
+            {
+              "old": "  cflags = []\n",
+              "new": "  # Standalone development: the codec needs basic optimization at runtime.\n  cflags = [ \"-O1\" ]\n"
+            },
+            {
+              "old": "    configs += [ \"//build/config/compiler:optimize_speed\" ]\n",
+              "new": "    configs += [ \"//build/config/compiler:optimize_speed\" ]\n\n    # Apply the codec-specific development optimization after optimize_speed.\n    configs -= [ \":opus_private_config\" ]\n    configs += [ \":opus_private_config\" ]\n"
+            }
+          ]
+        }
+      },
+      "incremental_upgrades": [
+        {
+          "id": "opus-o1-v1",
+          "from_configuration": {
+            "name": "dev",
+            "chromium_revision": "443fc1cc6746166ba1d0deba6bee26bbd8f7f84c",
+            "args_sha256": "925f7d2e88cf9e25bcad9a2d75fae530967c72a9cf8bc6cc26327068e1a69d8e",
+            "baseline_args_sha256": "c92f025c447636d1568ad5c2d57c1f7ed6c3f957722b5547391fc9d936f3c6b8",
+            "overlays": {
+              "build/config/compiler/BUILD.gn": "76a12003c7777a346c61670d2fef66a435cfdc62ad7880310bece0b056f5b8c2"
+            }
+          },
+          "overlay_paths": [
+            "third_party/opus/BUILD.gn"
+          ],
+          "reason": "Keep Opus at O1 without changing Blink/V8 O0 settings or disabling compiler diagnostics; preserve completed outputs in the existing development view."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,282 @@
+--- a/third_party/blink/renderer/core/BUILD.gn
++++ b/third_party/blink/renderer/core/BUILD.gn
+@@ -10,7 +10,7 @@
+ import("//build/config/ui.gni")
+ import("//build/nocompile.gni")
+ import("//build/toolchain/toolchain.gni")
+-import("//content/public/common/features.gni")
++import("//standalone/gn/platform_features.gni")
+ import("//media/media_options.gni")
+ import("//printing/buildflags/buildflags.gni")
+ import("//testing/libfuzzer/fuzzer_test.gni")
+@@ -258,7 +258,10 @@
+   output_name = "blink_core"
+ 
+   visibility = []  # Allow re-assignment of list.
+-  visibility = [ "//third_party/blink/*" ]
++  visibility = [
++    "//third_party/blink/*",
++    "//standalone/engine:blink_embed",
++  ]
+ 
+   sources = [
+     "core_initializer.cc",
+--- a/pdf/BUILD.gn
++++ b/pdf/BUILD.gn
+@@ -3,7 +3,7 @@
+ # found in the LICENSE file.
+ 
+ import("//build/buildflag_header.gni")
+-import("//content/public/common/features.gni")
++import("//standalone/gn/platform_features.gni")
+ import("//pdf/features.gni")
+ import("//services/screen_ai/buildflags/features.gni")
+ import("//testing/libfuzzer/fuzzer_test.gni")
+--- a/base/BUILD.gn
++++ b/base/BUILD.gn
+@@ -6765,7 +6765,7 @@
+   # doesn't need to build base_unittests. If this is required in the future, but
+   # we haven't moved chrome/VERSION, we should ifdef out those tests.
+   if (build_with_chromium) {
+-    sources = [ "//chrome/VERSION" ]
++    sources = [ "//standalone/gn/VERSION" ]
+     extra_args = [
+       "-e",
+       "VERSION_MAJOR=\"%s\" % (MAJOR)",
+--- a/base/version_info/BUILD.gn
++++ b/base/version_info/BUILD.gn
+@@ -40,8 +40,8 @@
+ process_version("generate_version_info") {
+   template_file = "version_info_values.h.version"
+   sources = [
+-    "//chrome/VERSION",
+-    branding_file_path,
++    "//standalone/gn/VERSION",
++    "//standalone/gn/BRANDING",
+     lastchange_file,
+   ]
+   output = "$target_gen_dir/version_info_values.h"
+--- a/third_party/blink/renderer/platform/BUILD.gn
++++ b/third_party/blink/renderer/platform/BUILD.gn
+@@ -431,7 +431,10 @@
+ 
+ component("platform") {
+   visibility = []  # Allow re-assignment of list.
+-  visibility = [ "//third_party/blink/*" ]
++  visibility = [
++    "//third_party/blink/*",
++    "//standalone/engine:blink_embed",
++  ]
+   output_name = "blink_platform"
+ 
+   sources = [
+--- a/third_party/blink/renderer/BUILD.gn
++++ b/third_party/blink/renderer/BUILD.gn
+@@ -31,6 +31,7 @@
+ # inside_blink -----------------------------------------------------------------
+ 
+ config("inside_blink") {
++  visibility += [ "//standalone/engine:blink_embed" ]
+   cflags = []
+   defines = [
+     "BLINK_IMPLEMENTATION=1",
+--- a/third_party/blink/renderer/core/workers/dedicated_worker.h
++++ b/third_party/blink/renderer/core/workers/dedicated_worker.h
+@@ -142,6 +142,11 @@
+   // process.
+   const blink::DedicatedWorkerToken& GetToken() const { return token_; }
+ 
++  // Allow embedders to enforce their supported worker script types.
++  bool UsesClassicScriptForEmbedding() const {
++    return options_->type() == V8WorkerType::Enum::kClassic;
++  }
++
+   DEFINE_ATTRIBUTE_EVENT_LISTENER(message, kMessage)
+ 
+   void ContextLifecycleStateChanged(
+--- a/third_party/blink/renderer/modules/BUILD.gn
++++ b/third_party/blink/renderer/modules/BUILD.gn
+@@ -30,7 +30,10 @@
+   output_name = "blink_modules"
+ 
+   visibility = []  # Allow re-assignment of list.
+-  visibility = [ "//third_party/blink/*" ]
++  visibility = [
++    "//third_party/blink/*",
++    "//standalone/engine:blink_embed",
++  ]
+ 
+   sources = [
+     "event_modules.h",
+--- a/ui/base/BUILD.gn
++++ b/ui/base/BUILD.gn
+@@ -206,8 +206,6 @@
+     "resource/scoped_startup_resource_bundle.h",
+     "scoped_visibility_tracker.cc",
+     "scoped_visibility_tracker.h",
+-    "template_expressions.cc",
+-    "template_expressions.h",
+     "theme_provider.cc",
+     "theme_provider.h",
+     "ui_base_exports.cc",
+@@ -218,12 +216,6 @@
+     "ui_base_switches_util.h",
+     "view_prop.cc",
+     "view_prop.h",
+-    "webui/i18n_source_stream.cc",
+-    "webui/i18n_source_stream.h",
+-    "webui/jstemplate_builder.cc",
+-    "webui/jstemplate_builder.h",
+-    "webui/web_ui_util.cc",
+-    "webui/web_ui_util.h",
+     "window_open_disposition_utils.cc",
+     "window_open_disposition_utils.h",
+   ]
+@@ -517,7 +509,6 @@
+     "//ui/display",
+     "//ui/display/util:gpu_info_util",
+     "//ui/strings",
+-    "//ui/webui/resources:resources_grit",
+     "//url",
+   ]
+ 
+--- a/components/regional_capabilities/BUILD.gn
++++ b/components/regional_capabilities/BUILD.gn
+@@ -10,14 +10,8 @@
+ static_library("regional_capabilities") {
+   sources = [
+     "enums.h",
+-    "regional_capabilities_internals_data_holder.cc",
+-    "regional_capabilities_internals_data_holder.h",
+-    "regional_capabilities_metrics.cc",
+-    "regional_capabilities_metrics.h",
+     "regional_capabilities_prefs.cc",
+     "regional_capabilities_prefs.h",
+-    "regional_capabilities_service.cc",
+-    "regional_capabilities_service.h",
+     "regional_capabilities_utils.cc",
+     "regional_capabilities_utils.h",
+   ]
+@@ -26,20 +20,15 @@
+     ":country_id",
+     ":switches",
+     "//base",
+-    "//components/keyed_service/core",
+   ]
+ 
+   deps = [
+     ":country_access_reason",
+     ":data",
+-    "//base/version_info",
+     "//components/country_codes",
+-    "//components/metrics",
+     "//components/pref_registry",
+     "//components/prefs",
+     "//components/search_engines:search_engine_pref_names",
+-    "//components/strings",
+-    "//components/webui/regional_capabilities_internals:constants",
+     "//third_party/abseil-cpp:absl",
+     "//third_party/search_engines_data:prepopulated_engines",
+     "//third_party/search_engines_data:regional_settings",
+--- a/components/password_manager/core/common/BUILD.gn
++++ b/components/password_manager/core/common/BUILD.gn
+@@ -10,12 +10,6 @@
+   sources = [
+     "credential_manager_types.cc",
+     "credential_manager_types.h",
+-    "driver_id.h",
+-    "password_manager_pref_names.h",
+-    "password_manager_ui.cc",
+-    "password_manager_ui.h",
+-    "password_manager_util.cc",
+-    "password_manager_util.h",
+   ]
+ 
+   if (is_ios) {
+@@ -27,17 +21,9 @@
+ 
+   deps = [
+     "//base",
+-    "//components/autofill/core/common",
+-    "//components/autofill/core/common:autofill_regex",
+-    "//components/autofill/core/common/mojom:mojo_types",
+-    "//sql",
+-    "//third_party/abseil-cpp:absl",
+   ]
+ 
+   public_deps = [
+-    ":browser_assisted_login_type",
+-    ":constants",
+-    ":features",
+     "//url",
+   ]
+ }
+--- a/cc/BUILD.gn
++++ b/cc/BUILD.gn
+@@ -521,8 +521,6 @@
+   deps = [
+     "//base",
+     "//build:chromeos_buildflags",
+-    "//components/metrics/dwa:dwa_builders",
+-    "//components/metrics/dwa/mojom",
+     "//components/viz/client",
+     "//device/base/synchronization",
+     "//gpu/command_buffer/client:gles2_interface",
+--- a/services/network/public/cpp/BUILD.gn
++++ b/services/network/public/cpp/BUILD.gn
+@@ -72,8 +72,6 @@
+     "content_decoding_util.h",
+     "content_language_parser.cc",
+     "content_language_parser.h",
+-    "cookie_encryption_provider_impl.cc",
+-    "cookie_encryption_provider_impl.h",
+     "cors/cors.cc",
+     "cors/cors.h",
+     "cors/origin_access_list.cc",
+@@ -210,9 +208,6 @@
+   deps = [
+     "//base",
+     "//components/link_header_util",
+-    "//components/os_crypt/browser",
+-    "//components/os_crypt/common",
+-    "//components/prefs",
+     "//components/url_pattern",
+     "//ipc",
+     "//net",
+--- a/ui/native_theme/BUILD.gn
++++ b/ui/native_theme/BUILD.gn
+@@ -47,7 +47,6 @@
+     "//ui/gfx",
+     "//ui/gfx/animation/keyframe",
+     "//ui/gfx/geometry",
+-    "//ui/resources",
+   ]
+ 
+   if (is_android) {
+--- a/third_party/blink/renderer/platform/heap/BUILD.gn
++++ b/third_party/blink/renderer/platform/heap/BUILD.gn
+@@ -14,7 +14,8 @@
+   # Whether the blink heap code is compiled into a shared library.
+   # Embedders like CEF use this flag to include blink in a shared library under
+   # non-component build.
+-  blink_heap_inside_shared_library = is_component_build
++  # The standalone engine embeds Blink in libblink_embed.so.
++  blink_heap_inside_shared_library = true
+ }
+ 
+ assert(blink_heap_inside_shared_library || !is_component_build,
+--- a/v8/BUILD.gn
++++ b/v8/BUILD.gn
+@@ -1379,9 +1379,9 @@
+     defines += [ "CPPGC_ALLOW_ALLOCATIONS_IN_PREFINALIZERS" ]
+   }
+ 
+-  if (v8_monolithic && v8_monolithic_for_shared_library) {
+-    defines += [ "V8_TLS_USED_IN_LIBRARY" ]
+-  }
++  # The standalone engine links these static V8 objects into libblink_embed.so.
++  # Select upstream library TLS without changing monolithic/startup-data modes.
++  defines += [ "V8_TLS_USED_IN_LIBRARY" ]
+ 
+   if (v8_enable_pointer_compression) {
+     defines += [

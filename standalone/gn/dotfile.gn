@@ -1,0 +1,84 @@
+# Engine-owned GN entry point. No Chromium browser root BUILD or dotfile is
+# loaded. Dependency defaults derive from the pinned
+# upstream/chromium/dotfile.gn; its original source and the root LICENSE are
+# preserved in this repository.
+import("//build/circular_includes_bedrock.gni")
+import("//build/circular_includes_untriaged.gni")
+import("//build/dotfile_settings.gni")
+import("//third_party/angle/dotfile_settings.gni")
+
+buildconfig = "//build/config/BUILDCONFIG.gn"
+script_executable = "/usr/bin/python3"
+root = "//:blink_engine"
+root_patterns = [
+  "//:blink_engine",
+  "//standalone/engine:blink_embed_smoke",
+]
+
+# Preserve the pinned dependency integration defaults (V8, WebRTC, ANGLE, etc.).
+default_args = {
+  # TODO(brettw) bug 684096: Chrome on iOS does not build v8, so "gn gen" prints
+  # a warning that "Build argument has no effect". When adding a v8 variable, it
+  # also needs to be defined to src/ios/BUILD.gn (respectively removed from both
+  # location when it is removed).
+
+  v8_enable_gdbjit = false
+  v8_imminent_deprecation_warnings = false
+
+  # Don't include webrtc's builtin task queue implementation.
+  rtc_link_task_queue_impl = false
+
+  # When building with Chromium, `webrtc::Location` is replaced by
+  # `base::Location`. Since WebRTC doesn't use `public_deps` (webrtc:8603), it
+  # would fail to propagate the dependency internally. Instead WebRTC let its
+  # embedders to define it globally for all of its targets.
+  rtc_common_public_deps = [ "//base" ]
+
+  # Don't include the iLBC audio codec.
+  # TODO(bugs.webrtc.org/8396): Once WebRTC gets rid of its internal
+  # deps on codecs, we can remove this.
+  rtc_include_ilbc = false
+
+  # Changes some setup for the Crashpad build to set them to build against
+  # Chromium's zlib, base, etc.
+  crashpad_dependencies = "chromium"
+
+  # Override ANGLE's Vulkan dependencies.
+  angle_vulkan_headers_dir = "//third_party/vulkan-headers/src"
+  angle_vulkan_loader_dir = "//third_party/vulkan-loader/src"
+  angle_vulkan_tools_dir = "//third_party/vulkan-tools/src"
+  angle_vulkan_validation_layers_dir =
+      "//third_party/vulkan-validation-layers/src"
+
+  # Override VMA's Vulkan dependencies.
+  vma_vulkan_headers_dir = "//third_party/vulkan-headers/src"
+
+  # Overwrite default args declared in the Fuchsia sdk
+  fuchsia_sdk_readelf_exec =
+      "//third_party/llvm-build/Release+Asserts/bin/llvm-readelf"
+
+  # Overwrite default args declared in the pdfium library
+  pdf_partition_alloc_dir = "//base/allocator/partition_allocator"
+
+  devtools_visibility = [ "*" ]
+
+  clang_unsafe_buffers_paths = "//build/config/unsafe_buffers_paths.txt"
+  clang_warning_suppression_file = "//build/config/warning_suppression.txt"
+  clang_raw_ptr_plugin_config_file = "//build/config/raw_ptr_plugin_config.yaml"
+  rust_clippy_conf_file = "//build/config/clippy.toml"
+}
+
+exec_script_allowlist =
+    build_dotfile_settings.exec_script_allowlist +
+    angle_dotfile_settings.exec_script_allowlist +
+    [
+      "//build_overrides/build.gni",
+      "//google_apis/BUILD.gn",
+      "//printing/BUILD.gn",
+      "//tools/grit/grit_rule.gni",
+      "//tools/gritsettings/BUILD.gn",
+      "//third_party/blink/renderer/build/scripts/scripts.gni",
+    ]
+expand_directory_allowlist = build_dotfile_settings.expand_directory_allowlist
+allow_circular_includes_from_allowlist =
+    allow_circular_includes_from_untriaged + project_bedrock_circular_includes

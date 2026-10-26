@@ -1,0 +1,85 @@
+name: Track official upstream release
+
+on:
+  schedule:
+    - cron: '23 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blink-upstream-discovery
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      eligible: ${{ steps.proposal.outputs.eligible }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: standalone
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - name: Resolve official stable version to immutable Chromium revision
+        run: python3 -B standalone/tools/automation.py upstream
+      - name: Plan compatibility work without modifying active source pins
+        id: proposal
+        run: >-
+          python3 -B standalone/tools/upstream_proposal.py
+          --candidate standalone/out/automation/upstream-candidate.json
+          --github-output
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: official-upstream-candidate
+          path: standalone/out/automation/upstream-*.json
+          if-no-files-found: error
+          retention-days: 30
+
+  propose:
+    needs: discover
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      needs.discover.outputs.eligible == 'true' &&
+      vars.BLINK_UPSTREAM_PROPOSALS == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: standalone
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      # Re-resolve from the official feed, rather than trusting a transferred
+      # artifact. The tool rechecks the main SHA and never force-pushes a ref.
+      - name: Resolve candidate again at the exact triggering checkout
+        run: python3 -B standalone/tools/automation.py upstream
+      - name: Open one draft compatibility proposal for a newer version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 -B standalone/tools/upstream_proposal.py
+          --candidate standalone/out/automation/upstream-candidate.json
+          --submit
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: official-upstream-proposal
+          path: standalone/out/automation/upstream-*.json
+          if-no-files-found: warn
+          retention-days: 30
