@@ -13,14 +13,17 @@ or collect them as CI artifacts. The pinned baseline graph remains source input.
 This establishes the recorded development artifact's tested scope. Release SDK
 staging and the unsupported services below are not established by these runs.
 
-The 2026-10-27 source publication audit found 3,140,367 missing Git objects
-while walking 7,292,506 entries reachable from `main` and
-`upstream/legacy-blink`, with lazy fetching disabled. The original author/date/
-message and commit-ID mapping are preserved, but this partial clone is not yet
-a complete offline history archive. Restore the historical objects from their
-official upstream repositories and recheck before publishing the full history;
-do not discard that history to work around the missing data. This is separate
-from the successful current-source and development-runtime checks above.
+The full-history publication audit now verifies 7,292,746 reachable objects
+locally, with lazy fetching disabled: zero missing objects and zero blobs above
+100 MiB. The largest historical blob is 51,579,983 bytes. The initial partial
+clone's 3,140,367 missing historical objects were restored from the official
+Chromium and legacy Blink stores. All 370,258 mapped Chromium Blink commits
+retain their exact author/committer/date/encoding/message and projected tree;
+the original legacy Blink ref retains its 182,131 commits. The fixed refs and
+object-size evidence are recorded in
+`standalone/upstream/history/archive-verification.json` and bound by the history
+lock. Rerun `history_archive.py audit` before publishing changed refs. This
+source archive check does not validate a release SDK or GitHub push pack sizing.
 
 ## Upstream maintenance automation
 
@@ -56,8 +59,9 @@ native builds need an isolated review/build environment. The existing dedicated
 self-hosted full-build workflow accepts only trusted `main`, is manually
 dispatchable, and runs on main pushes only with `BLINK_ENABLE_FULL_CI=true`.
 It requires the `blink-engine` runner and `blink-engine-build` environment.
-This maintenance setup has been tested locally; it is not active remotely while
-the full-history publication blocker above remains unresolved.
+This maintenance setup has been tested locally. Remote activation still requires
+publishing the repository and configuring the repository settings above; local
+verification alone does not establish a successful remote CI run.
 
 ## Scope
 

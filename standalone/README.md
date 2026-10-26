@@ -18,6 +18,11 @@ establish a release SDK or the unsupported services listed below. Generated
 receipts are local build artifacts. Source preservation, tool tests and GN
 checks alone do not establish runtime behavior.
 
+The pinned Chromium/Blink and legacy Blink histories now have a complete local
+object archive, with original metadata and commit-ID mapping preserved. See
+[history-archive.md](history-archive.md) for the fixed-ref proof, historical file
+size checks and the separate GitHub transfer-size constraint.
+
 ## Project boundary
 
 This repository extracts and packages the Blink engine. Browser application code

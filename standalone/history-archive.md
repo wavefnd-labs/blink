@@ -45,3 +45,10 @@ a single push to 2 GiB; complete large histories may need ordered ancestral
 checkpoint pushes before the final explicit refs. Do not mirror unrelated cache
 refs, and do not assume `pack.packSizeLimit` changes the streamed push pack size.
 See the [official GitHub push-limit guidance](https://docs.github.com/en/get-started/using-git/troubleshooting-the-2-gb-push-limit).
+
+The completed fixed-ref audit is recorded in
+[`archive-verification.json`](upstream/history/archive-verification.json) and
+hashed by `config/history.lock.json`. It reports zero missing objects, zero
+oversized blobs, unchanged original source bytes, and the preserved commit
+mapping. This is an audit of those exact pins; future source rolls must renew
+that evidence rather than inheriting the old result.
