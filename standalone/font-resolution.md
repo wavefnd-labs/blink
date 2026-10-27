@@ -55,6 +55,6 @@ generic, installed, missing and pending web fonts, historical forms, alias
 features and missing-glyph fallback. The project-authored tiny TrueType font in
 `engine/rendering_fixtures.h` provides deterministic feature glyphs for native
 high-level/low-level pixel comparisons in `engine/rendering_smoke.cc`. Its
-generator is `engine/generate_rendering_fixtures.py`; no upstream test font is
+generator is `tools/generate_rendering_fixtures.py`; no upstream test font is
 copied or altered. Existing prebuilt libraries still have the old behavior until
 a new engine build completes.
