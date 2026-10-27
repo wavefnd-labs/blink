@@ -280,3 +280,47 @@
  
    if (v8_enable_pointer_compression) {
      defines += [
+--- a/third_party/blink/renderer/core/css/css_font_selector.cc
++++ b/third_party/blink/renderer/core/css/css_font_selector.cc
+@@ -250,0 +251,6 @@
++  // Named platform fonts must use the same family-resolved description as
++  // web fonts. Returning null here used to send the unresolved original through
++  // FontFallbackList's raw FontCache path, losing @font-feature-values aliases.
++  if (settings_family_name.empty()) {
++    settings_family_name = family_name;
++  }
+--- a/third_party/blink/renderer/platform/fonts/font_variant_alternates.h
++++ b/third_party/blink/renderer/platform/fonts/font_variant_alternates.h
+@@ -69,0 +70 @@
++  bool IsResolved() const { return is_resolved_; }
+@@ -98 +99,3 @@
+-#if DCHECK_IS_ON()
++  // Platform/system fallback has no family alias table. Keep the resolution
++  // state in every build so it can resolve missing aliases without replacing
++  // a description already resolved by a document's CSSFontSelector.
+@@ -100 +102,0 @@
+-#endif
+--- a/third_party/blink/renderer/platform/fonts/font_variant_alternates.cc
++++ b/third_party/blink/renderer/platform/fonts/font_variant_alternates.cc
+@@ -186 +185,0 @@
+-#if DCHECK_IS_ON()
+@@ -188 +186,0 @@
+-#endif
+--- a/third_party/blink/renderer/platform/fonts/font_cache.cc
++++ b/third_party/blink/renderer/platform/fonts/font_cache.cc
+@@ -161,0 +162,15 @@
++  if (const auto* alternates = font_description.GetFontVariantAlternates();
++      alternates && !alternates->IsResolved()) {
++    // System/last-resort fallback and callers without a FontSelector do not
++    // have a family-specific @font-feature-values table. Unmatched aliases
++    // contribute no features, but historical-forms still resolves to 'hist'.
++    // Preserve descriptions already resolved by CSSFontSelector, including
++    // all family aliases and the normal font-feature-settings precedence.
++    auto no_lookup = [](const AtomicString&) -> Vector<uint32_t> { return {}; };
++    FontDescription resolved_description(font_description);
++    resolved_description.SetFontVariantAlternates(alternates->Resolve(
++        no_lookup, no_lookup, no_lookup, no_lookup, no_lookup, no_lookup));
++    return GetFontPlatformData(resolved_description, creation_params,
++                               alternate_font_name);
++  }
++

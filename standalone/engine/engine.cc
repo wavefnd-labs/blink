@@ -44,6 +44,7 @@
 #include "standalone/engine/navigation_policy.h"
 #include "standalone/engine/script.h"
 #include "standalone/include/blink_storage.h"
+#include "standalone/platform/discardable_memory.h"
 #include "standalone/platform/host_platform.h"
 #include "standalone/platform/host_url_loader.h"
 #include "standalone/platform/storage_host.h"
@@ -83,6 +84,7 @@
 #include "third_party/blink/renderer/core/page/frame_tree.h"
 #include "third_party/blink/renderer/core/paint/paint_flags.h"
 #include "third_party/blink/renderer/platform/exported/wrapped_resource_request.h"
+#include "third_party/blink/renderer/platform/fonts/font_cache.h"
 #include "third_party/blink/renderer/platform/graphics/color.h"
 #include "third_party/blink/renderer/platform/graphics/paint/cull_rect.h"
 #include "third_party/blink/renderer/platform/graphics/paint/paint_record_builder.h"
@@ -1195,6 +1197,7 @@ be_status be_engine_create(const be_engine_config* config,
   if (config->blink_scaled_resources_path)
     ui::ResourceBundle::GetSharedInstance().AddDataPackFromPath(
         base::FilePath(config->blink_scaled_resources_path), ui::k100Percent);
+  blink_standalone::InitializeDiscardableMemory();
   mojo::core::Init();
   if (!engine->platform.StartIO())
     return BE_RESOURCE_ERROR;
@@ -1206,6 +1209,11 @@ be_status be_engine_create(const be_engine_config* config,
           std::move(pump));
   blink::Initialize(&engine->platform, &engine->binders,
                     engine->scheduler.get());
+#if BUILDFLAG(IS_LINUX)
+  // The pinned Skia fontconfig interface recognizes "sans", not the CSS
+  // keyword "sans-serif". Set this process-global family before workers start.
+  blink::FontCache::SetSystemFontFamily(blink::AtomicString("sans"));
+#endif
   engine->platform.StartWorkers(engine->services);
   engine->active = true;
   *engine_out = engine;
@@ -1341,8 +1349,8 @@ be_status be_page_create(be_engine* engine,
   settings.SetDefaultFontSize(16);
   settings.SetDefaultFixedFontSize(13);
   auto& fonts = settings.GetGenericFontFamilySettings();
-  fonts.UpdateStandard(blink::AtomicString("sans-serif"));
-  fonts.UpdateSansSerif(blink::AtomicString("sans-serif"));
+  fonts.UpdateStandard(blink::AtomicString("sans"));
+  fonts.UpdateSansSerif(blink::AtomicString("sans"));
   fonts.UpdateSerif(blink::AtomicString("serif"));
   fonts.UpdateFixed(blink::AtomicString("monospace"));
   handle->main = blink::MakeGarbageCollected<FrameState>(*handle);

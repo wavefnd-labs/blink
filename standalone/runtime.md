@@ -13,6 +13,13 @@ or collect them as CI artifacts. The pinned baseline graph remains source input.
 This establishes the recorded development artifact's tested scope. Release SDK
 staging and the unsupported services below are not established by these runs.
 
+The 2026-10-27 image/font crash corrections require a new engine build. The
+older schema 3 artifact above does not validate them. Current schema 4 smoke
+coverage adds real PNG/JPEG/WebP/data-URL pixels and font alternate-feature
+comparisons; only executing the rebuilt harness establishes those assertions.
+See [font-resolution.md](font-resolution.md) for the separately recorded source
+adaptations and their failure analysis.
+
 The full-history publication audit now verifies 7,292,746 reachable objects
 locally, with lazy fetching disabled: zero missing objects and zero blobs above
 100 MiB. The largest historical blob is 51,579,983 bytes. The initial partial
@@ -128,6 +135,17 @@ IO shutdown waits for queued persistence work before callbacks are disabled. It 
 Reinitialization and unloading `libblink_embed.so` are unsupported. An existing
 Blink platform or global resource bundle causes initialization to be refused;
 this first profile expects to own those services in its process.
+
+Before Blink or its workers can decode images, initialization installs a
+process-lived discardable-memory provider using the production Skia memory
+pool. An existing provider is preserved. Pool access and residency accounting
+are serialized; locked blocks retain their bytes, and unlocked entries may be
+evicted and recreated by the decoder. The 128 MiB budget bounds retained cache
+memory, not all image memory: live locked allocations can exceed it. The provider
+also supports explicit free-memory release; automatic OS pressure notifications
+are not connected in this profile. Its isolated production base/Skia native
+contracts cover locking, eviction, budgets, lifetime, dumps, concurrent access
+and the actual Skia allocation bridge. These contracts do not render a page.
 
 All handle operations enforce the owning thread. Calls from within callbacks
 must be deferred until the outer call returns; reentry is rejected as busy.
@@ -487,12 +505,13 @@ python3 -B standalone/tools/engine.py runtime-check --profile dev
 ```
 
 This checks source/configuration/artifact fingerprints before and after the
-real native harness, validates every schema 3 assertion, and writes a separate
+real native harness, validates every schema 4 assertion, and writes a separate
 development check receipt. `--no-cache` selects the corresponding isolated
 development build. `runtime-check --profile release` similarly checks an existing
 release build without staging. Neither command replaces release smoke receipts.
-The development check was executed successfully on 2026-10-27; the DSO hash
-remained unchanged and Ninja reported no work when refreshing the tool receipt.
+The earlier schema 3 development check was executed successfully on 2026-10-27;
+the image/font source changes invalidate that build's receipt. Rebuild before
+running the current check.
 
 The SDK commands below select the release profile; browser integration uses
 `--profile dev` in the separate Wave Browser repository.
@@ -510,6 +529,11 @@ python3 -B standalone/tools/engine.py build --with-smoke --jobs 4
 python3 -B standalone/tools/engine.py runtime-smoke
 ```
 
+The optional `//standalone/engine:blink_discardable_memory_test` executable
+exercises the real base/Skia provider without initializing Blink. It can be
+selected directly with Ninja in the generated engine output directory and is
+not included in the default engine aggregate or substituted for native smoke.
+
 For direct diagnosis, the equivalent native arguments for the recorded
 context-snapshot profile are:
 
@@ -520,7 +544,7 @@ context-snapshot profile are:
   --blink-resources=/absolute/build/output/gen/third_party/blink/public/resources/blink_resources.pak
 ```
 
-The schema 3 smoke tool requires actual native assertions for:
+The schema 4 smoke tool requires actual native assertions for:
 
 - Initialization, host stylesheet/script loading, exact rendered pixels,
   resizing, wrong-thread rejection and shutdown refusing an open page.
@@ -543,12 +567,18 @@ The schema 3 smoke tool requires actual native assertions for:
 - Real dedicated worker script/importScripts/fetch, structured messages, module
   and failed-script error events, immediate terminate and page destruction with
   a live worker, including shutdown waiting for real worker termination.
+- Host-loaded PNG/JPEG/WebP and a data-URL image, exact decoded pixels, resize
+  and a second page's destruction without losing the original page's images.
+- Generic, named, missing and unavailable web fonts with alternate CSS retained;
+  an authored test font proves `styleset()` alias pixels equal direct `ss02`,
+  differ from the plain glyph, preserve `hist` and explicit feature precedence,
+  and still paint missing-glyph fallback.
 
 It emits a successful receipt only after those assertions pass, opens no
 windows and supplies no browser application. `runtime-smoke` executes only the
 already-built, hash-verified harness from a successful full build receipt; it
 never compiles as a fallback. It rejects stale source/artifact hashes and the
-old schema 1/2 receipts, and stages the SDK only after the current native receipt
+old schema 1/2/3 receipts, and stages the SDK only after the current native receipt
 passes. The staged SDK carries the header, library, runtime data, original
 notices, pinned locks and this scope document. Merely constructing a fixture
 receipt in a Python test is not evidence that these native assertions passed.

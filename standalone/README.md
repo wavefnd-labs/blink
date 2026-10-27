@@ -18,6 +18,12 @@ establish a release SDK or the unsupported services listed below. Generated
 receipts are local build artifacts. Source preservation, tool tests and GN
 checks alone do not establish runtime behavior.
 
+Image/font crash corrections added on 2026-10-27 require rebuilding the engine.
+The current schema 4 harness adds decoded-image and font-feature pixel
+assertions; the older artifact above has not passed them. See
+[font-resolution.md](font-resolution.md) and the memory-provider contract in
+[runtime.md](runtime.md).
+
 The pinned Chromium/Blink and legacy Blink histories now have a complete local
 object archive, with original metadata and commit-ID mapping preserved. See
 [history-archive.md](history-archive.md) for the fixed-ref proof, historical file
@@ -87,8 +93,8 @@ python3 -B standalone/tools/blink.py audit
 The lexical audit covers the file sample listed in the upstream lock; it is not
 a resolved GN dependency graph. The original evaluated Linux x64 baseline covers
 7,398 targets and locks 95 external dependency entries. The current engine graph
-declares 6,855 targets; 6,854 are reachable from the production engine root. The
-remaining target is a small embedding validation harness. See [graph.md](graph.md)
+declares 6,856 targets; 6,854 are reachable from the production engine root. The
+other two are the embedding harness and isolated memory-provider contracts. See [graph.md](graph.md)
 for the baseline and [engine.md](engine.md) for the current build entry, reviewed
 runtime additions and browser boundary checks.
 `python3 -B standalone/tools/materialize.py` restores the pinned source and
@@ -106,8 +112,8 @@ python3 -B standalone/tools/engine.py runtime-smoke
 ```
 
 `--jobs` is optional. The smoke tool must execute successfully before native
-runtime behavior is considered validated. The schema 3 harness requires real
-pixel, JavaScript, input/IME, frame, storage and worker assertions. `runtime-smoke` runs an
+runtime behavior is considered validated. The schema 4 harness requires real
+image/font pixels, JavaScript, input/IME, frame, storage and worker assertions. `runtime-smoke` runs an
 already-built, hash-verified harness and stages an SDK only after those checks
 pass; it does not compile or accept a fixture receipt as native evidence.
 The source-view rustfmt configuration

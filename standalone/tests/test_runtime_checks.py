@@ -19,12 +19,13 @@ SPEC.loader.exec_module(runtime)
 
 
 def passing_json():
-    return {'schema_version': 3, 'abi_version': 1, 'initialized': True,
+    return {'schema_version': 4, 'abi_version': 1, 'initialized': True,
             'html_committed': True, 'host_resource_fetches': 1, 'pixel_assertions': True,
             'resized': True, 'wrong_thread_rejected': True, 'shutdown': True,
             'width': 80, 'height': 80, 'rgba_fnv1a64': '1234567890abcdef',
             'javascript': True, 'input': True, 'navigation': True,
-            'ime': True, 'child_frames': True, 'storage': True, 'workers': True}
+            'ime': True, 'child_frames': True, 'storage': True, 'workers': True,
+            'images': True, 'fonts': True}
 
 
 class RuntimeChecksTests(unittest.TestCase):
@@ -231,7 +232,8 @@ class RuntimeChecksTests(unittest.TestCase):
                            ('abi_version', 2), ('rgba_fnv1a64', '1234'), ('shutdown', 1),
                            ('schema_version', 1), ('javascript', False), ('input', False),
                            ('navigation', False), ('ime', False), ('child_frames', False),
-                           ('storage', False), ('workers', False), ('schema_version', 2)):
+                           ('storage', False), ('workers', False), ('images', False),
+                           ('fonts', False), ('schema_version', 2), ('schema_version', 3)):
             with self.subTest(field=field):
                 value = passing_json()
                 value[field] = bad
@@ -241,6 +243,14 @@ class RuntimeChecksTests(unittest.TestCase):
         del value['wrong_thread_rejected']
         with self.assertRaises(ValueError):
             runtime.validate_smoke_json(json.dumps(value))
+
+    def test_receipt_requires_new_image_and_font_assertions(self):
+        for field in ('images', 'fonts'):
+            with self.subTest(field=field):
+                value = passing_json()
+                del value[field]
+                with self.assertRaisesRegex(ValueError, field):
+                    runtime.validate_smoke_json(json.dumps(value))
 
     def test_duplicate_or_diagnostic_only_json_does_not_fake_a_pixel_receipt(self):
         text = json.dumps(passing_json())

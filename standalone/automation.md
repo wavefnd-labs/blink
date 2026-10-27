@@ -124,9 +124,9 @@ version feed alone is not source provenance.
 ## Release evidence
 
 After a full SDK build, `engine.py runtime-smoke` executes the compiled harness.
-Its native schema 3 receipt includes JavaScript, input/IME, child frames, DOM storage,
-dedicated worker and navigation assertions as well as software pixels. Earlier
-schema 1/2 harnesses cannot
+Its native schema 4 receipt includes image/font pixels, JavaScript, input/IME,
+child frames, DOM storage, dedicated worker and navigation assertions. Earlier
+schema 1/2/3 harnesses cannot
 satisfy the current validation step.
 Its receipt must bind to the current Git commit, project source hashes, all
 dependency/adaptation locks and output artifact hashes. A successful dry-run,

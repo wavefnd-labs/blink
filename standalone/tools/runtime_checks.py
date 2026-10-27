@@ -197,10 +197,11 @@ def validate_smoke_json(text):
     if not isinstance(value, dict):
         raise ValueError('Native smoke receipt must be a JSON object')
     for field in ('initialized', 'html_committed', 'pixel_assertions', 'resized', 'wrong_thread_rejected', 'shutdown',
-                  'javascript', 'input', 'navigation', 'ime', 'child_frames', 'storage', 'workers'):
+                  'javascript', 'input', 'navigation', 'ime', 'child_frames', 'storage', 'workers',
+                  'images', 'fonts'):
         if value.get(field) is not True:
             raise ValueError('Native smoke assertion is missing or failed: ' + field)
-    for field, expected in (('schema_version', 3), ('abi_version', 1), ('width', 80), ('height', 80)):
+    for field, expected in (('schema_version', 4), ('abi_version', 1), ('width', 80), ('height', 80)):
         if type(value.get(field)) is not int or value[field] != expected:
             raise ValueError('Native smoke receipt has an invalid ' + field)
     if type(value.get('host_resource_fetches')) is not int or value['host_resource_fetches'] < 1:

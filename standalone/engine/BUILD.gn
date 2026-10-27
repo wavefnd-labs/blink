@@ -20,6 +20,8 @@ shared_library("blink_embed") {
     "//standalone/common/limits.h",
     "//standalone/common/navigation.h",
     "//standalone/common/storage.h",
+    "//standalone/platform/discardable_memory.cc",
+    "//standalone/platform/discardable_memory.h",
     "//standalone/platform/host_platform.cc",
     "//standalone/platform/host_platform.h",
     "//standalone/platform/host_url_loader.cc",
@@ -101,6 +103,25 @@ shared_library("blink_embed") {
 
 # A small engine validation tool. It has no windows, UI or browser services.
 executable("blink_embed_smoke") {
-  sources = [ "smoke.cc" ]
+  sources = [
+    "rendering_fixtures.h",
+    "rendering_smoke.cc",
+    "rendering_smoke.h",
+    "smoke.cc",
+  ]
   deps = [ ":blink_embed" ]
+}
+
+# Optional production-provider contracts; no Blink/browser runtime or gtest.
+executable("blink_discardable_memory_test") {
+  testonly = true
+  sources = [
+    "//standalone/platform/discardable_memory.cc",
+    "//standalone/platform/discardable_memory.h",
+    "discardable_memory_test.cc",
+  ]
+  deps = [
+    "//base",
+    "//skia",
+  ]
 }

@@ -12,6 +12,7 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include "standalone/engine/rendering_smoke.h"
 #include "standalone/include/blink_engine.h"
 
 // Keep raw pointer/count adaptation at the two C ABI boundaries below. This
@@ -19,8 +20,7 @@
 #if defined(__clang__)
 #define SMOKE_UNSAFE_BUFFERS(...)            \
   _Pragma("clang unsafe_buffer_usage begin") \
-  __VA_ARGS__                               \
-  _Pragma("clang unsafe_buffer_usage end")
+      __VA_ARGS__ _Pragma("clang unsafe_buffer_usage end")
 #else
 #define SMOKE_UNSAFE_BUFFERS(...) __VA_ARGS__
 #endif
@@ -37,6 +37,10 @@ be_status Fetch(void*, const char* url, be_resource_response* response) {
     return BE_WRONG_THREAD;
   if (!url || !response)
     return BE_INVALID_ARGUMENT;
+  if (blink_standalone::smoke::FetchRenderingFixture(url, response)) {
+    ++fetches;
+    return BE_OK;
+  }
   const std::string_view resource_url(url);
   static const char css[] =
       "html,body{margin:0;background:white}"
@@ -898,14 +902,15 @@ bool ImeSmoke(be_engine* engine, be_page* page) {
   if (!Check(be_page_ime_get_state(page, &state, surrounding.data(),
                                    surrounding.size(), &required),
              "IME surrounding text") ||
-      !Assert(required == std::string_view("한😀").size() + 1 &&
-                  required <= surrounding.size() &&
-                  std::string_view(surrounding.data(), required - 1) == "한😀" &&
-                  surrounding[required - 1] == '\0' &&
-                  state.text_utf16_length == 3 &&
-                  state.selection_start_utf16 == 3 &&
-                  state.composition_start_utf16 == -1,
-              "UTF-16 selection and finished composition") ||
+      !Assert(
+          required == std::string_view("한😀").size() + 1 &&
+              required <= surrounding.size() &&
+              std::string_view(surrounding.data(), required - 1) == "한😀" &&
+              surrounding[required - 1] == '\0' &&
+              state.text_utf16_length == 3 &&
+              state.selection_start_utf16 == 3 &&
+              state.composition_start_utf16 == -1,
+          "UTF-16 selection and finished composition") ||
       !Check(be_page_ime_set_composition(page, &composition),
              "second composition") ||
       !Check(be_page_ime_cancel_composition(page),
@@ -1004,8 +1009,8 @@ int main(int argc, char** argv) {
   owner_thread = std::this_thread::get_id();
   // Hosted C++ main guarantees argc nonnegative and argv[0..argc) readable;
   // argv strings remain valid for this program's lifetime.
-  SMOKE_UNSAFE_BUFFERS(const std::span<char* const> arguments(
-      argv, static_cast<size_t>(argc)));
+  SMOKE_UNSAFE_BUFFERS(
+      const std::span<char* const> arguments(argv, static_cast<size_t>(argc)));
   const auto icu = Argument(arguments, "icu-data");
   const auto snapshot = Argument(arguments, "v8-snapshot");
   const auto resources = Argument(arguments, "blink-resources");
@@ -1090,6 +1095,10 @@ int main(int argc, char** argv) {
     return 16;
   if (!WorkerSmoke(engine, page))
     return 17;
+  if (!blink_standalone::smoke::ImageRenderingSmoke(engine, page))
+    return 20;
+  if (!blink_standalone::smoke::FontRenderingSmoke(engine, page))
+    return 21;
   if (!Check(be_page_destroy(page), "page destruction"))
     return 10;
   const auto deadline =
@@ -1104,18 +1113,19 @@ int main(int argc, char** argv) {
   }
   if (!Check(shutdown, "worker-aware engine shutdown"))
     return 19;
-  std::cout << "{\"schema_version\":3,\"abi_version\":" << be_get_abi_version()
-            << ","
-               "\"initialized\":true,\"html_committed\":true,"
-               "\"host_resource_fetches\":"
-            << fetches
-            << ",\"pixel_assertions\":true,"
-               "\"resized\":true,\"wrong_thread_rejected\":true,"
-               "\"javascript\":true,\"input\":true,\"navigation\":true,"
-               "\"ime\":true,\"child_frames\":true,\"storage\":true,\"workers\":true,"
-               "\"shutdown\":true,\"width\":80,\"height\":80,"
-               "\"rgba_fnv1a64\":\""
-            << std::hex << std::setfill('0') << std::setw(16) << checksum
-            << "\"}\n";
+  std::cout
+      << "{\"schema_version\":4,\"abi_version\":" << be_get_abi_version()
+      << ","
+         "\"initialized\":true,\"html_committed\":true,"
+         "\"host_resource_fetches\":"
+      << fetches
+      << ",\"pixel_assertions\":true,"
+         "\"resized\":true,\"wrong_thread_rejected\":true,"
+         "\"javascript\":true,\"input\":true,\"navigation\":true,"
+         "\"ime\":true,\"child_frames\":true,\"storage\":true,\"workers\":true,"
+         "\"images\":true,\"fonts\":true,"
+         "\"shutdown\":true,\"width\":80,\"height\":80,"
+         "\"rgba_fnv1a64\":\""
+      << std::hex << std::setfill('0') << std::setw(16) << checksum << "\"}\n";
   return 0;
 }

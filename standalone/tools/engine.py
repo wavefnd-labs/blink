@@ -740,7 +740,8 @@ def normalized_target(node, view):
 
 
 def graph_additions(graph, parity, view):
-    owned = {TARGET, '//standalone/engine:blink_embed', '//standalone/engine:blink_embed_smoke'}
+    owned = {TARGET, '//standalone/engine:blink_embed', '//standalone/engine:blink_embed_smoke',
+             '//standalone/engine:blink_discardable_memory_test'}
     path = SUPPORT / 'config/runtime-graph-additions.json'
     config = read_json(path) if path.exists() else {'targets': {}}
     if path.exists():
